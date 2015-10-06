@@ -56,8 +56,8 @@ consultation sur votre projet. N'oubliez pas de m'écrire :
 
 Bio: né en Californie (1984), diplôme de Bachelor à UC Berkeley
 (2006), doctorat à Paris (2012), actuellement chercheur post-doctoral
-à McGill, Montréal. Passionnée sur l'analyse, la modélisation
-prédictive, et la visualisation des grands jeux de données. Auteur des
+à McGill, Montréal. Passionné sur l'analyse, la modélisation
+prédictive, et la visualisation des grands jeux de données. Auteur de
 plusieurs bibliothèques de logiciel libre dans
 R/Python/C/C++/JavaScript, [[https://github.com/tdhock?tab%3Drepositories][disponible GitHub]]. Plus d'infos en anglais
 [[file:TDHockingResume-2015-10-06.pdf][sur mon CV]].
