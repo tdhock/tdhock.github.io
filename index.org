@@ -1,3 +1,63 @@
-Dr. Toby Dylan Hocking
-- BA in Statistics (Honors) and Molecular and Cell Biology, UC Berkeley (2006).
-- PhD in Machine Learning, Ecole Normale Superieure de Cachan (2012).
+#+TITLE: Dr. Toby Dylan Hocking
+#+OPTIONS: toc:nil num:nil
+
+**** Email: tdhock5@gmail.com
+
+I am available for hire as a consultant for
+- Programming R packages or Python modules (including C/C++ code). For
+  example I designed and wrote the ggplot interface of the [[https://github.com/ropensci/plotly][plotly R
+  package]].
+- Interactive, animated data visualization. Rapid prototyping using my
+  [[https://github.com/tdhock/animint][animint]] R package. Custom [[http://d3js.org/][D3]] visualizations (for example [[http://bioviz.rocq.inria.fr/][SegAnnDB]]).
+- Developing highly accurate predictive models for big data, using
+  machine learning and numerical optimization algorithms. For example
+  [[https://github.com/tdhock/PeakSegJoint][my PeakSegJoint R package]] includes a discrete optimization algorithm
+  in C code, and a convex optimization algorithm in R code.
+- Teaching any of the above subjects. Example tutorials about
+  [[https://github.com/tdhock/regex-tutorial][named capture regular
+  expressions]] and [[https://github.com/tdhock/animint-tutorial][animated, interactive data visualization]].
+
+To schedule a free first meeting to estimate my fees for your project,
+please contact me via email with:
+- a list of times you would be available to meet (Skype, Google
+  Hangout, or face-to-face in Montreal), and
+- a description of your project.
+
+Bio: born in California (1984), Bachelors at UC Berkeley (2006), PhD
+in Paris (2012), currently a post-doctoral researcher at McGill in
+Montreal. Passionate about analysis, predictive modeling, and
+visualization of big data. Author of several free/open-source
+R/Python/C/C++/JavaScript packages, [[https://github.com/tdhock?tab%3Drepositories][available on GitHub]]. More complete
+[[file:TDHockingResume-2015-10-06.pdf][1-page CV]].
+
+**** Je parle français
+
+Je suis disponible pour travailler sur
+- Programmation des paquets R ou modules Python (y compris C/C++). Par
+  exemple j'ai conçu et écrit l'interface pour ggplots du [[https://github.com/ropensci/plotly][paquet
+  plotly dans R]].
+- Visualisation interactive et animée des données. Prototypage rapide
+  grâce à mon paquet [[https://github.com/tdhock/animint][animint]] dans R. Des visualisations sur mesure
+  grâce à [[http://d3js.org/][D3]] (par exemple [[http://bioviz.rocq.inria.fr/][SegAnnDB]]).
+- Développement des modèles très efficaces pour la prédiction, en
+  utilisant des méthodes d'apprentissage artificiel et des algorithmes
+  d'optimisation numérique. Par exemple [[https://github.com/tdhock/PeakSegJoint][mon paquet PeakSegJoint dans R]]
+  comprend un algorithme d'optimisation discrète écrit en C, et un
+  algorithme d'optimisation convexe écrit en R.
+- Enseignement dans les sujets ci-dessus. Par exemple des tutoriels en
+  anglais sur [[https://github.com/tdhock/regex-tutorial][la capture nommée dans les expressions rationnelles]] et
+  [[https://github.com/tdhock/animint-tutorial][la visualisation intéractive et animée]].
+
+SVP prendre rendez-vous par courriel pour discuter mes frais de
+consultation sur votre projet. N'oubliez pas de m'écrire :
+- vos horaires de disponibilité (par Skype, Google Hangout, ou
+  en vrai à Montréal), et
+- un résumé de votre projet.
+
+Bio: né en Californie (1984), diplôme de Bachelor à UC Berkeley
+(2006), doctorat à Paris (2012), actuellement chercheur post-doctoral
+à McGill, Montréal. Passionnée sur l'analyse, la modélisation
+prédictive, et la visualisation des grands jeux de données. Auteur des
+plusieurs bibliothèques de logiciel libre dans
+R/Python/C/C++/JavaScript, [[https://github.com/tdhock?tab%3Drepositories][disponible GitHub]]. Plus d'infos en anglais
+[[file:TDHockingResume-2015-10-06.pdf][sur mon CV]].
