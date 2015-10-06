@@ -1,7 +1,10 @@
 #+TITLE: Dr. Toby Dylan Hocking
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: num:nil 
+#+SETUPFILE: ~/src/org-html-themes/setup/theme-readtheorg.setup
 
 **** Email: tdhock5@gmail.com
+
+**** Machine learning and data visualization consulting services
 
 I am available for hire as a consultant for
 - Programming R packages or Python modules (including C/C++ code). For
@@ -30,13 +33,13 @@ visualization of big data. Author of several free/open-source
 R/Python/C/C++/JavaScript packages, [[https://github.com/tdhock?tab%3Drepositories][available on GitHub]]. More complete
 [[file:TDHockingResume-2015-10-06.pdf][1-page CV]].
 
-**** Je parle français
+**** Services de consultation pour l'apprentissage artificiel et la visualisation de données
 
 Je suis disponible pour travailler sur
 - Programmation des paquets R ou modules Python (y compris C/C++). Par
   exemple j'ai conçu et écrit l'interface pour ggplots du [[https://github.com/ropensci/plotly][paquet
   plotly dans R]].
-- Visualisation interactive et animée des données. Prototypage rapide
+- Visualisation interactive et animée de données. Prototypage rapide
   grâce à mon paquet [[https://github.com/tdhock/animint][animint]] dans R. Des visualisations sur mesure
   grâce à [[http://d3js.org/][D3]] (par exemple [[http://bioviz.rocq.inria.fr/][SegAnnDB]]).
 - Développement des modèles très efficaces pour la prédiction, en
@@ -59,5 +62,5 @@ Bio: né en Californie (1984), diplôme de Bachelor à UC Berkeley
 à McGill, Montréal. Passionné sur l'analyse, la modélisation
 prédictive, et la visualisation des grands jeux de données. Auteur de
 plusieurs bibliothèques de logiciel libre dans
-R/Python/C/C++/JavaScript, [[https://github.com/tdhock?tab%3Drepositories][disponible GitHub]]. Plus d'infos en anglais
+R/Python/C/C++/JavaScript, [[https://github.com/tdhock?tab%3Drepositories][disponible sur GitHub]]. Plus d'infos en anglais
 [[file:TDHockingResume-2015-10-06.pdf][sur mon CV]].
