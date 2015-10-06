@@ -35,14 +35,14 @@ R/Python/C/C++/JavaScript packages, [[https://github.com/tdhock?tab%3Drepositori
 
 **** Services de consultation pour l'apprentissage artificiel et la visualisation de données
 
-Je suis disponible pour travailler sur
-- Programmation des paquets R ou modules Python (y compris C/C++). Par
-  exemple j'ai conçu et écrit l'interface pour ggplots du [[https://github.com/ropensci/plotly][paquet
+Je suis disponible pour travailler en :
+- Programmation des paquets R ou modules Python, y compris C/C++. Par
+  exemple, j'ai conçu et écrit l'interface pour ggplots du [[https://github.com/ropensci/plotly][paquet
   plotly dans R]].
 - Visualisation interactive et animée de données. Prototypage rapide
   grâce à mon paquet [[https://github.com/tdhock/animint][animint]] dans R. Des visualisations sur mesure
-  grâce à [[http://d3js.org/][D3]] (par exemple [[http://bioviz.rocq.inria.fr/][SegAnnDB]]).
-- Développement des modèles très efficaces pour la prédiction, en
+  grâce à [[http://d3js.org/][D3]], par exemple [[http://bioviz.rocq.inria.fr/][SegAnnDB]].
+- Développement de modèles très efficaces pour la prédiction, en
   utilisant des méthodes d'apprentissage artificiel et des algorithmes
   d'optimisation numérique. Par exemple [[https://github.com/tdhock/PeakSegJoint][mon paquet PeakSegJoint dans R]]
   comprend un algorithme d'optimisation discrète écrit en C, et un
@@ -53,11 +53,11 @@ Je suis disponible pour travailler sur
 
 SVP prendre rendez-vous par courriel pour discuter mes frais de
 consultation sur votre projet. N'oubliez pas de m'écrire :
-- vos horaires de disponibilité (par Skype, Google Hangout, ou
-  en vrai à Montréal), et
+- vos disponibilités (par Skype, Google Hangout, ou
+  en personne à Montréal), et
 - un résumé de votre projet.
 
-Bio: né en Californie (1984), diplôme de Bachelor à UC Berkeley
+Bio : né en Californie (1984), diplôme de Bachelor à UC Berkeley
 (2006), doctorat à Paris (2012), actuellement chercheur post-doctoral
 à McGill, Montréal. Passionné sur l'analyse, la modélisation
 prédictive, et la visualisation des grands jeux de données. Auteur de
