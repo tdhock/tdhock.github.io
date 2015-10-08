@@ -16,9 +16,10 @@ I am available for hire as a consultant for
   machine learning and numerical optimization algorithms. For example
   [[https://github.com/tdhock/PeakSegJoint][my PeakSegJoint R package]] includes a discrete optimization algorithm
   in C code, and a convex optimization algorithm in R code.
-- Teaching any of the above subjects. Example tutorials about
-  [[https://github.com/tdhock/regex-tutorial][named capture regular
-  expressions]] and [[https://github.com/tdhock/animint-tutorial][animated, interactive data visualization]].
+- Teaching any of the above subjects. Example tutorials about [[https://github.com/tdhock/regex-tutorial][named
+  capture regular expressions]], [[https://github.com/tdhock/when-c][interfacing C/C++ code with R/Python]],
+  [[https://github.com/tdhock/graphics-tutorial][graphics for publication]], [[https://github.com/tdhock/datatable-foverlaps][computing overlapping genomic regions]], and
+  [[https://github.com/tdhock/animint-tutorial][animated, interactive data visualization]].
 
 To schedule a free first meeting to estimate my fees for your project,
 please contact me via email with:
@@ -48,8 +49,10 @@ Je suis disponible pour travailler en :
   comprend un algorithme d'optimisation discrète écrit en C, et un
   algorithme d'optimisation convexe écrit en R.
 - Enseignement dans les sujets ci-dessus. Par exemple des tutoriels en
-  anglais sur [[https://github.com/tdhock/regex-tutorial][la capture nommée dans les expressions rationnelles]] et
-  [[https://github.com/tdhock/animint-tutorial][la visualisation intéractive et animée]].
+  anglais sur [[https://github.com/tdhock/regex-tutorial][la capture nommée dans les expressions rationnelles]],
+  [[https://github.com/tdhock/when-c][l'utilisation de C/C++ avec R/Python]], [[https://github.com/tdhock/graphics-tutorial][graphiques pour publication]],
+  [[https://github.com/tdhock/datatable-foverlaps][computation de chevauchement]], et [[https://github.com/tdhock/animint-tutorial][la visualisation intéractive et
+  animée]].
 
 SVP prendre rendez-vous par courriel pour discuter mes frais de
 consultation sur votre projet. N'oubliez pas de m'écrire :
