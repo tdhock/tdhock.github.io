@@ -1,4 +1,4 @@
-#+TITLE: Dr. Toby Dylan Hocking
+#+TITLE: Toby Dylan Hocking, PhD
 #+OPTIONS: num:nil 
 #+SETUPFILE: ~/src/org-html-themes/setup/theme-readtheorg.setup
 
@@ -6,16 +6,11 @@
 
 **** Machine learning and data visualization consulting services
 
-I am available for hire as a consultant for
-- Programming R packages or Python modules (including C/C++ code). For
-  example I designed and wrote the ggplot interface of the [[https://github.com/ropensci/plotly][plotly R
-  package]].
-- Interactive, animated data visualization. Rapid prototyping using my
-  [[https://github.com/tdhock/animint][animint]] R package. Custom [[http://d3js.org/][D3]] visualizations (for example [[http://bioviz.rocq.inria.fr/][SegAnnDB]]).
-- Developing highly accurate predictive models for big data, using
-  machine learning and numerical optimization algorithms. For example
-  [[https://github.com/tdhock/PeakSegJoint][my PeakSegJoint R package]] includes a discrete optimization algorithm
-  in C code, and a convex optimization algorithm in R code.
+I am passionate about analysis, predictive modeling, and visualization
+of big data. I am available for hire as a consultant for:
+- Machine learning.
+- [[file:data-visualization.org][Data visualization]].
+- Programming R packages or Python modules (including C/C++ code).
 - Teaching any of the above subjects. [[https://github.com/tdhock/tutorials][List of previous teaching]].
 
 To schedule a free first meeting to estimate my fees for your project,
@@ -26,25 +21,18 @@ please contact me via email with:
 
 Bio: born in California (1984), Bachelors at UC Berkeley (2006), PhD
 in Paris (2012), currently a post-doctoral researcher at McGill in
-Montreal. Passionate about analysis, predictive modeling, and
-visualization of big data. Author of several free/open-source
+Montreal. Author of several free/open-source
 R/Python/C/C++/JavaScript packages, [[https://github.com/tdhock?tab%3Drepositories][available on GitHub]]. More complete
 [[file:TDHockingResume-2015-10-06.pdf][1-page CV]].
 
 **** Services de consultation pour l'apprentissage artificiel et la visualisation de données
 
-Je suis disponible pour travailler en :
-- Programmation des paquets R ou modules Python, y compris C/C++. Par
-  exemple, j'ai conçu et écrit l'interface pour ggplots du [[https://github.com/ropensci/plotly][paquet
-  plotly dans R]].
-- Visualisation interactive et animée de données. Prototypage rapide
-  grâce à mon paquet [[https://github.com/tdhock/animint][animint]] dans R. Des visualisations sur mesure
-  grâce à [[http://d3js.org/][D3]], par exemple [[http://bioviz.rocq.inria.fr/][SegAnnDB]].
-- Développement de modèles très efficaces pour la prédiction, en
-  utilisant des méthodes d'apprentissage artificiel et des algorithmes
-  d'optimisation numérique. Par exemple [[https://github.com/tdhock/PeakSegJoint][mon paquet PeakSegJoint dans R]]
-  comprend un algorithme d'optimisation discrète écrit en C, et un
-  algorithme d'optimisation convexe écrit en R.
+Je suis passionné par l'analyse, la modélisation prédictive, et la
+visualisation des grands jeux de données. Je suis disponible pour
+travailler en :
+- Apprentissage artificiel. 
+- [[file:data-visualization.org][Visualisation de données]].
+- Programmation des paquets R ou modules Python, y compris C/C++. 
 - Enseignement dans les sujets ci-dessus. Je peux parler en français
   alors que j'écris les [[https://github.com/tdhock/tutorials][slides]] en anglais.
 
@@ -56,8 +44,6 @@ consultation sur votre projet. N'oubliez pas de m'écrire :
 
 Bio : né en Californie (1984), diplôme de Bachelor à UC Berkeley
 (2006), doctorat à Paris (2012), actuellement chercheur post-doctoral
-à McGill, Montréal. Passionné sur l'analyse, la modélisation
-prédictive, et la visualisation des grands jeux de données. Auteur de
-plusieurs bibliothèques de logiciel libre dans
-R/Python/C/C++/JavaScript, [[https://github.com/tdhock?tab%3Drepositories][disponible sur GitHub]]. Plus d'infos en anglais
-[[file:TDHockingResume-2015-10-06.pdf][sur mon CV]].
+à McGill, Montréal. Auteur de plusieurs bibliothèques de logiciel
+libre dans R/Python/C/C++/JavaScript, [[https://github.com/tdhock?tab%3Drepositories][disponible sur GitHub]]. Plus
+d'infos en anglais [[file:TDHockingResume-2015-10-06.pdf][sur mon CV]].
