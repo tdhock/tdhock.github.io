@@ -8,7 +8,7 @@
 
 I am passionate about analysis, predictive modeling, and visualization
 of big data. I am available for hire as a consultant for:
-- Machine learning.
+- [[file:machine-learning.org][Machine learning]].
 - [[file:data-visualization.org][Data visualization]].
 - Programming R packages or Python modules (including C/C++ code).
 - Teaching any of the above subjects. [[https://github.com/tdhock/tutorials][List of previous teaching]].
@@ -30,7 +30,7 @@ R/Python/C/C++/JavaScript packages, [[https://github.com/tdhock?tab%3Drepositori
 Je suis passionné par l'analyse, la modélisation prédictive, et la
 visualisation des grands jeux de données. Je suis disponible pour
 travailler en :
-- Apprentissage artificiel. 
+- [[file:machine-learning.org][Apprentissage artificiel]]. 
 - [[file:data-visualization.org][Visualisation de données]].
 - Programmation des paquets R ou modules Python, y compris C/C++. 
 - Enseignement dans les sujets ci-dessus. Je peux parler en français

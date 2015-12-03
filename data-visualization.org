@@ -19,9 +19,11 @@ I am available for hire as a consultant for:
 - Designing custom visualizations for your big data sets. Send me your
   data set and I will write custom code that produces an informative
   visualization.
-- Teaching you how to use free/open-source software data visualization
-  tools (R+ggplot2+animint, JavaScript+D3). [[https://github.com/tdhock/tutorials#data-visualization][List of previous teaching
-  about data visualization]].
+- Teaching you how to use free/open-source software for data
+  visualization (R+ggplot2+animint, JavaScript+D3). Explain to me what
+  kinds of data visualizations you would like to make, and I will
+  create a custom seminar tailored to your particular needs.  [[https://github.com/tdhock/tutorials#data-visualization][List of
+  previous teaching about data visualization]].
 
 **** Data visualization software products
 
