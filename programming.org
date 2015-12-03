@@ -31,15 +31,15 @@ I have written several free/open-source software packages for
 programming with data.
 - I wrote the C code that interfaces R with the [[http://pcre.org/][Perl-Compatible
   Regular Expressions]] library, and permits named capture regular
-  expressions ([[https://bugs.r-project.org/bugzilla3/show_bug.cgi?id%3D14518][patch]]). My code has been distributed with every copy of
+  expressions ([[https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=14518][patch]]). My code has been distributed with every copy of
   R since version 2.14 in 2011.
 - [[https://github.com/tdhock/namedCapture][namedCapture]] is an R package which provides a convenient output
   format for data extracted using a named capture regular expression.
-- I designed and implemented the part of the [[https://github.com/ropensci/plotly][plotly]] package which
-  converts a ggplot (an R object) to a JSON file for upload to the
-  [[https://plot.ly/][plot.ly]] server.
+- I designed and wrote the part of the [[https://github.com/ropensci/plotly][plotly]] package which converts a
+  =ggplot= (an R object) to a JSON file for upload to the [[https://plot.ly/][plot.ly]]
+  server.
 - [[https://github.com/tdhock/memtime][memtime]] can be used for memory benchmarking R code.
-- I implmented the str.extractall method for named capture regular
+- I wrote the =str.extractall= method for named capture regular
   expressions in [[http://pandas.pydata.org/][pandas]] ([[https://github.com/pydata/pandas/pull/11386][PR]]).
 - [[https://github.com/tdhock/requireGitHub][requireGitHub]] can be used to record and install any version of any R
   package on GitHub, thus facilitating reproducible computations.
