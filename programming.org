@@ -2,7 +2,7 @@
 #+OPTIONS: num:nil 
 #+SETUPFILE: ~/src/org-html-themes/setup/theme-readtheorg.setup
 
-**** Email: tdhock5@gmail.com
+**** Email: toby.hocking@r-project.org
 
 **** Programming consulting services
 
@@ -24,7 +24,7 @@ I am available for hire as a consultant for:
   to solve, and I will create a custom seminar for your particular
   needs. [[https://github.com/tdhock/tutorials#programming-for-data-analysis][List of previous teaching about programming for data
   analysis]].
-
+  
 **** Progamming software products
 
 I have written several free/open-source software packages for

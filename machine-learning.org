@@ -2,7 +2,7 @@
 #+OPTIONS: num:nil 
 #+SETUPFILE: ~/src/org-html-themes/setup/theme-readtheorg.setup
 
-**** Email: tdhock5@gmail.com
+**** Email: toby.hocking@r-project.org
 
 **** Machine learning consulting services
 
@@ -34,5 +34,7 @@ learning.
   classification problem (R package).
 - [[https://github.com/tdhock/PeakSegJoint][PeakSegJoint]] implements convex and discrete optimization algorithms
   for supervised peak detection (R package with C code).
+- [[https://github.com/tdhock/coseg][coseg]] implements linear time algorithms for constrained optimal
+  segmentation (R package with C++ code).
 I am available for hire for teaching you about these software
 packages.

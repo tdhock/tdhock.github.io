@@ -2,7 +2,7 @@
 #+OPTIONS: num:nil 
 #+SETUPFILE: ~/src/org-html-themes/setup/theme-readtheorg.setup
 
-**** Email: tdhock5@gmail.com
+**** Email: toby.hocking@r-project.org
 
 **** Data visualization consulting services
 

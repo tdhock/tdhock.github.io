@@ -2,7 +2,7 @@
 #+OPTIONS: num:nil 
 #+SETUPFILE: ~/src/org-html-themes/setup/theme-readtheorg.setup
 
-**** Email: tdhock5@gmail.com
+**** Email: toby.hocking@r-project.org
 
 **** Machine learning and data visualization consulting services
 
@@ -23,7 +23,7 @@ Bio: born in California (1984), Bachelors at UC Berkeley (2006), PhD
 in Paris (2012), currently a post-doctoral researcher at McGill in
 Montreal. Author of several free/open-source
 R/Python/C/C++/JavaScript packages, [[https://github.com/tdhock?tab%3Drepositories][available on GitHub]]. More complete
-[[file:TDHockingResume-2015-10-06.pdf][1-page CV]].
+[[file:TDHockingResume-2016-10-25.pdf][1-page CV]].
 
 **** Services de consultation pour l'apprentissage artificiel et la visualisation de données
 
