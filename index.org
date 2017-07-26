@@ -24,7 +24,8 @@ analysis (DNA copy number, ChIP-seq, etc). For more info, see my
 
 Free/open-source software: I have written several free/open-source
 R/Python/C/C++/JavaScript packages, available on [[https://github.com/tdhock?tab%3Drepositories][GitHub]], [[https://r-forge.r-project.org/users/tdhock/][R-Forge]],
-[[https://pypi.python.org/pypi/annotate_regions/1.0][PyPI]], and [[https://cran.r-project.org/web/checks/check_results_toby.hocking_at_r-project.org.html][CRAN]].
+[[https://pypi.python.org/pypi/annotate_regions/1.0][PyPI]], and [[https://cran.r-project.org/web/checks/check_results_toby.hocking_at_r-project.org.html][CRAN]]. I have been helping as co-administrator and mentor in
+the [[https://github.com/rstats-gsoc][R project's participation in Google Summer of Code]] since 2012.
 
 **** Machine learning and data visualization consulting services
 
