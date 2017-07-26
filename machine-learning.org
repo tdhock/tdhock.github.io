@@ -9,7 +9,7 @@
 I am an expert in designing and implementing machine learning models
 for recognizing and predicting patterns in big data sets. I have
 published several academic papers at the major machine learning
-conferences ([[file:TDHockingResume-2015-10-06.pdf][CV]]).
+conferences (see my [[https://scholar.google.ca/citations?user%3Dc83d8tgAAAAJ][Google scholar profile]] and my [[https://github.com/tdhock/reproducible-papers][list of reproducible papers with accompanying source code]]).
 
 I am available for hire as a consultant for:
 - Designing new machine learning models for your data. Send me your
@@ -32,9 +32,12 @@ learning.
   package).
 - [[https://github.com/tdhock/WeightedROC][WeightedROC]] can compute a ROC curve for a weighted binary
   classification problem (R package).
-- [[https://github.com/tdhock/PeakSegJoint][PeakSegJoint]] implements convex and discrete optimization algorithms
+- [[https://github.com/tdhock/PeakSegJoint][PeakSegJoint]] implements a discrete optimization algorithm
   for supervised peak detection (R package with C code).
-- [[https://github.com/tdhock/coseg][coseg]] implements linear time algorithms for constrained optimal
-  segmentation (R package with C++ code).
+- [[https://github.com/tdhock/coseg][PeakSegOptimal]] implements linear time algorithms for constrained optimal
+  changepoint detection (R package with C++ code).
+- [[https://github.com/tdhock/penaltyLearning][penaltyLearning]] implements algorithms for supervised learning of 
+  penalty functions for optimal changepoint detection (R package with
+  C++ code).
 I am available for hire for teaching you about these software
 packages.

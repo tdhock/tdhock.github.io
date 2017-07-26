@@ -35,9 +35,6 @@ programming with data.
   R since version 2.14 in 2011.
 - [[https://github.com/tdhock/namedCapture][namedCapture]] is an R package which provides a convenient output
   format for data extracted using a named capture regular expression.
-- I designed and wrote the part of the [[https://github.com/ropensci/plotly][plotly]] package which converts a
-  =ggplot= (an R object) to a JSON file for upload to the [[https://plot.ly/][plot.ly]]
-  server.
 - [[https://github.com/tdhock/memtime][memtime]] can be used for memory benchmarking R code.
 - I wrote the =str.extractall= method for named capture regular
   expressions in [[http://pandas.pydata.org/][pandas]] ([[https://github.com/pydata/pandas/pull/11386][PR]]).

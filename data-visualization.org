@@ -22,7 +22,7 @@ I am available for hire as a consultant for:
 - Teaching you how to use free/open-source software for data
   visualization (R+ggplot2+animint, JavaScript+D3). Explain to me what
   kinds of data visualizations you would like to make, and I will
-  create a custom seminar tailored to your particular needs.  [[https://github.com/tdhock/tutorials#data-visualization][List of
+  create a custom seminar tailored to your particular needs. [[https://github.com/tdhock/tutorials#data-visualization][List of
   previous teaching about data visualization]].
 
 **** Data visualization software products
@@ -35,5 +35,8 @@ visualization.
 - [[https://github.com/tdhock/animint][animint]] makes it easy to design complex interactive data
   visualizations, by adding the clickSelects and showSelected keywords
   to the grammar of graphics (R+JavaScript code).
+- I designed and implemented the original ggplotly functionality
+  (convert ggplots in R to plotly interactive web graphics) for the
+  [[https://github.com/ropensci/plotly][plotly]] R package.
 I am available for hire for teaching you about these software
 packages.

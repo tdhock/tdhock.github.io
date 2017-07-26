@@ -2,7 +2,29 @@
 #+OPTIONS: num:nil 
 #+SETUPFILE: ~/src/org-html-themes/setup/theme-readtheorg.setup
 
+[[file:2016-Toby.jpg]]
+
 **** Email: toby.hocking@r-project.org
+
+**** Machine learning research profile
+
+Short bio: born in California (1984), Bachelors at UC Berkeley (2006),
+PhD in Paris (Ecole Normale Supérieure de Cachan 2012), Postdoc at
+Tokyo Tech (2013). Since 2014 I have been working on new machine
+learning models for genomic data, as a post-doctoral researcher with
+Guillaume Bourque at the genome center of McGill University in
+Montreal.
+
+Research topics: fast and accurate algorithms for convex optimization
+(clustering, regression, ranking, classification) and discrete
+optimization (changepoint detection, dynamic programming). The main
+application domain for the algorithms I develop are in genomic data
+analysis (DNA copy number, ChIP-seq, etc). For more info, see my
+[[https://scholar.google.ca/citations?user%3Dc83d8tgAAAAJ][Google scholar profile]] and my [[https://github.com/tdhock/reproducible-papers][list of reproducible papers with accompanying source code]].
+
+Free/open-source software: I have written several free/open-source
+R/Python/C/C++/JavaScript packages, available on [[https://github.com/tdhock?tab%3Drepositories][GitHub]], [[https://r-forge.r-project.org/users/tdhock/][R-Forge]],
+[[https://pypi.python.org/pypi/annotate_regions/1.0][PyPI]], and [[https://cran.r-project.org/web/checks/check_results_toby.hocking_at_r-project.org.html][CRAN]].
 
 **** Machine learning and data visualization consulting services
 
@@ -18,12 +40,6 @@ please contact me via email with:
 - a list of times you would be available to meet (Skype, Google
   Hangout, or face-to-face in Montreal), and
 - a description of your project.
-
-Bio: born in California (1984), Bachelors at UC Berkeley (2006), PhD
-in Paris (2012), currently a post-doctoral researcher at McGill in
-Montreal. Author of several free/open-source
-R/Python/C/C++/JavaScript packages, [[https://github.com/tdhock?tab%3Drepositories][available on GitHub]]. More complete
-[[file:TDHockingResume-2016-10-25.pdf][1-page CV]].
 
 **** Services de consultation pour l'apprentissage artificiel et la visualisation de données
 
@@ -42,8 +58,3 @@ consultation sur votre projet. N'oubliez pas de m'écrire :
   en personne à Montréal), et
 - un résumé de votre projet.
 
-Bio : né en Californie (1984), diplôme de Bachelor à UC Berkeley
-(2006), doctorat à Paris (2012), actuellement chercheur post-doctoral
-à McGill, Montréal. Auteur de plusieurs bibliothèques de logiciel
-libre dans R/Python/C/C++/JavaScript, [[https://github.com/tdhock?tab%3Drepositories][disponible sur GitHub]]. Plus
-d'infos en anglais [[file:TDHockingResume-2015-10-06.pdf][sur mon CV]].
