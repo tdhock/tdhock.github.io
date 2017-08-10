@@ -1,0 +1,14 @@
+Web site / blog
+
+Get RVM from https://github.com/rvm/ubuntu_rvm
+
+#+BEGIN_SRC shell-script
+sudo aptitude instal nodejs
+rvm use ruby-2.1.1
+gem install bundler
+bundle install
+bundle exec jekyll serve
+bundle exec jekyll build
+mv _site/* .
+#+END_SRC
+
