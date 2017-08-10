@@ -78,7 +78,7 @@ scholar:
 
   last_name: Hocking
 
-  style: apa
+  style: cell
   locale: en
 
   sort_by: year

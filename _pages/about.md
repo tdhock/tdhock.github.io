@@ -16,7 +16,17 @@ news: true
 social: true
 ---
 
- Short bio: born in California (1984), Bachelors at UC Berkeley (2006), PhD in Paris (Ecole Normale Supérieure de Cachan 2012), Postdoc at Tokyo Tech (2013). Since 2014 I have been working on new machine learning models for genomic data, as a post-doctoral researcher with Guillaume Bourque at the genome center of McGill University in Montreal.
+Short bio: born in California (1984), Bachelors at UC Berkeley (2006),
+PhD in Paris (Ecole Normale Supérieure de Cachan 2012), Postdoc at
+Tokyo Tech (2013). Since 2014 I have been working on new machine
+learning models for genomic data, as a post-doctoral researcher with
+Guillaume Bourque at the genome center of McGill University in
+Montreal.
 
-Research topics: fast and accurate algorithms for convex optimization (clustering, regression, ranking, classification) and discrete optimization (changepoint detection, dynamic programming). The main application domain for the algorithms I develop are in genomic data analysis (DNA copy number, ChIP-seq, etc). For more info, see my Google scholar profile and my list of reproducible papers with accompanying source code. 
+Research topics: fast and accurate algorithms for convex optimization
+(clustering, regression, ranking, classification) and discrete
+optimization (changepoint detection, dynamic programming). The main
+application domain for the algorithms I develop are in genomic data
+analysis (DNA copy number, ChIP-seq, etc). For more info, see my
+[publications](publications/) and [software](software/).
 
