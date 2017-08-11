@@ -2,9 +2,30 @@
 layout: page
 permalink: /teaching/
 title: teaching
-description: Materials for courses you taught. Replace this text with your description.
+description: Course materials
 ---
 
-For now, this page is assumed to be a static description of your courses. You can convert it to a collection similar to `_projects/` so that you can have a dedicated page for each course.
+### Summer 2017
 
-Organize your courses by years, topics, or universities, however you like!
+International useR 2017 conference, Brussels, Belgium, Tutorial on
+Introduction to Supervised changepoint detection,
+[my course materials](http://members.cbio.mines-paristech.fr/~thocking/change-tutorial/Supervised.html),
+[video](https://channel9.msdn.com/events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/Introduction-to-optimal-changepoint-detection-algorithms-II?term%3Dhocking).
+
+### Spring 2017
+
+Université de Montréal, Criminology Department, Introduction to R for
+Criminology,
+[my course materials](https://github.com/tdhock/intro-R-criminology).
+
+### Summer 2016
+
+International useR 2016 conference, Stanford, CA, Tutorial on
+Understanding and Creating Interactive Graphics,
+[my course materials](https://github.com/tdhock/interactive-tutorial).
+
+### Spring 2011
+
+Mines ParisTech, teaching assistant for Machine Learning class, professor
+[Fabien Moutarde](http://perso.mines-paristech.fr/fabien.moutarde/index.html),
+[my course materials](http://members.cbio.mines-paristech.fr/~thocking/mines-course/Mines-ParisTech-machine-learning-projects.html).

@@ -3,12 +3,11 @@ layout: page
 permalink: /publications/
 title: publications
 description: Publications in reverse chronological order.
-years: [In Progress, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2008]
 ---
 
 - Peer review notice: in addition to peer-reviewed journals, I publish
   papers at machine learning conferences such as ICML and NIPS, which
-  have double-blind peer reviews, and only accept about 20\% of
+  have double-blind peer reviews, and only accept about 20% of
   submitted papers.
 - Reproducible Research notice: a "Reproducible" link for each paper below
   provides source code that I used to perform the analysis and make
@@ -82,6 +81,7 @@ years: [In Progress, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2008]
   segmentation and supervised penalty learning for peak detection in
   count data.  International Conference on Machine Learning (ICML),
   2015. [PMLR](http://proceedings.mlr.press/v37/hocking15.html), 
+  [video](http://videolectures.net/icml2015_hocking_count_data/?q=hocking),
   [Software](https://github.com/tdhock/PeakSegDP),
   [Reproducible](https://github.com/tdhock/PeakSeg-paper)
 - Hocking TD. A breakpoint detection error function for segmentation
@@ -135,6 +135,7 @@ years: [In Progress, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2008]
   for change-point detection using max-margin interval regression.
   International Conference on Machine Learning
   (ICML), 2013. [PMLR](http://proceedings.mlr.press/v28/hocking13.html),
+  [video](http://techtalks.tv/talks/learning-sparse-penalties-for-change-point-detection-using-max-margin-interval-regression/58208/)
   [Software](https://github.com/tdhock/penaltyLearning),
   [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/?root=breakpoints)
 
@@ -157,6 +158,7 @@ years: [In Progress, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2008]
   for Clustering using Convex Fusion Penalties.  International
   Conference on Machine Learning
   (ICML), 2011. [pdf](http://www.icml-2011.org/papers/419_icmlpaper.pdf),
+  [video](http://techtalks.tv/talks/clusterpath-an-algorithm-for-clustering-using-convex-fusion-penalties/54405/)
   [Software](https://r-forge.r-project.org/scm/?group_id=1090),
   [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/?root=clusterpath)
 

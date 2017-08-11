@@ -2,8 +2,23 @@
 layout: page
 title: software
 permalink: /software/
-description: Machine learning and data visualization software
+description: Free/open-source software for machine learning and data visualization 
 ---
+
+My main contributions to free/open-source software are
+[R](http://r-project.org) packages that provide implementations of the
+methods described in my research papers (see below). 
+
+### R community
+
+- Since 2012, I am co-administrator and mentor for the
+  [R project in Google Summer of Code](https://github.com/rstats-gsoc/)
+  -- I have been helping teach college students all over the world how
+  to write R packages. Because of this work, the R Foundation gave me
+  the [toby.hocking@r-project.org](mailto:toby.hocking@r-project.org)
+  email address.
+- I am president of the organizing committee for "R in Montreal 2018,"
+  a local conference for useRs and developeRs of R.
 
 ### PeakSeg
 
