@@ -31,6 +31,8 @@ social: true
   [Mathieu Gautier](https://www6.montpellier.inra.fr/cbgp_eng/Staff/Permanent-staff/Gautier)
   and
   [Jean-Louis Foulley](https://scholar.google.ca/citations?user=ogC5yewAAAAJ).
+- 2006-2008: research assistant at
+  [Sangamo BioSciences](http://www.sangamo.com/).
 - 2002-2006: undergraduate, UC Berkeley, Double major in Molecular &
   Cell Biology and Statistics, with
   [Terry Speed](https://www.stat.berkeley.edu/~terry/).
