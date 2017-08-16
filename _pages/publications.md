@@ -5,6 +5,7 @@ title: publications
 description: Publications in reverse chronological order.
 ---
 
+- My page on [Google Scholar](https://scholar.google.ca/citations?user=c83d8tgAAAAJ).
 - Peer review notice: in addition to peer-reviewed journals, I publish
   papers at machine learning conferences such as ICML and NIPS, which
   have double-blind peer reviews, and only accept about 20% of
