@@ -39,7 +39,7 @@ can be interpreted in terms of peaks (after up changes) and background
   provides log-linear time algorithms for computing optimal
   models with multiple peaks for a single
   sample. [arXiv:1703.03352](https://arxiv.org/abs/1703.03352)
-- [PeakSegJoint](https://github.com/tdhock/PeakSegJoint) provides a
+- [PeakSegJoint](https://CRAN.R-project.org/package=PeakSegJoint) provides a
   fast heuristic algorithm for computing models with a single common
   peak in 0,...,S
   samples. [arXiv:1506.01286](https://arxiv.org/abs/1506.01286)

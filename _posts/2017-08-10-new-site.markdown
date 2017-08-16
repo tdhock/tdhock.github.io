@@ -5,7 +5,7 @@ description: now more complete and informative
 ---
 
 I have redone my web site based on
-[https://github.com/alshedivat/al-folio], based on recommendations
-from some colleagues who told me that my old web site could be
-improved. 
+[al-folio](https://github.com/alshedivat/al-folio), after getting
+recommendations from some colleagues who told me that my old web site
+could be improved.
  
