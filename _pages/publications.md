@@ -80,8 +80,9 @@ description: Publications in reverse chronological order.
 
 - Hocking TD, Rigaill G, Bourque G. PeakSeg: constrained optimal
   segmentation and supervised penalty learning for peak detection in
-  count data.  International Conference on Machine Learning (ICML),
-  2015. [PMLR](http://proceedings.mlr.press/v37/hocking15.html), 
+  count data.
+  International Conference on Machine Learning (ICML), 2015. 
+  [PMLR](http://proceedings.mlr.press/v37/hocking15.html), 
   [video](http://videolectures.net/icml2015_hocking_count_data/?q=hocking),
   [Software](https://github.com/tdhock/PeakSegDP),
   [Reproducible](https://github.com/tdhock/PeakSeg-paper)
