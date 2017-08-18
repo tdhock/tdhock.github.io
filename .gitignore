@@ -5,3 +5,5 @@ _site
 .DS_store
 auto
 Gemfile.lock
+.Rhistory
+*.log
