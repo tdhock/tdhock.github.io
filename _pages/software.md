@@ -1,6 +1,6 @@
 ---
 layout: page
-title: software
+title: Software
 permalink: /software/
 description: Free/open-source software for machine learning and data visualization 
 ---

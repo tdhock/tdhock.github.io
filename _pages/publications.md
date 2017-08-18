@@ -1,8 +1,8 @@
 ---
 layout: page
 permalink: /publications/
-title: publications
-description: Publications in reverse chronological order.
+title: Publications
+description: Peer-reviewed papers and pre-prints with links to code and data
 ---
 
 - My page on [Google Scholar](https://scholar.google.ca/citations?user=c83d8tgAAAAJ).
@@ -11,7 +11,7 @@ description: Publications in reverse chronological order.
   have double-blind peer reviews, and only accept about 20% of
   submitted papers.
 - Reproducible Research notice: a "Reproducible" link for each paper below
-  provides source code that I used to perform the analysis and make
+  provides source code and data that I used to perform the analysis and make
   the figures/tables.
 - Software notice: a "Software" link for each paper below provides a software
   package with a reference implementation of the algorithms described
