@@ -2,7 +2,7 @@
 layout: about
 permalink: /
 title: Toby Dylan Hocking, PhD
-description: Machine learning researcher, focusing on fast optimization algorithms for big data
+description: Statistical machine learning researcher, focusing on fast optimization algorithms for big data
 
 profile:
   align: right
