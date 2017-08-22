@@ -21,7 +21,7 @@ scholar_authorid: c83d8tgAAAAJ
 # Blog
 # -----------------------------------------------------------------------------
 blog_name: Toby Dylan Hocking's Blog
-blog_description: Machine learning, data visualization, genomics, R
+blog_description: Statistical machine learning, data visualization, genomics, R
 
 # Pagination
 paginate: 4
