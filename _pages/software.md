@@ -2,7 +2,7 @@
 layout: page
 title: Software
 permalink: /software/
-description: Free/open-source software for machine learning and data visualization 
+description: Free/open-source software for statistical machine learning and data visualization 
 ---
 
 My main contributions to free/open-source software are
