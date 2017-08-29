@@ -1,0 +1,11 @@
+---
+layout: post
+title: useR! 2017 debrief
+description: summary of interesting work I saw in Brussels
+---
+
+I attended [useR!2017](https://www.user2017.brussels/) in Brussels in
+July, and tomorrow during Guillaume Bourque's lab meeting, I will
+present [a debriefing](https://github.com/tdhock/useR2017-debrief) of
+interesting things that I saw there. There are links to videos of the
+presentations!

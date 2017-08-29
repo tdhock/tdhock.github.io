@@ -1,4 +1,11 @@
-This is a summary of R project in Google Summer of Code 2017.
+---
+layout: post
+title: R-GSOC-2017
+description: R project in Google Summer of Code 2017
+---
+
+This is a summary of my experience mentoring and administering the R
+project in Google Summer of Code 2017.
 
 We had 35 projects funded at the beginning of summer, and I mentored
 three of these projects.
