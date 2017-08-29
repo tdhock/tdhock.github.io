@@ -21,10 +21,13 @@ the package to Bioconductor.
 optimizations for the [iregnet](https://github.com/anujkhare/iregnet)
 package which implements a machine learning algorithm for regression
 with censored outputs. His commits for GSOC2017 are summarized on
-[PR59](https://github.com/anujkhare/iregnet/pull/59).
+[PR59](https://github.com/anujkhare/iregnet/pull/59), and his
+[blog post](http://rovervan.com/post/gsoc/gsoc-summary) provides a
+nice description of his overall experience.
 
 It was my second year working on the interactive grammar of graphics
-with [Faizan Khan](https://github.com/faizan-khan-iit). His GSOC
+with [Faizan Khan](https://github.com/faizan-khan-iit). As summarized
+on his [blog post](https://faizan-khan-iit.github.io/gsoc17/), his GSOC
 project was a very ambitious rewrite of the original
 [animint](https://github.com/tdhock/animint) package. This resulted in
 [animint2](https://github.com/tdhock/animint2), which supports an
