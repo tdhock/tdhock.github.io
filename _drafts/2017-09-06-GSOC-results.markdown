@@ -14,8 +14,9 @@ three of these projects.
 [TnT](https://github.com/marlin-na/TnT) package for rendering
 interactive genome browsers in R. This project was his idea, and he
 was very self motivated. We did not have skype calls, but he provided
-very detailed email updates all throughout GSOC. He plans to submit
-the package to Bioconductor.
+very detailed email updates all throughout GSOC. He wrote
+[a blog post](http://weblog.marlin.pub/post/tnt/tnt-gsoc17/) about his
+experience, and plans to submit the package to Bioconductor.
 
 [Rover Van](https://github.com/RoverVan) implemented speed
 optimizations for the [iregnet](https://github.com/anujkhare/iregnet)
