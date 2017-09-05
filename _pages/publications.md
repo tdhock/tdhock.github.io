@@ -19,9 +19,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### In progress
 
-- Drouin A, Hocking TD, Laviolette F. Max margin interval trees. Under
-  review. [Software](https://github.com/aldro61/mmit),
-  [Reproducible](https://github.com/tdhock/mmit-paper)
 - Sievert C, Cai J, VanderPlas S, Khan F, Hocking TD. Extending
   ggplot2's grammar of graphics implementation for linked and dynamic
   graphics on the web. [Software](https://github.com/tdhock/animint),
@@ -36,9 +33,15 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   key transcription factors.
 - Alirezaie N, Majewski J, Hocking TD. A supervised machine
   learning method for predicting pathogenicity of genetic variants.
+- Venuto D, Hocking TD. Support vector machines for predicting
+  outcomes of chess games.
 
 ### 2017
 
+- Drouin A, Hocking TD, Laviolette F. Max margin interval
+  trees. Neural Information Processing Systems
+  (NIPS) 2017. [Software](https://github.com/aldro61/mmit),
+  [Reproducible](https://github.com/tdhock/mmit-paper)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. A log-linear
   segmentation algorithm for peak detection in genomic
   data. [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352). Under
@@ -112,7 +115,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24493034),
   [Software](https://github.com/tdhock/SegAnnDB),
   [Reproducible](https://gforge.inria.fr/scm/viewvc.php/breakpoints/webapp/applications-note/)
-- Venuto D, Spanurattana S, Sugiyama M, Hocking TD. Support vector
+- Spanurattana S, Sugiyama M, Hocking TD. Support vector
   comparison
   machines. [Preprint arXiv:1401.8008](https://arxiv.org/abs/1401.8008).
   [Software](https://github.com/tdhock/rankSVMcompare),
