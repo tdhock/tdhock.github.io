@@ -1,0 +1,133 @@
+I met Wayne Oldford of the University of Waterloo Department of
+Statistics and Actuarial Science on Monday, and he showed me his
+awesome loon package for interactive exploratory data visualization in
+R. This post explains how I got it to work on my computer. First I
+tried downloading/installing loon from CRAN, and I got the following
+error message:
+
+```r
+> install.packages("loon")
+trying URL 'http://probability.ca/cran/src/contrib/loon_1.1.0.tar.gz'
+Content type 'application/x-gzip' length 875747 bytes (855 KB)
+==================================================
+downloaded 855 KB
+
+* installing *source* package ‘loon’ ...
+** package ‘loon’ successfully unpacked and MD5 sums checked
+** R
+** data
+*** moving datasets to lazyload DB
+** demo
+** inst
+** preparing package for lazy loading
+Warning: S3 methods ‘as.character.tclObj’, ‘as.character.tclVar’, ‘as.double.tclObj’, ‘as.integer.tclObj’, ‘as.logical.tclObj’, ‘as.raw.tclObj’, ‘print.tclObj’, ‘[[.tclArray’, ‘[[<-.tclArray’, ‘$.tclArray’, ‘$<-.tclArray’, ‘names.tclArray’, ‘names<-.tclArray’, ‘length.tclArray’, ‘length<-.tclArray’, ‘tclObj.tclVar’, ‘tclObj<-.tclVar’, ‘tclvalue.default’, ‘tclvalue.tclObj’, ‘tclvalue.tclVar’, ‘tclvalue<-.default’, ‘tclvalue<-.tclVar’, ‘close.tkProgressBar’ were declared in NAMESPACE but not found
+Error: package or namespace load failed for ‘tcltk’:
+ .onLoad failed in loadNamespace() for 'tcltk', details:
+  call: fun(libname, pkgname)
+  error: Tcl/Tk support is not available on this system
+Error : package ‘tcltk’ could not be loaded
+ERROR: lazy loading failed for package ‘loon’
+* removing ‘/home/tdhock/lib/R/library/loon’
+
+The downloaded source packages are in
+	‘/tmp/RtmpyMCpX2/downloaded_packages’
+Updating HTML index of packages in '.Library'
+Making 'packages.html' ... done
+Warning message:
+In install.packages("loon") :
+  installation of package ‘loon’ had non-zero exit status
+> 
+```
+
+Actually the problem is that the tcltk package can not be loaded:
+```
+> library(tcltk)
+Error: package or namespace load failed for ‘tcltk’:
+ .onLoad failed in loadNamespace() for 'tcltk', details:
+  call: fun(libname, pkgname)
+  error: Tcl/Tk support is not available on this system
+In addition: Warning message:
+S3 methods ‘as.character.tclObj’, ‘as.character.tclVar’, ‘as.double.tclObj’, ‘as.integer.tclObj’, ‘as.logical.tclObj’, ‘as.raw.tclObj’, ‘print.tclObj’, ‘[[.tclArray’, ‘[[<-.tclArray’, ‘$.tclArray’, ‘$<-.tclArray’, ‘names.tclArray’, ‘names<-.tclArray’, ‘length.tclArray’, ‘length<-.tclArray’, ‘tclObj.tclVar’, ‘tclObj<-.tclVar’, ‘tclvalue.default’, ‘tclvalue.tclObj’, ‘tclvalue.tclVar’, ‘tclvalue<-.default’, ‘tclvalue<-.tclVar’, ‘close.tkProgressBar’ were declared in NAMESPACE but not found 
+> 
+```
+
+That "Tcl/Tk support is not available on this system" made me think that I need to recompile R with tcltk support. So I downloaded R-3.4.2 source code and I when I ran the configure script I saw the following:
+
+```
+tdhock@recycled:~/R/R-3.4.2$ ./configure --prefix=$HOME 
+...
+checking for tclConfig.sh... no
+checking for tclConfig.sh in library (sub)directories... no
+checking for tkConfig.sh... no
+checking for tkConfig.sh in library (sub)directories... no
+checking for tcl.h... no
+...
+  Interfaces supported:      X11
+...
+```
+
+I guessed that I needed to install tcltk dev libraries, which is done via the following on my Ubuntu system:
+
+```
+sudo aptitude install tcl-dev tk-dev
+```
+
+After that I got the following output from the configure script:
+
+```
+tdhock@recycled:~/R/R-3.4.2$ ./configure --prefix=$HOME --with-blas --with-lapack --enable-R-shlib
+...
+checking for tclConfig.sh... no
+checking for tclConfig.sh in library (sub)directories... /usr/lib/tclConfig.sh
+checking for tkConfig.sh... no
+checking for tkConfig.sh in library (sub)directories... /usr/lib/tkConfig.sh
+checking tcl.h usability... yes
+checking tcl.h presence... yes
+checking for tcl.h... yes
+checking tk.h usability... yes
+checking tk.h presence... yes
+checking for tk.h... yes
+checking whether compiling/linking Tcl/Tk code works... yes
+...
+  Interfaces supported:      X11, tcltk
+...
+```
+
+Then I did `make` and `make install` and then,
+
+```
+> install.packages("loon")
+trying URL 'http://probability.ca/cran/src/contrib/loon_1.1.0.tar.gz'
+Content type 'application/x-gzip' length 875747 bytes (855 KB)
+==================================================
+downloaded 855 KB
+
+* installing *source* package ‘loon’ ...
+** package ‘loon’ successfully unpacked and MD5 sums checked
+** R
+** data
+*** moving datasets to lazyload DB
+** demo
+** inst
+** preparing package for lazy loading
+** help
+*** installing help indices
+*** copying figures
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (loon)
+
+The downloaded source packages are in
+	‘/tmp/Rtmpkkcn4y/downloaded_packages’
+Updating HTML index of packages in '.Library'
+Making 'packages.html' ... done
+> 
+```
+
+Finally it works!
+
+```
+library(loon)
+demo("loon", package="loon")
+```
