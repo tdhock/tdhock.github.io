@@ -1,0 +1,34 @@
+---
+layout: post
+title: True reproducibility in R 
+description: Using R to download and plot temperature data from wikipedia
+---
+
+Reproducible research is important for science. In an ideal world,
+every research publication would have accompanying data and code that
+could be used to re-do the analyses in the paper (including the
+figures and tables).
+
+However, in practice, not many papers do have accompanying data and
+code. Even if a paper does have data and code online (as I do for each
+of my papers), it may be difficult to re-do the analyses, because the
+versions of the software used may have changed.
+
+In R this is especially problematic, since the main package repository
+CRAN only officially supports installation of the most recent version
+of each package. I developed the
+[requireGitHub](https://github.com/tdhock/requireGitHub) R package to
+partially solve this problem. It facilitates use of any version of any
+R package which is on GitHub.
+
+Today I read an article that goes one step further, and is really
+important work towards truly reproducible research using R. In [Enhancing
+Reproducibility and Collaboration via Management of R Package
+Cohorts](https://www.jstatsoft.org/article/view/v082i01), Becker et al
+propose a reproducible research system for R based on "manifests,"
+which generalize package repositories. In their results section, they
+use their [switchr](https://github.com/gmbecker/switchr) package to
+reproduce a result from the [DESeq
+paper](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-10-r106),
+even though the versions of R and all of the packages they used have
+changed!

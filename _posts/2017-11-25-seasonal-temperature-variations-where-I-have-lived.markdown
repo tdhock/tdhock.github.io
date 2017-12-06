@@ -9,7 +9,7 @@ I used
 to make the plot below, which shows averages of daily high and low
 temperatures, for each month, in each city where I have lived.
 
-![temperature bands](https://raw.githubusercontent.com/tdhock/temperature-sensor/master/figure-wikipedia.png)
+![temperature bands]({{ site.url }}/assets/img/figure-wikipedia-temperature.png)
 
 I got the data from
 [wikipedia pages](https://en.wikipedia.org/wiki/Berkeley,_California),
