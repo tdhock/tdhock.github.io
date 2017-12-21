@@ -1,7 +1,7 @@
 ---
 layout: post
 title: True reproducibility in R 
-description: Using R to download and plot temperature data from wikipedia
+description: The switchr package and manifests
 ---
 
 Reproducible research is important for science. In an ideal world,
