@@ -44,6 +44,15 @@ discrete optimization (changepoint detection, dynamic
 programming). The main application domain for the algorithms I develop
 are in genomic data analysis (DNA copy number, ChIP-seq, etc); other
 applications include neuroscience, audio, internet, sensors,
-recommendation and ranking systems. For more info, see my
+recommendation and ranking systems.
+
+I think reproducible research is important, so in addition to every
+paper I write, I also provide
+
+- A reference implementation of the algorithm(s) described in the paper, typically as an R package.
+- Source code for doing the analyses and creating the figures, typically in a GitHub repo.
+
+For more info, see my
 [publications](publications/) and [software](software/).
+
 

@@ -23,6 +23,12 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   ggplot2's grammar of graphics implementation for linked and dynamic
   graphics on the web. [Software](https://github.com/tdhock/animint),
   [Reproducible](https://github.com/tdhock/animint-paper)
+- Hocking TD, Rigaill G, Fearnhead P, Bourque G. A log-linear
+  segmentation algorithm for peak detection in genomic
+  data. [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352). Under
+  review at Annals of Applied
+  Statistics. [Software](https://github.com/tdhock/coseg),
+  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
 - Hocking TD, Khare A. Learning penalty functions for changepoint
   detection using elastic-net regularized accelerated failure time
   models. [Software](https://github.com/anujkhare/iregnet),
@@ -42,12 +48,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   trees. Neural Information Processing Systems
   (NIPS) 2017. [Software](https://github.com/aldro61/mmit),
   [Reproducible](https://github.com/tdhock/mmit-paper)
-- Hocking TD, Rigaill G, Fearnhead P, Bourque G. A log-linear
-  segmentation algorithm for peak detection in genomic
-  data. [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352). Under
-  review at Annals of Applied
-  Statistics. [Software](https://github.com/tdhock/coseg),
-  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
 - Hocking TD, Goerner-Potvin P, Morin A, Shao X, Pastinen T, Bourque
   G. Optimizing ChIP-seq peak detectors using visual labels and
   supervised machine learning.  Bioinformatics (2017) 33 (4):
