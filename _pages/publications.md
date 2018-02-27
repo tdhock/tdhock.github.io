@@ -33,6 +33,10 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   detection using elastic-net regularized accelerated failure time
   models. [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper)
+- Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
+  Deconvolution of Calcium Imaging Data.
+  [Preprint arXiv:1802.07380](https://arxiv.org/abs/1802.07380). Under
+  review at PLOS Comp Bio.
 - Narahara M, Hocking TD, Bourque G, Yamada R, Setoh K, Matsuda F,
   Lathrop M. Transcriptomic analysis of antibody responses to seasonal
   influenza vaccine reveals predictive gene signatures and potential
