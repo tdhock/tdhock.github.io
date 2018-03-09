@@ -62,10 +62,13 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### 2017
 
-- Drouin A, Hocking TD, Laviolette F. Max margin interval
+- Drouin A, Hocking TD, Laviolette F. Maximum margin interval
   trees. Neural Information Processing Systems
   (NIPS) 2017. [Software](https://github.com/aldro61/mmit),
-  [Reproducible](https://github.com/tdhock/mmit-paper)
+  [Reproducible](https://github.com/tdhock/mmit-paper),
+  [arXiv](https://arxiv.org/abs/1710.04234),
+  [NIPS](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees),
+  [video](https://www.youtube.com/watch?v=sNrMH9z1rb4)
 - Hocking TD, Goerner-Potvin P, Morin A, Shao X, Pastinen T, Bourque
   G. Optimizing ChIP-seq peak detectors using visual labels and
   supervised machine learning.  Bioinformatics (2017) 33 (4):
