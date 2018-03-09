@@ -45,6 +45,20 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   learning method for predicting pathogenicity of genetic variants.
 - Venuto D, Hocking TD. Support vector machines for predicting
   outcomes of chess games.
+  
+### 2018
+
+- Depuydt P, Boeva V, Hocking TD, Cannoodt R, Ambros IM, Ambros PF,
+  Asgharzadeh S, Attiyeh EF, Combaret V, Defferrari R, Fischer M, Hero
+  B, Hogarty MD, Irwin MS, Koster J, Kreissman S, Ladenstein R,
+  Lapouble E, Laureys G, London WB, Mazzocco K, Nakagawara A, Noguera
+  R, Ohira M, Park JR, Pötschger U, Theissen J, Tonini GP,
+  Valteau-Couanet D, Varesio L, Versteeg R, Speleman F, Maris JM,
+  Schleiermacher G, De Preter K. Genomic Amplifications and Distal 6q
+  Loss: Novel Markers for Poor Survival in High-risk Neuroblastoma
+  Patients. Journal of the National Cancer
+  Institute 2008. DOI:10.1093/jnci/djy022.
+  [JNCI](https://academic.oup.com/jnci/advance-article/doi/10.1093/jnci/djy022/4921185)
 
 ### 2017
 
