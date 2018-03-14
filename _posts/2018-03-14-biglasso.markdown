@@ -24,7 +24,7 @@ loss functions which are useful in the context of regression with
 censored outputs (see
 [wikipedia for general info about censoring](https://en.wikipedia.org/wiki/Censoring_(statistics))). Like
 the standard regression problem, the goal is to learn a real-valued
-prediction. However, the outputs in the train set are not necessarily
+prediction function. However, the outputs in the train set are not necessarily
 real-valued; they can be left, right, or interval-censored. In my
 research these censored outputs naturally show up in the context of
 learning a penalty function in supervised changepoint detection (see
@@ -47,7 +47,7 @@ that can easily fit in memory. For many problems this is not an issue;
 penalty learning for optimal changepoint detection is one such
 example. In other contexts this computational bottleneck prevents
 multivariate predictive models such as the Lasso from being used; one
-example is genome-wide association studies, which are typically
+example is genome-wide association studies (GWAS), which are typically
 tackled using univariate analyses such as t-tests (partially because
 the data are so big and existing Lasso solvers are just too slow and
 memory intensive). To address this issue, the
