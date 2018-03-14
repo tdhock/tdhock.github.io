@@ -1,0 +1,74 @@
+---
+layout: post
+title: The biglasso package
+description: An on-disk implementation for huge data
+---
+
+The lasso is an interpretable machine learning model, based on solving
+a optimization problem with a convex loss function (which encourages
+good predictions on the train set) and an L1 penalty (for shrinkage
+and sparsity). Shrinkage is important in order to get a regularized
+model that does not overfit (good predictions on test data), and
+sparsity is important for interpretability (some
+weights/coefficients of the linear model are exactly zero, so are not
+used for prediction).
+
+Strictly speaking, the "Lasso" refers to the L1-regularized linear
+model in which the convex loss function is the square loss. This loss
+is useful in the standard regression setting, where training data
+outputs are real-valued, and we want to learn a real-valued prediction
+function.
+
+In my research I have proposed similar L1-regularized models for other
+loss functions which are useful in the context of regression with
+censored outputs (see
+[wikipedia for general info about censoring](https://en.wikipedia.org/wiki/Censoring_(statistics))). Like
+the standard regression problem, the goal is to learn a real-valued
+prediction. However, the outputs in the train set are not necessarily
+real-valued; they can be left, right, or interval-censored. In my
+research these censored outputs naturally show up in the context of
+learning a penalty function in supervised changepoint detection (see
+[my useR2017 tutorial for details](https://tdhock.github.io/change-tutorial/Supervised.html)). In
+this context we need to use a loss function which is adapted to the
+structure of the censored outputs. For example at
+[ICML'13](http://proceedings.mlr.press/v28/hocking13.html) we proposed
+a margin-based discriminative convex loss function that exploits the
+structure of the censored outputs (implemented in the
+IntervalRegressionCV function of
+[my CRAN package penaltyLearning](https://cran.r-project.org/package=penaltyLearning)). I
+have also been mentoring some Google Summer of Code students on
+[the iregnet R package](https://github.com/anujkhare/iregnet), which
+implements a generative loss function based on the assumption that the
+censored observations follow a certain distribution (Normal, Logistic,
+etc).
+
+However most implementations are limited to relatively small data sets
+that can easily fit in memory. For many problems this is not an issue;
+penalty learning for optimal changepoint detection is one such
+example. In other contexts this computational bottleneck prevents
+multivariate predictive models such as the Lasso from being used; one
+example is genome-wide association studies, which are typically
+tackled using univariate analyses such as t-tests (partially because
+the data are so big and existing Lasso solvers are just too slow and
+memory intensive). To address this issue, the
+[recently described](https://arxiv.org/abs/1701.05936)
+[biglasso package](https://cran.r-project.org/package=biglasso)
+provides an on-disk implementation of a fast coordinate descent
+algorithm for solving the Lasso problem. Figures 2 and 3 of the paper
+shows that it is actually faster than the
+[glmnet package](https://cran.r-project.org/package=glmnet), which has
+been my go-to Lasso solver for several years. More importantly,
+because it stores the data on disk (rather than in memory), it can be
+used on huge data analysis problems which do not fit in memory such as
+GWAS (with either real or binary responses/outputs). For a 31 GB
+feature matrix (2,898 rows x 1,339,511 columns), the required
+computation time was either 94 minutes (square loss) or 146 minutes
+(logistic loss). Not bad for such a huge data set! 
+
+Constructive criticism: I would have liked to see some comparison in
+terms of prediction accuracy, between the usual univariate t-test
+approach and the L1 regularized multivariate Lasso approach. Future
+work is not mentioned in their paper but I would suggest implementing
+an L1 fusion penalty, which is implemented in
+[genlasso](https://cran.r-project.org/package=genlasso) for small
+data. 
