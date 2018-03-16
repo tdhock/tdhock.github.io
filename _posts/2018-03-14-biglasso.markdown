@@ -48,7 +48,7 @@ penalty learning for optimal changepoint detection is one such
 example. In other contexts this computational bottleneck prevents
 multivariate predictive models such as the Lasso from being used; one
 example is genome-wide association studies (GWAS), which are typically
-tackled using univariate analyses such as t-tests (partially because
+tackled using univariate analyses (partially because
 the data are so big and existing Lasso solvers are just too slow and
 memory intensive). To address this issue, the
 [recently described](https://arxiv.org/abs/1701.05936)
@@ -66,7 +66,7 @@ computation time was either 94 minutes (square loss) or 146 minutes
 (logistic loss). Not bad for such a huge data set! 
 
 Constructive criticism: I would have liked to see some comparison in
-terms of prediction accuracy, between the usual univariate t-test
+terms of prediction accuracy, between the usual univariate 
 approach and the L1 regularized multivariate Lasso approach. Future
 work is not mentioned in their paper but I would suggest implementing
 an L1 fusion penalty, which is implemented in
