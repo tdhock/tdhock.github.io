@@ -1,0 +1,8 @@
+---
+layout: post
+title: Training Benchmark for Deep neural networks
+description: A new benchmark data set for neural network training
+---
+
+I read the [TBD arXiv paper](https://arxiv.org/abs/1803.06905) but I
+haven't yet had time to write a summary.
