@@ -2,21 +2,27 @@
 layout: about
 permalink: /
 title: Toby Dylan Hocking, PhD
-description: Statistics and machine learning researcher, focusing on fast optimization algorithms for big data
+description: Statistical machine learning researcher, focusing on fast optimization algorithms for big data
 
 profile:
   align: right
   image: prof_pic.jpg
   address: >
-    <p>McGill University and Genome Quebec Innovation Centre</p>
-    <p>740 Dr Penfield Ave, Room 4200</p>
-    <p>Montréal (Québec) H3A 1A4, Canada</p>
+    <p>Northern Arizona University</p>
+    <p>School of Informatics, Computing, and Cyber Systems</p>
+    <p>Building 90, Room 120</p>
+    <p>1295 S. Knoles Dr.</p>
+    <p>Flagstaff, AZ 86011</p>
+	<p>Directions: <a href="http://www2.nau.edu/nau-map/?buildingNum=90">interactive map to building 90</a>, <a href="/assets/img/NAU-SICCS-Hocking-office-map.pdf">PDF map to my office</a></p>
 
 news: true
 social: true
 ---
 
-- 2014-Present: Postdoc, McGill University, Human Genetics Department,
+- 2018-present: Assistant Professor,
+  [Northern Arizona University](http://nau.edu),
+  [School of Informatics, Computing, and Cyber Systems](http://nau.edu/siccs).
+- 2014-2018: Postdoc, McGill University, Human Genetics Department,
   with
   [Guillaume Bourque](http://www.computationalgenomics.ca/BourqueLab/team/).
 - 2013: Postdoc, Tokyo Institute of Technology, Computer Science
