@@ -19,10 +19,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### In progress
 
-- Sievert C, Cai J, VanderPlas S, Khan F, Hocking TD. Extending
-  ggplot2's grammar of graphics implementation for linked and dynamic
-  graphics on the web. [Software](https://github.com/tdhock/animint),
-  [Reproducible](https://github.com/tdhock/animint-paper)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. A log-linear
   segmentation algorithm for peak detection in genomic
   data. [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352). Under
@@ -48,6 +44,14 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   
 ### 2018
 
+- Sievert C, Cai J, VanderPlas S, Ferris K, Khan FUF, Hocking
+  TD. Extending ggplot2 for linked and animated web graphics. Accepted
+  in Journal of Computational and Graphical Statistics (2018).
+  doi:10.1080/10618600.2018.1513367.
+  [JCGS](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367),
+  [Software](https://github.com/tdhock/animint),
+  [Reproducible](https://github.com/tdhock/animint-paper),
+  [Interactive Figures](http://members.cbio.mines-paristech.fr/~thocking/animint-paper-figures/).
 - Depuydt P, Boeva V, Hocking TD, Cannoodt R, Ambros IM, Ambros PF,
   Asgharzadeh S, Attiyeh EF, Combaret V, Defferrari R, Fischer M, Hero
   B, Hogarty MD, Irwin MS, Koster J, Kreissman S, Ladenstein R,
