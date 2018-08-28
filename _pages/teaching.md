@@ -26,6 +26,14 @@ description: Course materials and students mentored
 
 I have mentored the
 following students in coding free/open-source software.
+- [Alan Williams](https://github.com/aw1231), 2018,
+  [SegAnnDB: machine learning system for DNA copy number analysis](https://github.com/tdhock/SegAnnDB),
+  [blog](https://medium.com/alans-gsoc-blog/work-product-a1080d175160).
+- [Vivek Kumar](https://github.com/vivekktiwari), 2018,
+  [animint2: interactive grammar of graphics](https://github.com/tdhock/animint2),
+  [blog](https://vivekktiwari.github.io/gsoc18/).
+- [Johan Larsson](https://github.com/jolars), 2018,
+  [sgdnet: SAGA algorithm for sparse linear models](https://github.com/jolars/sgdnet).
 - [Marlin Na](https://github.com/Marlin-Na), 2017,
   [TnT: interactive genome browser](https://github.com/Marlin-Na/TnT).
 - [Rover Van](https://github.com/RoverVan), 2017, [iregnet: regularized interval regression](https://github.com/anujkhare/iregnet).
