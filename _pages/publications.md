@@ -37,13 +37,18 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   Lathrop M. Transcriptomic analysis of antibody responses to seasonal
   influenza vaccine reveals predictive gene signatures and potential
   key transcription factors.
-- Alirezaie N, Majewski J, Hocking TD. A supervised machine
-  learning method for predicting pathogenicity of genetic variants.
 - Venuto D, Hocking TD. Support vector machines for predicting
   outcomes of chess games.
   
 ### 2018
 
+- Alirezaie N, Kernohan KD, Hartley T, Majewski J, Hocking
+  TD. ClinPred: Prediction Tool to Identify Disease-Relevant
+  Nonsynonymous Single-Nucleotide Variants. Accepted in American
+  Journal of Human Genetics
+  (2018). [doi:10.1016/j.ajhg.2018.08.005](https://doi.org/10.1016/j.ajhg.2018.08.005)
+  [AJHG](https://www.cell.com/action/showPdf?pii=S0002-9297%2818%2930271-4),
+  [Software](http://github.com/tdhock/predict-clinically-pathogenic).
 - Sievert C, Cai J, VanderPlas S, Ferris K, Khan FUF, Hocking
   TD. Extending ggplot2 for linked and animated web graphics. Accepted
   in Journal of Computational and Graphical Statistics (2018).
