@@ -19,6 +19,15 @@ news: true
 social: true
 ---
 
+**Jobs**
+
+My lab is recruiting masters and PhD students who are interested in
+working on new machine learning algorithms based on convex and
+discrete optimization -- if you are interested in joining my lab
+please email me your CV and a cover letter.
+
+**Brief CV**
+
 - 2018-present: Assistant Professor,
   [Northern Arizona University](http://nau.edu),
   [School of Informatics, Computing, and Cyber Systems](http://nau.edu/siccs).
