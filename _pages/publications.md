@@ -25,20 +25,29 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   review at Annals of Applied
   Statistics. [Software](https://github.com/tdhock/coseg),
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
-- Hocking TD, Khare A. Learning penalty functions for changepoint
-  detection using elastic-net regularized accelerated failure time
-  models. [Software](https://github.com/anujkhare/iregnet),
-  [Reproducible](https://github.com/tdhock/iregnet-paper)
+- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
+  Functional Pruning Optimal Partitioning (GFPOP) for Constrained
+  Changepoint Detection in Genomic
+  Data. [Preprint arXiv:1810.00117](https://arxiv.org/abs/1810.00117). Under
+  review at Journal of Statistical Software.
 - Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
   Deconvolution of Calcium Imaging Data.
   [Preprint arXiv:1802.07380](https://arxiv.org/abs/1802.07380). Under
-  review at PLOS Comp Bio.
+  review.
+- Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
+  comparison
+  machines. [Preprint arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under
+  review at Journal of Machine Learning Research.
+  [Software](https://github.com/tdhock/rankSVMcompare),
+  [Reproducible](https://github.com/tdhock/compare-paper)
 - Narahara M, Hocking TD, Bourque G, Yamada R, Setoh K, Matsuda F,
   Lathrop M. Transcriptomic analysis of antibody responses to seasonal
   influenza vaccine reveals predictive gene signatures and potential
   key transcription factors.
-- Venuto D, Hocking TD. Support vector machines for predicting
-  outcomes of chess games.
+- Hocking TD, Khare A. Learning penalty functions for changepoint
+  detection using elastic-net regularized accelerated failure time
+  models. [Software](https://github.com/anujkhare/iregnet),
+  [Reproducible](https://github.com/tdhock/iregnet-paper)
   
 ### 2018
 
@@ -145,11 +154,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24493034),
   [Software](https://github.com/tdhock/SegAnnDB),
   [Reproducible](https://gforge.inria.fr/scm/viewvc.php/breakpoints/webapp/applications-note/)
-- Spanurattana S, Sugiyama M, Hocking TD. Support vector
-  comparison
-  machines. [Preprint arXiv:1401.8008](https://arxiv.org/abs/1401.8008).
-  [Software](https://github.com/tdhock/rankSVMcompare),
-  [Reproducible](https://github.com/tdhock/compare-paper)
 
 ### 2013
 

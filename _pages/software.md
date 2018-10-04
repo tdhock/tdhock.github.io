@@ -34,11 +34,17 @@ can be interpreted in terms of peaks (after up changes) and background
   described in our
   [ICML'15 paper](http://jmlr.org/proceedings/papers/v37/hocking15.html),
   but it is neither fast nor optimal, so in practice we recommend to
-  use our newer PeakSegOptimal package instead.
+  use our newer packages below instead.
 - [PeakSegOptimal](https://CRAN.R-project.org/package=PeakSegOptimal)
   provides log-linear time algorithms for computing optimal
   models with multiple peaks for a single
   sample. [arXiv:1703.03352](https://arxiv.org/abs/1703.03352)
+- [PeakSegDisk](https://github.com/tdhock/PeakSegDisk) provides an
+  on-disk implementation of optimal log-linear algorithms for
+  computing multiple peaks in a single sample (same as PeakSegOptimal
+  but works for much larger data sets because disk is used for storage
+  instead of memory).
+  [arXiv:1810.00117](https://arxiv.org/abs/1810.00117)
 - [PeakSegJoint](https://CRAN.R-project.org/package=PeakSegJoint) provides a
   fast heuristic algorithm for computing models with a single common
   peak in 0,...,S
