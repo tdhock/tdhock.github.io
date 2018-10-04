@@ -7,6 +7,8 @@ description: Course materials and students mentored
 
 ### Course materials
 
+- Fall 2018, Open source software engineering class at
+  NAU. [my course materials](https://github.com/tdhock/oss-class-ideas)
 - Summer 2017, International useR 2017 conference, Brussels, Belgium,
   Tutorial on Introduction to Supervised changepoint detection,
   [my course materials](http://members.cbio.mines-paristech.fr/~thocking/change-tutorial/Supervised.html),
