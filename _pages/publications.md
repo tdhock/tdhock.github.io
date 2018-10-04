@@ -23,13 +23,15 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   segmentation algorithm for peak detection in genomic
   data. [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352). Under
   review at Annals of Applied
-  Statistics. [Software](https://github.com/tdhock/coseg),
+  Statistics. [Software](https://github.com/tdhock/PeakSegOptimal),
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
   Changepoint Detection in Genomic
   Data. [Preprint arXiv:1810.00117](https://arxiv.org/abs/1810.00117). Under
-  review at Journal of Statistical Software.
+  review at Journal of Statistical
+  Software. [Software](https://github.com/tdhock/PeakSegDisk),
+  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
 - Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
   Deconvolution of Calcium Imaging Data.
   [Preprint arXiv:1802.07380](https://arxiv.org/abs/1802.07380). Under
