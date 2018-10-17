@@ -70,4 +70,6 @@ paper I write, I also provide
 For more info, see my
 [publications](publications/) and [software](software/).
 
-
+If you want to send me encrypted/signed messages, you can use my
+[GPG key](HOCKING-key.gpg) (fingerprint 1D46 6295 2738 32E6 F70B 9F64
+45B0 8611 CDB1 FA96).
