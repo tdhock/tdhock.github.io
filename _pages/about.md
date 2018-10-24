@@ -73,3 +73,5 @@ For more info, see my
 If you want to send me encrypted/signed messages, you can use my
 [GPG key](HOCKING-key.gpg) (fingerprint 1D46 6295 2738 32E6 F70B 9F64
 45B0 8611 CDB1 FA96).
+
+My ORCID is [0000-0002-3146-0865](https://orcid.org/0000-0002-3146-0865).
