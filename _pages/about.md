@@ -8,6 +8,7 @@ profile:
   align: right
   image: prof_pic.jpg
   address: >
+    <p>toby.hocking@nau.edu</p>
     <p>Northern Arizona University</p>
     <p>School of Informatics, Computing, and Cyber Systems</p>
     <p>Building 90, Room 120</p>
