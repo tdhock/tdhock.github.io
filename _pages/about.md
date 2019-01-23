@@ -11,7 +11,7 @@ profile:
     <p>toby.hocking@nau.edu</p>
     <p>Northern Arizona University</p>
     <p>School of Informatics, Computing, and Cyber Systems</p>
-    <p>Building 90, Room 120</p>
+    <p>Building 90, Room 210</p>
     <p>1295 S. Knoles Dr.</p>
     <p>Flagstaff, AZ 86011</p>
     <p>Directions: <a href="http://www2.nau.edu/nau-map/?buildingNum=90">interactive map to building 90</a>, <a href="/assets/img/NAU-SICCS-Hocking-office-map.pdf">PDF map to my office</a></p>
