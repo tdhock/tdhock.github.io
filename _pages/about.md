@@ -9,12 +9,13 @@ profile:
   image: prof_pic.jpg
   address: >
     <p>toby.hocking@nau.edu</p>
-    <p>Northern Arizona University</p>
+	<p>(928)523-5209</p>
+	<p><a href="http://jan.ucc.nau.edu/~th798/">Machine learning lab director</a>
     <p>School of Informatics, Computing, and Cyber Systems</p>
-    <p>Building 90, Room 210</p>
+    <p>Northern Arizona University</p>
+    <p><a href="http://www2.nau.edu/nau-map/?buildingNum=90">Building 90</a>, Room 210</p>
     <p>1295 S. Knoles Dr.</p>
     <p>Flagstaff, AZ 86011</p>
-    <p>Directions: <a href="http://www2.nau.edu/nau-map/?buildingNum=90">interactive map to building 90</a>, <a href="/assets/img/NAU-SICCS-Hocking-office-map.pdf">PDF map to my office</a></p>
 
 news: true
 social: true
