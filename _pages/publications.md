@@ -19,11 +19,15 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### In progress
 
-- Hocking TD, Rigaill G, Fearnhead P, Bourque G. A log-linear
-  segmentation algorithm for peak detection in genomic
+- Hocking TD. Comparing namedCapture with other R packages for regular
+  expressions. Under review at R
+  Journal. [Reproducible](https://github.com/tdhock/namedCapture-article)
+- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained dynamic
+  programming and supervised penalty learning algorithms for peak
+  detection in genomic
   data. [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352). Under
-  review at Annals of Applied
-  Statistics. [Software](https://github.com/tdhock/PeakSegOptimal),
+  review at Journal of Machine Learning
+  Research. [Software](https://github.com/tdhock/PeakSegOptimal),
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
@@ -32,37 +36,38 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   review at Journal of Statistical
   Software. [Software](https://github.com/tdhock/PeakSegDisk),
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
-- Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
-  Deconvolution of Calcium Imaging Data.
-  [Preprint arXiv:1802.07380](https://arxiv.org/abs/1802.07380). Under
-  review.
 - Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
   comparison
   machines. [Preprint arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under
   review at Journal of Machine Learning Research.
   [Software](https://github.com/tdhock/rankSVMcompare),
   [Reproducible](https://github.com/tdhock/compare-paper)
-- Narahara M, Hocking TD, Bourque G, Yamada R, Setoh K, Matsuda F,
-  Lathrop M. Transcriptomic analysis of antibody responses to seasonal
-  influenza vaccine reveals predictive gene signatures and potential
-  key transcription factors.
 - Hocking TD, Khare A. Learning penalty functions for changepoint
   detection using elastic-net regularized accelerated failure time
   models. [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper)
   
+### 2019
+
+- Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
+  Deconvolution of Calcium Imaging Data. Biostatistics (2019), doi:
+  10.1093/biostatistics/kxy083. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/30753436)
+  
 ### 2018
 
+- Depuydt P, Koster J, Boeva V, Hocking TD, Speleman F, Schleiermacher
+  G, De Preter K. Meta-mining of copy number profiles of high-risk
+  neuroblastoma tumors. {\it Scientific Data} (2018).
 - Alirezaie N, Kernohan KD, Hartley T, Majewski J, Hocking
   TD. ClinPred: Prediction Tool to Identify Disease-Relevant
-  Nonsynonymous Single-Nucleotide Variants. Accepted in American
+  Nonsynonymous Single-Nucleotide Variants. American
   Journal of Human Genetics
   (2018). [doi:10.1016/j.ajhg.2018.08.005](https://doi.org/10.1016/j.ajhg.2018.08.005)
   [AJHG](https://www.cell.com/action/showPdf?pii=S0002-9297%2818%2930271-4),
   [Software](http://github.com/tdhock/predict-clinically-pathogenic).
 - Sievert C, Cai J, VanderPlas S, Ferris K, Khan FUF, Hocking
-  TD. Extending ggplot2 for linked and animated web graphics. Accepted
-  in Journal of Computational and Graphical Statistics (2018).
+  TD. Extending ggplot2 for linked and animated web graphics. Journal
+  of Computational and Graphical Statistics (2018).
   doi:10.1080/10618600.2018.1513367.
   [JCGS](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367),
   [Software](https://github.com/tdhock/animint),
@@ -77,7 +82,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   Schleiermacher G, De Preter K. Genomic Amplifications and Distal 6q
   Loss: Novel Markers for Poor Survival in High-risk Neuroblastoma
   Patients. Journal of the National Cancer
-  Institute 2008. DOI:10.1093/jnci/djy022.
+  Institute (2018). DOI:10.1093/jnci/djy022.
   [JNCI](https://academic.oup.com/jnci/advance-article/doi/10.1093/jnci/djy022/4921185)
 
 ### 2017
