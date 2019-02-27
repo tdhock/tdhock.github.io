@@ -17,8 +17,9 @@ methods described in my research papers (see below).
   to write R packages. Because of this work, the R Foundation gave me
   the [toby.hocking@r-project.org](mailto:toby.hocking@r-project.org)
   email address.
-- I am president of the organizing committee for "R in Montreal 2018,"
+- I was president of the organizing committee for "R in Montreal 2018,"
   a local conference for useRs and developeRs of R.
+- I am an editor for the Journal of Statistical Software.
 
 ### PeakSeg
 
@@ -129,3 +130,10 @@ To support our
 [Journal of Statistical Software (2013) paper](https://www.jstatsoft.org/article/view/v054i06)
 about documentation generation for R, we created the
 [inlinedocs](https://CRAN.R-project.org/package=inlinedocs) R package.
+
+### namedCapture
+
+To support our
+[R Journal submission](https://github.com/tdhock/namedCapture-article)
+about R packages for regular expressions, we created the
+[inlinedocs](https://CRAN.R-project.org/package=namedCapture) R package.

@@ -7,6 +7,7 @@ description: Course materials and students mentored
 
 ### Course materials
 
+- Spring 2019, CS499-007, Machine learning algorithms. [my course materials](https://github.com/tdhock/cs499-spring2019)
 - Fall 2018, Open source software engineering class at
   NAU. [my course materials](https://github.com/tdhock/oss-class-ideas)
 - Summer 2017, International useR 2017 conference, Brussels, Belgium,

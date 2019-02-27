@@ -21,7 +21,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 - Hocking TD. Comparing namedCapture with other R packages for regular
   expressions. Under review at R
-  Journal. [Reproducible](https://github.com/tdhock/namedCapture-article)
+  Journal. [Software](https://github.com/tdhock/namedCapture) [Reproducible](https://github.com/tdhock/namedCapture-article)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained dynamic
   programming and supervised penalty learning algorithms for peak
   detection in genomic
