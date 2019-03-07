@@ -5,7 +5,10 @@ title: Publications
 description: Peer-reviewed papers and pre-prints with links to code and data
 ---
 
-- My page on [Google Scholar](https://scholar.google.ca/citations?user=c83d8tgAAAAJ).
+- My pages on
+  [Google Scholar](https://scholar.google.ca/citations?user=c83d8tgAAAAJ)
+  and
+  [Mathematics Genealogy Project](https://www.genealogy.math.ndsu.nodak.edu/id.php?id=224469).
 - Peer review notice: in addition to peer-reviewed journals, I publish
   papers at machine learning conferences such as ICML and NIPS, which
   have double-blind peer reviews, and only accept about 20% of
