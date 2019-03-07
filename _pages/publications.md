@@ -60,7 +60,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 - Depuydt P, Koster J, Boeva V, Hocking TD, Speleman F, Schleiermacher
   G, De Preter K. Meta-mining of copy number profiles of high-risk
-  neuroblastoma tumors. [https://www.nature.com/articles/sdata2018240](Scientific Data) (2018).
+  neuroblastoma tumors. [Scientific Data](https://www.nature.com/articles/sdata2018240) (2018).
 - Alirezaie N, Kernohan KD, Hartley T, Majewski J, Hocking
   TD. ClinPred: Prediction Tool to Identify Disease-Relevant
   Nonsynonymous Single-Nucleotide Variants. American
