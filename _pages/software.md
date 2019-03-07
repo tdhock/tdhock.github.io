@@ -136,4 +136,4 @@ about documentation generation for R, we created the
 To support our
 [R Journal submission](https://github.com/tdhock/namedCapture-article)
 about R packages for regular expressions, we created the
-[inlinedocs](https://CRAN.R-project.org/package=namedCapture) R package.
+[namedCapture](https://CRAN.R-project.org/package=namedCapture) R package.
