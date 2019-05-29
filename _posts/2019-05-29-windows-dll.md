@@ -1,7 +1,7 @@
 ---
 layout: post
-title: tikzDevice on windows
-description: Fixing missing packages
+title: R package installation on windows considered harmful
+description: Warning for unsuccessful DLL copy should be an error
 ---
 
 Recently I have been getting this warning in R on windows while
