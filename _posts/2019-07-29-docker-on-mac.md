@@ -99,27 +99,31 @@ mount -t vboxsf [-o OPTIONS] sharename mountpoint
 so I opened up the Virtualbox linux command line and ran
 
 ```
-mount -t vboxsf Users /Users
+sudo mount -t vboxsf Users /Users
 ```
 
-which worked. I start a new docker container using
+which worked. Note that Users is a keyword/name for the shared folder,
+that can be set by going into Virtualbox settings. I start a new
+docker container using
 
 ```
-docker run \\
- --name test \\
- -d \\ detached
- -it \\ interactive
- -v /Users/maudelaperriere/toby:/home/toby \\ mount
+docker run \
+ --name test \
+ -d \
+ -it \
+ -v /Users/maudelaperriere/toby:/home/toby \
  rhub/debian-gcc-release
 ```
 
-Inside the docker image you can suspend using C-P C-Q.
-
-Then you can resume using
+Note that -d is for detached, -it is for interactive, and -v is for
+volume mounting. Since it starts detached, you can get a commandline
+inside using
 
 ```
 docker attach test
 ```
+
+Inside the docker image you can suspend it using C-P C-Q.
 
 Then I install the CRAN version of my package and its deps using
 
@@ -237,12 +241,11 @@ double=8 int=4 this=56
 ```
 
 which means that there are 52 bytes which are used to store data and 4
-bytes which are not (padding). 
-
-If we omit the call to `memset` above, then the constructor leaves 4
-bytes un-initialized. Normally that is not an issue with valgrind
-because we refer to all members by name. But since in this code I am
-serializing instances of this class to disk, the error comes from
+bytes which are not (padding). If we omit the call to `memset` above,
+then the constructor leaves 4 bytes un-initialized. Normally that is
+not an issue with valgrind because we refer to all members by
+name. But since in this code I am serializing instances of this class
+to disk, the error comes from
 
 ```
 memcpy(p, &(*it), sizeof(PoissonLossPieceLog));
@@ -256,3 +259,16 @@ explicitly mention all members of the class that should be
 serialized. On the one hand that would make the code more complicated
 (the fix above is only one line) but on the other hand it would make
 it more efficient.
+
+UPDATE: I ran the sizeof code on my Ubuntu laptop, on
+which I could not reproduce the error, and I got the following output:
+
+```
+double=8 int=4 this=52
+```
+
+So on that system the compiler does not allocate any padding bytes in
+the struct, which means that all 52 bytes are initialized, and so it
+never writes any un-initialized data, so it makes sense that there was
+no valgrind error on that system.
+
