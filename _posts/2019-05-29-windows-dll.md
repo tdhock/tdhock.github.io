@@ -52,6 +52,13 @@ regression? A reproducible example is below, but here is a summary:
   warnings. I expected there should be an error.
 * The third command line is the same as the first, and gives the same
   result.
+  
+UPDATE: this bug has been fixed as of R-3.6.1, i.e. R now stops with
+an error if the dll can not be installed. I highly recommend upgrading
+to R-3.6.1, because that also contains the updates for linear time
+regular expressions,
+[as explained in my R journal submission](https://github.com/tdhock/namedCapture-article/blob/master/README.org).
+
 
 ```
 th798@cmp2986 MINGW64 ~/R
