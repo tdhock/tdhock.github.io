@@ -81,10 +81,12 @@ for ranking and comparing (in preparation,
 
 ### animint
 
-To support our paper about animated and interactive extensions to the
-grammar of graphics (in preparation), and our
-[useR2016 tutorial on interactive graphics](https://github.com/tdhock/interactive-tutorial),
-we created the [animint](https://github.com/animint) R package.
+To support our
+[JCGS](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367)
+paper about animated and interactive extensions to the grammar of
+graphics, and our [useR2016 tutorial on interactive
+graphics](https://github.com/tdhock/interactive-tutorial), we created
+the [animint](https://github.com/tdhock/animint) R package.
 
 ### fpop
 
