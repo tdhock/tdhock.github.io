@@ -19,6 +19,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 - Software notice: a "Software" link for each paper below provides a software
   package with a reference implementation of the algorithms described
   in our paper.
+- Selected publications in [bib](/assets/TDH-refs.bib) format.
 
 ### In progress
 
