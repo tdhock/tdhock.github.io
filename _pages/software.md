@@ -73,7 +73,8 @@ clustering, we created the clusterpath R package, available on
 
 ### rankSVMcompare
 
-To support our paper about a Support Vector Machine (SVM) algorithm
+To support our
+paper about a Support Vector Machine (SVM) algorithm
 for ranking and comparing (in preparation,
 [arXiv:1401.8008](http://arxiv.org/abs/1401.8008)), we created the
 [rankSVMcompare](https://github.com/tdhock/rankSVMcompare) R package.
@@ -95,9 +96,10 @@ partitioning algorithm, we created the
 
 ### mmit
 
-To support our paper about max margin interval trees (in preparation),
-we created the [mmit](https://github.com/aldro61/mmit) R package and
-Python module.
+To support our
+[NeurIPS'17](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees)
+paper about max margin interval trees, we created the
+[mmit](https://github.com/aldro61/mmit) R package and Python module.
 
 
 ### penaltyLearning
