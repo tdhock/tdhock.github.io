@@ -2,8 +2,6 @@
 layout: post
 title: useR 2019 debrief
 description: Interesting talks I saw in Toulouse
-future: true
-published: true
 ---
 
 Recently I went to the useR 2019 conference in Toulouse, which is the
@@ -58,7 +56,7 @@ conference:
   .SDcols feature.
 * Jim Hester, [slides](http://www.user2019.fr/static/pres/t257803.pdf)
   about fast [vroom](https://github.com/r-lib/vroom) CSV reader.
-* Gábor Csárdi,
+* Gabor Csardi,
   [slides](http://www.user2019.fr/static/pres/t257603.zip) about
   [pak](https://cloud.r-project.org/web/packages/pak/), parallel
   alternative to install.packages function.
