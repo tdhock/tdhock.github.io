@@ -7,6 +7,8 @@ description: Course materials and students mentored
 
 ### Course materials
 
+- Fall 2019, CS599-6 / EE599-4, Machine learning research. [my course
+  materials](https://github.com/tdhock/cs599-fall2019/)
 - Spring 2019, CS499-007, Machine learning algorithms. [my course materials](https://github.com/tdhock/cs499-spring2019)
 - Fall 2018, Open source software engineering class at
   NAU. [my course materials](https://github.com/tdhock/oss-class-ideas)
@@ -29,6 +31,13 @@ description: Course materials and students mentored
 
 I have mentored the
 following students in coding free/open-source software.
+- [Anuraag Srivastava](https://github.com/as4378), 2019, [Optimal
+  Partitioning algorithm and opart R
+  package](https://github.com/as4378/opart).
+- [Avinash Barnwal](https://github.com/avinashbarnwal/), 2019, [AFT
+  and Binomial loss functions for
+  xgboost](https://github.com/avinashbarnwal/GSOC-2019).
+- [Aditya Sam](https://github.com/theadityasam/), 2019, [Elastic net regularized interval regression and iregnet R package](https://theadityasam.github.io/GSOC2019/).
 - [Alan Williams](https://github.com/aw1231), 2018,
   [SegAnnDB: machine learning system for DNA copy number analysis](https://github.com/tdhock/SegAnnDB),
   [blog](https://medium.com/alans-gsoc-blog/work-product-a1080d175160).
