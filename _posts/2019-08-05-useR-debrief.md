@@ -66,3 +66,7 @@ conference:
   for progress display and
   [future](https://github.com/HenrikBengtsson/future/) parallel
   computing framework.
+
+TODO post links to videos, maybe they will appear on [R consortium
+youtube
+channel](https://www.youtube.com/channel/UC_R5smHVXRYGhZYDJsnXTwg).
