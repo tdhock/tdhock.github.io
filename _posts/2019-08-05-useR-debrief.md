@@ -11,6 +11,12 @@ yearly international meeting of R package developers. The [talk
 schedule with links to slides](http://www.user2019.fr/talk_schedule/)
 is already online.
 
+I gave a talk about the fast algorithm for optimal peak
+detection implemented in the
+[PeakSegDisk](https://cloud.r-project.org/web/packages/PeakSegDisk/) R
+package, [slides](http://www.user2019.fr/static/pres/t257847.pdf),
+video.
+
 Here is a summary of the most interesting talks I saw during the
 conference:
 
