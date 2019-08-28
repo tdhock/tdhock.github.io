@@ -2,6 +2,8 @@
 layout: post
 title: useR 2019 debrief
 description: Interesting talks I saw in Toulouse
+future: true
+published: true
 ---
 
 Recently I went to the useR 2019 conference in Toulouse, which is the
