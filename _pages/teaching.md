@@ -25,7 +25,12 @@ description: Course materials and students mentored
 - Spring 2011, Mines ParisTech, teaching assistant for
   [Fabien Moutarde's](http://perso.mines-paristech.fr/fabien.moutarde/index.html)
   Machine Learning class,
-  [my course materials](http://members.cbio.mines-paristech.fr/~thocking/mines-course/Mines-ParisTech-machine-learning-projects.html).
+  [my course
+  materials](http://members.cbio.mines-paristech.fr/~thocking/mines-course/Mines-ParisTech-machine-learning-projects.html).
+  
+### NAU students mentored
+
+See my [Lab Members web page](http://jan.ucc.nau.edu/~th798/members/).
 
 ### Google Summer of Code students mentored
 
