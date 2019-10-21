@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Tinyverse
-description: Interesting talks I saw in Toulouse
+description: Complex software dependencies considered harmful
 ---
 
 Recently I have been working on a new R package
