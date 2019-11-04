@@ -146,7 +146,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   [Reproducible](https://github.com/tdhock/breakpointError-orig)
 - Hocking TD, Bourque G. PeakSegJoint: fast supervised peak detection
   via joint segmentation of multiple count data
-  samples. [Preprint arXiv:1506.01286](https://arxiv.org/abs/1509.00368),
+  samples. [Preprint arXiv:1506.01286](https://arxiv.org/abs/1506.01286),
   [Software](https://github.com/tdhock/PeakSegJoint),
   [Reproducible](https://github.com/tdhock/PeakSegJoint-paper)
 
