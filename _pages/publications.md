@@ -51,6 +51,14 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   models. [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper)
   
+### 2020
+
+- Hocking TD, Bourque G. Machine Learning Algorithms for Simultaneous
+  Supervised Detection of Peaks in Multiple Samples and Cell
+  Types. Pacific Symposium on Biocomputing
+  25:367-378. [PDF](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf),
+  [Software](https://github.com/tdhock/PeakSegJoint)
+  
 ### 2019
 
 - Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
