@@ -141,3 +141,11 @@ To support our
 [R Journal submission](https://github.com/tdhock/namedCapture-article)
 about R packages for regular expressions, we created the
 [namedCapture](https://CRAN.R-project.org/package=namedCapture) R package.
+
+### nc
+
+To support our [R Journal
+submission](https://github.com/tdhock/nc-article) about data reshaping
+using regular expressions, we created
+[nc](https://CRAN.R-project.org/package=nc), which is a redesign of
+our previous namedCapture package.
