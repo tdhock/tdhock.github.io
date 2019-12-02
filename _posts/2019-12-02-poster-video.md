@@ -23,9 +23,13 @@ comment on.
 * in the video the grad student gets a hand me down powerpoint
   template! PowerPoint is for presentations, not poster
   design. Instead, use [Scribus](https://www.scribus.net/) or
-  [Inkscape](https://inkscape.org/). Here is the [scribus sla
+  [Inkscape](https://inkscape.org/). Scribus is preferable if you are
+  still working on the figures, because it supports including linked
+  figure files (which are automatically updated in the poster if you
+  update the source figure file). Here is the [scribus sla
   file](https://raw.githubusercontent.com/tdhock/PeakSegDP-NIPS/master/HOCKING-RIGAILL-PeakSegDP-NIPS-poster.sla)
-  that I used for my [NIPS'14 PeakSeg poster](https://github.com/tdhock/PeakSegDP-NIPS/raw/master/HOCKING-RIGAILL-PeakSegDP-NIPS-poster.pdf).
+  that I used for my [NIPS'14 PeakSeg
+  poster](https://github.com/tdhock/PeakSegDP-NIPS/raw/master/HOCKING-RIGAILL-PeakSegDP-NIPS-poster.pdf).
 * make it easy/fast? I guess this is a good goal, but there is no
   substitute for hard work / dedicated time working on your poster.
 * the video suggests color coded poster types, e.g. green for
@@ -42,3 +46,15 @@ comment on.
 * No commentary in the video about how to display actual computer code
   / pseudocode for algorithms / equations, which are actually
   important in machine learning and statistical software.
+* No mention about figure file formats. For figures with equations I
+  use
+  [tikzDevice](https://cloud.r-project.org/web/packages/tikzDevice/vignettes/tikzDevice.pdf)
+  (`tikz` function in R) to generate a tex file which the `pdflatex`
+  command line program then converts to PDF for final inclusion in the
+  poster. For figures without equations you should use either vector
+  graphics (`pdf`/`svg` functions in R) or high-resolution raster
+  graphics, e.g.  `png("figure-1.png", width=5, height=5, units="in",
+  res=1000)` in R. [GIMP](https://www.gimp.org/) can be used to create
+  high-resolution raster graphics from vector graphics such as PDF
+  (the desired resolution can be specified along with the page number
+  when the PDF file is first opened/imported).
