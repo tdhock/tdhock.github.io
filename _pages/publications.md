@@ -23,9 +23,8 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### In progress
 
-- Hocking TD. Comparing namedCapture with other R packages for regular
-  expressions. Under review at R
-  Journal. [Software](https://github.com/tdhock/namedCapture) [Reproducible](https://github.com/tdhock/namedCapture-article)
+- Hocking TD. Regular expressions and reshaping using data tables and
+  the nc package. Under review at R Journal. [Software](https://github.com/tdhock/nc), [Reproducible](https://github.com/tdhock/nc-article)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained dynamic
   programming and supervised penalty learning algorithms for peak
   detection in genomic
@@ -51,8 +50,19 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   models. [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper)
   
+### 2020
+
+- Hocking TD, Bourque G. Machine Learning Algorithms for Simultaneous
+  Supervised Detection of Peaks in Multiple Samples and Cell
+  Types. Pacific Symposium on Biocomputing
+  25:367-378. [PDF](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf),
+  [Software](https://github.com/tdhock/PeakSegJoint)
+  
 ### 2019
 
+- Hocking TD. Comparing namedCapture with other R packages for regular
+  expressions. Accepted for publication in R
+  Journal. [Software](https://github.com/tdhock/namedCapture), [Reproducible](https://github.com/tdhock/namedCapture-article)
 - Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
   Deconvolution of Calcium Imaging Data. Biostatistics (2019), doi:
   10.1093/biostatistics/kxy083. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/30753436)
