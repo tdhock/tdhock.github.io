@@ -51,8 +51,10 @@ can be interpreted in terms of peaks (after up changes) and background
   peak in 0,...,S
   samples. [arXiv:1506.01286](https://arxiv.org/abs/1506.01286)
 - [PeakSegPipeline](https://github.com/tdhock/PeakSegPipeline)
-  provides a pipeline for genome-wide peak calling using
-  PeakSeg. (work in progress)
+  provides a supervised machine learning pipeline for genome-wide peak
+  calling in multiple samples and cell types, as described in our
+  [PSB'20
+  paper](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf).
 
 ### PeakError
 
