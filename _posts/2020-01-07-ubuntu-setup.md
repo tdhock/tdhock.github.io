@@ -17,7 +17,7 @@ First some APT packages:
 
 ```
 sudo aptitude install emacs ess aptitude \ #basics
-     r-recommended \ #R
+     r-recommended libcairo-dev libtiff-dev \ #R
      default-jre default-jdk \ #for java
      libbz2-dev liblzma-dev zlib1g-dev libcurl4-gnutls-dev xorg-dev \ #r
      texlive ghostscript texlive-fonts-extra texinfo \ #r manuals
