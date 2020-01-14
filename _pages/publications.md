@@ -34,11 +34,14 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
-  Changepoint Detection in Genomic
-  Data. [Preprint arXiv:1810.00117](https://arxiv.org/abs/1810.00117). Under
-  review at Journal of Statistical
+  Changepoint Detection in Genomic Data. [Preprint
+  arXiv:1810.00117](https://arxiv.org/abs/1810.00117). Under review at
+  Journal of Statistical
   Software. [Software](https://github.com/tdhock/PeakSegDisk),
-  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
+  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
+  Presentation at useR 2020:
+  [slides](http://www.user2019.fr/static/pres/t257847.pdf),
+  [video](https://www.youtube.com/watch?v=XlC4WCqsbuI).
 - Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
   comparison
   machines. [Preprint arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under
