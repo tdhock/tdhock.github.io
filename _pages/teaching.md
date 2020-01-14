@@ -7,6 +7,7 @@ description: Course materials and students mentored
 
 ### Course materials
 
+- Spring 2020, CS499-3, Deep Learning. [my course materials](https://github.com/tdhock/cs499-spring2020/)
 - Fall 2019, CS599-6 / EE599-4, Machine learning research. [my course
   materials](https://github.com/tdhock/cs599-fall2019/)
 - Spring 2019, CS499-007, Machine learning algorithms. [my course materials](https://github.com/tdhock/cs499-spring2019)
