@@ -23,7 +23,7 @@ each R-pkg/src/* file, we can use the following elisp code in
 R-pkg/src/.dir-locals.el just once:
 
 ```
-((nil . (compile-command . "R CMD INSTALL ..")))
+((nil . ((compile-command . "R CMD INSTALL .."))))
 ```
 
 [Safe File Variables in emacs
