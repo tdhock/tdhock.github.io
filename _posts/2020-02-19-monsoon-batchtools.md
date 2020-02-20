@@ -118,6 +118,67 @@ The other advantage to option (1) is that all other users of
 the cluster system can use the software, whereas with option (2-3)
 only you can use the software.
 
+You may need to install the batchtools package. I had to tell R to
+install to a library directory under my home, by putting the following
+in my ~/.bashrc file:
+
+```
+export R_LIBS_USER=$HOME/R/%v
+```
+
+That means when you run `install.packages` in R, the default place to
+put them should be in e.g. `~/R/3.6` so make sure that directory
+exists (create it via mkdir). Then put the following in your
+~/.Rprofile, which tells R to download packages from the cloud (aka
+closest/fastest CRAN mirror):
+
+```
+options(repos="http://cloud.r-project.org")
+```
+
+Then you can install batchtools (note it goes to
+/projects/genomic-ml/R/3.6 rather than ~/R/3.6 because I symlinked ~/R
+to /projects/genomic-ml/R, but you should probably install under your
+home dir).
+
+```
+> install.packages("batchtools")
+Installing package into ‘/projects/genomic-ml/R/3.6’
+(as ‘lib’ is unspecified)
+trying URL 'http://cloud.r-project.org/src/contrib/batchtools_0.9.12.tar.gz'
+Content type 'application/x-gzip' length 694694 bytes (678 KB)
+==================================================
+downloaded 678 KB
+
+* installing *source* package ‘batchtools’ ...
+** package ‘batchtools’ successfully unpacked and MD5 sums checked
+** using staged installation
+** libs
+gcc -I"/packages/R/3.6.2/lib64/R/include" -DNDEBUG   -I/usr/local/include  -fpic  -I/packages/zlib/1.2.8/include -I/packages/bzip2/1.0.6-shared/include -I/packages/xz/5.2.2/include -I/packages/pcre/8.39/include -I/packages/curl/7.65.0/include -I/packages/libtiff/4.0.9/include  -c binpack.c -o binpack.o
+gcc -I"/packages/R/3.6.2/lib64/R/include" -DNDEBUG   -I/usr/local/include  -fpic  -I/packages/zlib/1.2.8/include -I/packages/bzip2/1.0.6-shared/include -I/packages/xz/5.2.2/include -I/packages/pcre/8.39/include -I/packages/curl/7.65.0/include -I/packages/libtiff/4.0.9/include  -c count_not_missing.c -o count_not_missing.o
+gcc -I"/packages/R/3.6.2/lib64/R/include" -DNDEBUG   -I/usr/local/include  -fpic  -I/packages/zlib/1.2.8/include -I/packages/bzip2/1.0.6-shared/include -I/packages/xz/5.2.2/include -I/packages/pcre/8.39/include -I/packages/curl/7.65.0/include -I/packages/libtiff/4.0.9/include  -c fill_gaps.c -o fill_gaps.o
+gcc -I"/packages/R/3.6.2/lib64/R/include" -DNDEBUG   -I/usr/local/include  -fpic  -I/packages/zlib/1.2.8/include -I/packages/bzip2/1.0.6-shared/include -I/packages/xz/5.2.2/include -I/packages/pcre/8.39/include -I/packages/curl/7.65.0/include -I/packages/libtiff/4.0.9/include  -c init.c -o init.o
+gcc -I"/packages/R/3.6.2/lib64/R/include" -DNDEBUG   -I/usr/local/include  -fpic  -I/packages/zlib/1.2.8/include -I/packages/bzip2/1.0.6-shared/include -I/packages/xz/5.2.2/include -I/packages/pcre/8.39/include -I/packages/curl/7.65.0/include -I/packages/libtiff/4.0.9/include  -c lpt.c -o lpt.o
+gcc -shared -L/packages/R/3.6.2/lib64/R/lib -L/packages/R/3.6.2/lib64/R/lib -L/packages/zlib/1.2.8/lib -L/packages/bzip2/1.0.6-shared/lib -L/packages/xz/5.2.2/lib -L/packages/pcre/8.39/lib -L/packages/curl/7.65.0/lib -L/packages/libtiff/4.0.9/lib -L/usr/lib/jvm/java-1.6.0-openjdk-1.6.0.41.x86_64/jre/lib/amd64/server -L/packages/R/3.6.2/lib64/R/lib -L/packages/zlib/1.2.8/lib -L/packages/bzip2/1.0.6-shared/lib -L/packages/xz/5.2.2/lib -L/packages/pcre/8.39/lib -L/packages/curl/7.65.0/lib -L/packages/libtiff/4.0.9/lib -L/usr/lib/jvm/java-1.6.0-openjdk-1.6.0.41.x86_64/jre/lib/amd64/server -L/packages/R/3.6.2/lib64/R/lib -L/packages/zlib/1.2.8/lib -L/packages/bzip2/1.0.6-shared/lib -L/packages/xz/5.2.2/lib -L/packages/pcre/8.39/lib -L/packages/curl/7.65.0/lib -L/packages/libtiff/4.0.9/lib -L/usr/lib/jvm/java-1.6.0-openjdk-1.6.0.41.x86_64/jre/lib/amd64/server -L/packages/python/anaconda/latest/pkgs/openssl-1.0.2p-h470a237_2/lib -L/packages/gcc/6.2.0/lib64 -L/packages/git/2.16.3/lib64 -o batchtools.so binpack.o count_not_missing.o fill_gaps.o init.o lpt.o -L/packages/R/3.6.2/lib64/R/lib -lR
+installing to /projects/genomic-ml/R/3.6/00LOCK-batchtools/00new/batchtools/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (batchtools)
+
+The downloaded source packages are in
+	‘/tmp/th798/27797707/RtmpwMfGDh/downloaded_packages’
+> 
+```
+
 ## batchtools
 
 To launch your jobs on the cluster using batchtools the first thing
