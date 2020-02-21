@@ -90,6 +90,16 @@ th798@cn69:~/R/PeakSegPipeline(temp-db)$ rstudio &
 th798@cn69:~/R/PeakSegPipeline(temp-db)$ 
 ```
 
+Note that the emacs and rstudio commands above should open up a new
+window on your system. If you are on NAU wifi this may be slow
+(e.g. 50 seconds to load rstudio) relative to if you are on NAU
+ethernet. You should consider learning emacs and
+[ESS](http://ess.r-project.org/) because even on a really slow
+connection, you can still use interactive `emacs -nw` in the terminal
+(with all of the same editing/help/completion/etc features of Rstudio,
+more customizability, and support for more different programming
+languages).
+
 If you use some other software, and Monsoon doesn't have it, then you
 can either (1) request that the system administrators install the
 software via [this form](https://in.nau.edu/hpc/request-software/), or
