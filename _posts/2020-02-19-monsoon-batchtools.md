@@ -289,7 +289,7 @@ references to data outside of its body, but you can use as many things
 in `more.args` as you need. It can include further parallelization if
 you request more than one CPU per compute node, and to do this I
 recommend using the excellent
-[future](https://github.com/HenrikBengtsson/future) package. You
+[future](https://github.com/HenrikBengtsson/future) package (see the [future.apply vignette](https://cran.r-project.org/web/packages/future.apply/vignettes/future.apply-1-overview.html) for more info). You
 should typically save the results to a file on disk (although
 batchtools also supports getting the object which is returned by this
 function). For example:
