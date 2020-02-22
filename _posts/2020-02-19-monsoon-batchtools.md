@@ -286,15 +286,22 @@ operations like rbind), e.g.
 
 Note that the function `MyFun` to run in parallel must NOT include any
 references to data outside of its body, but you can use as many things
-in `more.args` as you need. You should
-typically save the results to a file on disk (although batchtools also
-supports getting the object which is returned by this function). For
-example:
+in `more.args` as you need. It can include further parallelization if
+you request more than one CPU per compute node, and to do this I
+recommend using the excellent
+[future](https://github.com/HenrikBengtsson/future) package. You
+should typically save the results to a file on disk (although
+batchtools also supports getting the object which is returned by this
+function). For example:
 
 ```r
 OneFold <- function(row.i, EUCL, DIST, N, ALPHA, all.seq.counts){
   library(data.table)
-  ## body
+  ## do something on the compute node.
+  future::plan("multiprocess")
+  future.apply::future_lapply(value.vec, function(value){
+    ## do something multicore/in parallel over CPUs on that node.
+  })
   ## save results to disk.
 }
 ```
