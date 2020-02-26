@@ -126,7 +126,22 @@ emacs
 
 The other advantage to option (1) is that all other users of
 the cluster system can use the software, whereas with option (2-3)
-only you can use the software.
+only you can use the software. I put these lines of code in my
+~/.bashrc file to get access to this software (and for git branch display):
+
+```
+function star_if_dirty {
+  [[ $(git status 2> /dev/null | tail -n1 | awk '{print $1}') != "nothing" ]] && echo "*"
+}
+function parse_git_branch {
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/[*] \(.*\)/(\1$(star_if_dirty))/"
+}
+export PS1='\u@\h:\w$(parse_git_branch)$ '
+export EDITOR="emacs -nw"
+export TERM=xterm-color
+module load R/3.6.2    #or just module load R
+module load emacs/26.3 #or just module load emacs
+```
 
 You may need to install the batchtools package. I had to tell R to
 install to a library directory under my home, by putting the following
