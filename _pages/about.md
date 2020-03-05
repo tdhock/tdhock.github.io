@@ -24,9 +24,10 @@ social: true
 **Jobs**
 
 My lab is recruiting masters and PhD students who are interested in
-working on new machine learning algorithms based on convex and
-discrete optimization -- if you are interested in joining my lab
-please email me your CV and a cover letter.
+working on new statistical models, optimization algorithms,
+interactive systems, and software for machine learning. If you are
+interested in joining, please [read the application
+instructions](http://jan.ucc.nau.edu/~th798/application.html).
 
 **Brief CV**
 

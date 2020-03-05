@@ -29,6 +29,32 @@ description: Course materials and students mentored
   [my course
   materials](http://members.cbio.mines-paristech.fr/~thocking/mines-course/Mines-ParisTech-machine-learning-projects.html).
   
+### Screencasts
+
+Topics without links below are on my TODO list.
+
+- [Make an R package with C++ code (10
+  screencasts)](https://www.youtube.com/playlist?list=PLwc48KSH3D1OkObQ22NHbFwEzof2CguJJ)
+- [R and Emacs Speaks Statistics](https://www.youtube.com/playlist?list=PLwc48KSH3D1Onsed66FPLywMSIQmAhUYJ)
+  - installation via package (ess, polymode)
+  - manual installation
+  - org-mode basics (links, html preview)
+  - compiling C++ code in an R package
+- Cluster computing on Monsoon
+- Regular expressions for text parsing and data reshaping
+- Data manipulation with data.table
+  - fread
+  - basic selections with first arg
+  - joins with first arg
+  - selecting columns with second arg
+  - summarize with second arg
+  - summarize by group with second arg
+  - foverlaps
+- Static data visualization with ggplot2
+  - work thru examples in animint2 manual chapter 2
+- Interactive data visualization with animint2
+- git/github 
+  
 ### NAU students mentored
 
 See my [Lab Members web page](http://jan.ucc.nau.edu/~th798/members/).
