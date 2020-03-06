@@ -52,6 +52,9 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   detection using elastic-net regularized accelerated failure time
   models. [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper)
+- Hocking TD, Vargovich J. Linear time dynamic programming for the
+  exact path of optimal models selected from a finite set. [Preprint
+  arXiv:2003.02808](https://arxiv.org/abs/2003.02808)
   
 ### 2020
 

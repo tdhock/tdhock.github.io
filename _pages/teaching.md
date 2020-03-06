@@ -33,15 +33,13 @@ description: Course materials and students mentored
 
 Topics without links below are on my TODO list.
 
-- [Make an R package with C++ code (10
-  screencasts)](https://www.youtube.com/playlist?list=PLwc48KSH3D1OkObQ22NHbFwEzof2CguJJ)
+- [Make an R package with C++ code](https://www.youtube.com/playlist?list=PLwc48KSH3D1OkObQ22NHbFwEzof2CguJJ)
+- [Machine learning basics in R](https://www.youtube.com/playlist?list=PLwc48KSH3D1M78ilQi35KPe2GHa7B_Rme)
+- [Regular expressions for text parsing and data reshaping](https://www.youtube.com/playlist?list=PLwc48KSH3D1P8R7470s0lgcUObJLEXSSO)
 - [R and Emacs Speaks Statistics](https://www.youtube.com/playlist?list=PLwc48KSH3D1Onsed66FPLywMSIQmAhUYJ)
   - installation via package (ess, polymode)
-  - manual installation
   - org-mode basics (links, html preview)
-  - compiling C++ code in an R package
 - Cluster computing on Monsoon
-- Regular expressions for text parsing and data reshaping
 - Data manipulation with data.table
   - fread
   - basic selections with first arg
