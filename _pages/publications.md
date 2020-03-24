@@ -39,7 +39,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   exact path of optimal models selected from a finite set. [Preprint
   arXiv:2003.02808](https://arxiv.org/abs/2003.02808)
   
-## Accepted 
+### Accepted, in press
 
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained dynamic
   programming and supervised penalty learning algorithms for peak
