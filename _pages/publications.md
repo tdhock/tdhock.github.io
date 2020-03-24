@@ -25,23 +25,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 - Hocking TD. Regular expressions and reshaping using data tables and
   the nc package. Under review at R Journal. [Software](https://github.com/tdhock/nc), [Reproducible](https://github.com/tdhock/nc-article)
-- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained dynamic
-  programming and supervised penalty learning algorithms for peak
-  detection in genomic
-  data. [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352). Under
-  review at Journal of Machine Learning
-  Research. [Software](https://github.com/tdhock/PeakSegOptimal),
-  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
-- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
-  Functional Pruning Optimal Partitioning (GFPOP) for Constrained
-  Changepoint Detection in Genomic Data. [Preprint
-  arXiv:1810.00117](https://arxiv.org/abs/1810.00117). Under review at
-  Journal of Statistical
-  Software. [Software](https://github.com/tdhock/PeakSegDisk),
-  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
-  Presentation at useR 2020:
-  [slides](http://www.user2019.fr/static/pres/t257847.pdf),
-  [video](https://www.youtube.com/watch?v=XlC4WCqsbuI).
 - Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
   comparison
   machines. [Preprint arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under
@@ -55,6 +38,27 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 - Hocking TD, Vargovich J. Linear time dynamic programming for the
   exact path of optimal models selected from a finite set. [Preprint
   arXiv:2003.02808](https://arxiv.org/abs/2003.02808)
+  
+## Accepted 
+
+- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained dynamic
+  programming and supervised penalty learning algorithms for peak
+  detection in genomic data. [Preprint
+  arXiv:1703.03352](https://arxiv.org/abs/1703.03352). Accepted for
+  publication in Journal of Machine Learning
+  Research. [Software](https://github.com/tdhock/PeakSegOptimal),
+  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
+- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
+  Functional Pruning Optimal Partitioning (GFPOP) for Constrained
+  Changepoint Detection in Genomic Data. [Preprint
+  arXiv:1810.00117](https://arxiv.org/abs/1810.00117). Accepted for
+  publication in
+  Journal of Statistical
+  Software. [Software](https://github.com/tdhock/PeakSegDisk),
+  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
+  Presentation at useR 2020:
+  [slides](http://www.user2019.fr/static/pres/t257847.pdf),
+  [video](https://www.youtube.com/watch?v=XlC4WCqsbuI).
   
 ### 2020
 
