@@ -71,8 +71,8 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 ### 2019
 
 - Hocking TD. Comparing namedCapture with other R packages for regular
-  expressions. Accepted for publication in R
-  Journal. [Software](https://github.com/tdhock/namedCapture), [Reproducible](https://github.com/tdhock/namedCapture-article)
+  expressions. R
+  Journal (2019). doi:10.32614/RJ-2019-050 [Software](https://github.com/tdhock/namedCapture), [Reproducible](https://github.com/tdhock/namedCapture-article)
 - Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
   Deconvolution of Calcium Imaging Data. Biostatistics (2019), doi:
   10.1093/biostatistics/kxy083. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/30753436)
