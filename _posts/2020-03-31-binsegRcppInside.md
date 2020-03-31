@@ -18,7 +18,7 @@ compile another program and link it to the R shared library. In [the
 previous blog post](https://tdhock.github.io/blog/2020/embedded-R/) I
 showed how to do this using the C interface provided with the R source
 code. In this blog post I investigate how to go one step further with
-[RInside](https://github.com/eddelbuettel/rinside). The goal will to
+[RInside](https://github.com/eddelbuettel/rinside). The goal will be to
 compile and run a simple C++ program with a main function that calls
 one of the C++ functions from the
 [binsegRcpp](https://github.com/tdhock/binsegRcpp) package.
@@ -102,6 +102,7 @@ package](https://github.com/tdhock/binsegRcpp/blob/master/src/rcpp_interface.cpp
 #include <RInside.h>
 #include <iostream>
 
+// this is a prototype which tells the compiler the inputs/outputs of rcpp_binseg_normal.
 Rcpp::List rcpp_binseg_normal(const Rcpp::NumericVector data_vec, const Rcpp::IntegerVector max_segments);
 
 void run_tests(Rcpp::List result, int n_data){
@@ -243,8 +244,8 @@ tdhock@maude-MacBookPro:~/R/R-3.6.3/tests/Embedding$
 
 Note that doing the above makes a binary/executable binsegRcppInside
 which contains copies of the machine code / objects defined in the
-binsegRcpp C++ code. This only works if we can get access to the
-binsegRcpp source code (which should be possible for all CRAN packages
+binsegRcpp C++ code. This method only works if we can get access to the
+package source code (which should be possible for all CRAN packages
 as long as we have an internet connection).
 
 Another way to achieve the same result is to link our compiled binary
