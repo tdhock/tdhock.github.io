@@ -4,7 +4,10 @@ title: binsegRcpp inside a C++ program
 description: Embedding Rcpp code into a main function
 ---
 
-As a part of the RcppDeepState project we are creating an easy way to
+As a part of the RcppDeepState project,
+which has been graciously funded by 
+[R Consortium](https://www.r-consortium.org/), 
+we are creating an easy way to
 use [DeepState](https://github.com/trailofbits/deepstate) to fuzz test
 R packages with C++ code defined using
 [Rcpp](http://www.rcpp.org/). DeepState requires the C++ programmer to
