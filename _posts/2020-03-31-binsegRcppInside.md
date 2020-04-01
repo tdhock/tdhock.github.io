@@ -283,7 +283,7 @@ tdhock@maude-MacBookPro:~/R/R-3.6.3/tests/Embedding$ du binsegRcppLinked binsegR
 1192	binsegRcppInside
 ```
 
-In conclusion, we have showed how to use RInside to embed the R
+In conclusion, we have shown how to use RInside to embed the R
 interpreter into a C++ program with a main function. Our main function
 called a C++ function `rcpp_binseg_normal` which was defined in an R
 package, and then ran some tests on the result. For the RcppDeepState
