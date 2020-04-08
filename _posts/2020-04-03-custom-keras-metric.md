@@ -347,3 +347,37 @@ For next time: try to get my exact AUC metric working on the most
 recent version of keras/tensorflow. If it works, it should be
 substantially simpler than the existing approximate AUC implementation
 in Tensorflow. 
+
+Anyway, to finish my translation of neural network training and
+interpretation in python code, below I reshape the train/validation
+loss/accuracy values using pandas, and visualize the curves with
+plotnine (which seems to be the current best for ggplots in python):
+
+```
+import pandas as pd
+import plotnine as p9
+history_wide = pd.DataFrame(history.history)
+history_wide["epoch"] = np.arange(n_epochs)+1
+history_tall = pd.melt(history_wide, id_vars="epoch")
+history_tall_sets = pd.concat([
+    history_tall,
+    history_tall["variable"].str.extract("(?P<prefix>val_|)(?P<metric>.*)"),
+    ], axis=1)
+history_tall_sets["set"] = history_tall_sets["prefix"].apply(
+    lambda x: "validation" if x == "val_" else "train")
+best_i = history_wide["val_loss"].idxmin()
+best_epoch = history_wide.loc[ best_i, "epoch" ]
+best_tall = history_tall_sets.loc[ history_tall_sets["epoch"]==best_epoch ]
+gg = p9.ggplot(history_tall_sets, p9.aes(x="epoch", y="value", color="set"))+\
+    p9.geom_line()+\
+    p9.theme_bw()+\
+    p9.facet_grid("metric ~ .", scales="free")+\
+    p9.geom_point(data=best_tall)+\
+    p9.theme(
+        facet_spacing={'right': 0.75},
+        panel_spacing=0)
+gg.save("5-acc-loss.png", width=5, height=5)
+```
+
+The python scripts mentioned above are in [my cs499-spring2020
+repo](https://github.com/tdhock/cs499-spring2020/blob/master/projects/5.py).
