@@ -38,6 +38,9 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 - Hocking TD, Vargovich J. Linear time dynamic programming for the
   exact path of optimal models selected from a finite set. [Preprint
   arXiv:2003.02808](https://arxiv.org/abs/2003.02808)
+- Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
+  G. gfpop: an R Package for Univariate Graph-Constrained Change-point
+  Detection. [Preprint arXiv:2002.03646](https://arxiv.org/abs/2002.03646)
   
 ### Accepted, in press
 
