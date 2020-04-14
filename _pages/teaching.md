@@ -33,6 +33,9 @@ description: Course materials and students mentored
 
 Topics without links below are on my TODO list.
 
+- [Convolutional neural networks in R](https://www.youtube.com/playlist?list=PLwc48KSH3D1O1iWRXid7CsiXI9gO9lS4V)
+- [Number of hidden units is a regularization parameter (R keras)](https://www.youtube.com/playlist?list=PLwc48KSH3D1MvTf_JOI00_eIPcoeYMM_o)
+- [Neural networks using keras in R](https://www.youtube.com/playlist?list=PLwc48KSH3D1PYdSd_27USy-WFAHJIfQTK)
 - [Make an R package with C++ code](https://www.youtube.com/playlist?list=PLwc48KSH3D1OkObQ22NHbFwEzof2CguJJ)
 - [Machine learning basics in R](https://www.youtube.com/playlist?list=PLwc48KSH3D1M78ilQi35KPe2GHa7B_Rme)
 - [Regular expressions for text parsing and data reshaping](https://www.youtube.com/playlist?list=PLwc48KSH3D1P8R7470s0lgcUObJLEXSSO)
@@ -40,6 +43,7 @@ Topics without links below are on my TODO list.
   - installation via package (ess, polymode)
   - org-mode basics (links, html preview)
 - Cluster computing on Monsoon
+- Interpreting machine learning models with feature selection
 - Data manipulation with data.table
   - fread
   - basic selections with first arg
