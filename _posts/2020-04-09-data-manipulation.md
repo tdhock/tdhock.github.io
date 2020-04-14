@@ -21,7 +21,7 @@ function of the regularization hyper-parameter. For example in my
 R](https://www.youtube.com/playlist?list=PLwc48KSH3D1PYdSd_27USy-WFAHJIfQTK)
 we plot subtrain/validation loss/accuracy versus number of epochs, in
 order to see when the neural network starts to overfit. In this
-section I comment on how I coded this in R, and how I translaed it
+section I comment on how I coded this in R, and how I translated it
 into python.
 
 The first step is to use the keras package in R to declare and fit a
@@ -110,7 +110,7 @@ history.tall.sets <- nc::capture_melt_single(
   metric="loss|acc")
 ```
 
-The functional call above performs the reshape operation on all of the
+The function call above performs the reshape operation on all of the
 columns from the first argument `history.wide` which match the regex
 provided in the other arguments, which are pasted together to form the
 final regex which will be used for matching. For more info see [my
@@ -126,7 +126,9 @@ the `melt` function to get a tall version of the data, then we use
 history_tall = pd.melt(history_wide, id_vars="epoch")
 history_var_info = history_tall["variable"].str.extract(
     "(?P<prefix>val_|)(?P<metric>.*)")
-history_tall_sets = pd.concat([history_tall, history_var_info], axis=1)
+history_tall_sets = pd.concat(
+    [history_tall, history_var_info],
+    axis=1)
 ```
 
 Translating the code above back to R results in the code below, which
@@ -136,14 +138,16 @@ is essentially what `nc::capture_melt_single` does under the hood:
 history.tall <- data.table::melt(history.wide, id.vars="epoch")
 history.var.info <- nc::capture_first_vec(
   history.tall$variable, prefix="val_|", metric=".*")
-history.tall.sets <- data.table::data.table(history.tall, history.var.info)
+history.tall.sets <- data.table::data.table(
+  history.tall, history.var.info)
 ```
 
 The next step is to add a variable for the set name that we want to
 display in the plot,
 
 ```r
-history.tall.sets[, set := ifelse(prefix=="val_", "validation", "subtrain")]
+history.tall.sets[, set := ifelse(
+  prefix=="val_", "validation", "subtrain")]
 ```
 
 ```py
