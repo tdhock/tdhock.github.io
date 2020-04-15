@@ -113,10 +113,12 @@ history.tall.sets <- nc::capture_melt_single(
 The function call above performs the reshape operation on all of the
 columns from the first argument `history.wide` which match the regex
 provided in the other arguments, which are pasted together to form the
-final regex which will be used for matching. For more info see [my
-recently submitted article about the new functions in nc for data
+final regex which will be used for matching. For more info see my
+[recently submitted article](https://github.com/tdhock/nc-article/raw/master/RJwrapper.pdf). 
+and [screencasts](https://www.youtube.com/playlist?list=PLwc48KSH3D1P8R7470s0lgcUObJLEXSSO)
+about the new functions in nc for data
 reshaping using regular
-expressions](https://github.com/tdhock/nc-article/raw/master/RJwrapper.pdf). 
+expressions.
 
 To accomplish something similar in the python code below we first use
 the `melt` function to get a tall version of the data, then we use
@@ -211,5 +213,5 @@ especially my students). [Another interesting
 comparison](https://towardsdatascience.com/an-overview-of-pythons-datatable-package-5d3a97394ee9)
 shows that for some big data sets, reading CSV using datatable and
 then converting to pandas can actually be faster than directly reading
-data in pandas.
+data in pandas. 
 
