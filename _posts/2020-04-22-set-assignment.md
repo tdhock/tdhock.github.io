@@ -307,6 +307,33 @@ N <- 3
 sample(rep(names(P), floor(P*(N+1)))) #two train, two test.
 ```
 
+Finally a note about a different sub-optimal implementation in
+[sklearn.model_selection.train_test_split](https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/model_selection/_split.py). Of
+course it does not make a significant difference in big data sets, but
+it is clear that the counts per set are sub-optimal for some small
+data, e.g.
+
+```py
+from sklearn.model_selection import train_test_split
+set_list = train_test_split(range(4), test_size=1.0/3, shuffle=False)
+dict(zip(["train", "test"], set_list))
+```
+
+On my system the output of the code above is:
+
+```
+>>> dict(zip(["train", "test"], set_list))
+{'test': [2, 3], 'train': [0, 1]}
+>>> sklearn.__version__
+'0.19.1'
+```
+
+Again that is not a huge problem, but returning a test set size of two
+when the test proportion is 1/3 has binomial probability of 0.296,
+whereas a test set size of one has binomial probability of 0.395, so
+it would be more appropriate/representative of the given proportion to
+return a test set size of one in this case.
+
 In conclusion I have presented a variety of different methods for
 dividing a data set into train/validation/test sets, based on given
 proportions. They all give quite similar results, but the ideas I
