@@ -298,7 +298,7 @@ test=0.5)`. Hint 1: you can use `dbinom` or `dmultinom` to compute the
 likelihood of a set size, given the desired proportions. Hint 2: the
 set sizes that maximize the likelihood given by the mode of the
 binomial/multinomial distribution. Here is a one-liner "solution" that
-uses these ideas, but needs some modification in order to work
+uses these ideas, but needs [some modification](https://github.com/tdhock/randomSets/blob/master/R/random_set_vec.R) in order to work
 correctly for the given example:
 
 ```r
