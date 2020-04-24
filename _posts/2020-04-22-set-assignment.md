@@ -313,7 +313,7 @@ In this section I present how train/test splits are implemented in
 some machine learning libraries.
 
 First there is a sub-optimal implementation in
-[sklearn.model_selection.train_test_split](https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/model_selection/_split.py). Of
+[sklearn.model_selection.train_test_split](https://github.com/scikit-learn/scikit-learn/blob/5a4340834d23c4bdcd813ccda24a690ae174c168/sklearn/model_selection/_split.py#L1780). Of
 course it does not make a significant difference in big data sets, but
 it is clear that the counts per set are sub-optimal for some small
 data, e.g.
