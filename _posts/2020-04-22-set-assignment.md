@@ -307,7 +307,12 @@ N <- 3
 sample(rep(names(P), floor(P*(N+1)))) #two train, two test.
 ```
 
-Finally a note about a different sub-optimal implementation in
+## Implementations in machine learning libraries
+
+In this section I present how train/test splits are implemented in
+some machine learning libraries.
+
+First there is a sub-optimal implementation in
 [sklearn.model_selection.train_test_split](https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/model_selection/_split.py). Of
 course it does not make a significant difference in big data sets, but
 it is clear that the counts per set are sub-optimal for some small
@@ -333,6 +338,46 @@ when the test proportion is 1/3 has binomial probability of 0.296,
 whereas a test set size of one has binomial probability of 0.395, so
 it would be more appropriate/representative of the given proportion to
 return a test set size of one in this case.
+
+Second I checked the implementation in
+[mlr3::rsmp("holdout")](https://github.com/mlr-org/mlr3/blob/131afc3f7b6a9a9d1e65831b5139c2e954a5d463/R/ResamplingHoldout.R#L57)
+which also appears to be sub-optimal, but in a different way:
+
+```r
+
+N <- 2
+prop.train <- 0.7
+task <- tsk("iris")$filter(1:N)
+rho <- rsmp("holdout", ratio=prop.train)
+set.seed(1)
+rho$instantiate(task)
+rho$train_set(1)
+rho$test_set(1)
+dbinom(0:N, N, prop.train)
+
+```
+
+The code above creates a data set of size `N <- 2` and then requests a
+train/test split with a proportion of `prop.train <- 0.7` in the train
+set. In this case a train set size of 2 is optimal with respect to the
+binomial likelihood, but `mlr3` returns a split with one observation
+in the train set and one observation in the test set:
+
+```
+> rho$train_set(1)
+[1] 1
+> rho$test_set(1)
+[1] 2
+> dbinom(0:N, N, prop.train)
+[1] 0.09 0.42 0.49
+> packageVersion("mlr3")
+[1] ‘0.2.0’
+```
+
+Again, no big deal for big/real data situations, but the code could be
+easily modified so that it is optimal in the small data case as well.
+
+### Conclusions
 
 In conclusion I have presented a variety of different methods for
 dividing a data set into train/validation/test sets, based on given
