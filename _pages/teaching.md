@@ -65,6 +65,18 @@ See my [Lab Members web page](http://jan.ucc.nau.edu/~th798/members/).
 
 I have mentored the
 following students in coding free/open-source software.
+- [Sanchit Saini](https://github.com/sanchit-saini), 2020,
+  [rtracklayer R package
+  improvements](https://github.com/rstats-gsoc/gsoc2020/wiki/rtracklayer-improvements).
+- [Himanshu Singh](https://github.com/lazycipher), 2020, [animint2:
+  interactive grammar of
+  graphics](https://github.com/tdhock/animint2).
+- [Julian Stanley](https://github.com/julianstanley), 2020, [Graphical
+  User Interface for gfpop R
+  package](https://github.com/julianstanley/gfpop-gui).
+- [Anirban Chetia](https://github.com/Anirban166), 2020,
+  [testComplexity R
+  package](https://github.com/Anirban166/testComplexity).
 - [Anuraag Srivastava](https://github.com/as4378), 2019, [Optimal
   Partitioning algorithm and opart R
   package](https://github.com/as4378/opart).
