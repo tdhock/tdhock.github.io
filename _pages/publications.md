@@ -41,6 +41,9 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
   G. gfpop: an R Package for Univariate Graph-Constrained Change-point
   Detection. [Preprint arXiv:2002.03646](https://arxiv.org/abs/2002.03646)
+- Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
+  Changepoint Detection Approach for ECG Segmentation. [Preprint
+  arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
   
 ### Accepted, in press
 
