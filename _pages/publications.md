@@ -44,6 +44,8 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
   Changepoint Detection Approach for ECG Segmentation. [Preprint
   arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
+- Barnwal A, Cho H, Hocking TD. [Preprint
+  arXiv:2006.04920](https://arxiv.org/abs/2006.04920).
   
 ### Accepted, in press
 
