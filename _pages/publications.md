@@ -23,29 +23,30 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### In progress
 
-- Hocking TD. Regular expressions and reshaping using data tables and
-  the nc package. Under review at R Journal. [Software](https://github.com/tdhock/nc), [Reproducible](https://github.com/tdhock/nc-article)
-- Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
-  comparison
-  machines. [Preprint arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under
-  review at Journal of Machine Learning Research.
-  [Software](https://github.com/tdhock/rankSVMcompare),
-  [Reproducible](https://github.com/tdhock/compare-paper)
-- Hocking TD, Khare A. Learning penalty functions for changepoint
-  detection using elastic-net regularized accelerated failure time
-  models. [Software](https://github.com/anujkhare/iregnet),
-  [Reproducible](https://github.com/tdhock/iregnet-paper)
+- Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
+  failure time model in XGBoost. [Preprint
+  arXiv:2006.04920](https://arxiv.org/abs/2006.04920).
+- Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
+  Changepoint Detection Approach for ECG Segmentation. [Preprint
+  arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
 - Hocking TD, Vargovich J. Linear time dynamic programming for the
   exact path of optimal models selected from a finite set. [Preprint
   arXiv:2003.02808](https://arxiv.org/abs/2003.02808)
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
   G. gfpop: an R Package for Univariate Graph-Constrained Change-point
   Detection. [Preprint arXiv:2002.03646](https://arxiv.org/abs/2002.03646)
-- Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
-  Changepoint Detection Approach for ECG Segmentation. [Preprint
-  arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
-- Barnwal A, Cho H, Hocking TD. [Preprint
-  arXiv:2006.04920](https://arxiv.org/abs/2006.04920).
+- Hocking TD. Regular expressions and reshaping using data tables and
+  the nc package. Under review at R Journal. [Software](https://github.com/tdhock/nc), [Reproducible](https://github.com/tdhock/nc-article)
+- Hocking TD, Khare A. Learning penalty functions for changepoint
+  detection using elastic-net regularized accelerated failure time
+  models. [Software](https://github.com/anujkhare/iregnet),
+  [Reproducible](https://github.com/tdhock/iregnet-paper)
+- Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
+  comparison
+  machines. [Preprint arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under
+  review at Journal of Machine Learning Research.
+  [Software](https://github.com/tdhock/rankSVMcompare),
+  [Reproducible](https://github.com/tdhock/compare-paper)
   
 ### Accepted, in press
 
