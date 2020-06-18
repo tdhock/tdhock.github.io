@@ -50,13 +50,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   
 ### Accepted, in press
 
-- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained dynamic
-  programming and supervised penalty learning algorithms for peak
-  detection in genomic data. [Preprint
-  arXiv:1703.03352](https://arxiv.org/abs/1703.03352). Accepted for
-  publication in Journal of Machine Learning
-  Research. [Software](https://github.com/tdhock/PeakSegOptimal),
-  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
   Changepoint Detection in Genomic Data. [Preprint
@@ -71,6 +64,13 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   
 ### 2020
 
+- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained Dynamic
+  Programming and Supervised Penalty Learning Algorithms for Peak
+  Detection in Genomic Data. Journal of Machine Learning Research
+  21(87):1−40, 2020. [JMLR](http://jmlr.org/papers/v21/18-843.html),
+  [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352),
+  [Software](https://github.com/tdhock/PeakSegOptimal),
+  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
 - Hocking TD, Bourque G. Machine Learning Algorithms for Simultaneous
   Supervised Detection of Peaks in Multiple Samples and Cell
   Types. Pacific Symposium on Biocomputing
