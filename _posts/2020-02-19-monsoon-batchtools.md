@@ -118,11 +118,16 @@ software is common enough, it is likely provided by conda, so you
 could use option (3), e.g. 
 
 ```
-module load anaconda
+module load anaconda3
 conda create -n emacs1 -c conda-forge emacs
 conda activate emacs1
 emacs
 ```
+
+By the way the above code block stopped working during June 2020
+because it had `anaconda` rather than `anaconda3` (the Monsoon admins
+changed the name of the anaconda module). To get a list of the current
+module names you can do `module avail`.
 
 The other advantage to option (1) is that all other users of
 the cluster system can use the software, whereas with option (2-3)
