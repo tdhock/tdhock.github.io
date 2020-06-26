@@ -54,10 +54,13 @@ TeX was unable to calculate metrics for:
 
 	A ...
 (/tmp/Rtmp12xHO8/tikzDevice25013d1aafd5/tikzStringWidthCalc.tex ...
-(/usr/share/texmf/tex/latex/R/tex/latex/jss.cls ...  ! LaTeX Error:
-File `jsslogo' not found.  ``` The output above shows that (1) the
-test tried to compute font metrics for A via a temporary file then (2)
-found jss.cls under /usr but (3) could not find jsslogo graphics file.
+(/usr/share/texmf/tex/latex/R/tex/latex/jss.cls ...  
+! LaTeX Error: File `jsslogo' not found.
+``` 
+
+The output above shows that (1) the test tried to compute font metrics
+for A via a temporary file then (2) found jss.cls under /usr but (3)
+could not find jsslogo graphics file.
 
 There are a number of [fixes for this
 issue](https://github.com/daqana/tikzDevice/issues/197):
