@@ -21,6 +21,12 @@ methods described in my research papers (see below).
   a local conference for useRs and developeRs of R.
 - I am an editor for the Journal of Statistical Software.
 
+### LOPART
+
+To support our paper about Labeled Optimal Partitioning we created the
+ [LOPART](https://github.com/tdhock/LOPART) R
+ package. [arXiv:2006.13967](https://arxiv.org/abs/2006.13967)
+
 ### PeakSeg
 
 The PeakSeg R packages contain algorithms for inferring optimal
@@ -37,9 +43,9 @@ can be interpreted in terms of peaks (after up changes) and background
   but it is neither fast nor optimal, so in practice we recommend to
   use our newer packages below instead.
 - [PeakSegOptimal](https://CRAN.R-project.org/package=PeakSegOptimal)
-  provides log-linear time algorithms for computing optimal
-  models with multiple peaks for a single
-  sample. [arXiv:1703.03352](https://arxiv.org/abs/1703.03352)
+  provides log-linear time algorithms for computing optimal models
+  with multiple peaks for a single sample, to support our [JMLR'20
+  paper](http://jmlr.org/papers/v21/18-843.html).
 - [PeakSegDisk](https://github.com/tdhock/PeakSegDisk) provides an
   on-disk implementation of optimal log-linear algorithms for
   computing multiple peaks in a single sample (same as PeakSegOptimal
@@ -125,7 +131,7 @@ models (in preparation), we created the
 ### Directlabels
 
 To support my poster "Adding direct labels to plots" which won
-[Best Student Poster at useR 2011](http://web.warwick.ac.uk/statsdept/useR-2011/),
+[Best Student Poster at useR 2011](https://www.r-project.org/conferences/useR-2011/),
 we created the
 [directlabels](https://CRAN.R-project.org/package=directlabels) R
 package.

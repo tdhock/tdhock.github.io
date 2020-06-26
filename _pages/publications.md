@@ -23,18 +23,25 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### In progress
 
+- Hocking TD, Srivastava A. Labeled Optimal Partitioning. [Preprint
+  arXiv:2006.13967](https://arxiv.org/abs/2006.13967). 
+  [Software](https://github.com/tdhock/LOPART),
+  [Reproducible](https://github.com/tdhock/LOPART-paper)
 - Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
   failure time model in XGBoost. [Preprint
-  arXiv:2006.04920](https://arxiv.org/abs/2006.04920).
+  arXiv:2006.04920](https://arxiv.org/abs/2006.04920). [Software](https://github.com/dmlc/xgboost),
+  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/)
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
   Changepoint Detection Approach for ECG Segmentation. [Preprint
   arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
 - Hocking TD, Vargovich J. Linear time dynamic programming for the
   exact path of optimal models selected from a finite set. [Preprint
-  arXiv:2003.02808](https://arxiv.org/abs/2003.02808)
+  arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
+  [Software](https://github.com/tdhock/penaltyLearning),
+  [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper)
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
   G. gfpop: an R Package for Univariate Graph-Constrained Change-point
-  Detection. [Preprint arXiv:2002.03646](https://arxiv.org/abs/2002.03646)
+  Detection. [Preprint arXiv:2002.03646](https://arxiv.org/abs/2002.03646), [Software](https://github.com/vrunge/gfpop), [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd)
 - Hocking TD. Regular expressions and reshaping using data tables and
   the nc package. Under review at R Journal. [Software](https://github.com/tdhock/nc), [Reproducible](https://github.com/tdhock/nc-article)
 - Hocking TD, Khare A. Learning penalty functions for changepoint
