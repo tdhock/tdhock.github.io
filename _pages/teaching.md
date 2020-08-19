@@ -7,6 +7,7 @@ description: Course materials and students mentored
 
 ### Course materials
 
+- Fall 2020, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2020)
 - Summer 2020, Introduction to Machine Learning and Neural Networks,
   90 minute summer school lecture. [my course
   materials](https://github.com/tdhock/2020-yiqi-summer-school)
