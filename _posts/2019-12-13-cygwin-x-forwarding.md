@@ -37,7 +37,7 @@ temporarily.
 After that in lxterminal do
 
 ```
-ssh -Y monsoon.hpc.nau.edu
+ssh -Y th798@monsoon.hpc.nau.edu
 ```
 
 and put in your password to get a shell on monsoon. You can then open

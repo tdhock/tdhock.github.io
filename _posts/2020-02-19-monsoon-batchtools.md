@@ -32,7 +32,7 @@ local X server.
 
 ```
 th798@cmp2986 ~
-$ ssh -Y monsoon.hpc.nau.edu
+$ ssh -Y th798@monsoon.hpc.nau.edu
 th798@monsoon.hpc.nau.edu's password: 
 Last login: Wed Feb 12 10:29:42 2020 from cmp2986.computers.nau.edu
 
