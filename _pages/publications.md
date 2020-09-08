@@ -23,6 +23,8 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### In progress
 
+- Changepoint detection algorithms and applications in R. Textbook in
+  preparation.
 - Optimal multiple changepoint detection models for recognition of
   histone modification events in ChIP-Seq data. Liehrmann A, Hocking
   TD. In preparation.
@@ -166,6 +168,11 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   491-499. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27797775),
   [Software](https://github.com/tdhock/PeakError),
   [Reproducible](https://bitbucket.org/mugqic/chip-seq-paper)
+- Introduction to optimal changepoint detection algorithms. Hocking TD
+  and Killick R. [useR2017 conference
+  tutorial](https://www.user2017.brussels/uploads/TobyHocking.html),
+  [video](https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/Introduction-to-optimal-changepoint-detection-algorithms-II),
+  [Reproducible](https://github.com/tdhock/change-tutorial).
 
 ### 2016
 
@@ -185,11 +192,18 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   in neuroblastoma. Clinical Cancer
   Research 2016. [journal](http://clincancerres.aacrjournals.org/content/early/2016/11/03/1078-0432.CCR-16-0500)
 - Maidstone R, Hocking TD, Rigaill G, Fearnhead P. On optimal multiple
-  changepoint algorithms for large data.  Statistics and Computing
+  changepoint algorithms for large data. Statistics and Computing
   (2016). doi:10.1007/s11222-016-9636-3
   [journal](https://link.springer.com/article/10.1007/s11222-016-9636-3),
   [Software](https://r-forge.r-project.org/R/?group_id%3D1851),
   [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/benchmark/?root%3Dopfp)
+- The animint2 manual, [online
+  "book" with multiple chapters](http://members.cbio.mines-paristech.fr/~thocking/animint2-manual/Ch02-ggplot2.html),
+  [Reproducible](https://github.com/tdhock/animint-book).
+- Understanding and Creating Interactive Graphics. Hocking TD, Ekstrøm
+  CT. [useR2016 conference
+  tutorial](http://user2016.r-project.org/tutorials/13.html),
+  [Reproducible](https://github.com/tdhock/interactive-tutorial).
 
 ### 2015
 
@@ -211,6 +225,10 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   samples. [Preprint arXiv:1506.01286](https://arxiv.org/abs/1506.01286),
   [Software](https://github.com/tdhock/PeakSegJoint),
   [Reproducible](https://github.com/tdhock/PeakSegJoint-paper)
+- Animint: Interactive Web-Based Animations Using Ggplot2's Grammar of
+  Graphics. VanderPlas SR and Sievert C and Hocking TD. Presentation
+  at
+  [JSM2015](https://ww2.amstat.org/meetings/jsm/2015/onlineprogram/AbstractDetails.cfm?abstractid=314184%0A).
 
 ### 2014
 
