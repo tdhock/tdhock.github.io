@@ -38,7 +38,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   [Reproducible](https://github.com/tdhock/iregnet-paper)
 - Chatbots language design: the influence of language use on user
   experience. Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa
-  MA. Submitted.
+  MA. Under review at ACM Transactions on Computer-Human Interaction.
 - Improved estimation of gut passage time considerably affects
   trait-based dispersal models. Abraham A, Prys-Jones T, De Cuyper A,
   Ridenour C, Hempson G, Hocking TD, Clauss M, Doughty C. Under review
@@ -90,12 +90,17 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   Journal of Statistical
   Software. [Software](https://github.com/tdhock/PeakSegDisk),
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
-  Presentation at useR 2020:
+  Presentation at useR 2019:
   [slides](http://www.user2019.fr/static/pres/t257847.pdf),
   [video](https://www.youtube.com/watch?v=XlC4WCqsbuI).
   
 ### 2020
 
+- Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
+  Changepoint Detection Approach for ECG Segmentation. In proceedings
+  of 42th Annual International Conference of the IEEE Engineering in
+  Medicine and Biology Society (EMBC). [IEEE
+  Xplore](https://ieeexplore.ieee.org/document/9175333)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained Dynamic
   Programming and Supervised Penalty Learning Algorithms for Peak
   Detection in Genomic Data. Journal of Machine Learning Research
