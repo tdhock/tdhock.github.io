@@ -270,7 +270,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   for change-point detection using max-margin interval regression.
   International Conference on Machine Learning
   (ICML), 2013. [PMLR](http://proceedings.mlr.press/v28/hocking13.html),
-  [video](http://techtalks.tv/talks/learning-sparse-penalties-for-change-point-detection-using-max-margin-interval-regression/58208/)
+  [video](http://techtalks.tv/talks/learning-sparse-penalties-for-change-point-detection-using-max-margin-interval-regression/58208/),
   [Software](https://github.com/tdhock/penaltyLearning),
   [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/?root=breakpoints)
 
