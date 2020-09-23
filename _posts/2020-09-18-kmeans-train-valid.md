@@ -387,7 +387,7 @@ smaller than the number of observations).
 The figure below takes the best method from above and compares it to
 the all.combos (array/cartesian join) methods:
 
-![all combinations figure]({{ site.url }}/assets/img/2020-09-18-all.png)
+![all combinations figure]({{ site.url }}/assets/img/2020-09-18-figure-all.png)
 
 The top panel shows that the `all.combos` methods take more time than
 the `data.table.by.cluster` method (which was tied as fastest in the
