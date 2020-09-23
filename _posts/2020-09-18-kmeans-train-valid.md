@@ -352,7 +352,7 @@ There are also three different things we can do the loop/by over:
 
 * observations only.
 * clusters only.
-* observations and clusters.
+* sets and observations.
 
 Exercise for the reader: implement all 9 combinations of the above.
 
