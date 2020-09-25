@@ -157,3 +157,12 @@ submission](https://github.com/tdhock/nc-article) about data reshaping
 using regular expressions, we created
 [nc](https://CRAN.R-project.org/package=nc), which is a redesign of
 our previous namedCapture package.
+
+### binsegRcpp
+
+To use as a baseline efficient implementation of binary segmentation
+in various papers such as [Labeled Optimal
+Partitioning](https://arxiv.org/abs/2006.13967) and [Linear time model
+selection](https://arxiv.org/abs/2003.02808), we created the
+[binsegRcpp](https://cloud.r-project.org/web/packages/binsegRcpp/) R
+package.
