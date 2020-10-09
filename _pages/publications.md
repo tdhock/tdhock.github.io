@@ -23,8 +23,11 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### In progress
 
-- Changepoint detection algorithms and applications in R. Textbook in
-  preparation.
+- Hocking TD and Killick R. Changepoint detection algorithms and
+  applications in R. Textbook in preparation.
+- Hocking TD. Chapter "Introduction to machine learning and neural
+  networks" for book "New Advances in Land Carbon Cycle Modeling"
+  edited by Luo Y, in preparation.
 - Optimal multiple changepoint detection models for recognition of
   histone modification events in ChIP-Seq data. Liehrmann A, Hocking
   TD. In preparation.
