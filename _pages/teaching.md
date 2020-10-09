@@ -9,7 +9,9 @@ description: Course materials and students mentored
 
 - Fall 2020, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2020)
 - Summer 2020, Introduction to Machine Learning and Neural Networks,
-  90 minute summer school lecture. [my course
+  90 minute lecture for summer school on "[New Advances in Land Carbon
+  Cycle Modeling](http://www2.nau.edu/luo-lab/?workshop)" (3rd
+  year). [my course
   materials](https://github.com/tdhock/2020-yiqi-summer-school)
 - Spring 2020, CS499-3, Deep Learning. [my course materials](https://github.com/tdhock/cs499-spring2020/)
 - Fall 2019, CS599-6 / EE599-4, Machine learning research. [my course
