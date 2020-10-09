@@ -21,13 +21,19 @@ methods described in my research papers (see below).
   a local conference for useRs and developeRs of R.
 - I am an editor for the Journal of Statistical Software.
 
-### LOPART
+### RcppDeepState: fuzz testing compiled code in R packages
+
+To support our R consortium funded project about fuzz testing C++
+functions in R packages that use Rcpp, we created the
+[RcppDeepState](https://github.com/akhikolla/RcppDeepState) R package.
+
+### LOPART: Labeled Optimal Partitioning
 
 To support our paper about Labeled Optimal Partitioning we created the
- [LOPART](https://github.com/tdhock/LOPART) R
- package. [arXiv:2006.13967](https://arxiv.org/abs/2006.13967)
+[LOPART](https://github.com/tdhock/LOPART) R
+package. [arXiv:2006.13967](https://arxiv.org/abs/2006.13967)
 
-### PeakSeg
+### PeakSeg: up-down constrained changepoint detection
 
 The PeakSeg R packages contain algorithms for inferring optimal
 segmentation models subject to the constraint that up changes must be
@@ -62,7 +68,7 @@ can be interpreted in terms of peaks (after up changes) and background
   [PSB'20
   paper](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf).
 
-### PeakError
+### PeakError: label error computation for peak models
 
 To support our
 [Bioinformatics (2017)
@@ -71,7 +77,7 @@ created the R package
 [PeakError](https://CRAN.R-project.org/package=PeakError) which computes
 the number of incorrect labels for a given set of predicted peaks.
 
-### Clusterpath
+### clusterpath: convex clustering
 
 To support our
 [ICML'11 paper](http://www.icml-2011.org/papers/419_icmlpaper.pdf)
@@ -79,7 +85,7 @@ about the "clusterpath," a convex formulation of hierarchical
 clustering, we created the clusterpath R package, available on
 [R-Forge](http://clusterpath.r-forge.r-project.org/). 
 
-### rankSVMcompare
+### rankSVMcompare: support vector machines for ranking and comparing
 
 To support our
 paper about a Support Vector Machine (SVM) algorithm
@@ -87,7 +93,7 @@ for ranking and comparing (in preparation,
 [arXiv:1401.8008](http://arxiv.org/abs/1401.8008)), we created the
 [rankSVMcompare](https://github.com/tdhock/rankSVMcompare) R package.
 
-### animint
+### animint: animated interactive grammar of graphics
 
 To support our
 [JCGS](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367)
@@ -96,7 +102,7 @@ graphics, and our [useR2016 tutorial on interactive
 graphics](https://github.com/tdhock/interactive-tutorial), we created
 the [animint](https://github.com/tdhock/animint) R package.
 
-### fpop
+### fpop: functional pruning optimal partitioning
 
 To support our
 [Statistics and Computing](https://link.springer.com/article/10.1007/s11222-016-9636-3)
@@ -104,15 +110,14 @@ To support our
 partitioning algorithm, we created the
 [fpop](https://r-forge.r-project.org/R/?group_id=1851) R package.
 
-### mmit
+### mmit: max margin interval trees
 
 To support our
 [NeurIPS'17](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees)
 paper about max margin interval trees, we created the
 [mmit](https://github.com/aldro61/mmit) R package and Python module.
 
-
-### penaltyLearning
+### penaltyLearning: supervised changepoint detection
 
 To support our
 [ICML'13 paper](http://proceedings.mlr.press/v28/hocking13.html) and
@@ -122,13 +127,13 @@ the
 [penaltyLearning](https://CRAN.R-project.org/package=penaltyLearning)
 R package.
 
-### iregnet
+### iregnet: elastic net regularized interval regression
 
 To support our paper about elastic net regularized interval regression
 models (in preparation), we created the
 [iregnet](https://github.com/anujkhare/iregnet) R package.
 
-### Directlabels
+### directlabels: automatic label placement on figures
 
 To support my poster "Adding direct labels to plots" which won
 [Best Student Poster at useR 2011](https://www.r-project.org/conferences/useR-2011/),
@@ -136,29 +141,32 @@ we created the
 [directlabels](https://CRAN.R-project.org/package=directlabels) R
 package.
 
-### inlinedocs
+### inlinedocs: documentation generation
 
 To support our
 [Journal of Statistical Software (2013) paper](https://www.jstatsoft.org/article/view/v054i06)
 about documentation generation for R, we created the
 [inlinedocs](https://CRAN.R-project.org/package=inlinedocs) R package.
 
-### namedCapture
+### namedCapture: regular expressions for text parsing
 
 To support our
 [R Journal submission](https://github.com/tdhock/namedCapture-article)
 about R packages for regular expressions, we created the
 [namedCapture](https://CRAN.R-project.org/package=namedCapture) R package.
 
-### nc
+### nc: named capture regular expressions for data reshaping
 
 To support our [R Journal
 submission](https://github.com/tdhock/nc-article) about data reshaping
-using regular expressions, we created
-[nc](https://CRAN.R-project.org/package=nc), which is a redesign of
-our previous namedCapture package.
+using regular expressions, we created the
+[nc](https://CRAN.R-project.org/package=nc) R package. To get a more
+efficient and fully-featured implementation of data reshaping, we
+contributed some R/C code to the
+[data.table](https://github.com/Rdatatable/data.table/pull/4731) R
+package.
 
-### binsegRcpp
+### binsegRcpp: binary segmentation
 
 To use as a baseline efficient implementation of binary segmentation
 in various papers such as [Labeled Optimal
@@ -166,3 +174,4 @@ Partitioning](https://arxiv.org/abs/2006.13967) and [Linear time model
 selection](https://arxiv.org/abs/2003.02808), we created the
 [binsegRcpp](https://cloud.r-project.org/web/packages/binsegRcpp/) R
 package.
+
