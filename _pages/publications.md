@@ -28,9 +28,9 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 - Hocking TD. Chapter "Introduction to machine learning and neural
   networks" for book "New Advances in Land Carbon Cycle Modeling"
   edited by Luo Y, in preparation.
-- Optimal multiple changepoint detection models for recognition of
-  histone modification events in ChIP-Seq data. Liehrmann A, Hocking
-  TD. In preparation.
+- Liehrmann A, Hocking TD. Optimal multiple changepoint detection
+  models for recognition of histone modification events in ChIP-Seq
+  data. In preparation.
 - Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
   failure time model in XGBoost. In preparation. [Preprint
   arXiv:2006.04920](https://arxiv.org/abs/2006.04920). [Software](https://github.com/dmlc/xgboost),
@@ -39,13 +39,14 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   detection using elastic-net regularized accelerated failure time
   models. In preparation. [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper)
-- Chatbots language design: the influence of language use on user
-  experience. Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa
-  MA. Under review at ACM Transactions on Computer-Human Interaction.
-- Improved estimation of gut passage time considerably affects
-  trait-based dispersal models. Abraham A, Prys-Jones T, De Cuyper A,
-  Ridenour C, Hempson G, Hocking TD, Clauss M, Doughty C. Under review
-  at Functional Ecology.
+- Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
+  language design: the influence of language use on user
+  experience. Under review at ACM Transactions on Computer-Human
+  Interaction.
+- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
+  TD, Clauss M, Doughty C. Improved estimation of gut passage time
+  considerably affects trait-based dispersal models. Under review at
+  Functional Ecology.
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. [Preprint
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967). 
   [Software](https://github.com/tdhock/LOPART),
