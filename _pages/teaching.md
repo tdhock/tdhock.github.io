@@ -7,6 +7,7 @@ description: Course materials and students mentored
 
 ### Course materials
 
+- Spring 2021, CS470/570, Artificial Intelligence. [my course materials](https://github.com/tdhock/cs470-570-spring-2021)
 - Fall 2020, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2020)
 - Summer 2020, Introduction to Machine Learning and Neural Networks,
   90 minute summer school lecture. [my course
