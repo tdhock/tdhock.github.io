@@ -23,44 +23,69 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 
 ### In progress
 
-- Improved estimation of gut passage time considerably affects
-  trait-based dispersal models. Abraham A, Prys-Jones T, De Cuyper A,
-  Ridenour C, Hempson G, Hocking TD, Clauss M, Doughty C. Under review
-  at Functional Ecology.
+- Hocking TD and Killick R. Changepoint detection algorithms and
+  applications in R. Textbook in preparation.
+- Hocking TD. Chapter "Introduction to machine learning and neural
+  networks" for book "New Advances in Land Carbon Cycle Modeling"
+  edited by Luo Y, in preparation.
+- Liehrmann A, Hocking TD. Optimal multiple changepoint detection
+  models for recognition of histone modification events in ChIP-Seq
+  data. In preparation.
+- Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
+  failure time model in XGBoost. In preparation. [Preprint
+  arXiv:2006.04920](https://arxiv.org/abs/2006.04920). [Software](https://github.com/dmlc/xgboost),
+  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/)
+- Hocking TD, Khare A. Learning penalty functions for changepoint
+  detection using elastic-net regularized accelerated failure time
+  models. In preparation. [Software](https://github.com/anujkhare/iregnet),
+  [Reproducible](https://github.com/tdhock/iregnet-paper)
+- Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
+  language design: the influence of language use on user
+  experience. Under review at ACM Transactions on Computer-Human
+  Interaction.
+- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
+  TD, Clauss M, Doughty C. Improved estimation of gut passage time
+  considerably affects trait-based dispersal models. Under review at
+  Functional Ecology.
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. [Preprint
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967). 
   [Software](https://github.com/tdhock/LOPART),
   [Reproducible](https://github.com/tdhock/LOPART-paper)
-- Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
-  failure time model in XGBoost. [Preprint
-  arXiv:2006.04920](https://arxiv.org/abs/2006.04920). [Software](https://github.com/dmlc/xgboost),
-  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/)
-- Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
-  Changepoint Detection Approach for ECG Segmentation. [Preprint
+- Fotoohinasab A, Hocking TD, Afghah F. A Greedy Graph Search
+  Algorithm Based on Changepoint Analysis for Automatic QRS-Complex
+  Detection. Under review at Computers in Biology and
+  Medicine. [Preprint
   arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
 - Hocking TD, Vargovich J. Linear time dynamic programming for the
-  exact path of optimal models selected from a finite set. [Preprint
+  exact path of optimal models selected from a finite set. Under
+  review at Journal of Computational and Graphical
+  Statistics. [Preprint
   arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
   [Software](https://github.com/tdhock/penaltyLearning),
   [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper)
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
   G. gfpop: an R Package for Univariate Graph-Constrained Change-point
-  Detection. [Preprint arXiv:2002.03646](https://arxiv.org/abs/2002.03646), [Software](https://github.com/vrunge/gfpop), [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd)
+  Detection. Under review at Journal of Statistical
+  Software. [Preprint
+  arXiv:2002.03646](https://arxiv.org/abs/2002.03646),
+  [Software](https://github.com/vrunge/gfpop),
+  [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd)
 - Hocking TD. Regular expressions and reshaping using data tables and
   the nc package. Under review at R Journal. [Software](https://github.com/tdhock/nc), [Reproducible](https://github.com/tdhock/nc-article)
-- Hocking TD, Khare A. Learning penalty functions for changepoint
-  detection using elastic-net regularized accelerated failure time
-  models. [Software](https://github.com/anujkhare/iregnet),
-  [Reproducible](https://github.com/tdhock/iregnet-paper)
 - Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
-  comparison
-  machines. [Preprint arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under
-  review at Journal of Machine Learning Research.
+  comparison machines. [Preprint
+  arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under review at
+  Machine Learning.
   [Software](https://github.com/tdhock/rankSVMcompare),
   [Reproducible](https://github.com/tdhock/compare-paper)
   
 ### Accepted, in press
 
+- Fotoohinasab A, Hocking TD, Afghah F. A Graph-Constrained
+  Changepoint Learning Approach for Automatic QRS-Complex
+  Detection. Accepted for Asilomar Conference on Signals, Systems, and
+  Computers. [Preprint
+  arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
   Changepoint Detection in Genomic Data. [Preprint
@@ -69,12 +94,17 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   Journal of Statistical
   Software. [Software](https://github.com/tdhock/PeakSegDisk),
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
-  Presentation at useR 2020:
+  Presentation at useR 2019:
   [slides](http://www.user2019.fr/static/pres/t257847.pdf),
   [video](https://www.youtube.com/watch?v=XlC4WCqsbuI).
   
 ### 2020
 
+- Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
+  Changepoint Detection Approach for ECG Segmentation. In proceedings
+  of 42th Annual International Conference of the IEEE Engineering in
+  Medicine and Biology Society (EMBC). [IEEE
+  Xplore](https://ieeexplore.ieee.org/document/9175333)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained Dynamic
   Programming and Supervised Penalty Learning Algorithms for Peak
   Detection in Genomic Data. Journal of Machine Learning Research
@@ -147,6 +177,11 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   491-499. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27797775),
   [Software](https://github.com/tdhock/PeakError),
   [Reproducible](https://bitbucket.org/mugqic/chip-seq-paper)
+- Introduction to optimal changepoint detection algorithms. Hocking TD
+  and Killick R. [useR2017 conference
+  tutorial](https://www.user2017.brussels/uploads/TobyHocking.html),
+  [video](https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/Introduction-to-optimal-changepoint-detection-algorithms-II),
+  [Reproducible](https://github.com/tdhock/change-tutorial).
 
 ### 2016
 
@@ -166,11 +201,18 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   in neuroblastoma. Clinical Cancer
   Research 2016. [journal](http://clincancerres.aacrjournals.org/content/early/2016/11/03/1078-0432.CCR-16-0500)
 - Maidstone R, Hocking TD, Rigaill G, Fearnhead P. On optimal multiple
-  changepoint algorithms for large data.  Statistics and Computing
+  changepoint algorithms for large data. Statistics and Computing
   (2016). doi:10.1007/s11222-016-9636-3
   [journal](https://link.springer.com/article/10.1007/s11222-016-9636-3),
   [Software](https://r-forge.r-project.org/R/?group_id%3D1851),
   [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/benchmark/?root%3Dopfp)
+- The animint2 manual, [online
+  "book" with multiple chapters](http://members.cbio.mines-paristech.fr/~thocking/animint2-manual/Ch02-ggplot2.html),
+  [Reproducible](https://github.com/tdhock/animint-book).
+- Understanding and Creating Interactive Graphics. Hocking TD, Ekstrøm
+  CT. [useR2016 conference
+  tutorial](http://user2016.r-project.org/tutorials/13.html),
+  [Reproducible](https://github.com/tdhock/interactive-tutorial).
 
 ### 2015
 
@@ -192,6 +234,10 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   samples. [Preprint arXiv:1506.01286](https://arxiv.org/abs/1506.01286),
   [Software](https://github.com/tdhock/PeakSegJoint),
   [Reproducible](https://github.com/tdhock/PeakSegJoint-paper)
+- Animint: Interactive Web-Based Animations Using Ggplot2's Grammar of
+  Graphics. VanderPlas SR and Sievert C and Hocking TD. Presentation
+  at
+  [JSM2015](https://ww2.amstat.org/meetings/jsm/2015/onlineprogram/AbstractDetails.cfm?abstractid=314184%0A).
 
 ### 2014
 
@@ -228,7 +274,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   for change-point detection using max-margin interval regression.
   International Conference on Machine Learning
   (ICML), 2013. [PMLR](http://proceedings.mlr.press/v28/hocking13.html),
-  [video](http://techtalks.tv/talks/learning-sparse-penalties-for-change-point-detection-using-max-margin-interval-regression/58208/)
+  [video](http://techtalks.tv/talks/learning-sparse-penalties-for-change-point-detection-using-max-margin-interval-regression/58208/),
   [Software](https://github.com/tdhock/penaltyLearning),
   [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/?root=breakpoints)
 
