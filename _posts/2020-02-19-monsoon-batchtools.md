@@ -4,6 +4,8 @@ title: R batchtools on Monsoon
 description: Cluster computing tutorial for NAU students
 ---
 
+NEW 26 Oct 2020: [video screencast tutorial](https://youtu.be/K_vJDKNLn28)!
+
 In machine learning research we often need to run the same algorithm
 on a bunch of different data sets, and/or run several algorithms on
 the same data set. Here is the protocol I use these days for such
