@@ -141,7 +141,8 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   Journal of Human Genetics
   (2018). [doi:10.1016/j.ajhg.2018.08.005](https://doi.org/10.1016/j.ajhg.2018.08.005)
   [AJHG](https://www.cell.com/action/showPdf?pii=S0002-9297%2818%2930271-4),
-  [Software](http://github.com/tdhock/predict-clinically-pathogenic).
+  [Software](http://github.com/tdhock/predict-clinically-pathogenic),
+  [used in dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP).
 - Sievert C, Cai J, VanderPlas S, Ferris K, Khan FUF, Hocking
   TD. Extending ggplot2 for linked and animated web graphics. Journal
   of Computational and Graphical Statistics (2018).
