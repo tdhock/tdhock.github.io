@@ -47,8 +47,9 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   TD, Clauss M, Doughty C. Improved estimation of gut passage time
   considerably affects trait-based dispersal models. Under review at
   Functional Ecology.
-- Hocking TD, Srivastava A. Labeled Optimal Partitioning. [Preprint
-  arXiv:2006.13967](https://arxiv.org/abs/2006.13967). 
+- Hocking TD, Srivastava A. Labeled Optimal Partitioning. Under review
+  at Statistics and Computing. [Preprint
+  arXiv:2006.13967](https://arxiv.org/abs/2006.13967).
   [Software](https://github.com/tdhock/LOPART),
   [Reproducible](https://github.com/tdhock/LOPART-paper)
 - Fotoohinasab A, Hocking TD, Afghah F. A Greedy Graph Search
