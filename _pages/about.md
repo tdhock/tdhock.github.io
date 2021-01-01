@@ -10,7 +10,7 @@ profile:
   address: >
     <p>toby.hocking@nau.edu</p>
     <p>(928)523-5209</p> 
-    <p><a href="http://jan.ucc.nau.edu/~th798/">Machine learning lab director</a>
+    <p><a href="http://ml.nau.edu/">Machine learning lab director</a>
     <p>School of Informatics, Computing, and Cyber Systems</p>
     <p>Northern Arizona University</p>
     <p><a href="http://www2.nau.edu/nau-map/?buildingNum=90">Building 90</a>, Room 210</p>
@@ -27,7 +27,7 @@ My lab is recruiting masters and PhD students who are interested in
 working on new statistical models, optimization algorithms,
 interactive systems, and software for machine learning. If you are
 interested in joining, please [read the application
-instructions](http://jan.ucc.nau.edu/~th798/application.html).
+instructions](http://ml.nau.edu/).
 
 **Brief CV**
 

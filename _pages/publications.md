@@ -43,10 +43,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   language design: the influence of language use on user
   experience. Under review at ACM Transactions on Computer-Human
   Interaction.
-- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
-  TD, Clauss M, Doughty C. Improved estimation of gut passage time
-  considerably affects trait-based dispersal models. Under review at
-  Functional Ecology.
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Under review
   at Statistics and Computing. [Preprint
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967).
@@ -82,6 +78,10 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   
 ### Accepted, in press
 
+- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
+  TD, Clauss M, Doughty C. Improved estimation of gut passage time
+  considerably affects trait-based dispersal models. Accepted at
+  Functional Ecology.
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-Constrained
   Changepoint Learning Approach for Automatic QRS-Complex
   Detection. Accepted for Asilomar Conference on Signals, Systems, and
