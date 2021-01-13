@@ -79,10 +79,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   
 ### Accepted, in press
 
-- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
-  TD, Clauss M, Doughty C. Improved estimation of gut passage time
-  considerably affects trait-based dispersal models. Accepted at
-  Functional Ecology.
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-Constrained
   Changepoint Learning Approach for Automatic QRS-Complex
   Detection. Accepted for [Asilomar Conference on Signals, Systems,
@@ -111,6 +107,11 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   
 ### 2020
 
+- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
+  TD, Clauss M, Doughty C. Improved estimation of gut passage time
+  considerably affects trait-based dispersal models. Accepted at
+  [Functional
+  Ecology](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2435.13726).
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
   Changepoint Detection Approach for ECG Segmentation. In proceedings
   of 42th Annual International Conference of the IEEE Engineering in
