@@ -66,7 +66,7 @@ Topics without links below are on my TODO list.
   
 ### NAU students mentored
 
-See my [Lab Members web page](http://jan.ucc.nau.edu/~th798/members/).
+See my [Lab Members web page](http://ml.nau.edu/members/).
 
 ### Google Summer of Code students mentored
 
