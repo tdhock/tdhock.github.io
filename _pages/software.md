@@ -21,6 +21,12 @@ methods described in my research papers (see below).
   a local conference for useRs and developeRs of R.
 - I am an editor for the Journal of Statistical Software.
 
+### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
+
+To support an upcoming paper about infectious disease modeling, we
+created the [SPARSEMODr](https://github.com/NAU-CCL/SPARSEMODr/)
+R package.
+
 ### RcppDeepState: fuzz testing compiled code in R packages
 
 To support our R consortium funded project about fuzz testing C++
@@ -32,6 +38,13 @@ functions in R packages that use Rcpp, we created the
 To support our paper about Labeled Optimal Partitioning we created the
 [LOPART](https://github.com/tdhock/LOPART) R
 package. [arXiv:2006.13967](https://arxiv.org/abs/2006.13967)
+
+### gfpop: Graph-constrained Functional Pruning Optimal Partitioning
+
+To support our paper about graph-constrained optimal changepoint
+detection, we created the [gfpop](https://github.com/vrunge/gfpop) and
+[gfpopgui](https://github.com/julianstanley/gfpopgui) R
+packages. [arXiv:2002.03646](https://arxiv.org/abs/2002.03646)
 
 ### PeakSeg: up-down constrained changepoint detection
 
@@ -100,7 +113,8 @@ To support our
 paper about animated and interactive extensions to the grammar of
 graphics, and our [useR2016 tutorial on interactive
 graphics](https://github.com/tdhock/interactive-tutorial), we created
-the [animint](https://github.com/tdhock/animint) R package.
+the [animint](https://github.com/tdhock/animint) R package. The more
+recent version is [animint2](https://github.com/tdhock/animint2).
 
 ### fpop: functional pruning optimal partitioning
 
@@ -155,7 +169,7 @@ To support our
 about R packages for regular expressions, we created the
 [namedCapture](https://CRAN.R-project.org/package=namedCapture) R package.
 
-### nc: named capture regular expressions for data reshaping
+### nc: named capture regular expressions for text parsing and data reshaping
 
 To support our [R Journal
 submission](https://github.com/tdhock/nc-article) about data reshaping
