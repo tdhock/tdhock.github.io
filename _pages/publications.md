@@ -29,9 +29,11 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   networks" for book "New Advances in Land Carbon Cycle Modeling"
   edited by Luo Y, in
   preparation. [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school)
-- Liehrmann A, Hocking TD. Optimal multiple changepoint detection
-  models for recognition of histone modification events in ChIP-Seq
-  data. In preparation.
+- Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
+  accuracy in over-dispersed ChIP-seq data with supervised
+  segmentation models. Under review at BMC
+  Bioinformatics. [arXiv:2012.06848](https://arxiv.org/abs/2012.06848),
+  [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper)
 - Hocking TD, Khare A. Learning penalty functions for changepoint
   detection using elastic-net regularized accelerated failure time
   models. In preparation. [Software](https://github.com/anujkhare/iregnet),
