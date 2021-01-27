@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Emulating the python interactive console
-description: code, sys, fileinput modules
+description: My hack using the code module
 ---
 
 Yesterday and today I had students in my CS470/570 AI class ask me
@@ -93,9 +93,9 @@ class FileConsole(code.InteractiveConsole):
         return line
 ```
 
-Note in the code above we assume that `f` is the file handle we want
-to read lines from. To use this class to get the desired output, we
-can use the code below:
+Note in the code above we assume that `f` is the file handle from
+which we want to read lines. To use this class to get the desired
+output, we can use the code below:
 
 ```python
 import sys
@@ -106,9 +106,10 @@ FileConsole().interact(banner="", exitmsg="")
 
 The code above first adds a newline to the prompt, then opens the file
 specified as the first command line argument, then instantiates a
-`FileConsole` and calls its `interact` method. The `banner` and
-`exitmsg` arguments specify that nothing should be printed at the
-start and end of the console. 
+`FileConsole` and calls its `interact` method (which repeatedly calls
+`raw_input` until `EOFError` is raised). The `banner` and `exitmsg`
+arguments specify that nothing should be printed at the start and end
+of the console.
 
 Now assume we have a python script file `add.py` as below that we
 would like to process just as if we copied its code and pasted it into
@@ -139,6 +140,27 @@ $ python interpreter.py add.py
 
 ```
 
+And actually this is more flexible than the copy-paste method because
+that results in a `SyntaxError` because in the `add.py` script there
+is no empty line after the function definition,
+
+```bash
+$ python
+Python 3.7.6 (default, Jan  8 2020, 19:59:22) 
+[GCC 7.3.0] :: Anaconda, Inc. on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> def add(x, y):
+...     return x + y
+... add(1, 2)
+  File "<stdin>", line 3
+    add(1, 2)
+      ^
+SyntaxError: invalid syntax
+>>> add(3, 4)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'add' is not defined
+```
 Overall this
 [interpreter.py](https://github.com/tdhock/cs470-570-spring-2021/blob/master/interpreter.py)
 python script seems pretty complicated compared to the R solution ---
