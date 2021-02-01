@@ -27,32 +27,32 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   applications in R. Textbook in preparation.
 - Hocking TD. Chapter "Introduction to machine learning and neural
   networks" for book "New Advances in Land Carbon Cycle Modeling"
-  edited by Luo Y, in preparation.
-- Liehrmann A, Hocking TD. Optimal multiple changepoint detection
-  models for recognition of histone modification events in ChIP-Seq
-  data. In preparation.
-- Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
-  failure time model in XGBoost. In preparation. [Preprint
-  arXiv:2006.04920](https://arxiv.org/abs/2006.04920). [Software](https://github.com/dmlc/xgboost),
-  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/)
+  edited by Luo Y, in
+  preparation. [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school)
+- Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
+  accuracy in over-dispersed ChIP-seq data with supervised
+  segmentation models. Under review at BMC
+  Bioinformatics. [arXiv:2012.06848](https://arxiv.org/abs/2012.06848),
+  [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper)
 - Hocking TD, Khare A. Learning penalty functions for changepoint
   detection using elastic-net regularized accelerated failure time
   models. In preparation. [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper)
+- Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
+  failure time model in XGBoost. Under review at Journal of
+  Computational and Graphical Statistics. [Preprint
+  arXiv:2006.04920](https://arxiv.org/abs/2006.04920). [Software](https://github.com/dmlc/xgboost),
+  [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
+  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/)
 - Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
   language design: the influence of language use on user
   experience. Under review at ACM Transactions on Computer-Human
   Interaction. [Preprint arXiv:2101.11089](https://arxiv.org/abs/2101.11089).
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Under review
-  at Statistics and Computing. [Preprint
+  at Computational Statistics. [Preprint
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967).
   [Software](https://github.com/tdhock/LOPART),
   [Reproducible](https://github.com/tdhock/LOPART-paper)
-- Fotoohinasab A, Hocking TD, Afghah F. A Greedy Graph Search
-  Algorithm Based on Changepoint Analysis for Automatic QRS-Complex
-  Detection. Under review at Computers in Biology and
-  Medicine. [Preprint
-  arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
 - Hocking TD, Vargovich J. Linear time dynamic programming for the
   exact path of optimal models selected from a finite set. Under
   review at Journal of Computational and Graphical
@@ -65,10 +65,13 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   Detection. Under review at Journal of Statistical
   Software. [Preprint
   arXiv:2002.03646](https://arxiv.org/abs/2002.03646),
-  [Software](https://github.com/vrunge/gfpop),
+  [Software (gfpop)](https://github.com/vrunge/gfpop),
+  [Software (gfpopgui)](https://github.com/julianstanley/gfpopgui),
   [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd)
 - Hocking TD. Regular expressions and reshaping using data tables and
-  the nc package. Under review at R Journal. [Software](https://github.com/tdhock/nc), [Reproducible](https://github.com/tdhock/nc-article)
+  the nc package. Under review at R
+  Journal. [Software](https://github.com/tdhock/nc),
+  [Reproducible](https://github.com/tdhock/nc-article)
 - Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
   comparison machines. [Preprint
   arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under review at
@@ -78,14 +81,11 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   
 ### Accepted, in press
 
-- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
-  TD, Clauss M, Doughty C. Improved estimation of gut passage time
-  considerably affects trait-based dispersal models. Accepted at
-  Functional Ecology.
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-Constrained
   Changepoint Learning Approach for Automatic QRS-Complex
-  Detection. Accepted for Asilomar Conference on Signals, Systems, and
-  Computers. [Preprint
+  Detection. Accepted for [Asilomar Conference on Signals, Systems,
+  and
+  Computers](https://www2.securecms.com/Asilomar2020/Papers/ViewPapers.asp?PaperNum=1323). [Preprint
   arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
@@ -99,8 +99,21 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   [slides](http://www.user2019.fr/static/pres/t257847.pdf),
   [video](https://www.youtube.com/watch?v=XlC4WCqsbuI).
   
+### 2021
+
+- Fotoohinasab A, Hocking TD, Afghah F. A Greedy Graph Search
+  Algorithm Based on Changepoint Analysis for Automatic QRS-Complex
+  Detection. Published by [Computers in Biology and
+  Medicine](https://www.sciencedirect.com/science/article/pii/S0010482521000020). [Preprint
+  arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
+  
 ### 2020
 
+- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
+  TD, Clauss M, Doughty C. Improved estimation of gut passage time
+  considerably affects trait-based dispersal models. Accepted at
+  [Functional
+  Ecology](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2435.13726).
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
   Changepoint Detection Approach for ECG Segmentation. In proceedings
   of 42th Annual International Conference of the IEEE Engineering in
