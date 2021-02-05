@@ -13,7 +13,7 @@ profile:
     <p><a href="http://ml.nau.edu/">Machine learning lab director</a>
     <p>School of Informatics, Computing, and Cyber Systems</p>
     <p>Northern Arizona University</p>
-    <p><a href="http://www2.nau.edu/nau-map/?buildingNum=90">Building 90</a>, Room 210</p>
+    <p><a href="https://nauedu-prod.modolabs.net/campus_map/map/index?filter=school%20of%20informatics%20computing&_recenter=true">Building 90</a>, Room 210</p>
     <p>1295 S. Knoles Dr.</p>
     <p>Flagstaff, AZ 86011</p>
 
