@@ -47,7 +47,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 - Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
   language design: the influence of language use on user
   experience. Under review at ACM Transactions on Computer-Human
-  Interaction.
+  Interaction. [Preprint arXiv:2101.11089](https://arxiv.org/abs/2101.11089).
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Under review
   at Computational Statistics. [Preprint
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967).
@@ -183,7 +183,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   trees. Neural Information Processing Systems
   (NIPS) 2017. [Software](https://github.com/aldro61/mmit),
   [Reproducible](https://github.com/tdhock/mmit-paper),
-  [arXiv](https://arxiv.org/abs/1710.04234),
+  [Preprint arXiv](https://arxiv.org/abs/1710.04234),
   [NIPS](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees),
   [video](https://www.youtube.com/watch?v=sNrMH9z1rb4)
 - Hocking TD, Goerner-Potvin P, Morin A, Shao X, Pastinen T, Bourque
