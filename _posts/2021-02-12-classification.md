@@ -85,7 +85,8 @@ linear rather than quadratic. The main idea they suggest in this paper
 is to replace the square loss with the squared hinge loss, which makes
 sense in the context of classification (as explained intuitively in
 their Figure 1). However the idea of using the squared hinge loss as a
-surrogate is not new; in fact it dates back to Yan 2005.
+surrogate is not new; in fact it dates back (at least) to [Yan
+2003](https://home.cs.colorado.edu/~mozer/Research/Selected%20Publications/reprints/wilcoxon_mann_whitney.pdf).
 
 Another paper by the same group involves extending these ideas to the
 setting of huge data distributed over several servers, [Federated Deep

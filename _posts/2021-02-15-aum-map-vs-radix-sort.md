@@ -45,7 +45,7 @@ several data sizes (N.pred) are shown below, along with the speedup
 I was not surprised to observe that the C++ code (aum) was orders of
 magnitude faster than the R code (penaltyLearning). That is to be
 expected due to the overhead of interpreting/evaluating R
-code. However I was surprised to observe that the speedup consistency
+code. However I was surprised to observe that the speedup consistently
 decreases as the data size (N.pred) increases. 
 
 This can be explained by remembering that R/data.table uses the linear
@@ -64,7 +64,7 @@ Revisited](http://www.codercorner.com/RadixSortRevisited.htm), which
 explains how to implement a radix sort (for float), but it would
 introduce substantial complexity to the code. Another option would be
 to use the radix sort code in R/data.table, but I would prefer a pure
-C/C++ solution. Maybe
+C/C++ solution (no dependency on R). Maybe
 [boost::sort::spreadsort::float_sort](https://www.boost.org/doc/libs/1_67_0/libs/sort/doc/html/boost/sort/spreadsort/float_sort_idp31797616.html)
 would do the job? It is "an extremely fast hybrid radix sort
 algorithm" with best, average, and worst case time complexity of N, N
