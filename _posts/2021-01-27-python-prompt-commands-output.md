@@ -165,3 +165,77 @@ Overall this
 [interpreter.py](https://github.com/tdhock/cs470-570-spring-2021/blob/master/interpreter.py)
 python script seems pretty complicated compared to the R solution ---
 is there an easier way to do this in python?
+
+### UPDATE 9 Feb 2021
+
+The original post correctly described that the `raw_input` method
+should return a string without a newline, but my code did not! The
+fixed class looks like:
+
+```python
+import code
+class FileConsole(code.InteractiveConsole):
+    """Emulate python console but use file instead of stdin"""
+    def raw_input(self, prompt):
+        line = f.readline()
+        if line=="":
+            raise EOFError()
+        no_newline = line.replace("\n", "")
+        print(prompt, no_newline, sep="")
+        return no_newline
+```
+
+Also note above the subtle difference that no separator is printed between
+the prompt and command. 
+
+The updated code which calls this class has an additional space in the
+definition of `sys.ps1` as shown below:
+
+```python
+import sys
+sys.ps1 = "\n>>> "
+f = open(sys.argv[1])
+FileConsole().interact(banner="", exitmsg="")
+```
+
+The result looks like
+
+```
+(base) tdhock@maude-MacBookPro:~/teaching/cs470-570-spring-2021$ python interpreter.py test.py 
+
+>>> def add(x, y):
+...     s = x + y
+...     return s
+... 
+
+>>> add(1, 2)
+3
+
+>>> add(3, 4)
+7
+
+```
+
+which is essentially the same as pasting the code into the python console,
+
+```python
+$ python
+Python 3.7.6 (default, Jan  8 2020, 19:59:22) 
+[GCC 7.3.0] :: Anaconda, Inc. on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import sys
+>>> sys.ps1="\n>>> "
+
+>>> def add(x, y):
+...     s = x + y
+...     return s
+... 
+
+>>> add(1, 2)
+3
+
+>>> add(3, 4)
+7
+
+```
+
