@@ -128,7 +128,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
 - Hocking TD, Bourque G. Machine Learning Algorithms for Simultaneous
   Supervised Detection of Peaks in Multiple Samples and Cell
-  Types. Pacific Symposium on Biocomputing
+  Types. Pacific Symposium on Biocomputing (2020)
   25:367-378. [PDF](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf),
   [Software](https://github.com/tdhock/PeakSegJoint)
   
