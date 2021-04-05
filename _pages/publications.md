@@ -68,10 +68,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   [Software (gfpop)](https://github.com/vrunge/gfpop),
   [Software (gfpopgui)](https://github.com/julianstanley/gfpopgui),
   [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd)
-- Hocking TD. Regular expressions and reshaping using data tables and
-  the nc package. Under review at R
-  Journal. [Software](https://github.com/tdhock/nc),
-  [Reproducible](https://github.com/tdhock/nc-article)
 - Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
   comparison machines. [Preprint
   arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under review at
@@ -81,6 +77,10 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   
 ### Accepted, in press
 
+- Hocking TD. Regular expressions and reshaping using data tables and
+  the nc package. Accepted in R
+  Journal. [Software](https://github.com/tdhock/nc),
+  [Reproducible](https://github.com/tdhock/nc-article)
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-Constrained
   Changepoint Learning Approach for Automatic QRS-Complex
   Detection. Accepted for [Asilomar Conference on Signals, Systems,
