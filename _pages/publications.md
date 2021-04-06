@@ -191,7 +191,8 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   supervised machine learning.  Bioinformatics (2017) 33 (4):
   491-499. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27797775),
   [Software](https://github.com/tdhock/PeakError),
-  [Reproducible](https://bitbucket.org/mugqic/chip-seq-paper)
+  [Reproducible](https://bitbucket.org/mugqic/chip-seq-paper),
+  [Data](https://rcdata.nau.edu/genomic-ml/chip-seq-chunk-db/)
 - Introduction to optimal changepoint detection algorithms. Hocking TD
   and Killick R. [useR2017 conference
   tutorial](https://www.user2017.brussels/uploads/TobyHocking.html),
