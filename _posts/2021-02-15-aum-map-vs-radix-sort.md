@@ -7,7 +7,7 @@ description: Log-linear C++ STL containers vs linear time radix sort
 To support our paper about gradient-based optimization of the Area
 Under the Minimum (AUM) of the False Positives and Negatives, I
 recently wrote [some C++
-code](https://github.com/tdhock/aum/blob/main/src/aum.cpp) which does
+code](https://github.com/tdhock/aum/blob/main/src/aum_map.cpp) which does
 the computation. It uses the
 [std::map](https://www.cplusplus.com/reference/map/map/) container
 from the Standard Template Library. The container is a key-value store
