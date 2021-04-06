@@ -40,23 +40,17 @@ After that in lxterminal do
 ssh -Y th798@monsoon.hpc.nau.edu
 ```
 
-and put in your password to get a shell on monsoon. You can then open
+and put in your password to get a shell on monsoon. 
+Note that the -Y flag for ssh enables trusted X11 forwarding, which
+are not subjected to the X11 SECURITY extension controls. (from man ssh)
+
+You can then open
 up any X windows program and see the windows on your own computer,
 e.g.
 
 ```
 emacs -fh &
 ```
-
-or
-
-```
-module load rstudio
-rstudio &
-```
-
-Note that the -Y flag for ssh enables trusted X11 forwarding, which
-are not subjected to the X11 SECURITY extension controls. (from man ssh)
 
 Some references:
 
@@ -67,3 +61,16 @@ cygwin/x](https://x.cygwin.com/docs/ug/using.html#using-starting)
 
 [Cygwin
 FAQ](https://x.cygwin.com/docs/faq/cygwin-x-faq.html#q-xserver-nolisten-tcp-default)
+
+UPDATE 5 Apr 2021! Monsoon no longer supports running rstudio via X
+forwarding. Instead you can run [RStudio on a compute node via the
+OnDemand web
+interface](https://ondemand.hpc.nau.edu/pun/sys/dashboard/batch_connect/sys/RStudio/session_contexts/new).
+
+If you still want to use R inside emacs on the cluster, remember to
+put the following in `~/.bashrc`
+
+```shell-script
+export R_LIBS_USER=$HOME/R/%v
+module load R
+```

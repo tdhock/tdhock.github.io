@@ -83,22 +83,13 @@ th798@cn69:~/R/PeakSegPipeline(temp-db)$ emacs &
 th798@cn69:~/R/PeakSegPipeline(temp-db)$ 
 ```
 
-Or Rstudio:
-
-```
-th798@cn69:~/R/PeakSegPipeline(temp-db)$ module load rstudio
-th798@cn69:~/R/PeakSegPipeline(temp-db)$ rstudio &
-[2] 6502
-th798@cn69:~/R/PeakSegPipeline(temp-db)$ 
-```
-
-Note that the emacs and rstudio commands above should open up a new
-window on your system. If you are on NAU wifi this may be slow
+Note that the emacs command above should open up a new
+window on your system. If you are on NAU wifi some programs may be slow
 (e.g. 50 seconds to load rstudio) relative to if you are on NAU
 ethernet. You should consider learning emacs and
 [ESS](http://ess.r-project.org/) because even on a really slow
 connection, you can still use interactive `emacs -nw` in the terminal
-(with all of the same editing/help/completion/etc features of Rstudio,
+(with similar editing/help/completion/etc features to Rstudio, but with
 more customizability, and support for more different programming
 languages).
 
@@ -146,8 +137,7 @@ function parse_git_branch {
 export PS1='\u@\h:\w$(parse_git_branch)$ '
 export EDITOR="emacs -nw"
 export TERM=xterm-color
-module load R/3.6.2    #or just module load R
-module load emacs/26.3 #or just module load emacs
+module load R
 ```
 
 You may need to install the batchtools package. I had to tell R to
