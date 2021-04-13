@@ -178,7 +178,7 @@ How confusing! I hope that a standard is adopted at some point.
 
 So to get a portable C code that can be used in all common platforms
 (mac, windows, linux) that R supports, I decided to use regular
-`qsort` instead of the s/r variatnts. The easiest way to do that is by
+`qsort` instead of the s/r variants. The easiest way to do that is by
 creating a (file-local) static variable that can be written from my
 `aum_sort` function, then read from my comparison function,
 
@@ -250,7 +250,7 @@ docs](https://gcc.gnu.org/onlinedocs/gcc/Thread-Local.html),
 static __thread double *sort_thresh;
 ```
 
-Re-compiling and runnig the code then gives us:
+Re-compiling and running the code then gives us:
 
 ```r
 > aum:::multithread(models, predictions, 2)
