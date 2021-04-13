@@ -54,7 +54,7 @@ instructions](http://ml.nau.edu/application.html).
 - 2002-2006: undergraduate, UC Berkeley, Double major in Molecular &
   Cell Biology and Statistics, with
   [Terry Speed](https://www.stat.berkeley.edu/~terry/).
-- [Full CV](HOCKING-cv.pdf)
+- [Full CV](HOCKING-cv.pdf), [Short Bio](http://ml.nau.edu/members/TDH-short-bio.html).
 
 Research interests: fast and accurate algorithms for convex
 optimization (clustering, regression, ranking, classification) and
