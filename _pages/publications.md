@@ -2,7 +2,7 @@
 layout: page
 permalink: /publications/
 title: Publications
-description: Peer-reviewed papers and pre-prints with links to code and data
+description: Peer-reviewed papers and preprints with links to code and data
 ---
 
 - My pages on
@@ -32,7 +32,7 @@ description: Peer-reviewed papers and pre-prints with links to code and data
 - Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
   accuracy in over-dispersed ChIP-seq data with supervised
   segmentation models. Under review at BMC
-  Bioinformatics. [arXiv:2012.06848](https://arxiv.org/abs/2012.06848),
+  Bioinformatics. [Preprint arXiv:2012.06848](https://arxiv.org/abs/2012.06848),
   [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper)
 - Hocking TD, Khare A. Learning penalty functions for changepoint
   detection using elastic-net regularized accelerated failure time
@@ -74,6 +74,8 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   Machine Learning.
   [Software](https://github.com/tdhock/rankSVMcompare),
   [Reproducible](https://github.com/tdhock/compare-paper)
+- Mihaljevic JR, Borkovec S, Ratnavale S, Hocking TD, Banister KE,
+  Eppinger JE, Hepp CM, Doerry E. [Preprint medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1). Under review.
   
 ### Accepted, in press
 
@@ -81,12 +83,6 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   the nc package. Accepted in R
   Journal. [Software](https://github.com/tdhock/nc),
   [Reproducible](https://github.com/tdhock/nc-article)
-- Fotoohinasab A, Hocking TD, Afghah F. A Graph-Constrained
-  Changepoint Learning Approach for Automatic QRS-Complex
-  Detection. Accepted for [Asilomar Conference on Signals, Systems,
-  and
-  Computers](https://www2.securecms.com/Asilomar2020/Papers/ViewPapers.asp?PaperNum=1323). [Preprint
-  arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
   Changepoint Detection in Genomic Data. [Preprint
@@ -109,6 +105,12 @@ description: Peer-reviewed papers and pre-prints with links to code and data
   
 ### 2020
 
+- Fotoohinasab A, Hocking TD, Afghah F. A Graph-Constrained
+  Changepoint Learning Approach for Automatic QRS-Complex
+  Detection. Accepted for [Asilomar Conference on Signals, Systems,
+  and
+  Computers](https://www2.securecms.com/Asilomar2020/Papers/ViewPapers.asp?PaperNum=1323). [Preprint
+  arXiv:2004.13558](https://arxiv.org/abs/2004.13558). [Proceedings will eventually be posted on IEEExplore](https://ieeexplore.ieee.org/xpl/conhome/1000671/all-proceedings).
 - Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
   TD, Clauss M, Doughty C. Improved estimation of gut passage time
   considerably affects trait-based dispersal models. Accepted at
