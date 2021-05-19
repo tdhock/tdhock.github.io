@@ -29,11 +29,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   networks" for book "New Advances in Land Carbon Cycle Modeling"
   edited by Luo Y, in
   preparation. [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school)
-- Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
-  accuracy in over-dispersed ChIP-seq data with supervised
-  segmentation models. Under review at BMC
-  Bioinformatics. [Preprint arXiv:2012.06848](https://arxiv.org/abs/2012.06848),
-  [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper)
 - Hocking TD, Khare A. Learning penalty functions for changepoint
   detection using elastic-net regularized accelerated failure time
   models. In preparation. [Software](https://github.com/anujkhare/iregnet),
@@ -79,6 +74,11 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### Accepted, in press
 
+- Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
+  accuracy in over-dispersed ChIP-seq data with supervised
+  segmentation models. Accepted for publication at BMC
+  Bioinformatics. [Preprint arXiv:2012.06848](https://arxiv.org/abs/2012.06848),
+  [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper)
 - Hocking TD. Regular expressions and reshaping using data tables and
   the nc package. Accepted in R
   Journal. [Software](https://github.com/tdhock/nc),
