@@ -19,7 +19,16 @@ methods described in my research papers (see below).
   email address.
 - I was president of the organizing committee for "R in Montreal 2018,"
   a local conference for useRs and developeRs of R.
-- I am an editor for the Journal of Statistical Software.
+- I am an editor for [Journal of Statistical
+  Software](https://www.jstatsoft.org/about/editorialTeam) and
+  [rOpenSci Statistical
+  Software](https://ropenscilabs.github.io/statistical-software-review-book/#welcome).
+  
+### FLOPART: Functional Labeled Optimal Partitioning
+
+To support an upcoming paper about a supervised peak detection
+algorithm (with label constraints), we created the
+[FLOPART](https://github.com/tdhock/FLOPART) R package.
 
 ### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
 
