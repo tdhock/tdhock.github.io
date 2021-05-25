@@ -177,8 +177,8 @@ about documentation generation for R, we created the
 ### namedCapture: regular expressions for text parsing
 
 To support our [R Journal
-submission](https://github.com/tdhock/namedCapture-article) about R
-packages for regular expressions, we created the
+paper](https://journal.r-project.org/archive/2019/RJ-2019-050/index.html)
+about R packages for regular expressions, we created the
 [namedCapture](https://CRAN.R-project.org/package=namedCapture) R
 package, and provided various contributions to base R:
 
