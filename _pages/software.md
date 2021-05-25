@@ -9,8 +9,12 @@ My main contributions to free/open-source software are
 [R](http://r-project.org) packages that provide implementations of the
 methods described in my research papers (see below). 
 
-### R community
+### R and statistical software research community
 
+- Since 2021, I am an editor for [rOpenSci Statistical
+  Software](https://ropenscilabs.github.io/statistical-software-review-book/#welcome).
+- Since 2018, I am an editor for [Journal of Statistical
+  Software](https://www.jstatsoft.org/about/editorialTeam).
 - Since 2012, I am co-administrator and mentor for the
   [R project in Google Summer of Code](https://github.com/rstats-gsoc/)
   -- I have been helping teach college students all over the world how
@@ -18,23 +22,13 @@ methods described in my research papers (see below).
   the [toby.hocking@r-project.org](mailto:toby.hocking@r-project.org)
   email address.
 - I was president of the organizing committee for "R in Montreal 2018,"
-  a local conference for useRs and developeRs of R.
-- I am an editor for [Journal of Statistical
-  Software](https://www.jstatsoft.org/about/editorialTeam) and
-  [rOpenSci Statistical
-  Software](https://ropenscilabs.github.io/statistical-software-review-book/#welcome).
+  a local conference for useRs and developeRs.
   
-### FLOPART: Functional Labeled Optimal Partitioning
-
-To support an upcoming paper about a supervised peak detection
-algorithm (with label constraints), we created the
-[FLOPART](https://github.com/tdhock/FLOPART) R package.
-
 ### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
 
-To support an upcoming paper about infectious disease modeling, we
+To support our paper about infectious disease modeling, we
 created the [SPARSEMODr](https://github.com/NAU-CCL/SPARSEMODr/)
-R package.
+R package. [Preprint medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1)
 
 ### RcppDeepState: fuzz testing compiled code in R packages
 
@@ -44,8 +38,8 @@ functions in R packages that use Rcpp, we created the
 
 ### LOPART: Labeled Optimal Partitioning
 
-To support our paper about Labeled Optimal Partitioning we created the
-[LOPART](https://github.com/tdhock/LOPART) R
+To support our paper about Labeled Optimal Partitioning, we
+created the [LOPART](https://github.com/tdhock/LOPART) R
 package. [arXiv:2006.13967](https://arxiv.org/abs/2006.13967)
 
 ### gfpop: Graph-constrained Functional Pruning Optimal Partitioning
@@ -89,6 +83,15 @@ can be interpreted in terms of peaks (after up changes) and background
   calling in multiple samples and cell types, as described in our
   [PSB'20
   paper](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf).
+- [FLOPART](https://github.com/tdhock/FLOPART), Functional Labeled
+  Optimal Partitioning, provides a supervised peak detection algorithm
+  with label constraints. (paper in progress)
+- [CROCS](https://github.com/aLiehrmann/CROCS) supports our BMC
+  Bioinformatics 2021 paper (accepted, to appear), and provides an
+  interface to various peak detection models as well as an
+  implementation of our proposed algorithm, Changepoints for a Range
+  Of
+  ComplexitieS. [arXiv:2012.06848](https://arxiv.org/abs/2012.06848)
 
 ### PeakError: label error computation for peak models
 
@@ -173,10 +176,21 @@ about documentation generation for R, we created the
 
 ### namedCapture: regular expressions for text parsing
 
-To support our
-[R Journal submission](https://github.com/tdhock/namedCapture-article)
-about R packages for regular expressions, we created the
-[namedCapture](https://CRAN.R-project.org/package=namedCapture) R package.
+To support our [R Journal
+submission](https://github.com/tdhock/namedCapture-article) about R
+packages for regular expressions, we created the
+[namedCapture](https://CRAN.R-project.org/package=namedCapture) R
+package, and provided various contributions to base R:
+
+* We wrote a [patch for
+  regexpr/gregexpr](https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=14518)
+  which implements named capture regular expression support. Brian
+  Ripley merged the patch into R (since version 2.14 in 2011).
+* We sent R-devel a [bug report for
+  substring](https://stat.ethz.ch/pipermail/r-devel/2019-February/077393.html)
+  and [a patch for
+  gregexpr](https://stat.ethz.ch/pipermail/r-devel/2019-February/077315.html). Tomas
+  Kalibera merged the fixes into R (since version 3.6 in 2019).
 
 ### nc: named capture regular expressions for text parsing and data reshaping
 
@@ -184,10 +198,11 @@ To support our [R Journal
 submission](https://github.com/tdhock/nc-article) about data reshaping
 using regular expressions, we created the
 [nc](https://CRAN.R-project.org/package=nc) R package. To get a more
-efficient and fully-featured implementation of data reshaping, we
-contributed some R/C code to the
-[data.table](https://github.com/Rdatatable/data.table/pull/4731) R
-package.
+efficient and fully-featured implementation of data reshaping, [we
+contributed C code and the new measure
+function](https://github.com/Rdatatable/data.table/pull/4731) to the
+[data.table](https://github.com/Rdatatable/data.table/pull/4731)
+package (since version 1.14.1 in 2021).
 
 ### binsegRcpp: binary segmentation
 
