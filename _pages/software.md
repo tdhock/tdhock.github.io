@@ -201,8 +201,7 @@ using regular expressions, we created the
 efficient and fully-featured implementation of data reshaping, [we
 contributed C code and the new measure
 function](https://github.com/Rdatatable/data.table/pull/4731) to the
-[data.table](https://github.com/Rdatatable/data.table/pull/4731)
-package (since version 1.14.1 in 2021).
+data.table package (since version 1.14.1 in 2021).
 
 ### binsegRcpp: binary segmentation
 
