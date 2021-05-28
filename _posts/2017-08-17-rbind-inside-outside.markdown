@@ -65,7 +65,7 @@ various sizes (10 data.tables, 20, ..., 100). The timings are plotted
 in the figure below, which clearly shows the quadratic time complexity
 of the inside version:
 
-![inside is quadratic]({{ site.url }}/assets/img/figure-list-of-data-inside-quadratic.png)
+![inside is quadratic](/assets/img/figure-list-of-data-inside-quadratic.png)
 
 Conclusion: use the version with rbind outside the for loop:
 `do.call(rbind, list.of.data.tables)` is fast because it is a linear
