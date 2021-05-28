@@ -4,9 +4,13 @@ title: Update about data reshaping and visualization in R and python
 description: data.table, tidyr, nc, pandas, datatable, plotnine, altair, bokeh
 ---
 
-
-```
-## [1] "/home/tdhock/tdhock.github.io/assets/img/2021-05-28-data-reshape-viz-update/"
+```{r setup, echo=FALSE}
+prefix <- normalizePath("..")
+f <- sub(".Rmd", "/", knitr::current_input())
+(img.path <- file.path(prefix, "assets", "img", f))
+knitr::opts_chunk$set(
+  fig.path=img.path,
+  fig.process=function(path)sub(prefix, "", path))
 ```
 
 My [paper about regular expressions for data
@@ -14,8 +18,7 @@ reshaping](https://github.com/tdhock/nc-article) was recently accepted
 into R journal. I used visualization of the iris data as a example to
 motivate reshaping. To make a facetted histogram I proposed to do
 
-
-```r
+```{r iris.long}
 iris.long <- nc::capture_melt_single(
   iris, part=".*", "[.]", dim=".*", value.name="cm")
 library(ggplot2)
@@ -26,12 +29,6 @@ ggplot()+
     data=iris.long)+
   facet_grid(part ~ dim)
 ```
-
-```
-## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-```
-
-![plot of chunk iris.long](/assets/img/2021-05-28-data-reshape-viz-update/iris.long-1.png)
 
 TODO
 
