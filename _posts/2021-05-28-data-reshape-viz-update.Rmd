@@ -11,8 +11,8 @@ img.path <- file.path(repo.dir, "assets", "img", post.id)
 cat(img.path, file=".img.path")
 knitr::opts_chunk$set(
   fig.path=img.path,
-  fig.width=5,
-  fig.height=5,
+  fig.width=8,
+  fig.height=4,
   fig.process=function(path)sub(repo.dir, "", path))
 ```
 
@@ -426,15 +426,15 @@ in R. In particular we observed the following:
   terms of keeping related information together) is the R nc syntax,
   which allows defining a list for each capture group that contains:
   (1) group name, (2) regex pattern, and (3) type conversion function.
-* Named capture groups can not be easily used for reshape to multiple
-  output columns. This is because `pivot_longer` outputs multiple
-  value columns when `names_to=".value"` is specified, but `.value`
-  can not be used as a capture group name in the regex. We showed a
-  workaround using the regex capture group named `_value` and renamed
-  to `.value`.
-* Python `pivot_longer` has no integrated type conversion like the
-  `names_pattern` argument in R tidyr (although types can be converted
-  after the reshape operation). 
+* Named capture groups can not be easily used with python
+  `pivot_longer` for reshape to multiple output columns. This is
+  because `pivot_longer` outputs multiple value columns when
+  `names_to=".value"` is specified, but `.value` can not be used as a
+  capture group name in the regex. We showed a workaround using the
+  regex capture group named `_value` and renamed to `.value`.
+* R packages provide integrated type conversion, but python
+  `pivot_longer` does not (although types can be converted after the
+  reshape operation).
 
 Of the python modules for visualization,
 
