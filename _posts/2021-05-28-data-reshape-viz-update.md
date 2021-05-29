@@ -275,9 +275,10 @@ chart = alt.Chart(iris_long).mark_bar().encode(
 
 Next plot from the paper was a facetted scatterplot comparing
 parts... are Petals longer and/or wider than Sepals? To do that we
-need to change the reshape operation. In R this amounts to changing
-one of the regex group names to a special value that is recognized as
-the keyword for creating multiple output columns. 
+need to change the reshape operation so we output a `Sepal` and a
+`Petal` column. In R this amounts to changing one of the regex group
+names to a special value that is recognized as the keyword for
+creating multiple output columns.
 
 | Package  | nc                      | data.table         | tidyr          |
 | Function | `capture_melt_multiple` | `melt` + `measure` | `pivot_longer` |
@@ -349,7 +350,7 @@ ggplot()+
   coord_equal()+
   geom_abline(slope=1, intercept=0, color="grey")+
   geom_point(aes(
-    Petal, Sepal, color=Species),
+    Sepal, Petal, color=Species),
     data=iris.parts)+
   facet_grid(. ~ dim, labeller=label_both)
 ```
@@ -445,9 +446,11 @@ are useful when you want to emphasize that the x and y axes have the
 same units, so you can see if the data are above the
 diagonal, are Petals longer/wider than Sepals?
 
-So remembering back to [my blog tutorial from last
-year](https://tdhock.github.io/blog/2020/data-manipulation/), does
-plotnine have these features? YES!
+So did you read [my blog tutorial from last
+year](https://tdhock.github.io/blog/2020/data-manipulation/), in which
+we explored python datatable and plotnine? Well, datatable still has
+not implemented the reshape/melt functionality, and plotnine still
+seems to have the best ggplot2 emulation:
 
 
 ```python
@@ -464,9 +467,6 @@ gg_scatter_parts = p9.ggplot()+\
 ```
 
 ![plot of scatter_parts](/assets/img/2021-05-28-data-reshape-viz-update/iris_p9_scatter_parts.png)
-
-/home/tdhock/.local/share/r-miniconda/envs/r-reticulate/lib/python3.6/site-packages/plotnine/ggplot.py:721: PlotnineWarning: Saving 5 x 5 in image.
-/home/tdhock/.local/share/r-miniconda/envs/r-reticulate/lib/python3.6/site-packages/plotnine/ggplot.py:722: PlotnineWarning: Filename: /home/tdhock/tdhock.github.io/assets/img/2021-05-28-data-reshape-viz-update/iris_p9_scatter_parts.png
 
 So janitor + plotnine works well here! Incidentally, we can also do
 this reshape with plain pandas:
@@ -580,7 +580,7 @@ ggplot()+
   facet_grid(. ~ part, labeller=label_both)
 ```
 
-![plot of chunk unnamed-chunk-14](/assets/img/2021-05-28-data-reshape-viz-update/unnamed-chunk-14-1.png)
+![plot of chunk unnamed-chunk-13](/assets/img/2021-05-28-data-reshape-viz-update/unnamed-chunk-13-1.png)
 
 ## Python approach for scatterplot comparing dims
 
@@ -642,9 +642,6 @@ gg_scatter_dims = p9.ggplot()+\
 ```
 
 ![plot of scatter_dims](/assets/img/2021-05-28-data-reshape-viz-update/iris_p9_scatter_dims.png)
-
-/home/tdhock/.local/share/r-miniconda/envs/r-reticulate/lib/python3.6/site-packages/plotnine/ggplot.py:721: PlotnineWarning: Saving 5 x 5 in image.
-/home/tdhock/.local/share/r-miniconda/envs/r-reticulate/lib/python3.6/site-packages/plotnine/ggplot.py:722: PlotnineWarning: Filename: /home/tdhock/tdhock.github.io/assets/img/2021-05-28-data-reshape-viz-update/iris_p9_scatter_dims.png
 
 ## No integrated type conversion in python
 
