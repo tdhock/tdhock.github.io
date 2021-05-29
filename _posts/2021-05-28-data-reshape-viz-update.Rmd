@@ -5,31 +5,431 @@ description: data.table, tidyr, nc, pandas, datatable, plotnine, altair, bokeh
 ---
 
 ```{r setup, echo=FALSE}
-prefix <- normalizePath("..")
-f <- sub(".Rmd", "/", knitr::current_input())
-(img.path <- file.path(prefix, "assets", "img", f))
+repo.dir <- normalizePath("..")
+post.id <- "2021-05-28-data-reshape-viz-update/"
+img.path <- file.path(repo.dir, "assets", "img", post.id)
+cat(img.path, file=".img.path")
 knitr::opts_chunk$set(
   fig.path=img.path,
-  fig.process=function(path)sub(prefix, "", path))
+  fig.process=function(path)sub(repo.dir, "", path))
 ```
+
+```{python pysetup, echo=FALSE}
+import os
+repo_dir = os.path.abspath("..")
+img_path = open(".img.path").read()
+```
+
+## R approach for histogram
 
 My [paper about regular expressions for data
 reshaping](https://github.com/tdhock/nc-article) was recently accepted
 into R journal. I used visualization of the iris data as a example to
-motivate reshaping. To make a facetted histogram I proposed to do
+motivate reshaping. Recall the iris data look like this,
+
+```{r iris}
+head(iris)
+```
+
+To make a facetted histogram, we need to combine the first four
+columns into a single column. To do that we define a regular
+expression to match those column names, then use that to reshape and
+visualize.
 
 ```{r iris.long}
-iris.long <- nc::capture_melt_single(
-  iris, part=".*", "[.]", dim=".*", value.name="cm")
+(iris.long <- nc::capture_melt_single(
+  iris, part=".*", "[.]", dim=".*", value.name="cm"))
 library(ggplot2)
 ggplot()+
   geom_histogram(aes(
     cm, fill=Species),
     color="black",
+    bins=20,
     data=iris.long)+
   facet_grid(part ~ dim)
 ```
 
-TODO
+Recently data.table [merged my
+PR](https://github.com/Rdatatable/data.table/pull/4731) which
+implements similar functionality:
 
-## Comparison of python pl
+```{r data.table.measure}
+library(data.table)
+one.iris <- data.table(iris[1,])
+nc::capture_melt_single(one.iris, part=".*", "[.]", dim=".*")
+data.table::melt(
+  one.iris, measure.vars=measure(dim, part, pattern="(.*)[.](.*)"))
+```
+
+This functionality is also implemented in the `tidyr` package:
+
+```{r tidyr.long}
+pattern <- "(.*)[.](.*)"
+tidyr::pivot_longer(
+  one.iris,
+  cols=matches(pattern),
+  names_to=c("dim", "part"),
+  names_pattern=pattern)
+```
+
+Note that in the `tidyr` version above the pattern needs to be
+repeated in the `cols` and the `names_pattern` arguments.
+
+## Comparison with python approaches for histogram
+
+I was curious to investigate the state of python modules for
+performing the same computations. Is it as easy as in R? The intent of
+the R code above is to use a regex pattern to specify: (1) the set of
+columns to melt/reshape/unpivot, and (2) the data to capture in the
+`dim` and `part` columns of the output. So my code below tries to
+translate that idea into python.
+
+If you are limited to using pandas, this is possible but not easy. My
+first attempt at the data reshaping involved `melt`,
+
+```{python}
+import pandas as pd
+one_iris=pd.DataFrame({
+    "Sepal.Length":[5.1],
+    "Sepal.Width":[3.5],
+    "Petal.Length":[1.4],
+    "Petal.Width":[0.2],
+    "Species":"setosa"})
+pattern = "(?P<part>.*)[.](?P<dim>.*)"
+col_extract = one_iris.columns.to_series().str.extract(pattern)
+id_vars = [
+    name for name,matched in
+    zip(one_iris.columns, col_extract.iloc[:,0].notna())
+    if not matched]
+one_long = one_iris.melt(id_vars=id_vars)
+pd.concat([one_long["variable"].str.extract(pattern), one_long], axis=1)
+```
+
+That was complicated! Luckily there is another function,
+
+```{python}
+import janitor
+import re
+names_to = list(re.compile(pattern).groupindex.keys())
+one_iris.pivot_longer(
+    index="Species",
+    names_pattern=pattern,
+    names_to=names_to)
+```
+
+That was much easier! Note that the names and sub-patterns for each
+capture group were defined together in the same regular expression
+string literal, which was then compiled to get the group names to pass
+as the `names_to` argument. Note that the python iris data has
+slightly different column names (no dot),
+
+```{python}
+iris_url = "https://raw.github.com/pandas-dev/pandas/master/pandas/tests/io/data/csv/iris.csv"
+iris_wide = pd.read_csv(iris_url)
+iris_wide
+```
+
+So we must repeat those steps with a different pattern,
+
+```{python}
+pattern = "(?P<part>Sepal|Petal)(?P<dim>Length|Width)"
+names_to = list(re.compile(pattern).groupindex.keys())
+iris_long = iris_wide.pivot_longer(
+    index="Name",
+    names_pattern=pattern,
+    names_to=names_to,
+    values_to="cm")
+iris_long
+```
+
+After that there are a number of modules to consider for making the
+histogram. Again my goal is to replicate the intent of the R ggplot2
+code, which says "each Species is a different color, and each part/dim
+is a different panel." At first I thought it may be possible to use
+the default pandas plotting methods, but it is clear from [the
+docs](https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html)
+that there is no easy way to specify a variable to use for plotting in
+different panels (a la `facet_grid`). Same for matplotlib and bokeh. A
+python alternative is [altair](https://altair-viz.github.io), which
+does implement facets:
+
+```{python}
+import altair as alt
+chart = alt.Chart(iris_long).mark_bar().encode(
+    alt.X("cm:Q", bin=True),
+    y='count()',
+    color="Name"
+).facet(row="part", column="dim")
+# need to do chart.show() then click save as PNG.
+```
+
+![plot of iris histogram](/assets/img/2021-05-28-data-reshape-viz-update/iris_altair_hist.png)
+
+## R approach for scatterplot comparing parts
+
+Next plot from the paper was a facetted scatterplot comparing
+parts... are Petals longer and/or wider than Sepals? To do that we
+need to change the reshape operation. In R this amounts to changing
+one of the regex group names to a special value that is recognized as
+the keyword for creating multiple output columns. 
+
+| Package  | nc                      | data.table         | tidyr          |
+| Function | `capture_melt_multiple` | `melt` + `measure` | `pivot_longer` |
+| Keyword  | `column`                | `value.name`       | `.value`       |
+
+```{r}
+nc::capture_melt_multiple(one.iris, column=".*", "[.]", dim=".*")
+data.table::melt(
+  one.iris, measure.vars=measure(value.name, dim, pattern="(.*)[.](.*)"))
+pattern <- "(.*)[.](.*)"
+tidyr::pivot_longer(
+  one.iris,
+  cols=matches(pattern),
+  names_to=c(".value", "part"),
+  names_pattern=pattern)
+```
+
+Doing that for the entire data set then plotting yields
+
+```{r}
+(iris.parts <- nc::capture_melt_multiple(iris, column=".*", "[.]", dim=".*"))
+ggplot()+
+  coord_equal()+
+  geom_abline(slope=1, intercept=0, color="grey")+
+  geom_point(aes(
+    Petal, Sepal, color=Species),
+    data=iris.parts)+
+  facet_grid(. ~ dim, labeller=label_both)
+```
+
+## Python approach for scatterplot comparing parts
+
+Python janitor can do the reshape (same `.value` keyword as in R to
+indicate multiple outputs), but we can't use a regex with named groups
+this time, because the dot is not allowed:
+
+```{python err, error=TRUE, purl=TRUE}
+re.compile("(?P<.value>Sepal|Petal)(?P<dim>Length|Width)")
+```
+
+Well I guess you could use do the following,
+
+```{python}
+names_pattern = "(?P<_value>Sepal|Petal)(?P<dim>Length|Width)"
+names_to = [x.replace("_", ".") for x in re.compile(names_pattern).groupindex.keys()]
+names_to
+iris_parts = iris_wide.pivot_longer(
+    index="Name",
+    names_pattern=pattern,
+    names_to=names_to)
+iris_parts
+```
+
+Now let's try to plot with altair again,
+
+```{python}
+import altair as alt
+chart = alt.Chart(iris_parts).mark_circle().encode(
+    x="Sepal",
+    y="Petal",
+    color="Name"
+).facet(column="dim")
+```
+
+![scatterplot of iris](/assets/img/2021-05-28-data-reshape-viz-update/iris_altair_scatter_parts.png)
+
+Two ggplot2 features which are missing in the altair plot above are
+[`coord_equal`](https://github.com/altair-viz/altair/issues/1628) and
+[`geom_abline`](https://stackoverflow.com/questions/62854174/altair-draw-a-line-in-plot-where-x-y). These
+are useful when you want to emphasize that the x and y axes have the
+same units, so you can see if the data are above the
+diagonal, are Petals longer/wider than Sepals?
+
+So remembering back to [my blog tutorial from last
+year](https://tdhock.github.io/blog/2020/data-manipulation/), does
+plotnine have these features? YES!
+
+```{python}
+import plotnine as p9
+gg_scatter_parts = p9.ggplot()+\
+    p9.geom_abline(
+        slope=1, intercept=0,
+        color="grey")+\
+    p9.geom_point(
+        p9.aes(x="Sepal", y="Petal", fill="Name"),
+        iris_parts)+\
+    p9.facet_grid(". ~ dim", labeller="label_both")+\
+    p9.coord_equal()
+```
+
+```{python saveone, echo=FALSE, results='asis'}
+def p9_save(g, name):
+    out_png = img_path+"iris_p9_"+name+".png"
+    g.save(out_png, width=5, height=5)
+    web_link = out_png.replace(repo_dir, "")
+    print('![plot of %s](%s)'%(name, web_link))
+p9_save(gg_scatter_parts, "scatter_parts")
+```
+
+So janitor + plotnine works well here! Incidentally, we can also do
+this reshape with plain pandas:
+
+```{python}
+iris_wide["id"] = iris_wide.index
+pd.wide_to_long(
+    iris_wide, ["Petal", "Sepal"],
+    i="id", j="dim", sep="", suffix="(Width|Length)"
+).reset_index()
+```
+
+So `pd.wide_to_long` in python is similar to `stats::reshape` in R, in
+that (1) two groups are assumed, and (2) it is assumed the `.value` /
+`value.name` / `column` group comes first. In other words, these work
+for this reshape operation, but they do NOT work for the similar
+reshape in the next section (without some pre-processing of column
+names).
+
+## R approach for scatterplot comparing dims
+
+In this section we reshape into `Length` and `Width` columns. In R we
+just have to move the keyword from the first to the second group,
+
+```{r}
+nc::capture_melt_multiple(one.iris, part=".*", "[.]", column=".*")
+data.table::melt(
+  one.iris, measure.vars=measure(part, value.name, pattern="(.*)[.](.*)"))
+pattern <- "(.*)[.](.*)"
+tidyr::pivot_longer(
+  one.iris,
+  cols=matches(pattern),
+  names_to=c("part", ".value"),
+  names_pattern=pattern)
+```
+
+Doing that for the entire data set then plotting yields
+
+```{r}
+(iris.dims <- nc::capture_melt_multiple(iris, part=".*", "[.]", column=".*"))
+ggplot()+
+  coord_equal()+
+  geom_abline(slope=1, intercept=0, color="grey")+
+  geom_point(aes(
+    Length, Width, color=Species),
+    data=iris.dims)+
+  facet_grid(. ~ part, labeller=label_both)
+```
+
+## Python approach for scatterplot comparing dims
+
+As in the previous problem, we can use janitor + plotnine:
+
+```{python}
+names_pattern = "(?P<part>Sepal|Petal)(?P<_value>Length|Width)"
+names_to = [x.replace("_", ".") for x in re.compile(names_pattern).groupindex.keys()]
+names_to
+iris_dims = iris_wide.pivot_longer(
+    index="Name",
+    names_pattern=pattern,
+    names_to=names_to)
+iris_dims
+gg_scatter_dims = p9.ggplot()+\
+    p9.geom_abline(
+        slope=1, intercept=0,
+        color="grey")+\
+    p9.geom_point(
+        p9.aes(x="Length", y="Width", fill="Name"),
+        iris_dims)+\
+    p9.facet_grid(". ~ part", labeller="label_both")+\
+    p9.coord_equal()
+```
+
+```{python savedims, echo=FALSE, results='asis'}
+p9_save(gg_scatter_dims, "scatter_dims")
+```
+
+## No integrated type conversion in python
+
+In R we can do type conversion during the reshape,
+
+```{r}
+DT <- data.table(id=1, child1_sex="M", child1_age=34, child2_sex="F")
+pattern <- "(.)_(.*)"
+names_transform <- list(number_int=as.integer, .value=identity)
+tidyr::pivot_longer(
+  DT, matches(pattern),
+  names_to=names(names_transform),
+  names_transform=names_transform,
+  names_pattern=pattern)
+print(
+  melt(DT, measure.vars=measurev(
+    names_transform, pattern=pattern, multiple.keyword=".value"))
+, class=TRUE)
+number_pattern <- list(number_int=".", as.integer)
+print(
+  nc::capture_melt_multiple(
+    DT, number_pattern, "_", column=".*", fill=TRUE)
+, class=TRUE)
+```
+
+Note that `tidyr` and `data.table` syntax require definition of the
+regex `pattern` in a separately from the names/conversions which are
+defined in `names_transform`. In contrast, the `nc` syntax allows
+definition of these three related pieces of information together in
+group-specific sub-pattern list variables, for example
+`number_pattern`. The results above show that `number_int` is indeed
+of type `int` --- is this possible in python?
+
+```{python}
+DT = pd.DataFrame({
+    "id":[1],
+    "child1_sex":["M"],
+    "child1_age":[34],
+    "child2_sex":["F"]
+})
+DT_long = DT.pivot_longer(
+    index="id",
+    names_pattern="(.)_(.*)",
+    names_to = ["number", ".value"])
+DT_long
+type(DT_long["number"][0])
+```
+
+There is no `names_transform` argument in python (`number` is actually a
+string), but you can always do the transform after the fact (less
+efficient/convenient),
+
+```{python}
+DT_long["number_int"] = DT_long["number"].astype(int)
+DT_long
+type(DT_long["number_int"][0])
+```
+
+## Conclusions
+
+So in conclusion the python `pivot_longer` is a decent data reshaping
+tool, but still is not quite as fully featured as the software we have
+in R. In particular we observed the following:
+
+* Named capture groups are supported in python, and are useful since
+  they allow defining the capture group names and sub-patterns
+  together in the regex string literal. This is an advantage over R
+  tidyr, which does not support named groups because it uses the ICU C
+  regex library (does not export of group names to R).
+* Named capture groups can not be easily used for reshape to multiple
+  output columns. This is because `pivot_longer` outputs multiple
+  value columns when `names_to=".value"` is specified, but `.value`
+  can not be used as a capture group name in the regex. We showed a
+  workaround using the regex capture group named `_value` and renamed
+  to `.value`.
+* Python `pivot_longer` has no integrated type conversion like the
+  `names_pattern` argument in R tidyr (although types can be converted
+  after the reshape operation). 
+
+Of the python modules for visualization,
+
+* neither bokeh, nor the pandas plot method, nor matplotlib, supports
+  facets (subplots defined via column names).
+* altair supports facets but does not support `coord_equal` and
+  `geom_abline`.
+* plotnine seems to be the best way in python to emulate the
+  functionality we have in R with ggplot2.
