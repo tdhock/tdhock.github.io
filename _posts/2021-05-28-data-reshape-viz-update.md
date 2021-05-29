@@ -767,7 +767,10 @@ in R. In particular we observed the following:
   they allow defining the capture group names and sub-patterns
   together in the regex string literal. This is an advantage over R
   tidyr, which does not support named groups because it uses the ICU C
-  regex library (does not export of group names to R).
+  regex library (does not export of group names to R). Even better (in
+  terms of keeping related information together) is the R nc syntax,
+  which allows defining a list for each capture group that contains:
+  (1) group name, (2) regex pattern, and (3) type conversion function.
 * Named capture groups can not be easily used for reshape to multiple
   output columns. This is because `pivot_longer` outputs multiple
   value columns when `names_to=".value"` is specified, but `.value`
