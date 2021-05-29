@@ -87,8 +87,8 @@ Each column after the first has a regular name:
 
 * new,
 * an optional underscore,
-* a diagnosis code (sp|rel|ep),
-* sex (m|f),
+* a diagnosis code `(sp|rel|ep)`,
+* sex `(m|f)`,
 * a min age in years,
 * an optional max age.
 

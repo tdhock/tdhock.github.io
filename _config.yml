@@ -28,6 +28,9 @@ blog_description: Statistical machine learning, data visualization, genomics, R
 permalink: /blog/:year/:title/
 #paginate_path: /blog/page:num/
 
+exclude:
+  _posts/*.Rmd
+
 text:
   pagination:
     newer: 'Newer'
