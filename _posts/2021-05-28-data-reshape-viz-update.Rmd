@@ -49,7 +49,7 @@ ggplot()+
     color="black",
     bins=20,
     data=iris.long)+
-  facet_grid(part ~ dim)
+  facet_grid(part ~ dim, labeller=label_both)
 ```
 
 Recently data.table [merged my
@@ -61,7 +61,7 @@ library(data.table)
 one.iris <- data.table(iris[1,])
 nc::capture_melt_single(one.iris, part=".*", "[.]", dim=".*")
 data.table::melt(
-  one.iris, measure.vars=measure(dim, part, pattern="(.*)[.](.*)"))
+  one.iris, measure.vars=measure(part, dim, pattern="(.*)[.](.*)"))
 ```
 
 This functionality is also implemented in the `tidyr` package:
@@ -71,7 +71,7 @@ pattern <- "(.*)[.](.*)"
 tidyr::pivot_longer(
   one.iris,
   cols=matches(pattern),
-  names_to=c("dim", "part"),
+  names_to=c("part", "dim"),
   names_pattern=pattern)
 ```
 

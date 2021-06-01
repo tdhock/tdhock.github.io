@@ -58,13 +58,20 @@ visualize.
 
 ```r
 library(ggplot2)
+```
+
+```
+## Keep up to date with changes at https://www.tidyverse.org/blog/
+```
+
+```r
 ggplot()+
   geom_histogram(aes(
     cm, fill=Species),
     color="black",
     bins=20,
     data=iris.long)+
-  facet_grid(part ~ dim)
+  facet_grid(part ~ dim, labeller=label_both)
 ```
 
 ![plot of chunk iris.long](/assets/img/2021-05-28-data-reshape-viz-update/iris.long-1.png)
@@ -76,6 +83,13 @@ implements similar functionality:
 
 ```r
 library(data.table)
+```
+
+```
+## data.table 1.14.1 IN DEVELOPMENT built 2021-05-25 12:11:15 UTC; tdhock using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+```r
 one.iris <- data.table(iris[1,])
 nc::capture_melt_single(one.iris, part=".*", "[.]", dim=".*")
 ```
@@ -90,11 +104,11 @@ nc::capture_melt_single(one.iris, part=".*", "[.]", dim=".*")
 
 ```r
 data.table::melt(
-  one.iris, measure.vars=measure(dim, part, pattern="(.*)[.](.*)"))
+  one.iris, measure.vars=measure(part, dim, pattern="(.*)[.](.*)"))
 ```
 
 ```
-##    Species   dim   part value
+##    Species  part    dim value
 ## 1:  setosa Sepal Length   5.1
 ## 2:  setosa Sepal  Width   3.5
 ## 3:  setosa Petal Length   1.4
@@ -109,13 +123,13 @@ pattern <- "(.*)[.](.*)"
 tidyr::pivot_longer(
   one.iris,
   cols=matches(pattern),
-  names_to=c("dim", "part"),
+  names_to=c("part", "dim"),
   names_pattern=pattern)
 ```
 
 ```
 ## # A tibble: 4 x 4
-##   Species dim   part   value
+##   Species part  dim    value
 ##   <fct>   <chr> <chr>  <dbl>
 ## 1 setosa  Sepal Length   5.1
 ## 2 setosa  Sepal Width    3.5
