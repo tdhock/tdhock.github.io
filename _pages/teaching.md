@@ -76,6 +76,12 @@ See my [Lab Members web page](http://ml.nau.edu/members/).
 
 I have mentored the
 following students in coding free/open-source software.
+- [Anirban Chetia](https://github.com/Anirban166), 2021, [directlabels
+  improvements](https://github.com/Anirban166/directlabels).
+- [Diego Urgell](https://github.com/diego-urgell), 2021,
+  [BinSeg](https://github.com/diego-urgell/BinSeg) efficient C++
+  implementation of binary segmentation.
+- [Mark Nawar](https://github.com/Mark-Nawar), 2021, [re2r back on CRAN](https://github.com/rstats-gsoc/gsoc2021/wiki/re2r-back-on-CRAN)
 - [Sanchit Saini](https://github.com/sanchit-saini), 2020,
   [rtracklayer R package
   improvements](https://github.com/rstats-gsoc/gsoc2020/wiki/rtracklayer-improvements).
