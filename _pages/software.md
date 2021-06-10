@@ -159,6 +159,15 @@ To support our paper about elastic net regularized interval regression
 models (in preparation), we created the
 [iregnet](https://github.com/anujkhare/iregnet) R package.
 
+### binsegRcpp: binary segmentation
+
+To use as a baseline efficient implementation of binary segmentation
+in various papers such as [Labeled Optimal
+Partitioning](https://arxiv.org/abs/2006.13967) and [Linear time model
+selection](https://arxiv.org/abs/2003.02808), we created the
+[binsegRcpp](https://cloud.r-project.org/web/packages/binsegRcpp/) R
+package.
+
 ### directlabels: automatic label placement on figures
 
 To support my poster "Adding direct labels to plots" which won
@@ -182,9 +191,9 @@ about R packages for regular expressions, we created the
 [namedCapture](https://CRAN.R-project.org/package=namedCapture) R
 package, and provided various contributions to base R:
 
-* We wrote a [patch for
+* We wrote a [C code patch for
   regexpr/gregexpr](https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=14518)
-  which implements named capture regular expression support. Brian
+  which implements named capture regular expressions. Brian
   Ripley merged the patch into R (since version 2.14 in 2011).
 * We sent R-devel a [bug report for
   substring](https://stat.ethz.ch/pipermail/r-devel/2019-February/077393.html)
@@ -203,12 +212,8 @@ contributed C code and the new measure
 function](https://github.com/Rdatatable/data.table/pull/4731) to the
 data.table package (since version 1.14.1 in 2021).
 
-### binsegRcpp: binary segmentation
+### Python pandas str.extractall method for regular expressions
 
-To use as a baseline efficient implementation of binary segmentation
-in various papers such as [Labeled Optimal
-Partitioning](https://arxiv.org/abs/2006.13967) and [Linear time model
-selection](https://arxiv.org/abs/2003.02808), we created the
-[binsegRcpp](https://cloud.r-project.org/web/packages/binsegRcpp/) R
-package.
+I wrote the `str.extractall` method for regular expressions, which was
+[merged into pandas in 2016](https://github.com/pandas-dev/pandas/pull/11386).
 
