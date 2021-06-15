@@ -24,6 +24,12 @@ methods described in my research papers (see below).
 - I was president of the organizing committee for "R in Montreal 2018,"
   a local conference for useRs and developeRs.
   
+### aum: Area Under Min(FP,FN)
+
+To support our paper (in progress) about optimizing the Area Under
+Min(FP,FN) functions (a differentiable surrogate for ROC-AUC), we
+created the [aum](https://github.com/tdhock/aum) R package.
+
 ### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
 
 To support our paper about infectious disease modeling, we
