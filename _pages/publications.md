@@ -74,11 +74,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### Accepted, in press
 
-- Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
-  accuracy in over-dispersed ChIP-seq data with supervised
-  segmentation models. Accepted for publication at BMC
-  Bioinformatics. [Preprint arXiv:2012.06848](https://arxiv.org/abs/2012.06848),
-  [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper)
 - Hocking TD. Regular expressions and reshaping using data tables and
   the nc package. Accepted in R
   Journal. [Software](https://github.com/tdhock/nc),
@@ -97,6 +92,11 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### 2021
 
+- Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
+  accuracy in over-dispersed ChIP-seq data with supervised
+  segmentation models. [BMC Bioinformatics 22, Article number: 323
+  (2021)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-04221-5),
+  [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper).
 - Fotoohinasab A, Hocking TD, Afghah F. A Greedy Graph Search
   Algorithm Based on Changepoint Analysis for Automatic QRS-Complex
   Detection. Published by [Computers in Biology and
