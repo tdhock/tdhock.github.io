@@ -74,8 +74,8 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### Accepted, in press
 
-- Hocking TD. Regular expressions and reshaping using data tables and
-  the nc package. Accepted in R
+- Hocking TD. Wide-to-tall data reshaping using regular expressions
+  and the nc package. Accepted in R
   Journal. [Software](https://github.com/tdhock/nc),
   [Reproducible](https://github.com/tdhock/nc-article)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
