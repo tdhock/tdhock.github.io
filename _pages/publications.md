@@ -70,7 +70,14 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Software](https://github.com/tdhock/rankSVMcompare),
   [Reproducible](https://github.com/tdhock/compare-paper)
 - Mihaljevic JR, Borkovec S, Ratnavale S, Hocking TD, Banister KE,
-  Eppinger JE, Hepp CM, Doerry E. [Preprint medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1). Under review.
+  Eppinger JE, Hepp CM, Doerry E. Rapid simulations of spatially
+  explicit and stochastic models of infectious disease. [Preprint
+  medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1). Under
+  review at Methods in Ecology and Evolution.
+- Hillman J, Hocking TD. Optimizing ROC Curves with a Sort-Based
+  Surrogate Loss Function for Binary Classification and Changepoint
+  Detection. [Preprint
+  arXiv:2107.01285](https://arxiv.org/abs/2107.01285).
   
 ### Accepted, in press
 
@@ -99,8 +106,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper).
 - Fotoohinasab A, Hocking TD, Afghah F. A Greedy Graph Search
   Algorithm Based on Changepoint Analysis for Automatic QRS-Complex
-  Detection. Published by [Computers in Biology and
-  Medicine](https://www.sciencedirect.com/science/article/pii/S0010482521000020). [Preprint
+  Detection. [Computers in Biology and Medicine 130 (2021)](https://www.sciencedirect.com/science/article/pii/S0010482521000020). [Preprint
   arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
   
 ### 2020
@@ -183,10 +189,10 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 - Drouin A, Hocking TD, Laviolette F. Maximum margin interval
   trees. Neural Information Processing Systems
-  (NIPS) 2017. [Software](https://github.com/aldro61/mmit),
+  (NeurIPS) 2017. [Software](https://github.com/aldro61/mmit),
   [Reproducible](https://github.com/tdhock/mmit-paper),
   [Preprint arXiv](https://arxiv.org/abs/1710.04234),
-  [NIPS](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees),
+  [NeurIPS](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees),
   [video](https://www.youtube.com/watch?v=sNrMH9z1rb4)
 - Hocking TD, Goerner-Potvin P, Morin A, Shao X, Pastinen T, Bourque
   G. Optimizing ChIP-seq peak detectors using visual labels and
@@ -195,8 +201,8 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Software](https://github.com/tdhock/PeakError),
   [Reproducible](https://bitbucket.org/mugqic/chip-seq-paper),
   [Data](https://rcdata.nau.edu/genomic-ml/chip-seq-chunk-db/)
-- Introduction to optimal changepoint detection algorithms. Hocking TD
-  and Killick R. [useR2017 conference
+- Hocking TD and Killick R. Introduction to optimal changepoint
+  detection algorithms. [useR2017 conference
   tutorial](https://www.user2017.brussels/uploads/TobyHocking.html),
   [video](https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/Introduction-to-optimal-changepoint-detection-algorithms-II),
   [Reproducible](https://github.com/tdhock/change-tutorial).
