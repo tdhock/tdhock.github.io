@@ -103,7 +103,8 @@ description: Peer-reviewed papers and preprints with links to code and data
   accuracy in over-dispersed ChIP-seq data with supervised
   segmentation models. [BMC Bioinformatics 22, Article number: 323
   (2021)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-04221-5),
-  [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper).
+  [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper),
+  [Software](https://github.com/aliehrmann/crocs).
 - Fotoohinasab A, Hocking TD, Afghah F. A Greedy Graph Search
   Algorithm Based on Changepoint Analysis for Automatic QRS-Complex
   Detection. [Computers in Biology and Medicine 130 (2021)](https://www.sciencedirect.com/science/article/pii/S0010482521000020). [Preprint
