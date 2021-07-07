@@ -26,9 +26,10 @@ methods described in my research papers (see below).
   
 ### aum: Area Under Min(FP,FN)
 
-To support our paper (in progress) about optimizing the Area Under
-Min(FP,FN) functions (a differentiable surrogate for ROC-AUC), we
-created the [aum](https://github.com/tdhock/aum) R package.
+To support our [paper](https://arxiv.org/abs/2107.01285) (in progress)
+about optimizing the Area Under Min(FP,FN) functions (a differentiable
+surrogate for ROC-AUC), we created the
+[aum](https://github.com/tdhock/aum) R package.
 
 ### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
 
