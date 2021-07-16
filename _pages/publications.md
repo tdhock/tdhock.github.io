@@ -81,10 +81,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### Accepted, in press
 
-- Hocking TD. Wide-to-tall data reshaping using regular expressions
-  and the nc package. Accepted in R
-  Journal. [Software](https://github.com/tdhock/nc),
-  [Reproducible](https://github.com/tdhock/nc-article)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
   Changepoint Detection in Genomic Data. [Preprint
@@ -99,6 +95,12 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### 2021
 
+- Hocking TD. Wide-to-tall data reshaping using regular expressions
+  and the nc package. [R
+  Journal](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html)
+  (2021), doi:10.32614/RJ-2021-029.
+  Journal. [Software](https://github.com/tdhock/nc),
+  [Reproducible](https://github.com/tdhock/nc-article)
 - Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
   accuracy in over-dispersed ChIP-seq data with supervised
   segmentation models. [BMC Bioinformatics 22, Article number: 323
