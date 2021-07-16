@@ -210,9 +210,8 @@ package, and provided various contributions to base R:
 
 ### nc: named capture regular expressions for text parsing and data reshaping
 
-To support our [R Journal
-submission](https://github.com/tdhock/nc-article) about data reshaping
-using regular expressions, we created the
+To support our [R Journal paper](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html)
+about data reshaping using regular expressions, we created the
 [nc](https://CRAN.R-project.org/package=nc) R package. To get a more
 efficient and fully-featured implementation of data reshaping, [we
 contributed C code and the new measure
