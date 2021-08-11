@@ -81,6 +81,8 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### Accepted, in press
 
+- Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
+  Packages. Accepted at [ISSRE 2021](http://2021.issre.net/).
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
   Changepoint Detection in Genomic Data. [Preprint
