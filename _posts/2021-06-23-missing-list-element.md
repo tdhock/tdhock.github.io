@@ -64,6 +64,13 @@ Now let's put that list into a column of a data table,
 
 ```r
 library(data.table)
+```
+
+```
+## data.table 1.14.1 IN DEVELOPMENT built 2021-07-24 13:52:54 UTC using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+```r
 (DT.wide <- data.table(L))
 ```
 
@@ -288,5 +295,5 @@ missing values.
 
 ## Follow-up
 
-I posted a thread on R-devel about `na.omit` on lists and data frames
-with list columns (TODO link).
+I posted [a thread on R-devel](https://stat.ethz.ch/pipermail/r-devel/2021-August/080994.html) about `na.omit` on lists and data frames
+with list columns.
