@@ -26,9 +26,10 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Hocking TD and Killick R. Changepoint detection algorithms and
   applications in R. Textbook in preparation.
 - Hocking TD. Chapter "Introduction to machine learning and neural
-  networks" for book "New Advances in Land Carbon Cycle Modeling"
-  edited by Luo Y, in
-  preparation. [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school)
+  networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
+  Data Assimilation, and Ecological Forecasting" edited by Luo Y, in
+  preparation (expected publication Jan
+  2022). [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school)
 - Hocking TD, Khare A. Learning penalty functions for changepoint
   detection using elastic-net regularized accelerated failure time
   models. In preparation. [Software](https://github.com/anujkhare/iregnet),
