@@ -7,6 +7,7 @@ description: Course materials and students mentored
 
 ### Course materials
 
+- Fall 2021, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2021)
 - Summer 2021, Introduction to Machine Learning and Neural Networks,
   with an application to earth system modeling. 60 minute lecture for
   summer school on "[New Advances in Land Carbon Cycle
