@@ -98,6 +98,13 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### 2021
 
+- Kolla A, Hocking TD, Groce A. RcppDeepState, a simple way to fuzz
+  test Rcpp Packages. Contributed talk at international useR 2021
+  conference. [Software](https://github.com/akhikolla/RcppDeepState),
+  [abstract](https://www.conftool.org/user2021/index.php?page=browseSessions&form_session=9#paperID123),
+  [video](https://www.youtube.com/watch?v=LXyruwSo2K0&t=245s),
+  [blog](https://akhikolla.github.io),
+  [results](https://akhikolla.github.io/packages-folders/)
 - Hocking TD. Wide-to-tall data reshaping using regular expressions
   and the nc package. [R
   Journal](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html)
