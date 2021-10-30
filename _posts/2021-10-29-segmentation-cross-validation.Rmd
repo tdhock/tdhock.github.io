@@ -1,0 +1,192 @@
+---
+layout: post
+title: Segmentation cross-validation
+description: Some advanced data.table features
+---
+
+We explore the neuroblastoma data, which contain many data sequences
+for testing changepoint detection algorithms.
+
+```{r}
+data(neuroblastoma, package="neuroblastoma")
+sapply(neuroblastoma, dim)
+```
+
+The profiles data table contain more than four million data
+points. Below we consider the subset for a single changepoint
+detection problem.
+
+```{r}
+library(data.table)
+nb.profiles <- data.table(neuroblastoma$profiles)
+meta <- data.table(profile.id="4", chromosome="2")
+one.chrom <- nb.profiles[meta, on=names(meta)]
+one.chrom <- nb.profiles[meta, on=.NATURAL]
+one.chrom <- nb.profiles[profile.id=="4" & chromosome=="2"]
+setkey(nb.profiles, profile.id, chromosome)
+one.chrom <- nb.profiles[meta]
+one.chrom
+```
+
+Above we show several different but equivalent ways to subset the data
+table. The first three are easy to read/understand because each one
+specifies the columns to join, and the join values, on in a single
+line. The last one if a bit more complicated since two lines are
+necessary to understand the join (`setkey`, square brackets with no
+`on=`). Is there any difference in efficiency?
+
+```{r}
+nb.list <- list(
+  random=nb.profiles[sample(.N)],
+  sorted=data.table(data.frame(nb.profiles)),
+  keyed=nb.profiles)
+sapply(nb.list, key)
+all.equal(nb.list$sorted, nb.list$keyed)
+all(nb.list$sorted == nb.list$keyed)
+timing.dt.list <- list()
+for(data.name in names(nb.list)){
+  nb <- nb.list[[data.name]]
+  times.df <- microbenchmark::microbenchmark(
+    on.names=nb[meta, on=names(meta)],
+    on.NATURAL=nb[meta, on=.NATURAL],
+    logical=nb[profile.id=="4" & chromosome=="2"],
+    times=10)
+  timing.dt.list[[data.name]] <- data.table(data.name, times.df)
+}
+timing.dt <- do.call(rbind, timing.dt.list)
+timing.dt[, seconds := time/1e9]
+
+library(ggplot2)
+timing.dt[, data.fac := factor(data.name, names(nb.list))]
+ggplot()+
+  geom_point(aes(
+    seconds, expr),
+    data=timing.dt)+
+  facet_grid(data.fac ~ .)+
+  scale_x_log10()+
+  scale_y_discrete(
+    "Subset method")
+```
+
+The figure compares three subset methods (Y axis) and three data types
+(panels). We see that using a logical vector is the same speed, no
+matter if the data are keyed or sorted. We also see that the `on=`
+versions are slightly slower if the data are sorted/random, and much
+faster if the data are keyed.
+
+# Cross-validation
+
+We divide the train data sequence into subtrain and validation sets.
+
+```{r}
+one.chrom[, data.i := .I]
+set.seed(1)
+one.chrom[, set := sample(rep(c("subtrain", "validation"), l=.N))]
+table(one.chrom$set)
+```
+
+We then use the subtrain set as input to the binary segmentation
+algorithm.
+
+```{r}
+(subtrain.dt <- one.chrom[set=="subtrain"])
+binseg.model <- binsegRcpp::binseg_normal(subtrain.dt$logratio)
+(some.segs <- coef(binseg.model, 2:5))
+```
+
+The `coef` method returns a data table of segments with `start` and
+`end` columns in units of subtrain rows. But to do cross-validation we
+need to assign learned mean parameters to validation data. So we
+compute new start/end columns in original units,
+
+```{r}
+change.vec <- subtrain.dt[, floor(data.i[-1]-diff(data.i)/2)+0.5]
+subtrain.dt[, start := c(0.5, change.vec)]
+subtrain.dt[, end := c(change.vec, nrow(one.chrom)+0.5)]
+subtrain.dt[, .(start, data.i, end)]
+subtrain.dt[, all(start < data.i & data.i < end)]
+```
+
+Above we added start/end columns to subtrain data, which we can use to
+
+```{r}
+set.i <- function(DT){
+  for(col.name in c("start", "end")){
+    subtrain.row <- DT[[col.name]]
+    set(
+      DT,
+      j=paste0(col.name, ".i"),
+      value=subtrain.dt[[col.name]][subtrain.row])
+  }
+}
+set.i(some.segs)
+some.segs
+```
+
+Then we map learned parameters to validation data. One way to do that
+is with the non-equi join below, which allocates a row for each model
+size and data point.
+
+```{r}
+(data.and.means <- one.chrom[
+  some.segs,
+  data.table(logratio, mean, set, segments),
+  on=.(data.i > start.i, data.i < end.i)])
+data.and.means[, .(
+  error=sum((logratio-mean)^2),
+  n.data=.N
+), keyby=.(set, segments)]
+```
+
+Another way which would be more memory efficient, for just the
+validation set, is to do `by=.EACHI` as below.
+
+```{r}
+(error.dt <- one.chrom[set=="validation"][
+  some.segs,
+  data.table(segments, seg.error=sum((logratio-mean)^2)),
+  by=.EACHI,
+  on=.(data.i > start.i, data.i < end.i)])
+error.dt[, .(error=sum(seg.error)), by=segments]
+```
+
+So that computation is more memory efficient since the `error.dt`
+table is the same size as the segments table. to do that for both sets,
+
+```{r}
+one.chrom[, {
+  .SD[
+    some.segs,
+    data.table(segments, seg.error=sum((logratio-mean)^2)),
+    by=.EACHI,
+    on=.(data.i > start.i, data.i < end.i)
+  ][, .(error=sum(seg.error)), by=segments]
+}, by=set]
+```
+
+To do the whole path in quadratic time (but only linear space) we can
+do
+
+```{r}
+all.error <- data.table(segments=1:nrow(binseg.model))[, {
+  model.segs <- coef(binseg.model, segments)
+  set.i(model.segs)
+  one.chrom[
+    model.segs,
+    data.table(set, logratio, mean)[, .(
+      error=sum((logratio-mean)^2)
+    ), by=set],
+    on=.(data.i > start.i, data.i < end.i)
+  ]
+}, by=segments]
+
+ggplot()+
+  geom_line(aes(
+    segments, error, color=set),
+    data=all.error)
+```
+
+Can we do it in linear time? We should be able to compute the whole
+path of validation error values in the same time as the subtrain
+error. So that means log-linear time in the best case, and quadratic
+time in the worst case. 
