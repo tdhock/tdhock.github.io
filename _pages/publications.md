@@ -49,13 +49,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967).
   [Software](https://github.com/tdhock/LOPART),
   [Reproducible](https://github.com/tdhock/LOPART-paper)
-- Hocking TD, Vargovich J. Linear time dynamic programming for the
-  exact path of optimal models selected from a finite set. Under
-  review at Journal of Computational and Graphical
-  Statistics. [Preprint
-  arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
-  [Software](https://github.com/tdhock/penaltyLearning),
-  [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper)
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
   G. gfpop: an R Package for Univariate Graph-Constrained Change-point
   Detection. Under review at Journal of Statistical
@@ -83,7 +76,9 @@ description: Peer-reviewed papers and preprints with links to code and data
 ### Accepted, in press
 
 - Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
-  Packages. Accepted at [ISSRE 2021](http://2021.issre.net/).
+  Packages. Accepted at [ISSRE 2021](http://2021.issre.net/), paper to
+  appear in
+  [proceedings](https://ieeexplore.ieee.org/xpl/conhome/1000700/all-proceedings).
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
   Changepoint Detection in Genomic Data. [Preprint
@@ -98,6 +93,15 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### 2021
 
+- Hocking TD, Vargovich J. Linear time dynamic programming for the
+  exact path of optimal models selected from a finite set. [Journal of
+  Computational and Graphical
+  Statistics](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2021.2000422)
+  (2021), doi:10.1080/10618600.2021.2000422. [Preprint
+  arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
+  [Software](https://github.com/tdhock/penaltyLearning),
+  [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper)
+  
 - Kolla A, Hocking TD, Groce A. RcppDeepState, a simple way to fuzz
   test Rcpp Packages. Contributed talk at international useR 2021
   conference. [Software](https://github.com/akhikolla/RcppDeepState),

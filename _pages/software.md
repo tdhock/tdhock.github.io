@@ -152,9 +152,11 @@ paper about max margin interval trees, we created the
 
 ### penaltyLearning: supervised changepoint detection
 
-To support our
-[ICML'13 paper](http://proceedings.mlr.press/v28/hocking13.html) and
-[useR2017 tutorial](http://members.cbio.mines-paristech.fr/~thocking/change-tutorial/Supervised.html)
+To support our [ICML'13
+paper](http://proceedings.mlr.press/v28/hocking13.html), [useR2017
+tutorial](https://rcdata.nau.edu/genomic-ml/change-tutorial/Supervised.html),
+and [JCGS'21
+paper](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2021.2000422)
 about learning penalty functions for changepoint detection, we created
 the
 [penaltyLearning](https://CRAN.R-project.org/package=penaltyLearning)
