@@ -1,0 +1,16 @@
+```{r}
+rate <- 1.0915
+days <- 365
+coef.vec <- rep(0, days+1)
+coef.vec[days+1] <- 1
+coef.vec[1] <- -rate
+Im(polyroot(coef.vec))==0 ##?
+f <- function(x)x^days-rate
+(daily <- rbind(
+  exp.log=exp(log(rate)/days),
+  uniroot=uniroot(f, c(-1,2))$root
+  ))
+f(daily)
+daily^365 * 100
+daily * 4000 # 96 cents interest on first day.
+```
