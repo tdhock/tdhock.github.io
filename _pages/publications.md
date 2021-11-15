@@ -101,7 +101,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
   [Software](https://github.com/tdhock/penaltyLearning),
   [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper)
-  
 - Kolla A, Hocking TD, Groce A. RcppDeepState, a simple way to fuzz
   test Rcpp Packages. Contributed talk at international useR 2021
   conference. [Software](https://github.com/akhikolla/RcppDeepState),
