@@ -129,10 +129,11 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-Constrained
   Changepoint Learning Approach for Automatic QRS-Complex
-  Detection. Accepted for [Asilomar Conference on Signals, Systems,
-  and
-  Computers](https://www2.securecms.com/Asilomar2020/Papers/ViewPapers.asp?PaperNum=1323). [Preprint
-  arXiv:2004.13558](https://arxiv.org/abs/2004.13558). [Proceedings will eventually be posted on IEEExplore](https://ieeexplore.ieee.org/xpl/conhome/1000671/all-proceedings).
+  Detection. [Paper](https://ieeexplore.ieee.org/document/9443307) in
+  proceedings of [Asilomar Conference on Signals, Systems, and
+  Computers](https://www2.securecms.com/Asilomar2020/Papers/ViewPapers.asp?PaperNum=1323)
+  (2020). [Preprint
+  arXiv:2004.13558](https://arxiv.org/abs/2004.13558).
 - Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
   TD, Clauss M, Doughty C. Improved estimation of gut passage time
   considerably affects trait-based dispersal models. Accepted at
