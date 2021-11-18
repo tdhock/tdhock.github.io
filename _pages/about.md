@@ -40,7 +40,7 @@ instructions](http://ml.nau.edu/application.html).
 - 2013: Postdoc, Tokyo Institute of Technology, Computer Science
   Department, with
   [Masashi Sugiyama](http://www.ms.k.u-tokyo.ac.jp/sugi/).
-- 2009-2012: PhD in Mathematics from […cole Normale SupÈrieure de
+- 2009-2012: PhD in Mathematics from [Ecole Normale Sup√©rieure de
   Cachan](https://en.wikipedia.org/wiki/%C3%89cole_normale_sup%C3%A9rieure_Paris-Saclay), with [Francis Bach](http://www.di.ens.fr/~fbach/) and
   [Jean-Philippe Vert](http://members.cbio.mines-paristech.fr/~jvert/).
 - 2008-2009: Masters student, [Universit√© Paris 6](https://en.wikipedia.org/wiki/Pierre_and_Marie_Curie_University), Statistics
