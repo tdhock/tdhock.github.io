@@ -34,16 +34,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   detection using elastic-net regularized accelerated failure time
   models. In preparation. [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper)
-- Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
-  failure time model in XGBoost. Under review at Journal of
-  Computational and Graphical Statistics. [Preprint
-  arXiv:2006.04920](https://arxiv.org/abs/2006.04920). [Software](https://github.com/dmlc/xgboost),
-  [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
-  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/)
-- Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
-  language design: the influence of language use on user
-  experience. Under review at ACM Transactions on Computer-Human
-  Interaction. [Preprint arXiv:2101.11089](https://arxiv.org/abs/2101.11089).
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Under review
   at Computational Statistics. [Preprint
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967).
@@ -75,6 +65,16 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### Accepted, in press
 
+- Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
+  language design: the influence of language use on user
+  experience. Accepted in ACM Transactions on Computer-Human
+  Interaction. [Preprint arXiv:2101.11089](https://arxiv.org/abs/2101.11089).
+- Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
+  failure time model in XGBoost. Accepted in Journal of
+  Computational and Graphical Statistics. [Preprint
+  arXiv:2006.04920](https://arxiv.org/abs/2006.04920). [Software](https://github.com/dmlc/xgboost),
+  [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
+  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/)
 - Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
   Packages. Accepted at [ISSRE 2021](http://2021.issre.net/), paper to
   appear in
