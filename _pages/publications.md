@@ -23,17 +23,11 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### In progress
 
-- Hocking TD and Killick R. Changepoint detection algorithms and
-  applications in R. Textbook in preparation.
 - Hocking TD. Chapter "Introduction to machine learning and neural
   networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
   Data Assimilation, and Ecological Forecasting" edited by Luo Y, in
   preparation (expected publication Jan
   2022). [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school)
-- Hocking TD, Khare A. Learning penalty functions for changepoint
-  detection using elastic-net regularized accelerated failure time
-  models. In preparation. [Software](https://github.com/anujkhare/iregnet),
-  [Reproducible](https://github.com/tdhock/iregnet-paper)
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Under review
   at Computational Statistics. [Preprint
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967).
@@ -61,10 +55,22 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Software](https://github.com/NAU-CCL/SPARSEMODr).
 - Hillman J, Hocking TD. Optimizing ROC Curves with a Sort-Based
   Surrogate Loss Function for Binary Classification and Changepoint
-  Detection. [Preprint
+  Detection. Under review at Journal of Machine Learning
+  Research, [Preprint
   arXiv:2107.01285](https://arxiv.org/abs/2107.01285),
   [Software](https://github.com/tdhock/aum),
-  [Reproducible](https://github.com/tdhock/max-generalized-auc). 
+  [Reproducible](https://github.com/tdhock/max-generalized-auc).
+- Hocking TD and Killick R. Changepoint detection algorithms and
+  applications in R. Textbook in preparation.
+- Hocking TD. A breakpoint detection error function for segmentation
+  model selection and
+  validation. [Preprint arXiv:1509.00368](https://arxiv.org/abs/1509.00368),
+  [Software](http://r-forge.r-project.org/scm/?group_id=1540),
+  [Reproducible](https://github.com/tdhock/breakpointError-orig)
+- Hocking TD, Khare A. Learning penalty functions for changepoint
+  detection using elastic-net regularized accelerated failure time
+  models. In preparation. [Software](https://github.com/anujkhare/iregnet),
+  [Reproducible](https://github.com/tdhock/iregnet-paper)
   
 ### Accepted, in press
 
@@ -266,11 +272,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   [video](http://videolectures.net/icml2015_hocking_count_data/?q=hocking),
   [Software](https://github.com/tdhock/PeakSegDP),
   [Reproducible](https://github.com/tdhock/PeakSeg-paper)
-- Hocking TD. A breakpoint detection error function for segmentation
-  model selection and
-  validation. [Preprint arXiv:1509.00368](https://arxiv.org/abs/1509.00368),
-  [Software](http://r-forge.r-project.org/scm/?group_id=1540),
-  [Reproducible](https://github.com/tdhock/breakpointError-orig)
 - Hocking TD, Bourque G. PeakSegJoint: fast supervised peak detection
   via joint segmentation of multiple count data
   samples. [Preprint arXiv:1506.01286](https://arxiv.org/abs/1506.01286),
