@@ -149,8 +149,8 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
   Changepoint Detection Approach for ECG Segmentation. In proceedings
   of 42th Annual International Conference of the IEEE Engineering in
-  Medicine and Biology Society (EMBC 2020). [IEEE
-  Xplore](https://ieeexplore.ieee.org/document/9175333)
+  Medicine and Biology Society (EMBC 2020), [IEEE
+  Xplore](https://ieeexplore.ieee.org/document/9175333).
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained Dynamic
   Programming and Supervised Penalty Learning Algorithms for Peak
   Detection in Genomic Data. Journal of Machine Learning Research
@@ -161,8 +161,8 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Hocking TD, Bourque G. Machine Learning Algorithms for Simultaneous
   Supervised Detection of Peaks in Multiple Samples and Cell
   Types. Pacific Symposium on Biocomputing (2020)
-  25:367-378. [PDF](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf),
-  [Software](https://github.com/tdhock/PeakSegJoint)
+  25:367-378, [PDF](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf),
+  [Software](https://github.com/tdhock/PeakSegJoint).
   
 ### 2019
 
