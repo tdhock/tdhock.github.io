@@ -27,26 +27,26 @@ description: Peer-reviewed papers and preprints with links to code and data
   networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
   Data Assimilation, and Ecological Forecasting" edited by Luo Y, in
   preparation (expected publication Jan
-  2022). [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school)
+  2022), [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school).
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Under review
-  at Computational Statistics. [Preprint
+  at Computational Statistics, [Preprint
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967).
   [Software](https://github.com/tdhock/LOPART),
-  [Reproducible](https://github.com/tdhock/LOPART-paper)
+  [Reproducible](https://github.com/tdhock/LOPART-paper).
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
   G. gfpop: an R Package for Univariate Graph-Constrained Change-point
   Detection. Under review at Journal of Statistical
-  Software. [Preprint
+  Software, [Preprint
   arXiv:2002.03646](https://arxiv.org/abs/2002.03646),
   [Software (gfpop)](https://github.com/vrunge/gfpop),
   [Software (gfpopgui)](https://github.com/julianstanley/gfpopgui),
-  [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd)
+  [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd).
 - Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
   comparison machines. [Preprint
   arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under review at
-  Machine Learning.
+  Machine Learning,
   [Software](https://github.com/tdhock/rankSVMcompare),
-  [Reproducible](https://github.com/tdhock/compare-paper)
+  [Reproducible](https://github.com/tdhock/compare-paper).
 - Mihaljevic JR, Borkovec S, Ratnavale S, Hocking TD, Banister KE,
   Eppinger JE, Hepp CM, Doerry E. Rapid simulations of spatially
   explicit and stochastic models of infectious disease. [Preprint
@@ -66,11 +66,11 @@ description: Peer-reviewed papers and preprints with links to code and data
   model selection and
   validation. [Preprint arXiv:1509.00368](https://arxiv.org/abs/1509.00368),
   [Software](http://r-forge.r-project.org/scm/?group_id=1540),
-  [Reproducible](https://github.com/tdhock/breakpointError-orig)
+  [Reproducible](https://github.com/tdhock/breakpointError-orig).
 - Hocking TD, Khare A. Learning penalty functions for changepoint
   detection using elastic-net regularized accelerated failure time
-  models. In preparation. [Software](https://github.com/anujkhare/iregnet),
-  [Reproducible](https://github.com/tdhock/iregnet-paper)
+  models. In preparation, [Software](https://github.com/anujkhare/iregnet),
+  [Reproducible](https://github.com/tdhock/iregnet-paper).
   
 ### Accepted, in press
 
@@ -109,7 +109,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   (2021), doi:10.1080/10618600.2021.2000422. [Preprint
   arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
   [Software](https://github.com/tdhock/penaltyLearning),
-  [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper)
+  [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper).
 - Kolla A, Hocking TD, Groce A. RcppDeepState, a simple way to fuzz
   test Rcpp Packages. Contributed talk at international useR 2021
   conference. [Software](https://github.com/akhikolla/RcppDeepState),
@@ -150,7 +150,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   Changepoint Detection Approach for ECG Segmentation. In proceedings
   of 42th Annual International Conference of the IEEE Engineering in
   Medicine and Biology Society (EMBC 2020), [IEEE
-  Xplore](https://ieeexplore.ieee.org/document/9175333).
+	  Xplore](https://ieeexplore.ieee.org/document/9175333).
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained Dynamic
   Programming and Supervised Penalty Learning Algorithms for Peak
   Detection in Genomic Data. Journal of Machine Learning Research
@@ -169,12 +169,13 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Hocking TD. Comparing namedCapture with other R packages for regular
   expressions. 
   [R Journal](https://journal.r-project.org/archive/2019/RJ-2019-050/index.html) 
-  (2019). doi:10.32614/RJ-2019-050 
+  (2019), doi:10.32614/RJ-2019-050 
   [Software](https://github.com/tdhock/namedCapture), 
-  [Reproducible](https://github.com/tdhock/namedCapture-article)
+  [Reproducible](https://github.com/tdhock/namedCapture-article).
 - Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
   Deconvolution of Calcium Imaging Data. Biostatistics (2019), doi:
-  10.1093/biostatistics/kxy083. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/30753436)
+  10.1093/biostatistics/kxy083,
+  [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/30753436).
   
 ### 2018
 
@@ -206,8 +207,8 @@ description: Peer-reviewed papers and preprints with links to code and data
   Schleiermacher G, De Preter K. Genomic Amplifications and Distal 6q
   Loss: Novel Markers for Poor Survival in High-risk Neuroblastoma
   Patients. Journal of the National Cancer
-  Institute (2018). DOI:10.1093/jnci/djy022.
-  [JNCI](https://academic.oup.com/jnci/advance-article/doi/10.1093/jnci/djy022/4921185)
+  Institute (2018), DOI:10.1093/jnci/djy022,
+  [JNCI](https://academic.oup.com/jnci/advance-article/doi/10.1093/jnci/djy022/4921185).
 
 ### 2017
 
@@ -217,14 +218,14 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Reproducible](https://github.com/tdhock/mmit-paper),
   [Preprint arXiv](https://arxiv.org/abs/1710.04234),
   [NeurIPS](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees),
-  [video](https://www.youtube.com/watch?v=sNrMH9z1rb4)
+  [video](https://www.youtube.com/watch?v=sNrMH9z1rb4).
 - Hocking TD, Goerner-Potvin P, Morin A, Shao X, Pastinen T, Bourque
   G. Optimizing ChIP-seq peak detectors using visual labels and
   supervised machine learning.  Bioinformatics (2017) 33 (4):
   491-499. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27797775),
   [Software](https://github.com/tdhock/PeakError),
   [Reproducible](https://bitbucket.org/mugqic/chip-seq-paper),
-  [Data](https://rcdata.nau.edu/genomic-ml/chip-seq-chunk-db/)
+  [Data](https://rcdata.nau.edu/genomic-ml/chip-seq-chunk-db/).
 - Hocking TD and Killick R. Introduction to optimal changepoint
   detection algorithms. [useR2017 conference
   tutorial](https://www.user2017.brussels/uploads/TobyHocking.html),
@@ -238,7 +239,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   Naoe T, Nakamura S, Hayakawa F, Seto M, Tomita A, Kiyoi
   H. Development and analysis of patient-derived xenograft mouse
   models in intravascular large B-cell lymphoma.
-  Leukemia 2016. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27001523)
+  Leukemia 2016. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27001523).
 - Chicard M, Boyault S, Colmet-Daage L, Richer W, Gentien D, Pierron
   G, Lapouble E, Bellini A, Clement N, Iacono I, Bréjon S, Carrere M,
   Reyes C, Hocking TD, Bernard V, Peuchmaur M, Corradini N,
@@ -247,15 +248,15 @@ description: Peer-reviewed papers and preprints with links to code and data
   Delattre O, Combaret V, Schleiermacher G. Genomic copy number
   profiling using circulating free tumor DNA highlights heterogeneity
   in neuroblastoma. Clinical Cancer
-  Research 2016. [journal](http://clincancerres.aacrjournals.org/content/early/2016/11/03/1078-0432.CCR-16-0500)
+  Research 2016. [journal](http://clincancerres.aacrjournals.org/content/early/2016/11/03/1078-0432.CCR-16-0500).
 - Maidstone R, Hocking TD, Rigaill G, Fearnhead P. On optimal multiple
   changepoint algorithms for large data. Statistics and Computing
   (2016). doi:10.1007/s11222-016-9636-3
   [journal](https://link.springer.com/article/10.1007/s11222-016-9636-3),
   [Software](https://r-forge.r-project.org/R/?group_id%3D1851),
-  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/benchmark/?root%3Dopfp)
+  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/benchmark/?root%3Dopfp).
 - The animint2 manual, [online
-  "book" with multiple chapters](http://members.cbio.mines-paristech.fr/~thocking/animint2-manual/Ch02-ggplot2.html),
+  "book" with multiple chapters](https://rcdata.nau.edu/genomic-ml/animint2-manual/Ch02-ggplot2.html),
   [Reproducible](https://github.com/tdhock/animint-book).
 - Understanding and Creating Interactive Graphics. Hocking TD, Ekstrøm
   CT. [useR2016 conference
@@ -271,12 +272,12 @@ description: Peer-reviewed papers and preprints with links to code and data
   [PMLR](http://proceedings.mlr.press/v37/hocking15.html), 
   [video](http://videolectures.net/icml2015_hocking_count_data/?q=hocking),
   [Software](https://github.com/tdhock/PeakSegDP),
-  [Reproducible](https://github.com/tdhock/PeakSeg-paper)
+  [Reproducible](https://github.com/tdhock/PeakSeg-paper).
 - Hocking TD, Bourque G. PeakSegJoint: fast supervised peak detection
   via joint segmentation of multiple count data
   samples. [Preprint arXiv:1506.01286](https://arxiv.org/abs/1506.01286),
   [Software](https://github.com/tdhock/PeakSegJoint),
-  [Reproducible](https://github.com/tdhock/PeakSegJoint-paper)
+  [Reproducible](https://github.com/tdhock/PeakSegJoint-paper).
 - Animint: Interactive Web-Based Animations Using Ggplot2's Grammar of
   Graphics. VanderPlas SR and Sievert C and Hocking TD. Presentation
   at
@@ -288,7 +289,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   N, Karnan S, Takeuchi I, Hocking TD, Arita K, Karube K, Tsuzuki S,
   Nakamura S, Kinoshita T, Seto M. Clonal heterogeneity of lymphoid
   malignancies correlates with poor prognosis.  Cancer Sci. 2014
-  Jul;105(7):897-904. [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24815991)
+  Jul;105(7):897-904. [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24815991).
 - Hocking TD, Boeva V, Rigaill G, Schleiermacher G, Janoueix-Lerosey
   I, Delattre O, Richer W, Bourdeaut F, Suguro M, Seto M, Bach F, Vert
   J-P. SegAnnDB: interactive Web-based genomic segmentation.
@@ -296,7 +297,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   1539-1546. DOI:10.1093/bioinformatics/btu072
   [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24493034),
   [Software](https://github.com/tdhock/SegAnnDB),
-  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/breakpoints/webapp/applications-note/)
+  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/breakpoints/webapp/applications-note/).
 
 ### 2013
 
@@ -305,21 +306,21 @@ description: Peer-reviewed papers and preprints with links to code and data
   Statistical Software (2013), 54(6), 1-20. DOI:10.18637/jss.v054.i06
   [journal](https://www.jstatsoft.org/article/view/v054i06),
   [Software](https://cran.r-project.org/package=inlinedocs),
-  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/jss762/?root=inlinedocs)
+  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/jss762/?root=inlinedocs).
 - Hocking TD, Schleiermacher G, Janoueix-Lerosey I, Boeva V, Cappo J,
   Delattre O, Bach F, Vert J-P. Learning smoothing models of copy
   number profiles using breakpoint annotations.  BMC Bioinfo. 2013,
   14:164. DOI:10.1186/1471-2105-14-164
   [journal](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-164),
   [Software](https://cran.r-project.org/src/contrib/Archive/bams/),
-  [Reproducible](http://cbio.ensmp.fr/~thocking/papers/2012-01-27-Breakpoint-annotation-model-smoothing/HOCKING-breakpoint-annotation-model-smoothing.tgz)
+  [Reproducible](https://rcdata.nau.edu/genomic-ml/public_html/papers/2012-01-27-Breakpoint-annotation-model-smoothing/HOCKING-breakpoint-annotation-model-smoothing.tgz).
 - Hocking TD, Rigaill G, Bach F, Vert J-P. Learning sparse penalties
   for change-point detection using max-margin interval regression.
   International Conference on Machine Learning
   (ICML), 2013. [PMLR](http://proceedings.mlr.press/v28/hocking13.html),
   [video](http://techtalks.tv/talks/learning-sparse-penalties-for-change-point-detection-using-max-margin-interval-regression/58208/),
   [Software](https://github.com/tdhock/penaltyLearning),
-  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/?root=breakpoints)
+  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/?root=breakpoints).
 
 ### 2012
 
@@ -327,12 +328,12 @@ description: Peer-reviewed papers and preprints with links to code and data
   of annotated piecewise constant signals,
   [Preprint hal-00759129](https://hal.inria.fr/hal-00759129). 
   [Software](https://r-forge.r-project.org/scm/?group_id=1541),
-  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/SegAnnot/inst/doc/?root=breakpoints)
+  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/SegAnnot/inst/doc/?root=breakpoints).
 - Hocking TD. Learning algorithms and statistical software, with
   applications to bioinformatics. PhD thesis, Ecole Normale Superieure
   de Cachan,
   France. [tel-00906029](https://tel.archives-ouvertes.fr/tel-00906029/), 
-  [Reproducible](http://cbio.ensmp.fr/~thocking/papers/2012-11-20-PhD-thesis/HOCKING-phd-thesis.tgz)
+  [Reproducible](https://rcdata.nau.edu/genomic-ml/public_html/papers/2012-11-20-PhD-thesis/HOCKING-phd-thesis.tgz).
 
 ### 2011
 
@@ -342,14 +343,14 @@ description: Peer-reviewed papers and preprints with links to code and data
   (ICML), 2011. [pdf](http://www.icml-2011.org/papers/419_icmlpaper.pdf),
   [video](http://techtalks.tv/talks/clusterpath-an-algorithm-for-clustering-using-convex-fusion-penalties/54405/)
   [Software](https://r-forge.r-project.org/scm/?group_id=1090),
-  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/?root=clusterpath)
+  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/?root=clusterpath).
 
 ### 2010
 
 - Gautier M, Hocking TD, Foulley JL. A Bayesian outlier criterion to
   detect SNPs under selection in large data sets.  PloS ONE 5 (8),
   e11913
-  (2010). [journal](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0011913)
+  (2010). [journal](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0011913).
 
 ### 2008
 
@@ -357,7 +358,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   R, Hocking TD, Zhang L, Rebar EJ, Gregory PD, Urnov FD, Amacher
   SL. Heritable targeted gene disruption in zebrafish using designed
   zinc-finger nucleases.  Nature biotechnology 26 (6), 702-70
-  (2008). [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/18500334)
+  (2008). [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/18500334).
 
 
 
