@@ -75,9 +75,9 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
   failure time model in XGBoost. Accepted in Journal of
   Computational and Graphical Statistics. [Preprint
-  arXiv:2006.04920](https://arxiv.org/abs/2006.04920). [Software](https://github.com/dmlc/xgboost),
+  arXiv:2006.04920](https://arxiv.org/abs/2006.04920), [Software](https://github.com/dmlc/xgboost),
   [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
-  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/)
+  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/).
 - Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
   Packages. Accepted at [ISSRE 2021](http://2021.issre.net/), paper to
   appear in
@@ -114,9 +114,8 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Hocking TD. Wide-to-tall data reshaping using regular expressions
   and the nc package. [R
   Journal](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html)
-  (2021), doi:10.32614/RJ-2021-029.
-  Journal. [Software](https://github.com/tdhock/nc),
-  [Reproducible](https://github.com/tdhock/nc-article)
+  (2021), doi:10.32614/RJ-2021-029, [Software](https://github.com/tdhock/nc),
+  [Reproducible](https://github.com/tdhock/nc-article).
 - Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
   accuracy in over-dispersed ChIP-seq data with supervised
   segmentation models. [BMC Bioinformatics 22, Article number: 323
@@ -125,8 +124,12 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Software](https://github.com/aliehrmann/crocs).
 - Fotoohinasab A, Hocking TD, Afghah F. A Greedy Graph Search
   Algorithm Based on Changepoint Analysis for Automatic QRS-Complex
-  Detection. [Computers in Biology and Medicine 130 (2021)](https://www.sciencedirect.com/science/article/pii/S0010482521000020). [Preprint
-  arXiv:2004.13558](https://arxiv.org/abs/2004.13558)
+  Detection. [Computers in Biology and Medicine 130 (2021)](https://www.sciencedirect.com/science/article/pii/S0010482521000020), [Preprint
+  arXiv:2004.13558](https://arxiv.org/abs/2004.13558).
+- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
+  TD, Clauss M, Doughty C. Improved estimation of gut passage time
+  considerably affects trait-based dispersal models. 
+  [Functional Ecology](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2435.13726) 2021; 35: 860-869.
   
 ### 2020
 
@@ -135,22 +138,17 @@ description: Peer-reviewed papers and preprints with links to code and data
   Detection. [Paper](https://ieeexplore.ieee.org/document/9443307) in
   proceedings of [Asilomar Conference on Signals, Systems, and
   Computers](https://www2.securecms.com/Asilomar2020/Papers/ViewPapers.asp?PaperNum=1323)
-  (2020). [Preprint
+  (2020), [Preprint
   arXiv:2004.13558](https://arxiv.org/abs/2004.13558).
-- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
-  TD, Clauss M, Doughty C. Improved estimation of gut passage time
-  considerably affects trait-based dispersal models. Accepted at
-  [Functional
-  Ecology](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2435.13726).
 - Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
   Changepoint Detection Approach for ECG Segmentation. In proceedings
   of 42th Annual International Conference of the IEEE Engineering in
-  Medicine and Biology Society (EMBC). [IEEE
+  Medicine and Biology Society (EMBC 2020). [IEEE
   Xplore](https://ieeexplore.ieee.org/document/9175333)
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained Dynamic
   Programming and Supervised Penalty Learning Algorithms for Peak
   Detection in Genomic Data. Journal of Machine Learning Research
-  21(87):1−40, 2020. [JMLR](http://jmlr.org/papers/v21/18-843.html),
+  21(87):1-40, 2020. [JMLR](http://jmlr.org/papers/v21/18-843.html),
   [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352),
   [Software](https://github.com/tdhock/PeakSegOptimal),
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
