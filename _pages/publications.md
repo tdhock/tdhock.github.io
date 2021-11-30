@@ -30,7 +30,8 @@ description: Peer-reviewed papers and preprints with links to code and data
   2022), [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school).
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Under review
   at Computational Statistics, [Preprint
-  arXiv:2006.13967](https://arxiv.org/abs/2006.13967).
+  arXiv:2006.13967](https://arxiv.org/abs/2006.13967),
+  [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
   [Software](https://github.com/tdhock/LOPART),
   [Reproducible](https://github.com/tdhock/LOPART-paper).
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
