@@ -7,6 +7,7 @@ description: Course materials and students mentored
 
 ### Course materials
 
+- Spring 2022, CS570, Advanced Intelligent Systems (Deep Learning). [my course materials](https://github.com/tdhock/cs570-spring-2022)
 - Fall 2021, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2021)
 - Summer 2021, Introduction to Machine Learning and Neural Networks,
   with an application to earth system modeling. 60 minute lecture for
