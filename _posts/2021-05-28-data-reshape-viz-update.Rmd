@@ -5,6 +5,10 @@ description: data.table, tidyr, nc, pandas, datatable, plotnine, altair, bokeh
 ---
 
 ```{r setup, echo=FALSE}
+Sys.setenv(RETICULATE_PYTHON=if(.Platform$OS.type=="unix")
+  "/home/tdhock/.local/share/r-miniconda/envs/cs570s22/bin/python"
+  else "~/Miniconda3/envs/cs570s22/python.exe")
+reticulate::use_condaenv("cs570s22", required=TRUE)
 repo.dir <- normalizePath("..")
 post.id <- "2021-05-28-data-reshape-viz-update/"
 img.path <- file.path(repo.dir, "assets", "img", post.id)
@@ -380,7 +384,7 @@ print(
 ```
 
 Note that `tidyr` and `data.table` syntax require definition of the
-regex `pattern` in a separately from the names/conversions which are
+regex `pattern` separately from the names/conversions which are
 defined in `names_transform`. In contrast, the `nc` syntax allows
 definition of these three related pieces of information together in
 group-specific sub-pattern list variables, for example
