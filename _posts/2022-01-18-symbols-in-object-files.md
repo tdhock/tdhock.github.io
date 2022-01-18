@@ -50,8 +50,8 @@ using std::cerr;
 So then I started looking at the armadillo docs, and [the logging
 section](http://arma.sourceforge.net/docs.html#logging) says that "a
 blunt method to disable printing of all warnings and errors is via
-placing `#define ARMA_DONT_PRINT_ERRORS` before `#include
-<armadillo>`". Before doing that I verified that cerr is found in the
+placing `#define ARMA_DONT_PRINT_ERRORS` before `#include <armadillo>`". 
+Before doing that I verified that cerr is found in the
 compiled object file, by using `objdump -t` to list all symbols,
 
 ```shell-script
