@@ -28,12 +28,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   Data Assimilation, and Ecological Forecasting" edited by Luo Y, in
   preparation (expected publication Jan
   2022), [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school).
-- Hocking TD, Srivastava A. Labeled Optimal Partitioning. Under review
-  at Computational Statistics, [Preprint
-  arXiv:2006.13967](https://arxiv.org/abs/2006.13967),
-  [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
-  [Software](https://github.com/tdhock/LOPART),
-  [Reproducible](https://github.com/tdhock/LOPART-paper).
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
   G. gfpop: an R Package for Univariate Graph-Constrained Change-point
   Detection. Under review at Journal of Statistical
@@ -75,6 +69,12 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### Accepted, in press
 
+- Hocking TD, Srivastava A. Labeled Optimal Partitioning. Accepted in
+  Computational Statistics, [Preprint
+  arXiv:2006.13967](https://arxiv.org/abs/2006.13967),
+  [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
+  [Software](https://github.com/tdhock/LOPART),
+  [Reproducible](https://github.com/tdhock/LOPART-paper).
 - Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
   language design: the influence of language use on user
   experience. Accepted in ACM Transactions on Computer-Human
@@ -84,6 +84,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   Computational and Graphical Statistics. [Preprint
   arXiv:2006.04920](https://arxiv.org/abs/2006.04920), [Software](https://github.com/dmlc/xgboost),
   [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
+  [Video](https://www.youtube.com/watch?v=HuWRnzgGuIo),
   [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/).
 - Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
   Packages. Accepted at [ISSRE 2021](http://2021.issre.net/), paper to
