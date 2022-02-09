@@ -90,13 +90,14 @@ description: Peer-reviewed papers and preprints with links to code and data
   Packages. Accepted at [ISSRE 2021](http://2021.issre.net/), paper to
   appear in
   [proceedings](https://ieeexplore.ieee.org/xpl/conhome/1000700/all-proceedings).
+
+### 2022
+
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
-  Changepoint Detection in Genomic Data. [Preprint
-  arXiv:1810.00117](https://arxiv.org/abs/1810.00117). Accepted for
-  publication in
-  Journal of Statistical
-  Software. [Software](https://github.com/tdhock/PeakSegDisk),
+  Changepoint Detection in Genomic Data.  [Journal of Statistical
+  Software Vol. 101, Issue
+  10](https://www.jstatsoft.org/article/view/v101i10). [Software](https://github.com/tdhock/PeakSegDisk),
   [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
   Presentation at useR 2019:
   [slides](http://www.user2019.fr/static/pres/t257847.pdf),
