@@ -5,7 +5,14 @@ title: Teaching
 description: Course materials and students mentored
 ---
 
+### Progression plans
+
 ### Course materials
+
+For current and potential CS master students at NAU, [here is a list
+of progression plans with various specialties including machine
+learning](https://github.com/NAU-CS/progression-plans), which should
+be useful for planning what classes you take.
 
 - Spring 2022, CS570, Advanced Intelligent Systems (Deep Learning). [my course materials](https://github.com/tdhock/cs570-spring-2022)
 - Fall 2021, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2021)
