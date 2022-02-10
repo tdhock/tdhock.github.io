@@ -5,8 +5,6 @@ title: Teaching
 description: Course materials and students mentored
 ---
 
-### Progression plans
-
 ### Course materials
 
 For current and potential CS master students at NAU, [here is a list
