@@ -1,0 +1,153 @@
+---
+layout: post
+title: AUM in Torch
+description: Auto-grad of a non-differentiable loss function
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2021-03-17-torch-auto-grad-non-diff-"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=200,
+  fig.path=fig.path,
+  fig.width=10,
+  fig.height=6)
+Sys.setenv(RETICULATE_PYTHON=if(.Platform$OS.type=="unix")
+  "/home/tdhock/.local/share/r-miniconda/envs/cs570s22/bin/python"
+  else "~/Miniconda3/envs/cs570s22/python.exe")
+reticulate::use_condaenv("cs570s22", required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+if(FALSE){
+  knitr::knit("2021-03-17-torch-auto-grad-non-diff.Rmd")
+}
+rendering <- in_render || in_knit
+```
+
+```{python echo=FALSE}
+repo_dir = r["repo.dir"]
+fig_path = r["fig.path"]
+import warnings
+def p9_save(g, name):
+    out_png = fig_path+name+".png"
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        g.save(out_png)
+    web_link = out_png.replace(repo_dir, "")
+    print('![plot of %s](%s)'%(name, web_link))
+# work-around for rendering plots under windows, which hangs within
+# emacs python shell: instead write a PNG file and view in browser.
+import os
+import webbrowser
+on_windows = os.name == "nt"
+rendering = r.rendering if 'r' in dir() else False
+using_agg = on_windows and not rendering
+if using_agg:
+    import matplotlib
+    matplotlib.use("agg")
+def show(g, name):
+    if not using_agg:
+        return p9_save(g, name)
+    g.save("tmp.png")
+    webbrowser.open('tmp.png')
+```
+
+## What happens with auto-grad on a non-differentiable loss?
+
+Apparently the backward method returns a subgradient, as explained in
+[an issue discussing autograd of L1 loss
+function](https://github.com/pytorch/pytorch/issues/7172). 
+
+However In the case of the non-convex AUM loss function, there may be
+no subgradients. What should we return?
+
+## Can we implement AUM loss in torch?
+
+We would need a sort operation.
+
+```{python}
+import pandas as pd
+import numpy as np
+spam_df = pd.read_csv(
+    "~/teaching/cs570-spring-2022/data/spam.data",
+    header=None,
+    sep=" ")
+
+spam_features = spam_df.iloc[:,:-1].to_numpy()
+spam_labels = spam_df.iloc[:,-1].to_numpy()
+# 1. feature scaling
+spam_features.mean()
+spam_features.mean(axis=0)
+spam_features.var(axis=0) # var = sd^2
+np.sqrt(spam_features.var(axis=0))
+
+np.random.seed(1)
+n_folds = 5
+fold_vec = np.random.randint(low=0, high=n_folds, size=spam_labels.size)
+validation_fold = 0
+is_set_dict = {
+    "validation":fold_vec == validation_fold,
+    "subtrain":fold_vec != validation_fold,
+}
+
+set_features = {}
+set_labels = {}
+for set_name, is_set in is_set_dict.items():
+    set_features[set_name] = spam_features[is_set,:]
+    set_labels[set_name] = spam_labels[is_set]
+
+subtrain_mean = set_features["subtrain"].mean(axis=0)
+subtrain_sd = np.sqrt(set_features["subtrain"].var(axis=0))
+
+scaled_features = {
+    set_name:(set_mat-subtrain_mean)/subtrain_sd
+    for set_name, set_mat in set_features.items()
+    }
+{set_name:set_mat.mean(axis=0) for set_name, set_mat in scaled_features.items()}
+{set_name:set_mat.var(axis=0) for set_name, set_mat in scaled_features.items()}
+import torch
+array_dict = {"features":scaled_features, "labels":set_labels}
+tensor_dict = {
+    data_type:{
+        set_name:torch.from_numpy(set_array)
+        for set_name, set_array in set_dict.items()
+    } for data_type, set_dict in array_dict.items()
+}
+{data_type:{
+    set_name:array.shape for set_name, array in set_dict.items()
+} for data_type, set_dict in tensor_dict.items()}
+y_subtrain = tensor_dict["labels"]["subtrain"]
+pred = torch.from_numpy(np.random.normal(size=y_subtrain.size()))
+
+y_subtrain = torch.tensor([-1, -1, 1, 1])
+pred = torch.tensor([1.0, 1.0, -1.0, -1.0])
+fn_diff = torch.where(y_subtrain == 1, -1, 0)
+fp_diff = torch.where(y_subtrain == 1, 0, 1)
+thresh = -pred
+sorted_indices = torch.argsort(thresh)
+
+
+```
+
+How do existing ROC-AUC functions work?
+[ignite](https://github.com/pytorch/ignite/blob/cc76de461f63475f3b792c7c109fede95301556e/tests/ignite/contrib/metrics/test_roc_auc.py)
+uses sklearn's implementation via `np.argsort` in `_binary_clf_curve`
+in `roc_curve` in `_binary_roc_auc_score`, see
+[sklearn.metrics._ranking](https://github.com/scikit-learn/scikit-learn/blob/95119c13af77c76e150b753485c662b7c52a41a2/sklearn/metrics/_ranking.py)
+source code.
+
+Torch lightning source code shows that the implementation is adapted
+from sklearn:
+
+```
+adapted from https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/metrics/_ranking.py
+```
+
+It uses `torch.argsort` in `_binary_clf_curve` in `roc` in `auroc` in
+`forward` method of `AUROC` class, see
+[pytorch_lightning.metrics.classification](https://github.com/PyTorchLightning/PyTorch-Lightning/blob/0.8.5/pytorch_lightning/metrics/classification.py)
+and
+[metrics.function.classification](https://github.com/PyTorchLightning/pytorch-lightning/blob/92d6abcbb9e73645fff0bba2914f7a7e0e748a91/pytorch_lightning/metrics/functional/classification.py)
+source code.
+
