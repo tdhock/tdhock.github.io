@@ -76,7 +76,7 @@ def loss_grad(pred_vec, label_vec):
 
 ## Simple differentiable points
 
-Let us consider an example from the aum package,
+Let us consider an example from the aum R package,
 
 
 ```r
@@ -94,10 +94,10 @@ aum::aum(bin.diffs, c(-10,10))
 ## [2,]    0    0
 ```
 
-The output above shows that for one negative label with predicted
-value -10, and one positive label with predicted value 10, we have
-AUM=0 and directional derivatives are also zero. That is also seen in
-the python code:
+The R code and output above shows that for one negative label with
+predicted value -10, and one positive label with predicted value 10,
+we have AUM=0 and directional derivatives are also zero. That is also
+seen in the python code below:
 
 
 ```python
@@ -110,7 +110,7 @@ loss_grad([-10.0, 10.0], y_list)
 ```
 
 Another example is for the same labels but the opposite predicted
-values,
+values, for which the R code is below,
 
 
 ```r
@@ -127,12 +127,13 @@ aum::aum(bin.diffs, c(10,-10))
 ## [2,]   -1   -1
 ```
 
-The output above shows that we have AUM=20 and derivative 1 for the
-first/negative example, and derivative -1 for the second/positive
-example. Those derivatives indicate that the AUM can be decreased by
-decreasing the predicted value for the first/negative example and/or
-increasing the predicted vale for the second/positive
-example. Consistent results can be observed from the python code below,
+The R code and output above shows that we have AUM=20 and derivative 1
+for the first/negative example, and derivative -1 for the
+second/positive example. Those derivatives indicate that the AUM can
+be decreased by decreasing the predicted value for the first/negative
+example and/or increasing the predicted vale for the second/positive
+example. Consistent results can be observed from the python code
+below,
 
 
 ```python
