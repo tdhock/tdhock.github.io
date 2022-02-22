@@ -12,9 +12,8 @@ Last week I met Joe Barr of [Acronis](https://acronisscs.com/) who
 gave a talk at NAU about an application of machine learning to
 predicting security vulnerabilities based on source code analysis, and
 a database of exploits. The data they are using for training/testing
-their models is highly imbalanced so I suggested trying my new Area
-Under the Min(FP,FN) loss function (AUM),
-https://arxiv.org/abs/2107.01285
+their models is highly imbalanced so I suggested trying my new [Area
+Under the Min(FP,FN) loss function (AUM)](https://arxiv.org/abs/2107.01285).
 
 After talking with them about the easiest way to try this new loss
 function on their data, I decided that it would be good to code it up
@@ -199,7 +198,6 @@ in our paper we also discuss an application to changepoint detection
 problems. In the case of changepoint detection problems with
 non-monotonic error functions, the AUM may be non-convex, and there
 may be points at which there are no subgradients. Some are used as
-test cases in
-https://github.com/tdhock/aum/blob/main/tests/testthat/test-CRAN.R
+[test cases in our R package](https://github.com/tdhock/aum/blob/main/tests/testthat/test-CRAN.R).
 What does auto-grad return in that case? (exercise for the reader)
 
