@@ -31,13 +31,15 @@ Below I wrote an implementation of our AUM loss function,
 
 
 ```python
+import torch
 def AUM(pred_tensor, label_tensor):
     """Area Under Min(FP,FN)
 
-    This should be used as a loss function for binary classification
+    Loss function for imbalanced binary classification
     problems. Minimizing AUM empirically results in maximizing Area
     Under the ROC Curve (AUC). Arguments: pred_tensor and label_tensor
-    should both be 1d tensors (real-valued predictions and labels).
+    should both be 1d tensors (vectors of real-valued predictions and
+    labels for each observation in the set/batch).
 
     """
     fn_diff = torch.where(label_tensor == 1, -1, 0)
@@ -105,11 +107,7 @@ loss_grad([-10.0, 10.0], y_list)
 ```
 
 ```
-## Error in py_call_impl(callable, dots$args, dots$keywords): NameError: name 'torch' is not defined
-## 
-## Detailed traceback:
-##   File "<string>", line 1, in <module>
-##   File "<string>", line 2, in loss_grad
+## (tensor(0., grad_fn=<SumBackward0>), tensor([-0., -0.]))
 ```
 
 Another example is for the same labels but the opposite predicted
@@ -143,11 +141,7 @@ loss_grad([10.0, -10.0], y_list)
 ```
 
 ```
-## Error in py_call_impl(callable, dots$args, dots$keywords): NameError: name 'torch' is not defined
-## 
-## Detailed traceback:
-##   File "<string>", line 1, in <module>
-##   File "<string>", line 2, in loss_grad
+## (tensor(20., grad_fn=<SumBackward0>), tensor([ 1., -1.]))
 ```
 
 ## Non-differentiable points
@@ -191,11 +185,7 @@ loss_grad([0.0, 0.0], y_list)
 ```
 
 ```
-## Error in py_call_impl(callable, dots$args, dots$keywords): NameError: name 'torch' is not defined
-## 
-## Detailed traceback:
-##   File "<string>", line 1, in <module>
-##   File "<string>", line 2, in loss_grad
+## (tensor(0., grad_fn=<SumBackward0>), tensor([-0., -0.]))
 ```
 
 The output above says that the gradient is zero, which is OK (these
