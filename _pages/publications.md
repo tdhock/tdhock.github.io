@@ -23,6 +23,14 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### In progress
 
+- Tao F, ..., Hocking TD, ..., Luo Y. Microbial carbon use efficiency
+  promoting global soil carbon storage. Under review in Nature.
+- Why does functional pruning yield such fast algorithms for optimal
+  changepoint detection? Invited talk for TRIPODS seminar
+  [video](https://arizona.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4e87c8d0-96d2-40d1-808c-ad16014c6962),
+  [slides](https://github.com/tdhock/functional-pruning-theory#readme),
+  [IEEE NJACS](https://events.vtools.ieee.org/m/280515), [ASU West ML
+  Day](https://newcollege.asu.edu/machine-learning-day-1).
 - Hocking TD. Chapter "Introduction to machine learning and neural
   networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
   Data Assimilation, and Ecological Forecasting" edited by Luo Y, in
@@ -75,10 +83,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
   [Software](https://github.com/tdhock/LOPART),
   [Reproducible](https://github.com/tdhock/LOPART-paper).
-- Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
-  language design: the influence of language use on user
-  experience. Accepted in ACM Transactions on Computer-Human
-  Interaction. [Preprint arXiv:2101.11089](https://arxiv.org/abs/2101.11089).
 - Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
   failure time model in XGBoost. Accepted in Journal of
   Computational and Graphical Statistics. [Preprint
@@ -93,6 +97,12 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### 2022
 
+- Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. [Chatbots
+  language design: the influence of language use on user
+  experience](https://dl.acm.org/doi/10.1145/3487193). ACM
+  Transactions on Computer-Human Interaction 29, 2, Article 13
+  (2022). [Preprint
+  arXiv:2101.11089](https://arxiv.org/abs/2101.11089).
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
   Changepoint Detection in Genomic Data.  [Journal of Statistical
@@ -105,9 +115,9 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### 2021
 
-- Hocking TD, Vargovich J. Linear time dynamic programming for the
-  exact path of optimal models selected from a finite set. [Journal of
-  Computational and Graphical
+- Hocking TD, Vargovich J. Linear Time Dynamic Programming for
+  Computing Breakpoints in the Regularization Path of Models Selected
+  From a Finite Set. [Journal of Computational and Graphical
   Statistics](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2021.2000422)
   (2021), doi:10.1080/10618600.2021.2000422. [Preprint
   arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
