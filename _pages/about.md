@@ -43,11 +43,15 @@ instructions](http://ml.nau.edu/application.html).
 - 2009-2012: PhD in Mathematics from [Ecole Normale Supérieure de
   Cachan](https://en.wikipedia.org/wiki/%C3%89cole_normale_sup%C3%A9rieure_Paris-Saclay), with [Francis Bach](http://www.di.ens.fr/~fbach/) and
   [Jean-Philippe Vert](http://members.cbio.mines-paristech.fr/~jvert/).
-- 2008-2009: Masters student, [Université Paris 6](https://en.wikipedia.org/wiki/Pierre_and_Marie_Curie_University), Statistics
-  Department, interned with
-  [Mathieu Gautier](https://www6.montpellier.inra.fr/cbgp_eng/Staff/Permanent-staff/Gautier)
-  and
-  [Jean-Louis Foulley](https://scholar.google.ca/citations?user=ogC5yewAAAAJ).
+- 2008-2009: Masters student, [Université Paris
+  6](https://en.wikipedia.org/wiki/Pierre_and_Marie_Curie_University),
+  [Statistics Department](https://m2stat.sorbonne-universite.fr/),
+  research internship at
+  [INRA](https://en.wikipedia.org/wiki/Institut_national_de_la_recherche_agronomique)
+  Jouy-en-Josas with [Mathieu
+  Gautier](https://www6.montpellier.inra.fr/cbgp_eng/Staff/Permanent-staff/Gautier)
+  and [Jean-Louis
+  Foulley](https://scholar.google.ca/citations?user=ogC5yewAAAAJ).
 - 2006-2008: research assistant at
   [Sangamo BioSciences](http://www.sangamo.com/).
 - 2002-2006: undergraduate, UC Berkeley, Double major in Molecular &
