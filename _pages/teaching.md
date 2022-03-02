@@ -45,7 +45,7 @@ be useful for planning what classes you take.
   [Fabien Moutarde's](http://perso.mines-paristech.fr/fabien.moutarde/index.html)
   Machine Learning class,
   [my course
-  materials](http://members.cbio.mines-paristech.fr/~thocking/mines-course/Mines-ParisTech-machine-learning-projects.html).
+  materials](https://rcdata.nau.edu/genomic-ml/public_html/mines-course/Mines-ParisTech-machine-learning-projects.html).
   
 ### Screencasts
 
