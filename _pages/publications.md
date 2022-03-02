@@ -102,11 +102,11 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### 2022
 
-- Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. [Chatbots
+- Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
   language design: the influence of language use on user
-  experience](https://dl.acm.org/doi/10.1145/3487193). ACM
-  Transactions on Computer-Human Interaction 29, 2, Article 13
-  (2022). [Preprint
+  experience. [ACM Transactions on Computer-Human
+  Interaction](https://dl.acm.org/doi/10.1145/3487193) 29, 2, Article
+  13 (2022). [Preprint
   arXiv:2101.11089](https://arxiv.org/abs/2101.11089).
 - Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
   Functional Pruning Optimal Partitioning (GFPOP) for Constrained
