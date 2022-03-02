@@ -96,9 +96,8 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Video](https://www.youtube.com/watch?v=HuWRnzgGuIo),
   [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/).
 - Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
-  Packages. Accepted at [ISSRE 2021](http://2021.issre.net/), paper to
-  appear in
-  [proceedings](https://ieeexplore.ieee.org/xpl/conhome/1000700/all-proceedings).
+  Packages. Published in proceedings of [ISSRE
+  2021](https://ieeexplore.ieee.org/document/9700272).
 
 ### 2022
 
