@@ -1,0 +1,88 @@
+---
+layout: post
+title: Torch randomness
+description: Reproducible neural network learning
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2022-02-21-torch-auto-grad-non-diff-"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=200,
+  fig.path=fig.path,
+  fig.width=10,
+  fig.height=6)
+Sys.setenv(RETICULATE_PYTHON=if(.Platform$OS.type=="unix")
+  "/home/tdhock/.local/share/r-miniconda/envs/cs570s22/bin/python"
+  else "~/Miniconda3/envs/cs570s22/python.exe")
+reticulate::use_condaenv("cs570s22", required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+if(FALSE){
+  knitr::knit("2022-02-21-torch-auto-grad-non-diff.Rmd")
+}
+rendering <- in_render || in_knit
+```
+
+Today I discussed with my students how to control randomness in torch
+neural network learning code. The [torch
+docs](https://pytorch.org/docs/stable/generated/torch.manual_seed.html)
+describe manual_seed as "Sets the seed for generating random numbers."
+
+## Neural network weights
+
+When you instantiate a class which represents weights in a neural
+network, their values are a function of the random seed. For example:
+
+```{python}
+import torch
+n_outputs = 2
+n_seeds = 2
+n_reps = 2
+for seed in range(n_seeds):
+    for repetition in range(n_reps):
+        torch.manual_seed(seed)
+        weight_vec = torch.nn.Linear(n_outputs, 1)
+        print("seed=%s repetition=%s"%(seed,repetition))
+        print(weight_vec._parameters)
+        print("")
+```
+
+## Batch order in Stochastic Gradient Descent
+
+Actually in torch the stochastic gradient descent sampling is
+typically controlled via a `DataLoader`. If `shuffle=False` then the
+batch indices go from smallest to largest.
+
+```{python}
+N_data = 10
+class trivial(torch.utils.data.Dataset):
+    def __getitem__(self, item):
+        return item
+    def __len__(self):
+        return N_data
+ds = trivial()
+dl = torch.utils.data.DataLoader(ds, batch_size=3, shuffle=False)
+[batch for batch in dl]
+```
+
+If you want random batching you can do `shuffle=True` and control for
+randomness via `manual_seed`,
+
+```{python}
+n_epochs = 2
+for seed in range(n_seeds):
+    for repetition in range(n_reps):
+        torch.manual_seed(seed)
+        dl = torch.utils.data.DataLoader(ds, batch_size=3, shuffle=True)
+        for epoch in range(n_epochs):
+            print("seed=%s repetition=%s epoch=%s"%(seed,repetition,epoch))
+            print([batch for batch in dl])
+            print("")
+```
+
+## Data splitting
+
+Some splits are deterministic, others are random. Exercise for the
+reader: show how to control randomness in data splitting, as above.
