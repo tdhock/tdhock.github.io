@@ -1,7 +1,7 @@
 ---
 layout: post
 title: No argument unpacking in C
-description: But there is in R, Python, C++
+description: But there is in R and Python
 ---
 
 Today I was wondering if it is possible to do argument unpacking in
@@ -325,6 +325,11 @@ example](https://www.rangakrish.com/index.php/2018/10/14/c17-stdapply-and-stdinv
 and
 [std::make_from_tuple](https://en.cppreference.com/w/cpp/utility/make_from_tuple)
 (for instantiation/construction).
+Could R be re-implemented in C++ to
+take advantage of this new feature, and avoid that huge switch block?
+For the `.Call` interface it could, because it could use std::apply
+with a tuple of SEXP. For the `.C` interface it could do something
+similar with tuple of pointers to int/double/etc.
 
 What about the inverse operation, variable number of arguments? The
 C++ equivalent of C's `va_arg` etc is described as variadic on
