@@ -58,21 +58,11 @@ Topics without links below are on my TODO list.
 - [Machine learning basics in R](https://www.youtube.com/playlist?list=PLwc48KSH3D1M78ilQi35KPe2GHa7B_Rme)
 - [Regular expressions for text parsing and data reshaping](https://www.youtube.com/playlist?list=PLwc48KSH3D1P8R7470s0lgcUObJLEXSSO)
 - [R and Emacs Speaks Statistics](https://www.youtube.com/playlist?list=PLwc48KSH3D1Onsed66FPLywMSIQmAhUYJ)
-  - installation via package (ess, polymode)
-  - org-mode basics (links, html preview)
-- Cluster computing on Monsoon
+  - [On Monsoon](https://www.youtube.com/watch?v=PByS8QnqDGc&list=PLwc48KSH3D1Onsed66FPLywMSIQmAhUYJ&index=11)
+- [emacs and python](https://www.youtube.com/playlist?list=PLwc48KSH3D1OeAHFQhWpd8Fz8rLhTaD7t)
 - Interpreting machine learning models with feature selection
 - Data manipulation with data.table
-  - fread
-  - basic selections with first arg
-  - joins with first arg
-  - selecting columns with second arg
-  - summarize with second arg
-  - summarize by group with second arg
-  - foverlaps
-- Static data visualization with ggplot2
-  - work thru examples in animint2 manual chapter 2
-- Interactive data visualization with animint2
+- Interactive data visualization with the grammar of graphics
 - git/github 
   
 ### NAU students mentored
