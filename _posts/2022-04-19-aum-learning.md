@@ -313,9 +313,7 @@ gg = p9.ggplot()+\
 show(gg, "AUM-AUC")
 ```
 
-```
-## ![plot of AUM-AUC](/assets/img/2022-04-19-aum-learning-AUM-AUC.png)
-```
+![plot of AUM-AUC](/assets/img/2022-04-19-aum-learning-AUM-AUC.png)
 
 The plot above shows that the algorithm clearly is learning, and that
 decreasing the AUM results in increased AUC. 

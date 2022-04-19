@@ -260,7 +260,7 @@ loss_df = pd.concat(loss_df_list)
 
 Finally we visualize the subtrain/validation loss and AUC using plotnine,
 
-```{python}
+```{python, results='asis'}
 import plotnine as p9
 gg = p9.ggplot()+\
     p9.facet_grid("variable ~ .", labeller="label_both", scales="free")+\
