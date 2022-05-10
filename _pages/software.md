@@ -29,7 +29,10 @@ methods described in my research papers (see below).
 To support our [paper](https://arxiv.org/abs/2107.01285) (in progress)
 about optimizing the Area Under Min(FP,FN) functions (a differentiable
 surrogate for ROC-AUC), we created the
-[aum](https://github.com/tdhock/aum) R package.
+[aum](https://github.com/tdhock/aum) R package which has a C++
+implementation of directional derivatives, and a [python torch
+function](https://tdhock.github.io/blog/2022/torch-auto-grad-non-diff/)
+which can be used with automatic differentiation.
 
 ### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
 
