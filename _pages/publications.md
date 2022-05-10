@@ -59,7 +59,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   Eppinger JE, Hepp CM, Doerry E. Rapid simulations of spatially
   explicit and stochastic models of infectious disease. [Preprint
   medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1). Under
-  review at Methods in Ecology and Evolution,
+  review at Biology Methods & Protocols,
   [Software](https://github.com/NAU-CCL/SPARSEMODr).
 - Hillman J, Hocking TD. Optimizing ROC Curves with a Sort-Based
   Surrogate Loss Function for Binary Classification and Changepoint
