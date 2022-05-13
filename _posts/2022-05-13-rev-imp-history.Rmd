@@ -11,9 +11,9 @@ fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=200,
   fig.path=fig.path,
-  fig.width=10,
+  fig.width=5,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=6)
+  fig.height=3)
 if(FALSE){
   knitr::knit("2022-05-13-rev-imp-history.Rmd")
 }
