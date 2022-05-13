@@ -95,9 +95,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
   [Video](https://www.youtube.com/watch?v=HuWRnzgGuIo),
   [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/).
-- Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
-  Packages. Published in proceedings of [ISSRE
-  2021](https://ieeexplore.ieee.org/document/9700272).
 
 ### 2022
 
@@ -119,6 +116,9 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### 2021
 
+- Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
+  Packages. Published in proceedings of [ISSRE
+  2021](https://ieeexplore.ieee.org/document/9700272).
 - Hocking TD, Vargovich J. Linear Time Dynamic Programming for
   Computing Breakpoints in the Regularization Path of Models Selected
   From a Finite Set. [Journal of Computational and Graphical
