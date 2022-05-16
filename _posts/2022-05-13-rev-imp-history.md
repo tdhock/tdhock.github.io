@@ -245,6 +245,7 @@ Finally we can plug these count data into a ggplot,
 
 ```r
 library(ggplot2)
+expand.days <- 11*30
 gg <- ggplot()+
   theme_bw()+
   scale_color_manual(values=c(
@@ -257,8 +258,8 @@ gg <- ggplot()+
   scale_x_date(
     breaks=seq(min(date.vec), max(date.vec), by="year"),
     limits=as.IDate(c(
-      min(date.vec),
-      max(date.vec)+11*30 # days
+      min(date.vec)-expand.days,
+      max(date.vec)+expand.days
     )))
 gg.imports <- gg+
   scale_y_log10()+
@@ -266,7 +267,9 @@ gg.imports <- gg+
     date, n.rev.imports, color=Package),
     size=1,
     data=rev.imp.counts)
-directlabels::direct.label(gg.imports, "right.polygons")
+directlabels::direct.label(
+  gg.imports,
+  directlabels::dl.combine("left.polygons", "right.polygons"))
 ```
 
 ![plot of chunk unnamed-chunk-6](/assets/img/2022-05-13-rev-imp-historyunnamed-chunk-6-1.png)
