@@ -218,7 +218,7 @@ Let's look at the first day of every month since the start of 2015.
 
 ```r
 date.vec <- seq(as.IDate("2015-01-01"), as.IDate("2022-01-01"), by="month")
-(rev.imp.pkgs <- data.table(date=date.vec)[, {
+(rev.imp.counts <- data.table(date=date.vec)[, {
   date.pkgs <- get_packages(date)
   get_num_rev_imports(date.pkgs, compare.pkgs)
 }, by=date])
@@ -258,7 +258,7 @@ gg <- ggplot()+
     breaks=seq(min(date.vec), max(date.vec), by="year"),
     limits=as.IDate(c(
       min(date.vec),
-      max(date.vec)+9*30 # days
+      max(date.vec)+11*30 # days
     )))
 gg.imports <- gg+
   scale_y_log10()+
@@ -313,7 +313,10 @@ gg.diff <- gg+
     date, diff.rev.imports, color=Package),
     size=1,
     data=rev.imp.diff)+
-  scale_y_continuous(breaks=seq(0, 300, by=20))
+  scale_y_continuous(
+    "Monthly change in number of reverse imports",
+    breaks=seq(0, 300, by=20))+
+  coord_cartesian(ylim=c(-5, 100))
 directlabels::direct.label(gg.diff, "right.polygons")
 ```
 
