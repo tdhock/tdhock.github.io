@@ -25,7 +25,7 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 - Tao F, Huang Y, Hungate BA, Manzoni S, Frey SD, Schmidt MWI,
   Reichstein M, Carvalhais N, Ciais P, Jiang L, Lehmann J, Mishra U,
-  Hugelius G, {\bf Hocking TD}, Lu X, Shi Z, Viatkin K, Vargas R,
+  Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin K, Vargas R,
   Yigini Y, Omuto C, Malik AA, Peralta G, Cuevas-Corona R, Di Paolo
   LE, Luotto I, Liao C, Liang YS, Saynes VS, Huang X, Luo Y.
   Microbial carbon use efficiency promoting global soil carbon
