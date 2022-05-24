@@ -88,16 +88,16 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
   [Software](https://github.com/tdhock/LOPART),
   [Reproducible](https://github.com/tdhock/LOPART-paper).
+### 2022
+
 - Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
-  failure time model in XGBoost. Accepted in Journal of
-  Computational and Graphical Statistics. [Preprint
-  arXiv:2006.04920](https://arxiv.org/abs/2006.04920), [Software](https://github.com/dmlc/xgboost),
+  failure time model in XGBoost. [Journal of Computational and
+  Graphical Statistics](https://www.tandfonline.com/doi/full/10.1080/10618600.2022.2067548) (doi:10.1080/10618600.2022.2067548). [Preprint
+  arXiv:2006.04920](https://arxiv.org/abs/2006.04920),
+  [Software](https://github.com/dmlc/xgboost),
   [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
   [Video](https://www.youtube.com/watch?v=HuWRnzgGuIo),
   [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/).
-
-### 2022
-
 - Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
   language design: the influence of language use on user
   experience. [ACM Transactions on Computer-Human

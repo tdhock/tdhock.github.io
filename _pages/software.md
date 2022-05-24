@@ -24,6 +24,17 @@ methods described in my research papers (see below).
 - I was president of the organizing committee for "R in Montreal 2018,"
   a local conference for useRs and developeRs.
   
+### xgboost: Extreme Gradient Boosting
+
+To support our paper about [Survival Regression with Accelerated
+Failure Time Model in
+XGBoost](https://www.tandfonline.com/doi/full/10.1080/10618600.2022.2067548)
+(Journal of Computational and Graphical Statistics, 2022) we created
+the AFT objectives in xgboost,
+[Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
+[Video](https://www.youtube.com/watch?v=HuWRnzgGuIo).
+ 
+  
 ### aum: Area Under Min(FP,FN)
 
 To support our [paper](https://arxiv.org/abs/2107.01285) (in progress)
