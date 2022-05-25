@@ -88,6 +88,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
   [Software](https://github.com/tdhock/LOPART),
   [Reproducible](https://github.com/tdhock/LOPART-paper).
+
 ### 2022
 
 - Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
