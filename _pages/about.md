@@ -26,7 +26,8 @@ social: true
 My lab is recruiting masters and PhD students who are interested in
 working on new statistical models, optimization algorithms,
 interactive systems, and software for machine learning. If you are
-interested in joining, please [read the application
+interested in joining, please first read my mentorship plan to see
+what you and I would be committing to, then [read the application
 instructions](http://ml.nau.edu/application.html).
 
 **Brief CV**
