@@ -36,11 +36,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   [slides](https://github.com/tdhock/functional-pruning-theory#readme),
   [IEEE NJACS](https://events.vtools.ieee.org/m/280515), [ASU West ML
   Day](https://newcollege.asu.edu/machine-learning-day-1).
-- Hocking TD. Chapter "Introduction to machine learning and neural
-  networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
-  Data Assimilation, and Ecological Forecasting" edited by Luo Y, in
-  preparation (expected publication Jan
-  2022), [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school).
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
   G. gfpop: an R Package for Univariate Graph-Constrained Change-point
   Detection. Under review at Journal of Statistical
@@ -79,18 +74,36 @@ description: Peer-reviewed papers and preprints with links to code and data
   detection using elastic-net regularized accelerated failure time
   models. In preparation, [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper).
+- Rust K, Skirvin T, Hocking TD. Sub-quadratic Algorithms for
+  Optimizing Area Under the ROC Curve.
+- Kaufman J, Hocking TD. Functional Labeled Optimal Partitioning.
+- Hocking TD. Exact line search for Area Under the Minimum with a
+  margin parameter.
+- Thatcher T, Hocking TD, Barr J. Optimizing predictions of security
+  vulnerabilities in source code using AUM.
+- Hocking TD, Thatcher T, Barr J. Interpretable linear models for
+  predicting security vulnerabilities in source code.
+- Hocking TD. Finite Sample Complexity Analysis of Binary Segmentation.
+- Hocking TD. Comparing binsegRcpp with other implementations of
+  binary segmentation for changepoint detection.
   
 ### Accepted, in press
 
-- Hocking TD, Srivastava A. Labeled Optimal Partitioning. Accepted in
-  Computational Statistics, [Preprint
+- Hocking TD. Chapter "Introduction to machine learning and neural
+  networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
+  Data Assimilation, and Ecological Forecasting" edited by Luo Y, in
+  preparation (expected publication Jan
+  2022), [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school).
+
+### 2022
+
+- Hocking TD, Srivastava A. Labeled Optimal Partitioning. Published in
+  [Computational Statistics](https://rdcu.be/cQ8qM),
+  DOI:10.1007/s00180-022-01238-z, [Preprint
   arXiv:2006.13967](https://arxiv.org/abs/2006.13967),
   [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
   [Software](https://github.com/tdhock/LOPART),
   [Reproducible](https://github.com/tdhock/LOPART-paper).
-
-### 2022
-
 - Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
   failure time model in XGBoost. [Journal of Computational and
   Graphical Statistics](https://www.tandfonline.com/doi/full/10.1080/10618600.2022.2067548) (doi:10.1080/10618600.2022.2067548). [Preprint
