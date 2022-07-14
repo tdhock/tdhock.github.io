@@ -1,0 +1,37 @@
+---
+layout: post
+title: AUM in Torch
+description: Auto-grad of a non-differentiable loss function
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2022-07-14-pos-and-neg-log-transform-"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=200,
+  fig.path=fig.path,
+  fig.width=10,
+  fig.height=6)
+Sys.setenv(RETICULATE_PYTHON=if(.Platform$OS.type=="unix")
+  "/home/tdhock/.local/share/r-miniconda/envs/cs570s22/bin/python"
+  else "~/Miniconda3/envs/cs570s22/python.exe")
+reticulate::use_condaenv("cs570s22", required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+if(FALSE){
+  knitr::knit("2022-07-14-pos-and-neg-log-transform.Rmd")
+}
+rendering <- in_render || in_knit
+```
+
+I recently used the following code/transformation to make an
+[informative plot of linear model
+coefficients](https://rcdata.nau.edu/genomic-ml/nn_embedding_with_interpretable_figures/compare_weights_heat_map.png),
+
+```{r}
+normalize <- function(x)(x-min(x))/(max(x)-min(x))
+curve(sign(x)*normalize(log10(abs(x))),-9,9.1)
+```
+
+TODO explain!
