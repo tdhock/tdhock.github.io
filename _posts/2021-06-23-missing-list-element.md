@@ -4,6 +4,8 @@ title: Stress testing reshape operations on list columns
 description: Advantages of updated data.table::melt
 ---
 
+
+
 My [paper about regular expressions for data
 reshaping](https://github.com/tdhock/nc-article) was recently accepted
 into R journal. It proposes a new syntax for wide-to-tall data
@@ -67,7 +69,7 @@ library(data.table)
 ```
 
 ```
-## data.table 1.14.1 IN DEVELOPMENT built 2021-07-24 13:52:54 UTC using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+## data.table 1.14.3 IN DEVELOPMENT built 2022-07-20 16:55:52 UTC; th798 using 6 threads (see ?getDTthreads).  Latest news: r-datatable.com
 ```
 
 ```r
@@ -102,7 +104,7 @@ Reshaping that data table gives
 ```
 
 ```
-## # A tibble: 3 x 2
+## # A tibble: 3 × 2
 ##   name  value    
 ##   <chr> <list>   
 ## 1 L     <NULL>   
@@ -144,7 +146,7 @@ na.omit(DT.pivot)
 ```
 
 ```
-## # A tibble: 3 x 2
+## # A tibble: 3 × 2
 ##   name  value    
 ##   <chr> <list>   
 ## 1 L     <NULL>   
@@ -157,7 +159,7 @@ tidyr::pivot_longer(DT.wide, cols="L", values_drop_na=TRUE)
 ```
 
 ```
-## # A tibble: 2 x 2
+## # A tibble: 2 × 2
 ##   name  value    
 ##   <chr> <list>   
 ## 1 L     <lgl [1]>
@@ -199,7 +201,7 @@ Above is some data with a "missing" `list_2` column. We reshape below:
 ## 3:     3    NA      3
 ```
 
-Note that in in `melt.tall` the missing `list_2` column is represented
+Note that in `melt.tall` the missing `list_2` column is represented
 by `NA`, which is recognized as missing by `is.na`. If we exclude
 missing values the result is consistent,
 
@@ -240,7 +242,7 @@ names_pattern <- "(.*)_(.*)"
 ```
 
 ```
-## # A tibble: 3 x 3
+## # A tibble: 3 × 3
 ##   int     num list     
 ##   <chr> <dbl> <list>   
 ## 1 1         1 <dbl [1]>
@@ -259,7 +261,7 @@ na.omit(pivot.tall)
 ```
 
 ```
-## # A tibble: 2 x 3
+## # A tibble: 2 × 3
 ##   int     num list     
 ##   <chr> <dbl> <list>   
 ## 1 1         1 <dbl [1]>
@@ -276,7 +278,7 @@ tidyr::pivot_longer(
 ```
 
 ```
-## # A tibble: 3 x 3
+## # A tibble: 3 × 3
 ##   int     num list     
 ##   <chr> <dbl> <list>   
 ## 1 1         1 <dbl [1]>

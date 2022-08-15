@@ -4,6 +4,12 @@ title: Stress testing reshape operations on list columns
 description: Advantages of updated data.table::melt
 ---
 
+```{r Ropts, echo=FALSE}
+if(FALSE){
+  knitr::knit("2021-06-23-missing-list-element.Rmd")
+}
+```
+
 My [paper about regular expressions for data
 reshaping](https://github.com/tdhock/nc-article) was recently accepted
 into R journal. It proposes a new syntax for wide-to-tall data
@@ -85,7 +91,7 @@ Above is some data with a "missing" `list_2` column. We reshape below:
 (melt.tall <- melt(dt.wide, measure=measure(value.name, int=as.integer)))
 ```
 
-Note that in in `melt.tall` the missing `list_2` column is represented
+Note that in `melt.tall` the missing `list_2` column is represented
 by `NA`, which is recognized as missing by `is.na`. If we exclude
 missing values the result is consistent,
 
