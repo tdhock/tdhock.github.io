@@ -79,13 +79,19 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Kaufman J, Hocking TD. Functional Labeled Optimal Partitioning.
 - Hocking TD. Exact line search for Area Under the Minimum with a
   margin parameter.
-- Thatcher T, Hocking TD, Barr J. Optimizing predictions of security
-  vulnerabilities in source code using AUM.
+- Barr J, Hocking TD, Morton G, Thatcher T, Shaw P. Classifying
+  Imbalanced Data with AUM Loss.
 - Hocking TD, Thatcher T, Barr J. Interpretable linear models for
   predicting security vulnerabilities in source code.
 - Hocking TD. Finite Sample Complexity Analysis of Binary Segmentation.
 - Hocking TD. Comparing binsegRcpp with other implementations of
   binary segmentation for changepoint detection.
+- Hocking TD, Jenson R. Predictive Modeling Framework for District
+  Continuous Improvement.
+- Barr J, Shaw P, Abu-Khzam FN, Thatcher T, Hocking TD. Graph
+  Embedding: A Methodological Survey.
+- Hocking TD. Teaching Hidden Markov Models Using Interactive Data
+  Visualization.
   
 ### Accepted, in press
 
