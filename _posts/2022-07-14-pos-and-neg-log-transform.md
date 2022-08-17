@@ -4,29 +4,22 @@ title: Positive and negative log transform
 description: A nonlinear transformation for heatmaps
 ---
 
-```{r Ropts, echo=FALSE}
-repo.dir <- normalizePath("..")
-post.id <- "2022-07-14-pos-and-neg-log-transform-"
-fig.path <- file.path(repo.dir, "assets", "img", post.id)
-knitr::opts_chunk$set(
-  dpi=200,
-  fig.path=fig.path,
-  fig.width=10,
-  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=6)
-if(FALSE){
-  knitr::knit("2022-07-14-pos-and-neg-log-transform.Rmd")
-}
+
+```
+## Error in loadNamespace(x): there is no package called 'reticulate'
 ```
 
 I recently used the following code/transformation to make an
 [informative plot of linear model
 coefficients](https://rcdata.nau.edu/genomic-ml/nn_embedding_with_interpretable_figures/compare_weights_heat_map.png),
 
-```{r}
+
+```r
 normalize <- function(x)(x-min(x))/(max(x)-min(x))
 curve(sign(x)*normalize(log10(abs(x))),-9,9.1)
 ```
+
+![plot of chunk unnamed-chunk-1](/assets/img/2022-07-14-pos-and-neg-log-transform-unnamed-chunk-1-1.png)
 
 This curve is a nonlinear transformation which makes it easy to
 visualize log-scale changes in both positive and negative numbers, so

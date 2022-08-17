@@ -1,0 +1,67 @@
+---
+layout: post
+title: R packages on github
+description: How to query CRAN meta-data
+---
+
+```{r Ropts, echo=FALSE}
+if(FALSE){
+  knitr::knit("2022-08-17-packages-on-github.Rmd")
+}
+```
+
+The goal here is to find beta testers for
+[RcppDeepState-action](https://github.com/FabrizioSandri/RcppDeepState-action).
+Previously, Akhila Kolla created [a list of R packages with
+RcppDeepState issues](https://akhikolla.github.io./packages-folders/).
+Some of these packages may be hosted on github, but how to find that
+programmatically? 
+
+First, we download the web page which lists all of the candidate packages,
+
+```{r}
+if(!file.exists("problems.html")){
+  download.file(
+    "https://akhikolla.github.io./packages-folders/",
+    "problems.html")
+}
+(prob.dt <- nc::capture_all_str(
+  "problems.html",
+  '<li><a href="',
+  Package=".*?",
+  '[.]html">'))
+```
+
+The code above shows that there are `r nrow(prob.dt)` packages on that
+web page. Can we find the CRAN meta-data for each of them? First we
+download the current CRAN meta-data,
+
+```{r}
+if(!file.exists("packages.rds")){
+  download.file(
+    "https://cloud.r-project.org/web/packages/packages.rds",
+    "packages.rds")
+}
+meta.mat <- readRDS("packages.rds")
+nrow(meta.mat)
+```
+
+Then we can subset the meta-data based on the packages on that web page,
+
+```{r}
+library(data.table)
+meta.dt <- data.table(meta.mat)
+meta.prob <- meta.dt[prob.dt, on="Package"]
+meta.prob[, .(Package, URL.truncated=substr(URL, 1, 50))]
+```
+
+The output above shows that there are several packages which mention
+github in the URL field. To find the repo URL we can do,
+
+```{r}
+pkg.repos <- meta.prob[, nc::capture_all_str(
+  c("",URL), # to avoid attempting to download URL.
+  repo.url="https://github.com/.*?/[^#/ ,]+"),
+  by=Package]
+pkg.repos$repo.url
+```
