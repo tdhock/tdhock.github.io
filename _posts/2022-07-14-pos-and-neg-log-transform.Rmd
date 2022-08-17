@@ -9,11 +9,11 @@ repo.dir <- normalizePath("..")
 post.id <- "2022-07-14-pos-and-neg-log-transform-"
 fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
-  dpi=200,
+  dpi=100,
   fig.path=fig.path,
-  fig.width=10,
+  fig.width=8,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=6)
+  fig.height=7)
 if(FALSE){
   knitr::knit("2022-07-14-pos-and-neg-log-transform.Rmd")
 }

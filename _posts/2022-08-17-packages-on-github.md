@@ -5,9 +5,6 @@ description: How to query CRAN meta-data
 ---
 
 
-```
-## Error in loadNamespace(x): there is no package called 'reticulate'
-```
 
 The goal here is to find beta testers for
 [RcppDeepState-action](https://github.com/FabrizioSandri/RcppDeepState-action).
@@ -222,3 +219,10 @@ pkg.repos$repo.url
 ## [114] "https://github.com/paleolimbot/wk"                   
 ## [115] "https://github.com/paleolimbot/wkutils"
 ```
+
+Exercise for the reader: programmatically fork each of these repos,
+then make a new branch, then add a
+[RcppDeepState.yaml](https://github.com/tdhock/binsegRcpp/blob/32d09699bc55c32c09a70b8580b21c335791fb81/.github/workflows/RcppDeepState.yaml)
+file, then push. This may be doable in R via
+[gh](https://github.com/r-lib/gh), an R package for making calls to
+the GitHub API.

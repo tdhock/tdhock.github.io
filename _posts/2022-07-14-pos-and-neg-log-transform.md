@@ -5,9 +5,6 @@ description: A nonlinear transformation for heatmaps
 ---
 
 
-```
-## Error in loadNamespace(x): there is no package called 'reticulate'
-```
 
 I recently used the following code/transformation to make an
 [informative plot of linear model

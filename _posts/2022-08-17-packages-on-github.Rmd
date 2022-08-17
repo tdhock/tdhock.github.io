@@ -65,3 +65,10 @@ pkg.repos <- meta.prob[, nc::capture_all_str(
   by=Package]
 pkg.repos$repo.url
 ```
+
+Exercise for the reader: programmatically fork each of these repos,
+then make a new branch, then add a
+[RcppDeepState.yaml](https://github.com/tdhock/binsegRcpp/blob/32d09699bc55c32c09a70b8580b21c335791fb81/.github/workflows/RcppDeepState.yaml)
+file, then push. This may be doable in R via
+[gh](https://github.com/r-lib/gh), an R package for making calls to
+the GitHub API.
