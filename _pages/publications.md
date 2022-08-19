@@ -101,9 +101,9 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Hocking TD. Chapter "Introduction to machine learning and neural
   networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
   Data Assimilation, and Ecological Forecasting" edited by Luo Y,
-  published by [Routledge Taylor and
-  Francis](https://www.routledge.com/Land-Carbon-Cycle-Modeling-Matrix-Approach-Data-Assimilation--Ecological/Luo-Smith/p/book/9781498737012),
-  [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school).
+  published by Taylor and Francis, [download whole book](https://www.taylorfrancis.com/books/oa-edit/10.1201/9780429155659/land-carbon-cycle-modeling-yiqi-luo-benjamin-smith),
+  [download my chapter](https://raw.githubusercontent.com/tdhock/2020-yiqi-summer-school/master/HOCKING-chapter.pdf),
+  [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school#prepared-for-the-summer-school-4th-year-2021).
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Published in
   [Computational Statistics](https://rdcu.be/cQ8qM),
   DOI:10.1007/s00180-022-01238-z, [Preprint
