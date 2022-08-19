@@ -50,12 +50,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   Machine Learning,
   [Software](https://github.com/tdhock/rankSVMcompare),
   [Reproducible](https://github.com/tdhock/compare-paper).
-- Mihaljevic JR, Borkovec S, Ratnavale S, Hocking TD, Banister KE,
-  Eppinger JE, Hepp CM, Doerry E. Rapid simulations of spatially
-  explicit and stochastic models of infectious disease. [Preprint
-  medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1). Under
-  review at Biology Methods & Protocols,
-  [Software](https://github.com/NAU-CCL/SPARSEMODr).
 - Hillman J, Hocking TD. Optimizing ROC Curves with a Sort-Based
   Surrogate Loss Function for Binary Classification and Changepoint
   Detection. Under review at Journal of Machine Learning
@@ -95,14 +89,21 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### Accepted, in press
 
-- Hocking TD. Chapter "Introduction to machine learning and neural
-  networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
-  Data Assimilation, and Ecological Forecasting" edited by Luo Y, in
-  preparation (expected publication Jan
-  2022), [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school).
-
+- Mihaljevic JR, Borkovec S, Ratnavale S, Hocking TD, Banister KE,
+  Eppinger JE, Hepp CM, Doerry E. Rapid simulations of spatially
+  explicit and stochastic models of infectious disease. [Preprint
+  medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1). Provisionally
+  accepted at Biology Methods & Protocols,
+  [Software](https://github.com/NAU-CCL/SPARSEMODr).
+  
 ### 2022
 
+- Hocking TD. Chapter "Introduction to machine learning and neural
+  networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
+  Data Assimilation, and Ecological Forecasting" edited by Luo Y,
+  published by [Routledge Taylor and
+  Francis](https://www.routledge.com/Land-Carbon-Cycle-Modeling-Matrix-Approach-Data-Assimilation--Ecological/Luo-Smith/p/book/9781498737012),
+  [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school).
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Published in
   [Computational Statistics](https://rdcu.be/cQ8qM),
   DOI:10.1007/s00180-022-01238-z, [Preprint
