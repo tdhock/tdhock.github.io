@@ -17,14 +17,14 @@ be useful for planning what classes you take.
 - Summer 2022, Introduction to Machine Learning and Neural Networks,
   with an application to earth system modeling. 60 minute lecture for
   summer school on "[New Advances in Land Carbon Cycle
-  Modeling](http://www2.nau.edu/luo-lab/?workshop)" (4rd
+  Modeling](http://www2.nau.edu/luo-lab/?workshop)" (5th
   year), [my course materials](https://github.com/tdhock/2020-yiqi-summer-school#prepared-for-the-summer-school-4th-year-2021).
 - Spring 2022, CS570, Advanced Intelligent Systems (Deep Learning). [my course materials](https://github.com/tdhock/cs570-spring-2022)
 - Fall 2021, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2021)
 - Summer 2021, Introduction to Machine Learning and Neural Networks,
   with an application to earth system modeling. 60 minute lecture for
   summer school on "[New Advances in Land Carbon Cycle
-  Modeling](http://www2.nau.edu/luo-lab/?workshop)" (4rd year). [code](https://github.com/tdhock/2020-yiqi-summer-school), [slides](https://github.com/tdhock/2020-yiqi-summer-school/blob/master/raw/master/slides-short.pdf), [video](https://youtu.be/c21etYEb-tE), [quiz](https://forms.office.com/Pages/ResponsePage.aspx?id=n57UJ-GJoEqZo9NbV7K6A4W5m6WiFvFJkzgC_Y4KHq9UQkJTRjBVS1A5TDJBSkc5OUxKSDJEVkM3OC4u)
+  Modeling](http://www2.nau.edu/luo-lab/?workshop)" (4th year). [code](https://github.com/tdhock/2020-yiqi-summer-school), [slides](https://github.com/tdhock/2020-yiqi-summer-school/blob/master/raw/master/slides-short.pdf), [video](https://youtu.be/c21etYEb-tE), [quiz](https://forms.office.com/Pages/ResponsePage.aspx?id=n57UJ-GJoEqZo9NbV7K6A4W5m6WiFvFJkzgC_Y4KHq9UQkJTRjBVS1A5TDJBSkc5OUxKSDJEVkM3OC4u)
 - Spring 2021, CS470/570, Artificial Intelligence. [my course materials](https://github.com/tdhock/cs470-570-spring-2021)
 - Fall 2020, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2020)
 - Summer 2020, Introduction to Machine Learning and Neural Networks,
