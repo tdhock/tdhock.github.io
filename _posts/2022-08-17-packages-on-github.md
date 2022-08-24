@@ -69,6 +69,16 @@ Then we can subset the meta-data based on the packages on that web page,
 
 ```r
 library(data.table)
+```
+
+```
+## data.table 1.14.3 IN DEVELOPMENT built 2022-07-20 16:55:52 UTC; th798 using 6 threads (see ?getDTthreads).  Latest news: r-datatable.com
+## **********
+## This development version of data.table was built more than 4 weeks ago. Please update: data.table::update_dev_pkg()
+## **********
+```
+
+```r
 meta.dt <- data.table(meta.mat)
 meta.prob <- meta.dt[prob.dt, on="Package"]
 meta.prob[, .(Package, URL.truncated=substr(URL, 1, 50))]
@@ -226,3 +236,7 @@ then make a new branch, then add a
 file, then push. This may be doable in R via
 [gh](https://github.com/r-lib/gh), an R package for making calls to
 the GitHub API.
+
+UPDATE: my excellent GSOC student Fabrizio Sandri describes how to do
+that [on his
+blog](https://fabriziosandri.github.io/gsoc-2022-blog/github%20action/2022/08/23/rcppdeepstate-beta-test.html).
