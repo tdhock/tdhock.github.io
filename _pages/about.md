@@ -58,7 +58,7 @@ instructions](http://ml.nau.edu/application.html).
   [Sangamo BioSciences](http://www.sangamo.com/).
 - 2002-2006: undergraduate, UC Berkeley, Double major in Molecular &
   Cell Biology and Statistics, honors thesis with
-  [Terry Speed](https://www.stat.berkeley.edu/~terry/).
+  [Terry Speed](https://en.wikipedia.org/wiki/Terry_Speed).
 - [Full CV](HOCKING-cv.pdf), [Short Bio](http://ml.nau.edu/members/TDH-short-bio.html).
 
 Research interests: fast and accurate algorithms for convex

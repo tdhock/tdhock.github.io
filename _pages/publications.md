@@ -70,7 +70,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Reproducible](https://github.com/tdhock/iregnet-paper).
 - Rust K, Skirvin T, Hocking TD. Sub-quadratic Algorithms for
   Optimizing Area Under the ROC Curve.
-- Kaufman J, Hocking TD. Functional Labeled Optimal Partitioning.
+- Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal Partitioning.
 - Hocking TD. Exact line search for Area Under the Minimum with a
   margin parameter.
 - Barr J, Hocking TD, Morton G, Thatcher T, Shaw P. Classifying
