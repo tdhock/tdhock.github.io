@@ -89,15 +89,15 @@ description: Peer-reviewed papers and preprints with links to code and data
   
 ### Accepted, in press
 
+### 2022
+
 - Mihaljevic JR, Borkovec S, Ratnavale S, Hocking TD, Banister KE,
   Eppinger JE, Hepp CM, Doerry E. Rapid simulations of spatially
   explicit and stochastic models of infectious disease. [Preprint
-  medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1). Provisionally
-  accepted at Biology Methods & Protocols,
-  [Software](https://github.com/NAU-CCL/SPARSEMODr).
-  
-### 2022
-
+  medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1). [Biology
+  Methods &
+  Protocols](https://academic.oup.com/biomethods/advance-article/doi/10.1093/biomethods/bpac022/6680179)
+  2022, [Software](https://github.com/NAU-CCL/SPARSEMODr).
 - Hocking TD. Chapter "Introduction to machine learning and neural
   networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
   Data Assimilation, and Ecological Forecasting" edited by Luo Y,
