@@ -379,9 +379,11 @@ description: Peer-reviewed papers and preprints with links to code and data
   for Clustering using Convex Fusion Penalties.  International
   Conference on Machine Learning
   (ICML), 2011. [pdf](http://www.icml-2011.org/papers/419_icmlpaper.pdf),
-  [video](http://techtalks.tv/talks/clusterpath-an-algorithm-for-clustering-using-convex-fusion-penalties/54405/)
+  [video](http://techtalks.tv/talks/clusterpath-an-algorithm-for-clustering-using-convex-fusion-penalties/54405/).
   [Software](https://r-forge.r-project.org/scm/?group_id=1090),
-  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/?root=clusterpath).
+  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/?root=clusterpath). Cited
+  by Genevera Allen who showed interactive visualizations in her
+  [Ihaka lecture](https://www.youtube.com/watch?v=2g-akN6q8aI).
 
 ### 2010
 
