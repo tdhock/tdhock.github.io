@@ -80,6 +80,15 @@ See my [Lab Members web page](http://ml.nau.edu/members/).
 
 I have mentored the
 following students in coding free/open-source software.
+- [Yufan Fei](https://github.com/Faye-yufan), [animint2: interactive
+  grammar of
+  graphics](https://github.com/Faye-yufan/gsoc22-animint/blob/master/README.md).
+- [Fabrizio Sandri](https://github.com/FabrizioSandri),
+  [RcppDeepState: github action for fuzz testing C++ code in R
+  packages](https://fabriziosandri.github.io/gsoc-2022-blog/summary/2022/09/08/gsoc-summary.html).
+- [Daniel Agyapong](https://github.com/EngineerDanny), [Rperform
+  github action for performance testing R
+  packages](https://engineerdanny.github.io/GSOC22-RPerform-Blog/).
 - [Anirban Chetia](https://github.com/Anirban166), 2021, [directlabels
   improvements](https://github.com/Anirban166/directlabels).
 - [Diego Urgell](https://github.com/diego-urgell), 2021,
