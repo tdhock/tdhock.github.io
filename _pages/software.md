@@ -47,21 +47,27 @@ which can be used with automatic differentiation.
 
 ### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
 
-To support our paper about infectious disease modeling, we
-created the [SPARSEMODr](https://github.com/NAU-CCL/SPARSEMODr/)
-R package. [Preprint medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1)
+To support our paper about infectious disease modeling, we created the
+[SPARSEMODr](https://github.com/NAU-CCL/SPARSEMODr/) R
+package. [Preprint
+medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1),
+[Biology Methods &
+Protocols](https://academic.oup.com/biomethods/advance-article/doi/10.1093/biomethods/bpac022/6680179)
+(2022).
 
 ### RcppDeepState: fuzz testing compiled code in R packages
 
 To support our R consortium funded project about fuzz testing C++
 functions in R packages that use Rcpp, we created the
-[RcppDeepState](https://github.com/akhikolla/RcppDeepState) R package.
+[RcppDeepState](https://github.com/FabrizioSandri/RcppDeepState) R
+package and [github
+action](https://github.com/FabrizioSandri/RcppDeepState-action).
 
 ### LOPART: Labeled Optimal Partitioning
 
-To support our paper about Labeled Optimal Partitioning, we
-created the [LOPART](https://github.com/tdhock/LOPART) R
-package. [arXiv:2006.13967](https://arxiv.org/abs/2006.13967)
+To support our [Computational Statistics](https://rdcu.be/cQ8qM)
+(2022) paper about Labeled Optimal Partitioning, we created the
+[LOPART](https://github.com/tdhock/LOPART) R package.
 
 ### gfpop: Graph-constrained Functional Pruning Optimal Partitioning
 
@@ -94,11 +100,13 @@ can be interpreted in terms of peaks (after up changes) and background
   computing multiple peaks in a single sample (same as PeakSegOptimal
   but works for much larger data sets because disk is used for storage
   instead of memory).
-  [arXiv:1810.00117](https://arxiv.org/abs/1810.00117)
+  [Journal of Statistical
+  Software Vol. 101, Issue
+  10](https://www.jstatsoft.org/article/view/v101i10).
 - [PeakSegJoint](https://CRAN.R-project.org/package=PeakSegJoint) provides a
   fast heuristic algorithm for computing models with a single common
   peak in 0,...,S
-  samples. [arXiv:1506.01286](https://arxiv.org/abs/1506.01286)
+  samples. [arXiv:1506.01286](https://arxiv.org/abs/1506.01286).
 - [PeakSegPipeline](https://github.com/tdhock/PeakSegPipeline)
   provides a supervised machine learning pipeline for genome-wide peak
   calling in multiple samples and cell types, as described in our
@@ -107,12 +115,13 @@ can be interpreted in terms of peaks (after up changes) and background
 - [FLOPART](https://github.com/tdhock/FLOPART), Functional Labeled
   Optimal Partitioning, provides a supervised peak detection algorithm
   with label constraints. (paper in progress)
-- [CROCS](https://github.com/aLiehrmann/CROCS) supports our BMC
-  Bioinformatics 2021 paper (accepted, to appear), and provides an
-  interface to various peak detection models as well as an
-  implementation of our proposed algorithm, Changepoints for a Range
-  Of
-  ComplexitieS. [arXiv:2012.06848](https://arxiv.org/abs/2012.06848)
+- [CROCS](https://github.com/aLiehrmann/CROCS) supports our [BMC
+  Bioinformatics
+  (2021)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-04221-5),
+  paper, and provides an interface to various peak detection models as
+  well as an implementation of our proposed algorithm, Changepoints
+  for a Range Of
+  ComplexitieS.
 
 ### PeakError: label error computation for peak models
 
@@ -186,8 +195,8 @@ models (in preparation), we created the
 
 To use as a baseline efficient implementation of binary segmentation
 in various papers such as [Labeled Optimal
-Partitioning](https://arxiv.org/abs/2006.13967) and [Linear time model
-selection](https://arxiv.org/abs/2003.02808), we created the
+Partitioning](https://rdcu.be/cQ8qM) and [Linear time model
+selection](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2021.2000422), we created the
 [binsegRcpp](https://cloud.r-project.org/web/packages/binsegRcpp/) R
 package.
 
