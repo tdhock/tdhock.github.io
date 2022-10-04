@@ -74,3 +74,11 @@ put the following in `~/.bashrc`
 export R_LIBS_USER=$HOME/R/%v
 module load R
 ```
+
+UPDATE 4 Oct 2022! An easier method, after starting xwin server, which
+does not involve lxterminal, is to just set the DISPLAY variable in
+Start -> cygwin64 terminal -> then type
+
+```shell-script
+DISPLAY=:0.0 ssh -Y linux.ac.nau.edu
+```
