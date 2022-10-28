@@ -1,7 +1,7 @@
-s---
+---
 layout: post
 title: Indirect reverse dependencies
-description: Computing the entire graph
+description: Computing the entire graph, and histogram tutorial
 ---
 
 
