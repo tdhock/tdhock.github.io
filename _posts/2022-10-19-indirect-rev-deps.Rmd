@@ -1,0 +1,428 @@
+---
+layout: post
+title: Indirect reverse dependencies
+description: Computing the entire graph, and histogram tutorial
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2022-10-19-indirect-rev-deps/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=16,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+if(FALSE){
+  knitr::knit("2022-10-19-indirect-rev-deps.Rmd")
+}
+```
+
+For a recent grant proposal submission to the National Science
+Foundation POSE program, I wanted to make an argument that the
+`data.table` R package is one of the most used, out of all R
+packages.
+
+I therefore wrote some code to compute the number of indirect reverse
+dependencies for all R packages. First, download meta-data from the
+current CRAN,
+
+```{r}
+library(data.table)
+if(!file.exists("packages.rds")){
+  u <- paste0(
+    "https://cloud.r-project.org/web/packages/packages.rds")
+  download.file(u, "packages.rds")
+}
+packages <- readRDS("packages.rds")
+pkg.dt <- data.table(packages)[is.na(Path)]
+nrow(pkg.dt)
+```
+
+The output above shows the number of packages on CRAN.
+
+## Direct reverse imports
+
+Then, we can get direct reverse imports,
+
+```{r}
+imp.by <- pkg.dt[, .(
+  imported.by=strsplit(`Reverse imports`, ", ")[[1]]
+), by=.(Imports=Package)]
+imp.by[!is.na(imported.by)]
+```
+
+The table above contains one row for each direct reverse import listed
+on CRAN.
+
+```{r}
+imp.by[Imports=="data.table"]
+```
+
+The table above contains a row for each direct reverse import listed
+for the `data.table` package.
+
+## Indirect reverse imports
+
+Then, we can use a loop to recursively compute indirect reverse
+imports,
+
+```{r}
+order.i <- 0
+ord.dt.list <- list()
+order.pkgs <- pkg.dt[, .(Package, Imports=Package)]
+while(nrow(order.pkgs)){
+  print(order.i <- order.i+1)
+  order.deps <- imp.by[
+    order.pkgs, 
+    on="Imports", nomatch=0L, allow.cartesian=TRUE]
+  if(nrow(order.deps)){
+    ord.dt.list[[order.i]] <- data.table(order.i, order.deps)
+  }
+  order.pkgs <- unique(order.deps[, .(Package, Imports=imported.by)])
+}
+(ord.dt <- do.call(rbind, ord.dt.list))
+```
+
+The table above contains one row for each reverse import (direct or
+indirect). Direct reverse imports have `order.i=1` and indirect have
+larger values.
+
+Below we check that the number of packages in this table is the same
+as the number of packages in the CRAN meta-data,
+
+```{r}
+rbind(pkgs.in.ord=length(unique(ord.dt$Package)), pkgs=nrow(pkg.dt))
+```
+
+The output above indicates that the table of reverse imports was
+computed correctly (the total number of packages is correct).
+
+## Subset of packages funded by NSF
+
+Which packages were funded by NSF?
+
+```{r}
+pkg.dt[, Desc.no.newlines := gsub("\n\\s+", " ", Description)]
+(nsf.pkgs <- pkg.dt[
+  grep("NSF|National Science Foundation", Desc.no.newlines), 
+  Package])
+```
+
+Which of the reverse imports were funded by NSF?
+
+```{r}
+dt.pkgs <- ord.dt[Package=="data.table", imported.by]
+(int.pkgs <- intersect(nsf.pkgs, dt.pkgs))
+```
+
+The output above shows that there are four reverse imports that were
+also funded by NSF.
+
+## Computing path from reverse import in dependency graph
+
+What is the path of packages from each reverse import in the
+dependency graph?
+
+```{r}
+select.dt <- data.table(
+  rev.dep=int.pkgs,
+  imported.by=int.pkgs, 
+  Package="data.table")
+path.dt.list <- list()
+iteration <- 0
+while(nrow(select.dt)){
+  print(iteration <- iteration+1)
+  dep.dt <- ord.dt[select.dt, on=.(imported.by, Package)]
+  path.dt.list[[iteration]] <- dep.dt
+  select.dt <- dep.dt[
+    Imports != Package, 
+    .(rev.dep, imported.by=Imports, Package)]
+}
+(path.dt <- do.call(rbind, path.dt.list)[
+  order(Package, rev.dep, -order.i),
+  .(Package, rev.dep, order.i, imported.by, Imports)])
+```
+
+The table above shows that there are two direct reverse imports
+(futureheatwaves, hurricaneexposure) for which the path length (max
+`order.i`) is 1. The `fdapace` package imports `Hmisc` which imports
+`data.table` (path length 2), whereas `bizicount` imports `DHARMa`
+which imports `gap` which imports `plotly` which imports `data.table`
+(path length 4).
+
+## Unique reverse imports, direct or all
+
+The code below counts the number of unique reverse imports (either
+direct or all), for each CRAN package,
+
+```{r}
+(dep.type.counts <- rbind(
+  data.table(dep.type="all", max.order=Inf),
+  data.table(dep.type="direct", max.order=1)
+)[, {
+  ord.dt[order.i <= max.order, .(
+    rev.imports=length(unique(na.omit(imported.by)))
+  ), by=Package
+  ][, `:=`(
+    rank=rank(-rev.imports),
+    prop.bigger=1-rank(rev.imports)/.N
+  )][order(rank)]
+}, by=dep.type])
+```
+
+The `data.table` package appears near the top in terms of number of
+dependent packages,
+
+```{r}
+(dt.counts <- dep.type.counts[Package=="data.table"])
+```
+
+The table above shows that `data.table` has 
+
+* 1326 direct reverse imports, which is rank 11 among CRAN packages
+  (only 10 other packages, 0.05% of all CRAN packages, have a larger
+  number of reverse imports).
+* 2661 packages which import either directly or indirectly, which is
+  rank 45 among CRAN packages (only 44 other packages, 0.2% of all
+  CRAN packages, have a larger number).
+  
+## Comparison with other CRAN packages
+
+The code below can be used to compute a histogram of reverse import
+counts, among all CRAN packages. To compute a histogram using a
+`data.table` rolling join, we first need to look at the range of the
+data, and then use the min/max to define the sequence of midpoints of
+histogram bins.
+
+```{r}
+log10(range(dep.type.counts$rev.imports))
+log10.min <- 0
+log10.max <- 4
+(bin.dt <- data.table(
+  log10.bin=c(-Inf,seq(log10.min, log10.max, by=0.5))
+)[, bin := 10^log10.bin][, Bin := round(bin)][])
+```
+
+The bins defined above range from 1 to 10000 on the log scale, with an
+additional bin for 0 (packages that have no reverse imports). Below we
+use a rolling join to figure out which packages are closest to each
+bin midpoint on the log scale,
+
+```{r}
+dep.type.counts[, log10.rev.imports := log10(rev.imports)]
+(bin.log.join <- bin.dt[dep.type.counts, .(
+  dep.type, Package, Bin, bin,
+  log10.bin=x.log10.bin, 
+  log10.rev.imports),
+  roll="nearest", 
+  on=.(log10.bin=log10.rev.imports)])
+```
+
+The table above has columns for bin midpoint on the log scale,
+`log10.bin`, as well as the actual number of reverse imports,
+`log10.rev.imports`. We can compute a histogram by summarizing for
+each bin,
+
+```{r}
+(bin.log.hist <- bin.log.join[, .(
+  n.packages=.N
+), by=.(dep.type, bin)])
+```
+
+The table above has a column `n.packages` which shows the number of
+packages which are closest to each bin. These numbers can be plotted
+to compare with the corresponding number of reverse imports for the
+`data.table` package,
+
+```{r compareLine}
+library(ggplot2)
+ggplot()+
+  theme_bw()+
+  geom_line(aes(
+    bin, n.packages),
+    color="grey50",
+    size=2,
+    data=bin.log.hist)+
+  geom_vline(aes(
+    xintercept=rev.imports),
+    data=dt.counts)+
+  geom_text(aes(
+    rev.imports*0.9, Inf, 
+    label=sprintf(paste(
+      "data.table rev. imports=%d",
+      "rank=%d/%d packages",
+      "%.2f%% of packages have",
+      "larger rev. dep. count",
+      sep="\n"),
+      rev.imports, rank, nrow(pkg.dt), prop.bigger*100)),
+    data=dt.counts,
+    hjust=1, 
+    vjust=1.1)+
+  facet_grid(. ~ dep.type, labeller=label_both)+
+  scale_y_log10(paste(
+    "Number of packages with that",
+    "reverse dependency count (log scale)",
+    sep="\n"))+
+  scale_x_log10(paste(
+    "Reverse dependency count",
+    "(number of other packages which import, log scale)"))
+```
+
+The figure above shows that `data.table` is ranked near the top, when
+comparing with other CRAN packages in terms of number of reverse
+imports.
+
+## Appendix: rolling join in original or log space?
+
+In the code above, to compute a histogram that we want to display in
+the log space, we did a rolling join in the log space, which results
+in symmetric histogram bins. If we did the join in the original space,
+then the histogram bins would have been asymmetric, as the code below
+shows,
+
+```{r theoretical-bin-size, fig.height=1}
+bin.tall <- melt(
+  bin.dt[bin>0], 
+  measure.vars=c("log10.bin", "bin"), 
+  id.vars=c("Bin", "log10.bin"))
+bin.tall[, next.break := c(value+c(diff(value)/2,NA)), by=variable]
+bin.tall[, next.log10 := ifelse(
+  variable=="bin", log10(next.break), next.break)]
+bin.tall[, prev.log10 := c(NA, next.log10[-.N]), by=variable]
+bin.tall[, distance := ifelse(variable=="bin", "original", "log")]
+bin.not.na <- bin.tall[!(is.na(prev.log10)|is.na(next.log10))]
+ggplot()+
+  geom_segment(aes(
+    prev.log10, distance,
+    xend=next.log10, yend=distance),
+    data=bin.not.na)+
+  geom_point(aes(
+    log10.bin, distance),
+    data=bin.not.na)+
+  facet_grid(. ~ Bin, labeller=label_both, scales="free")+
+  scale_x_continuous(breaks=seq(log10.min, log10.max, by=0.1))
+```
+
+The figure above shows the center of each histogram bin as a dot, and
+the min/max extent of each bin as a line segment. It is clear that
+using original space distances for the join results in bins which are
+asymmetric, in the sense that the bin will count more data which is
+larger than the bin center.
+
+Another way of looking at it is empirically, in terms of the reverse
+imports data,
+
+```{r histLog}
+bin.log.join[, log10.diff := ifelse(
+  log10.rev.imports == -Inf, 0, log10.rev.imports-log10.bin)]
+bin.width <- 0.05
+ggplot()+
+  geom_histogram(aes(
+    log10.diff, after_stat(ncount)),
+    binwidth=bin.width,
+    data=bin.log.join)+
+  scale_x_continuous(breaks=seq(-1, 1, by=0.2))+
+  geom_point(aes(x,y),data=data.table(x=0,y=0))+
+  facet_grid(dep.type ~ Bin, labeller=label_both)
+```
+
+The histogram above shows the distribution of differences between the
+actual number of reverse imports and the corresponding bin
+center. Most of the differences fall between -0.2 and 0.2, which is to
+be expected, since `bin.dt` used a bin size of 0.5 on the log scale.
+
+What if we did the same computation using the original distance scale?
+
+```{r histOriginal}
+bin.join <- bin.dt[dep.type.counts, .(
+  dep.type, Package, Bin,
+  log10.bin=x.log10.bin, 
+  rev.imports),
+  roll="nearest", 
+  on=.(bin=rev.imports)
+  ][, log10.rev.imports := log10(rev.imports)
+  ][, log10.diff := ifelse(
+    log10.rev.imports == -Inf, 0, log10.rev.imports-log10.bin)]
+ggplot()+
+  geom_histogram(aes(
+    log10.diff, after_stat(ncount)),
+    binwidth=bin.width,
+    data=bin.join)+
+  scale_x_continuous(breaks=seq(-1, 1, by=0.2))+
+  geom_point(aes(x,y),data=data.table(x=0,y=0))+
+  facet_grid(dep.type ~ Bin, labeller=label_both)
+```
+
+The bin assignments above were computed using a rolling join in the
+original reverse import count space (not the log space), so each
+histogram above is skewed to the right (the are more larger
+differences in each bin), as expected based on our theoretical
+analysis above which showed the asymmetric bins.
+
+Finally we can compare the two histograms in the same plot. First we
+combine the two data sets created from rolling joins,
+
+```{r}
+joinDT <- function(DT, distance, sign){
+  DT[, .(distance, sign, log10.diff, dep.type, Bin)]
+}
+(bin.both.join <- rbind(
+  joinDT(bin.join, "original", -1),
+  joinDT(bin.log.join, "log", sign=1)))
+```
+
+Then we compute histograms ourselves in the code below using the
+`hist` function (instead of using `geom_histogram` as we did in the
+code above),
+
+```{r}
+max.abs.diff <- 0.4
+breaks.vec <- seq(-max.abs.diff, max.abs.diff, by=bin.width)
+(bin.both.hist <- bin.both.join[, {
+  hlist <- hist(log10.diff, breaks.vec, plot=FALSE)
+  with(hlist, data.table(log10.diff=mids, ncount=counts/max(counts)))
+}, by=.(distance, sign, dep.type, Bin)])
+```
+
+The table above contains histograms of differences between actual
+numbers of reverse imports, and the corresponding bin centers. The
+`ncount` column is normalized between 0 and 1 so that the histograms
+can be displayed on a common scale. In the code below we also compute
+the mean of the differences, to see if there is any skew to larger
+values than the bin center, as we would expect.
+
+```{r}
+(bin.both.stats <- dcast(
+  bin.both.join,
+  distance + sign + dep.type + Bin ~ .,
+  list(length, mean),
+  value.var = "log10.diff"))
+```
+
+The table above has number of packages and mean difference columns,
+for every bin/histogram to plot, which we show below,
+
+```{r histCompare}
+ggplot()+
+  theme(legend.position=c(0.95, 0.2))+
+  geom_bar(aes(
+    log10.diff, sign*ncount, fill=distance),
+    stat="identity",
+    data=bin.both.hist)+
+  geom_text(aes(
+    0, sign, label=sprintf(
+      "%d packages", log10.diff_length)),
+    data=bin.both.stats)+
+  geom_point(aes(
+    x,y),
+    size=4,
+    data=data.table(x=0,y=0))+
+  geom_point(aes(
+    log10.diff_mean, 0, fill=distance),
+    data=bin.both.stats,
+    size=3,
+    shape=21)+
+  facet_grid(dep.type ~ Bin, labeller=label_both)
+```
