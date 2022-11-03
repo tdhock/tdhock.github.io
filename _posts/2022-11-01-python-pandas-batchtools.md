@@ -283,7 +283,11 @@ Disk quotas for user th798 (uid 682419):
      Filesystem   space   quota   limit   grace   files   quota   limit   grace
 minim.ib.nauhpc:/export/home
                   3983M  10000M  10100M           26358       0       0
-(base) [th798@cn64 ~ ]$
+(base) [th798@cn64 ~ ]$ getquotas
+Filesystem            #Bytes  Quota   %    |  #Files  Quota  %
+/home                 2620M   10000M  26%  |  -       -      -
+/scratch              9.219M  13.97T  0%   |  344     2M     0%
+/projects/genomic-ml  7.5T    10T     75%  |  97M     5.2G   2%
 ```
 
 The output above indicates the conda directory takes up 1363 megabytes

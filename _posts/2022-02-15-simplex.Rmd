@@ -2,7 +2,6 @@
 layout: post
 title: Plotting the probability simplex
 description: An application of matrix inversion 
-output:
 ---
 
 ```{r Ropts, echo=FALSE}
