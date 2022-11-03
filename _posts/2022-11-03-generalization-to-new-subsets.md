@@ -46,17 +46,17 @@ full_df
 
 ```
 ##       feature    label  image
-## 0    0.528527   burned      1
-## 1   -0.701357  no burn      1
-## 2   -0.430664   burned      1
-## 3    0.083043  no burn      1
-## 4   -0.468872   burned      1
+## 0   -0.741292   burned      1
+## 1   -0.428366  no burn      1
+## 2   -0.883569   burned      1
+## 3    1.127654  no burn      1
+## 4    0.849613   burned      1
 ## ..        ...      ...    ...
-## 995  0.524254  no burn      4
-## 996 -0.103435   burned      4
-## 997 -2.282597  no burn      4
-## 998  1.122587   burned      4
-## 999  1.608295  no burn      4
+## 995 -0.995421  no burn      4
+## 996 -1.850110   burned      4
+## 997 -1.621216  no burn      4
+## 998 -0.046971   burned      4
+## 999 -0.824488  no burn      4
 ## 
 ## [1000 rows x 3 columns]
 ```
@@ -105,17 +105,17 @@ full_df
 
 ```
 ##       feature    label  image  random_fold  fold
-## 0    0.528527   burned      1            2     1
-## 1   -0.701357  no burn      1            1     1
-## 2   -0.430664   burned      1            1     1
-## 3    0.083043  no burn      1            2     0
-## 4   -0.468872   burned      1            2     1
+## 0   -0.741292   burned      1            2     1
+## 1   -0.428366  no burn      1            1     1
+## 2   -0.883569   burned      1            1     1
+## 3    1.127654  no burn      1            2     0
+## 4    0.849613   burned      1            2     1
 ## ..        ...      ...    ...          ...   ...
-## 995  0.524254  no burn      4            2     2
-## 996 -0.103435   burned      4            3     0
-## 997 -2.282597  no burn      4            2     2
-## 998  1.122587   burned      4            1     0
-## 999  1.608295  no burn      4            2     1
+## 995 -0.995421  no burn      4            2     2
+## 996 -1.850110   burned      4            3     0
+## 997 -1.621216  no burn      4            2     2
+## 998 -0.046971   burned      4            1     0
+## 999 -0.824488  no burn      4            2     1
 ## 
 ## [1000 rows x 5 columns]
 ```
