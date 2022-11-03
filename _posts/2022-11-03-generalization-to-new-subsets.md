@@ -193,9 +193,9 @@ algorithms on several different train sets:
 
 * same: train folds (0 and 1) and same image (4), there are 34+33=67
   train data in this set.
-* other: train folds (0 and 1) and other images (1-3), there are 301
+* other: train folds (0 and 1) and other images (1-3), there are 601
   train data in this set.
-* all: train folds (0 and 1) and all images (1-4), there are 368 train
+* all: train folds (0 and 1) and all images (1-4), there are 668 train
   data in this set.
 
 For each of the three trained models, we compute prediction error on
