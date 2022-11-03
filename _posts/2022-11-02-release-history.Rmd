@@ -1,0 +1,275 @@
+---
+layout: post
+title: R Package Release History
+description: Extracting and plotting data from CRAN web site 
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2022-11-02-release-history/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=7,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=200)
+if(FALSE){
+  knitr::knit("2022-11-02-release-history.Rmd")
+}
+```
+
+For a recent grant proposal submission to the National Science
+Foundation POSE program, I wanted to make a figure that shows the
+release history of the `data.table` R package.
+
+## Download Archive web page
+
+First, we create a releases directory to cache the
+downloaded web pages,
+
+```{r}
+releases.dir <- "~/grants/2022-NSF-POSE/releases"
+dir.create(releases.dir, showWarnings = FALSE)
+```
+
+We can download an Archive web page via the code below,
+
+```{r}
+Archive <- "https://cloud.r-project.org/src/contrib/Archive/"
+get_Archive <- function(Package){
+  pkg.html <- file.path(releases.dir, paste0(Package, ".html"))
+  if(!file.exists(pkg.html)){
+    u <- paste0(Archive, Package)
+    download.file(u, pkg.html)
+  }
+  readLines(pkg.html)
+}
+(Archive.data.table <- get_Archive("data.table"))
+```
+
+The output above shows that the Archive web page has a regular
+structure.
+
+## Parsing with a regular expression
+
+The Archive web page can be parsed via a regular expression,
+
+```{r}
+extract_versions <- function(Archive){
+  nc::capture_all_str(
+    Archive,
+    "_",
+    version="[0-9.]+",
+    "[.]tar[.]gz</a>\\s+",
+    date.str=".*?",
+    "\\s")
+}
+```
+
+In the function call above, the first argument is `Archive`, the data
+to parse, and the other arguments specify the regular expression:
+
+* `"_"` means to start by matching an underscore,
+* `version="[0-9.]+"` means to match one or more digits or dots, and
+  output them in the `version` column,
+* `"[.]tar[.]gz</a>\\s+"` means to match the `.tar.gz` file name
+  suffix, the closing `</a>` tag, and then one or more white space
+  characters,
+* `date.str=".*?"` means to match zero or more characters (non-greedy,
+  as few as possible), and output them in the `date.str` column,
+* `"\\s"` means to match one white space character.
+
+The end result is a table with one row for each matched package
+version, and one column for each of the named arguments:
+
+```{r}
+extract_versions(Archive.data.table)
+```
+
+## Analyze several packages for comparison
+
+The code below defines a set of four packages for which we would like
+to analyze the release history (tidyverse packages for comparison).
+
+```{r}
+library(data.table)
+compare.pkg.dt <- rbind(
+  data.table(project="tidyverse", Package=c("readr","tidyr","dplyr")),
+  data.table(project="deprecated", Package=c("reshape2", "plyr")),
+  data.table(project="data.table", Package="data.table"))
+```
+
+In the code below, we do the same thing for each package, 
+
+```{r}
+(release.dt <- compare.pkg.dt[, {
+  Archive.pkg <- get_Archive(Package)
+  extract_versions(Archive.pkg)
+}, by=names(compare.pkg.dt)])
+```
+
+The result above is a data table with one row for each package
+version. Note that the code set `by` to all column names, so that the
+code is run for each row/package.
+
+## Add columns for plotting
+
+For plotting we add a few more columns,
+
+```{r}
+release.dt[, `:=`(
+  IDate = as.IDate(date.str),
+  year = as.integer(sub("-.*", "", date.str)),
+  package = factor(Package, compare.pkg.dt$Package),
+  Project = paste0('\n', project))]
+setkey(release.dt, Project, Package, IDate)
+release.dt
+```
+
+To explain the new columns above,
+
+* `IDate` is for the date to display on the X axis,
+* `year` is for labeling the first released version each year,
+* `package` is for displaying the Y axis in a particular order
+  (defined by the factor levels),
+* `Project` is for the facet/panel titles (newline so that minimal
+  vertical space is used).
+  
+## Basic plot
+
+The code below creates a basic version history plot,
+
+```{r points}
+library(ggplot2)
+(gg.points <- ggplot()+
+  theme(
+    axis.text.x=element_text(hjust=1, angle=40))+
+  facet_grid(Project ~ ., labeller=label_both, scales="free")+
+  geom_point(aes(
+    IDate, package),
+    shape=1,
+    data=release.dt)+
+  coord_cartesian(expand=5)+
+  scale_x_date("Date", breaks="year"))
+```
+
+The plot above shows a point for every release to CRAN, so you can see
+the distribution of releases over time.
+
+## Add direct labels
+
+Before plotting we make a new table which contains only the first
+release of `data.table` in each year (for direct labels),
+
+```{r}
+(labeled.releases <- release.dt[Package=="data.table", .SD[1], by=year])
+```
+
+```{r points-labels}
+gg.points+
+  directlabels::geom_dl(aes(
+    IDate, package, label=paste0(year, "\n", version)),
+    method=list(
+      cex=0.7,
+      directlabels::polygon.method(
+        "top", offset.cm=0.2, custom.colors=list(
+          colour="white",
+          box.color="black",
+          text.color="black"))),
+    data=labeled.releases)
+```
+  
+The plot above shows a label for the first version released each year.
+
+## Releases per year
+
+One way to compute releases per year would be to add up the total
+number of releases, then divide by the number of years,
+
+```{r release-history}
+(overall.stats <- dcast(
+  release.dt, 
+  project + Package ~ ., 
+  list(min,max,length), 
+  value.var="year"
+)[, releases.per.year := year_length/(year_max-year_min+1)][])
+```
+
+Another way to do it would be to compute the number of releases in
+each year since the release of the package. To do that we first
+compute, for each package, a set of years for which we want to count
+releases.
+
+```{r}
+(max.year <- max(release.dt$year))
+(years.since.release <- release.dt[, .(
+  year=seq(min(year), max.year)
+), by=.(Project, project, Package, package)])
+```
+
+Then we can do a join and summarize to count the number of releases in
+each year, for each package,
+
+```{r}
+(releases.per.year <- release.dt[years.since.release, .(
+  N=as.numeric(.N)
+), on=.NATURAL, by=.EACHI])
+```
+
+Note that `on=.NATURAL` above means to join on the common columns
+between the two tables, and `by=.EACHI` means to compute a summary for
+each value specified in `i` (the first argument in the square bracket).
+We can plot these data as a heat map via
+
+```{r heatMap}
+ggplot()+
+  theme_bw()+
+  theme(panel.spacing=grid::unit(0, "lines"))+
+  geom_tile(aes(
+    year, package, fill=log(N+1)),
+    data=releases.per.year)+
+  geom_text(aes(
+    year, package, label=N),
+    data=releases.per.year)+
+  facet_grid(Project ~ ., labeller=label_both, scales="free", space="free")+
+  scale_fill_gradient("releases\n(log scale)", low="white", high="red")+
+  scale_x_continuous(breaks=seq(2006, 2022, by=2))+
+  coord_cartesian(expand=FALSE)
+```
+
+The heat map above shows a different display of the the same release
+data we saw earlier in the dot plot.
+
+Next, we can apply a list of summary functions over all of the yearly
+counts, for each package, via
+
+```{r}
+(per.year.stats <- dcast(
+  releases.per.year,
+  project + Package ~ .,
+  list(min, max, mean, sd, length),
+  value.var = "N"))
+```
+
+Finally, the code below creates a table to compare the two different ways of
+computing the number of releases per year,
+
+```{r}
+per.year.stats[overall.stats, .(
+  Package, 
+  overall.mean=N_mean, 
+  mean.per.year=releases.per.year
+), on="Package"]
+```
+
+The table above show similar numbers for the two methods of computing
+the number of releases per year.
+
+## Conclusion
+
+We have shown how to download CRAN package release data, how to parse
+the web pages using the `nc` package and a regular expression, how to
+summarize/analyze using `data.table`, and how to visualize using
+`ggplot2`.
