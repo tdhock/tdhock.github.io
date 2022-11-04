@@ -72,7 +72,6 @@ import pandas as pd
 import numpy as np
 N = 1000
 full_df = pd.DataFrame({
-    "feature":np.random.randn(N),
     "label":np.tile(["burned","no burn"],int(N/2)),
     })
 ```
@@ -170,8 +169,11 @@ data set. The code to do that should look something like below,
 ```{python}
 error_df_list = []
 gkf = GroupKFold(n_splits=n_folds)
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
 for test_fold, index_tup in enumerate(gkf.split(full_df, groups=full_df.fold)):
-    index_dict = dict(zip(["train","test"], index_tup))
+    index_dict = dict(zip(["all_train","all_test"], index_tup))
     df_dict = {
         set_name:full_df.iloc[index_array]
         for set_name, index_array in index_dict.items()}
@@ -179,28 +181,56 @@ for test_fold, index_tup in enumerate(gkf.split(full_df, groups=full_df.fold)):
         is_same_dict = {
             set_name:set_df.image == target_img
             for set_name, set_df in df_dict.items()}
-        test_df = df_dict["test"].loc[ is_same_dict["test"], :]
-        test_nrow, test_ncol = test_df.shape
-        train_same_dict = {
+        df_dict["test"] = df_dict["all_test"].loc[ is_same_dict["all_test"], :]
+        is_same_values_dict = {
             "all":[True,False],
             "same":[True],
             "other":[False],
             }
-        for data_name, is_same_values in train_same_dict.items():
-            train_is_same = is_same_dict["train"].isin(is_same_values)
-            train_df = df_dict["train"].loc[train_is_same,:]
-            train_nrow, train_col = train_df.shape
-            # all of your model fitting code
-            # prediction on test set, test_df
-            out_df=pd.DataFrame({
-                "test_fold":[test_fold],
-                "target_img":[target_img],
-                "test_nrow":[test_nrow],
-                "train_nrow":[train_nrow],
-                "data_name":[data_name],
-                "error_percent":["TODO"],
-                })
-            error_df_list.append(out_df)
+        train_name_list = []
+        for data_name, is_same_values in is_same_values_dict.items():
+            train_name_list.append(data_name)
+            train_is_same = is_same_dict["all_train"].isin(is_same_values)
+            df_dict[data_name] = df_dict["all_train"].loc[train_is_same,:]
+        same_nrow, same_ncol = df_dict["same"].shape
+        for data_name in "all", "other":
+            small_name = data_name+"_small"
+            train_name_list.append(small_name)
+            train_df = df_dict[data_name]
+            all_indices = np.arange(len(train_df))
+            small_indices = np.random.permutation(all_indices)[:same_nrow]
+            df_dict[small_name] = train_df.iloc[small_indices,:]
+        xy_dict = {
+            data_name:(df.loc[:,is_feature], df.label)
+            for data_name, df in df_dict.items()}
+        test_X, test_y = xy_dict["test"]
+        for train_name in train_name_list:
+            train_X, train_y = xy_dict[train_name]
+            param_dicts = [{'n_neighbors':[x]} for x in range(1, 21)]
+            learner_dict = {
+                "linear_model":LogisticRegressionCV(),
+                "nearest_neighbors":GridSearchCV(
+                    KNeighborsClassifier(), param_dicts)
+                }
+            featureless_pred = train_y.value_counts().index[0]
+            pred_dict = {
+                "featureless":np.repeat(featureless_pred, len(test_y)),
+            }
+            for algorithm, learner in learner_dict.items():
+                learner.fit(train_X, train_y)
+                pred_dict[algorithm] = learner.predict(test_X)
+            for algorithm, pred_vec in pred_dict.items():
+                error_vec = pred_vec != test_y
+                out_df=pd.DataFrame({
+                    "test_fold":[test_fold],
+                    "target_img":[target_img],
+                    "test_nrow":[len(test_y)],
+                    "train_nrow":[len(train_y)],
+                    "train_name":[train_name],
+                    "algorithm":[algorithm],
+                    "error_percent":[error_vec.mean()*100],
+                    })
+                error_df_list.append(out_df)
 pd.concat(error_df_list)
 ```
 
