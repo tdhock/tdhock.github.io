@@ -7,19 +7,22 @@ if using_agg:
     matplotlib.use("agg")
 import pandas as pd
 import numpy as np
-np.random.seed(1)
 N = 1000
 full_df = pd.DataFrame({
     "label":np.tile(["burned","no burn"],int(N/2)),
     "image":np.concatenate([
-        np.repeat(1, 0.2*N), np.repeat(2, 0.4*N),
-        np.repeat(3, 0.3*N), np.repeat(4, 0.1*N)
+        np.repeat(1, 0.4*N), np.repeat(2, 0.4*N),
+        np.repeat(3, 0.1*N), np.repeat(4, 0.1*N)
     ])
 })
+len_series = full_df.groupby("image").apply(len)
 uniq_images = full_df.image.unique()
 n_images = len(uniq_images)
-full_df["signal"] = np.where(full_df.label=="no burn", 0, 2)
+full_df["signal"] = np.where(
+    full_df.label=="no burn", 0, 1
+)*full_df.image
 full_df
+np.random.seed(1)
 for n_noise in range(n_images-1):
     full_df["feature_easy_%s"%n_noise] = np.random.randn(N)
 full_df["feature_easy_%s"%n_images] = np.random.randn(N)+full_df.signal
@@ -103,6 +106,7 @@ for feature_name in feature_name_series:
                         "feature_name":[feature_name],
                         "test_fold":[test_fold],
                         "target_img":[target_img],
+                        "data_for_img":[len_series[target_img]],
                         "test_nrow":[len(test_y)],
                         "train_nrow":[len(train_y)],
                         "train_name":[train_name],
@@ -112,18 +116,40 @@ for feature_name in feature_name_series:
                     print(out_df)
                     error_df_list.append(out_df)
 error_df = pd.concat(error_df_list)
-import plotnine as p9
 
+import plotnine as p9
+train_name_order=["same", "all", "all_small", "other", "other_small"]
 for feature_name in feature_name_series:
     feature_df = error_df.query("feature_name == '%s'"%feature_name)
+    featureless = feature_df.query("algorithm=='featureless'")
+    grouped = featureless.groupby(['target_img', 'data_for_img'])["error_percent"]
+    min_max_df = grouped.apply(lambda df: pd.DataFrame({
+        "xmin":[df.min()],
+        "xmax":[df.max()],
+        "ymin":[-np.inf],
+        "ymax":[np.inf],
+    })).reset_index()
     feature_df["Algorithm"] = "\n"+feature_df.algorithm
+    feature_df["Train data"] = pd.Categorical(feature_df.train_name, train_name_order)
     gg = p9.ggplot()+\
+        p9.theme_bw()+\
+        p9.theme(panel_spacing=0.1)+\
+        p9.geom_rect(
+            p9.aes(
+                xmin="xmin",
+                xmax="xmax",
+                ymin="ymin",
+                ymax="ymax"
+                ),
+            fill="grey",
+            data=min_max_df)+\
         p9.geom_point(
             p9.aes(
                 x="error_percent",
-                y="train_name"
+                y="Train data"
             ),
-            data=feature_df)+\
-        p9.facet_grid("Algorithm ~ target_img", scales="free", labeller="label_both")+\
+        data=feature_df)+\
+        p9.scale_x_continuous(limits=[0,62])+\
+        p9.facet_grid("Algorithm ~ target_img + data_for_img", labeller="label_both")+\
         p9.ggtitle("Features: "+feature_name)
     gg.save("2022-11-03-generalization-to-new-subsets-%s.png"%feature_name, width=10, height=5)
