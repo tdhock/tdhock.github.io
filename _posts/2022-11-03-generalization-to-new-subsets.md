@@ -28,38 +28,62 @@ import pandas as pd
 import numpy as np
 N = 1000
 full_df = pd.DataFrame({
-    "feature":np.random.randn(N),
     "label":np.tile(["burned","no burn"],int(N/2)),
-    })
-```
-
-And let's say that each row has an image ID, one of four images,
-
-
-```python
-full_df["image"] = np.concatenate([
-    np.repeat(1, 0.2*N), np.repeat(2, 0.4*N),
-    np.repeat(3, 0.3*N), np.repeat(4, 0.1*N)
-])
+    "image":np.concatenate([
+        np.repeat(1, 0.4*N), np.repeat(2, 0.4*N),
+        np.repeat(3, 0.1*N), np.repeat(4, 0.1*N)
+    ])
+})
+len_series = full_df.groupby("image").apply(len)
+uniq_images = full_df.image.unique()
+n_images = len(uniq_images)
+full_df["signal"] = np.where(
+    full_df.label=="no burn", 0, 1
+)*full_df.image
 full_df
 ```
 
 ```
-##       feature    label  image
-## 0   -0.741292   burned      1
-## 1   -0.428366  no burn      1
-## 2   -0.883569   burned      1
-## 3    1.127654  no burn      1
-## 4    0.849613   burned      1
-## ..        ...      ...    ...
-## 995 -0.995421  no burn      4
-## 996 -1.850110   burned      4
-## 997 -1.621216  no burn      4
-## 998 -0.046971   burned      4
-## 999 -0.824488  no burn      4
+##        label  image  signal
+## 0     burned      1       1
+## 1    no burn      1       0
+## 2     burned      1       1
+## 3    no burn      1       0
+## 4     burned      1       1
+## ..       ...    ...     ...
+## 995  no burn      4       0
+## 996   burned      4       4
+## 997  no burn      4       0
+## 998   burned      4       4
+## 999  no burn      4       0
 ## 
 ## [1000 rows x 3 columns]
 ```
+
+Above each row has an image ID between 1 and 4. We also generate/simulate some features:
+
+
+```python
+np.random.seed(1)
+for n_noise in range(n_images-1):
+    full_df["feature_easy_%s"%n_noise] = np.random.randn(N)
+full_df["feature_easy_%s"%n_images] = np.random.randn(N)+full_df.signal
+for img in uniq_images:
+    noise = np.random.randn(N)
+    full_df["feature_impossible_%s"%img] = np.where(
+        full_df.image == img, full_df.signal+noise, noise)
+```
+
+There are two sets of four features:
+
+* For easy features, three are random noise, and one is correlated
+  with the label.
+* Each impossible feature is correlated with the label (when feature
+  number same as image number), or is just noise (when image number
+  different from feature number).
+  
+The signal is stronger for larger image numbers (image number 4 is
+easier to learn from than image number 1).
 
 We would like to fix a test image, and then compare models trained on
 either the same image, or on different images (or all images). To
@@ -77,11 +101,11 @@ pd.crosstab(full_df["random_fold"], full_df["image"])
 ```
 
 ```
-## image         1    2    3   4
+## image          1    2   3   4
 ## random_fold                  
-## 1            72  139   95  28
-## 2            75  111  104  39
-## 3            53  150  101  33
+## 1            144  134  28  28
+## 2            132  120  38  39
+## 3            124  146  34  33
 ```
 
 In the output above we see that for each image, there is not an equal
@@ -104,20 +128,20 @@ full_df
 ```
 
 ```
-##       feature    label  image  random_fold  fold
-## 0   -0.741292   burned      1            2     1
-## 1   -0.428366  no burn      1            1     1
-## 2   -0.883569   burned      1            1     1
-## 3    1.127654  no burn      1            2     0
-## 4    0.849613   burned      1            2     1
-## ..        ...      ...    ...          ...   ...
-## 995 -0.995421  no burn      4            2     2
-## 996 -1.850110   burned      4            3     0
-## 997 -1.621216  no burn      4            2     2
-## 998 -0.046971   burned      4            1     0
-## 999 -0.824488  no burn      4            2     1
+##        label  image  signal  ...  feature_impossible_4  random_fold  fold
+## 0     burned      1       1  ...              0.920079            2     2
+## 1    no burn      1       0  ...              0.018099            1     2
+## 2     burned      1       1  ...              1.475869            1     1
+## 3    no burn      1       0  ...              0.373199            2     0
+## 4     burned      1       1  ...              1.295183            2     1
+## ..       ...    ...     ...  ...                   ...          ...   ...
+## 995  no burn      4       0  ...             -0.381307            2     0
+## 996   burned      4       4  ...              5.036886            3     0
+## 997  no burn      4       0  ...              0.671736            2     0
+## 998   burned      4       4  ...              4.510561            1     1
+## 999  no burn      4       0  ...              1.006131            2     2
 ## 
-## [1000 rows x 5 columns]
+## [1000 rows x 13 columns]
 ```
 
 ```python
@@ -125,11 +149,11 @@ pd.crosstab(full_df.fold, full_df.image)
 ```
 
 ```
-## image   1    2    3   4
+## image    1    2   3   4
 ## fold                   
-## 0      67  134  100  34
-## 1      67  133  100  33
-## 2      66  133  100  33
+## 0      134  134  34  34
+## 1      133  133  33  33
+## 2      133  133  33  33
 ```
 
 The table above shows that for each image, the number of data per fold
@@ -152,37 +176,37 @@ for test_fold, index_tup in enumerate(gkf.split(full_df, groups=full_df.fold)):
 ```
 ## 
 ## fold=0, set=train
-## image   1    2    3   4
+## image    1    2   3   4
 ## fold                   
-## 1      67  133  100  33
-## 2      66  133  100  33
+## 1      133  133  33  33
+## 2      133  133  33  33
 ## 
 ## fold=0, set=test
-## image   1    2    3   4
+## image    1    2   3   4
 ## fold                   
-## 0      67  134  100  34
+## 0      134  134  34  34
 ## 
 ## fold=1, set=train
-## image   1    2    3   4
+## image    1    2   3   4
 ## fold                   
-## 0      67  134  100  34
-## 2      66  133  100  33
+## 0      134  134  34  34
+## 1      133  133  33  33
 ## 
 ## fold=1, set=test
-## image   1    2    3   4
+## image    1    2   3   4
 ## fold                   
-## 1      67  133  100  33
+## 2      133  133  33  33
 ## 
 ## fold=2, set=train
-## image   1    2    3   4
+## image    1    2   3   4
 ## fold                   
-## 0      67  134  100  34
-## 1      67  133  100  33
+## 0      134  134  34  34
+## 2      133  133  33  33
 ## 
 ## fold=2, set=test
-## image   1    2    3   4
+## image    1    2   3   4
 ## fold                   
-## 2      66  133  100  33
+## 1      133  133  33  33
 ```
 
 The output above indicates that there are equal proportions of each
@@ -218,87 +242,163 @@ data set. The code to do that should look something like below,
 
 
 ```python
-error_df_list = []
+from sklearn.model_selection import GroupKFold
 gkf = GroupKFold(n_splits=n_folds)
-for test_fold, index_tup in enumerate(gkf.split(full_df, groups=full_df.fold)):
-    index_dict = dict(zip(["train","test"], index_tup))
-    df_dict = {
-        set_name:full_df.iloc[index_array]
-        for set_name, index_array in index_dict.items()}
-    for target_img in full_df.image.unique():
-        is_same_dict = {
-            set_name:set_df.image == target_img
-            for set_name, set_df in df_dict.items()}
-        test_df = df_dict["test"].loc[ is_same_dict["test"], :]
-        test_nrow, test_ncol = test_df.shape
-        train_same_dict = {
-            "all":[True,False],
-            "same":[True],
-            "other":[False],
-            }
-        for data_name, is_same_values in train_same_dict.items():
-            train_is_same = is_same_dict["train"].isin(is_same_values)
-            train_df = df_dict["train"].loc[train_is_same,:]
-            train_nrow, train_col = train_df.shape
-            # all of your model fitting code
-            # prediction on test set, test_df
-            out_df=pd.DataFrame({
-                "test_fold":[test_fold],
-                "target_img":[target_img],
-                "test_nrow":[test_nrow],
-                "train_nrow":[train_nrow],
-                "data_name":[data_name],
-                "error_percent":["TODO"],
-                })
-            error_df_list.append(out_df)
-pd.concat(error_df_list)
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+cache_csv = fig_path+"cache.csv"
+if os.path.exists(cache_csv):
+    error_df = pd.read_csv(cache_csv)
+else:
+    error_df_list = []
+    extract_df = full_df.columns.str.extract("feature_(?P<type>[^_]+)")
+    feature_name_series = extract_df.value_counts().reset_index().type
+    for feature_name in feature_name_series:
+        is_feature = np.array([feature_name in col for col in full_df.columns])
+        for test_fold, index_tup in enumerate(gkf.split(full_df, groups=full_df.fold)):
+            index_dict = dict(zip(["all_train","all_test"], index_tup))
+            df_dict = {
+                set_name:full_df.iloc[index_array]
+                for set_name, index_array in index_dict.items()}
+            for target_img in full_df.image.unique():
+                is_same_dict = {
+                    set_name:set_df.image == target_img
+                    for set_name, set_df in df_dict.items()}
+                df_dict["test"] = df_dict["all_test"].loc[ is_same_dict["all_test"], :]
+                is_same_values_dict = {
+                    "all":[True,False],
+                    "same":[True],
+                    "other":[False],
+                    }
+                train_name_list = []
+                for data_name, is_same_values in is_same_values_dict.items():
+                    train_name_list.append(data_name)
+                    train_is_same = is_same_dict["all_train"].isin(is_same_values)
+                    df_dict[data_name] = df_dict["all_train"].loc[train_is_same,:]
+                same_nrow, same_ncol = df_dict["same"].shape
+                for data_name in "all", "other":
+                    small_name = data_name+"_small"
+                    train_name_list.append(small_name)
+                    train_df = df_dict[data_name]
+                    all_indices = np.arange(len(train_df))
+                    small_indices = np.random.permutation(all_indices)[:same_nrow]
+                    df_dict[small_name] = train_df.iloc[small_indices,:]
+                xy_dict = {
+                    data_name:(df.loc[:,is_feature], df.label)
+                    for data_name, df in df_dict.items()}
+                test_X, test_y = xy_dict["test"]
+                for train_name in train_name_list:
+                    train_X, train_y = xy_dict[train_name]
+                    param_dicts = [{'n_neighbors':[x]} for x in range(1, 21)]
+                    learner_dict = {
+                        "linear_model":LogisticRegressionCV(),
+                        "nearest_neighbors":GridSearchCV(
+                            KNeighborsClassifier(), param_dicts)
+                        }
+                    featureless_pred = train_y.value_counts().index[0]
+                    pred_dict = {
+                        "featureless":np.repeat(featureless_pred, len(test_y)),
+                    }
+                    for algorithm, learner in learner_dict.items():
+                        learner.fit(train_X, train_y)
+                        pred_dict[algorithm] = learner.predict(test_X)
+                    for algorithm, pred_vec in pred_dict.items():
+                        error_vec = pred_vec != test_y
+                        out_df=pd.DataFrame({
+                            "feature_name":[feature_name],
+                            "test_fold":[test_fold],
+                            "target_img":[target_img],
+                            "data_for_img":[len_series[target_img]],
+                            "test_nrow":[len(test_y)],
+                            "train_nrow":[len(train_y)],
+                            "train_name":[train_name],
+                            "algorithm":[algorithm],
+                            "error_percent":[error_vec.mean()*100],
+                            })
+                        print(out_df)
+                        error_df_list.append(out_df)
+    error_df = pd.concat(error_df_list)
+    error_df.to_csv(cache_csv)
+error_df
 ```
 
 ```
-##    test_fold  target_img  test_nrow  train_nrow data_name error_percent
-## 0          0           1         67         665       all          TODO
-## 0          0           1         67         133      same          TODO
-## 0          0           1         67         532     other          TODO
-## 0          0           2        134         665       all          TODO
-## 0          0           2        134         266      same          TODO
-## 0          0           2        134         399     other          TODO
-## 0          0           3        100         665       all          TODO
-## 0          0           3        100         200      same          TODO
-## 0          0           3        100         465     other          TODO
-## 0          0           4         34         665       all          TODO
-## 0          0           4         34          66      same          TODO
-## 0          0           4         34         599     other          TODO
-## 0          1           1         67         667       all          TODO
-## 0          1           1         67         133      same          TODO
-## 0          1           1         67         534     other          TODO
-## 0          1           2        133         667       all          TODO
-## 0          1           2        133         267      same          TODO
-## 0          1           2        133         400     other          TODO
-## 0          1           3        100         667       all          TODO
-## 0          1           3        100         200      same          TODO
-## 0          1           3        100         467     other          TODO
-## 0          1           4         33         667       all          TODO
-## 0          1           4         33          67      same          TODO
-## 0          1           4         33         600     other          TODO
-## 0          2           1         66         668       all          TODO
-## 0          2           1         66         134      same          TODO
-## 0          2           1         66         534     other          TODO
-## 0          2           2        133         668       all          TODO
-## 0          2           2        133         267      same          TODO
-## 0          2           2        133         401     other          TODO
-## 0          2           3        100         668       all          TODO
-## 0          2           3        100         200      same          TODO
-## 0          2           3        100         468     other          TODO
-## 0          2           4         33         668       all          TODO
-## 0          2           4         33          67      same          TODO
-## 0          2           4         33         601     other          TODO
+##      Unnamed: 0 feature_name  ...          algorithm  error_percent
+## 0             0         easy  ...        featureless      49.253731
+## 1             0         easy  ...       linear_model      26.865672
+## 2             0         easy  ...  nearest_neighbors      28.358209
+## 3             0         easy  ...        featureless      50.746269
+## 4             0         easy  ...       linear_model      26.865672
+## ..          ...          ...  ...                ...            ...
+## 355           0   impossible  ...       linear_model      42.424242
+## 356           0   impossible  ...  nearest_neighbors      36.363636
+## 357           0   impossible  ...        featureless      57.575758
+## 358           0   impossible  ...       linear_model      36.363636
+## 359           0   impossible  ...  nearest_neighbors      21.212121
+## 
+## [360 rows x 10 columns]
 ```
 
-The result table above has a row for every combination of test fold,
-target image, ane train data name (all/other/same). Exercise for the
-reader: fill in the TODO with some actual prediction error values. You
-should have one more for loop over learning algorithms (and a
-corresponding column in `out_df`). Try at least featureless (always
-predict most frequent class in train data), linear model, and nearest
-neighbors, as in my [Deep Learning class homework
+The result table above has a row for every combination of features,
+test fold, target image, ane train data name
+(all/other/same). Exercise for the reader: fill in the TODO with some
+actual prediction error values from a real data set. You should have
+one more for loop over learning algorithms (and a corresponding column
+in `out_df`). Try at least featureless (always predict most frequent
+class in train data), linear model, and nearest neighbors, as in my
+[Deep Learning class homework
 2](https://github.com/tdhock/cs499-599-fall-2022/blob/main/homeworks/02-k-fold-cross-validation.org).
+
+
+```python
+import plotnine as p9
+train_name_order=["same", "all", "all_small", "other", "other_small"]
+def gg_error(feature_name):
+    feature_df = error_df.query("feature_name == '%s'"%feature_name).copy()
+    featureless = feature_df.query("algorithm=='featureless'")
+    grouped = featureless.groupby(
+        ['target_img', 'data_for_img']
+    )["error_percent"]
+    min_max_df = grouped.apply(lambda df: pd.DataFrame({
+        "xmin":[df.min()],
+        "xmax":[df.max()],
+        "ymin":[-np.inf],
+        "ymax":[np.inf],
+    })).reset_index()
+    feature_df["Algorithm"] = "\n"+feature_df.algorithm
+    feature_df["Train data"] = pd.Categorical(
+        feature_df.train_name, train_name_order)
+    gg = p9.ggplot()+\
+        p9.theme_bw()+\
+        p9.theme(panel_spacing=0.1)+\
+        p9.theme(figure_size=(10,5))+\
+        p9.geom_rect(
+            p9.aes(
+                xmin="xmin",
+                xmax="xmax",
+                ymin="ymin",
+                ymax="ymax"
+                ),
+            fill="grey",
+            data=min_max_df)+\
+        p9.geom_point(
+            p9.aes(
+                x="error_percent",
+                y="Train data"
+            ),
+        data=feature_df)+\
+        p9.scale_x_continuous(limits=[0,62])+\
+        p9.facet_grid("Algorithm ~ target_img + data_for_img", labeller="label_both")+\
+        p9.ggtitle("Features: "+feature_name)
+    p9_save(gg, feature_name)
+gg_error("easy")
+```
+
+![plot of easy](/assets/img/2022-11-03-generalization-to-new-subsets/easy.png)
+
+```python
+gg_error("impossible")
+```
+
+![plot of impossible](/assets/img/2022-11-03-generalization-to-new-subsets/impossible.png)
