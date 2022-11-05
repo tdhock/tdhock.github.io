@@ -57,19 +57,15 @@ structure.
 The Archive web page can be parsed via a regular expression,
 
 ```{r}
-extract_versions <- function(Archive){
-  nc::capture_all_str(
-    Archive,
-    "_",
-    version="[0-9.]+",
-    "[.]tar[.]gz</a>\\s+",
-    date.str=".*?",
-    "\\s")
-}
+naive.pattern <- list(
+  "_",
+  version="[0-9.]+",
+  "[.]tar[.]gz</a>\\s+",
+  date.str=".*?",
+  "\\s")
 ```
 
-In the function call above, the first argument is `Archive`, the data
-to parse, and the other arguments specify the regular expression:
+The code above specifies a regular expression:
 
 * `"_"` means to start by matching an underscore,
 * `version="[0-9.]+"` means to match one or more digits or dots, and
@@ -85,7 +81,45 @@ The end result is a table with one row for each matched package
 version, and one column for each of the named arguments:
 
 ```{r}
-extract_versions(Archive.data.table)
+(naive.dt <- nc::capture_all_str(Archive.data.table, naive.pattern))
+```
+
+Above the table shows all matches for the given pattern. How do we
+know that it has captured all the patterns? We can use a simpler
+pattern to get all of the packages,
+
+```{r}
+(tar.gz.vec <- grep("tar[.]gz", Archive.data.table, value=TRUE))
+```
+
+The output above shows 56 lines, which means there were some that were
+not captured by the regex. Which ones were they?
+
+```{r}
+(missed.subjects <- grep(
+  nc::var_args_list(naive.pattern)$pattern, 
+  tar.gz.vec, value=TRUE, invert=TRUE))
+```
+
+The output above indicates 3 missed subjects. Another way to determine
+we missed them would be to use that pattern as follows,
+
+```{r err, error=TRUE, purl=TRUE}
+nc::capture_first_vec(tar.gz.vec, naive.pattern)
+tar.gz.vec[c(5,6,7)]
+```
+
+Below we revise the pattern so that it matches all of the tar files,
+including those with a hyphen in the version,
+
+```{r}
+revised.pattern <- list(
+  "_",
+  version="[0-9.-]+",
+  "[.]tar[.]gz</a>\\s+",
+  date.str=".*?",
+  "\\s")
+nc::capture_first_vec(tar.gz.vec, revised.pattern)
 ```
 
 ## Analyze several packages for comparison
@@ -106,7 +140,7 @@ In the code below, we do the same thing for each package,
 ```{r}
 (release.dt <- compare.pkg.dt[, {
   Archive.pkg <- get_Archive(Package)
-  extract_versions(Archive.pkg)
+  nc::capture_all_str(Archive.pkg, revised.pattern)
 }, by=names(compare.pkg.dt)])
 ```
 
@@ -239,8 +273,8 @@ ggplot()+
   coord_cartesian(expand=FALSE)
 ```
 
-The heat map above shows a different display of the the same release
-data we saw earlier in the dot plot.
+The heat map above shows a summarized display of the release data we
+saw earlier in the dot plot.
 
 Next, we can apply a list of summary functions over all of the yearly
 counts, for each package, via

@@ -116,19 +116,15 @@ The Archive web page can be parsed via a regular expression,
 
 
 ```r
-extract_versions <- function(Archive){
-  nc::capture_all_str(
-    Archive,
-    "_",
-    version="[0-9.]+",
-    "[.]tar[.]gz</a>\\s+",
-    date.str=".*?",
-    "\\s")
-}
+naive.pattern <- list(
+  "_",
+  version="[0-9.]+",
+  "[.]tar[.]gz</a>\\s+",
+  date.str=".*?",
+  "\\s")
 ```
 
-In the function call above, the first argument is `Archive`, the data
-to parse, and the other arguments specify the regular expression:
+The code above specifies a regular expression:
 
 * `"_"` means to start by matching an underscore,
 * `version="[0-9.]+"` means to match one or more digits or dots, and
@@ -145,7 +141,7 @@ version, and one column for each of the named arguments:
 
 
 ```r
-extract_versions(Archive.data.table)
+(naive.dt <- nc::capture_all_str(Archive.data.table, naive.pattern))
 ```
 
 ```
@@ -207,6 +203,189 @@ extract_versions(Archive.data.table)
 ##     version   date.str
 ```
 
+Above the table shows all matches for the given pattern. How do we
+know that it has captured all the patterns? We can use a simpler
+pattern to get all of the packages,
+
+
+```r
+(tar.gz.vec <- grep("tar[.]gz", Archive.data.table, value=TRUE))
+```
+
+```
+##  [1] "      <a href=\"data.table_1.0.tar.gz\">data.table_1.0.tar.gz</a>      2006-04-14 22:03   16K  "     
+##  [2] "      <a href=\"data.table_1.1.tar.gz\">data.table_1.1.tar.gz</a>      2008-08-27 07:35   40K  "     
+##  [3] "      <a href=\"data.table_1.10.0.tar.gz\">data.table_1.10.0.tar.gz</a>   2016-12-03 10:05  2.9M  "  
+##  [4] "      <a href=\"data.table_1.10.2.tar.gz\">data.table_1.10.2.tar.gz</a>   2017-01-31 15:09  2.9M  "  
+##  [5] "      <a href=\"data.table_1.10.4-1.tar.gz\">data.table_1.10.4-1.tar.gz</a> 2017-10-09 22:36  2.9M  "
+##  [6] "      <a href=\"data.table_1.10.4-2.tar.gz\">data.table_1.10.4-2.tar.gz</a> 2017-10-12 14:03  2.9M  "
+##  [7] "      <a href=\"data.table_1.10.4-3.tar.gz\">data.table_1.10.4-3.tar.gz</a> 2017-10-27 07:40  2.9M  "
+##  [8] "      <a href=\"data.table_1.10.4.tar.gz\">data.table_1.10.4.tar.gz</a>   2017-02-01 14:52  2.9M  "  
+##  [9] "      <a href=\"data.table_1.11.0.tar.gz\">data.table_1.11.0.tar.gz</a>   2018-05-01 17:00  3.1M  "  
+## [10] "      <a href=\"data.table_1.11.2.tar.gz\">data.table_1.11.2.tar.gz</a>   2018-05-08 16:16  3.1M  "  
+## [11] "      <a href=\"data.table_1.11.4.tar.gz\">data.table_1.11.4.tar.gz</a>   2018-05-27 16:34  3.1M  "  
+## [12] "      <a href=\"data.table_1.11.6.tar.gz\">data.table_1.11.6.tar.gz</a>   2018-09-19 22:10  3.2M  "  
+## [13] "      <a href=\"data.table_1.11.8.tar.gz\">data.table_1.11.8.tar.gz</a>   2018-09-30 13:30  3.1M  "  
+## [14] "      <a href=\"data.table_1.12.0.tar.gz\">data.table_1.12.0.tar.gz</a>   2019-01-13 11:50  3.2M  "  
+## [15] "      <a href=\"data.table_1.12.2.tar.gz\">data.table_1.12.2.tar.gz</a>   2019-04-07 10:06  3.2M  "  
+## [16] "      <a href=\"data.table_1.12.4.tar.gz\">data.table_1.12.4.tar.gz</a>   2019-10-03 09:10  4.8M  "  
+## [17] "      <a href=\"data.table_1.12.6.tar.gz\">data.table_1.12.6.tar.gz</a>   2019-10-18 22:20  4.7M  "  
+## [18] "      <a href=\"data.table_1.12.8.tar.gz\">data.table_1.12.8.tar.gz</a>   2019-12-09 10:30  4.7M  "  
+## [19] "      <a href=\"data.table_1.13.0.tar.gz\">data.table_1.13.0.tar.gz</a>   2020-07-24 09:40  5.0M  "  
+## [20] "      <a href=\"data.table_1.13.2.tar.gz\">data.table_1.13.2.tar.gz</a>   2020-10-19 18:50  5.0M  "  
+## [21] "      <a href=\"data.table_1.13.4.tar.gz\">data.table_1.13.4.tar.gz</a>   2020-12-08 10:10  5.0M  "  
+## [22] "      <a href=\"data.table_1.13.6.tar.gz\">data.table_1.13.6.tar.gz</a>   2020-12-30 15:50  5.1M  "  
+## [23] "      <a href=\"data.table_1.14.0.tar.gz\">data.table_1.14.0.tar.gz</a>   2021-02-21 06:00  5.1M  "  
+## [24] "      <a href=\"data.table_1.2.tar.gz\">data.table_1.2.tar.gz</a>      2008-09-01 06:59   40K  "     
+## [25] "      <a href=\"data.table_1.4.1.tar.gz\">data.table_1.4.1.tar.gz</a>    2010-05-03 08:40  344K  "   
+## [26] "      <a href=\"data.table_1.5.1.tar.gz\">data.table_1.5.1.tar.gz</a>    2011-01-08 08:31  589K  "   
+## [27] "      <a href=\"data.table_1.5.2.tar.gz\">data.table_1.5.2.tar.gz</a>    2011-01-21 09:03  607K  "   
+## [28] "      <a href=\"data.table_1.5.3.tar.gz\">data.table_1.5.3.tar.gz</a>    2011-02-11 08:49  623K  "   
+## [29] "      <a href=\"data.table_1.5.tar.gz\">data.table_1.5.tar.gz</a>      2010-09-14 06:23  589K  "     
+## [30] "      <a href=\"data.table_1.6.1.tar.gz\">data.table_1.6.1.tar.gz</a>    2011-06-29 09:41  692K  "   
+## [31] "      <a href=\"data.table_1.6.2.tar.gz\">data.table_1.6.2.tar.gz</a>    2011-07-02 14:21  693K  "   
+## [32] "      <a href=\"data.table_1.6.3.tar.gz\">data.table_1.6.3.tar.gz</a>    2011-08-04 11:28  698K  "   
+## [33] "      <a href=\"data.table_1.6.4.tar.gz\">data.table_1.6.4.tar.gz</a>    2011-08-10 05:50  705K  "   
+## [34] "      <a href=\"data.table_1.6.5.tar.gz\">data.table_1.6.5.tar.gz</a>    2011-08-25 04:35  711K  "   
+## [35] "      <a href=\"data.table_1.6.6.tar.gz\">data.table_1.6.6.tar.gz</a>    2011-08-25 20:08  712K  "   
+## [36] "      <a href=\"data.table_1.6.tar.gz\">data.table_1.6.tar.gz</a>      2011-04-24 06:07  684K  "     
+## [37] "      <a href=\"data.table_1.7.1.tar.gz\">data.table_1.7.1.tar.gz</a>    2011-10-22 12:05  728K  "   
+## [38] "      <a href=\"data.table_1.7.10.tar.gz\">data.table_1.7.10.tar.gz</a>   2012-02-07 08:43  758K  "  
+## [39] "      <a href=\"data.table_1.7.2.tar.gz\">data.table_1.7.2.tar.gz</a>    2011-11-07 14:05  735K  "   
+## [40] "      <a href=\"data.table_1.7.3.tar.gz\">data.table_1.7.3.tar.gz</a>    2011-11-25 07:12  741K  "   
+## [41] "      <a href=\"data.table_1.7.4.tar.gz\">data.table_1.7.4.tar.gz</a>    2011-11-29 06:57  741K  "   
+## [42] "      <a href=\"data.table_1.7.5.tar.gz\">data.table_1.7.5.tar.gz</a>    2011-12-04 12:51  742K  "   
+## [43] "      <a href=\"data.table_1.7.6.tar.gz\">data.table_1.7.6.tar.gz</a>    2011-12-13 08:36  743K  "   
+## [44] "      <a href=\"data.table_1.7.7.tar.gz\">data.table_1.7.7.tar.gz</a>    2011-12-15 10:07  744K  "   
+## [45] "      <a href=\"data.table_1.7.8.tar.gz\">data.table_1.7.8.tar.gz</a>    2012-01-25 07:53  754K  "   
+## [46] "      <a href=\"data.table_1.7.9.tar.gz\">data.table_1.7.9.tar.gz</a>    2012-01-31 07:30  756K  "   
+## [47] "      <a href=\"data.table_1.8.0.tar.gz\">data.table_1.8.0.tar.gz</a>    2012-07-16 08:21  768K  "   
+## [48] "      <a href=\"data.table_1.8.10.tar.gz\">data.table_1.8.10.tar.gz</a>   2013-09-03 04:41  914K  "  
+## [49] "      <a href=\"data.table_1.8.2.tar.gz\">data.table_1.8.2.tar.gz</a>    2012-07-17 19:51  799K  "   
+## [50] "      <a href=\"data.table_1.8.4.tar.gz\">data.table_1.8.4.tar.gz</a>    2012-11-09 15:23  820K  "   
+## [51] "      <a href=\"data.table_1.8.6.tar.gz\">data.table_1.8.6.tar.gz</a>    2012-11-13 13:28  821K  "   
+## [52] "      <a href=\"data.table_1.8.8.tar.gz\">data.table_1.8.8.tar.gz</a>    2013-03-06 06:31  874K  "   
+## [53] "      <a href=\"data.table_1.9.2.tar.gz\">data.table_1.9.2.tar.gz</a>    2014-02-27 13:49  1.0M  "   
+## [54] "      <a href=\"data.table_1.9.4.tar.gz\">data.table_1.9.4.tar.gz</a>    2014-10-02 06:41  927K  "   
+## [55] "      <a href=\"data.table_1.9.6.tar.gz\">data.table_1.9.6.tar.gz</a>    2015-09-19 20:13  3.5M  "   
+## [56] "      <a href=\"data.table_1.9.8.tar.gz\">data.table_1.9.8.tar.gz</a>    2016-11-25 11:55  2.9M  "
+```
+
+The output above shows 56 lines, which means there were some that were
+not captured by the regex. Which ones were they?
+
+
+```r
+(missed.subjects <- grep(
+  nc::var_args_list(naive.pattern)$pattern, 
+  tar.gz.vec, value=TRUE, invert=TRUE))
+```
+
+```
+## [1] "      <a href=\"data.table_1.10.4-1.tar.gz\">data.table_1.10.4-1.tar.gz</a> 2017-10-09 22:36  2.9M  "
+## [2] "      <a href=\"data.table_1.10.4-2.tar.gz\">data.table_1.10.4-2.tar.gz</a> 2017-10-12 14:03  2.9M  "
+## [3] "      <a href=\"data.table_1.10.4-3.tar.gz\">data.table_1.10.4-3.tar.gz</a> 2017-10-27 07:40  2.9M  "
+```
+
+The output above indicates 3 missed subjects. Another way to determine
+we missed them would be to use that pattern as follows,
+
+
+```r
+nc::capture_first_vec(tar.gz.vec, naive.pattern)
+```
+
+```
+## Error in stop_for_na(make.na): subject(s) 5,6,7 (3 total) did not match regex below; to output missing rows use nomatch.error=FALSE
+## (?:(?:_([0-9.]+)[.]tar[.]gz</a>\s+(.*?)\s))
+```
+
+```r
+tar.gz.vec[c(5,6,7)]
+```
+
+```
+## [1] "      <a href=\"data.table_1.10.4-1.tar.gz\">data.table_1.10.4-1.tar.gz</a> 2017-10-09 22:36  2.9M  "
+## [2] "      <a href=\"data.table_1.10.4-2.tar.gz\">data.table_1.10.4-2.tar.gz</a> 2017-10-12 14:03  2.9M  "
+## [3] "      <a href=\"data.table_1.10.4-3.tar.gz\">data.table_1.10.4-3.tar.gz</a> 2017-10-27 07:40  2.9M  "
+```
+
+Below we revise the pattern so that it matches all of the tar files,
+including those with a hyphen in the version,
+
+
+```r
+revised.pattern <- list(
+  "_",
+  version="[0-9.-]+",
+  "[.]tar[.]gz</a>\\s+",
+  date.str=".*?",
+  "\\s")
+nc::capture_first_vec(tar.gz.vec, revised.pattern)
+```
+
+```
+##      version   date.str
+##       <char>     <char>
+##  1:      1.0 2006-04-14
+##  2:      1.1 2008-08-27
+##  3:   1.10.0 2016-12-03
+##  4:   1.10.2 2017-01-31
+##  5: 1.10.4-1 2017-10-09
+##  6: 1.10.4-2 2017-10-12
+##  7: 1.10.4-3 2017-10-27
+##  8:   1.10.4 2017-02-01
+##  9:   1.11.0 2018-05-01
+## 10:   1.11.2 2018-05-08
+## 11:   1.11.4 2018-05-27
+## 12:   1.11.6 2018-09-19
+## 13:   1.11.8 2018-09-30
+## 14:   1.12.0 2019-01-13
+## 15:   1.12.2 2019-04-07
+## 16:   1.12.4 2019-10-03
+## 17:   1.12.6 2019-10-18
+## 18:   1.12.8 2019-12-09
+## 19:   1.13.0 2020-07-24
+## 20:   1.13.2 2020-10-19
+## 21:   1.13.4 2020-12-08
+## 22:   1.13.6 2020-12-30
+## 23:   1.14.0 2021-02-21
+## 24:      1.2 2008-09-01
+## 25:    1.4.1 2010-05-03
+## 26:    1.5.1 2011-01-08
+## 27:    1.5.2 2011-01-21
+## 28:    1.5.3 2011-02-11
+## 29:      1.5 2010-09-14
+## 30:    1.6.1 2011-06-29
+## 31:    1.6.2 2011-07-02
+## 32:    1.6.3 2011-08-04
+## 33:    1.6.4 2011-08-10
+## 34:    1.6.5 2011-08-25
+## 35:    1.6.6 2011-08-25
+## 36:      1.6 2011-04-24
+## 37:    1.7.1 2011-10-22
+## 38:   1.7.10 2012-02-07
+## 39:    1.7.2 2011-11-07
+## 40:    1.7.3 2011-11-25
+## 41:    1.7.4 2011-11-29
+## 42:    1.7.5 2011-12-04
+## 43:    1.7.6 2011-12-13
+## 44:    1.7.7 2011-12-15
+## 45:    1.7.8 2012-01-25
+## 46:    1.7.9 2012-01-31
+## 47:    1.8.0 2012-07-16
+## 48:   1.8.10 2013-09-03
+## 49:    1.8.2 2012-07-17
+## 50:    1.8.4 2012-11-09
+## 51:    1.8.6 2012-11-13
+## 52:    1.8.8 2013-03-06
+## 53:    1.9.2 2014-02-27
+## 54:    1.9.4 2014-10-02
+## 55:    1.9.6 2015-09-19
+## 56:    1.9.8 2016-11-25
+##      version   date.str
+```
+
 ## Analyze several packages for comparison
 
 The code below defines a set of four packages for which we would like
@@ -227,7 +406,7 @@ In the code below, we do the same thing for each package,
 ```r
 (release.dt <- compare.pkg.dt[, {
   Archive.pkg <- get_Archive(Package)
-  extract_versions(Archive.pkg)
+  nc::capture_all_str(Archive.pkg, revised.pattern)
 }, by=names(compare.pkg.dt)])
 ```
 
@@ -240,11 +419,11 @@ In the code below, we do the same thing for each package,
 ##   4:  tidyverse      readr   0.2.1 2015-10-21
 ##   5:  tidyverse      readr   0.2.2 2015-10-22
 ##  ---                                         
-## 176: data.table data.table   1.8.8 2013-03-06
-## 177: data.table data.table   1.9.2 2014-02-27
-## 178: data.table data.table   1.9.4 2014-10-02
-## 179: data.table data.table   1.9.6 2015-09-19
-## 180: data.table data.table   1.9.8 2016-11-25
+## 179: data.table data.table   1.8.8 2013-03-06
+## 180: data.table data.table   1.9.2 2014-02-27
+## 181: data.table data.table   1.9.4 2014-10-02
+## 182: data.table data.table   1.9.6 2015-09-19
+## 183: data.table data.table   1.9.8 2016-11-25
 ```
 
 The result above is a data table with one row for each package
@@ -275,11 +454,11 @@ release.dt
 ##   4: data.table data.table   1.4.1 2010-05-03 2010-05-03  2010 data.table \ndata.table
 ##   5: data.table data.table     1.5 2010-09-14 2010-09-14  2010 data.table \ndata.table
 ##  ---                                                                                  
-## 176:  tidyverse      tidyr   1.1.1 2020-07-31 2020-07-31  2020      tidyr  \ntidyverse
-## 177:  tidyverse      tidyr   1.1.2 2020-08-27 2020-08-27  2020      tidyr  \ntidyverse
-## 178:  tidyverse      tidyr   1.1.3 2021-03-03 2021-03-03  2021      tidyr  \ntidyverse
-## 179:  tidyverse      tidyr   1.1.4 2021-09-27 2021-09-27  2021      tidyr  \ntidyverse
-## 180:  tidyverse      tidyr   1.2.0 2022-02-01 2022-02-01  2022      tidyr  \ntidyverse
+## 179:  tidyverse      tidyr   1.1.1 2020-07-31 2020-07-31  2020      tidyr  \ntidyverse
+## 180:  tidyverse      tidyr   1.1.2 2020-08-27 2020-08-27  2020      tidyr  \ntidyverse
+## 181:  tidyverse      tidyr   1.1.3 2021-03-03 2021-03-03  2021      tidyr  \ntidyverse
+## 182:  tidyverse      tidyr   1.1.4 2021-09-27 2021-09-27  2021      tidyr  \ntidyverse
+## 183:  tidyverse      tidyr   1.2.0 2022-02-01 2022-02-01  2022      tidyr  \ntidyverse
 ```
 
 To explain the new columns above,
@@ -298,6 +477,17 @@ The code below creates a basic version history plot,
 
 ```r
 library(ggplot2)
+```
+
+```
+## Warning: replacing previous import 'lifecycle::last_warnings' by 'rlang::last_warnings' when loading 'tibble'
+```
+
+```
+## Warning: replacing previous import 'lifecycle::last_warnings' by 'rlang::last_warnings' when loading 'pillar'
+```
+
+```r
 (gg.points <- ggplot()+
   theme(
     axis.text.x=element_text(hjust=1, angle=40))+
@@ -387,7 +577,7 @@ number of releases, then divide by the number of years,
 ```
 ##       project    Package year_min year_max year_length releases.per.year
 ##        <char>     <char>    <int>    <int>       <int>             <num>
-## 1: data.table data.table     2006     2021          53          3.312500
+## 1: data.table data.table     2006     2021          56          3.500000
 ## 2: deprecated       plyr     2008     2020          32          2.461538
 ## 3: deprecated   reshape2     2010     2017           9          1.125000
 ## 4:  tidyverse      dplyr     2014     2022          39          4.333333
@@ -516,7 +706,7 @@ each year, for each package,
 ##  9: data.table data.table  2014 data.table \ndata.table     2
 ## 10: data.table data.table  2015 data.table \ndata.table     1
 ## 11: data.table data.table  2016 data.table \ndata.table     2
-## 12: data.table data.table  2017 data.table \ndata.table     2
+## 12: data.table data.table  2017 data.table \ndata.table     5
 ## 13: data.table data.table  2018 data.table \ndata.table     5
 ## 14: data.table data.table  2019 data.table \ndata.table     5
 ## 15: data.table data.table  2020 data.table \ndata.table     4
@@ -603,8 +793,8 @@ ggplot()+
 
 ![plot of chunk heatMap](/assets/img/2022-11-02-release-history/heatMap-1.png)
 
-The heat map above shows a different display of the the same release
-data we saw earlier in the dot plot.
+The heat map above shows a summarized display of the release data we
+saw earlier in the dot plot.
 
 Next, we can apply a list of summary functions over all of the yearly
 counts, for each package, via
@@ -621,7 +811,7 @@ counts, for each package, via
 ```
 ##       project    Package N_min N_max    N_mean      N_sd N_length
 ##        <char>     <char> <num> <num>     <num>     <num>    <int>
-## 1: data.table data.table     0    17 3.1176471 4.0755729       17
+## 1: data.table data.table     0    17 3.2941176 4.0890816       17
 ## 2: deprecated       plyr     0     7 2.1333333 2.5597619       15
 ## 3: deprecated   reshape2     0     2 0.6923077 0.8548504       13
 ## 4:  tidyverse      dplyr     1     8 4.3333333 2.0000000        9
@@ -644,7 +834,7 @@ per.year.stats[overall.stats, .(
 ```
 ##       Package overall.mean mean.per.year
 ##        <char>        <num>         <num>
-## 1: data.table    3.1176471      3.312500
+## 1: data.table    3.2941176      3.500000
 ## 2:       plyr    2.1333333      2.461538
 ## 3:   reshape2    0.6923077      1.125000
 ## 4:      dplyr    4.3333333      4.333333
