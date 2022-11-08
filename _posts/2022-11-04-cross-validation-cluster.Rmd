@@ -1,0 +1,775 @@
+---
+layout: post
+title: Cross-validation experiments on the cluster
+description: NAU monsoon tutorial
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2022-11-04-cross-validation-cluster/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=200,
+  fig.path=fig.path,
+  fig.width=10,
+  fig.height=6)
+Sys.setenv(RETICULATE_PYTHON=if(.Platform$OS.type=="unix")
+  "/home/tdhock/.local/share/r-miniconda/envs/cs570s22/bin/python"
+  else "~/Miniconda3/envs/cs570s22/python.exe")
+reticulate::use_condaenv("cs570s22", required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+if(FALSE){
+  knitr::knit("2022-11-04-cross-validation-cluster.Rmd")
+}
+rendering <- in_render || in_knit
+```
+
+```{python echo=FALSE}
+repo_dir = r["repo.dir"]
+fig_path = r["fig.path"]
+import warnings
+def p9_save(g, name):
+    out_png = fig_path+name+".png"
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        g.save(out_png)
+    web_link = out_png.replace(repo_dir, "")
+    print('![plot of %s](%s)'%(name, web_link))
+# work-around for rendering plots under windows, which hangs within
+# emacs python shell: instead write a PNG file and view in browser.
+import os
+import webbrowser
+on_windows = os.name == "nt"
+rendering = r.rendering if 'r' in dir() else False
+using_agg = on_windows and not rendering
+if using_agg:
+    import matplotlib
+    matplotlib.use("agg")
+def show(g, name):
+    if not using_agg:
+        return p9_save(g, name)
+    g.save("tmp.png")
+    webbrowser.open('tmp.png')
+```
+
+This post is similar to [a previous
+post](https://tdhock.github.io/blog/2022/generalization-to-new-subsets/),
+but here we explain how to do the same computation on the cluster.
+
+A number of students have asked me how to properly code
+cross-validation, in order to compare generalization / accuracy of
+different machine learning algorithms, when trained on different data
+sets. For example in one project, a student is trying to build an
+algorithm for satellite image segmentation. For each pixel in each
+image, there should be a predicted class, which represents the
+intensity of forest fire burn in that area of the image. The student
+has about 10000 rows (pixels with labels), where each row comes from
+one of 9 different images. I suggested the following cross-validation
+experiment to determine the extent to which prediction error increases
+when generalizing to new images.
+
+Let's say there are 1000 rows,
+
+```{python}
+import pandas as pd
+import numpy as np
+import math
+
+N = 1000
+
+full_df = pd.DataFrame({
+    "label":np.tile(["burned","no burn"],int(N/2)),
+    "image":np.concatenate([
+        np.repeat(1, 0.4*N), np.repeat(2, 0.4*N),
+        np.repeat(3, 0.1*N), np.repeat(4, 0.1*N)
+    ])
+})
+
+len_series = full_df.groupby("image").apply(len)
+
+uniq_images = full_df.image.unique()
+
+n_images = len(uniq_images)
+
+full_df["signal"] = np.where(
+    full_df.label=="no burn", 0, 1
+)*full_df.image
+
+np.random.seed(1)
+
+for n_noise in range(n_images-1):
+    full_df["feature_easy_%s"%n_noise] = np.random.randn(N) 
+
+full_df["feature_easy_%s"%n_images] = np.random.randn(N)+full_df.signal 
+
+for img in uniq_images:
+    noise = np.random.randn(N)
+    full_df["feature_impossible_%s"%img] = np.where(
+        full_df.image == img, full_df.signal+noise, noise)
+
+n_folds=3
+def get_fold_ids(some_array):
+    n_out = len(some_array)
+    arange_vec = np.arange(n_folds)
+    tile_vec = np.tile(arange_vec, math.ceil(n_out/n_folds))[:n_out]
+    return pd.DataFrame({
+        "fold":np.random.permutation(tile_vec),
+        })
+
+new_fold_df = full_df.groupby("image").apply(get_fold_ids)
+full_df["fold"] = new_fold_df.reset_index().fold
+pd.crosstab(full_df.fold, full_df.image)
+full_df.columns 
+```
+
+The output above shows that the fold IDs have been assigned such that,
+for each image, there is an equal amount of data across folds. It also
+shows the columns of the full data, with four "easy" feature columns
+and four "impossible" feature columns, which were simulated using this
+model:
+
+* In the easy features, there is one signal feature, with the same
+  pattern across images (larger is more likely to be burned). There
+  are three other features which are just noise.
+* In the impossible features, each image has a corresponding signal
+  feature, so learning from one image does not help when making
+  predictions on another image.
+
+We would like to compute the test error, when predicting on any given
+image, and training on either that same image or other images. In the
+code below we create a DataFrame of parameters that we can run in
+parallel to do that computation,
+
+```{python}
+extract_df = full_df.columns.str.extract("feature_(?P<type>[^_]+)")
+feature_name_series = extract_df.value_counts().reset_index().type
+params_dict = {
+    "feature_name":feature_name_series,
+    "test_fold":range(n_folds),
+    "target_img":full_df.image.unique(),
+}
+params_df = pd.MultiIndex.from_product(
+    params_dict.values(),
+    names=params_dict.keys()
+).to_frame().reset_index(drop=True)
+params_df
+```
+
+The table above has three columns, for `feature_name`, `test_fold`,
+and `target_img`. Each row represents a particular set of test data
+and features that we can compute in parallel on the cluster. Each row
+can be used for the arguments of the function below, which computes
+the test error:
+
+```{python}
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+def compute_one(feature_name, test_fold, target_img):
+    is_feature = np.array([feature_name in col for col in full_df.columns])
+    is_all_test = full_df.fold == test_fold
+    is_dict = {"all_train":False,"all_test":True}
+    df_dict = {
+        set_name:full_df.loc[is_all_test==is_value]
+        for set_name, is_value in is_dict.items()}
+    is_same_dict = {
+        set_name:set_df.image == target_img
+        for set_name, set_df in df_dict.items()}
+    df_dict["test"] = df_dict["all_test"].loc[ is_same_dict["all_test"], :]
+    is_same_values_dict = {
+        "all":[True,False],
+        "same":[True],
+        "other":[False],
+        }
+    train_name_list = []
+    for data_name, is_same_values in is_same_values_dict.items():
+        train_name_list.append(data_name)
+        train_is_same = is_same_dict["all_train"].isin(is_same_values)
+        df_dict[data_name] = df_dict["all_train"].loc[train_is_same,:]
+    same_nrow, same_ncol = df_dict["same"].shape
+    for data_name in "all", "other":
+        small_name = data_name+"_small"
+        train_name_list.append(small_name)
+        train_df = df_dict[data_name]
+        all_indices = np.arange(len(train_df))
+        small_indices = np.random.permutation(all_indices)[:same_nrow]
+        df_dict[small_name] = train_df.iloc[small_indices,:]
+    xy_dict = {
+        data_name:(df.loc[:,is_feature], df.label)
+        for data_name, df in df_dict.items()}
+    test_X, test_y = xy_dict["test"]
+    error_df_list = []
+    for train_name in train_name_list:
+        train_X, train_y = xy_dict[train_name]
+        param_dicts = [{'n_neighbors':[x]} for x in range(1, 21)]
+        learner_dict = {
+            "linear_model":LogisticRegressionCV(),
+            "nearest_neighbors":GridSearchCV(
+                KNeighborsClassifier(), param_dicts)
+            }
+        featureless_pred = train_y.value_counts().index[0]
+        pred_dict = {
+            "featureless":np.repeat(featureless_pred, len(test_y)),
+        }
+        for algorithm, learner in learner_dict.items():
+            learner.fit(train_X, train_y)
+            pred_dict[algorithm] = learner.predict(test_X)
+        for algorithm, pred_vec in pred_dict.items():
+            error_vec = pred_vec != test_y
+            out_df=pd.DataFrame({
+                "feature_name":[feature_name],
+                "test_fold":[test_fold],
+                "target_img":[target_img],
+                "data_for_img":[len_series[target_img]],
+                "test_nrow":[len(test_y)],
+                "train_nrow":[len(train_y)],
+                "train_name":[train_name],
+                "algorithm":[algorithm],
+                "error_percent":[error_vec.mean()*100],
+                })
+            error_df_list.append(out_df)
+    return pd.concat(error_df_list)
+
+one_param_num=0
+one_param_series = params_df.iloc[one_param_num,:]
+one_param_dict = dict(one_param_series)
+compute_one(**one_param_dict)
+```
+
+To run this experiment on the monsoon cluster, [as previously
+described](https://tdhock.github.io/blog/2022/python-pandas-batchtools/),
+we need to create three python scripts.
+
+* `params.py` creates parameter combination CSV files, which is
+  `param_df` above.
+* `run_one.py` computes the result for one parameter combination,
+  which is the `compute_one` function above.
+* `analyze.py` combines the results for each parameter combination
+  into a single result for analysis/plotting.
+
+## Params script
+
+The `params.py` script contents are below. It creates `params.csv` and
+`full.csv` in both the original/current directory, and in the scratch
+sub-directory for this job.
+
+```python
+from datetime import datetime
+import pandas as pd
+import numpy as np
+import os
+import shutil
+import math
+N = 1000
+full_df = pd.DataFrame({
+    "label":np.tile(["burned","no burn"],int(N/2)),
+    "image":np.concatenate([
+        np.repeat(1, 0.4*N), np.repeat(2, 0.4*N),
+        np.repeat(3, 0.1*N), np.repeat(4, 0.1*N)
+    ])
+})
+uniq_images = full_df.image.unique()
+n_images = len(uniq_images)
+full_df["signal"] = np.where(
+    full_df.label=="no burn", 0, 1
+)*full_df.image
+np.random.seed(1)
+for n_noise in range(n_images-1):
+    full_df["feature_easy_%s"%n_noise] = np.random.randn(N) 
+full_df["feature_easy_%s"%n_images] = np.random.randn(N)+full_df.signal 
+for img in uniq_images:
+    noise = np.random.randn(N)
+    full_df["feature_impossible_%s"%img] = np.where(
+        full_df.image == img, full_df.signal+noise, noise)
+n_folds=3
+def get_fold_ids(some_array):
+    n_out = len(some_array)
+    arange_vec = np.arange(n_folds)
+    tile_vec = np.tile(arange_vec, math.ceil(n_out/n_folds))[:n_out]
+    return pd.DataFrame({
+        "fold":np.random.permutation(tile_vec),
+        })
+new_fold_df = full_df.groupby("image").apply(get_fold_ids)
+full_df["fold"] = new_fold_df.reset_index().fold
+extract_df = full_df.columns.str.extract("feature_(?P<type>[^_]+)")
+feature_name_series = extract_df.value_counts().reset_index().type
+params_dict = {
+    "feature_name":feature_name_series,
+    "test_fold":range(n_folds),
+    "target_img":full_df.image.unique(),
+}
+params_df = pd.MultiIndex.from_product(
+    params_dict.values(),
+    names=params_dict.keys()
+).to_frame().reset_index(drop=True)
+n_tasks, ncol = params_df.shape
+job_name = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+job_name = "gabi_demo"
+job_dir = "/scratch/th798/"+job_name
+results_dir = os.path.join(job_dir, "results")
+os.system("mkdir -p "+results_dir)
+params_csv = os.path.join(job_dir, "params.csv")
+params_df.to_csv(params_csv,index=False)
+full_csv = os.path.join(job_dir, "full.csv")
+full_df.to_csv(full_csv,index=False)
+run_one_contents = f"""#!/bin/bash
+#SBATCH --array=0-{n_tasks-1}
+#SBATCH --time=24:00:00
+#SBATCH --mem=8GB
+#SBATCH --cpus-per-task=1
+#SBATCH --output={job_dir}/slurm-%A_%a.out
+#SBATCH --error={job_dir}/slurm-%A_%a.out
+#SBATCH --job-name={job_name}
+cd {job_dir}
+python run_one.py $SLURM_ARRAY_TASK_ID
+"""
+run_one_sh = os.path.join(job_dir, "run_one.sh")
+with open(run_one_sh, "w") as run_one_f:
+    run_one_f.write(run_one_contents)
+run_one_py = os.path.join(job_dir, "run_one.py")
+run_orig_py = "run_one.py"
+shutil.copyfile(run_orig_py, run_one_py)
+orig_dir = os.path.dirname(run_orig_py)
+orig_results = os.path.join(orig_dir, "results")
+os.system("mkdir -p "+orig_results)
+orig_csv = os.path.join(orig_dir, "params.csv")
+params_df.to_csv(orig_csv,index=False)
+orig_full_csv = os.path.join(orig_dir, "full.csv")
+full_df.to_csv(orig_full_csv,index=False)
+msg=f"""created params CSV files and job scripts, test with
+python {run_orig_py} 0
+SLURM_ARRAY_TASK_ID=0 bash {run_one_sh}"""
+print(msg)
+```
+
+## Run one script
+
+The `run_one.py` script below computes the test error for one
+parameter combination, and saves the result in a CSV file under the
+results sub-directory.
+
+```python
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+import pandas as pd
+import numpy as np
+import sys
+full_df = pd.read_csv("full.csv")
+len_series = full_df.groupby("image").apply(len)
+params_df = pd.read_csv("params.csv")
+if len(sys.argv)==2:
+    prog_name, task_str = sys.argv
+    one_param_num = int(task_str)
+else:
+    print("len(sys.argv)=%d so trying first param"%len(sys.argv))
+    one_param_num = 0
+def compute_one(feature_name, test_fold, target_img):
+    is_feature = np.array([feature_name in col for col in full_df.columns])
+    is_all_test = full_df.fold == test_fold
+    is_dict = {"all_train":False,"all_test":True}
+    df_dict = {
+        set_name:full_df.loc[is_all_test==is_value]
+        for set_name, is_value in is_dict.items()}
+    is_same_dict = {
+        set_name:set_df.image == target_img
+        for set_name, set_df in df_dict.items()}
+    df_dict["test"] = df_dict["all_test"].loc[ is_same_dict["all_test"], :]
+    is_same_values_dict = {
+        "all":[True,False],
+        "same":[True],
+        "other":[False],
+        }
+    train_name_list = []
+    for data_name, is_same_values in is_same_values_dict.items():
+        train_name_list.append(data_name)
+        train_is_same = is_same_dict["all_train"].isin(is_same_values)
+        df_dict[data_name] = df_dict["all_train"].loc[train_is_same,:]
+    same_nrow, same_ncol = df_dict["same"].shape
+    for data_name in "all", "other":
+        small_name = data_name+"_small"
+        train_name_list.append(small_name)
+        train_df = df_dict[data_name]
+        all_indices = np.arange(len(train_df))
+        small_indices = np.random.permutation(all_indices)[:same_nrow]
+        df_dict[small_name] = train_df.iloc[small_indices,:]
+    xy_dict = {
+        data_name:(df.loc[:,is_feature], df.label)
+        for data_name, df in df_dict.items()}
+    test_X, test_y = xy_dict["test"]
+    error_df_list = []
+    for train_name in train_name_list:
+        train_X, train_y = xy_dict[train_name]
+        param_dicts = [{'n_neighbors':[x]} for x in range(1, 21)]
+        learner_dict = {
+            "linear_model":LogisticRegressionCV(),
+            "nearest_neighbors":GridSearchCV(
+                KNeighborsClassifier(), param_dicts)
+            }
+        featureless_pred = train_y.value_counts().index[0]
+        pred_dict = {
+            "featureless":np.repeat(featureless_pred, len(test_y)),
+        }
+        for algorithm, learner in learner_dict.items():
+            learner.fit(train_X, train_y)
+            pred_dict[algorithm] = learner.predict(test_X)
+        for algorithm, pred_vec in pred_dict.items():
+            error_vec = pred_vec != test_y
+            out_df=pd.DataFrame({
+                "feature_name":[feature_name],
+                "test_fold":[test_fold],
+                "target_img":[target_img],
+                "data_for_img":[len_series[target_img]],
+                "test_nrow":[len(test_y)],
+                "train_nrow":[len(train_y)],
+                "train_name":[train_name],
+                "algorithm":[algorithm],
+                "error_percent":[error_vec.mean()*100],
+                })
+            error_df_list.append(out_df)
+    return pd.concat(error_df_list)
+one_param_series = params_df.iloc[one_param_num,:]
+one_param_dict = dict(one_param_series)
+error_df = compute_one(**one_param_dict)
+out_file = f"results/{one_param_num}.csv"
+error_df.to_csv(out_file,index=False)
+```
+
+## Running the scripts on the cluster
+
+I put these scripts on the cluster and first ran the params script on
+a compute node,
+
+```shell
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ python params.py
+created params CSV files and job scripts, test with
+python run_one.py 0
+SLURM_ARRAY_TASK_ID=0 bash /scratch/th798/gabi_demo/run_one.sh
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ ls
+full.csv  params.csv  params.py  params.py~  results  run_one.py  run_one.py~
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ head *.csv
+==> full.csv <==
+label,image,signal,feature_easy_0,feature_easy_1,feature_easy_2,feature_easy_4,feature_impossible_1,feature_impossible_2,feature_impossible_3,feature_impossible_4,fold
+burned,1,1,1.6243453636632417,-0.15323616176709168,0.4895166181417871,0.9228930431325937,0.8596290051283277,-0.9247552836219404,-2.8510695426019397,0.9200785993027285,0
+no burn,1,0,-0.6117564136500754,-2.432508512647113,0.2387958575229506,0.2078252673129942,0.1416416728308121,1.1288898954126778,0.8231234224707914,0.018099210462107714,2
+burned,1,1,-0.5281717522634557,0.5079843366153792,-0.4481118060935155,1.9861959282732953,1.311968612695531,-1.1287912685853583,-0.27474362331135227,1.4758691196562372,0
+no burn,1,0,-1.0729686221561705,-0.3240323290200066,-0.6107950028484128,1.432756426622143,0.7690851809940938,-0.7247376220830969,-0.6881014060987432,0.3731985591697631,1
+burned,1,1,0.8654076293246785,-1.5110766079102027,-2.0299450691852883,1.528258499515287,1.5842857679634836,0.6235712087829979,1.120080836099801,1.2951831782590502,0
+no burn,1,0,-2.3015386968802827,-0.8714220655949576,0.607946586089135,-0.3677319748239843,1.7885926519290443,1.4379664640750502,0.2520928412415682,0.3277513475414965,0
+burned,1,1,1.74481176421648,-0.8648299414655872,-0.35410888355969,1.691720859369497,0.975368956749922,0.2741418428159658,0.7824721743051218,-0.08139687871858095,2
+no burn,1,0,-0.7612069008951028,0.6087490823417022,0.15258149012149536,-0.798346748264865,1.4902897985704333,-0.5044690146598694,-0.6030809780235539,0.1343882401809338,2
+burned,1,1,0.31903909605709857,0.5616380965234054,0.5012748490408392,1.2138177272479647,0.6789228521496135,1.1066709960295764,1.248752273820923,1.7385846511025012,2
+
+==> params.csv <==
+feature_name,test_fold,target_img
+easy,0,1
+easy,0,2
+easy,0,3
+easy,0,4
+easy,1,1
+easy,1,2
+easy,1,3
+easy,1,4
+easy,2,1
+```
+
+The output above indicates that the params script successfully created
+the `full.csv` and `params.csv` files. Now we test that the
+computation works for one parameter combination,
+
+```shell
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ python run_one.py 0
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ python run_one.py 5
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ head results/*.csv
+==> results/0.csv <==
+feature_name,test_fold,target_img,data_for_img,test_nrow,train_nrow,train_name,algorithm,error_percent
+easy,0,1,400,134,664,all,featureless,58.2089552238806
+easy,0,1,400,134,664,all,linear_model,29.1044776119403
+easy,0,1,400,134,664,all,nearest_neighbors,29.1044776119403
+easy,0,1,400,134,266,same,featureless,58.2089552238806
+easy,0,1,400,134,266,same,linear_model,33.582089552238806
+easy,0,1,400,134,266,same,nearest_neighbors,44.776119402985074
+easy,0,1,400,134,398,other,featureless,58.2089552238806
+easy,0,1,400,134,398,other,linear_model,32.83582089552239
+easy,0,1,400,134,398,other,nearest_neighbors,30.597014925373134
+
+==> results/5.csv <==
+feature_name,test_fold,target_img,data_for_img,test_nrow,train_nrow,train_name,algorithm,error_percent
+easy,1,2,400,133,668,all,featureless,55.639097744360896
+easy,1,2,400,133,668,all,linear_model,9.022556390977442
+easy,1,2,400,133,668,all,nearest_neighbors,17.293233082706767
+easy,1,2,400,133,267,same,featureless,55.639097744360896
+easy,1,2,400,133,267,same,linear_model,8.270676691729323
+easy,1,2,400,133,267,same,nearest_neighbors,19.548872180451127
+easy,1,2,400,133,401,other,featureless,55.639097744360896
+easy,1,2,400,133,401,other,linear_model,10.526315789473683
+easy,1,2,400,133,401,other,nearest_neighbors,16.541353383458645
+```
+
+The output above indicates that the computation worked for subsets 0
+and 5. Now we try a similar computation under scratch,
+
+```shell
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ SLURM_ARRAY_TASK_ID=1 bash /scratch/th798/gabi_demo/run_one.sh
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ SLURM_ARRAY_TASK_ID=20 bash /scratch/th798/gabi_demo/run_one.sh
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ head /scratch/th798/gabi_demo/results/*.csv
+==> /scratch/th798/gabi_demo/results/1.csv <==
+feature_name,test_fold,target_img,data_for_img,test_nrow,train_nrow,train_name,algorithm,error_percent
+easy,0,2,400,134,664,all,featureless,52.98507462686567
+easy,0,2,400,134,664,all,linear_model,17.91044776119403
+easy,0,2,400,134,664,all,nearest_neighbors,19.402985074626866
+easy,0,2,400,134,266,same,featureless,52.98507462686567
+easy,0,2,400,134,266,same,linear_model,18.65671641791045
+easy,0,2,400,134,266,same,nearest_neighbors,18.65671641791045
+easy,0,2,400,134,398,other,featureless,52.98507462686567
+easy,0,2,400,134,398,other,linear_model,18.65671641791045
+easy,0,2,400,134,398,other,nearest_neighbors,23.134328358208954
+
+==> /scratch/th798/gabi_demo/results/20.csv <==
+feature_name,test_fold,target_img,data_for_img,test_nrow,train_nrow,train_name,algorithm,error_percent
+impossible,2,1,400,133,668,all,featureless,43.609022556390975
+impossible,2,1,400,133,668,all,linear_model,42.857142857142854
+impossible,2,1,400,133,668,all,nearest_neighbors,48.1203007518797
+impossible,2,1,400,133,267,same,featureless,56.390977443609025
+impossible,2,1,400,133,267,same,linear_model,39.849624060150376
+impossible,2,1,400,133,267,same,nearest_neighbors,42.10526315789473
+impossible,2,1,400,133,401,other,featureless,43.609022556390975
+impossible,2,1,400,133,401,other,linear_model,51.127819548872175
+impossible,2,1,400,133,401,other,nearest_neighbors,51.8796992481203
+```
+
+The output above indicates the result was computed successfully. Next
+we send the job to the compute cluster,
+
+```shell
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ sbatch /scratch/th798/gabi_demo/run_one.sh
+Submitted batch job 55610497
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ squeue -j55610497
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+   55610497_[0-23]      core gabi_dem    th798 PD       0:00      1 (Priority)
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ squeue -j55610497
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+       55610497_23      core gabi_dem    th798  R       0:01      1 cn95
+       55610497_22      core gabi_dem    th798  R       0:01      1 cn100
+       55610497_21      core gabi_dem    th798  R       0:01      1 cn101
+       55610497_20      core gabi_dem    th798  R       0:01      1 cn101
+       55610497_19      core gabi_dem    th798  R       0:01      1 cn101
+       55610497_18      core gabi_dem    th798  R       0:01      1 cn102
+       55610497_17      core gabi_dem    th798  R       0:01      1 cn102
+       55610497_16      core gabi_dem    th798  R       0:01      1 cn102
+       55610497_15      core gabi_dem    th798  R       0:01      1 cn103
+       55610497_14      core gabi_dem    th798  R       0:01      1 cn103
+       55610497_13      core gabi_dem    th798  R       0:01      1 cn103
+       55610497_12      core gabi_dem    th798  R       0:01      1 cn104
+       55610497_11      core gabi_dem    th798  R       0:01      1 cn104
+       55610497_10      core gabi_dem    th798  R       0:01      1 cn104
+        55610497_9      core gabi_dem    th798  R       0:01      1 cn105
+        55610497_8      core gabi_dem    th798  R       0:01      1 cn105
+        55610497_7      core gabi_dem    th798  R       0:01      1 cn105
+        55610497_6      core gabi_dem    th798  R       0:01      1 cn6
+        55610497_5      core gabi_dem    th798  R       0:01      1 cn6
+        55610497_4      core gabi_dem    th798  R       0:01      1 cn6
+        55610497_3      core gabi_dem    th798  R       0:01      1 cn8
+        55610497_2      core gabi_dem    th798  R       0:01      1 cn20
+        55610497_1      core gabi_dem    th798  R       0:01      1 cn55
+        55610497_0      core gabi_dem    th798  R       0:01      1 cn55
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ squeue -j55610497
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ wc -l /scratch/th798/gabi_demo/results/*.csv
+   16 /scratch/th798/gabi_demo/results/0.csv
+   16 /scratch/th798/gabi_demo/results/10.csv
+   16 /scratch/th798/gabi_demo/results/11.csv
+   16 /scratch/th798/gabi_demo/results/12.csv
+   16 /scratch/th798/gabi_demo/results/13.csv
+   16 /scratch/th798/gabi_demo/results/14.csv
+   16 /scratch/th798/gabi_demo/results/15.csv
+   16 /scratch/th798/gabi_demo/results/16.csv
+   16 /scratch/th798/gabi_demo/results/17.csv
+   16 /scratch/th798/gabi_demo/results/18.csv
+   16 /scratch/th798/gabi_demo/results/19.csv
+   16 /scratch/th798/gabi_demo/results/1.csv
+   16 /scratch/th798/gabi_demo/results/20.csv
+   16 /scratch/th798/gabi_demo/results/21.csv
+   16 /scratch/th798/gabi_demo/results/22.csv
+   16 /scratch/th798/gabi_demo/results/23.csv
+   16 /scratch/th798/gabi_demo/results/2.csv
+   16 /scratch/th798/gabi_demo/results/3.csv
+   16 /scratch/th798/gabi_demo/results/4.csv
+   16 /scratch/th798/gabi_demo/results/5.csv
+   16 /scratch/th798/gabi_demo/results/6.csv
+   16 /scratch/th798/gabi_demo/results/7.csv
+   16 /scratch/th798/gabi_demo/results/8.csv
+   16 /scratch/th798/gabi_demo/results/9.csv
+  384 total
+```
+
+The output above indicates the jobs were running and then finished
+successfully. We then copy the results to the project directory,
+
+```shell
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ rsync -rvz /scratch/th798/gabi_demo/ ./
+sending incremental file list
+run_one.py
+run_one.sh
+slurm-55610497_0.out
+slurm-55610497_1.out
+slurm-55610497_10.out
+slurm-55610497_11.out
+slurm-55610497_12.out
+slurm-55610497_13.out
+slurm-55610497_14.out
+slurm-55610497_15.out
+slurm-55610497_16.out
+slurm-55610497_17.out
+slurm-55610497_18.out
+slurm-55610497_19.out
+slurm-55610497_2.out
+slurm-55610497_20.out
+slurm-55610497_21.out
+slurm-55610497_22.out
+slurm-55610497_23.out
+slurm-55610497_3.out
+slurm-55610497_4.out
+slurm-55610497_5.out
+slurm-55610497_6.out
+slurm-55610497_7.out
+slurm-55610497_8.out
+slurm-55610497_9.out
+results/0.csv
+results/1.csv
+results/10.csv
+results/11.csv
+results/12.csv
+results/13.csv
+results/14.csv
+results/15.csv
+results/16.csv
+results/17.csv
+results/18.csv
+results/19.csv
+results/2.csv
+results/20.csv
+results/21.csv
+results/22.csv
+results/23.csv
+results/3.csv
+results/4.csv
+results/5.csv
+results/6.csv
+results/7.csv
+results/8.csv
+results/9.csv
+
+sent 13,167 bytes  received 975 bytes  9,428.00 bytes/sec
+total size is 202,392  speedup is 14.31
+```
+
+We combine the results with the `analyze.py` script below,
+
+```python
+import pandas as pd
+import numpy as np
+from glob import glob
+out_df_list = []
+for out_csv in glob("results/*.csv"):
+    out_df_list.append(pd.read_csv(out_csv))
+error_df = pd.concat(out_df_list)
+error_df.to_csv("results.csv")
+print(error_df)
+import plotnine as p9
+train_name_order=["same", "all", "all_small", "other", "other_small"]
+def gg_error(feature_name):
+    feature_df = error_df.query("feature_name == '%s'"%feature_name).copy()
+    featureless = feature_df.query("algorithm=='featureless'")
+    grouped = featureless.groupby(
+        ['target_img', 'data_for_img']
+    )["error_percent"]
+    min_max_df = grouped.apply(lambda df: pd.DataFrame({
+        "xmin":[df.min()],
+        "xmax":[df.max()],
+        "ymin":[-np.inf],
+        "ymax":[np.inf],
+    })).reset_index()
+    feature_df["Algorithm"] = "\n"+feature_df.algorithm
+    feature_df["Train data"] = pd.Categorical(
+        feature_df.train_name, train_name_order)
+    gg = p9.ggplot()+\
+        p9.theme_bw()+\
+        p9.theme(panel_spacing=0.1)+\
+        p9.theme(figure_size=(10,5))+\
+        p9.geom_rect(
+            p9.aes(
+                xmin="xmin",
+                xmax="xmax",
+                ymin="ymin",
+                ymax="ymax"
+                ),
+            fill="grey",
+            data=min_max_df)+\
+        p9.geom_point(
+            p9.aes(
+                x="error_percent",
+                y="Train data"
+            ),
+        data=feature_df)+\
+        p9.scale_x_continuous(limits=[0,62])+\
+        p9.facet_grid("Algorithm ~ target_img + data_for_img", labeller="label_both")+\
+        p9.ggtitle("Features: "+feature_name)
+    gg.save(feature_name+".png")
+gg_error("easy")
+gg_error("impossible")
+```
+
+Running that script yields
+
+```shell
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ python analyze.py
+   feature_name  test_fold  ...          algorithm  error_percent
+0    impossible          0  ...        featureless      58.208955
+1    impossible          0  ...       linear_model      38.059701
+2    impossible          0  ...  nearest_neighbors      44.776119
+3    impossible          0  ...        featureless      58.208955
+4    impossible          0  ...       linear_model      34.328358
+..          ...        ...  ...                ...            ...
+10   impossible          2  ...       linear_model      36.363636
+11   impossible          2  ...  nearest_neighbors      36.363636
+12   impossible          2  ...        featureless      42.424242
+13   impossible          2  ...       linear_model      45.454545
+14   impossible          2  ...  nearest_neighbors      45.454545
+
+[360 rows x 9 columns]
+/home/th798/.conda/envs/emacs1/lib/python3.7/site-packages/plotnine/ggplot.py:721: PlotnineWarning: Saving 10 x 5 in image.
+/home/th798/.conda/envs/emacs1/lib/python3.7/site-packages/plotnine/ggplot.py:722: PlotnineWarning: Filename: easy.png
+/home/th798/.conda/envs/emacs1/lib/python3.7/site-packages/plotnine/ggplot.py:721: PlotnineWarning: Saving 10 x 5 in image.
+/home/th798/.conda/envs/emacs1/lib/python3.7/site-packages/plotnine/ggplot.py:722: PlotnineWarning: Filename: impossible.png
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ ls *.png
+easy.png  impossible.png
+(emacs1) th798@cn29:~/genomic-ml/gabi_demo$ cd ..
+(emacs1) th798@cn29:~/genomic-ml$ publish_data gabi_demo/
+gabi_demo/ has been published
+Any published files are now accessible at https://rcdata.nau.edu/th798
+```
+
+Actually, the files are published at
+https://rcdata.nau.edu/genomic-ml/gabi_demo/
+including:
+
+* [results.csv](https://rcdata.nau.edu/genomic-ml/gabi_demo/results.csv)
+  combined results CSV file, from all parallel jobs.
+* [easy.png](https://rcdata.nau.edu/genomic-ml/gabi_demo/easy.png)
+  plot of error rates when learning using easy features.
+* [impossible.png](https://rcdata.nau.edu/genomic-ml/gabi_demo/impossible.png)
+  plot of error rates when learning using impossible features.
+* other files include slurm out/log files, individual result CSV
+  files, and the input python script and CSV data files.
+
+In conclusion, we have shown how to use the cluster to compute a
+machine learning cross-validation experiment in parallel. In this
+example there was a relatively small data set, and only 24 parameter
+combinations that were run in parallel on the cluster nodes, so there
+are not a lot of time savings for doing this in parallel on the
+cluster. For larger machine learning experiments, involving more
+different data sets and algorithms, which results in hundreds or
+thousands of parameter combinations, this parallel computing setup can
+save a lot of time.
