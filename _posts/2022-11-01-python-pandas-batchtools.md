@@ -692,3 +692,49 @@ cluster, how to send the shell script to the cluster using `sbatch`,
 how to check if your jobs are still running, how to copy results from
 `/scratch` to `/projects`, and finally how to combine and analyze
 result files.
+
+## Update 8 Nov 2022
+
+In response to feedback from graduate student Daniel Kramer, 
+
+* Using Python 3.11 instead of python 3.10 apparently could result in
+  10% speedups? But maybe not all modules (numpy, pandas, etc) are
+  compatible with the new version, so I would suggest using an older
+  version (if it works, don't fix it, even for some constant factor
+  speedups).
+* The ideas presented here, having some script generate a bash script
+  to submit via sbatch, were implemented here in python, but could be
+  implemented in any language. For example in R I would recommend the
+  excellent
+  [batchtools](https://tdhock.github.io/blog/2020/monsoon-batchtools/)
+  package.
+* You can tell sbatch to start the (child) job only after another
+  (parent) job has finished successfully, using the
+  `--depend=afterok:123456` argument. In the example above the parent
+  job would be the `run_one.sh` script, and the child job would be the
+  `analyze.py` script. Typically I don't use this for machine learning
+  experiments, because the `analyze.py` does not usually take very
+  much time, and may be a better use of dev/debug time to just run
+  that interactively. I used this feature in my
+  [PeakSegPipeline](https://github.com/tdhock/PeakSegPipeline/blob/master/inst/templates/slurm-afterok.tmpl)
+  R package.
+* In the code above I stored parameters and results on disk using CSV,
+  for simplicity. As long as your data files are not too huge, then
+  this should not be an issue. If your data is so large that you do
+  not need/want to read it all into memory at once, you may consider
+  using several CSV files (read only the ones which are required), or
+  some binary file format like HDF, [which can be read by
+  pandas](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_hdf.html). Another
+  approach for large data would be to use CSV with some custom C/C++
+  code that only reads one line of the text file into memory at a time
+  (if your algorithm is compatible with that access pattern), which is
+  the approach used by the C++ code which implements the dynamic
+  progamming algorithm for changepoint detection in my
+  [PeakSegDisk](https://github.com/tdhock/PeakSegDisk) package.
+  Daniel mentioned "you'll save a lot of disk space and read/write
+  time" by moving from CSV to HDF/parquet (binary file formats), but
+  at least for the read/write time, that depends on the software you
+  use --- for example [data.table::fwrite in R can actually write a
+  CSV file faster than other software for writing a feather format
+  binary data file](https://h2o.ai/blog/fast-csv-writing-for-r/).
+
