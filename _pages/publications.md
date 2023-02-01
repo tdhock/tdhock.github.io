@@ -50,13 +50,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   Machine Learning,
   [Software](https://github.com/tdhock/rankSVMcompare),
   [Reproducible](https://github.com/tdhock/compare-paper).
-- Hillman J, Hocking TD. Optimizing ROC Curves with a Sort-Based
-  Surrogate Loss Function for Binary Classification and Changepoint
-  Detection. Under review at Journal of Machine Learning
-  Research, [Preprint
-  arXiv:2107.01285](https://arxiv.org/abs/2107.01285),
-  [Software](https://github.com/tdhock/aum),
-  [Reproducible](https://github.com/tdhock/max-generalized-auc).
 - Hocking TD and Killick R. Changepoint detection algorithms and
   applications in R. Textbook in preparation.
 - Hocking TD. A breakpoint detection error function for segmentation
@@ -88,6 +81,14 @@ description: Peer-reviewed papers and preprints with links to code and data
   Visualization.
   
 ### Accepted, in press
+
+- Hillman J, Hocking TD. Optimizing ROC Curves with a Sort-Based
+  Surrogate Loss Function for Binary Classification and Changepoint
+  Detection. Accepted in Journal of Machine Learning
+  Research, [Preprint
+  arXiv:2107.01285](https://arxiv.org/abs/2107.01285),
+  [Software](https://github.com/tdhock/aum),
+  [Reproducible](https://github.com/tdhock/max-generalized-auc).
 
 ### 2022
 
