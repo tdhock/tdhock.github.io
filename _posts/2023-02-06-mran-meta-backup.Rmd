@@ -1,0 +1,155 @@
+---
+layout: post
+title: Historical reverse imports
+description: Analysis of R package usage over time
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2022-05-13-rev-imp-history/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=7)
+if(FALSE){
+  knitr::knit("2023-02-06-mran-meta-backup.Rmd")
+}
+```
+
+The Microsoft R Application Network (MRAN) [time
+machine](https://mran.microsoft.com/documents/rro/reproducibility#timemachine)
+keeps daily CRAN snapshots, so we can access historical packages.rds
+files going back to its inception on September 17th, 2014. However it
+is going offline in July 2023, so here we explain how to make a
+backup.
+
+```{r}
+library(data.table)
+get_packages <- function(date){
+  date.str <- paste(date)
+  date.dir <- file.path("~/R/dt-deps-time", date.str)
+  dir.create(date.dir,showWarnings=FALSE,recursive=TRUE)
+  packages.rds <- file.path(date.dir, "packages.rds")
+  tryCatch({
+    if(!file.exists(packages.rds)){
+      u <- paste0(
+        "https://cran.microsoft.com/snapshot/",
+        date.str,
+        "/web/packages/packages.rds")
+      print(packages.rds)
+      download.file(u, packages.rds)
+    }
+    packages <- readRDS(packages.rds)
+    data.table(packages)
+  }, error=function(e){
+    NULL
+  })
+}
+pkg.dt <- get_packages("2014-09-17")
+names(pkg.dt)
+(rev.imports.str <- pkg.dt["data.table", on="Package"][["Reverse imports"]])
+```
+
+The code below downloads meta-data for every day,
+
+```{r}
+date.vec <- seq(as.IDate("2014-09-17"), as.IDate(Sys.time()), by="day")
+date.pkgs.list <- list()
+for(date.i in seq_along(date.vec)){
+  date <- date.vec[[date.i]]
+  pkg.dt <- get_packages(date)
+  if(is.data.table(pkg.dt)){
+    dim(TODO)
+  }else{
+    TODO
+  }
+  date.pkgs.list[[paste(date)]] <- pkg.dt
+}
+```
+
+Finally we can plug these count data into a ggplot,
+
+```{r}
+library(ggplot2)
+expand.days <- 11*30
+gg <- ggplot()+
+  theme_bw()+
+  scale_color_manual(values=c(
+    plyr="grey50",
+    reshape2="grey50",
+    data.table="blue",
+    tidyr="red",
+    readr="red",
+    dplyr="red"))+
+  scale_x_date(
+    breaks=seq(min(date.vec), max(date.vec), by="year"),
+    limits=as.IDate(c(
+      min(date.vec)-expand.days,
+      max(date.vec)+expand.days
+    )))
+gg.imports <- gg+
+  scale_y_log10()+
+  geom_line(aes(
+    date, n.rev.imports, color=Package),
+    size=1,
+    data=rev.imp.counts)
+directlabels::direct.label(
+  gg.imports,
+  directlabels::dl.combine("left.polygons", "right.polygons"))
+```
+
+We can see in the figure above that at the beginning of this time
+period, data.table had more reverse imports than readr/dplyr/tidyr
+(red), but fewer than plyr/reshape2 (grey). At the end of this time
+period we see the opposite pattern, which makes sense because
+plyr/reshape2 are now deprecated (it is actually surprising to see
+their reverse imports increasing over time). The number of reverse
+imports of dplyr surpassed that of data.table in 2015, and the same
+happened for tidyr in 2021.
+
+What about the rate of change each month? Overall each is clearly
+increasing, but which is increasing the most?
+
+```{r}
+(rev.imp.diff <- rev.imp.counts[, .(
+  diff.rev.imports=diff(n.rev.imports),
+  date=date[-1]
+), by=Package])
+gg.diff <- gg+
+  geom_line(aes(
+    date, diff.rev.imports, color=Package),
+    size=1,
+    data=rev.imp.diff)+
+  scale_y_continuous(
+    "Monthly change in number of reverse imports",
+    breaks=seq(0, 300, by=20))+
+  coord_cartesian(ylim=c(-5, 100))
+directlabels::direct.label(gg.diff, "right.polygons")
+```
+
+The figure above shows that the number of new reverse imports per
+month is around 10--100, with some variation over packages and over
+time.
+
+Overall this analysis shows a few interesting trends. 
+- All packages, even ones that were deprecated, tend to have increased
+  numbers of reverse imports over time.
+- Tidyverse packages did not have as many reverse imports as
+  data.table in 2015, but that trend has reversed in recent years.
+
+Exercise for the reader: modify the code above to perform the same
+analysis for package properties other than Reverse imports (for
+example, Reverse depends and Reverse suggests). Plot each time series
+in a different panel/facet of a ggplot. Hint: use .SDcols with sapply
+as below!
+
+```{r}
+some.cols <- c("Reverse imports", "Reverse depends", "Reverse suggests")
+pkg.dt[compare.pkgs, .(
+  dep.type=some.cols,
+  n.rev.deps=sapply(.SD, function(x)length(strsplit(x, ", ")[[1]]))
+), .SDcols=some.cols, by=.EACHI, on="Package"]
+```
