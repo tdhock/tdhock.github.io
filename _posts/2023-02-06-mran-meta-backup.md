@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Historical reverse imports
-description: Analysis of R package usage over time
+title: CRAN Meta-data
+description: Backing up MRAN
 ---
 
 
@@ -1387,7 +1387,7 @@ ggplot()+
     data=date.pkgs)
 ```
 
-![plot of chunk unnamed-chunk-3](/assets/img/2022-05-13-rev-imp-historyunnamed-chunk-3-1.png)
+![plot of chunk dimTimeSeries](/assets/img/2023-02-06-mran-meta-backupdimTimeSeries-1.png)
 
 We can see in the figure above that the number of packages (nrow) has
 been increasing over time until 2022, when there was a period where

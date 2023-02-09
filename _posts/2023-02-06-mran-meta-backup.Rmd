@@ -1,12 +1,12 @@
 ---
 layout: post
-title: Historical reverse imports
-description: Analysis of R package usage over time
+title: CRAN Meta-data
+description: Backing up MRAN
 ---
 
 ```{r Ropts, echo=FALSE}
 repo.dir <- normalizePath("..")
-post.id <- "2022-05-13-rev-imp-history/"
+post.id <- "2023-02-06-mran-meta-backup/"
 fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
@@ -76,7 +76,7 @@ for(date.i in seq_along(date.vec)){
 
 Finally we can plug these count data into a ggplot,
 
-```{r}
+```{r dimTimeSeries}
 library(ggplot2)
 ggplot()+
   theme_bw()+

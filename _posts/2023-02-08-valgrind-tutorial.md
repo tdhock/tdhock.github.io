@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Debugging C/C++ code
-description: Essential tools: valgrind and gdb
+title: Debugging C code
+description: valgrind and gdb are essential tools
 ---
 
 Today in office hours, I explained how to use valgrind, to a student
