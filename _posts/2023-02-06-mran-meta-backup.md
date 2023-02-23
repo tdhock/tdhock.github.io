@@ -6,16 +6,28 @@ description: Backing up MRAN
 
 
 
-The Microsoft R Application Network (MRAN) [time
-machine](https://mran.microsoft.com/documents/rro/reproducibility#timemachine)
-keeps daily CRAN snapshots, so we can access historical packages.rds
-files going back to its inception on September 17th, 2014. However it
-is going offline in July 2023, so here we explain how to make a
-backup.
+Recently I submitted a grant to the National Science Foundation, POSE
+program, about expanding the open-source ecosystem around the R
+package `data.table`. In the grant application, I made some figures
+that show how many other R packages depend on `data.table`, and I
+showed trends over time, thanks to the historical CRAN meta-data which
+is available on the The Microsoft R Application Network (MRAN) [time
+machine](https://mran.microsoft.com/documents/rro/reproducibility#timemachine),
+which keeps daily CRAN snapshots, so we can access historical
+packages.rds files going back to its inception on September
+17th, 2014. However it is going offline in July 2023, so here we
+explain how to make a backup.
 
 
 ```r
 library(data.table)
+```
+
+```
+## data.table 1.14.8 using 6 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+```r
 get_packages <- function(date){
   date.str <- paste(date)
   date.dir <- file.path("~/R/dt-deps-time", date.str)
@@ -104,8 +116,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2015-06-04/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2015-06-04/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -119,8 +131,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2015-06-05/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2015-06-05/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -134,8 +146,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2015-06-06/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2015-06-06/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -149,8 +161,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2015-06-07/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2015-06-07/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -164,8 +176,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2015-06-08/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2015-06-08/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -179,8 +191,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2015-07-03/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2015-07-03/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -194,8 +206,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2015-07-04/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2015-07-04/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -209,8 +221,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2015-07-05/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2015-07-05/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -224,8 +236,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2015-07-06/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2015-07-06/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -239,8 +251,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-05/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-05/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -254,8 +266,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-06/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-06/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -269,8 +281,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-07/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-07/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -284,8 +296,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-08/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-08/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -299,8 +311,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-09/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-09/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -314,8 +326,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-10/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-10/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -329,8 +341,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-11/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-11/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -344,8 +356,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-12/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-12/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -359,8 +371,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-13/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-13/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -374,8 +386,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-14/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-14/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -389,8 +401,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-15/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-15/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -404,8 +416,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-16/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-16/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -419,8 +431,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-05-17/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-05-17/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -434,8 +446,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2016-12-04/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2016-12-04/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -449,8 +461,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2017-03-29/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2017-03-29/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -464,8 +476,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2018-07-18/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2018-07-18/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -479,8 +491,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2019-06-27/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2019-06-27/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -494,8 +506,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2019-11-20/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2019-11-20/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -509,8 +521,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2019-12-31/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2019-12-31/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -524,8 +536,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-01-03/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-01-03/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -539,8 +551,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-02-05/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-02-05/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -554,8 +566,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-02-13/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-02-13/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -569,8 +581,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-02-18/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-02-18/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -584,8 +596,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-06-25/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-06-25/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -599,8 +611,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-08-06/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-08-06/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -614,8 +626,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-09-10/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-09-10/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -629,8 +641,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-09-16/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-09-16/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -644,8 +656,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-09-23/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-09-23/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -659,8 +671,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2020-11-14/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2020-11-14/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -674,8 +686,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-04/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-04/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -689,8 +701,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-05/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-05/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -704,8 +716,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-21/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-21/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -719,8 +731,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-22/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-22/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -734,8 +746,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-23/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-23/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -749,8 +761,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-24/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-24/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -764,8 +776,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-25/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-25/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -779,8 +791,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-26/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-26/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -794,8 +806,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-27/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-27/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -809,8 +821,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-28/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-28/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -824,8 +836,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-04-29/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-04-29/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -839,8 +851,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-08-14/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-08-14/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -854,8 +866,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-10-27/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-10-27/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -869,8 +881,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-11-09/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-11-09/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -884,8 +896,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-11-10/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-11-10/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -899,8 +911,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-11-12/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-11-12/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -914,8 +926,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2021-12-14/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2021-12-14/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -929,8 +941,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-03-01/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-03-01/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -944,8 +956,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-03-16/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-03-16/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -959,8 +971,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-03-19/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-03-19/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -974,8 +986,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-03-20/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-03-20/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -989,8 +1001,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-04-23/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-04-23/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1004,8 +1016,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-07-12/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-07-12/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1019,8 +1031,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-07-27/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-07-27/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1034,8 +1046,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-07-28/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-07-28/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1049,8 +1061,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-07-29/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-07-29/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1064,8 +1076,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-07-30/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-07-30/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1079,8 +1091,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-07-31/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-07-31/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1094,8 +1106,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-01/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-01/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1109,8 +1121,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-02/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-02/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1124,8 +1136,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-03/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-03/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1139,8 +1151,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-04/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-04/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1154,8 +1166,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-05/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-05/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1169,8 +1181,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-06/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-06/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1184,8 +1196,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-07/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-07/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1199,8 +1211,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-08/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-08/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1214,8 +1226,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-18/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-18/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1229,8 +1241,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-08-22/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-08-22/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1244,8 +1256,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-09-11/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-09-11/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1259,8 +1271,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-09-16/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-09-16/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1274,8 +1286,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-12-17/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-12-17/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1289,8 +1301,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2022-12-18/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2022-12-18/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1304,8 +1316,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2023-01-10/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2023-01-10/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1319,8 +1331,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2023-01-19/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2023-01-19/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1334,8 +1346,8 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2023-01-30/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2023-01-30/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
 ```
 
 ```
@@ -1349,8 +1361,25 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ## Warning in download.file(u, packages.rds): cannot open URL
-## 'https://cran.microsoft.com/snapshot/2023-02-02/web/packages/packages.rds': HTTP
-## status was '500 Internal Server Error'
+## 'https://cran.microsoft.com/snapshot/2023-02-02/web/packages/packages.rds':
+## HTTP status was '500 Internal Server Error'
+```
+
+```
+## [1] "~/R/dt-deps-time/2023-02-10/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-11/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-12/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-13/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-14/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-15/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-16/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-17/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-18/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-19/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-20/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-21/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-22/packages.rds"
+## [1] "~/R/dt-deps-time/2023-02-23/packages.rds"
 ```
 
 ```r
@@ -1359,18 +1388,17 @@ for(date.i in seq_along(date.vec)){
 
 ```
 ##             date variable value
-##           <IDat>   <char> <num>
 ##    1: 2014-09-17     nrow  5899
 ##    2: 2014-09-17     ncol    41
 ##    3: 2014-09-18     nrow  5902
 ##    4: 2014-09-18     ncol    41
 ##    5: 2014-09-19     nrow  5909
 ##   ---                          
-## 6132: 2023-02-07     ncol    67
-## 6133: 2023-02-08     nrow 19173
-## 6134: 2023-02-08     ncol    67
-## 6135: 2023-02-09     nrow 19181
-## 6136: 2023-02-09     ncol    67
+## 6160: 2023-02-21     ncol    67
+## 6161: 2023-02-22     nrow 19251
+## 6162: 2023-02-22     ncol    67
+## 6163: 2023-02-23     nrow 19265
+## 6164: 2023-02-23     ncol    67
 ```
 
 Finally we can plug these count data into a ggplot,
@@ -1396,3 +1424,21 @@ number of fields/features per package (ncol) has generally increased
 over time, from 41 in 2014, to more than 60 currently. (the one
 exception is when a field was removed in 2019)
 
+UPDATE 23 Feb 2023: I run a cron job every day on NAU Monsoon, and you
+can download the CRAN meta-data using:
+
+
+```r
+download.file(
+  "https://rcdata.nau.edu/genomic-ml/cran-meta/data/2023/02/23/packages.rds",
+  "packages.rds")
+packages.mat <- readRDS("packages.rds")
+nrow(packages.mat)
+```
+
+```
+## [1] 19265
+```
+
+The output above shows the number of packages available on the CRAN,
+as of 23 Feb 2023.

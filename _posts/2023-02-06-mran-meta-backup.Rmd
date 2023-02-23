@@ -19,12 +19,17 @@ if(FALSE){
 }
 ```
 
-The Microsoft R Application Network (MRAN) [time
-machine](https://mran.microsoft.com/documents/rro/reproducibility#timemachine)
-keeps daily CRAN snapshots, so we can access historical packages.rds
-files going back to its inception on September 17th, 2014. However it
-is going offline in July 2023, so here we explain how to make a
-backup.
+Recently I submitted a grant to the National Science Foundation, POSE
+program, about expanding the open-source ecosystem around the R
+package `data.table`. In the grant application, I made some figures
+that show how many other R packages depend on `data.table`, and I
+showed trends over time, thanks to the historical CRAN meta-data which
+is available on the The Microsoft R Application Network (MRAN) [time
+machine](https://mran.microsoft.com/documents/rro/reproducibility#timemachine),
+which keeps daily CRAN snapshots, so we can access historical
+packages.rds files going back to its inception on September
+17th, 2014. However it is going offline in July 2023, so here we
+explain how to make a backup.
 
 ```{r}
 library(data.table)
@@ -94,3 +99,16 @@ number of fields/features per package (ncol) has generally increased
 over time, from 41 in 2014, to more than 60 currently. (the one
 exception is when a field was removed in 2019)
 
+UPDATE 23 Feb 2023: I run a cron job every day on NAU Monsoon, and you
+can download the CRAN meta-data using:
+
+```{r}
+download.file(
+  "https://rcdata.nau.edu/genomic-ml/cran-meta/data/2023/02/23/packages.rds",
+  "packages.rds")
+packages.mat <- readRDS("packages.rds")
+nrow(packages.mat)
+```
+
+The output above shows the number of packages available on the CRAN,
+as of 23 Feb 2023.
