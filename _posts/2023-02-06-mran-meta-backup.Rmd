@@ -1,0 +1,114 @@
+---
+layout: post
+title: CRAN Meta-data
+description: Backing up MRAN
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2023-02-06-mran-meta-backup/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=7)
+if(FALSE){
+  knitr::knit("2023-02-06-mran-meta-backup.Rmd")
+}
+```
+
+Recently I submitted a grant to the National Science Foundation, POSE
+program, about expanding the open-source ecosystem around the R
+package `data.table`. In the grant application, I made some figures
+that show how many other R packages depend on `data.table`, and I
+showed trends over time, thanks to the historical CRAN meta-data which
+is available on the The Microsoft R Application Network (MRAN) [time
+machine](https://mran.microsoft.com/documents/rro/reproducibility#timemachine),
+which keeps daily CRAN snapshots, so we can access historical
+packages.rds files going back to its inception on September
+17th, 2014. However it is going offline in July 2023, so here we
+explain how to make a backup.
+
+```{r}
+library(data.table)
+get_packages <- function(date){
+  date.str <- paste(date)
+  date.dir <- file.path("~/R/dt-deps-time", date.str)
+  dir.create(date.dir,showWarnings=FALSE,recursive=TRUE)
+  packages.rds <- file.path(date.dir, "packages.rds")
+  tryCatch({
+    if(!file.exists(packages.rds)){
+      u <- paste0(
+        "https://cran.microsoft.com/snapshot/",
+        date.str,
+        "/web/packages/packages.rds")
+      print(packages.rds)
+      download.file(u, packages.rds)
+    }
+    packages <- readRDS(packages.rds)
+    data.table(packages)
+  }, error=function(e){
+    NULL
+  })
+}
+pkg.dt <- get_packages("2014-09-17")
+names(pkg.dt)
+(rev.imports.str <- pkg.dt["data.table", on="Package"][["Reverse imports"]])
+```
+
+The code below downloads meta-data for every day,
+
+```{r}
+date.vec <- seq(as.IDate("2014-09-17"), as.IDate(Sys.time()), by="day")
+date.pkgs.list <- list()
+for(date.i in seq_along(date.vec)){
+  date <- date.vec[[date.i]]
+  pkg.dt <- get_packages(date)
+  value <- if(is.data.table(pkg.dt)){
+    dim(pkg.dt)
+  }else{
+    c(0,0)
+  }
+  date.pkgs.list[[paste(date)]] <- data.table(
+    date,
+    variable=c("nrow","ncol"),
+    value)
+}
+(date.pkgs <- rbindlist(date.pkgs.list))
+```
+
+Finally we can plug these count data into a ggplot,
+
+```{r dimTimeSeries}
+library(ggplot2)
+ggplot()+
+  theme_bw()+
+  facet_grid(variable ~ ., scales="free")+
+  geom_point(aes(
+    date, value),
+    shape=21,
+    data=date.pkgs)
+```
+
+We can see in the figure above that the number of packages (nrow) has
+been increasing over time until 2022, when there was a period where
+more packages were removed than packages added. Also we see that the
+number of fields/features per package (ncol) has generally increased
+over time, from 41 in 2014, to more than 60 currently. (the one
+exception is when a field was removed in 2019)
+
+UPDATE 23 Feb 2023: I run a cron job every day on NAU Monsoon, and you
+can download the CRAN meta-data using:
+
+```{r}
+download.file(
+  "https://rcdata.nau.edu/genomic-ml/cran-meta/data/2023/02/23/packages.rds",
+  "packages.rds")
+packages.mat <- readRDS("packages.rds")
+nrow(packages.mat)
+```
+
+The output above shows the number of packages available on the CRAN,
+as of 23 Feb 2023.
