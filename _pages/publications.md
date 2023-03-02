@@ -54,9 +54,11 @@ description: Peer-reviewed papers and preprints with links to code and data
   detection using elastic-net regularized accelerated failure time
   models. In preparation, [Software](https://github.com/anujkhare/iregnet),
   [Reproducible](https://github.com/tdhock/iregnet-paper).
-- Rust K, Skirvin T, Hocking TD. Sub-quadratic Algorithms for
-  Optimizing Area Under the ROC Curve.
-- Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal Partitioning.
+- Rust K, Hocking TD. A Log-linear Gradient Descent Algorithm for
+  Unbalanced Binary Classification using the All Pairs Squared Hinge
+  Loss. Preprint [arXiv:2302.11062](https://arxiv.org/abs/2302.11062).
+- Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
+  Partitioning. [arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
 - Hocking TD. Exact line search for Area Under the Minimum with a
   margin parameter.
 - Barr J, Hocking TD, Morton G, Thatcher T, Shaw P. Classifying
