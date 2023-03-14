@@ -238,7 +238,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   [JCGS](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367),
   [Software](https://github.com/tdhock/animint),
   [Reproducible](https://github.com/tdhock/animint-paper),
-  [Interactive Figures](http://members.cbio.mines-paristech.fr/~thocking/animint-paper-figures/).
+  [Interactive Figures](https://rcdata.nau.edu/genomic-ml/public_html/animint-paper-figures/).
 - Depuydt P, Boeva V, Hocking TD, Cannoodt R, Ambros IM, Ambros PF,
   Asgharzadeh S, Attiyeh EF, Combaret V, Defferrari R, Fischer M, Hero
   B, Hogarty MD, Irwin MS, Koster J, Kreissman S, Ladenstein R,
