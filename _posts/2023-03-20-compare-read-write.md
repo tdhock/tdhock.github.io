@@ -46,7 +46,7 @@ computation time (bottom) for reading CSV files with N rows, where N
 is on the X/horizontal axis, and the different methods are shown in
 different colors (darker shades of red/purple/green mean more threads).
 
-![macbook read char vary rows ](/assets/img/2023-03-20-compare-read-write/macbook-read-char-vary-rows.png)
+![macbook read char vary rows ](/assets/img/2023-03-20-compare-read-write/macbook-read-char-vary-rows-thumb.png)
 
 The results above show that in terms of time, all methods are
 asymptotically equivalent (same slope). It is clear that
@@ -61,7 +61,7 @@ used in R for computation. The plot above was from my laptop, and the
 plot below is the same comparison, run on a compute node of the NAU
 Monsoon cluster.
 
-![cluster read char vary rows ](/assets/img/2023-03-20-compare-read-write/cluster-read-char-vary-rows.png)
+![cluster read char vary rows ](/assets/img/2023-03-20-compare-read-write/cluster-read-char-vary-rows-thumb.png)
 
 The plot above shows essentially the same results as the previous one,
 except that there are three different values for number of threads (1,
@@ -72,7 +72,7 @@ when reading larger number of rows with larger number of
 threads. Below we do another comparison, where we collapse each row
 after reading it into memory.
 
-![cluster read char vary rows collapse ](/assets/img/2023-03-20-compare-read-write/cluster-read-char-vary-rows-collapse.png)
+![cluster read char vary rows collapse ](/assets/img/2023-03-20-compare-read-write/cluster-read-char-vary-rows-collapse-thumb.png)
 
 The plot above shows little difference between the methods. In
 particular, the asymptotic difference in memory usage has disappeared,
@@ -85,7 +85,7 @@ In the comparison below, the data size that we vary on the X/horizontal
 axis is the number of columns (whereas in the previous section it was
 the number of rows).
 
-![cluster read char vary cols ](/assets/img/2023-03-20-compare-read-write/cluster-read-char-vary-cols.png)
+![cluster read char vary cols ](/assets/img/2023-03-20-compare-read-write/cluster-read-char-vary-cols-thumb.png)
 
 The plot above shows that both time and memory for most methods is
 linear, except time is super-linear for `utils::read.csv()`. There is
@@ -93,14 +93,14 @@ no advantage to using multiple threads. The plot above was for the NAU
 Monsoon compute node, and these trends are also observable when run on my
 laptop, as shown in the figure below.
 
-![macbook read char vary cols ](/assets/img/2023-03-20-compare-read-write/macbook-read-char-vary-cols.png)
+![macbook read char vary cols ](/assets/img/2023-03-20-compare-read-write/macbook-read-char-vary-cols-thumb.png)
 
 ### Write CSV, variable number of columns
 
 Below we show results for writing CSV files with different numbers of
 character columns (displayed on X/horizontal axis).
 
-![cluster write char vary cols ](/assets/img/2023-03-20-compare-read-write/cluster-write-char-vary-cols.png)
+![cluster write char vary cols ](/assets/img/2023-03-20-compare-read-write/cluster-write-char-vary-cols-thumb.png)
 
 There is an interesting trend in the plot above:
 `data.table::fwrite()` is asymptotically more efficient (smaller
@@ -108,19 +108,19 @@ slope) than both other methods. To more clearly see the asymptotic
 complexity class of each method, we can add reference lines, as shown
 below.
 
-![macbook write char vary cols ref ](/assets/img/2023-03-20-compare-read-write/macbook-write-char-vary-cols-ref.png)
+![macbook write char vary cols ref ](/assets/img/2023-03-20-compare-read-write/macbook-write-char-vary-cols-ref-thumb.png)
 
 The plot above shows that `data.table::fwrite()` is linear (`N`) in
 the number of columns, whereas the other methods are quadratic
 (`N^2`). The plot below shows similar trends for writing real columns.
 
-![macbook write real vary cols ](/assets/img/2023-03-20-compare-read-write/macbook-write-real-vary-cols.png)
+![macbook write real vary cols ](/assets/img/2023-03-20-compare-read-write/macbook-write-real-vary-cols-thumb.png)
 
 Finally, the plot below shows that all methods are asymptotically
 similar (linear time and constant memory), except `utils::write.csv()`
 has much larger memory usage.
 
-![macbook write real vary rows ](/assets/img/2023-03-20-compare-read-write/macbook-write-real-vary-rows.png)
+![macbook write real vary rows ](/assets/img/2023-03-20-compare-read-write/macbook-write-real-vary-rows-thumb.png)
 
 ## Conclusion
 
