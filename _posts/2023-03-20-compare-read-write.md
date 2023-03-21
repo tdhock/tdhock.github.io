@@ -81,18 +81,63 @@ data are actually used in the downstream R code computations.
 
 ### Reading CSV, variable number of columns
 
-In this comparison, the data size that we vary on the X/horizontal
+In the comparison below, the data size that we vary on the X/horizontal
 axis is the number of columns (whereas in the previous section it was
 the number of rows).
 
 ![cluster read char vary cols ](/assets/img/2023-03-20-compare-read-write/cluster-read-char-vary-cols.png)
+
+The plot above shows that both time and memory for most methods is
+linear, except time is super-linear for `utils::read.csv()`. There is
+no advantage to using multiple threads. The plot above was for the NAU
+Monsoon compute node, and these trends are also observable when run on my
+laptop, as shown in the figure below.
+
 ![macbook read char vary cols ](/assets/img/2023-03-20-compare-read-write/macbook-read-char-vary-cols.png)
 
+### Write CSV, variable number of columns
+
+Below we show results for writing CSV files with different numbers of
+character columns (displayed on X/horizontal axis).
+
 ![cluster write char vary cols ](/assets/img/2023-03-20-compare-read-write/cluster-write-char-vary-cols.png)
-![cluster write real vary cols ](/assets/img/2023-03-20-compare-read-write/cluster-write-real-vary-cols.png)
+
+There is an interesting trend in the plot above:
+`data.table::fwrite()` is asymptotically more efficient (smaller
+slope) than both other methods. To more clearly see the asymptotic
+complexity class of each method, we can add reference lines, as shown
+below.
+
 ![macbook write char vary cols ref ](/assets/img/2023-03-20-compare-read-write/macbook-write-char-vary-cols-ref.png)
+
+The plot above shows that `data.table::fwrite()` is linear (`N`) in
+the number of columns, whereas the other methods are quadratic
+(`N^2`). The plot below shows similar trends for writing real columns.
+
 ![macbook write real vary cols ](/assets/img/2023-03-20-compare-read-write/macbook-write-real-vary-cols.png)
+
+Finally, the plot below shows that all methods are asymptotically
+similar (linear time and constant memory), except `utils::write.csv()`
+has much larger memory usage.
+
 ![macbook write real vary rows ](/assets/img/2023-03-20-compare-read-write/macbook-write-real-vary-rows.png)
 
+## Conclusion
 
+Asymptotic performance testing is useful for identifying parts of code
+which can be improved in terms of time or memory usage. We have
+identified sub-optimal asymptotic complexity in the following
+functions:
 
+* `utils::read.csv()` could improve time usage, for large numbers of
+  columns.
+* `utils::write.csv()` and `readr::write_csv()` could improve both
+  time and memory usage, for large numbers of columns.
+* `utils::write.csv()` memory usage could be improved, for large
+  number of rows.
+
+We observed that `data.table::fread()` and `data.table::fwrite()`
+provide implementations of CSV reading/writing that are asymptotically
+optimal, in terms of both time and memory usage. For future work, we
+would like to create examples that more clearly show how
+multi-threading could be used for speed improvements.
