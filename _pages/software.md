@@ -23,7 +23,20 @@ methods described in my research papers (see below).
   email address.
 - I was president of the organizing committee for "R in Montreal 2018,"
   a local conference for useRs and developeRs.
-  
+
+### atime: Asymptotic Time and Memory Complexity
+
+To support our paper about testing and improving software for large
+data, using asymptotic time and memory measurement, we created the
+[atime](https://github.com/tdhock/atime) R package. This work led to
+the following improvements in base R:
+- write.csv is now linear in the number of columns (it was quadratic
+  before I wrote [an email to
+  R-devel](https://stat.ethz.ch/pipermail/r-devel/2023-March/082506.html),
+  which prompted Gabriel Becker to write a patch that was [committed
+  by Sebastian
+  Meyer](https://github.com/wch/r-source/commit/bc9f8a0f383fbad3fff26db7b554f0b827524d23)).
+
 ### xgboost: Extreme Gradient Boosting
 
 To support our paper about [Survival Regression with Accelerated
