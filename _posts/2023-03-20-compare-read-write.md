@@ -97,7 +97,8 @@ laptop, as shown in the figure below.
 
 ### Write CSV, variable number of columns
 
-Below we show results for writing CSV files with different numbers of
+Below we show results for writing CSV files (previous sections above
+were about reading rather than writing), with different numbers of
 character columns (displayed on X/horizontal axis).
 
 [![cluster write char vary cols ](/assets/img/2023-03-20-compare-read-write/cluster-write-char-vary-cols-thumb.png)](/assets/img/2023-03-20-compare-read-write/cluster-write-char-vary-cols.png)
