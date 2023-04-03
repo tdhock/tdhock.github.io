@@ -23,18 +23,46 @@ if(FALSE){
 
 To make my research about new machine learning algorithms more
 reproducible, I provide free/open-source implementations as R
-packages, published on the CRAN (Comprehensive R Archive Network).  In
+packages, published on the CRAN (Comprehensive R Archive Network). In
 2022, CRAN introduced a new policy that NEWS files must be in a
-standard format.
+standard format, so I started to get CRAN check messages as below,
+
+```
+Flavor: r-devel-linux-x86_64-debian-gcc
+Check: package subdirectories, Result: NOTE
+  Problems with news in 'NEWS':
+    Cannot process chunk/lines:
+      Line search C++ code review, exclude speed and line search vignettes from CRAN.
+    Cannot process chunk/lines:
+      aum_diffs_penalty now correctly handles denominator="rate" (previously
+    Cannot process chunk/lines:
+      there could be problems if there are more examples in error table than
+```
+
+The first few lines of my old NEWS file were
 
 ```{r}
-Sys.glob("*/NEWS")
-NEWS <- "animint2/NEWS"
+NEWS <- "~/R/aum/NEWS"
+NEWS <- "~/teaching/regex-tutorial/NEWS/old/aum.txt"
+NEWS.lines <- readLines(NEWS)
+cat(head(NEWS.lines, 19), sep="\n")
+```
+
+Since there is some structure, we can use a regular expression to
+parse the news items into a data table...
+
+```{r}
 change.dt <- nc::capture_all_str(
-  NEWS,
+  NEWS.lines,
   version="[0-9]+[.][0-9]+[.][0-9]+",
   "\\s*\n",
   changes="(?:[^0-9].*\n*)*")
+change.dt[, .(version, changes=substr(changes,1,50))]
+```
+
+...then convert them into the correct format,
+
+```{r}
 change.dt[, change.list := strsplit(changes, "\n\n")]
 change.dt[, new.str := sapply(change.list, function(change.vec){
   no.newline <- gsub("\n", " ", change.vec)
