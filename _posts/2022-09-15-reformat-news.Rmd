@@ -1,0 +1,48 @@
+---
+layout: post
+title: Reformatting NEWS files
+description: Regular expression example
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.name <- "2022-09-15-reformat-news"
+post.id <- paste0(post.name,"/")
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=7)
+if(FALSE){
+  post.Rmd <- paste0(post.name,".Rmd")
+  knitr::knit(post.Rmd)
+}
+```
+
+To make my research about new machine learning algorithms more
+reproducible, I provide free/open-source implementations as R
+packages, published on the CRAN (Comprehensive R Archive Network).  In
+2022, CRAN introduced a new policy that NEWS files must be in a
+standard format.
+
+```{r}
+Sys.glob("*/NEWS")
+NEWS <- "animint2/NEWS"
+change.dt <- nc::capture_all_str(
+  NEWS,
+  version="[0-9]+[.][0-9]+[.][0-9]+",
+  "\\s*\n",
+  changes="(?:[^0-9].*\n*)*")
+change.dt[, change.list := strsplit(changes, "\n\n")]
+change.dt[, new.str := sapply(change.list, function(change.vec){
+  no.newline <- gsub("\n", " ", change.vec)
+  with.dash <- paste0("- ", no.newline)
+  paste(with.dash, collapse="\n")
+})]
+change.dt[, new.block := sprintf(
+  "Changes in version %s\n\n%s", version, new.str)]
+out.str <- paste(change.dt$new.block, collapse="\n\n")
+cat(out.str)
+```
