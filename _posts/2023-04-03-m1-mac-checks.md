@@ -90,7 +90,63 @@ no problem,
 So that means Mac Builder is not doing the same thing as CRAN Flavor
 r-release-macos-arm64.
 
-R-hub is supposed to be able to check too, but I got some errors which
-seem to indicate that it is out of disk space, so I filed an
-[issue](https://github.com/r-hub/rhub/issues/554).
+R-hub is supposed to be able to check too. You can list the current
+platforms which are available for checking via
 
+```r
+> rhub::platforms()
+debian-clang-devel:
+  Debian Linux, R-devel, clang, ISO-8859-15 locale
+debian-gcc-devel:
+  Debian Linux, R-devel, GCC
+debian-gcc-devel-nold:
+  Debian Linux, R-devel, GCC, no long double
+debian-gcc-patched:
+  Debian Linux, R-patched, GCC
+debian-gcc-release:
+  Debian Linux, R-release, GCC
+fedora-clang-devel:
+  Fedora Linux, R-devel, clang, gfortran
+fedora-gcc-devel:
+  Fedora Linux, R-devel, GCC
+linux-x86_64-rocker-gcc-san:
+  Debian Linux, R-devel, GCC ASAN/UBSAN
+macos-highsierra-release:
+  macOS 10.13.6 High Sierra, R-release, brew
+macos-highsierra-release-cran:
+  macOS 10.13.6 High Sierra, R-release, CRAN's setup
+solaris-x86-patched:
+  Oracle Solaris 10, x86, 32 bit, R-release
+solaris-x86-patched-ods:
+  Oracle Solaris 10, x86, 32 bit, R release, Oracle Developer Studio 12.6
+ubuntu-gcc-devel:
+  Ubuntu Linux 20.04.1 LTS, R-devel, GCC
+ubuntu-gcc-release:
+  Ubuntu Linux 20.04.1 LTS, R-release, GCC
+ubuntu-rchk:
+  Ubuntu Linux 20.04.1 LTS, R-devel with rchk
+windows-x86_64-devel:
+  Windows Server 2022, R-devel, 64 bit
+windows-x86_64-oldrel:
+  Windows Server 2022, R-oldrel, 32/64 bit
+windows-x86_64-patched:
+  Windows Server 2022, R-patched, 32/64 bit
+windows-x86_64-release:
+  Windows Server 2022, R-release, 32/64 bit
+```
+
+The platform/command that I hoped would work to reproduce is 
+
+```r
+> rhub::check("path/to/pkg_1.0.tar.gz", "macos-highsierra-release-cran")
+...
+* checking re-building of vignette outputs ...Build timed out (after 10 minutes). Marking the build as failed.
+Build was aborted
+Pinging https://builder.r-hub.io/build/FAILURE/aum_2023.4.3.tar.gz-c02bbd656bec4f15bb0c5fa8000dadde/2023-04-03T21:04:18Z
+{"status":"ok"}
+Finished: FAILURE
+```
+
+Strangely, I get ok status, even though the build failed, is this a
+bug? In any case my "polygon edge not found" is not reproducible here,
+either.
