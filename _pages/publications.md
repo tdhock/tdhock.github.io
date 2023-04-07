@@ -84,10 +84,14 @@ description: Peer-reviewed papers and preprints with links to code and data
   LE, Luotto I, Liao C, Liang YS, Saynes VS, Huang X, Luo Y.
   Microbial carbon use efficiency promoting global soil carbon
   storage. Accepted in Nature.
+  
+### 2023
+
 - Hillman J, Hocking TD. Optimizing ROC Curves with a Sort-Based
   Surrogate Loss Function for Binary Classification and Changepoint
-  Detection. Accepted in Journal of Machine Learning
-  Research, [Preprint
+  Detection. [Journal of Machine Learning
+  Research](https://jmlr.org/papers/v24/21-0751.html)
+  24(70):1-24, 2023.  [Preprint
   arXiv:2107.01285](https://arxiv.org/abs/2107.01285),
   [Software](https://github.com/tdhock/aum),
   [Reproducible](https://github.com/tdhock/max-generalized-auc).

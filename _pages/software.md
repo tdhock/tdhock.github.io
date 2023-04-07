@@ -50,11 +50,12 @@ the AFT objectives in xgboost,
   
 ### aum: Area Under Min(FP,FN)
 
-To support our [paper](https://arxiv.org/abs/2107.01285) (in progress)
-about optimizing the Area Under Min(FP,FN) functions (a differentiable
-surrogate for ROC-AUC), we created the
-[aum](https://github.com/tdhock/aum) R package which has a C++
-implementation of directional derivatives, and a [python torch
+To support our [JMLR 2023
+paper](https://jmlr.org/papers/v24/21-0751.html) about optimizing the
+Area Under Min(FP,FN) functions (a differentiable surrogate for
+ROC-AUC), we created the [aum](https://github.com/tdhock/aum) R
+package which has a C++ implementation of directional derivatives, and
+a [python torch
 function](https://tdhock.github.io/blog/2022/torch-auto-grad-non-diff/)
 which can be used with automatic differentiation.
 

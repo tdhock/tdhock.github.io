@@ -12,8 +12,24 @@ another user-space package manager,
 difference?
 - spack builds from source downloaded from github (slow), whereas
   conda downloads pre-built binaries (fast).
-- conda's focus is on packages for data science, whereas spack's focus
-  is on HPC.
+- conda's focus is on packages for data science (including on
+  windows), whereas spack's focus is on HPC (no windows support).
+  
+I tried [Basic
+installation](https://spack-tutorial.readthedocs.io/en/latest/tutorial_basics.html)
+on cygwin and I got:
+
+```
+th798@cmp2986 ~/spack
+$ . share/spack/setup-env.sh
+-bash: $'\r': command not found
+-bash: $'\r': command not found
+-bash: $'\r': command not found
+-bash: share/spack/setup-env.sh: line 49: syntax error near unexpected token `$'{\r''
+'bash: share/spack/setup-env.sh: line 49: `_spack_shell_wrapper() {
+```
+  
+Related: [Using Spack to Replace Homebrew/Conda](https://spack.readthedocs.io/en/latest/replace_conda_homebrew.html).
   
 TODO: check to see if spack supports [these
 packages](https://github.com/tdhock/data.table-revdeps#software-required)
