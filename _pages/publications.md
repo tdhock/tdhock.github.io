@@ -73,8 +73,13 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Barr J, Shaw P, Abu-Khzam FN, Thatcher T, Hocking TD. Graph
   Embedding: A Methodological Survey.
 - Hocking TD. Teaching Hidden Markov Models Using Interactive Data
-  Visualization.
-  
+  Visualization. Under review at ICER.
+- Harshe K, Williams J, Hocking TD, Lerner Z. Predicting Neuromuscular
+  Engagement to Improve Gait Training with a Robotic Ankle
+  Exoskeleton. Under review at IEEE Robotics and Automation Letters.
+- Gabi Thibault, TD Hocking, Alexis Achim. Predicting forest burn from
+  satellite image data.
+ 
 ### Accepted, in press
 
 - Tao F, Huang Y, Hungate BA, Manzoni S, Frey SD, Schmidt MWI,
