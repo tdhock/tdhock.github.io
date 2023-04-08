@@ -36,7 +36,16 @@ Some more differences:
 - Pro has Intel Core2 Duo CPU P8600 @ 2.40GHz, 2008 has P7350 @ 2.00GHz
 
 I copied some photos into Pictures, and it crashes the whole computer
-when I double click them. (update?)
+when I double click them. same with firefox. Try Additional Drivers,
+NVIDIA Corporation: C79 [GeForce 9400M] (MacBook5, 1), change from
+Using X.Org X server to Using NVIDIA binary driver.
+
+firefox -> settings, 
+- privacy and security, 
+  - do not track always, 
+  - logins and password uncheck,
+add-ons and themes, ublock origin, add to firefox.
+- 
 
 sudo snap install emacs
 
@@ -49,3 +58,4 @@ Settings, trackpad, natural scrolling off.
 Region and Language, Manage installed languages, install,
 install/remove languages, French check mark, apply, logout,
 login. Input sources, +, French, French.
+
