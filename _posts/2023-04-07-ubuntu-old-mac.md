@@ -47,11 +47,12 @@ firefox -> settings,
 add-ons and themes, ublock origin, add to firefox.
 - 
 
-sudo snap install emacs
-
-sudo apt install git gnome-tweak-tool
-
 Settings, trackpad, natural scrolling off.
+
+```
+sudo snap install emacs
+sudo apt install git gnome-tweak-tool
+```
 
 [Caps lock is another control key](https://askubuntu.com/questions/33774/how-do-i-remap-the-caps-lock-and-ctrl-keys). gnome-tweaks -> Keyboard & Mouse -> Additional Layout Options, Ctrl position, Caps Lock as Ctrl.
 
@@ -59,3 +60,135 @@ Region and Language, Manage installed languages, install,
 install/remove languages, French check mark, apply, logout,
 login. Input sources, +, French, French.
 
+```
+ssh-keygen
+```
+
+firefox, github.com, settings, keys, new key, copy text from
+~/.ssh/id_rsa.pub and paste it in github, save.
+
+```
+git clone git@github.com:tdhock/tdhock.github.io
+git clone git@github.com:tdhock/dotfiles
+```
+
+emacs, put
+```elisp
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
+```
+
+M-x package-list-packages a for always
+
+ess
+poly-R
+poly-markdown
+poly-org
+autocomplete
+org
+
+then put the whole .emacs
+
+```elisp
+;; font size in units of 1/10 point.
+(set-face-attribute 'default nil :height 150)
+
+;; set frame startup size in number of characters
+(setq initial-frame-alist
+      '((top . 1) (left . 1) (width . 80) (height . 30)))
+
+;; Need to set style before loading ess.
+(setq ess-default-style 'RStudio)
+(load "ess-site.el")
+(define-key ess-r-mode-map "_" #'ess-insert-assign)
+(define-key inferior-ess-r-mode-map "_" #'ess-insert-assign)
+
+;; Most important ESS options.
+(setq ess-eval-visibly-p nil)
+(setq ess-ask-for-ess-directory nil)
+(setq ess-eldoc-show-on-symbol t)
+(setq ess-default-style 'RStudio)
+(setq ess-startup-directory 'default-directory);;https://github.com/emacs-ess/ESS/issues/1187#issuecomment-1038360149
+(with-eval-after-load "ess-mode" 
+  (define-key ess-mode-map ";" #'ess-insert-assign)
+  (define-key inferior-ess-mode-map ";" #'ess-insert-assign)
+  )
+(setq tab-always-indent 'complete)
+
+;; turn off pkg mode (eval bug TDH 16 Jan 2019)
+(setq ess-r-package-auto-activate nil)
+(setq ess-r-package-auto-set-evaluation-env nil)
+;; from http://ygc.name/2014/12/07/auto-complete-in-ess/
+(add-to-list 'load-path "~/auto-complete-1.3.1")
+(setq ess-use-auto-complete t)
+(require 'auto-complete)
+(require 'auto-complete-config)
+(add-to-list 'ac-dictionary-directories "~/auto-complete-1.3.1/dict")
+(ac-config-default)
+(auto-complete-mode)
+(setq ac-auto-start nil)
+;(setq ac-auto-start 5)
+(setq ac-quick-help-delay 2)
+(define-key ac-mode-map [C-tab] 'auto-complete);C-tab auto-complete
+(setq ess-describe-at-point-method 'tooltip);C-c C-d C-e C-e help window
+;; Emacs stuff.
+(global-set-key "\M-s" 'isearch-forward-regexp)
+(global-set-key "\M-r" 'isearch-backward-regexp)
+(if (functionp 'tool-bar-mode) (tool-bar-mode 0))
+(if (functionp 'scroll-bar-mode) (scroll-bar-mode -1))
+(menu-bar-mode 0)
+(setq inhibit-startup-screen t)
+(show-paren-mode 1)
+;; Org.
+(setq org-src-fontify-natively t)
+;; Compile with F9, view PDF with F10.
+(setq compilation-scroll-output t)
+(setq compile-command "make ")
+(setq compilation-read-command nil)
+(defun evince-pdf ()
+  "homebrew view pdf, convenient from latex"
+  (interactive)
+  ;;(expand-file-name "~/foo")
+  ;;(shell-quote-argument "some file with spaces")
+  (shell-command
+   (concat "evince " (file-name-sans-extension (buffer-file-name)) ".pdf &"))
+  )
+;; for compiling R packages.
+(global-set-key [f9] 'compile)
+(add-to-list 'safe-local-variable-values '(compile-command . "R -e \"Rcpp::compileAttributes('..')\" && R CMD INSTALL .. && R --vanilla < ../tests/testthat/test-CRAN.R"))
+(add-to-list 'safe-local-variable-values '(compile-command . "R -e \"devtools::test()\""))
+(global-set-key [f10] 'evince-pdf)
+;; turn on font-lock mode
+(when (fboundp 'global-font-lock-mode)
+  (global-font-lock-mode t))
+;; default to unified diffs
+(setq diff-switches "-u")
+;elisp
+(add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+(put 'downcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+;; https://github.com/melpa/melpa#usage
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+;;excute all code blocks in an Rmd.
+(defun Rmd-execute-all-code-blocks ()
+  "Run keyboard macro until bell rings"
+  (interactive)
+  (execute-kbd-macro "\C-s```{\C-n\C-a\C- \C-s```\C-p\C-e\C-c\C-r" 0)
+  )
+```
+
+```
+sudo snap install valgrind
+sudo apt install r-cran-rgl xorg-dev aptitude libcairo-dev default-jre default-jdk libpcre2-dev libcurl4-gnutls-dev  zlib1g-dev libtiff-dev texlive-latex-base fonts-inconsolata texlive-fonts-extra texinfo
+mkdir R
+cd R
+wget ftp://ftp.stat.math.ethz.ch/CRAN/src/base/R-4/R-4.2.3.tar.gz
+tar xf R-4.2.3.tar.gz
+./configure --prefix=$HOME --with-cairo --with-blas --with-lapack --enable-R-shlib --with-valgrind-instrumentation=2 --enable-memory-profiling
+```
+
+screen brightness buttons do not
+respond. https://www.debugpoint.com/2-ways-fix-laptop-brightness-problem-ubuntu-linux/
