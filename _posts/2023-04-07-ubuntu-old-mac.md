@@ -191,7 +191,14 @@ tar xf R-4.2.3.tar.gz
 ```
 
 screen brightness buttons do not
-respond. https://www.debugpoint.com/2-ways-fix-laptop-brightness-problem-ubuntu-linux/
+respond. https://www.debugpoint.com/2-ways-fix-laptop-brightness-problem-ubuntu-linux/ method 2 worked for changing the brightness
+
+```
+sudo add-apt-repository ppa:apandada1/brightness-controller
+sudo apt update
+sudo apt install brightness-controller
+brightness-controller 
+```
 
 NAU VPN
 
@@ -205,7 +212,7 @@ get private key
 rsync -rvz monsoon.hpc.nau.edu:.gnupg/ ~/.gnupg/
 ```
 
-Tell git to sign commits
+Tell git to sign commits, [github docs](https://docs.github.com/en/authentication/managing-commit-signature-verification/telling-git-about-your-signing-key)
 
 ```
 git config --global user.signingkey 680AA3B73AA19C4F
