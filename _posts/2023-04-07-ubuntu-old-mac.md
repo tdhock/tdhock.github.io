@@ -192,3 +192,9 @@ tar xf R-4.2.3.tar.gz
 
 screen brightness buttons do not
 respond. https://www.debugpoint.com/2-ways-fix-laptop-brightness-problem-ubuntu-linux/
+
+NAU VPN
+
+```
+sudo apt install network-manager-openconnect-gnome
+```
