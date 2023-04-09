@@ -198,3 +198,16 @@ NAU VPN
 ```
 sudo apt install network-manager-openconnect-gnome
 ```
+
+get private key
+
+```
+rsync -rvz monsoon.hpc.nau.edu:.gnupg/ ~/.gnupg/
+```
+
+Tell git to sign commits
+
+```
+git config --global user.signingkey 680AA3B73AA19C4F
+git config commit.gpgsign true
+```
