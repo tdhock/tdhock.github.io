@@ -42,12 +42,19 @@ Students should expect to do the following:
   deliver 60 minute scientific presentations, and get feedback from
   other research students in the lab who are working on similar
   topics. 
+- frequently ask questions about anything you do not completely
+  understand (theoretical concepts, statistical models, data sets,
+  algorithms, coding techniques, etc). In research the goal is to
+  create new knowledge, so being honest about what you don't know, and
+  asking questions to help clarify your understanding, are important
+  steps in advancing the frontier of knowledge (both your knowledge,
+  and our collective knowledge).
 - make backups of all data which is important for doing the above
   activities, by keeping copies in 2+ of the following: 1. your
   personal computer, 2. github, 3. [cloud
   storage](https://tdhock.github.io/blog/2022/cloud-storage/),
   4. external hard drive,
-  5. [monsoon](https://in.nau.edu/arc/obtaining-an-account/).
+  5. [monsoon](https://in.nau.edu/arc/obtaining-an-account/). 
 
 I am aware of differences between research projects and student
 capabilities, and I plan to adapt my approach to the specific needs of
@@ -67,3 +74,10 @@ progress of the specific research idea/project you are working on.
   and advisor, and I want you to succeed, so you should feel free to
   tell me how you are doing and what we can do together to improve
   your chances for success.
+  
+If you have questions about how to do any of the above, I expect that
+you will ask me, and you should expect that I take the time to show
+you.
+
+Updated 21 April 2023: added that students are expected to ask
+questions and keep backups of all important data.
