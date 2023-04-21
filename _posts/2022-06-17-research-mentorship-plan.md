@@ -50,11 +50,12 @@ Students should expect to do the following:
   steps in advancing the frontier of knowledge (both your knowledge,
   and our collective knowledge).
 - make backups of data which are important for doing the above
-  activities, by keeping copies in 2+ of the following: (1) your
-  personal computer, (2) github, (3) [cloud
-  storage](https://tdhock.github.io/blog/2022/cloud-storage/), (4)
-  external hard drive, (5) 
-  [monsoon](https://in.nau.edu/arc/obtaining-an-account/).
+  activities, by keeping copies in 2+ of the following: 
+  (1) your personal computer, 
+  (2) github, 
+  (3) [cloud storage](https://tdhock.github.io/blog/2022/cloud-storage/), 
+  (4) external hard drive, 
+  (5) [monsoon](https://in.nau.edu/arc/obtaining-an-account/).
 
 I am aware of differences between research projects and student
 capabilities, and I plan to adapt my approach to the specific needs of
