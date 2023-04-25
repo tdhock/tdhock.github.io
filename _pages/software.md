@@ -12,7 +12,7 @@ methods described in my research papers (see below).
 ### R and statistical software research community
 
 - Since 2021, I am an editor for [rOpenSci Statistical
-  Software](https://ropenscilabs.github.io/statistical-software-review-book/#welcome).
+  Software](https://ropensci.org/stat-software-review/).
 - Since 2018, I am an editor for [Journal of Statistical
   Software](https://www.jstatsoft.org/about/editorialTeam).
 - Since 2012, I am co-administrator and mentor for the
