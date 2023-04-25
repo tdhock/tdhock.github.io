@@ -29,13 +29,18 @@ methods described in my research papers (see below).
 To support our paper about testing and improving software for large
 data, using asymptotic time and memory measurement, we created the
 [atime](https://github.com/tdhock/atime) R package. This work led to
-the following improvements in base R:
-- write.csv is now linear in the number of columns (it was quadratic
+the following improvements in base R, since version 4.3.0 in 2023:
+- `write.csv` is linear in the number of columns (it was quadratic
   before I wrote [an email to
   R-devel](https://stat.ethz.ch/pipermail/r-devel/2023-March/082506.html),
-  which prompted Gabriel Becker to write a patch that was [committed
-  by Sebastian
-  Meyer](https://github.com/wch/r-source/commit/bc9f8a0f383fbad3fff26db7b554f0b827524d23)).
+  which prompted Gabriel Becker to write a patch that was
+  [committed](https://github.com/wch/r-source/commit/bc9f8a0f383fbad3fff26db7b554f0b827524d23)
+  by Sebastian Meyer).
+- Replacing columns, `df[j]<-value`, for a data frame `df` with a
+  large number of columns is now linear, thanks to a fix
+  [committed](https://github.com/wch/r-source/commit/008cb90ef7623976a217dd84d50d5f5fd1a9f222)
+  by Sebastian Meyer (before my report, it was log-quadratic in number
+  of columns to replace).
 
 ### xgboost: Extreme Gradient Boosting
 
