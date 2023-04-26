@@ -142,3 +142,18 @@ provide implementations of CSV reading/writing that are asymptotically
 optimal, in terms of both time and memory usage. For future work, we
 would like to create examples that more clearly show how
 multi-threading could be used for speed improvements.
+
+UPDATE 26 April 2023: Sebastian Meyer and Gabe Becker have helped to
+fix some of the issues in write.csv (and a related issue with
+replacing columns of data frames). I computed the [updated
+benchmarks](https://rcdata.nau.edu/genomic-ml/atime/vignettes/compare-data.table-tidyverse.html)
+using
+
+```
+th798@wind:~$ srun -t 24:00:00 --mem=32GB --cpus-per-task=4 --pty bash          srun: job 64668716 queued and waiting for resources
+srun: job 64668716 has been allocated resources
+th798@cn63:~$ module load anaconda3
+th798@cn63:~$ conda activate emacs1
+(emacs1) th798@cn63:~$ R -e 'rmarkdown::render("~/R/atime/vignettes/compare-data.table-tidyverse.Rmd")'
+```
+
