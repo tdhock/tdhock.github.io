@@ -188,6 +188,8 @@ cd R
 wget ftp://ftp.stat.math.ethz.ch/CRAN/src/base/R-4/R-4.2.3.tar.gz
 tar xf R-4.2.3.tar.gz
 ./configure --prefix=$HOME --with-cairo --with-blas --with-lapack --enable-R-shlib --with-valgrind-instrumentation=2 --enable-memory-profiling
+make
+make install
 ```
 
 screen brightness buttons do not
@@ -216,5 +218,7 @@ Tell git to sign commits, [github docs](https://docs.github.com/en/authenticatio
 
 ```
 git config --global user.signingkey 680AA3B73AA19C4F
-git config commit.gpgsign true
+git config --global commit.gpgsign true
+git config --global user.email "toby.hocking@r-project.org"
+git config --global user.name "Toby Dylan Hocking"
 ```
