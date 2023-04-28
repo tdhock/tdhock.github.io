@@ -182,11 +182,15 @@ then put the whole .emacs
 
 ```
 sudo snap install valgrind
-sudo apt install r-cran-rgl xorg-dev aptitude libcairo-dev default-jre default-jdk libpcre2-dev libcurl4-gnutls-dev  zlib1g-dev libtiff-dev texlive-latex-base fonts-inconsolata texlive-fonts-extra texinfo
+# below for compiling base R.
+sudo apt install r-cran-rgl xorg-dev aptitude libcairo-dev default-jre default-jdk libpcre2-dev libcurl4-gnutls-dev  zlib1g-dev libtiff-dev texlive-latex-base fonts-inconsolata texlive-fonts-extra texinfo 
+# below for compiling common packages (devtools etc)
+sudo apt install libharfbuzz-dev libfribidi-dev libssl-dev libxml2-dev
 mkdir R
 cd R
-wget ftp://ftp.stat.math.ethz.ch/CRAN/src/base/R-4/R-4.2.3.tar.gz
-tar xf R-4.2.3.tar.gz
+wget https://cloud.r-project.org/src/base/R-4/R-4.3.0.tar.gz
+tar xf R-4.3.0.tar.gz
+cd R-4.3.0
 ./configure --prefix=$HOME --with-cairo --with-blas --with-lapack --enable-R-shlib --with-valgrind-instrumentation=2 --enable-memory-profiling
 make
 make install
