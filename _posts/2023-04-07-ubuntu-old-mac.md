@@ -70,6 +70,9 @@ firefox, github.com, settings, keys, new key, copy text from
 ```
 git clone git@github.com:tdhock/tdhock.github.io
 git clone git@github.com:tdhock/dotfiles
+cat dotfiles/.bashrc >> ~/.bashrc
+mkdir bin
+echo 'PATH=$HOME/bin:$PATH' >> ~/.bashrc
 ```
 
 emacs, put
@@ -225,4 +228,15 @@ git config --global user.signingkey 680AA3B73AA19C4F
 git config --global commit.gpgsign true
 git config --global user.email "toby.hocking@r-project.org"
 git config --global user.name "Toby Dylan Hocking"
+```
+
+maybe [build a newer gcc](https://iamsorush.com/posts/build-gcc11/).
+
+maybe install miniconda.
+
+```
+conda create -n new-env
+conda activate new-env
+conda install python=3.10
+pip install plotnine
 ```
