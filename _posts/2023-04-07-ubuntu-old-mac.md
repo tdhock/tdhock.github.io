@@ -186,9 +186,9 @@ then put the whole .emacs
 ```
 sudo snap install valgrind
 # below for compiling base R.
-sudo apt install r-cran-rgl xorg-dev aptitude libcairo-dev default-jre default-jdk libpcre2-dev libcurl4-gnutls-dev  zlib1g-dev libtiff-dev texlive-latex-base fonts-inconsolata texlive-fonts-extra texinfo 
+sudo apt install r-cran-rgl xorg-dev aptitude libcairo-dev tk-dev libpango1.0-dev default-jre default-jdk libpcre2-dev libcurl4-gnutls-dev zlib1g-dev libtiff-dev texlive-latex-base fonts-inconsolata texlive-fonts-extra texinfo 
 # below for compiling common packages (devtools etc)
-sudo apt install libharfbuzz-dev libfribidi-dev libssl-dev libxml2-dev
+sudo apt install libharfbuzz-dev libfribidi-dev libssl-dev libxml2-dev libssh2-1-dev libgit2-dev
 mkdir R
 cd R
 wget https://cloud.r-project.org/src/base/R-4/R-4.3.0.tar.gz
@@ -198,6 +198,7 @@ cd R-4.3.0
 make
 make install
 ```
+
 
 screen brightness buttons do not
 respond. https://www.debugpoint.com/2-ways-fix-laptop-brightness-problem-ubuntu-linux/ method 2 worked for changing the brightness
@@ -230,8 +231,6 @@ git config --global user.email "toby.hocking@r-project.org"
 git config --global user.name "Toby Dylan Hocking"
 ```
 
-maybe [build a newer gcc](https://iamsorush.com/posts/build-gcc11/).
-
 maybe install miniconda.
 
 ```
@@ -239,4 +238,131 @@ conda create -n new-env
 conda activate new-env
 conda install python=3.10
 pip install plotnine
+```
+
+## Some problems I have encountered in the past
+
+### random gcc segfaults
+
+These happen randomly when attempting to compile some R packages, fix
+by [building a newer gcc](https://iamsorush.com/posts/build-gcc11/).
+
+```
+cd gcc-releases-gcc-13.1.0
+./configure --prefix=$HOME --disable-multilib
+make
+make install
+```
+
+### no pango, R package vignette building fails, x11 font error
+
+Note that if the above configure does not have pango we will see:
+
+```
+checking whether pkg-config knows about cairo and pango... no
+```
+
+Then when doing R CMD check, 
+
+```
+* creating vignettes ... ERROR
+--- re-building ‘Custom_Plots.Rmd’ using knitr
+Quitting from lines 22-80 (Custom_Plots.Rmd) 
+Error: processing vignette 'Custom_Plots.Rmd' failed with diagnostics:
+X11 font -adobe-helvetica-%s-%s-*-*-%d-*-*-*-*-*-*-*, face 1 at size 9 could not be loaded
+--- failed re-building ‘Custom_Plots.Rmd’
+```
+
+Why is X11 graphics device being used instead of cairo? The following
+help page says it should be the default.
+
+```
+> ?options
+...
+     ‘bitmapType’: (Unix only, incl. macOS) character.  The default
+          type for the bitmap devices such as png.  Defaults to
+          ‘"cairo"’ on systems where that is available, or to
+          ‘"quartz"’ on macOS where that is available.
+```
+
+Below the help page says the default should be cairo if R was built using pangocairo:
+
+```
+> ?x11
+...
+    type: character string, one of ‘"Xlib"’, ‘"cairo"’, ‘"nbcairo"’ or
+          ‘"dbcairo"’.  Only the first will be available if the system
+          was compiled without support for cairographics.  The default
+          is ‘"cairo"’ where R was built using ‘pangocairo’ (often not
+          the case on macOS), otherwise ‘"Xlib"’.
+```
+
+So I think the problem was no pango dev pkg, fix by doing `apt install
+libpango1.0-dev` after which configure says
+
+```
+checking whether pkg-config knows about cairo and pango... yes
+checking whether cairo including pango is >= 1.2 and works... yes
+```
+
+At run-time it works:
+
+```
+> devtools::build_vignettes("~/R/atime")
+ℹ Installing atime in temporary library
+ℹ Building vignettes for atime
+--- re-building ‘cum_median.Rmd’ using knitr
+processing file: cum_median.Rmd
+output file: cum_median.md
+--- finished re-building ‘cum_median.Rmd’
+
+--- re-building ‘Custom_Plots.Rmd’ using knitr
+processing file: Custom_Plots.Rmd
+output file: Custom_Plots.md
+--- finished re-building ‘Custom_Plots.Rmd’
+```
+
+### tcltk does not work
+
+Looks like below at configure time
+
+```
+~/R/R-4.3.0$ ./configure
+...
+checking for tclConfig.sh... no
+checking for tclConfig.sh in library (sub)directories... no
+checking for tkConfig.sh... no
+checking for tkConfig.sh in library (sub)directories... no
+checking for tcl.h... no
+```
+
+and like below at run time
+
+```
+> library(tcltk)
+Error: package or namespace load failed for ‘tcltk’:
+ .onLoad failed in loadNamespace() for 'tcltk', details:
+  call: fun(libname, pkgname)
+  error: Tcl/Tk support is not available on this system
+In addition: Warning message:
+S3 methods ‘as.character.tclObj’, ‘as.character.tclVar’, ‘as.double.tclObj’, ‘as.integer.tclObj’, ‘as.logical.tclObj’, ‘as.raw.tclObj’, ‘print.tclObj’, ‘[[.tclArray’, ‘[[<-.tclArray’, ‘$.tclArray’, ‘$<-.tclArray’, ‘names.tclArray’, ‘names<-.tclArray’, ‘length.tclArray’, ‘length<-.tclArray’, ‘tclObj.tclVar’, ‘tclObj<-.tclVar’, ‘tclvalue.default’, ‘tclvalue.tclObj’, ‘tclvalue.tclVar’, ‘tclvalue<-.default’, ‘tclvalue<-.tclVar’, ‘close.tkProgressBar’ were declared in NAMESPACE but not found 
+```
+
+fix by doing `apt install tk-dev` after which configure says
+
+```
+checking for tclConfig.sh... no
+checking for tclConfig.sh in library (sub)directories... /usr/lib/tclConfig.sh
+checking for tkConfig.sh... no
+checking for tkConfig.sh in library (sub)directories... /usr/lib/tkConfig.sh
+checking for tcl.h... yes
+checking for tk.h... yes
+checking whether compiling/linking Tcl/Tk code works... yes
+```
+
+At runtime it works:
+
+```
+> library(tcltk)
+> 
 ```
