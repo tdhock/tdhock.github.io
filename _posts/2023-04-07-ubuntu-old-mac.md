@@ -192,7 +192,7 @@ then put the whole .emacs
 ```
 sudo snap install valgrind
 # below for compiling base R.
-sudo apt install r-cran-rgl xorg-dev aptitude libcairo-dev tk-dev libpango1.0-dev default-jre default-jdk libpcre2-dev libcurl4-gnutls-dev zlib1g-dev libtiff-dev texlive-latex-base fonts-inconsolata texlive-fonts-extra texinfo 
+sudo apt install r-cran-rgl xorg-dev aptitude libcairo-dev tk-dev libpango1.0-dev default-jre default-jdk libpcre2-dev libcurl4-gnutls-dev zlib1g-dev libtiff-dev texlive-latex-base fonts-inconsolata texlive-fonts-extra texinfo qpdf
 # below for compiling common packages (devtools etc)
 sudo apt install libharfbuzz-dev libfribidi-dev libssl-dev libxml2-dev libssh2-1-dev libgit2-dev
 mkdir R
