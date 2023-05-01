@@ -5,19 +5,23 @@ description: Step by step instructions
 ---
 
 Today I bought a 2008 MacBook from NAU property surplus for $5. Apple
-no longer support 15 year old computers like this, so I downloaded
+no longer supports 15 year old computers like this, so I downloaded
 Ubuntu 18.04 LTS, same as I have on my other MacBook Pro (from circa
 2010). I tried using a more recent OS (22.04, 20.04) but both of those
-require a USB drive with more than 4GB disk space, so I ended up with
-18.04 which takes only about 2GB (probably a good idea too since I
-know it works on similar MacBook Pro hardware). I used Startup Disk
-Creator on Ubuntu to create a bootable USB drive from the iso
-file. Then I put the bootable USB drive into the 2008 MacBook, and
-started up with option key held down, and it shows a menu to select
-which disk to boot, followed by installation menus, on which I took
-all the defaults. Installation finished after about 15 minutes, after
-which it asks for a restart, take out USB stick, type enter, I see
-login prompt.
+require a USB drive with more than 4GB disk space, so I installed
+18.04 which takes only about 2GB space on the USB drive (probably a
+good idea too since I know it works on similar MacBook Pro
+hardware). I used Startup Disk Creator on Ubuntu to create a bootable
+USB drive from the iso file. Then I put the bootable USB drive into
+the 2008 MacBook, and started up with option key held down, and it
+shows a menu to select which disk to boot, followed by installation
+menus, on which I took all the defaults. Installation finished after
+about 15 minutes, after which it asks for a restart, take out USB
+stick, type enter, I see login prompt.
+
+After that I did two distribution upgrades, to 20.04 (brightness keys
+did not work) and then 22.04 (seems to work best, and memory usage of
+system is reasonable).
 
 No wi-fi adapter found by default. I think it was like this with my
 Pro as well, and [here is a
@@ -83,12 +87,14 @@ emacs, put
 
 M-x package-list-packages a for always
 
+```
 ess
 poly-R
 poly-markdown
 poly-org
 autocomplete
 org
+```
 
 then put the whole .emacs
 
@@ -197,17 +203,6 @@ cd R-4.3.0
 ./configure --prefix=$HOME --with-cairo --with-blas --with-lapack --enable-R-shlib --with-valgrind-instrumentation=2 --enable-memory-profiling
 make
 make install
-```
-
-
-screen brightness buttons do not
-respond. https://www.debugpoint.com/2-ways-fix-laptop-brightness-problem-ubuntu-linux/ method 2 worked for changing the brightness
-
-```
-sudo add-apt-repository ppa:apandada1/brightness-controller
-sudo apt update
-sudo apt install brightness-controller
-brightness-controller 
 ```
 
 NAU VPN
@@ -366,3 +361,19 @@ At runtime it works:
 > library(tcltk)
 > 
 ```
+
+### brightness buttons
+
+screen brightness buttons do not respond on 20.04,
+https://www.debugpoint.com/2-ways-fix-laptop-brightness-problem-ubuntu-linux/
+method 2 worked for changing the brightness
+
+```
+sudo add-apt-repository ppa:apandada1/brightness-controller
+sudo apt update
+sudo apt install brightness-controller
+brightness-controller 
+```
+
+brightness keys do work on 22.04.
+
