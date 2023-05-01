@@ -4,6 +4,8 @@ title: Re-building vignettes on windows
 description: Fixing mysterious error
 ---
 
+## Fixing the error
+
 CRAN says I need to update my R package nc, for named capture regular
 expressions, because of the following error,
 
@@ -181,3 +183,360 @@ The stack trace from the error above is shown below,
 ```
 
 And I posted [an issue](https://github.com/yihui/knitr/issues/2254).
+
+## Reducing vignette sizes
+
+Below terminal shows that inst/doc is a reasonable size, using built
+packages from CRAN, 
+
+```
+th798@cmp2986 MINGW64 ~/Downloads
+$ du -ks data.table/inst/doc/*
+8	data.table/inst/doc/datatable-benchmarking.Rmd
+28	data.table/inst/doc/datatable-benchmarking.html
+8	data.table/inst/doc/datatable-faq.R
+52	data.table/inst/doc/datatable-faq.Rmd
+124	data.table/inst/doc/datatable-faq.html
+16	data.table/inst/doc/datatable-importing.Rmd
+36	data.table/inst/doc/datatable-importing.html
+8	data.table/inst/doc/datatable-intro.R
+32	data.table/inst/doc/datatable-intro.Rmd
+104	data.table/inst/doc/datatable-intro.html
+8	data.table/inst/doc/datatable-keys-fast-subset.R
+20	data.table/inst/doc/datatable-keys-fast-subset.Rmd
+76	data.table/inst/doc/datatable-keys-fast-subset.html
+8	data.table/inst/doc/datatable-reference-semantics.R
+16	data.table/inst/doc/datatable-reference-semantics.Rmd
+60	data.table/inst/doc/datatable-reference-semantics.html
+4	data.table/inst/doc/datatable-reshape.R
+12	data.table/inst/doc/datatable-reshape.Rmd
+52	data.table/inst/doc/datatable-reshape.html
+8	data.table/inst/doc/datatable-sd-usage.R
+16	data.table/inst/doc/datatable-sd-usage.Rmd
+152	data.table/inst/doc/datatable-sd-usage.html
+8	data.table/inst/doc/datatable-secondary-indices-and-auto-indexing.R
+16	data.table/inst/doc/datatable-secondary-indices-and-auto-indexing.Rmd
+52	data.table/inst/doc/datatable-secondary-indices-and-auto-indexing.html
+th798@cmp2986 MINGW64 ~/Downloads
+$ du -ks nc/inst/doc/*
+8	nc/inst/doc/v1-capture-first.R
+12	nc/inst/doc/v1-capture-first.Rmd
+40	nc/inst/doc/v1-capture-first.html
+4	nc/inst/doc/v2-capture-all.R
+8	nc/inst/doc/v2-capture-all.Rmd
+36	nc/inst/doc/v2-capture-all.html
+4	nc/inst/doc/v3-capture-melt.R
+12	nc/inst/doc/v3-capture-melt.Rmd
+48	nc/inst/doc/v3-capture-melt.html
+16	nc/inst/doc/v4-comparisons.R
+20	nc/inst/doc/v4-comparisons.Rmd
+84	nc/inst/doc/v4-comparisons.html
+```
+
+A [SO
+post](https://stackoverflow.com/questions/66181907/the-html-files-of-rendered-vignettes-are-too-big-for-cran)
+says "there's nothing to be done." But I do not believe that. So I
+tried building data.table from source,
+
+```r
+> devtools::build("~/R/data.table")
+-- R CMD build -----------------------------------------------------------------
+* checking for file 'C:\Users\th798\R\data.table/DESCRIPTION' ... OK
+* preparing 'data.table':
+* checking DESCRIPTION meta-information ... OK
+* cleaning src
+* installing the package to build vignettes
+      -----------------------------------
+* installing *source* package 'data.table' ...
+** using staged installation
+
+   **********************************************
+   WARNING: this package has a configure script
+         It probably needs manual configuration
+   **********************************************
+
+
+** libs
+using C compiler: 'gcc.exe (MinGW.org GCC-6.3.0-1) 6.3.0'
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c assign.c -o assign.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c between.c -o between.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c bmerge.c -o bmerge.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c chmatch.c -o chmatch.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c cj.c -o cj.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c coalesce.c -o coalesce.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c dogroups.c -o dogroups.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c fastmean.c -o fastmean.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c fcast.c -o fcast.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c fifelse.c -o fifelse.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c fmelt.c -o fmelt.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c forder.c -o forder.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c frank.c -o frank.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c fread.c -o fread.o
+fread.c: In function 'filesize_to_str':
+fread.c:418:36: warning: unknown conversion type character 'l' in format [-Wformat=]
+         snprintf(output, BUFFSIZE, "%"PRIu64"%cB (%"PRIu64" bytes)",
+                                    ^~~
+fread.c:418:36: warning: format '%c' expects argument of type 'int', but argument 4 has type 'long long unsigned int' [-Wformat=]
+fread.c:418:36: warning: unknown conversion type character 'l' in format [-Wformat=]
+fread.c:418:36: warning: too many arguments for format [-Wformat-extra-args]
+fread.c:423:34: warning: unknown conversion type character 'l' in format [-Wformat=]
+       snprintf(output, BUFFSIZE, "%.*f%cB (%"PRIu64" bytes)",
+                                  ^~~~~~~~~~~~
+fread.c:423:34: warning: too many arguments for format [-Wformat-extra-args]
+fread.c:429:30: warning: unknown conversion type character 'l' in format [-Wformat=]
+   snprintf(output, BUFFSIZE, "%"PRIu64" bytes", (uint64_t)lsize);
+                              ^~~
+fread.c:429:30: warning: too many arguments for format [-Wformat-extra-args]
+fread.c: In function 'freadMain':
+fread.c:1290:11: warning: implicit declaration of function 'isspace' [-Wimplicit-function-declaration]
+       if (isspace(ch[0]) || isspace(ch[nchar-1]))
+           ^~~~~~~
+In file included from freadR.h:6:0,
+                 from fread.h:12,
+                 from fread.c:1:
+fread.c:2385:23: warning: unknown conversion type character 'l' in format [-Wformat=]
+                     _("Column %d%s%.*s%s bumped from '%s' to '%s' due to <<%.*s>> on row %"PRIu64"\n"),
+                       ^
+po.h:3:42: note: in definition of macro '_'
+ #define _(String) dgettext("data.table", String)
+                                          ^~~~~~
+fread.c:2385:23: warning: too many arguments for format [-Wformat-extra-args]
+                     _("Column %d%s%.*s%s bumped from '%s' to '%s' due to <<%.*s>> on row %"PRIu64"\n"),
+                       ^
+po.h:3:42: note: in definition of macro '_'
+ #define _(String) dgettext("data.table", String)
+                                          ^~~~~~
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c freadR.c -o freadR.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c froll.c -o froll.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c frollR.c -o frollR.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c frolladaptive.c -o frolladaptive.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c fsort.c -o fsort.o
+gcc  -I"c:/PROGRA~1/R/R-43~1.0/include" -DNDEBUG     -I"c:/rtools43/x86_64-w64-mingw32.static.posix/include"  -fopenmp   -O2 -Wall  -mfpmath=sse -msse2 -mstackrealign  -Wall -pedantic -c fwrite.c -o fwrite.o
+fwrite.c:11:49: fatal error: zlib.h: No such file or directory
+ #include <zlib.h>      // for compression to .gz
+                                                 ^
+compilation terminated.
+make: *** [c:/PROGRA~1/R/R-43~1.0/etc/x64/Makeconf:265: fwrite.o] Error 1
+ERROR: compilation failed for package 'data.table'
+* removing 'C:/Users/th798/AppData/Local/Temp/Rtmps1AH7I/Rinst1d38723f4d34/data.table'
+      -----------------------------------
+ERROR: package installation failed
+Error in `(function (command = NULL, args = character(), error_on_status = TRUE, ...`:
+! System command 'Rcmd.exe' failed
+---
+Exit status: 1
+stdout & stderr: <printed>
+---
+Type .Last.error to see the more details.
+```
+
+The above output suggests I have an old version of gcc, so I tried to
+install a newer version,
+[rtools43](https://cloud.r-project.org/bin/windows/Rtools/rtools43/rtools.html),
+
+After which I get
+
+```
+> devtools::build("~/R/data.table")
+-- R CMD build -----------------------------------------------------------------
+* checking for file 'C:\Users\th798\R\data.table/DESCRIPTION' ... OK
+* preparing 'data.table':
+* checking DESCRIPTION meta-information ... OK
+* cleaning src
+* installing the package to build vignettes
+* creating vignettes ... OK
+* cleaning src
+* checking for LF line-endings in source and make files and shell scripts
+* checking for empty or unneeded directories
+* building 'data.table_1.14.9.tar.gz'
+Warning: file 'data.table/cleanup' did not have execute permissions: corrected
+Warning: file 'data.table/configure' did not have execute permissions: corrected
+
+[1] "C:/Users/th798/R/data.table_1.14.9.tar.gz"
+> Sys.which("gcc")
+                                       gcc 
+"C:\\rtools43\\X86_64~1.POS\\bin\\gcc.exe" 
+> system("gcc --version")
+gcc.exe (GCC) 12.2.0
+Copyright (C) 2022 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+[1] 0
+```
+
+Re-building both data.table and nc, I see major differences in html
+file sizes, below,
+
+```
+th798@cmp2986 MINGW64 ~/R/built
+$ tar xf ../data.table_1.14.9.tar.gz 
+th798@cmp2986 MINGW64 ~/R/built
+$ tar xf ../nc_2023.5.1.tar.gz 
+th798@cmp2986 MINGW64 ~/R/built
+$ du -ks */inst/doc/*html
+28	data.table/inst/doc/datatable-benchmarking.html
+132	data.table/inst/doc/datatable-faq.html
+40	data.table/inst/doc/datatable-importing.html
+116	data.table/inst/doc/datatable-intro.html
+88	data.table/inst/doc/datatable-keys-fast-subset.html
+80	data.table/inst/doc/datatable-programming.html
+52	data.table/inst/doc/datatable-reference-semantics.html
+52	data.table/inst/doc/datatable-reshape.html
+68	data.table/inst/doc/datatable-sd-usage.html
+52	data.table/inst/doc/datatable-secondary-indices-and-auto-indexing.html
+720	nc/inst/doc/v0-overview.html
+748	nc/inst/doc/v1-capture-first.html
+736	nc/inst/doc/v2-capture-all.html
+844	nc/inst/doc/v3-capture-melt.html
+180	nc/inst/doc/v4-comparisons.html
+724	nc/inst/doc/v5-helpers.html
+720	nc/inst/doc/v6-engines.html
+```
+
+At least the first one, v0-overview, should be small (there are only
+about 100 lines in the Rmd file). Different headers
+
+```
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{vignette 0: Overview}
+-->
+```
+
+and
+
+```r
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+vs
+
+```
+---
+title: "Efficient reshaping using data.tables"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Efficient reshaping using data.tables}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+```
+
+```r
+require(data.table)
+knitr::opts_chunk$set(
+  comment = "#",
+    error = FALSE,
+     tidy = FALSE,
+    cache = FALSE,
+ collapse = TRUE)
+```
+
+First I tried to copy the chunk options to nc, which makes the code below,
+
+```r
+knitr::opts_chunk$set(
+    error = FALSE,
+     tidy = FALSE,
+    cache = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+No, the code below says the vignette is still big:
+
+```
+th798@cmp2986 MINGW64 ~/R/built
+$ rm -rf nc && tar xf ../nc_2023.5.1.tar.gz && du -ks */inst/doc/*html
+28	data.table/inst/doc/datatable-benchmarking.html
+132	data.table/inst/doc/datatable-faq.html
+40	data.table/inst/doc/datatable-importing.html
+116	data.table/inst/doc/datatable-intro.html
+88	data.table/inst/doc/datatable-keys-fast-subset.html
+80	data.table/inst/doc/datatable-programming.html
+52	data.table/inst/doc/datatable-reference-semantics.html
+52	data.table/inst/doc/datatable-reshape.html
+68	data.table/inst/doc/datatable-sd-usage.html
+52	data.table/inst/doc/datatable-secondary-indices-and-auto-indexing.html
+720	nc/inst/doc/v0-overview.html
+748	nc/inst/doc/v1-capture-first.html
+736	nc/inst/doc/v2-capture-all.html
+844	nc/inst/doc/v3-capture-melt.html
+180	nc/inst/doc/v4-comparisons.html
+724	nc/inst/doc/v5-helpers.html
+720	nc/inst/doc/v6-engines.html
+```
+
+So I try the other part of the header, and I see the size is reduced below,
+
+```
+th798@cmp2986 MINGW64 ~/R/built
+$ cd .. && R CMD build nc && cd built && rm -rf nc && tar xf ../nc_2023.5.1.tar.gz && du -ks */inst/doc/*html
+* checking for file 'nc/DESCRIPTION' ... OK
+* preparing 'nc':
+* checking DESCRIPTION meta-information ... OK
+* installing the package to build vignettes
+* creating vignettes ... OK
+* checking for LF line-endings in source and make files and shell scripts
+* checking for empty or unneeded directories
+* building 'nc_2023.5.1.tar.gz'
+
+28	data.table/inst/doc/datatable-benchmarking.html
+132	data.table/inst/doc/datatable-faq.html
+40	data.table/inst/doc/datatable-importing.html
+116	data.table/inst/doc/datatable-intro.html
+88	data.table/inst/doc/datatable-keys-fast-subset.html
+80	data.table/inst/doc/datatable-programming.html
+52	data.table/inst/doc/datatable-reference-semantics.html
+52	data.table/inst/doc/datatable-reshape.html
+68	data.table/inst/doc/datatable-sd-usage.html
+52	data.table/inst/doc/datatable-secondary-indices-and-auto-indexing.html
+28	nc/inst/doc/v0-overview.html
+748	nc/inst/doc/v1-capture-first.html
+736	nc/inst/doc/v2-capture-all.html
+844	nc/inst/doc/v3-capture-melt.html
+180	nc/inst/doc/v4-comparisons.html
+724	nc/inst/doc/v5-helpers.html
+720	nc/inst/doc/v6-engines.html
+```
+
+The important part is `output: rmarkdown::html_vignette`
+apparently. Using that in all of the vignettes gives the sizes below,
+
+```
+th798@cmp2986 MINGW64 ~/R/built
+$ cd .. && R CMD build nc && cd built && rm -rf nc && tar xf ../nc_2023.5.1.tar.gz && du -ks */inst/doc/*html
+* checking for file 'nc/DESCRIPTION' ... OK
+* preparing 'nc':
+* checking DESCRIPTION meta-information ... OK
+* installing the package to build vignettes
+* creating vignettes ... OK
+* checking for LF line-endings in source and make files and shell scripts
+* checking for empty or unneeded directories
+* building 'nc_2023.5.1.tar.gz'
+
+28	data.table/inst/doc/datatable-benchmarking.html
+132	data.table/inst/doc/datatable-faq.html
+40	data.table/inst/doc/datatable-importing.html
+116	data.table/inst/doc/datatable-intro.html
+88	data.table/inst/doc/datatable-keys-fast-subset.html
+80	data.table/inst/doc/datatable-programming.html
+52	data.table/inst/doc/datatable-reference-semantics.html
+52	data.table/inst/doc/datatable-reshape.html
+68	data.table/inst/doc/datatable-sd-usage.html
+52	data.table/inst/doc/datatable-secondary-indices-and-auto-indexing.html
+28	nc/inst/doc/v0-overview.html
+100	nc/inst/doc/v1-capture-first.html
+72	nc/inst/doc/v2-capture-all.html
+100	nc/inst/doc/v3-capture-melt.html
+180	nc/inst/doc/v4-comparisons.html
+36	nc/inst/doc/v5-helpers.html
+28	nc/inst/doc/v6-engines.html
+```
