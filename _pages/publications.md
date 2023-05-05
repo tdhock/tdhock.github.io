@@ -61,17 +61,11 @@ description: Peer-reviewed papers and preprints with links to code and data
   Partitioning. [arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
 - Hocking TD. Exact line search for Area Under the Minimum with a
   margin parameter.
-- Barr J, Hocking TD, Morton G, Thatcher T, Shaw P. Classifying
-  Imbalanced Data with AUM Loss.
-- Hocking TD, Thatcher T, Barr J. Interpretable linear models for
-  predicting security vulnerabilities in source code.
 - Hocking TD. Finite Sample Complexity Analysis of Binary Segmentation.
 - Hocking TD. Comparing binsegRcpp with other implementations of
   binary segmentation for changepoint detection.
 - Hocking TD, Jenson R. Predictive Modeling Framework for District
   Continuous Improvement.
-- Barr J, Shaw P, Abu-Khzam FN, Thatcher T, Hocking TD. Graph
-  Embedding: A Methodological Survey.
 - Hocking TD. Teaching Hidden Markov Models Using Interactive Data
   Visualization. Under review at ICER.
 - Harshe K, Williams J, Hocking TD, Lerner Z. Predicting Neuromuscular
@@ -103,6 +97,18 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### 2022
 
+- Barr J, Hocking TD, Morton G, Thatcher T, Shaw P. Classifying
+  Imbalanced Data with AUM Loss. 2022 Fourth International Conference
+  on Transdisciplinary AI
+  (TransAI). [IEEE](https://ieeexplore.ieee.org/document/9951523).
+- Hocking TD, Barr J, Thatcher T. Interpretable linear models for
+  predicting security vulnerabilities in source code. 2022 Fourth International Conference
+  on Transdisciplinary AI
+  (TransAI). [IEEE](https://ieeexplore.ieee.org/document/9951610/)
+- Barr J, Shaw P, Abu-Khzam FN, Thatcher T, Hocking TD. Graph
+  Embedding: A Methodological Survey. 2022 Fourth International Conference
+  on Transdisciplinary AI
+  (TransAI). [IEEE](https://ieeexplore.ieee.org/document/9951469/)
 - Mihaljevic JR, Borkovec S, Ratnavale S, Hocking TD, Banister KE,
   Eppinger JE, Hepp CM, Doerry E. Rapid simulations of spatially
   explicit and stochastic models of infectious disease. [Preprint
