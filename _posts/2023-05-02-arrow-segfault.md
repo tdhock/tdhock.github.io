@@ -3548,4 +3548,1349 @@ libarrow.so  libarrow.so.1300  libarrow.so.1300.0.0
 Cookbook page about how to read/write data sets in C++
 https://arrow.apache.org/cookbook/cpp/datasets.html
 
+Maybe there is a simpler way to test GCC? What is a simple C program
+that will generate the popcnt instruction?
 
+I tried the program below, [from
+here](https://iq.opengenus.org/__builtin_popcount-in-c/),
+
+```c
+#include <stdio.h>
+
+int main(){
+    int num = 22; // 22 in binary = 00000000 00000000 00000000 00010110
+    printf("Number of 1's is = %d\n", __builtin_popcount(num));
+    return 0;
+}
+```
+
+but I observed that the program above runs fine (no segfault), and does not
+produce the popcnt instruction, see below.
+
+```
+(arrow) tdhock@tdhock-MacBook:~/arrow-bug$ gcc builtin_popcount.c -o builtin_popcount && ./builtin_popcount 
+Number of 1's is = 3
+(arrow) tdhock@tdhock-MacBook:~/arrow-bug$ gcc builtin_popcount.c -S && cat builtin_popcount.s 
+	.file	"builtin_popcount.c"
+	.text
+	.globl	__popcountdi2
+	.section	.rodata
+.LC0:
+	.string	"Number of 1's is = %d\n"
+	.text
+	.globl	main
+	.type	main, @function
+main:
+.LFB0:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$16, %rsp
+	movl	$22, -4(%rbp)
+	movl	-4(%rbp), %eax
+	movl	%eax, %eax
+	movq	%rax, %rdi
+	call	__popcountdi2
+	movl	%eax, %esi
+	movl	$.LC0, %edi
+	movl	$0, %eax
+	call	printf
+	movl	$0, %eax
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE0:
+	.size	main, .-main
+	.ident	"GCC: (GNU) 13.1.0"
+	.section	.note.GNU-stack,"",@progbits
+```
+
+Where was that popcnt instruction produced?
+
+```
+(gdb) bt
+#0  0x00007fffeb5aeaa7 in arrow::compute::RowTableMetadata::FromColumnMetadataVector(std::vector<arrow::compute::KeyColumnMetadata, std::allocator<arrow::compute::KeyColumnMetadata> > const&, int, int) ()
+    at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#1  0x00007fffeb59e720 in arrow::compute::RowTableEncoder::Init(std::vector<arrow::compute::KeyColumnMetadata, std::allocator<arrow::compute::KeyColumnMetadata> > const&, int, int) () at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#2  0x00007fffeb5a6441 in arrow::compute::Grouper::Make(std::vector<arrow::TypeHolder, std::allocator<arrow::TypeHolder> > const&, arrow::compute::ExecContext*) () at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#3  0x00007fffeae9dc42 in arrow::dataset::KeyValuePartitioning::Partition(std::shared_ptr<arrow::RecordBatch> const&) const ()
+    at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#4  0x00007fffeae7b4fb in arrow::dataset::(anonymous namespace)::WriteBatch(std::shared_ptr<arrow::RecordBatch>, arrow::compute::Expression, arrow::dataset::FileSystemDatasetWriteOptions, std::function<arrow::Status (std::shared_ptr<arrow::RecordBatch>, arrow::dataset::PartitionPathFormat const&)>) ()
+    at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#5  0x00007fffeae7c138 in arrow::dataset::(anonymous namespace)::DatasetWritingSinkNodeConsumer::Consume(arrow::compute::ExecBatch) ()
+    at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#6  0x00007fffeadea60f in non-virtual thunk to arrow::acero::(anonymous namespace)::ConsumingSinkNode::Process(arrow::compute::ExecBatch) ()
+    at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#7  0x00007fffeae17e8c in arrow::acero::util::(anonymous namespace)::SerialSequencingQueueImpl::DoProcess(std::unique_lock<std::mutex>&&) [clone .constprop.0] () at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#8  0x00007fffeae1918c in arrow::acero::util::(anonymous namespace)::SerialSequencingQueueImpl::InsertBatch(arrow::compute::ExecBatch) ()
+    at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#9  0x00007fffeadec27e in arrow::acero::(anonymous namespace)::ConsumingSinkNode::InputReceived(arrow::acero::ExecNode*, arrow::compute::ExecBatch) ()
+    at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#10 0x00007fffeadf356a in arrow::acero::(anonymous namespace)::SourceNode::SliceAndDeliverMorsel(arrow::compute::ExecBatch const&)::{lambda()#1}::operator()() const () at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#11 0x00007fffeadf37a5 in std::_Function_handler<arrow::Status (), arrow::acero::(anonymous namespace)::SourceNode::SliceAndDeliverMorsel(arrow::compute::ExecBatch const&)::{lambda()#1}>::_M_invoke(std::_Any_data const&) ()
+    at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#12 0x00007fffeade6dae in arrow::internal::FnOnce<void ()>::FnImpl<std::_Bind<arrow::detail::ContinueFuture (arrow::Future<arrow::internal::Empty>, std::function<arrow::Status ()>)> >::invoke() ()
+    at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#13 0x00007fffeb378bfd in std::thread::_State_impl<std::thread::_Invoker<std::tuple<arrow::internal::ThreadPool::LaunchWorkersUnlocked(int)::{lambda()#1}> > >::_M_run() () at /home/tdhock/lib/R/library/arrow/libs/arrow.so
+#14 0x00007ffff4f7d2b3 in  () at /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#15 0x00007ffff7976b43 in start_thread (arg=<optimized out>)
+    at ./nptl/pthread_create.c:442
+#16 0x00007ffff7a08a00 in clone3 ()
+    at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:81
+```
+
+github search in arrow repo says `FromColumnMetadataVector` is defined
+in
+[row_internal.cc](https://github.com/apache/arrow/blob/3948c426927514ab6d3165255b4717af9446e949/cpp/src/arrow/compute/row/row_internal.cc#L55). This
+is included in the R package distribution:
+
+```
+(arrow) tdhock@tdhock-MacBook:~/arrow_12$ find . -name row_internal.cc
+./tools/cpp/src/arrow/compute/row/row_internal.cc
+```
+
+It is not mentioned in the R compilation output, but it is in the C++
+arrow output:
+
+```
+[152/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/row/row_internal.cc.o
+~/arrow/cpp/build/src/arrow/CMakeFiles/arrow_objlib.dir/compute/row/row_internal.cc.o
+```
+
+There are static libraries in the R source package below?
+
+```
+~/R/R-4.3.0 $ ls ~/arrow_12/libarrow/arrow-12.0.0/lib
+cmake       libarrow_acero.a                 libarrow_dataset.a  pkgconfig
+libarrow.a  libarrow_bundled_dependencies.a  libparquet.a        
+```
+
+This seems to suggest that these static libraries are the cause of the
+segfault, is there a way to compile them from source instead?
+
+Usually installing arrow gives
+
+```
+(base) tdhock@tdhock-MacBook:/tmp/Rtmp8icqQo/downloaded_packages$ ARROW_R_DEV=true R CMD INSTALL arrow_12.0.0.100000037.tar.gz 
+Le chargement a nécessité le package : grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+Le chargement a nécessité le package : grDevices
+*** Found libcurl and OpenSSL >= 3.0.0
+essai de l'URL 'https://nightlies.apache.org/arrow/r/libarrow/bin/linux-openssl-3.0/arrow-12.0.0.100000037.zip'
+Content type 'application/zip' length 39699427 bytes (37.9 MB)
+==================================================
+downloaded 37.9 MB
+
+*** Successfully retrieved C++ binaries (linux-openssl-3.0)
+PKG_CFLAGS=-DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS
+PKG_LIBS=-L/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/lib -L/usr/lib/lib/x86_64-linux-gnu -larrow_acero -larrow_dataset -lparquet -larrow -larrow_bundled_dependencies -lcurl -lssl -lcrypto  
+** libs
+using C++ compiler: ‘g++ (GCC) 13.1.0’
+using C++17
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c RTasks.cpp -o RTasks.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c altrep.cpp -o altrep.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c array.cpp -o array.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c array_to_vector.cpp -o array_to_vector.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c arraydata.cpp -o arraydata.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c arrowExports.cpp -o arrowExports.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c bridge.cpp -o bridge.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c buffer.cpp -o buffer.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c chunkedarray.cpp -o chunkedarray.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c compression.cpp -o compression.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c compute-exec.cpp -o compute-exec.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c compute.cpp -o compute.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c config.cpp -o config.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c csv.cpp -o csv.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c dataset.cpp -o dataset.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c datatype.cpp -o datatype.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c expression.cpp -o expression.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c extension-impl.cpp -o extension-impl.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c feather.cpp -o feather.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c field.cpp -o field.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c filesystem.cpp -o filesystem.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c io.cpp -o io.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c json.cpp -o json.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c memorypool.cpp -o memorypool.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c message.cpp -o message.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c parquet.cpp -o parquet.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c r_to_arrow.cpp -o r_to_arrow.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c recordbatch.cpp -o recordbatch.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c recordbatchreader.cpp -o recordbatchreader.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c recordbatchwriter.cpp -o recordbatchwriter.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c safe-call-into-r-impl.cpp -o safe-call-into-r-impl.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c scalar.cpp -o scalar.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c schema.cpp -o schema.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c symbols.cpp -o symbols.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c table.cpp -o table.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c threadpool.cpp -o threadpool.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -DARROW_STATIC -I/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/include -I/usr/lib/include/x86_64-linux-gnu -I/usr/lib/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -DARROW_R_WITH_S3 -DARROW_R_WITH_GCS -I'/home/tdhock/lib/R/library/cpp11/include' -march=core2    -fpic  -g -O2  -c type_infer.cpp -o type_infer.o
+g++ -std=gnu++17 -shared -L/home/tdhock/lib/R/lib -L/usr/local/lib -o arrow.so RTasks.o altrep.o array.o array_to_vector.o arraydata.o arrowExports.o bridge.o buffer.o chunkedarray.o compression.o compute-exec.o compute.o config.o csv.o dataset.o datatype.o expression.o extension-impl.o feather.o field.o filesystem.o io.o json.o memorypool.o message.o parquet.o r_to_arrow.o recordbatch.o recordbatchreader.o recordbatchwriter.o safe-call-into-r-impl.o scalar.o schema.o symbols.o table.o threadpool.o type_infer.o -L/tmp/RtmpKjpWUw/R.INSTALL7256197605d7/arrow/libarrow/arrow-12.0.0.100000037/lib -L/usr/lib/lib/x86_64-linux-gnu -larrow_acero -larrow_dataset -lparquet -larrow -larrow_bundled_dependencies -lcurl -lssl -lcrypto -L/home/tdhock/lib/R/lib -lR
+installing to /home/tdhock/lib/R/library/00LOCK-arrow/00new/arrow/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Le chargement a nécessité le package : grDevices
+** help
+*** installing help indices
+** building package indices
+Le chargement a nécessité le package : grDevices
+** testing if installed package can be loaded from temporary location
+Le chargement a nécessité le package : grDevices
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+Le chargement a nécessité le package : grDevices
+** testing if installed package keeps a record of temporary installation path
+* DONE (arrow)
+```
+
+[R arrow installation page](https://arrow.apache.org/docs/r/articles/install.html#basic-configuration) says to try below to build libarrow from
+source (in addition to R bindings).
+
+```
+> Sys.setenv("LIBARROW_BINARY"=FALSE)
+> install.packages("~/arrow_12/",repos=NULL)
+Le chargement a nécessité le package : grDevices
+* installing *source* package ‘arrow’ ...
+** package ‘arrow’ correctement décompressé et sommes MD5 vérifiées
+** using staged installation
+Le chargement a nécessité le package : grDevices
+*** Found local C++ source: 'tools/cpp'
+*** Building libarrow from source
+    For build options and troubleshooting, see the install guide:
+    https://arrow.apache.org/docs/r/articles/install.html
+**** cmake: /usr/bin/cmake
+**** arrow  
+**** Error building Arrow C++. Re-run with ARROW_R_DEV=true for debug information. 
+------------------------- NOTE ---------------------------
+There was an issue preparing the Arrow C++ libraries.
+See https://arrow.apache.org/docs/r/articles/install.html
+---------------------------------------------------------
+ERROR: configuration failed for package ‘arrow’
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+Message d'avis :
+Dans install.packages("~/arrow_12/", repos = NULL) :
+  l'installation du package ‘/home/tdhock/arrow_12/’ a eu un statut de sortie non nul
+[ 49%] Built target parse_test
+
+-- stderr output is:
+/usr/bin/ld: BFD (GNU Binutils for Ubuntu) 2.38 internal error, aborting at ../../bfd/merge.c:939 in _bfd_merged_section_offset
+
+/usr/bin/ld: Merci de rapporter cette anomalie.
+
+collect2: erreur: ld a retourné le statut de sortie 1
+make[5]: *** [CMakeFiles/filtered_re2_test.dir/build.make:115 : filtered_re2_test] Erreur 1
+make[5]: *** Suppression du fichier « filtered_re2_test »
+make[4]: *** [CMakeFiles/Makefile2:234 : CMakeFiles/filtered_re2_test.dir/all] Erreur 2
+make[4]: *** Attente des tâches non terminées....
+make[3]: *** [Makefile:136 : all] Erreur 2
+
+CMake Error at /tmp/Rtmp5tTRmH/filedab020a0561d/re2_ep-prefix/src/re2_ep-stamp/re2_ep-build-RELEASE.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+make[2]: *** [CMakeFiles/re2_ep.dir/build.make:86 : re2_ep-prefix/src/re2_ep-stamp/re2_ep-build] Erreur 1
+make[1]: *** [CMakeFiles/Makefile2:1099 : CMakeFiles/re2_ep.dir/all] Erreur 2
+gmake: *** [Makefile:146 : all] Erreur 2
+**** Error building Arrow C++.  
+------------------------- NOTE ---------------------------
+There was an issue preparing the Arrow C++ libraries.
+See https://arrow.apache.org/docs/r/articles/install.html
+---------------------------------------------------------
+ERROR: configuration failed for package ‘arrow’
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+Message d'avis :
+Dans install.packages("~/arrow_12/", repos = NULL) :
+  l'installation du package ‘/home/tdhock/arrow_12/’ a eu un statut de sortie non nul
+> install.packages("~/arrow_12/",repos=NULL)
+Le chargement a nécessité le package : grDevices
+* installing *source* package ‘arrow’ ...
+** package ‘arrow’ correctement décompressé et sommes MD5 vérifiées
+** using staged installation
+Le chargement a nécessité le package : grDevices
+*** Found local C++ source: 'tools/cpp'
+*** Building libarrow from source
+    For build options and troubleshooting, see the install guide:
+    https://arrow.apache.org/docs/r/articles/install.html
+*** Building with MAKEFLAGS= -j2 
+**** cmake: /usr/bin/cmake
+**** arrow with SOURCE_DIR='tools/cpp' BUILD_DIR='/tmp/Rtmp5tTRmH/filedab020a0561d' DEST_DIR='libarrow/arrow-12.0.0' CMAKE='/usr/bin/cmake' EXTRA_CMAKE_FLAGS='' CC='gcc' CXX='g++ -std=gnu++17' LDFLAGS='-L/usr/local/lib' ARROW_S3='ON' ARROW_GCS='ON' 
+++ pwd
++ > : /home/tdhock/arrow_12
++ > : tools/cpp
++ > : /tmp/Rtmp5tTRmH/filedab020a0561d
++ > : libarrow/arrow-12.0.0
++ > : /usr/bin/cmake
+++ cd tools/cpp
+++ pwd
++ > SOURCE_DIR=/home/tdhock/arrow_12/tools/cpp
+++ mkdir -p libarrow/arrow-12.0.0
+++ cd libarrow/arrow-12.0.0
+++ pwd
++ > DEST_DIR=/home/tdhock/arrow_12/libarrow/arrow-12.0.0
+++ nproc
++ > : 2
++ > '[' false '!=' '' ']'
+++ echo false
+++ tr '[:upper:]' '[:lower:]'
++ > LIBARROW_MINIMAL=false
++ > '[' false = false ']'
++ > ARROW_DEFAULT_PARAM=ON
++ > mkdir -p /tmp/Rtmp5tTRmH/filedab020a0561d
++ > pushd /tmp/Rtmp5tTRmH/filedab020a0561d
+/tmp/Rtmp5tTRmH/filedab020a0561d ~/arrow_12
++ > /usr/bin/cmake -DARROW_BOOST_USE_SHARED=OFF -DARROW_BUILD_TESTS=OFF -DARROW_BUILD_SHARED=OFF -DARROW_BUILD_STATIC=ON -DARROW_ACERO=ON -DARROW_COMPUTE=ON -DARROW_CSV=ON -DARROW_DATASET=ON -DARROW_DEPENDENCY_SOURCE=AUTO -DAWSSDK_SOURCE= -DARROW_FILESYSTEM=ON -DARROW_GCS=ON -DARROW_JEMALLOC=ON -DARROW_MIMALLOC=ON -DARROW_JSON=ON -DARROW_PARQUET=ON -DARROW_S3=ON -DARROW_WITH_BROTLI=ON -DARROW_WITH_BZ2=ON -DARROW_WITH_LZ4=ON -DARROW_WITH_RE2=ON -DARROW_WITH_SNAPPY=ON -DARROW_WITH_UTF8PROC=ON -DARROW_WITH_ZLIB=ON -DARROW_WITH_ZSTD=ON -DARROW_VERBOSE_THIRDPARTY_BUILD=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_DEBUG_MODE=OFF -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_PREFIX=/home/tdhock/arrow_12/libarrow/arrow-12.0.0 -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -DCMAKE_UNITY_BUILD=OFF -Dxsimd_SOURCE= -Dzstd_SOURCE= -G 'Unix Makefiles' /home/tdhock/arrow_12/tools/cpp
+-- Building using CMake version: 3.22.1
+-- The C compiler identification is GNU 13.1.0
+-- The CXX compiler identification is GNU 13.1.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /home/tdhock/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /home/tdhock/bin/g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Arrow version: 12.0.0 (full: '12.0.0')
+-- Arrow SO version: 1200 (full: 1200.0.0)
+-- clang-tidy 14 not found
+-- clang-format 14 not found
+-- Could NOT find ClangTools (missing: CLANG_FORMAT_BIN CLANG_TIDY_BIN) 
+-- infer not found
+-- Found Python3: /usr/bin/python3.10 (found version "3.10.6") found components: Interpreter 
+fatal: ni ceci ni aucun de ses répertoires parents n'est un dépôt git : .git
+-- Found cpplint executable at /home/tdhock/arrow_12/tools/cpp/build-support/cpplint.py
+-- System processor: x86_64
+-- Performing Test CXX_SUPPORTS_SSE4_2
+-- Performing Test CXX_SUPPORTS_SSE4_2 - Success
+-- Performing Test CXX_SUPPORTS_AVX2
+-- Performing Test CXX_SUPPORTS_AVX2 - Success
+-- Performing Test CXX_SUPPORTS_AVX512
+-- Performing Test CXX_SUPPORTS_AVX512 - Success
+-- Arrow build warning level: PRODUCTION
+-- Using ld linker
+-- Build Type: RELEASE
+-- Performing Test CXX_LINKER_SUPPORTS_VERSION_SCRIPT
+-- Performing Test CXX_LINKER_SUPPORTS_VERSION_SCRIPT - Success
+-- Using AUTO approach to find dependencies
+-- ARROW_ABSL_BUILD_VERSION: 20211102.0
+-- ARROW_ABSL_BUILD_SHA256_CHECKSUM: dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4
+-- ARROW_AWS_C_AUTH_BUILD_VERSION: v0.6.22
+-- ARROW_AWS_C_AUTH_BUILD_SHA256_CHECKSUM: 691a6b4418afcd3dc141351b6ad33fccd8e3ff84df0e9e045b42295d284ee14c
+-- ARROW_AWS_C_CAL_BUILD_VERSION: v0.5.20
+-- ARROW_AWS_C_CAL_BUILD_SHA256_CHECKSUM: acc352359bd06f8597415c366cf4ec4f00d0b0da92d637039a73323dd55b6cd0
+-- ARROW_AWS_C_COMMON_BUILD_VERSION: v0.8.9
+-- ARROW_AWS_C_COMMON_BUILD_SHA256_CHECKSUM: 2f3fbaf7c38eae5a00e2a816d09b81177f93529ae8ba1b82dc8f31407565327a
+-- ARROW_AWS_C_COMPRESSION_BUILD_VERSION: v0.2.16
+-- ARROW_AWS_C_COMPRESSION_BUILD_SHA256_CHECKSUM: 044b1dbbca431a07bde8255ef9ec443c300fc60d4c9408d4b862f65e496687f4
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_VERSION: v0.2.18
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_SHA256_CHECKSUM: 310ca617f713bf664e4c7485a3d42c1fb57813abd0107e49790d107def7cde4f
+-- ARROW_AWS_C_HTTP_BUILD_VERSION: v0.7.3
+-- ARROW_AWS_C_HTTP_BUILD_SHA256_CHECKSUM: 07e16c6bf5eba6f0dea96b6f55eae312a7c95b736f4d2e4a210000f45d8265ae
+-- ARROW_AWS_C_IO_BUILD_VERSION: v0.13.14
+-- ARROW_AWS_C_IO_BUILD_SHA256_CHECKSUM: 12b66510c3d9a4f7e9b714e9cfab2a5bf835f8b9ce2f909d20ae2a2128608c71
+-- ARROW_AWS_C_MQTT_BUILD_VERSION: v0.8.4
+-- ARROW_AWS_C_MQTT_BUILD_SHA256_CHECKSUM: 232eeac63e72883d460c686a09b98cdd811d24579affac47c5c3f696f956773f
+-- ARROW_AWS_C_S3_BUILD_VERSION: v0.2.3
+-- ARROW_AWS_C_S3_BUILD_SHA256_CHECKSUM: a00b3c9f319cd1c9aa2c3fa15098864df94b066dcba0deaccbb3caa952d902fe
+-- ARROW_AWS_C_SDKUTILS_BUILD_VERSION: v0.1.6
+-- ARROW_AWS_C_SDKUTILS_BUILD_SHA256_CHECKSUM: 8a2951344b2fb541eab1e9ca17c18a7fcbfd2aaff4cdd31d362d1fad96111b91
+-- ARROW_AWS_CHECKSUMS_BUILD_VERSION: v0.1.13
+-- ARROW_AWS_CHECKSUMS_BUILD_SHA256_CHECKSUM: 0f897686f1963253c5069a0e495b85c31635ba146cd3ac38cc2ea31eaf54694d
+-- ARROW_AWS_CRT_CPP_BUILD_VERSION: v0.18.16
+-- ARROW_AWS_CRT_CPP_BUILD_SHA256_CHECKSUM: 9e69bc1dc4b50871d1038aa9ff6ddeb4c9b28f7d6b5e5b1b69041ccf50a13483
+-- ARROW_AWS_LC_BUILD_VERSION: v1.3.0
+-- ARROW_AWS_LC_BUILD_SHA256_CHECKSUM: ae96a3567161552744fc0cae8b4d68ed88b1ec0f3d3c98700070115356da5a37
+-- ARROW_AWSSDK_BUILD_VERSION: 1.10.55
+-- ARROW_AWSSDK_BUILD_SHA256_CHECKSUM: 2d552fb1a84bef4a9b65e34aa7031851ed2aef5319e02cc6e4cb735c48aa30de
+-- ARROW_BOOST_BUILD_VERSION: 1.81.0
+-- ARROW_BOOST_BUILD_SHA256_CHECKSUM: 9e0ffae35528c35f90468997bc8d99500bf179cbae355415a89a600c38e13574
+-- ARROW_BROTLI_BUILD_VERSION: v1.0.9
+-- ARROW_BROTLI_BUILD_SHA256_CHECKSUM: f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46
+-- ARROW_BZIP2_BUILD_VERSION: 1.0.8
+-- ARROW_BZIP2_BUILD_SHA256_CHECKSUM: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
+-- ARROW_CARES_BUILD_VERSION: 1.17.2
+-- ARROW_CARES_BUILD_SHA256_CHECKSUM: 4803c844ce20ce510ef0eb83f8ea41fa24ecaae9d280c468c582d2bb25b3913d
+-- ARROW_CRC32C_BUILD_VERSION: 1.1.2
+-- ARROW_CRC32C_BUILD_SHA256_CHECKSUM: ac07840513072b7fcebda6e821068aa04889018f24e10e46181068fb214d7e56
+-- ARROW_GBENCHMARK_BUILD_VERSION: v1.7.1
+-- ARROW_GBENCHMARK_BUILD_SHA256_CHECKSUM: 6430e4092653380d9dc4ccb45a1e2dc9259d581f4866dc0759713126056bc1d7
+-- ARROW_GFLAGS_BUILD_VERSION: v2.2.2
+-- ARROW_GFLAGS_BUILD_SHA256_CHECKSUM: 34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf
+-- ARROW_GLOG_BUILD_VERSION: v0.5.0
+-- ARROW_GLOG_BUILD_SHA256_CHECKSUM: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_VERSION: v2.8.0
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_SHA256_CHECKSUM: 21fb441b5a670a18bb16b6826be8e0530888d0b94320847c538d46f5a54dddbc
+-- ARROW_GRPC_BUILD_VERSION: v1.46.3
+-- ARROW_GRPC_BUILD_SHA256_CHECKSUM: d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964
+-- ARROW_GTEST_BUILD_VERSION: 1.11.0
+-- ARROW_GTEST_BUILD_SHA256_CHECKSUM: b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+-- ARROW_JEMALLOC_BUILD_VERSION: 5.3.0
+-- ARROW_JEMALLOC_BUILD_SHA256_CHECKSUM: 2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
+-- ARROW_LZ4_BUILD_VERSION: v1.9.4
+-- ARROW_LZ4_BUILD_SHA256_CHECKSUM: 0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b
+-- ARROW_MIMALLOC_BUILD_VERSION: v2.0.6
+-- ARROW_MIMALLOC_BUILD_SHA256_CHECKSUM: 9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5
+-- ARROW_NLOHMANN_JSON_BUILD_VERSION: v3.10.5
+-- ARROW_NLOHMANN_JSON_BUILD_SHA256_CHECKSUM: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
+-- ARROW_OPENTELEMETRY_BUILD_VERSION: v1.8.1
+-- ARROW_OPENTELEMETRY_BUILD_SHA256_CHECKSUM: 3d640201594b07f08dade9cd1017bd0b59674daca26223b560b9bb6bf56264c2
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_VERSION: v0.17.0
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_SHA256_CHECKSUM: f269fbcb30e17b03caa1decd231ce826e59d7651c0f71c3b28eb5140b4bb5412
+-- ARROW_ORC_BUILD_VERSION: 1.8.3
+-- ARROW_ORC_BUILD_SHA256_CHECKSUM: a78678ec425c8129d63370cb8a9bacb54186aa66af1e2bec01ce92e7eaf72e20
+-- ARROW_PROTOBUF_BUILD_VERSION: v21.3
+-- ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM: 2f723218f6cb709ae4cdc4fb5ed56a5951fc5d466f0128ce4c946b8c78c8c49f
+-- ARROW_RAPIDJSON_BUILD_VERSION: 232389d4f1012dddec4ef84861face2d2ba85709
+-- ARROW_RAPIDJSON_BUILD_SHA256_CHECKSUM: b9290a9a6d444c8e049bd589ab804e0ccf2b05dc5984a19ed5ae75d090064806
+-- ARROW_RE2_BUILD_VERSION: 2022-06-01
+-- ARROW_RE2_BUILD_SHA256_CHECKSUM: f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f
+-- ARROW_SNAPPY_BUILD_VERSION: 1.1.9
+-- ARROW_SNAPPY_BUILD_SHA256_CHECKSUM: 75c1fbb3d618dd3a0483bff0e26d0a92b495bbe5059c8b4f1c962b478b6e06e7
+-- ARROW_SUBSTRAIT_BUILD_VERSION: v0.20.0
+-- ARROW_SUBSTRAIT_BUILD_SHA256_CHECKSUM: 5ceaa559ccef29a7825b5e5d4b5e7eed384830294f08bec913feecdd903a94cf
+-- ARROW_S2N_TLS_BUILD_VERSION: v1.3.35
+-- ARROW_S2N_TLS_BUILD_SHA256_CHECKSUM: 9d32b26e6bfcc058d98248bf8fc231537e347395dd89cf62bb432b55c5da990d
+-- ARROW_THRIFT_BUILD_VERSION: 0.16.0
+-- ARROW_THRIFT_BUILD_SHA256_CHECKSUM: f460b5c1ca30d8918ff95ea3eb6291b3951cf518553566088f3f2be8981f6209
+-- ARROW_UCX_BUILD_VERSION: 1.12.1
+-- ARROW_UCX_BUILD_SHA256_CHECKSUM: 9bef31aed0e28bf1973d28d74d9ac4f8926c43ca3b7010bd22a084e164e31b71
+-- ARROW_UTF8PROC_BUILD_VERSION: v2.7.0
+-- ARROW_UTF8PROC_BUILD_SHA256_CHECKSUM: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
+-- ARROW_XSIMD_BUILD_VERSION: 9.0.1
+-- ARROW_XSIMD_BUILD_SHA256_CHECKSUM: b1bb5f92167fd3a4f25749db0be7e61ed37e0a5d943490f3accdcd2cd2918cc0
+-- ARROW_ZLIB_BUILD_VERSION: 1.2.13
+-- ARROW_ZLIB_BUILD_SHA256_CHECKSUM: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+-- ARROW_ZSTD_BUILD_VERSION: 1.5.5
+-- ARROW_ZSTD_BUILD_SHA256_CHECKSUM: 9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Looking for _M_ARM64
+-- Looking for _M_ARM64 - not found
+-- Looking for __SIZEOF_INT128__
+-- Looking for __SIZEOF_INT128__ - found
+-- Found Boost: /usr/lib/x86_64-linux-gnu/cmake/Boost-1.74.0/BoostConfig.cmake (found suitable version "1.74.0", minimum required is "1.58")  
+-- Boost include dir: /usr/include
+CMake Warning at cmake_modules/FindSnappyAlt.cmake:29 (find_package):
+  By not providing "FindSnappy.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "Snappy", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "Snappy" with any
+  of the following names:
+
+    SnappyConfig.cmake
+    snappy-config.cmake
+
+  Add the installation prefix of "Snappy" to CMAKE_PREFIX_PATH or set
+  "Snappy_DIR" to a directory containing one of the above files.  If "Snappy"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:267 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:1305 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Could NOT find SnappyAlt (missing: Snappy_LIB Snappy_INCLUDE_DIR) 
+-- Building snappy from source
+-- Checking for modules 'libbrotlicommon;libbrotlienc;libbrotlidec'
+--   Found libbrotlicommon, version 1.0.9
+--   Found libbrotlienc, version 1.0.9
+--   Found libbrotlidec, version 1.0.9
+-- Found BrotliAlt: /usr/lib/x86_64-linux-gnu/libbrotlicommon.so  
+-- Providing CMake module for BrotliAlt as part of Arrow CMake package
+-- Using pkg-config package for libbrotlidec for static link
+-- Using pkg-config package for libbrotlienc for static link
+-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found suitable version "3.0.2", minimum required is "1.0.2")  
+-- Providing CMake module for OpenSSLAlt as part of Arrow CMake package
+-- Found OpenSSL Crypto Library: /usr/lib/x86_64-linux-gnu/libcrypto.so
+-- Building with OpenSSL (Version: 3.0.2) support
+CMake Warning at cmake_modules/FindThriftAlt.cmake:56 (find_package):
+  By not providing "FindThrift.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "Thrift", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "Thrift" (requested
+  version 0.11.0) with any of the following names:
+
+    ThriftConfig.cmake
+    thrift-config.cmake
+
+  Add the installation prefix of "Thrift" to CMAKE_PREFIX_PATH or set
+  "Thrift_DIR" to a directory containing one of the above files.  If "Thrift"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:267 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:1646 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Checking for module 'thrift'
+--   No package 'thrift' found
+-- Could NOT find ThriftAlt: Found unsuitable version "", but required is at least "0.11.0" (found ThriftAlt_LIB-NOTFOUND)
+-- Building Apache Thrift from source
+-- Building jemalloc from source
+-- Building (vendored) mimalloc from source
+CMake Warning at cmake_modules/FindRapidJSONAlt.cmake:29 (find_package):
+  By not providing "FindRapidJSON.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "RapidJSON", but CMake did not find one.
+
+  Could not find a package configuration file provided by "RapidJSON"
+  (requested version 1.1.0) with any of the following names:
+
+    RapidJSONConfig.cmake
+    rapidjson-config.cmake
+
+  Add the installation prefix of "RapidJSON" to CMAKE_PREFIX_PATH or set
+  "RapidJSON_DIR" to a directory containing one of the above files.  If
+  "RapidJSON" provides a separate development package or SDK, be sure it has
+  been installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:267 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2367 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Could NOT find RapidJSONAlt (missing: RAPIDJSON_INCLUDE_DIR) (Required is at least version "1.1.0")
+-- Building RapidJSON from source
+CMake Warning at cmake_modules/ThirdpartyToolchain.cmake:267 (find_package):
+  By not providing "Findxsimd.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "xsimd", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "xsimd" with any of
+  the following names:
+
+    xsimdConfig.cmake
+    xsimd-config.cmake
+
+  Add the installation prefix of "xsimd" to CMAKE_PREFIX_PATH or set
+  "xsimd_DIR" to a directory containing one of the above files.  If "xsimd"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:2424 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Building xsimd from source
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.2.11") 
+-- Using pkg-config package for zlib for static link
+CMake Warning at cmake_modules/Findlz4Alt.cmake:29 (find_package):
+  By not providing "Findlz4.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "lz4", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "lz4" with any of
+  the following names:
+
+    lz4Config.cmake
+    lz4-config.cmake
+
+  Add the installation prefix of "lz4" to CMAKE_PREFIX_PATH or set "lz4_DIR"
+  to a directory containing one of the above files.  If "lz4" provides a
+  separate development package or SDK, be sure it has been installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:267 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2523 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Checking for module 'liblz4'
+--   No package 'liblz4' found
+-- Could NOT find lz4Alt (missing: LZ4_LIB LZ4_INCLUDE_DIR) 
+-- Building LZ4 from source
+CMake Warning at cmake_modules/FindzstdAlt.cmake:29 (find_package):
+  By not providing "Findzstd.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "zstd", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "zstd" (requested
+  version 1.4.0) with any of the following names:
+
+    zstdConfig.cmake
+    zstd-config.cmake
+
+  Add the installation prefix of "zstd" to CMAKE_PREFIX_PATH or set
+  "zstd_DIR" to a directory containing one of the above files.  If "zstd"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:267 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2582 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Checking for module 'libzstd'
+--   No package 'libzstd' found
+-- Could NOT find zstdAlt (missing: ZSTD_LIB ZSTD_INCLUDE_DIR) (Required is at least version "1.4.0")
+-- Building Zstandard from source
+CMake Warning at cmake_modules/Findre2Alt.cmake:29 (find_package):
+  By not providing "Findre2.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "re2", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "re2" with any of
+  the following names:
+
+    re2Config.cmake
+    re2-config.cmake
+
+  Add the installation prefix of "re2" to CMAKE_PREFIX_PATH or set "re2_DIR"
+  to a directory containing one of the above files.  If "re2" provides a
+  separate development package or SDK, be sure it has been installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:267 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2644 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Checking for module 're2'
+--   No package 're2' found
+-- Could NOT find re2Alt (missing: RE2_LIB RE2_INCLUDE_DIR) 
+-- Building RE2 from source
+-- Found BZip2: /usr/lib/x86_64-linux-gnu/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+-- pkg-config package for bzip2 for static link isn't found
+-- Could NOT find utf8proc: Found unsuitable version "", but required is at least "2.2.0" (found utf8proc_LIB-NOTFOUND)
+-- Building utf8proc from source
+CMake Warning at cmake_modules/ThirdpartyToolchain.cmake:267 (find_package):
+  By not providing "Findnlohmann_json.cmake" in CMAKE_MODULE_PATH this
+  project has asked CMake to find a package configuration file provided by
+  "nlohmann_json", but CMake did not find one.
+
+  Could not find a package configuration file provided by "nlohmann_json"
+  with any of the following names:
+
+    nlohmann_jsonConfig.cmake
+    nlohmann_json-config.cmake
+
+  Add the installation prefix of "nlohmann_json" to CMAKE_PREFIX_PATH or set
+  "nlohmann_json_DIR" to a directory containing one of the above files.  If
+  "nlohmann_json" provides a separate development package or SDK, be sure it
+  has been installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:4187 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Building nlohmann-json from source
+-- Found nlohmann_json headers: /tmp/Rtmp5tTRmH/filedab020a0561d/nlohmann_json_ep-install/include
+CMake Warning at cmake_modules/ThirdpartyToolchain.cmake:267 (find_package):
+  By not providing "Findgoogle_cloud_cpp_storage.cmake" in CMAKE_MODULE_PATH
+  this project has asked CMake to find a package configuration file provided
+  by "google_cloud_cpp_storage", but CMake did not find one.
+
+  Could not find a package configuration file provided by
+  "google_cloud_cpp_storage" with any of the following names:
+
+    google_cloud_cpp_storageConfig.cmake
+    google_cloud_cpp_storage-config.cmake
+
+  Add the installation prefix of "google_cloud_cpp_storage" to
+  CMAKE_PREFIX_PATH or set "google_cloud_cpp_storage_DIR" to a directory
+  containing one of the above files.  If "google_cloud_cpp_storage" provides
+  a separate development package or SDK, be sure it has been installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:4376 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Building google-cloud-cpp from source
+-- Only building the google-cloud-cpp::storage component
+CMake Warning at cmake_modules/ThirdpartyToolchain.cmake:2828 (find_package):
+  By not providing "Findabsl.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "absl", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "absl" (requested
+  version 20211102) with any of the following names:
+
+    abslConfig.cmake
+    absl-config.cmake
+
+  Add the installation prefix of "absl" to CMAKE_PREFIX_PATH or set
+  "absl_DIR" to a directory containing one of the above files.  If "absl"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:4198 (ensure_absl)
+  cmake_modules/ThirdpartyToolchain.cmake:174 (build_google_cloud_cpp_storage)
+  cmake_modules/ThirdpartyToolchain.cmake:280 (build_dependency)
+  cmake_modules/ThirdpartyToolchain.cmake:4376 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+CMake Warning at cmake_modules/ThirdpartyToolchain.cmake:2828 (find_package):
+  By not providing "Findabsl.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "absl", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "absl" (requested
+  version 20220623) with any of the following names:
+
+    abslConfig.cmake
+    absl-config.cmake
+
+  Add the installation prefix of "absl" to CMAKE_PREFIX_PATH or set
+  "absl_DIR" to a directory containing one of the above files.  If "absl"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:4198 (ensure_absl)
+  cmake_modules/ThirdpartyToolchain.cmake:174 (build_google_cloud_cpp_storage)
+  cmake_modules/ThirdpartyToolchain.cmake:280 (build_dependency)
+  cmake_modules/ThirdpartyToolchain.cmake:4376 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Building Abseil-cpp from source
+-- Building crc32c from source
+-- Found CURL: /usr/lib/x86_64-linux-gnu/libcurl.so (found version "7.81.0")  
+-- Found google-cloud-cpp::storage headers: /tmp/Rtmp5tTRmH/filedab020a0561d/google_cloud_cpp_ep-install/include
+-- Found hdfs.h at: /home/tdhock/arrow_12/tools/cpp/thirdparty/hadoop/include/hdfs.h
+CMake Warning at cmake_modules/FindAWSSDKAlt.cmake:36 (find_package):
+  By not providing "FindAWSSDK.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "AWSSDK", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "AWSSDK" with any
+  of the following names:
+
+    AWSSDKConfig.cmake
+    awssdk-config.cmake
+
+  Add the installation prefix of "AWSSDK" to CMAKE_PREFIX_PATH or set
+  "AWSSDK_DIR" to a directory containing one of the above files.  If "AWSSDK"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:267 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:5075 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Building AWS C++ SDK from source
+-- Found AWS SDK headers: /tmp/Rtmp5tTRmH/filedab020a0561d/awssdk_ep-install/include
+-- Found AWS SDK libraries: aws-cpp-sdk-identity-management;aws-cpp-sdk-sts;aws-cpp-sdk-cognito-identity;aws-cpp-sdk-s3;aws-cpp-sdk-core;AWS::aws-crt-cpp;AWS::aws-c-s3;AWS::aws-c-auth;AWS::aws-c-mqtt;AWS::aws-c-http;AWS::aws-c-compression;AWS::aws-c-sdkutils;AWS::aws-c-event-stream;AWS::aws-c-io;AWS::aws-c-cal;AWS::aws-checksums;AWS::aws-c-common;AWS::s2n-tls
+-- All bundled static libraries: Snappy::snappy-static;thrift::thrift;jemalloc::jemalloc;mimalloc::mimalloc;LZ4::lz4;zstd::libzstd_static;re2::re2;utf8proc::utf8proc;google-cloud-cpp::storage;google-cloud-cpp::rest-internal;google-cloud-cpp::common;absl::bad_optional_access;absl::bad_variant_access;absl::base;absl::civil_time;absl::int128;absl::log_severity;absl::raw_logging_internal;absl::spinlock_wait;absl::strings;absl::strings_internal;absl::str_format_internal;absl::throw_delegate;absl::time;absl::time_zone;Crc32c::crc32c;aws-cpp-sdk-identity-management;aws-cpp-sdk-sts;aws-cpp-sdk-cognito-identity;aws-cpp-sdk-s3;aws-cpp-sdk-core;AWS::aws-crt-cpp;AWS::aws-c-s3;AWS::aws-c-auth;AWS::aws-c-mqtt;AWS::aws-c-http;AWS::aws-c-compression;AWS::aws-c-sdkutils;AWS::aws-c-event-stream;AWS::aws-c-io;AWS::aws-c-cal;AWS::aws-checksums;AWS::aws-c-common;AWS::s2n-tls
+-- CMAKE_C_FLAGS: -g -O2  -Wall -fno-semantic-interposition -msse4.2 
+-- CMAKE_CXX_FLAGS:  -Wno-noexcept-type -g -O2 -fdiagnostics-color=always  -Wall -fno-semantic-interposition -msse4.2 
+-- CMAKE_C_FLAGS_RELEASE: -O3 -DNDEBUG -O2 -ftree-vectorize
+-- CMAKE_CXX_FLAGS_RELEASE: -O3 -DNDEBUG -O2 -ftree-vectorize
+-- Creating bundled static library target arrow_bundled_dependencies at /tmp/Rtmp5tTRmH/filedab020a0561d/release/libarrow_bundled_dependencies.a
+-- Looking for backtrace
+-- Looking for backtrace - found
+-- backtrace facility detected in default set of libraries
+-- Found Backtrace: /usr/include  
+-- ---------------------------------------------------------------------
+-- Arrow version:                                 12.0.0
+-- 
+-- Build configuration summary:
+--   Generator: Unix Makefiles
+--   Build type: RELEASE
+--   Source directory: /home/tdhock/arrow_12/tools/cpp
+--   Install prefix: /home/tdhock/arrow_12/libarrow/arrow-12.0.0
+-- 
+-- Compile and link options:
+-- 
+--   ARROW_CXXFLAGS="" [default=""]
+--       Compiler flags to append when compiling Arrow
+--   ARROW_BUILD_STATIC=ON [default=ON]
+--       Build static libraries
+--   ARROW_BUILD_SHARED=OFF [default=ON]
+--       Build shared libraries
+--   ARROW_PACKAGE_KIND="" [default=""]
+--       Arbitrary string that identifies the kind of package
+--       (for informational purposes)
+--   ARROW_GIT_ID="" [default=""]
+--       The Arrow git commit id (if any)
+--   ARROW_GIT_DESCRIPTION="" [default=""]
+--       The Arrow git commit description (if any)
+--   ARROW_NO_DEPRECATED_API=OFF [default=OFF]
+--       Exclude deprecated APIs from build
+--   ARROW_POSITION_INDEPENDENT_CODE=ON [default=ON]
+--       Whether to create position-independent target
+--   ARROW_USE_CCACHE=ON [default=ON]
+--       Use ccache when compiling (if available)
+--   ARROW_USE_SCCACHE=ON [default=ON]
+--       Use sccache when compiling (if available),
+--       takes precedence over ccache if a storage backend is configured
+--   ARROW_USE_LD_GOLD=OFF [default=OFF]
+--       Use ld.gold for linking on Linux (if available)
+--   ARROW_USE_PRECOMPILED_HEADERS=OFF [default=OFF]
+--       Use precompiled headers when compiling
+--   ARROW_SIMD_LEVEL=SSE4_2 [default=NONE|SSE4_2|AVX2|AVX512|NEON|SVE|SVE128|SVE256|SVE512|DEFAULT]
+--       Compile-time SIMD optimization level
+--   ARROW_RUNTIME_SIMD_LEVEL=MAX [default=NONE|SSE4_2|AVX2|AVX512|MAX]
+--       Max runtime SIMD optimization level
+--   ARROW_ALTIVEC=ON [default=ON]
+--       Build with Altivec if compiler has support
+--   ARROW_RPATH_ORIGIN=OFF [default=OFF]
+--       Build Arrow libraries with RATH set to $ORIGIN
+--   ARROW_INSTALL_NAME_RPATH=ON [default=ON]
+--       Build Arrow libraries with install_name set to @rpath
+--   ARROW_GGDB_DEBUG=ON [default=ON]
+--       Pass -ggdb flag to debug builds
+--   ARROW_WITH_MUSL=OFF [default=OFF]
+--       Whether the system libc is musl or not
+-- 
+-- Test and benchmark options:
+-- 
+--   ARROW_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Arrow examples
+--   ARROW_BUILD_TESTS=OFF [default=OFF]
+--       Build the Arrow googletest unit tests
+--   ARROW_ENABLE_TIMING_TESTS=ON [default=ON]
+--       Enable timing-sensitive tests
+--   ARROW_BUILD_INTEGRATION=OFF [default=OFF]
+--       Build the Arrow integration test executables
+--   ARROW_BUILD_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow micro benchmarks
+--   ARROW_BUILD_BENCHMARKS_REFERENCE=OFF [default=OFF]
+--       Build the Arrow micro reference benchmarks
+--   ARROW_BUILD_OPENMP_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow benchmarks that rely on OpenMP
+--   ARROW_BUILD_DETAILED_BENCHMARKS=OFF [default=OFF]
+--       Build benchmarks that do a longer exploration of performance
+--   ARROW_TEST_LINKAGE=static [default=shared|static]
+--       Linkage of Arrow libraries with unit tests executables.
+--   ARROW_FUZZING=OFF [default=OFF]
+--       Build Arrow Fuzzing executables
+--   ARROW_LARGE_MEMORY_TESTS=OFF [default=OFF]
+--       Enable unit tests which use large memory
+-- 
+-- Lint options:
+-- 
+--   ARROW_ONLY_LINT=OFF [default=OFF]
+--       Only define the lint and check-format targets
+--   ARROW_VERBOSE_LINT=OFF [default=OFF]
+--       If off, 'quiet' flags will be passed to linting tools
+--   ARROW_GENERATE_COVERAGE=OFF [default=OFF]
+--       Build with C++ code coverage enabled
+-- 
+-- Checks options:
+-- 
+--   ARROW_TEST_MEMCHECK=OFF [default=OFF]
+--       Run the test suite using valgrind --tool=memcheck
+--   ARROW_USE_ASAN=OFF [default=OFF]
+--       Enable Address Sanitizer checks
+--   ARROW_USE_TSAN=OFF [default=OFF]
+--       Enable Thread Sanitizer checks
+--   ARROW_USE_UBSAN=OFF [default=OFF]
+--       Enable Undefined Behavior sanitizer checks
+-- 
+-- Project component options:
+-- 
+--   ARROW_BUILD_UTILITIES=OFF [default=OFF]
+--       Build Arrow commandline utilities
+--   ARROW_COMPUTE=ON [default=OFF]
+--       Build all Arrow Compute kernels
+--   ARROW_CSV=ON [default=OFF]
+--       Build the Arrow CSV Parser Module
+--   ARROW_CUDA=OFF [default=OFF]
+--       Build the Arrow CUDA extensions (requires CUDA toolkit)
+--   ARROW_DATASET=ON [default=OFF]
+--       Build the Arrow Dataset Modules
+--   ARROW_FILESYSTEM=ON [default=OFF]
+--       Build the Arrow Filesystem Layer
+--   ARROW_FLIGHT=OFF [default=OFF]
+--       Build the Arrow Flight RPC System (requires GRPC, Protocol Buffers)
+--   ARROW_FLIGHT_SQL=OFF [default=OFF]
+--       Build the Arrow Flight SQL extension
+--   ARROW_GANDIVA=OFF [default=OFF]
+--       Build the Gandiva libraries
+--   ARROW_GCS=ON [default=OFF]
+--       Build Arrow with GCS support (requires the GCloud SDK for C++)
+--   ARROW_HDFS=OFF [default=OFF]
+--       Build the Arrow HDFS bridge
+--   ARROW_IPC=ON [default=ON]
+--       Build the Arrow IPC extensions
+--   ARROW_JEMALLOC=ON [default=ON]
+--       Build the Arrow jemalloc-based allocator
+--   ARROW_JSON=ON [default=OFF]
+--       Build Arrow with JSON support (requires RapidJSON)
+--   ARROW_MIMALLOC=ON [default=OFF]
+--       Build the Arrow mimalloc-based allocator
+--   ARROW_PARQUET=ON [default=OFF]
+--       Build the Parquet libraries
+--   ARROW_ORC=OFF [default=OFF]
+--       Build the Arrow ORC adapter
+--   ARROW_PYTHON=OFF [default=OFF]
+--       Build some components needed by PyArrow.
+--       (This is a deprecated option. Use CMake presets instead.)
+--   ARROW_S3=ON [default=OFF]
+--       Build Arrow with S3 support (requires the AWS SDK for C++)
+--   ARROW_SKYHOOK=OFF [default=OFF]
+--       Build the Skyhook libraries
+--   ARROW_SUBSTRAIT=OFF [default=OFF]
+--       Build the Arrow Substrait Consumer Module
+--   ARROW_ACERO=ON [default=OFF]
+--       Build the Arrow Acero Engine Module
+--   ARROW_TENSORFLOW=OFF [default=OFF]
+--       Build Arrow with TensorFlow support enabled
+--   ARROW_TESTING=OFF [default=OFF]
+--       Build the Arrow testing libraries
+-- 
+-- Thirdparty toolchain options:
+-- 
+--   ARROW_DEPENDENCY_SOURCE=AUTO [default=AUTO|BUNDLED|SYSTEM|CONDA|VCPKG|BREW]
+--       Method to use for acquiring arrow's build dependencies
+--   ARROW_VERBOSE_THIRDPARTY_BUILD=OFF [default=OFF]
+--       Show output from ExternalProjects rather than just logging to files
+--   ARROW_DEPENDENCY_USE_SHARED=ON [default=ON]
+--       Link to shared libraries
+--   ARROW_BOOST_USE_SHARED=OFF [default=ON]
+--       Rely on Boost shared libraries where relevant
+--   ARROW_BROTLI_USE_SHARED=ON [default=ON]
+--       Rely on Brotli shared libraries where relevant
+--   ARROW_BZ2_USE_SHARED=ON [default=ON]
+--       Rely on Bz2 shared libraries where relevant
+--   ARROW_GFLAGS_USE_SHARED=ON [default=ON]
+--       Rely on GFlags shared libraries where relevant
+--   ARROW_GRPC_USE_SHARED=ON [default=ON]
+--       Rely on gRPC shared libraries where relevant
+--   ARROW_JEMALLOC_USE_SHARED=OFF [default=ON]
+--       Rely on jemalloc shared libraries where relevant
+--   ARROW_LZ4_USE_SHARED=ON [default=ON]
+--       Rely on lz4 shared libraries where relevant
+--   ARROW_OPENSSL_USE_SHARED=ON [default=ON]
+--       Rely on OpenSSL shared libraries where relevant
+--   ARROW_PROTOBUF_USE_SHARED=ON [default=ON]
+--       Rely on Protocol Buffers shared libraries where relevant
+--   ARROW_SNAPPY_USE_SHARED=ON [default=ON]
+--       Rely on snappy shared libraries where relevant
+--   ARROW_THRIFT_USE_SHARED=ON [default=ON]
+--       Rely on thrift shared libraries where relevant
+--   ARROW_UTF8PROC_USE_SHARED=ON [default=ON]
+--       Rely on utf8proc shared libraries where relevant
+--   ARROW_ZSTD_USE_SHARED=ON [default=ON]
+--       Rely on zstd shared libraries where relevant
+--   ARROW_USE_GLOG=OFF [default=OFF]
+--       Build libraries with glog support for pluggable logging
+--   ARROW_WITH_BACKTRACE=ON [default=ON]
+--       Build with backtrace support
+--   ARROW_WITH_OPENTELEMETRY=OFF [default=OFF]
+--       Build libraries with OpenTelemetry support for distributed tracing
+--   ARROW_WITH_BROTLI=ON [default=OFF]
+--       Build with Brotli compression
+--   ARROW_WITH_BZ2=ON [default=OFF]
+--       Build with BZ2 compression
+--   ARROW_WITH_LZ4=ON [default=OFF]
+--       Build with lz4 compression
+--   ARROW_WITH_SNAPPY=ON [default=OFF]
+--       Build with Snappy compression
+--   ARROW_WITH_ZLIB=ON [default=OFF]
+--       Build with zlib compression
+--   ARROW_WITH_ZSTD=ON [default=OFF]
+--       Build with zstd compression
+--   ARROW_WITH_UCX=OFF [default=OFF]
+--       Build with UCX transport for Arrow Flight
+--       (only used if ARROW_FLIGHT is ON)
+--   ARROW_WITH_UTF8PROC=ON [default=ON]
+--       Build with support for Unicode properties using the utf8proc library
+--       (only used if ARROW_COMPUTE is ON or ARROW_GANDIVA is ON)
+--   ARROW_WITH_RE2=ON [default=ON]
+--       Build with support for regular expressions using the re2 library
+--       (only used if ARROW_COMPUTE or ARROW_GANDIVA is ON)
+-- 
+-- Parquet options:
+-- 
+--   PARQUET_MINIMAL_DEPENDENCY=OFF [default=OFF]
+--       Depend only on Thirdparty headers to build libparquet.
+--       Always OFF if building binaries
+--   PARQUET_BUILD_EXECUTABLES=OFF [default=OFF]
+--       Build the Parquet executable CLI tools. Requires static libraries to be built.
+--   PARQUET_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Parquet examples. Requires static libraries to be built.
+--   PARQUET_REQUIRE_ENCRYPTION=OFF [default=OFF]
+--       Build support for encryption. Fail if OpenSSL is not found
+-- 
+-- Gandiva options:
+-- 
+--   ARROW_GANDIVA_STATIC_LIBSTDCPP=OFF [default=OFF]
+--       Include -static-libstdc++ -static-libgcc when linking with
+--       Gandiva static libraries
+--   ARROW_GANDIVA_PC_CXX_FLAGS="" [default=""]
+--       Compiler flags to append when pre-compiling Gandiva operations
+-- 
+-- Advanced developer options:
+-- 
+--   ARROW_EXTRA_ERROR_CONTEXT=OFF [default=OFF]
+--       Compile with extra error context (line numbers, code)
+--   ARROW_OPTIONAL_INSTALL=OFF [default=OFF]
+--       If enabled install ONLY targets that have already been built. Please be
+--       advised that if this is enabled 'install' will fail silently on components
+--       that have not been built
+--   ARROW_GDB_INSTALL_DIR="" [default=""]
+--       Use a custom install directory for GDB plugin.
+--       In general, you don't need to specify this because the default
+--       (CMAKE_INSTALL_FULL_BINDIR on Windows, CMAKE_INSTALL_FULL_LIBDIR otherwise)
+--       is reasonable.
+--   Outputting build configuration summary to /tmp/Rtmp5tTRmH/filedab020a0561d/cmake_summary.json
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /tmp/Rtmp5tTRmH/filedab020a0561d
++ > /usr/bin/cmake --build . --target install -- -j 2
+[  0%] Creating directories for 'snappy_ep'
+[  0%] Creating directories for 'thrift_ep'
+[  0%] Performing download step (download, verify and extract) for 'snappy_ep'
+[  0%] Performing download step (download, verify and extract) for 'thrift_ep'
+-- snappy_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/snappy_ep-prefix/src/snappy_ep-stamp/snappy_ep-download-*.log
+[  1%] No update step for 'snappy_ep'
+[  1%] No patch step for 'snappy_ep'
+[  1%] Performing configure step for 'snappy_ep'
+-- thrift_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/thrift_ep-prefix/src/thrift_ep-stamp/thrift_ep-download-*.log
+[  1%] No update step for 'thrift_ep'
+[  1%] No patch step for 'thrift_ep'
+[  1%] Performing configure step for 'thrift_ep'
+-- snappy_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/snappy_ep-prefix/src/snappy_ep-stamp/snappy_ep-configure-*.log
+[  2%] Performing build step for 'snappy_ep'
+-- thrift_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/thrift_ep-prefix/src/thrift_ep-stamp/thrift_ep-configure-*.log
+[  2%] Performing build step for 'thrift_ep'
+-- snappy_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/snappy_ep-prefix/src/snappy_ep-stamp/snappy_ep-build-*.log
+[  2%] Performing install step for 'snappy_ep'
+-- snappy_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/snappy_ep-prefix/src/snappy_ep-stamp/snappy_ep-install-*.log
+[  2%] Completed 'snappy_ep'
+[  2%] Built target snappy_ep
+[  2%] Creating directories for 'jemalloc_ep'
+[  2%] Performing download step (download, verify and extract) for 'jemalloc_ep'
+-- jemalloc_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/jemalloc_ep-prefix/src/jemalloc_ep-stamp/jemalloc_ep-download-*.log
+[  3%] No update step for 'jemalloc_ep'
+[  3%] Performing patch step for 'jemalloc_ep'
+[  3%] Performing configure step for 'jemalloc_ep'
+-- jemalloc_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/jemalloc_ep-prefix/src/jemalloc_ep-stamp/jemalloc_ep-configure-*.log
+[  4%] Performing build step for 'jemalloc_ep'
+-- thrift_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/thrift_ep-prefix/src/thrift_ep-stamp/thrift_ep-build-*.log
+[  5%] Performing install step for 'thrift_ep'
+-- thrift_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/thrift_ep-prefix/src/thrift_ep-stamp/thrift_ep-install-*.log
+[  5%] Completed 'thrift_ep'
+[  5%] Built target thrift_ep
+[  5%] Creating directories for 'mimalloc_ep'
+[  5%] Performing download step (download, verify and extract) for 'mimalloc_ep'
+-- mimalloc_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/mimalloc_ep-prefix/src/mimalloc_ep-stamp/mimalloc_ep-download-*.log
+[  6%] No update step for 'mimalloc_ep'
+[  6%] No patch step for 'mimalloc_ep'
+[  7%] Performing configure step for 'mimalloc_ep'
+-- mimalloc_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/mimalloc_ep-prefix/src/mimalloc_ep-stamp/mimalloc_ep-configure-*.log
+[  7%] Performing build step for 'mimalloc_ep'
+-- mimalloc_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/mimalloc_ep-prefix/src/mimalloc_ep-stamp/mimalloc_ep-build-*.log
+[  7%] Performing install step for 'mimalloc_ep'
+-- mimalloc_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/mimalloc_ep-prefix/src/mimalloc_ep-stamp/mimalloc_ep-install-*.log
+[  7%] Completed 'mimalloc_ep'
+[  7%] Built target mimalloc_ep
+[  7%] Creating directories for 'rapidjson_ep'
+[  8%] Performing download step (download, verify and extract) for 'rapidjson_ep'
+-- rapidjson_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/src/rapidjson_ep-stamp/rapidjson_ep-download-*.log
+[  8%] No update step for 'rapidjson_ep'
+[  8%] No patch step for 'rapidjson_ep'
+[  8%] Performing configure step for 'rapidjson_ep'
+-- rapidjson_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/src/rapidjson_ep-stamp/rapidjson_ep-configure-*.log
+[  8%] Performing build step for 'rapidjson_ep'
+-- rapidjson_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/src/rapidjson_ep-stamp/rapidjson_ep-build-*.log
+[  8%] Performing install step for 'rapidjson_ep'
+-- rapidjson_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/src/rapidjson_ep-stamp/rapidjson_ep-install-*.log
+[  8%] Completed 'rapidjson_ep'
+[  8%] Built target rapidjson_ep
+[  9%] Creating directories for 'xsimd_ep'
+[  9%] Performing download step (download, verify and extract) for 'xsimd_ep'
+-- xsimd_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/src/xsimd_ep-stamp/xsimd_ep-download-*.log
+[  9%] No update step for 'xsimd_ep'
+[  9%] No patch step for 'xsimd_ep'
+[  9%] Performing configure step for 'xsimd_ep'
+-- xsimd_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/src/xsimd_ep-stamp/xsimd_ep-configure-*.log
+[  9%] Performing build step for 'xsimd_ep'
+-- xsimd_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/src/xsimd_ep-stamp/xsimd_ep-build-*.log
+[  9%] Performing install step for 'xsimd_ep'
+-- xsimd_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/src/xsimd_ep-stamp/xsimd_ep-install-*.log
+[  9%] Completed 'xsimd_ep'
+[  9%] Built target xsimd_ep
+[  9%] Creating directories for 'lz4_ep'
+[  9%] Performing download step (download, verify and extract) for 'lz4_ep'
+-- lz4_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/lz4_ep-prefix/src/lz4_ep-stamp/lz4_ep-download-*.log
+[  9%] No update step for 'lz4_ep'
+[  9%] No patch step for 'lz4_ep'
+[  9%] Performing configure step for 'lz4_ep'
+-- lz4_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/lz4_ep-prefix/src/lz4_ep-stamp/lz4_ep-configure-*.log
+[  9%] Performing build step for 'lz4_ep'
+-- lz4_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/lz4_ep-prefix/src/lz4_ep-stamp/lz4_ep-build-*.log
+[ 10%] Performing install step for 'lz4_ep'
+-- lz4_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/lz4_ep-prefix/src/lz4_ep-stamp/lz4_ep-install-*.log
+[ 10%] Completed 'lz4_ep'
+[ 10%] Built target lz4_ep
+[ 10%] Creating directories for 'zstd_ep'
+[ 10%] Performing download step (download, verify and extract) for 'zstd_ep'
+-- zstd_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/zstd_ep-prefix/src/zstd_ep-stamp/zstd_ep-download-*.log
+[ 11%] No update step for 'zstd_ep'
+[ 11%] No patch step for 'zstd_ep'
+[ 12%] Performing configure step for 'zstd_ep'
+-- zstd_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/zstd_ep-prefix/src/zstd_ep-stamp/zstd_ep-configure-*.log
+[ 12%] Performing build step for 'zstd_ep'
+-- jemalloc_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/jemalloc_ep-prefix/src/jemalloc_ep-stamp/jemalloc_ep-build-*.log
+[ 12%] Performing install step for 'jemalloc_ep'
+-- jemalloc_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/jemalloc_ep-prefix/src/jemalloc_ep-stamp/jemalloc_ep-install-*.log
+[ 12%] Completed 'jemalloc_ep'
+[ 12%] Built target jemalloc_ep
+[ 12%] Creating directories for 're2_ep'
+[ 12%] Performing download step (download, verify and extract) for 're2_ep'
+-- re2_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/re2_ep-prefix/src/re2_ep-stamp/re2_ep-download-*.log
+[ 12%] No update step for 're2_ep'
+[ 13%] No patch step for 're2_ep'
+[ 13%] Performing configure step for 're2_ep'
+-- re2_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/re2_ep-prefix/src/re2_ep-stamp/re2_ep-configure-*.log
+[ 14%] Performing build step for 're2_ep'
+-- zstd_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/zstd_ep-prefix/src/zstd_ep-stamp/zstd_ep-build-*.log
+[ 14%] Performing install step for 'zstd_ep'
+-- zstd_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/zstd_ep-prefix/src/zstd_ep-stamp/zstd_ep-install-*.log
+[ 14%] Completed 'zstd_ep'
+[ 14%] Built target zstd_ep
+[ 14%] Creating directories for 'utf8proc_ep'
+[ 14%] Performing download step (download, verify and extract) for 'utf8proc_ep'
+-- utf8proc_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/utf8proc_ep-prefix/src/utf8proc_ep-stamp/utf8proc_ep-download-*.log
+[ 15%] No update step for 'utf8proc_ep'
+[ 15%] No patch step for 'utf8proc_ep'
+[ 16%] Performing configure step for 'utf8proc_ep'
+-- utf8proc_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/utf8proc_ep-prefix/src/utf8proc_ep-stamp/utf8proc_ep-configure-*.log
+[ 16%] Performing build step for 'utf8proc_ep'
+-- utf8proc_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/utf8proc_ep-prefix/src/utf8proc_ep-stamp/utf8proc_ep-build-*.log
+[ 16%] Performing install step for 'utf8proc_ep'
+-- utf8proc_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/utf8proc_ep-prefix/src/utf8proc_ep-stamp/utf8proc_ep-install-*.log
+[ 16%] Completed 'utf8proc_ep'
+[ 16%] Built target utf8proc_ep
+[ 17%] Creating directories for 'nlohmann_json_ep'
+[ 17%] Performing download step (download, verify and extract) for 'nlohmann_json_ep'
+-- nlohmann_json_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/nlohmann_json_ep-prefix/src/nlohmann_json_ep-stamp/nlohmann_json_ep-download-*.log
+[ 17%] No update step for 'nlohmann_json_ep'
+[ 17%] No patch step for 'nlohmann_json_ep'
+[ 17%] Performing configure step for 'nlohmann_json_ep'
+-- nlohmann_json_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/nlohmann_json_ep-prefix/src/nlohmann_json_ep-stamp/nlohmann_json_ep-configure-*.log
+[ 17%] Performing build step for 'nlohmann_json_ep'
+-- nlohmann_json_ep build command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/nlohmann_json_ep-prefix/src/nlohmann_json_ep-stamp/nlohmann_json_ep-build-*.log
+[ 17%] Performing install step for 'nlohmann_json_ep'
+-- nlohmann_json_ep install command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/nlohmann_json_ep-prefix/src/nlohmann_json_ep-stamp/nlohmann_json_ep-install-*.log
+[ 17%] Completed 'nlohmann_json_ep'
+[ 17%] Built target nlohmann_json_ep
+[ 18%] Creating directories for 'absl_ep'
+[ 18%] Performing download step (download, verify and extract) for 'absl_ep'
+-- absl_ep download command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/absl_ep-prefix/src/absl_ep-stamp/absl_ep-download-*.log
+[ 18%] No update step for 'absl_ep'
+[ 18%] No patch step for 'absl_ep'
+[ 18%] Performing configure step for 'absl_ep'
+-- absl_ep configure command succeeded.  See also /tmp/Rtmp5tTRmH/filedab020a0561d/absl_ep-prefix/src/absl_ep-stamp/absl_ep-configure-*.log
+[ 18%] Performing build step for 'absl_ep'
+CMake Error at /tmp/Rtmp5tTRmH/filedab020a0561d/absl_ep-prefix/src/absl_ep-stamp/absl_ep-build-RELEASE.cmake:37 (message):
+  Command failed: 2
+
+   'make'
+
+  See also
+
+    /tmp/Rtmp5tTRmH/filedab020a0561d/absl_ep-prefix/src/absl_ep-stamp/absl_ep-build-*.log
+
+
+-- stdout output is:
+[  1%] Building CXX object absl/base/CMakeFiles/log_severity.dir/log_severity.cc.o
+[  1%] Linking CXX static library libabsl_log_severity.a
+[  1%] Built target log_severity
+[  1%] Building CXX object absl/base/CMakeFiles/spinlock_wait.dir/internal/spinlock_wait.cc.o
+[  2%] Linking CXX static library libabsl_spinlock_wait.a
+[  2%] Built target spinlock_wait
+[  3%] Building CXX object absl/base/CMakeFiles/strerror.dir/internal/strerror.cc.o
+[  4%] Linking CXX static library libabsl_strerror.a
+[  4%] Built target strerror
+[  5%] Building CXX object absl/time/CMakeFiles/time_zone.dir/internal/cctz/src/time_zone_fixed.cc.o
+[  5%] Building CXX object absl/time/CMakeFiles/time_zone.dir/internal/cctz/src/time_zone_format.cc.o
+[  6%] Building CXX object absl/time/CMakeFiles/time_zone.dir/internal/cctz/src/time_zone_if.cc.o
+[  6%] Building CXX object absl/time/CMakeFiles/time_zone.dir/internal/cctz/src/time_zone_impl.cc.o
+[  7%] Building CXX object absl/time/CMakeFiles/time_zone.dir/internal/cctz/src/time_zone_info.cc.o
+[  7%] Building CXX object absl/time/CMakeFiles/time_zone.dir/internal/cctz/src/time_zone_libc.cc.o
+
+-- stderr output is:
+/home/tdhock/include/c++/13.1.0/ratio: Dans l'instanciation de « struct std::__safe_multiply<1, 1> » :
+/home/tdhock/include/c++/13.1.0/ratio:306:54:   requis par « struct std::__ratio_multiply<std::ratio<1, 1000000000>, std::ratio<1> > »
+/home/tdhock/include/c++/13.1.0/ratio:335:42:   requis par « struct std::__ratio_divide<std::ratio<1, 1000000000>, std::ratio<1> > »
+/home/tdhock/include/c++/13.1.0/ratio:353:11:   requis par la substitution de « template<class _R1, class _R2> using std::ratio_divide = typename std::__ratio_divide::type [with _R1 = std::ratio<1, 1000000000>; _R2 = std::ratio<1>] »
+/home/tdhock/include/c++/13.1.0/bits/chrono.h:283:10:   requis par « constexpr std::chrono::__enable_if_is_duration<_ToDur> std::chrono::duration_cast(const duration<_Rep, _Period>&) [with _ToDur = duration<long int>; _Rep = long int; _Period = std::ratio<1, 1000000000>; __enable_if_is_duration<_ToDur> = duration<long int>] »
+/home/tdhock/include/c++/13.1.0/bits/chrono.h:1257:7:   requis depuis ici
+/home/tdhock/include/c++/13.1.0/ratio:102:36: erreur interne du compilateur: Erreur de segmentation
+  102 |       static_assert(__b0 * __a0 <= __INTMAX_MAX__,
+      |                                    ^~~~~~~~~~~~~~
+0xe67aff crash_signal
+	../.././gcc/toplev.cc:314
+0x7fc25701951f ???
+	./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0
+0x93f9f5 cp_expr_location(tree_node const*)
+	../.././gcc/cp/tree.cc:6261
+0x8ecc12 tsubst_copy_and_build(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:20364
+0x8ed6be tsubst_copy_and_build(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:21762
+0x8ece22 tsubst_copy_and_build(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:20691
+0x8fdd70 tsubst_expr(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:19889
+0x8fe687 tsubst_expr(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:18827
+0x8fe687 tsubst_expr(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:19394
+0x910295 tsubst_expr(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:18827
+0x910295 instantiate_class_template(tree_node*)
+	../.././gcc/cp/pt.cc:12359
+0x94a37b complete_type(tree_node*)
+	../.././gcc/cp/typeck.cc:138
+0x91ad1f lookup_member(tree_node*, tree_node*, int, bool, int, access_failure_info*)
+	../.././gcc/cp/search.cc:1168
+0x87eca1 lookup_qualified_name(tree_node*, tree_node*, LOOK_want, bool)
+	../.././gcc/cp/name-lookup.cc:6894
+0x8ec7b2 tsubst_qualified_id
+	../.././gcc/cp/pt.cc:17047
+0x8ee293 tsubst_copy_and_build(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:20730
+0x8fdd70 tsubst_expr(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:19889
+0x901ced tsubst_template_args(tree_node*, tree_node*, int, tree_node*)
+	../.././gcc/cp/pt.cc:13764
+0x906a49 tsubst_aggr_type_1
+	../.././gcc/cp/pt.cc:14038
+0x906a49 tsubst_aggr_type_1
+	../.././gcc/cp/pt.cc:14019
+Veuillez soumettre un rapport d’anomalies complet, avec la sortie du préprocesseur (en utilisant -freport-bug).
+Veuillez inclure la trace de débogage complète dans tout rapport d'anomalie.
+Voir <https://gcc.gnu.org/bugs/> pour les instructions.
+make[5]: *** [absl/time/CMakeFiles/time_zone.dir/build.make:146 : absl/time/CMakeFiles/time_zone.dir/internal/cctz/src/time_zone_libc.cc.o] Erreur 1
+make[4]: *** [CMakeFiles/Makefile2:2789 : absl/time/CMakeFiles/time_zone.dir/all] Erreur 2
+make[3]: *** [Makefile:136 : all] Erreur 2
+
+CMake Error at /tmp/Rtmp5tTRmH/filedab020a0561d/absl_ep-prefix/src/absl_ep-stamp/absl_ep-build-RELEASE.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+make[2]: *** [CMakeFiles/absl_ep.dir/build.make:86 : absl_ep-prefix/src/absl_ep-stamp/absl_ep-build] Erreur 1
+make[1]: *** [CMakeFiles/Makefile2:1177 : CMakeFiles/absl_ep.dir/all] Erreur 2
+make[1]: *** Attente des tâches non terminées....
+CMake Error at /tmp/Rtmp5tTRmH/filedab020a0561d/re2_ep-prefix/src/re2_ep-stamp/re2_ep-build-RELEASE.cmake:37 (message):
+  Command failed: 2
+
+   'make'
+
+  See also
+
+    /tmp/Rtmp5tTRmH/filedab020a0561d/re2_ep-prefix/src/re2_ep-stamp/re2_ep-build-*.log
+
+
+-- stdout output is:
+[  1%] Building CXX object CMakeFiles/re2.dir/re2/bitstate.cc.o
+[  2%] Building CXX object CMakeFiles/re2.dir/re2/compile.cc.o
+[  3%] Building CXX object CMakeFiles/re2.dir/re2/dfa.cc.o
+[  4%] Building CXX object CMakeFiles/re2.dir/re2/filtered_re2.cc.o
+[  5%] Building CXX object CMakeFiles/re2.dir/re2/mimics_pcre.cc.o
+[  6%] Building CXX object CMakeFiles/re2.dir/re2/nfa.cc.o
+[  7%] Building CXX object CMakeFiles/re2.dir/re2/onepass.cc.o
+[  8%] Building CXX object CMakeFiles/re2.dir/re2/parse.cc.o
+[  9%] Building CXX object CMakeFiles/re2.dir/re2/perl_groups.cc.o
+[ 10%] Building CXX object CMakeFiles/re2.dir/re2/prefilter.cc.o
+[ 11%] Building CXX object CMakeFiles/re2.dir/re2/prefilter_tree.cc.o
+[ 12%] Building CXX object CMakeFiles/re2.dir/re2/prog.cc.o
+[ 13%] Building CXX object CMakeFiles/re2.dir/re2/re2.cc.o
+[ 14%] Building CXX object CMakeFiles/re2.dir/re2/regexp.cc.o
+[ 15%] Building CXX object CMakeFiles/re2.dir/re2/set.cc.o
+[ 16%] Building CXX object CMakeFiles/re2.dir/re2/simplify.cc.o
+[ 17%] Building CXX object CMakeFiles/re2.dir/re2/stringpiece.cc.o
+[ 18%] Building CXX object CMakeFiles/re2.dir/re2/tostring.cc.o
+[ 20%] Building CXX object CMakeFiles/re2.dir/re2/unicode_casefold.cc.o
+[ 21%] Building CXX object CMakeFiles/re2.dir/re2/unicode_groups.cc.o
+[ 22%] Building CXX object CMakeFiles/re2.dir/util/rune.cc.o
+[ 23%] Building CXX object CMakeFiles/re2.dir/util/strutil.cc.o
+[ 24%] Linking CXX static library libre2.a
+[ 24%] Built target re2
+[ 25%] Building CXX object CMakeFiles/testing.dir/re2/testing/backtrack.cc.o
+[ 26%] Building CXX object CMakeFiles/testing.dir/re2/testing/dump.cc.o
+[ 27%] Building CXX object CMakeFiles/testing.dir/re2/testing/exhaustive_tester.cc.o
+[ 28%] Building CXX object CMakeFiles/testing.dir/re2/testing/null_walker.cc.o
+[ 29%] Building CXX object CMakeFiles/testing.dir/re2/testing/regexp_generator.cc.o
+[ 30%] Building CXX object CMakeFiles/testing.dir/re2/testing/string_generator.cc.o
+[ 31%] Building CXX object CMakeFiles/testing.dir/re2/testing/tester.cc.o
+[ 32%] Building CXX object CMakeFiles/testing.dir/util/pcre.cc.o
+[ 33%] Linking CXX static library libtesting.a
+[ 33%] Built target testing
+[ 35%] Building CXX object CMakeFiles/compile_test.dir/re2/testing/compile_test.cc.o
+[ 35%] Building CXX object CMakeFiles/charclass_test.dir/re2/testing/charclass_test.cc.o
+[ 36%] Building CXX object CMakeFiles/charclass_test.dir/util/test.cc.o
+[ 37%] Linking CXX executable charclass_test
+[ 37%] Built target charclass_test
+[ 38%] Building CXX object CMakeFiles/filtered_re2_test.dir/re2/testing/filtered_re2_test.cc.o
+[ 40%] Building CXX object CMakeFiles/compile_test.dir/util/test.cc.o
+[ 41%] Linking CXX executable compile_test
+[ 41%] Built target compile_test
+[ 42%] Building CXX object CMakeFiles/mimics_pcre_test.dir/re2/testing/mimics_pcre_test.cc.o
+[ 43%] Building CXX object CMakeFiles/mimics_pcre_test.dir/util/test.cc.o
+[ 44%] Linking CXX executable mimics_pcre_test
+[ 45%] Building CXX object CMakeFiles/filtered_re2_test.dir/util/test.cc.o
+[ 45%] Built target mimics_pcre_test
+[ 46%] Building CXX object CMakeFiles/parse_test.dir/re2/testing/parse_test.cc.o
+[ 47%] Linking CXX executable filtered_re2_test
+[ 48%] Building CXX object CMakeFiles/parse_test.dir/util/test.cc.o
+[ 49%] Linking CXX executable parse_test
+[ 49%] Built target parse_test
+
+-- stderr output is:
+/usr/bin/ld: BFD (GNU Binutils for Ubuntu) 2.38 internal error, aborting at ../../bfd/merge.c:939 in _bfd_merged_section_offset
+
+/usr/bin/ld: Merci de rapporter cette anomalie.
+
+collect2: erreur: ld a retourné le statut de sortie 1
+make[5]: *** [CMakeFiles/filtered_re2_test.dir/build.make:115 : filtered_re2_test] Erreur 1
+make[5]: *** Suppression du fichier « filtered_re2_test »
+make[4]: *** [CMakeFiles/Makefile2:234 : CMakeFiles/filtered_re2_test.dir/all] Erreur 2
+make[4]: *** Attente des tâches non terminées....
+make[3]: *** [Makefile:136 : all] Erreur 2
+
+CMake Error at /tmp/Rtmp5tTRmH/filedab020a0561d/re2_ep-prefix/src/re2_ep-stamp/re2_ep-build-RELEASE.cmake:47 (message):
+  Stopping after outputting logs.
+
+
+make[2]: *** [CMakeFiles/re2_ep.dir/build.make:86 : re2_ep-prefix/src/re2_ep-stamp/re2_ep-build] Erreur 1
+make[1]: *** [CMakeFiles/Makefile2:1099 : CMakeFiles/re2_ep.dir/all] Erreur 2
+gmake: *** [Makefile:146 : all] Erreur 2
+**** Error building Arrow C++.  
+------------------------- NOTE ---------------------------
+There was an issue preparing the Arrow C++ libraries.
+See https://arrow.apache.org/docs/r/articles/install.html
+---------------------------------------------------------
+ERROR: configuration failed for package ‘arrow’
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+Message d'avis :
+Dans install.packages("~/arrow_12/", repos = NULL) :
+  l'installation du package ‘/home/tdhock/arrow_12/’ a eu un statut de sortie non nul
+> Sys.which("ld")
+           ld 
+"/usr/bin/ld" 
+```
+
+The above failed, but it seems like even if it does compile something,
+it will probably not have the `-march=core2` flag that I want, how to
+tell cmake to use that? I tried looking for instructions about how to
+add that flag to the g++ command lines used for building libarrow C++
+but I was not able to find
+instructions. https://arrow.apache.org/docs/developers/cpp/building.html
+and https://arrow.apache.org/docs/r/articles/install.html
+
+To be continued.
