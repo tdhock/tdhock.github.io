@@ -7527,8 +7527,8 @@ ERROR: compilation failed for package ‘arrow’
 The installation of the R package above fails. I guess this is because
 we used the minimal preset, which I suppose does not include
 `arrow/csv/*` files (they were not reported when running the install
-command). So below we try a non-minimal installation. Need to do conda
-install boost gflags openssl rapidjson.
+command). So below we try a non-minimal installation. 
+Need to do conda install boost gflags openssl rapidjson thrift-cpp (not thrift).
 
 ```
 (arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2
@@ -8296,7 +8296,1936 @@ out of memory/freeze
 [1/310] Building CXX object src/arrow/CMakeFiles/arrow-extension-type-test.dir/extension_type_test.cc.o
 [2/310] Building CXX object src/arrow/CMakeFiles/arrow-array-test.dir/array/array_binary_test.cc.o
 ...
+[309/310] Linking CXX executable debug/arrow-fixed-shape-tensor-test
+[310/310] Linking CXX executable debug/arrow-json-test
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ (arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cmake --install .
+-- Install configuration: "DEBUG"
+-- Installing: /home/tdhock/include/arrow/util/config.h
+-- Up-to-date: /home/tdhock/share/doc/arrow/LICENSE.txt
+-- Up-to-date: /home/tdhock/share/doc/arrow/NOTICE.txt
+-- Up-to-date: /home/tdhock/share/doc/arrow/README.md
+-- Up-to-date: /home/tdhock/share/arrow/gdb/gdb_arrow.py
+-- Installing: /home/tdhock/lib/libarrow.so.1300.0.0
+-- Up-to-date: /home/tdhock/lib/libarrow.so.1300
+-- Up-to-date: /home/tdhock/lib/libarrow.so
+-- Up-to-date: /home/tdhock/lib/cmake/Arrow/ArrowConfig.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/Arrow/ArrowConfigVersion.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/Arrow/ArrowTargets.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/Arrow/ArrowTargets-debug.cmake
+-- Up-to-date: /home/tdhock/lib/pkgconfig/arrow.pc
+-- Up-to-date: /home/tdhock/share/gdb/auto-load/home/tdhock/lib/libarrow.so.1300.0.0-gdb.py
+-- Installing: /home/tdhock/lib/libarrow_testing.so.1300.0.0
+-- Installing: /home/tdhock/lib/libarrow_testing.so.1300
+-- Set runtime path of "/home/tdhock/lib/libarrow_testing.so.1300.0.0" to ""
+-- Installing: /home/tdhock/lib/libarrow_testing.so
+-- Installing: /home/tdhock/lib/cmake/ArrowTesting/ArrowTestingConfig.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowTesting/ArrowTestingConfigVersion.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowTesting/ArrowTestingTargets.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowTesting/ArrowTestingTargets-debug.cmake
+-- Installing: /home/tdhock/lib/pkgconfig/arrow-testing.pc
+-- Up-to-date: /home/tdhock/include/arrow/api.h
+-- Up-to-date: /home/tdhock/include/arrow/array.h
+-- Up-to-date: /home/tdhock/include/arrow/buffer.h
+-- Up-to-date: /home/tdhock/include/arrow/buffer_builder.h
+-- Up-to-date: /home/tdhock/include/arrow/builder.h
+-- Up-to-date: /home/tdhock/include/arrow/chunk_resolver.h
+-- Up-to-date: /home/tdhock/include/arrow/chunked_array.h
+-- Up-to-date: /home/tdhock/include/arrow/compare.h
+-- Up-to-date: /home/tdhock/include/arrow/config.h
+-- Up-to-date: /home/tdhock/include/arrow/datum.h
+-- Up-to-date: /home/tdhock/include/arrow/device.h
+-- Up-to-date: /home/tdhock/include/arrow/extension_type.h
+-- Up-to-date: /home/tdhock/include/arrow/memory_pool.h
+-- Up-to-date: /home/tdhock/include/arrow/memory_pool_test.h
+-- Up-to-date: /home/tdhock/include/arrow/pch.h
+-- Up-to-date: /home/tdhock/include/arrow/pretty_print.h
+-- Up-to-date: /home/tdhock/include/arrow/record_batch.h
+-- Up-to-date: /home/tdhock/include/arrow/result.h
+-- Up-to-date: /home/tdhock/include/arrow/scalar.h
+-- Up-to-date: /home/tdhock/include/arrow/sparse_tensor.h
+-- Up-to-date: /home/tdhock/include/arrow/status.h
+-- Up-to-date: /home/tdhock/include/arrow/stl.h
+-- Up-to-date: /home/tdhock/include/arrow/stl_allocator.h
+-- Up-to-date: /home/tdhock/include/arrow/stl_iterator.h
+-- Up-to-date: /home/tdhock/include/arrow/table.h
+-- Up-to-date: /home/tdhock/include/arrow/table_builder.h
+-- Up-to-date: /home/tdhock/include/arrow/tensor.h
+-- Up-to-date: /home/tdhock/include/arrow/type.h
+-- Up-to-date: /home/tdhock/include/arrow/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/type_traits.h
+-- Up-to-date: /home/tdhock/include/arrow/visit_array_inline.h
+-- Up-to-date: /home/tdhock/include/arrow/visit_data_inline.h
+-- Up-to-date: /home/tdhock/include/arrow/visit_scalar_inline.h
+-- Up-to-date: /home/tdhock/include/arrow/visit_type_inline.h
+-- Up-to-date: /home/tdhock/include/arrow/visitor.h
+-- Up-to-date: /home/tdhock/include/arrow/visitor_generate.h
+-- Installing: /home/tdhock/lib/cmake/Arrow/ArrowOptions.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/Arrow/arrow-config.cmake
+-- Up-to-date: /home/tdhock/include/arrow/testing/async_test_util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/builder.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/executor_util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/extension_type.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/future_util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/generator.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/gtest_compat.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/gtest_util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/json_integration.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/matchers.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/pch.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/random.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/uniform_real.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/visibility.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_base.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_binary.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_decimal.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_dict.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_nested.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_primitive.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_run_end.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_adaptive.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_base.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_binary.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_decimal.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_dict.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_nested.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_primitive.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_run_end.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_time.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_union.h
+-- Up-to-date: /home/tdhock/include/arrow/array/concatenate.h
+-- Up-to-date: /home/tdhock/include/arrow/array/data.h
+-- Up-to-date: /home/tdhock/include/arrow/array/diff.h
+-- Up-to-date: /home/tdhock/include/arrow/array/util.h
+-- Up-to-date: /home/tdhock/include/arrow/array/validate.h
+-- Up-to-date: /home/tdhock/include/arrow/c/abi.h
+-- Up-to-date: /home/tdhock/include/arrow/c/bridge.h
+-- Up-to-date: /home/tdhock/include/arrow/c/helpers.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/api.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/api_aggregate.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/api_scalar.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/api_vector.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/cast.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/exec.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/expression.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/function.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/kernel.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/key_hash.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/key_map.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/light_array.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/ordering.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/registry.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/util.h
+-- Up-to-date: /home/tdhock/lib/pkgconfig/arrow-compute.pc
+-- Up-to-date: /home/tdhock/include/arrow/compute/row/grouper.h
+-- Up-to-date: /home/tdhock/include/arrow/io/api.h
+-- Up-to-date: /home/tdhock/include/arrow/io/buffered.h
+-- Up-to-date: /home/tdhock/include/arrow/io/caching.h
+-- Up-to-date: /home/tdhock/include/arrow/io/compressed.h
+-- Up-to-date: /home/tdhock/include/arrow/io/concurrency.h
+-- Up-to-date: /home/tdhock/include/arrow/io/file.h
+-- Up-to-date: /home/tdhock/include/arrow/io/hdfs.h
+-- Up-to-date: /home/tdhock/include/arrow/io/interfaces.h
+-- Up-to-date: /home/tdhock/include/arrow/io/memory.h
+-- Up-to-date: /home/tdhock/include/arrow/io/mman.h
+-- Up-to-date: /home/tdhock/include/arrow/io/slow.h
+-- Up-to-date: /home/tdhock/include/arrow/io/stdio.h
+-- Up-to-date: /home/tdhock/include/arrow/io/test_common.h
+-- Up-to-date: /home/tdhock/include/arrow/io/transform.h
+-- Up-to-date: /home/tdhock/include/arrow/io/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/tensor/converter.h
+-- Up-to-date: /home/tdhock/include/arrow/util/algorithm.h
+-- Up-to-date: /home/tdhock/include/arrow/util/align_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/aligned_storage.h
+-- Up-to-date: /home/tdhock/include/arrow/util/async_generator.h
+-- Up-to-date: /home/tdhock/include/arrow/util/async_generator_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/util/async_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/base64.h
+-- Up-to-date: /home/tdhock/include/arrow/util/basic_decimal.h
+-- Up-to-date: /home/tdhock/include/arrow/util/benchmark_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bit_block_counter.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bit_run_reader.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bit_stream_utils.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bit_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_builders.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_generate.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_ops.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_reader.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_visit.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_writer.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitset_stack.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking64_default.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_avx2.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_avx512.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_default.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_neon.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_simd128_generated.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_simd256_generated.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_simd512_generated.h
+-- Up-to-date: /home/tdhock/include/arrow/util/byte_size.h
+-- Up-to-date: /home/tdhock/include/arrow/util/byte_stream_split.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bytes_view.h
+-- Up-to-date: /home/tdhock/include/arrow/util/cancel.h
+-- Up-to-date: /home/tdhock/include/arrow/util/checked_cast.h
+-- Up-to-date: /home/tdhock/include/arrow/util/compare.h
+-- Up-to-date: /home/tdhock/include/arrow/util/compression.h
+-- Up-to-date: /home/tdhock/include/arrow/util/concurrent_map.h
+-- Installing: /home/tdhock/include/arrow/util/config.h
+-- Up-to-date: /home/tdhock/include/arrow/util/converter.h
+-- Up-to-date: /home/tdhock/include/arrow/util/counting_semaphore.h
+-- Up-to-date: /home/tdhock/include/arrow/util/cpu_info.h
+-- Up-to-date: /home/tdhock/include/arrow/util/crc32.h
+-- Up-to-date: /home/tdhock/include/arrow/util/debug.h
+-- Up-to-date: /home/tdhock/include/arrow/util/decimal.h
+-- Up-to-date: /home/tdhock/include/arrow/util/delimiting.h
+-- Up-to-date: /home/tdhock/include/arrow/util/dispatch.h
+-- Up-to-date: /home/tdhock/include/arrow/util/double_conversion.h
+-- Up-to-date: /home/tdhock/include/arrow/util/endian.h
+-- Up-to-date: /home/tdhock/include/arrow/util/formatting.h
+-- Up-to-date: /home/tdhock/include/arrow/util/functional.h
+-- Up-to-date: /home/tdhock/include/arrow/util/future.h
+-- Up-to-date: /home/tdhock/include/arrow/util/hash_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/hashing.h
+-- Up-to-date: /home/tdhock/include/arrow/util/int_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/int_util_overflow.h
+-- Up-to-date: /home/tdhock/include/arrow/util/io_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/iterator.h
+-- Up-to-date: /home/tdhock/include/arrow/util/key_value_metadata.h
+-- Up-to-date: /home/tdhock/include/arrow/util/launder.h
+-- Up-to-date: /home/tdhock/include/arrow/util/logging.h
+-- Up-to-date: /home/tdhock/include/arrow/util/macros.h
+-- Up-to-date: /home/tdhock/include/arrow/util/map.h
+-- Up-to-date: /home/tdhock/include/arrow/util/math_constants.h
+-- Up-to-date: /home/tdhock/include/arrow/util/memory.h
+-- Up-to-date: /home/tdhock/include/arrow/util/mutex.h
+-- Up-to-date: /home/tdhock/include/arrow/util/parallel.h
+-- Up-to-date: /home/tdhock/include/arrow/util/pcg_random.h
+-- Up-to-date: /home/tdhock/include/arrow/util/print.h
+-- Up-to-date: /home/tdhock/include/arrow/util/queue.h
+-- Up-to-date: /home/tdhock/include/arrow/util/range.h
+-- Up-to-date: /home/tdhock/include/arrow/util/ree_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/regex.h
+-- Up-to-date: /home/tdhock/include/arrow/util/rle_encoding.h
+-- Up-to-date: /home/tdhock/include/arrow/util/rows_to_batches.h
+-- Up-to-date: /home/tdhock/include/arrow/util/simd.h
+-- Up-to-date: /home/tdhock/include/arrow/util/small_vector.h
+-- Up-to-date: /home/tdhock/include/arrow/util/sort.h
+-- Up-to-date: /home/tdhock/include/arrow/util/spaced.h
+-- Up-to-date: /home/tdhock/include/arrow/util/stopwatch.h
+-- Up-to-date: /home/tdhock/include/arrow/util/string.h
+-- Up-to-date: /home/tdhock/include/arrow/util/string_builder.h
+-- Up-to-date: /home/tdhock/include/arrow/util/task_group.h
+-- Up-to-date: /home/tdhock/include/arrow/util/tdigest.h
+-- Up-to-date: /home/tdhock/include/arrow/util/test_common.h
+-- Up-to-date: /home/tdhock/include/arrow/util/thread_pool.h
+-- Up-to-date: /home/tdhock/include/arrow/util/time.h
+-- Up-to-date: /home/tdhock/include/arrow/util/tracing.h
+-- Up-to-date: /home/tdhock/include/arrow/util/trie.h
+-- Up-to-date: /home/tdhock/include/arrow/util/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/util/type_traits.h
+-- Up-to-date: /home/tdhock/include/arrow/util/ubsan.h
+-- Up-to-date: /home/tdhock/include/arrow/util/union_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/unreachable.h
+-- Up-to-date: /home/tdhock/include/arrow/util/uri.h
+-- Up-to-date: /home/tdhock/include/arrow/util/utf8.h
+-- Up-to-date: /home/tdhock/include/arrow/util/value_parsing.h
+-- Up-to-date: /home/tdhock/include/arrow/util/vector.h
+-- Up-to-date: /home/tdhock/include/arrow/util/visibility.h
+-- Up-to-date: /home/tdhock/include/arrow/util/windows_compatibility.h
+-- Up-to-date: /home/tdhock/include/arrow/util/windows_fixup.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/ProducerConsumerQueue.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/strptime.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/xxhash.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/date.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/ios.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/tz.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/tz_private.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/visibility.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/bignum-dtoa.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/bignum.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/cached-powers.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/diy-fp.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/double-conversion.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/fast-dtoa.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/fixed-dtoa.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/ieee.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/strtod.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/utils.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/pcg/pcg_extras.hpp
+-- Up-to-date: /home/tdhock/include/arrow/vendored/pcg/pcg_random.hpp
+-- Up-to-date: /home/tdhock/include/arrow/vendored/pcg/pcg_uint128.hpp
+-- Up-to-date: /home/tdhock/include/arrow/vendored/portable-snippets/debug-trap.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/portable-snippets/safe-math.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/xxhash/xxhash.h
+-- Installing: /home/tdhock/include/arrow/csv/api.h
+-- Installing: /home/tdhock/include/arrow/csv/chunker.h
+-- Installing: /home/tdhock/include/arrow/csv/column_builder.h
+-- Installing: /home/tdhock/include/arrow/csv/column_decoder.h
+-- Installing: /home/tdhock/include/arrow/csv/converter.h
+-- Installing: /home/tdhock/include/arrow/csv/invalid_row.h
+-- Installing: /home/tdhock/include/arrow/csv/options.h
+-- Installing: /home/tdhock/include/arrow/csv/parser.h
+-- Installing: /home/tdhock/include/arrow/csv/reader.h
+-- Installing: /home/tdhock/include/arrow/csv/test_common.h
+-- Installing: /home/tdhock/include/arrow/csv/type_fwd.h
+-- Installing: /home/tdhock/include/arrow/csv/writer.h
+-- Installing: /home/tdhock/lib/pkgconfig/arrow-csv.pc
+-- Installing: /home/tdhock/include/arrow/acero/accumulation_queue.h
+-- Installing: /home/tdhock/include/arrow/acero/aggregate_node.h
+-- Installing: /home/tdhock/include/arrow/acero/asof_join_node.h
+-- Installing: /home/tdhock/include/arrow/acero/benchmark_util.h
+-- Installing: /home/tdhock/include/arrow/acero/bloom_filter.h
+-- Installing: /home/tdhock/include/arrow/acero/exec_plan.h
+-- Installing: /home/tdhock/include/arrow/acero/groupby.h
+-- Installing: /home/tdhock/include/arrow/acero/hash_join.h
+-- Installing: /home/tdhock/include/arrow/acero/hash_join_dict.h
+-- Installing: /home/tdhock/include/arrow/acero/hash_join_node.h
+-- Installing: /home/tdhock/include/arrow/acero/map_node.h
+-- Installing: /home/tdhock/include/arrow/acero/options.h
+-- Installing: /home/tdhock/include/arrow/acero/order_by_impl.h
+-- Installing: /home/tdhock/include/arrow/acero/partition_util.h
+-- Installing: /home/tdhock/include/arrow/acero/pch.h
+-- Installing: /home/tdhock/include/arrow/acero/query_context.h
+-- Installing: /home/tdhock/include/arrow/acero/schema_util.h
+-- Installing: /home/tdhock/include/arrow/acero/task_util.h
+-- Installing: /home/tdhock/include/arrow/acero/test_nodes.h
+-- Installing: /home/tdhock/include/arrow/acero/tpch_node.h
+-- Installing: /home/tdhock/include/arrow/acero/type_fwd.h
+-- Installing: /home/tdhock/include/arrow/acero/util.h
+-- Installing: /home/tdhock/include/arrow/acero/visibility.h
+-- Installing: /home/tdhock/lib/libarrow_acero.so.1300.0.0
+-- Installing: /home/tdhock/lib/libarrow_acero.so.1300
+-- Set runtime path of "/home/tdhock/lib/libarrow_acero.so.1300.0.0" to ""
+-- Installing: /home/tdhock/lib/libarrow_acero.so
+-- Installing: /home/tdhock/lib/cmake/ArrowAcero/ArrowAceroConfig.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowAcero/ArrowAceroConfigVersion.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowAcero/ArrowAceroTargets.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowAcero/ArrowAceroTargets-debug.cmake
+-- Installing: /home/tdhock/lib/pkgconfig/arrow-acero.pc
+-- Installing: /home/tdhock/include/arrow/dataset/api.h
+-- Installing: /home/tdhock/include/arrow/dataset/dataset.h
+-- Installing: /home/tdhock/include/arrow/dataset/dataset_writer.h
+-- Installing: /home/tdhock/include/arrow/dataset/discovery.h
+-- Installing: /home/tdhock/include/arrow/dataset/file_base.h
+-- Installing: /home/tdhock/include/arrow/dataset/file_csv.h
+-- Installing: /home/tdhock/include/arrow/dataset/file_ipc.h
+-- Installing: /home/tdhock/include/arrow/dataset/file_json.h
+-- Installing: /home/tdhock/include/arrow/dataset/file_orc.h
+-- Installing: /home/tdhock/include/arrow/dataset/file_parquet.h
+-- Installing: /home/tdhock/include/arrow/dataset/partition.h
+-- Installing: /home/tdhock/include/arrow/dataset/pch.h
+-- Installing: /home/tdhock/include/arrow/dataset/plan.h
+-- Installing: /home/tdhock/include/arrow/dataset/projector.h
+-- Installing: /home/tdhock/include/arrow/dataset/scanner.h
+-- Installing: /home/tdhock/include/arrow/dataset/type_fwd.h
+-- Installing: /home/tdhock/include/arrow/dataset/visibility.h
+-- Installing: /home/tdhock/lib/libarrow_dataset.so.1300.0.0
+-- Installing: /home/tdhock/lib/libarrow_dataset.so.1300
+-- Set runtime path of "/home/tdhock/lib/libarrow_dataset.so.1300.0.0" to ""
+-- Installing: /home/tdhock/lib/libarrow_dataset.so
+-- Installing: /home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetConfig.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetConfigVersion.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetTargets.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetTargets-debug.cmake
+-- Installing: /home/tdhock/lib/pkgconfig/arrow-dataset.pc
+-- Installing: /home/tdhock/include/arrow/filesystem/api.h
+-- Installing: /home/tdhock/include/arrow/filesystem/filesystem.h
+-- Installing: /home/tdhock/include/arrow/filesystem/gcsfs.h
+-- Installing: /home/tdhock/include/arrow/filesystem/hdfs.h
+-- Installing: /home/tdhock/include/arrow/filesystem/localfs.h
+-- Installing: /home/tdhock/include/arrow/filesystem/mockfs.h
+-- Installing: /home/tdhock/include/arrow/filesystem/path_util.h
+-- Installing: /home/tdhock/include/arrow/filesystem/s3_test_util.h
+-- Installing: /home/tdhock/include/arrow/filesystem/s3fs.h
+-- Installing: /home/tdhock/include/arrow/filesystem/test_util.h
+-- Installing: /home/tdhock/include/arrow/filesystem/type_fwd.h
+-- Installing: /home/tdhock/lib/pkgconfig/arrow-filesystem.pc
+-- Up-to-date: /home/tdhock/include/arrow/ipc/api.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/dictionary.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/feather.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/json_simple.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/message.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/options.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/reader.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/test_common.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/util.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/writer.h
+-- Installing: /home/tdhock/include/arrow/json/api.h
+-- Installing: /home/tdhock/include/arrow/json/chunked_builder.h
+-- Installing: /home/tdhock/include/arrow/json/chunker.h
+-- Installing: /home/tdhock/include/arrow/json/converter.h
+-- Installing: /home/tdhock/include/arrow/json/object_parser.h
+-- Installing: /home/tdhock/include/arrow/json/object_writer.h
+-- Installing: /home/tdhock/include/arrow/json/options.h
+-- Installing: /home/tdhock/include/arrow/json/parser.h
+-- Installing: /home/tdhock/include/arrow/json/rapidjson_defs.h
+-- Installing: /home/tdhock/include/arrow/json/reader.h
+-- Installing: /home/tdhock/include/arrow/json/test_common.h
+-- Installing: /home/tdhock/include/arrow/json/type_fwd.h
+-- Installing: /home/tdhock/lib/pkgconfig/arrow-json.pc
+-- Installing: /home/tdhock/include/arrow/extension/fixed_shape_tensor.h
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cd ../../r/
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/r(main)$ ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig R CMD INSTALL .
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Loading required package: grDevices
+Error in library(decor) : there is no package called ‘decor’
+Calls: suppressPackageStartupMessages -> withCallingHandlers -> library
+Execution halted
+*** Trying Arrow C++ found by pkg-config: /home/tdhock
+*** > Packages are both on development versions (13.0.0-SNAPSHOT, 12.0.0.9000)
+*** > If installation fails, rebuild the C++ library to match the R version
+*** > or retry with FORCE_BUNDLED_BUILD=true
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_acero -larrow_dataset -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 10.1.0’
+using C++17
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c altrep.cpp -o altrep.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c array.cpp -o array.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c array_to_vector.cpp -o array_to_vector.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c arraydata.cpp -o arraydata.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c arrowExports.cpp -o arrowExports.o
+arrowExports.cpp:1821:131: error: ‘parquet’ was not declared in this scope
+ 1821 | s::ParquetFileWriteOptions>& options, const std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^~~~~~~
+
+arrowExports.cpp:1821:156: error: template argument 1 is invalid
+ 1821 | s>& options, const std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^
+
+arrowExports.cpp:1821:131: error: ‘parquet’ was not declared in this scope
+ 1821 | s::ParquetFileWriteOptions>& options, const std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^~~~~~~
+
+arrowExports.cpp:1821:156: error: template argument 1 is invalid
+ 1821 | s>& options, const std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^
+
+arrowExports.cpp:1821:131: error: ‘parquet’ was not declared in this scope
+ 1821 | s::ParquetFileWriteOptions>& options, const std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^~~~~~~
+
+arrowExports.cpp:1821:156: error: template argument 1 is invalid
+ 1821 | s>& options, const std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^
+
+arrowExports.cpp:1821:115: error: invalid template-id
+ 1821 | td::shared_ptr<ds::ParquetFileWriteOptions>& options, const std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^~~
+
+arrowExports.cpp:1821:131: error: ‘parquet’ has not been declared
+ 1821 | s::ParquetFileWriteOptions>& options, const std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^~~~~~~
+
+arrowExports.cpp:1821:109: error: template placeholder type ‘const shared_ptr<...auto...>’ must be followed by a simple declarator-id
+ 1821 | onst std::shared_ptr<ds::ParquetFileWriteOptions>& options, const std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^~~~~
+
+In file included from /home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:52,
+                 from /home/tdhock/include/c++/10.1.0/memory:84,
+                 from /home/tdhock/lib/R/library/cpp11/include/cpp11/as.hpp:5,
+                 from /home/tdhock/lib/R/library/cpp11/include/cpp11.hpp:5,
+                 from arrowExports.cpp:2:
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:351:11: note: ‘template<class _Tp> class std::shared_ptr’ declared here
+  351 |     class shared_ptr;
+      |           ^~~~~~~~~~
+arrowExports.cpp:1821:171: error: expected ‘)’ before ‘,’ token
+ 1821 | nst std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^
+      |                                                             )
+arrowExports.cpp:1821:173: error: expected unqualified-id before ‘const’
+ 1821 | t std::shared_ptr<parquet::WriterProperties>& writer_props, const std::shared_ptr<parquet::ArrowWriterProperties>& arrow_writer_props);
+      |                                                             ^~~~~
+
+arrowExports.cpp: In function ‘SEXPREC* _arrow_dataset___ParquetFileWriteOptions__update(SEXP, SEXP, SEXP)’:
+arrowExports.cpp:1825:40: error: ‘parquet’ was not declared in this scope
+ 1825 |  arrow::r::Input<const std::shared_ptr<parquet::WriterProperties>&>::type writer_props(writer_props_sexp);
+      |                                        ^~~~~~~
+arrowExports.cpp:1825:65: error: template argument 1 is invalid
+ 1825 | ow::r::Input<const std::shared_ptr<parquet::WriterProperties>&>::type writer_props(writer_props_sexp);
+      |                                                             ^
+
+arrowExports.cpp:1825:67: error: template argument 1 is invalid
+ 1825 | ::r::Input<const std::shared_ptr<parquet::WriterProperties>&>::type writer_props(writer_props_sexp);
+      |                                                             ^
+
+arrowExports.cpp:1825:75: error: qualified-id in declaration before ‘writer_props’
+ 1825 | ut<const std::shared_ptr<parquet::WriterProperties>&>::type writer_props(writer_props_sexp);
+      |                                                             ^~~~~~~~~~~~
+
+arrowExports.cpp:1826:72: error: template argument 1 is invalid
+ 1826 | Input<const std::shared_ptr<parquet::ArrowWriterProperties>&>::type arrow_writer_props(arrow_writer_props_sexp);
+      |                                                             ^
+
+arrowExports.cpp:1826:80: error: qualified-id in declaration before ‘arrow_writer_props’
+ 1826 | nst std::shared_ptr<parquet::ArrowWriterProperties>&>::type arrow_writer_props(arrow_writer_props_sexp);
+      |                                                             ^~~~~~~~~~~~~~~~~~
+
+arrowExports.cpp:1827:53: error: ‘writer_props’ was not declared in this scope; did you mean ‘writer_props_sexp’?
+ 1827 |  dataset___ParquetFileWriteOptions__update(options, writer_props, arrow_writer_props);
+      |                                                     ^~~~~~~~~~~~
+      |                                                     writer_props_sexp
+arrowExports.cpp:1827:67: error: ‘arrow_writer_props’ was not declared in this scope; did you mean ‘arrow_writer_props_sexp’?
+ 1827 | et___ParquetFileWriteOptions__update(options, writer_props, arrow_writer_props);
+      |                                                             ^~~~~~~~~~~~~~~~~~
+      |                                                             arrow_writer_props_sexp
+/home/tdhock/lib/R/etc/Makeconf:198: recipe for target 'arrowExports.o' failed
+make: *** [arrowExports.o] Error 1
+ERROR: compilation failed for package ‘arrow’
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
 ```
 
-Looks like two processors are being used for compilation. If freeze
-again, we can maybe try using only one?
+Above suggests parquet is required. Looks like two processors are
+being used for compilation. If freeze again, we can maybe try using
+only one?
+
+```
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON 
+Preset CMake variables:
+
+  ARROW_BUILD_INTEGRATION="ON"
+  ARROW_BUILD_STATIC="OFF"
+  ARROW_BUILD_TESTS="ON"
+  ARROW_COMPUTE="ON"
+  ARROW_CSV="ON"
+  ARROW_DATASET="ON"
+  ARROW_EXTRA_ERROR_CONTEXT="ON"
+  ARROW_FILESYSTEM="ON"
+  ARROW_JSON="ON"
+  ARROW_WITH_RE2="OFF"
+  ARROW_WITH_UTF8PROC="OFF"
+  CMAKE_BUILD_TYPE="Debug"
+
+-- Building using CMake version: 3.22.1
+-- Arrow version: 13.0.0 (full: '13.0.0-SNAPSHOT')
+-- Arrow SO version: 1300 (full: 1300.0.0)
+-- clang-tidy 14 not found
+-- clang-format 14 not found
+-- Could NOT find ClangTools (missing: CLANG_FORMAT_BIN CLANG_TIDY_BIN) 
+-- infer not found
+-- Found cpplint executable at /home/tdhock/arrow-git/cpp/build-support/cpplint.py
+-- System processor: x86_64
+-- Arrow build warning level: CHECKIN
+-- Using ld linker
+-- Build Type: DEBUG
+-- Using CONDA approach to find dependencies
+-- Using CONDA_PREFIX for ARROW_PACKAGE_PREFIX: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Setting (unset) dependency *_ROOT variables: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- ARROW_ABSL_BUILD_VERSION: 20211102.0
+-- ARROW_ABSL_BUILD_SHA256_CHECKSUM: dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4
+-- ARROW_AWS_C_AUTH_BUILD_VERSION: v0.6.22
+-- ARROW_AWS_C_AUTH_BUILD_SHA256_CHECKSUM: 691a6b4418afcd3dc141351b6ad33fccd8e3ff84df0e9e045b42295d284ee14c
+-- ARROW_AWS_C_CAL_BUILD_VERSION: v0.5.20
+-- ARROW_AWS_C_CAL_BUILD_SHA256_CHECKSUM: acc352359bd06f8597415c366cf4ec4f00d0b0da92d637039a73323dd55b6cd0
+-- ARROW_AWS_C_COMMON_BUILD_VERSION: v0.8.9
+-- ARROW_AWS_C_COMMON_BUILD_SHA256_CHECKSUM: 2f3fbaf7c38eae5a00e2a816d09b81177f93529ae8ba1b82dc8f31407565327a
+-- ARROW_AWS_C_COMPRESSION_BUILD_VERSION: v0.2.16
+-- ARROW_AWS_C_COMPRESSION_BUILD_SHA256_CHECKSUM: 044b1dbbca431a07bde8255ef9ec443c300fc60d4c9408d4b862f65e496687f4
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_VERSION: v0.2.18
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_SHA256_CHECKSUM: 310ca617f713bf664e4c7485a3d42c1fb57813abd0107e49790d107def7cde4f
+-- ARROW_AWS_C_HTTP_BUILD_VERSION: v0.7.3
+-- ARROW_AWS_C_HTTP_BUILD_SHA256_CHECKSUM: 07e16c6bf5eba6f0dea96b6f55eae312a7c95b736f4d2e4a210000f45d8265ae
+-- ARROW_AWS_C_IO_BUILD_VERSION: v0.13.14
+-- ARROW_AWS_C_IO_BUILD_SHA256_CHECKSUM: 12b66510c3d9a4f7e9b714e9cfab2a5bf835f8b9ce2f909d20ae2a2128608c71
+-- ARROW_AWS_C_MQTT_BUILD_VERSION: v0.8.4
+-- ARROW_AWS_C_MQTT_BUILD_SHA256_CHECKSUM: 232eeac63e72883d460c686a09b98cdd811d24579affac47c5c3f696f956773f
+-- ARROW_AWS_C_S3_BUILD_VERSION: v0.2.3
+-- ARROW_AWS_C_S3_BUILD_SHA256_CHECKSUM: a00b3c9f319cd1c9aa2c3fa15098864df94b066dcba0deaccbb3caa952d902fe
+-- ARROW_AWS_C_SDKUTILS_BUILD_VERSION: v0.1.6
+-- ARROW_AWS_C_SDKUTILS_BUILD_SHA256_CHECKSUM: 8a2951344b2fb541eab1e9ca17c18a7fcbfd2aaff4cdd31d362d1fad96111b91
+-- ARROW_AWS_CHECKSUMS_BUILD_VERSION: v0.1.13
+-- ARROW_AWS_CHECKSUMS_BUILD_SHA256_CHECKSUM: 0f897686f1963253c5069a0e495b85c31635ba146cd3ac38cc2ea31eaf54694d
+-- ARROW_AWS_CRT_CPP_BUILD_VERSION: v0.18.16
+-- ARROW_AWS_CRT_CPP_BUILD_SHA256_CHECKSUM: 9e69bc1dc4b50871d1038aa9ff6ddeb4c9b28f7d6b5e5b1b69041ccf50a13483
+-- ARROW_AWS_LC_BUILD_VERSION: v1.3.0
+-- ARROW_AWS_LC_BUILD_SHA256_CHECKSUM: ae96a3567161552744fc0cae8b4d68ed88b1ec0f3d3c98700070115356da5a37
+-- ARROW_AWSSDK_BUILD_VERSION: 1.10.55
+-- ARROW_AWSSDK_BUILD_SHA256_CHECKSUM: 2d552fb1a84bef4a9b65e34aa7031851ed2aef5319e02cc6e4cb735c48aa30de
+-- ARROW_BOOST_BUILD_VERSION: 1.81.0
+-- ARROW_BOOST_BUILD_SHA256_CHECKSUM: 9e0ffae35528c35f90468997bc8d99500bf179cbae355415a89a600c38e13574
+-- ARROW_BROTLI_BUILD_VERSION: v1.0.9
+-- ARROW_BROTLI_BUILD_SHA256_CHECKSUM: f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46
+-- ARROW_BZIP2_BUILD_VERSION: 1.0.8
+-- ARROW_BZIP2_BUILD_SHA256_CHECKSUM: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
+-- ARROW_CARES_BUILD_VERSION: 1.17.2
+-- ARROW_CARES_BUILD_SHA256_CHECKSUM: 4803c844ce20ce510ef0eb83f8ea41fa24ecaae9d280c468c582d2bb25b3913d
+-- ARROW_CRC32C_BUILD_VERSION: 1.1.2
+-- ARROW_CRC32C_BUILD_SHA256_CHECKSUM: ac07840513072b7fcebda6e821068aa04889018f24e10e46181068fb214d7e56
+-- ARROW_GBENCHMARK_BUILD_VERSION: v1.7.1
+-- ARROW_GBENCHMARK_BUILD_SHA256_CHECKSUM: 6430e4092653380d9dc4ccb45a1e2dc9259d581f4866dc0759713126056bc1d7
+-- ARROW_GFLAGS_BUILD_VERSION: v2.2.2
+-- ARROW_GFLAGS_BUILD_SHA256_CHECKSUM: 34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf
+-- ARROW_GLOG_BUILD_VERSION: v0.5.0
+-- ARROW_GLOG_BUILD_SHA256_CHECKSUM: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_VERSION: v2.8.0
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_SHA256_CHECKSUM: 21fb441b5a670a18bb16b6826be8e0530888d0b94320847c538d46f5a54dddbc
+-- ARROW_GRPC_BUILD_VERSION: v1.46.3
+-- ARROW_GRPC_BUILD_SHA256_CHECKSUM: d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964
+-- ARROW_GTEST_BUILD_VERSION: 1.11.0
+-- ARROW_GTEST_BUILD_SHA256_CHECKSUM: b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+-- ARROW_JEMALLOC_BUILD_VERSION: 5.3.0
+-- ARROW_JEMALLOC_BUILD_SHA256_CHECKSUM: 2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
+-- ARROW_LZ4_BUILD_VERSION: v1.9.4
+-- ARROW_LZ4_BUILD_SHA256_CHECKSUM: 0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b
+-- ARROW_MIMALLOC_BUILD_VERSION: v2.0.6
+-- ARROW_MIMALLOC_BUILD_SHA256_CHECKSUM: 9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5
+-- ARROW_NLOHMANN_JSON_BUILD_VERSION: v3.10.5
+-- ARROW_NLOHMANN_JSON_BUILD_SHA256_CHECKSUM: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
+-- ARROW_OPENTELEMETRY_BUILD_VERSION: v1.8.1
+-- ARROW_OPENTELEMETRY_BUILD_SHA256_CHECKSUM: 3d640201594b07f08dade9cd1017bd0b59674daca26223b560b9bb6bf56264c2
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_VERSION: v0.17.0
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_SHA256_CHECKSUM: f269fbcb30e17b03caa1decd231ce826e59d7651c0f71c3b28eb5140b4bb5412
+-- ARROW_ORC_BUILD_VERSION: 1.8.3
+-- ARROW_ORC_BUILD_SHA256_CHECKSUM: a78678ec425c8129d63370cb8a9bacb54186aa66af1e2bec01ce92e7eaf72e20
+-- ARROW_PROTOBUF_BUILD_VERSION: v21.3
+-- ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM: 2f723218f6cb709ae4cdc4fb5ed56a5951fc5d466f0128ce4c946b8c78c8c49f
+-- ARROW_RAPIDJSON_BUILD_VERSION: 232389d4f1012dddec4ef84861face2d2ba85709
+-- ARROW_RAPIDJSON_BUILD_SHA256_CHECKSUM: b9290a9a6d444c8e049bd589ab804e0ccf2b05dc5984a19ed5ae75d090064806
+-- ARROW_RE2_BUILD_VERSION: 2022-06-01
+-- ARROW_RE2_BUILD_SHA256_CHECKSUM: f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f
+-- ARROW_SNAPPY_BUILD_VERSION: 1.1.9
+-- ARROW_SNAPPY_BUILD_SHA256_CHECKSUM: 75c1fbb3d618dd3a0483bff0e26d0a92b495bbe5059c8b4f1c962b478b6e06e7
+-- ARROW_SUBSTRAIT_BUILD_VERSION: v0.20.0
+-- ARROW_SUBSTRAIT_BUILD_SHA256_CHECKSUM: 5ceaa559ccef29a7825b5e5d4b5e7eed384830294f08bec913feecdd903a94cf
+-- ARROW_S2N_TLS_BUILD_VERSION: v1.3.35
+-- ARROW_S2N_TLS_BUILD_SHA256_CHECKSUM: 9d32b26e6bfcc058d98248bf8fc231537e347395dd89cf62bb432b55c5da990d
+-- ARROW_THRIFT_BUILD_VERSION: 0.16.0
+-- ARROW_THRIFT_BUILD_SHA256_CHECKSUM: f460b5c1ca30d8918ff95ea3eb6291b3951cf518553566088f3f2be8981f6209
+-- ARROW_UCX_BUILD_VERSION: 1.12.1
+-- ARROW_UCX_BUILD_SHA256_CHECKSUM: 9bef31aed0e28bf1973d28d74d9ac4f8926c43ca3b7010bd22a084e164e31b71
+-- ARROW_UTF8PROC_BUILD_VERSION: v2.7.0
+-- ARROW_UTF8PROC_BUILD_SHA256_CHECKSUM: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
+-- ARROW_XSIMD_BUILD_VERSION: 9.0.1
+-- ARROW_XSIMD_BUILD_SHA256_CHECKSUM: b1bb5f92167fd3a4f25749db0be7e61ed37e0a5d943490f3accdcd2cd2918cc0
+-- ARROW_ZLIB_BUILD_VERSION: 1.2.13
+-- ARROW_ZLIB_BUILD_SHA256_CHECKSUM: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+-- ARROW_ZSTD_BUILD_VERSION: 1.5.5
+-- ARROW_ZSTD_BUILD_SHA256_CHECKSUM: 9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4
+-- Boost include dir: /usr/include
+-- Building without OpenSSL support. Minimum OpenSSL version 1.0.2 required.
+-- Found thrift: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Found libevent include directory: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_core.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_extra.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_openssl.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_pthreads.so
+-- Found libevent 2.1.12 in /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Providing CMake module for ThriftAlt as part of Arrow CMake package
+-- Building jemalloc from source
+-- Could NOT find GTest (missing: GTest_DIR)
+-- Building gtest from source
+-- RapidJSON found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- xsimd found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found hdfs.h at: /home/tdhock/arrow-git/cpp/thirdparty/hadoop/include/hdfs.h
+-- All bundled static libraries: jemalloc::jemalloc
+-- CMAKE_C_FLAGS:   -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_CXX_FLAGS:  -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_C_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- CMAKE_CXX_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- ---------------------------------------------------------------------
+-- Arrow version:                                 13.0.0-SNAPSHOT
+-- 
+-- Build configuration summary:
+--   Generator: Ninja
+--   Build type: DEBUG
+--   Source directory: /home/tdhock/arrow-git/cpp
+--   Install prefix: /home/tdhock
+-- 
+-- Compile and link options:
+-- 
+--   ARROW_CXXFLAGS=-march=core2 [default=""]
+--       Compiler flags to append when compiling Arrow
+--   ARROW_BUILD_STATIC=OFF [default=ON]
+--       Build static libraries
+--   ARROW_BUILD_SHARED=ON [default=ON]
+--       Build shared libraries
+--   ARROW_PACKAGE_KIND="" [default=""]
+--       Arbitrary string that identifies the kind of package
+--       (for informational purposes)
+--   ARROW_GIT_ID=6d3fe6bda1c3b67b683ada2327194adeed09e9ca [default=""]
+--       The Arrow git commit id (if any)
+--   ARROW_GIT_DESCRIPTION=apache-arrow-13.0.0.dev-46-g6d3fe6bda [default=""]
+--       The Arrow git commit description (if any)
+--   ARROW_NO_DEPRECATED_API=OFF [default=OFF]
+--       Exclude deprecated APIs from build
+--   ARROW_POSITION_INDEPENDENT_CODE=ON [default=ON]
+--       Whether to create position-independent target
+--   ARROW_USE_CCACHE=ON [default=ON]
+--       Use ccache when compiling (if available)
+--   ARROW_USE_SCCACHE=ON [default=ON]
+--       Use sccache when compiling (if available),
+--       takes precedence over ccache if a storage backend is configured
+--   ARROW_USE_LD_GOLD=OFF [default=OFF]
+--       Use ld.gold for linking on Linux (if available)
+--   ARROW_USE_PRECOMPILED_HEADERS=OFF [default=OFF]
+--       Use precompiled headers when compiling
+--   ARROW_SIMD_LEVEL=SSE4_2 [default=NONE|SSE4_2|AVX2|AVX512|NEON|SVE|SVE128|SVE256|SVE512|DEFAULT]
+--       Compile-time SIMD optimization level
+--   ARROW_RUNTIME_SIMD_LEVEL=MAX [default=NONE|SSE4_2|AVX2|AVX512|MAX]
+--       Max runtime SIMD optimization level
+--   ARROW_ALTIVEC=ON [default=ON]
+--       Build with Altivec if compiler has support
+--   ARROW_RPATH_ORIGIN=OFF [default=OFF]
+--       Build Arrow libraries with RATH set to $ORIGIN
+--   ARROW_INSTALL_NAME_RPATH=ON [default=ON]
+--       Build Arrow libraries with install_name set to @rpath
+--   ARROW_GGDB_DEBUG=ON [default=ON]
+--       Pass -ggdb flag to debug builds
+--   ARROW_WITH_MUSL=OFF [default=OFF]
+--       Whether the system libc is musl or not
+-- 
+-- Test and benchmark options:
+-- 
+--   ARROW_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Arrow examples
+--   ARROW_BUILD_TESTS=ON [default=OFF]
+--       Build the Arrow googletest unit tests
+--   ARROW_ENABLE_TIMING_TESTS=ON [default=ON]
+--       Enable timing-sensitive tests
+--   ARROW_BUILD_INTEGRATION=ON [default=OFF]
+--       Build the Arrow integration test executables
+--   ARROW_BUILD_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow micro benchmarks
+--   ARROW_BUILD_BENCHMARKS_REFERENCE=OFF [default=OFF]
+--       Build the Arrow micro reference benchmarks
+--   ARROW_BUILD_OPENMP_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow benchmarks that rely on OpenMP
+--   ARROW_BUILD_DETAILED_BENCHMARKS=OFF [default=OFF]
+--       Build benchmarks that do a longer exploration of performance
+--   ARROW_TEST_LINKAGE=shared [default=shared|static]
+--       Linkage of Arrow libraries with unit tests executables.
+--   ARROW_FUZZING=OFF [default=OFF]
+--       Build Arrow Fuzzing executables
+--   ARROW_LARGE_MEMORY_TESTS=OFF [default=OFF]
+--       Enable unit tests which use large memory
+-- 
+-- Lint options:
+-- 
+--   ARROW_ONLY_LINT=OFF [default=OFF]
+--       Only define the lint and check-format targets
+--   ARROW_VERBOSE_LINT=OFF [default=OFF]
+--       If off, 'quiet' flags will be passed to linting tools
+--   ARROW_GENERATE_COVERAGE=OFF [default=OFF]
+--       Build with C++ code coverage enabled
+-- 
+-- Checks options:
+-- 
+--   ARROW_TEST_MEMCHECK=OFF [default=OFF]
+--       Run the test suite using valgrind --tool=memcheck
+--   ARROW_USE_ASAN=OFF [default=OFF]
+--       Enable Address Sanitizer checks
+--   ARROW_USE_TSAN=OFF [default=OFF]
+--       Enable Thread Sanitizer checks
+--   ARROW_USE_UBSAN=OFF [default=OFF]
+--       Enable Undefined Behavior sanitizer checks
+-- 
+-- Project component options:
+-- 
+--   ARROW_BUILD_UTILITIES=OFF [default=OFF]
+--       Build Arrow commandline utilities
+--   ARROW_COMPUTE=ON [default=OFF]
+--       Build all Arrow Compute kernels
+--   ARROW_CSV=ON [default=OFF]
+--       Build the Arrow CSV Parser Module
+--   ARROW_CUDA=OFF [default=OFF]
+--       Build the Arrow CUDA extensions (requires CUDA toolkit)
+--   ARROW_DATASET=ON [default=OFF]
+--       Build the Arrow Dataset Modules
+--   ARROW_FILESYSTEM=ON [default=OFF]
+--       Build the Arrow Filesystem Layer
+--   ARROW_FLIGHT=OFF [default=OFF]
+--       Build the Arrow Flight RPC System (requires GRPC, Protocol Buffers)
+--   ARROW_FLIGHT_SQL=OFF [default=OFF]
+--       Build the Arrow Flight SQL extension
+--   ARROW_GANDIVA=OFF [default=OFF]
+--       Build the Gandiva libraries
+--   ARROW_GCS=OFF [default=OFF]
+--       Build Arrow with GCS support (requires the GCloud SDK for C++)
+--   ARROW_HDFS=OFF [default=OFF]
+--       Build the Arrow HDFS bridge
+--   ARROW_IPC=ON [default=ON]
+--       Build the Arrow IPC extensions
+--   ARROW_JEMALLOC=ON [default=ON]
+--       Build the Arrow jemalloc-based allocator
+--   ARROW_JSON=ON [default=OFF]
+--       Build Arrow with JSON support (requires RapidJSON)
+--   ARROW_MIMALLOC=OFF [default=OFF]
+--       Build the Arrow mimalloc-based allocator
+--   ARROW_PARQUET=ON [default=OFF]
+--       Build the Parquet libraries
+--   ARROW_ORC=OFF [default=OFF]
+--       Build the Arrow ORC adapter
+--   ARROW_PYTHON=OFF [default=OFF]
+--       Build some components needed by PyArrow.
+--       (This is a deprecated option. Use CMake presets instead.)
+--   ARROW_S3=OFF [default=OFF]
+--       Build Arrow with S3 support (requires the AWS SDK for C++)
+--   ARROW_SKYHOOK=OFF [default=OFF]
+--       Build the Skyhook libraries
+--   ARROW_SUBSTRAIT=OFF [default=OFF]
+--       Build the Arrow Substrait Consumer Module
+--   ARROW_ACERO=ON [default=OFF]
+--       Build the Arrow Acero Engine Module
+--   ARROW_TENSORFLOW=OFF [default=OFF]
+--       Build Arrow with TensorFlow support enabled
+--   ARROW_TESTING=ON [default=OFF]
+--       Build the Arrow testing libraries
+-- 
+-- Thirdparty toolchain options:
+-- 
+--   ARROW_DEPENDENCY_SOURCE=CONDA [default=AUTO|BUNDLED|SYSTEM|CONDA|VCPKG|BREW]
+--       Method to use for acquiring arrow's build dependencies
+--   ARROW_VERBOSE_THIRDPARTY_BUILD=OFF [default=OFF]
+--       Show output from ExternalProjects rather than just logging to files
+--   ARROW_DEPENDENCY_USE_SHARED=ON [default=ON]
+--       Link to shared libraries
+--   ARROW_BOOST_USE_SHARED=ON [default=ON]
+--       Rely on Boost shared libraries where relevant
+--   ARROW_BROTLI_USE_SHARED=ON [default=ON]
+--       Rely on Brotli shared libraries where relevant
+--   ARROW_BZ2_USE_SHARED=ON [default=ON]
+--       Rely on Bz2 shared libraries where relevant
+--   ARROW_GFLAGS_USE_SHARED=ON [default=ON]
+--       Rely on GFlags shared libraries where relevant
+--   ARROW_GRPC_USE_SHARED=ON [default=ON]
+--       Rely on gRPC shared libraries where relevant
+--   ARROW_JEMALLOC_USE_SHARED=OFF [default=ON]
+--       Rely on jemalloc shared libraries where relevant
+--   ARROW_LZ4_USE_SHARED=ON [default=ON]
+--       Rely on lz4 shared libraries where relevant
+--   ARROW_OPENSSL_USE_SHARED=ON [default=ON]
+--       Rely on OpenSSL shared libraries where relevant
+--   ARROW_PROTOBUF_USE_SHARED=ON [default=ON]
+--       Rely on Protocol Buffers shared libraries where relevant
+--   ARROW_SNAPPY_USE_SHARED=ON [default=ON]
+--       Rely on snappy shared libraries where relevant
+--   ARROW_THRIFT_USE_SHARED=OFF [default=ON]
+--       Rely on thrift shared libraries where relevant
+--   ARROW_UTF8PROC_USE_SHARED=ON [default=ON]
+--       Rely on utf8proc shared libraries where relevant
+--   ARROW_ZSTD_USE_SHARED=ON [default=ON]
+--       Rely on zstd shared libraries where relevant
+--   ARROW_USE_GLOG=OFF [default=OFF]
+--       Build libraries with glog support for pluggable logging
+--   ARROW_WITH_BACKTRACE=ON [default=ON]
+--       Build with backtrace support
+--   ARROW_WITH_OPENTELEMETRY=OFF [default=OFF]
+--       Build libraries with OpenTelemetry support for distributed tracing
+--   ARROW_WITH_BROTLI=OFF [default=OFF]
+--       Build with Brotli compression
+--   ARROW_WITH_BZ2=OFF [default=OFF]
+--       Build with BZ2 compression
+--   ARROW_WITH_LZ4=OFF [default=OFF]
+--       Build with lz4 compression
+--   ARROW_WITH_SNAPPY=OFF [default=OFF]
+--       Build with Snappy compression
+--   ARROW_WITH_ZLIB=OFF [default=OFF]
+--       Build with zlib compression
+--   ARROW_WITH_ZSTD=OFF [default=OFF]
+--       Build with zstd compression
+--   ARROW_WITH_UCX=OFF [default=OFF]
+--       Build with UCX transport for Arrow Flight
+--       (only used if ARROW_FLIGHT is ON)
+--   ARROW_WITH_UTF8PROC=OFF [default=ON]
+--       Build with support for Unicode properties using the utf8proc library
+--       (only used if ARROW_COMPUTE is ON or ARROW_GANDIVA is ON)
+--   ARROW_WITH_RE2=OFF [default=ON]
+--       Build with support for regular expressions using the re2 library
+--       (only used if ARROW_COMPUTE or ARROW_GANDIVA is ON)
+-- 
+-- Parquet options:
+-- 
+--   PARQUET_MINIMAL_DEPENDENCY=OFF [default=OFF]
+--       Depend only on Thirdparty headers to build libparquet.
+--       Always OFF if building binaries
+--   PARQUET_BUILD_EXECUTABLES=OFF [default=OFF]
+--       Build the Parquet executable CLI tools. Requires static libraries to be built.
+--   PARQUET_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Parquet examples. Requires static libraries to be built.
+--   PARQUET_REQUIRE_ENCRYPTION=OFF [default=OFF]
+--       Build support for encryption. Fail if OpenSSL is not found
+-- 
+-- Gandiva options:
+-- 
+--   ARROW_GANDIVA_STATIC_LIBSTDCPP=OFF [default=OFF]
+--       Include -static-libstdc++ -static-libgcc when linking with
+--       Gandiva static libraries
+--   ARROW_GANDIVA_PC_CXX_FLAGS="" [default=""]
+--       Compiler flags to append when pre-compiling Gandiva operations
+-- 
+-- Advanced developer options:
+-- 
+--   ARROW_EXTRA_ERROR_CONTEXT=ON [default=OFF]
+--       Compile with extra error context (line numbers, code)
+--   ARROW_OPTIONAL_INSTALL=OFF [default=OFF]
+--       If enabled install ONLY targets that have already been built. Please be
+--       advised that if this is enabled 'install' will fail silently on components
+--       that have not been built
+--   ARROW_GDB_INSTALL_DIR="" [default=""]
+--       Use a custom install directory for GDB plugin.
+--       In general, you don't need to specify this because the default
+--       (CMAKE_INSTALL_FULL_BINDIR on Windows, CMAKE_INSTALL_FULL_LIBDIR otherwise)
+--       is reasonable.
+--   Outputting build configuration summary to /home/tdhock/arrow-git/cpp/build/cmake_summary.json
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/tdhock/arrow-git/cpp/build
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cmake --build .
+[0/1] Re-running CMake...
+-- Building using CMake version: 3.22.1
+-- Arrow version: 13.0.0 (full: '13.0.0-SNAPSHOT')
+-- Arrow SO version: 1300 (full: 1300.0.0)
+-- clang-tidy 14 not found
+-- clang-format 14 not found
+-- Could NOT find ClangTools (missing: CLANG_FORMAT_BIN CLANG_TIDY_BIN) 
+-- infer not found
+-- Found cpplint executable at /home/tdhock/arrow-git/cpp/build-support/cpplint.py
+-- System processor: x86_64
+-- Arrow build warning level: CHECKIN
+-- Using ld linker
+-- Build Type: DEBUG
+-- Using CONDA approach to find dependencies
+-- Using CONDA_PREFIX for ARROW_PACKAGE_PREFIX: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Setting (unset) dependency *_ROOT variables: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- ARROW_ABSL_BUILD_VERSION: 20211102.0
+-- ARROW_ABSL_BUILD_SHA256_CHECKSUM: dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4
+-- ARROW_AWS_C_AUTH_BUILD_VERSION: v0.6.22
+-- ARROW_AWS_C_AUTH_BUILD_SHA256_CHECKSUM: 691a6b4418afcd3dc141351b6ad33fccd8e3ff84df0e9e045b42295d284ee14c
+-- ARROW_AWS_C_CAL_BUILD_VERSION: v0.5.20
+-- ARROW_AWS_C_CAL_BUILD_SHA256_CHECKSUM: acc352359bd06f8597415c366cf4ec4f00d0b0da92d637039a73323dd55b6cd0
+-- ARROW_AWS_C_COMMON_BUILD_VERSION: v0.8.9
+-- ARROW_AWS_C_COMMON_BUILD_SHA256_CHECKSUM: 2f3fbaf7c38eae5a00e2a816d09b81177f93529ae8ba1b82dc8f31407565327a
+-- ARROW_AWS_C_COMPRESSION_BUILD_VERSION: v0.2.16
+-- ARROW_AWS_C_COMPRESSION_BUILD_SHA256_CHECKSUM: 044b1dbbca431a07bde8255ef9ec443c300fc60d4c9408d4b862f65e496687f4
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_VERSION: v0.2.18
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_SHA256_CHECKSUM: 310ca617f713bf664e4c7485a3d42c1fb57813abd0107e49790d107def7cde4f
+-- ARROW_AWS_C_HTTP_BUILD_VERSION: v0.7.3
+-- ARROW_AWS_C_HTTP_BUILD_SHA256_CHECKSUM: 07e16c6bf5eba6f0dea96b6f55eae312a7c95b736f4d2e4a210000f45d8265ae
+-- ARROW_AWS_C_IO_BUILD_VERSION: v0.13.14
+-- ARROW_AWS_C_IO_BUILD_SHA256_CHECKSUM: 12b66510c3d9a4f7e9b714e9cfab2a5bf835f8b9ce2f909d20ae2a2128608c71
+-- ARROW_AWS_C_MQTT_BUILD_VERSION: v0.8.4
+-- ARROW_AWS_C_MQTT_BUILD_SHA256_CHECKSUM: 232eeac63e72883d460c686a09b98cdd811d24579affac47c5c3f696f956773f
+-- ARROW_AWS_C_S3_BUILD_VERSION: v0.2.3
+-- ARROW_AWS_C_S3_BUILD_SHA256_CHECKSUM: a00b3c9f319cd1c9aa2c3fa15098864df94b066dcba0deaccbb3caa952d902fe
+-- ARROW_AWS_C_SDKUTILS_BUILD_VERSION: v0.1.6
+-- ARROW_AWS_C_SDKUTILS_BUILD_SHA256_CHECKSUM: 8a2951344b2fb541eab1e9ca17c18a7fcbfd2aaff4cdd31d362d1fad96111b91
+-- ARROW_AWS_CHECKSUMS_BUILD_VERSION: v0.1.13
+-- ARROW_AWS_CHECKSUMS_BUILD_SHA256_CHECKSUM: 0f897686f1963253c5069a0e495b85c31635ba146cd3ac38cc2ea31eaf54694d
+-- ARROW_AWS_CRT_CPP_BUILD_VERSION: v0.18.16
+-- ARROW_AWS_CRT_CPP_BUILD_SHA256_CHECKSUM: 9e69bc1dc4b50871d1038aa9ff6ddeb4c9b28f7d6b5e5b1b69041ccf50a13483
+-- ARROW_AWS_LC_BUILD_VERSION: v1.3.0
+-- ARROW_AWS_LC_BUILD_SHA256_CHECKSUM: ae96a3567161552744fc0cae8b4d68ed88b1ec0f3d3c98700070115356da5a37
+-- ARROW_AWSSDK_BUILD_VERSION: 1.10.55
+-- ARROW_AWSSDK_BUILD_SHA256_CHECKSUM: 2d552fb1a84bef4a9b65e34aa7031851ed2aef5319e02cc6e4cb735c48aa30de
+-- ARROW_BOOST_BUILD_VERSION: 1.81.0
+-- ARROW_BOOST_BUILD_SHA256_CHECKSUM: 9e0ffae35528c35f90468997bc8d99500bf179cbae355415a89a600c38e13574
+-- ARROW_BROTLI_BUILD_VERSION: v1.0.9
+-- ARROW_BROTLI_BUILD_SHA256_CHECKSUM: f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46
+-- ARROW_BZIP2_BUILD_VERSION: 1.0.8
+-- ARROW_BZIP2_BUILD_SHA256_CHECKSUM: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
+-- ARROW_CARES_BUILD_VERSION: 1.17.2
+-- ARROW_CARES_BUILD_SHA256_CHECKSUM: 4803c844ce20ce510ef0eb83f8ea41fa24ecaae9d280c468c582d2bb25b3913d
+-- ARROW_CRC32C_BUILD_VERSION: 1.1.2
+-- ARROW_CRC32C_BUILD_SHA256_CHECKSUM: ac07840513072b7fcebda6e821068aa04889018f24e10e46181068fb214d7e56
+-- ARROW_GBENCHMARK_BUILD_VERSION: v1.7.1
+-- ARROW_GBENCHMARK_BUILD_SHA256_CHECKSUM: 6430e4092653380d9dc4ccb45a1e2dc9259d581f4866dc0759713126056bc1d7
+-- ARROW_GFLAGS_BUILD_VERSION: v2.2.2
+-- ARROW_GFLAGS_BUILD_SHA256_CHECKSUM: 34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf
+-- ARROW_GLOG_BUILD_VERSION: v0.5.0
+-- ARROW_GLOG_BUILD_SHA256_CHECKSUM: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_VERSION: v2.8.0
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_SHA256_CHECKSUM: 21fb441b5a670a18bb16b6826be8e0530888d0b94320847c538d46f5a54dddbc
+-- ARROW_GRPC_BUILD_VERSION: v1.46.3
+-- ARROW_GRPC_BUILD_SHA256_CHECKSUM: d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964
+-- ARROW_GTEST_BUILD_VERSION: 1.11.0
+-- ARROW_GTEST_BUILD_SHA256_CHECKSUM: b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+-- ARROW_JEMALLOC_BUILD_VERSION: 5.3.0
+-- ARROW_JEMALLOC_BUILD_SHA256_CHECKSUM: 2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
+-- ARROW_LZ4_BUILD_VERSION: v1.9.4
+-- ARROW_LZ4_BUILD_SHA256_CHECKSUM: 0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b
+-- ARROW_MIMALLOC_BUILD_VERSION: v2.0.6
+-- ARROW_MIMALLOC_BUILD_SHA256_CHECKSUM: 9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5
+-- ARROW_NLOHMANN_JSON_BUILD_VERSION: v3.10.5
+-- ARROW_NLOHMANN_JSON_BUILD_SHA256_CHECKSUM: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
+-- ARROW_OPENTELEMETRY_BUILD_VERSION: v1.8.1
+-- ARROW_OPENTELEMETRY_BUILD_SHA256_CHECKSUM: 3d640201594b07f08dade9cd1017bd0b59674daca26223b560b9bb6bf56264c2
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_VERSION: v0.17.0
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_SHA256_CHECKSUM: f269fbcb30e17b03caa1decd231ce826e59d7651c0f71c3b28eb5140b4bb5412
+-- ARROW_ORC_BUILD_VERSION: 1.8.3
+-- ARROW_ORC_BUILD_SHA256_CHECKSUM: a78678ec425c8129d63370cb8a9bacb54186aa66af1e2bec01ce92e7eaf72e20
+-- ARROW_PROTOBUF_BUILD_VERSION: v21.3
+-- ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM: 2f723218f6cb709ae4cdc4fb5ed56a5951fc5d466f0128ce4c946b8c78c8c49f
+-- ARROW_RAPIDJSON_BUILD_VERSION: 232389d4f1012dddec4ef84861face2d2ba85709
+-- ARROW_RAPIDJSON_BUILD_SHA256_CHECKSUM: b9290a9a6d444c8e049bd589ab804e0ccf2b05dc5984a19ed5ae75d090064806
+-- ARROW_RE2_BUILD_VERSION: 2022-06-01
+-- ARROW_RE2_BUILD_SHA256_CHECKSUM: f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f
+-- ARROW_SNAPPY_BUILD_VERSION: 1.1.9
+-- ARROW_SNAPPY_BUILD_SHA256_CHECKSUM: 75c1fbb3d618dd3a0483bff0e26d0a92b495bbe5059c8b4f1c962b478b6e06e7
+-- ARROW_SUBSTRAIT_BUILD_VERSION: v0.20.0
+-- ARROW_SUBSTRAIT_BUILD_SHA256_CHECKSUM: 5ceaa559ccef29a7825b5e5d4b5e7eed384830294f08bec913feecdd903a94cf
+-- ARROW_S2N_TLS_BUILD_VERSION: v1.3.35
+-- ARROW_S2N_TLS_BUILD_SHA256_CHECKSUM: 9d32b26e6bfcc058d98248bf8fc231537e347395dd89cf62bb432b55c5da990d
+-- ARROW_THRIFT_BUILD_VERSION: 0.16.0
+-- ARROW_THRIFT_BUILD_SHA256_CHECKSUM: f460b5c1ca30d8918ff95ea3eb6291b3951cf518553566088f3f2be8981f6209
+-- ARROW_UCX_BUILD_VERSION: 1.12.1
+-- ARROW_UCX_BUILD_SHA256_CHECKSUM: 9bef31aed0e28bf1973d28d74d9ac4f8926c43ca3b7010bd22a084e164e31b71
+-- ARROW_UTF8PROC_BUILD_VERSION: v2.7.0
+-- ARROW_UTF8PROC_BUILD_SHA256_CHECKSUM: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
+-- ARROW_XSIMD_BUILD_VERSION: 9.0.1
+-- ARROW_XSIMD_BUILD_SHA256_CHECKSUM: b1bb5f92167fd3a4f25749db0be7e61ed37e0a5d943490f3accdcd2cd2918cc0
+-- ARROW_ZLIB_BUILD_VERSION: 1.2.13
+-- ARROW_ZLIB_BUILD_SHA256_CHECKSUM: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+-- ARROW_ZSTD_BUILD_VERSION: 1.5.5
+-- ARROW_ZSTD_BUILD_SHA256_CHECKSUM: 9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4
+-- Boost include dir: /usr/include
+-- Building without OpenSSL support. Minimum OpenSSL version 1.0.2 required.
+-- Found thrift: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Found libevent include directory: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_core.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_extra.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_openssl.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_pthreads.so
+-- Found libevent 2.1.12 in /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Providing CMake module for ThriftAlt as part of Arrow CMake package
+-- Building jemalloc from source
+-- Could NOT find GTest (missing: GTest_DIR)
+-- Building gtest from source
+-- RapidJSON found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- xsimd found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found hdfs.h at: /home/tdhock/arrow-git/cpp/thirdparty/hadoop/include/hdfs.h
+-- All bundled static libraries: jemalloc::jemalloc
+-- CMAKE_C_FLAGS:   -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_CXX_FLAGS:  -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_C_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- CMAKE_CXX_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- ---------------------------------------------------------------------
+-- Arrow version:                                 13.0.0-SNAPSHOT
+-- 
+-- Build configuration summary:
+--   Generator: Ninja
+--   Build type: DEBUG
+--   Source directory: /home/tdhock/arrow-git/cpp
+--   Install prefix: /home/tdhock
+-- 
+-- Compile and link options:
+-- 
+--   ARROW_CXXFLAGS=-march=core2 [default=""]
+--       Compiler flags to append when compiling Arrow
+--   ARROW_BUILD_STATIC=OFF [default=ON]
+--       Build static libraries
+--   ARROW_BUILD_SHARED=ON [default=ON]
+--       Build shared libraries
+--   ARROW_PACKAGE_KIND="" [default=""]
+--       Arbitrary string that identifies the kind of package
+--       (for informational purposes)
+--   ARROW_GIT_ID=6d3fe6bda1c3b67b683ada2327194adeed09e9ca [default=""]
+--       The Arrow git commit id (if any)
+--   ARROW_GIT_DESCRIPTION=apache-arrow-13.0.0.dev-46-g6d3fe6bda [default=""]
+--       The Arrow git commit description (if any)
+--   ARROW_NO_DEPRECATED_API=OFF [default=OFF]
+--       Exclude deprecated APIs from build
+--   ARROW_POSITION_INDEPENDENT_CODE=ON [default=ON]
+--       Whether to create position-independent target
+--   ARROW_USE_CCACHE=ON [default=ON]
+--       Use ccache when compiling (if available)
+--   ARROW_USE_SCCACHE=ON [default=ON]
+--       Use sccache when compiling (if available),
+--       takes precedence over ccache if a storage backend is configured
+--   ARROW_USE_LD_GOLD=OFF [default=OFF]
+--       Use ld.gold for linking on Linux (if available)
+--   ARROW_USE_PRECOMPILED_HEADERS=OFF [default=OFF]
+--       Use precompiled headers when compiling
+--   ARROW_SIMD_LEVEL=SSE4_2 [default=NONE|SSE4_2|AVX2|AVX512|NEON|SVE|SVE128|SVE256|SVE512|DEFAULT]
+--       Compile-time SIMD optimization level
+--   ARROW_RUNTIME_SIMD_LEVEL=MAX [default=NONE|SSE4_2|AVX2|AVX512|MAX]
+--       Max runtime SIMD optimization level
+--   ARROW_ALTIVEC=ON [default=ON]
+--       Build with Altivec if compiler has support
+--   ARROW_RPATH_ORIGIN=OFF [default=OFF]
+--       Build Arrow libraries with RATH set to $ORIGIN
+--   ARROW_INSTALL_NAME_RPATH=ON [default=ON]
+--       Build Arrow libraries with install_name set to @rpath
+--   ARROW_GGDB_DEBUG=ON [default=ON]
+--       Pass -ggdb flag to debug builds
+--   ARROW_WITH_MUSL=OFF [default=OFF]
+--       Whether the system libc is musl or not
+-- 
+-- Test and benchmark options:
+-- 
+--   ARROW_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Arrow examples
+--   ARROW_BUILD_TESTS=ON [default=OFF]
+--       Build the Arrow googletest unit tests
+--   ARROW_ENABLE_TIMING_TESTS=ON [default=ON]
+--       Enable timing-sensitive tests
+--   ARROW_BUILD_INTEGRATION=ON [default=OFF]
+--       Build the Arrow integration test executables
+--   ARROW_BUILD_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow micro benchmarks
+--   ARROW_BUILD_BENCHMARKS_REFERENCE=OFF [default=OFF]
+--       Build the Arrow micro reference benchmarks
+--   ARROW_BUILD_OPENMP_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow benchmarks that rely on OpenMP
+--   ARROW_BUILD_DETAILED_BENCHMARKS=OFF [default=OFF]
+--       Build benchmarks that do a longer exploration of performance
+--   ARROW_TEST_LINKAGE=shared [default=shared|static]
+--       Linkage of Arrow libraries with unit tests executables.
+--   ARROW_FUZZING=OFF [default=OFF]
+--       Build Arrow Fuzzing executables
+--   ARROW_LARGE_MEMORY_TESTS=OFF [default=OFF]
+--       Enable unit tests which use large memory
+-- 
+-- Lint options:
+-- 
+--   ARROW_ONLY_LINT=OFF [default=OFF]
+--       Only define the lint and check-format targets
+--   ARROW_VERBOSE_LINT=OFF [default=OFF]
+--       If off, 'quiet' flags will be passed to linting tools
+--   ARROW_GENERATE_COVERAGE=OFF [default=OFF]
+--       Build with C++ code coverage enabled
+-- 
+-- Checks options:
+-- 
+--   ARROW_TEST_MEMCHECK=OFF [default=OFF]
+--       Run the test suite using valgrind --tool=memcheck
+--   ARROW_USE_ASAN=OFF [default=OFF]
+--       Enable Address Sanitizer checks
+--   ARROW_USE_TSAN=OFF [default=OFF]
+--       Enable Thread Sanitizer checks
+--   ARROW_USE_UBSAN=OFF [default=OFF]
+--       Enable Undefined Behavior sanitizer checks
+-- 
+-- Project component options:
+-- 
+--   ARROW_BUILD_UTILITIES=OFF [default=OFF]
+--       Build Arrow commandline utilities
+--   ARROW_COMPUTE=ON [default=OFF]
+--       Build all Arrow Compute kernels
+--   ARROW_CSV=ON [default=OFF]
+--       Build the Arrow CSV Parser Module
+--   ARROW_CUDA=OFF [default=OFF]
+--       Build the Arrow CUDA extensions (requires CUDA toolkit)
+--   ARROW_DATASET=ON [default=OFF]
+--       Build the Arrow Dataset Modules
+--   ARROW_FILESYSTEM=ON [default=OFF]
+--       Build the Arrow Filesystem Layer
+--   ARROW_FLIGHT=OFF [default=OFF]
+--       Build the Arrow Flight RPC System (requires GRPC, Protocol Buffers)
+--   ARROW_FLIGHT_SQL=OFF [default=OFF]
+--       Build the Arrow Flight SQL extension
+--   ARROW_GANDIVA=OFF [default=OFF]
+--       Build the Gandiva libraries
+--   ARROW_GCS=OFF [default=OFF]
+--       Build Arrow with GCS support (requires the GCloud SDK for C++)
+--   ARROW_HDFS=OFF [default=OFF]
+--       Build the Arrow HDFS bridge
+--   ARROW_IPC=ON [default=ON]
+--       Build the Arrow IPC extensions
+--   ARROW_JEMALLOC=ON [default=ON]
+--       Build the Arrow jemalloc-based allocator
+--   ARROW_JSON=ON [default=OFF]
+--       Build Arrow with JSON support (requires RapidJSON)
+--   ARROW_MIMALLOC=OFF [default=OFF]
+--       Build the Arrow mimalloc-based allocator
+--   ARROW_PARQUET=ON [default=OFF]
+--       Build the Parquet libraries
+--   ARROW_ORC=OFF [default=OFF]
+--       Build the Arrow ORC adapter
+--   ARROW_PYTHON=OFF [default=OFF]
+--       Build some components needed by PyArrow.
+--       (This is a deprecated option. Use CMake presets instead.)
+--   ARROW_S3=OFF [default=OFF]
+--       Build Arrow with S3 support (requires the AWS SDK for C++)
+--   ARROW_SKYHOOK=OFF [default=OFF]
+--       Build the Skyhook libraries
+--   ARROW_SUBSTRAIT=OFF [default=OFF]
+--       Build the Arrow Substrait Consumer Module
+--   ARROW_ACERO=ON [default=OFF]
+--       Build the Arrow Acero Engine Module
+--   ARROW_TENSORFLOW=OFF [default=OFF]
+--       Build Arrow with TensorFlow support enabled
+--   ARROW_TESTING=ON [default=OFF]
+--       Build the Arrow testing libraries
+-- 
+-- Thirdparty toolchain options:
+-- 
+--   ARROW_DEPENDENCY_SOURCE=CONDA [default=AUTO|BUNDLED|SYSTEM|CONDA|VCPKG|BREW]
+--       Method to use for acquiring arrow's build dependencies
+--   ARROW_VERBOSE_THIRDPARTY_BUILD=OFF [default=OFF]
+--       Show output from ExternalProjects rather than just logging to files
+--   ARROW_DEPENDENCY_USE_SHARED=ON [default=ON]
+--       Link to shared libraries
+--   ARROW_BOOST_USE_SHARED=ON [default=ON]
+--       Rely on Boost shared libraries where relevant
+--   ARROW_BROTLI_USE_SHARED=ON [default=ON]
+--       Rely on Brotli shared libraries where relevant
+--   ARROW_BZ2_USE_SHARED=ON [default=ON]
+--       Rely on Bz2 shared libraries where relevant
+--   ARROW_GFLAGS_USE_SHARED=ON [default=ON]
+--       Rely on GFlags shared libraries where relevant
+--   ARROW_GRPC_USE_SHARED=ON [default=ON]
+--       Rely on gRPC shared libraries where relevant
+--   ARROW_JEMALLOC_USE_SHARED=OFF [default=ON]
+--       Rely on jemalloc shared libraries where relevant
+--   ARROW_LZ4_USE_SHARED=ON [default=ON]
+--       Rely on lz4 shared libraries where relevant
+--   ARROW_OPENSSL_USE_SHARED=ON [default=ON]
+--       Rely on OpenSSL shared libraries where relevant
+--   ARROW_PROTOBUF_USE_SHARED=ON [default=ON]
+--       Rely on Protocol Buffers shared libraries where relevant
+--   ARROW_SNAPPY_USE_SHARED=ON [default=ON]
+--       Rely on snappy shared libraries where relevant
+--   ARROW_THRIFT_USE_SHARED=OFF [default=ON]
+--       Rely on thrift shared libraries where relevant
+--   ARROW_UTF8PROC_USE_SHARED=ON [default=ON]
+--       Rely on utf8proc shared libraries where relevant
+--   ARROW_ZSTD_USE_SHARED=ON [default=ON]
+--       Rely on zstd shared libraries where relevant
+--   ARROW_USE_GLOG=OFF [default=OFF]
+--       Build libraries with glog support for pluggable logging
+--   ARROW_WITH_BACKTRACE=ON [default=ON]
+--       Build with backtrace support
+--   ARROW_WITH_OPENTELEMETRY=OFF [default=OFF]
+--       Build libraries with OpenTelemetry support for distributed tracing
+--   ARROW_WITH_BROTLI=OFF [default=OFF]
+--       Build with Brotli compression
+--   ARROW_WITH_BZ2=OFF [default=OFF]
+--       Build with BZ2 compression
+--   ARROW_WITH_LZ4=OFF [default=OFF]
+--       Build with lz4 compression
+--   ARROW_WITH_SNAPPY=OFF [default=OFF]
+--       Build with Snappy compression
+--   ARROW_WITH_ZLIB=OFF [default=OFF]
+--       Build with zlib compression
+--   ARROW_WITH_ZSTD=OFF [default=OFF]
+--       Build with zstd compression
+--   ARROW_WITH_UCX=OFF [default=OFF]
+--       Build with UCX transport for Arrow Flight
+--       (only used if ARROW_FLIGHT is ON)
+--   ARROW_WITH_UTF8PROC=OFF [default=ON]
+--       Build with support for Unicode properties using the utf8proc library
+--       (only used if ARROW_COMPUTE is ON or ARROW_GANDIVA is ON)
+--   ARROW_WITH_RE2=OFF [default=ON]
+--       Build with support for regular expressions using the re2 library
+--       (only used if ARROW_COMPUTE or ARROW_GANDIVA is ON)
+-- 
+-- Parquet options:
+-- 
+--   PARQUET_MINIMAL_DEPENDENCY=OFF [default=OFF]
+--       Depend only on Thirdparty headers to build libparquet.
+--       Always OFF if building binaries
+--   PARQUET_BUILD_EXECUTABLES=OFF [default=OFF]
+--       Build the Parquet executable CLI tools. Requires static libraries to be built.
+--   PARQUET_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Parquet examples. Requires static libraries to be built.
+--   PARQUET_REQUIRE_ENCRYPTION=OFF [default=OFF]
+--       Build support for encryption. Fail if OpenSSL is not found
+-- 
+-- Gandiva options:
+-- 
+--   ARROW_GANDIVA_STATIC_LIBSTDCPP=OFF [default=OFF]
+--       Include -static-libstdc++ -static-libgcc when linking with
+--       Gandiva static libraries
+--   ARROW_GANDIVA_PC_CXX_FLAGS="" [default=""]
+--       Compiler flags to append when pre-compiling Gandiva operations
+-- 
+-- Advanced developer options:
+-- 
+--   ARROW_EXTRA_ERROR_CONTEXT=ON [default=OFF]
+--       Compile with extra error context (line numbers, code)
+--   ARROW_OPTIONAL_INSTALL=OFF [default=OFF]
+--       If enabled install ONLY targets that have already been built. Please be
+--       advised that if this is enabled 'install' will fail silently on components
+--       that have not been built
+--   ARROW_GDB_INSTALL_DIR="" [default=""]
+--       Use a custom install directory for GDB plugin.
+--       In general, you don't need to specify this because the default
+--       (CMAKE_INSTALL_FULL_BINDIR on Windows, CMAKE_INSTALL_FULL_LIBDIR otherwise)
+--       is reasonable.
+--   Outputting build configuration summary to /home/tdhock/arrow-git/cpp/build/cmake_summary.json
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/tdhock/arrow-git/cpp/build
+[1/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/buffered.cc.o
+[2/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/caching.cc.o
+[3/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/c/bridge.cc.o
+[4/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/compressed.cc.o
+[5/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/file.cc.o
+[6/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/interfaces.cc.o
+[7/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/memory.cc.o
+[8/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/scalar.cc.o
+[9/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/slow.cc.o
+[10/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/transform.cc.o
+[11/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/basic_decimal.cc.o
+[12/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/async_util.cc.o
+[13/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/formatting.cc.o
+[14/365] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/decimal.cc.o
+...
+[364/365] Building CXX object src/parquet/CMakeFiles/parquet-arrow-test.dir/arrow/arrow_reader_writer_test.cc.o
+[365/365] Linking CXX executable debug/parquet-arrow-test
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cmake --install .
+-- Install configuration: "DEBUG"
+-- Installing: /home/tdhock/lib/cmake/Arrow/FindThriftAlt.cmake
+-- Installing: /home/tdhock/include/arrow/util/config.h
+-- Up-to-date: /home/tdhock/share/doc/arrow/LICENSE.txt
+-- Up-to-date: /home/tdhock/share/doc/arrow/NOTICE.txt
+-- Up-to-date: /home/tdhock/share/doc/arrow/README.md
+-- Up-to-date: /home/tdhock/share/arrow/gdb/gdb_arrow.py
+-- Installing: /home/tdhock/lib/libarrow.so.1300.0.0
+-- Up-to-date: /home/tdhock/lib/pkgconfig/arrow.pc
+-- Up-to-date: /home/tdhock/share/gdb/auto-load/home/tdhock/lib/libarrow.so.1300.0.0-gdb.py
+-- Installing: /home/tdhock/lib/libarrow_testing.so.1300.0.0
+-- Up-to-date: /home/tdhock/lib/libarrow_testing.so.1300
+-- Set runtime path of "/home/tdhock/lib/libarrow_testing.so.1300.0.0" to ""
+-- Up-to-date: /home/tdhock/lib/libarrow_testing.so
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowTesting/ArrowTestingConfig.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowTesting/ArrowTestingConfigVersion.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowTesting/ArrowTestingTargets.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowTesting/ArrowTestingTargets-debug.cmake
+-- Up-to-date: /home/tdhock/lib/pkgconfig/arrow-testing.pc
+-- Up-to-date: /home/tdhock/include/arrow/api.h
+-- Up-to-date: /home/tdhock/include/arrow/array.h
+-- Up-to-date: /home/tdhock/include/arrow/buffer.h
+-- Up-to-date: /home/tdhock/include/arrow/buffer_builder.h
+-- Up-to-date: /home/tdhock/include/arrow/builder.h
+-- Up-to-date: /home/tdhock/include/arrow/chunk_resolver.h
+-- Up-to-date: /home/tdhock/include/arrow/chunked_array.h
+-- Up-to-date: /home/tdhock/include/arrow/compare.h
+-- Up-to-date: /home/tdhock/include/arrow/config.h
+-- Up-to-date: /home/tdhock/include/arrow/datum.h
+-- Up-to-date: /home/tdhock/include/arrow/device.h
+-- Up-to-date: /home/tdhock/include/arrow/extension_type.h
+-- Up-to-date: /home/tdhock/include/arrow/memory_pool.h
+-- Up-to-date: /home/tdhock/include/arrow/memory_pool_test.h
+-- Up-to-date: /home/tdhock/include/arrow/pch.h
+-- Up-to-date: /home/tdhock/include/arrow/pretty_print.h
+-- Up-to-date: /home/tdhock/include/arrow/record_batch.h
+-- Up-to-date: /home/tdhock/include/arrow/result.h
+-- Up-to-date: /home/tdhock/include/arrow/scalar.h
+-- Up-to-date: /home/tdhock/include/arrow/sparse_tensor.h
+-- Up-to-date: /home/tdhock/include/arrow/status.h
+-- Up-to-date: /home/tdhock/include/arrow/stl.h
+-- Up-to-date: /home/tdhock/include/arrow/stl_allocator.h
+-- Up-to-date: /home/tdhock/include/arrow/stl_iterator.h
+-- Up-to-date: /home/tdhock/include/arrow/table.h
+-- Up-to-date: /home/tdhock/include/arrow/table_builder.h
+-- Up-to-date: /home/tdhock/include/arrow/tensor.h
+-- Up-to-date: /home/tdhock/include/arrow/type.h
+-- Up-to-date: /home/tdhock/include/arrow/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/type_traits.h
+-- Up-to-date: /home/tdhock/include/arrow/visit_array_inline.h
+-- Up-to-date: /home/tdhock/include/arrow/visit_data_inline.h
+-- Up-to-date: /home/tdhock/include/arrow/visit_scalar_inline.h
+-- Up-to-date: /home/tdhock/include/arrow/visit_type_inline.h
+-- Up-to-date: /home/tdhock/include/arrow/visitor.h
+-- Up-to-date: /home/tdhock/include/arrow/visitor_generate.h
+-- Installing: /home/tdhock/lib/cmake/Arrow/ArrowOptions.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/Arrow/arrow-config.cmake
+-- Up-to-date: /home/tdhock/include/arrow/testing/async_test_util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/builder.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/executor_util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/extension_type.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/future_util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/generator.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/gtest_compat.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/gtest_util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/json_integration.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/matchers.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/pch.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/random.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/uniform_real.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/util.h
+-- Up-to-date: /home/tdhock/include/arrow/testing/visibility.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_base.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_binary.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_decimal.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_dict.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_nested.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_primitive.h
+-- Up-to-date: /home/tdhock/include/arrow/array/array_run_end.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_adaptive.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_base.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_binary.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_decimal.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_dict.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_nested.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_primitive.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_run_end.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_time.h
+-- Up-to-date: /home/tdhock/include/arrow/array/builder_union.h
+-- Up-to-date: /home/tdhock/include/arrow/array/concatenate.h
+-- Up-to-date: /home/tdhock/include/arrow/array/data.h
+-- Up-to-date: /home/tdhock/include/arrow/array/diff.h
+-- Up-to-date: /home/tdhock/include/arrow/array/util.h
+-- Up-to-date: /home/tdhock/include/arrow/array/validate.h
+-- Up-to-date: /home/tdhock/include/arrow/c/abi.h
+-- Up-to-date: /home/tdhock/include/arrow/c/bridge.h
+-- Up-to-date: /home/tdhock/include/arrow/c/helpers.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/api.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/api_aggregate.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/api_scalar.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/api_vector.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/cast.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/exec.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/expression.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/function.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/kernel.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/key_hash.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/key_map.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/light_array.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/ordering.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/registry.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/compute/util.h
+-- Up-to-date: /home/tdhock/lib/pkgconfig/arrow-compute.pc
+-- Up-to-date: /home/tdhock/include/arrow/compute/row/grouper.h
+-- Up-to-date: /home/tdhock/include/arrow/io/api.h
+-- Up-to-date: /home/tdhock/include/arrow/io/buffered.h
+-- Up-to-date: /home/tdhock/include/arrow/io/caching.h
+-- Up-to-date: /home/tdhock/include/arrow/io/compressed.h
+-- Up-to-date: /home/tdhock/include/arrow/io/concurrency.h
+-- Up-to-date: /home/tdhock/include/arrow/io/file.h
+-- Up-to-date: /home/tdhock/include/arrow/io/hdfs.h
+-- Up-to-date: /home/tdhock/include/arrow/io/interfaces.h
+-- Up-to-date: /home/tdhock/include/arrow/io/memory.h
+-- Up-to-date: /home/tdhock/include/arrow/io/mman.h
+-- Up-to-date: /home/tdhock/include/arrow/io/slow.h
+-- Up-to-date: /home/tdhock/include/arrow/io/stdio.h
+-- Up-to-date: /home/tdhock/include/arrow/io/test_common.h
+-- Up-to-date: /home/tdhock/include/arrow/io/transform.h
+-- Up-to-date: /home/tdhock/include/arrow/io/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/tensor/converter.h
+-- Up-to-date: /home/tdhock/include/arrow/util/algorithm.h
+-- Up-to-date: /home/tdhock/include/arrow/util/align_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/aligned_storage.h
+-- Up-to-date: /home/tdhock/include/arrow/util/async_generator.h
+-- Up-to-date: /home/tdhock/include/arrow/util/async_generator_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/util/async_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/base64.h
+-- Up-to-date: /home/tdhock/include/arrow/util/basic_decimal.h
+-- Up-to-date: /home/tdhock/include/arrow/util/benchmark_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bit_block_counter.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bit_run_reader.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bit_stream_utils.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bit_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_builders.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_generate.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_ops.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_reader.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_visit.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitmap_writer.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bitset_stack.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking64_default.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_avx2.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_avx512.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_default.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_neon.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_simd128_generated.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_simd256_generated.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bpacking_simd512_generated.h
+-- Up-to-date: /home/tdhock/include/arrow/util/byte_size.h
+-- Up-to-date: /home/tdhock/include/arrow/util/byte_stream_split.h
+-- Up-to-date: /home/tdhock/include/arrow/util/bytes_view.h
+-- Up-to-date: /home/tdhock/include/arrow/util/cancel.h
+-- Up-to-date: /home/tdhock/include/arrow/util/checked_cast.h
+-- Up-to-date: /home/tdhock/include/arrow/util/compare.h
+-- Up-to-date: /home/tdhock/include/arrow/util/compression.h
+-- Up-to-date: /home/tdhock/include/arrow/util/concurrent_map.h
+-- Installing: /home/tdhock/include/arrow/util/config.h
+-- Up-to-date: /home/tdhock/include/arrow/util/converter.h
+-- Up-to-date: /home/tdhock/include/arrow/util/counting_semaphore.h
+-- Up-to-date: /home/tdhock/include/arrow/util/cpu_info.h
+-- Up-to-date: /home/tdhock/include/arrow/util/crc32.h
+-- Up-to-date: /home/tdhock/include/arrow/util/debug.h
+-- Up-to-date: /home/tdhock/include/arrow/util/decimal.h
+-- Up-to-date: /home/tdhock/include/arrow/util/delimiting.h
+-- Up-to-date: /home/tdhock/include/arrow/util/dispatch.h
+-- Up-to-date: /home/tdhock/include/arrow/util/double_conversion.h
+-- Up-to-date: /home/tdhock/include/arrow/util/endian.h
+-- Up-to-date: /home/tdhock/include/arrow/util/formatting.h
+-- Up-to-date: /home/tdhock/include/arrow/util/functional.h
+-- Up-to-date: /home/tdhock/include/arrow/util/future.h
+-- Up-to-date: /home/tdhock/include/arrow/util/hash_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/hashing.h
+-- Up-to-date: /home/tdhock/include/arrow/util/int_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/int_util_overflow.h
+-- Up-to-date: /home/tdhock/include/arrow/util/io_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/iterator.h
+-- Up-to-date: /home/tdhock/include/arrow/util/key_value_metadata.h
+-- Up-to-date: /home/tdhock/include/arrow/util/launder.h
+-- Up-to-date: /home/tdhock/include/arrow/util/logging.h
+-- Up-to-date: /home/tdhock/include/arrow/util/macros.h
+-- Up-to-date: /home/tdhock/include/arrow/util/map.h
+-- Up-to-date: /home/tdhock/include/arrow/util/math_constants.h
+-- Up-to-date: /home/tdhock/include/arrow/util/memory.h
+-- Up-to-date: /home/tdhock/include/arrow/util/mutex.h
+-- Up-to-date: /home/tdhock/include/arrow/util/parallel.h
+-- Up-to-date: /home/tdhock/include/arrow/util/pcg_random.h
+-- Up-to-date: /home/tdhock/include/arrow/util/print.h
+-- Up-to-date: /home/tdhock/include/arrow/util/queue.h
+-- Up-to-date: /home/tdhock/include/arrow/util/range.h
+-- Up-to-date: /home/tdhock/include/arrow/util/ree_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/regex.h
+-- Up-to-date: /home/tdhock/include/arrow/util/rle_encoding.h
+-- Up-to-date: /home/tdhock/include/arrow/util/rows_to_batches.h
+-- Up-to-date: /home/tdhock/include/arrow/util/simd.h
+-- Up-to-date: /home/tdhock/include/arrow/util/small_vector.h
+-- Up-to-date: /home/tdhock/include/arrow/util/sort.h
+-- Up-to-date: /home/tdhock/include/arrow/util/spaced.h
+-- Up-to-date: /home/tdhock/include/arrow/util/stopwatch.h
+-- Up-to-date: /home/tdhock/include/arrow/util/string.h
+-- Up-to-date: /home/tdhock/include/arrow/util/string_builder.h
+-- Up-to-date: /home/tdhock/include/arrow/util/task_group.h
+-- Up-to-date: /home/tdhock/include/arrow/util/tdigest.h
+-- Up-to-date: /home/tdhock/include/arrow/util/test_common.h
+-- Up-to-date: /home/tdhock/include/arrow/util/thread_pool.h
+-- Up-to-date: /home/tdhock/include/arrow/util/time.h
+-- Up-to-date: /home/tdhock/include/arrow/util/tracing.h
+-- Up-to-date: /home/tdhock/include/arrow/util/trie.h
+-- Up-to-date: /home/tdhock/include/arrow/util/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/util/type_traits.h
+-- Up-to-date: /home/tdhock/include/arrow/util/ubsan.h
+-- Up-to-date: /home/tdhock/include/arrow/util/union_util.h
+-- Up-to-date: /home/tdhock/include/arrow/util/unreachable.h
+-- Up-to-date: /home/tdhock/include/arrow/util/uri.h
+-- Up-to-date: /home/tdhock/include/arrow/util/utf8.h
+-- Up-to-date: /home/tdhock/include/arrow/util/value_parsing.h
+-- Up-to-date: /home/tdhock/include/arrow/util/vector.h
+-- Up-to-date: /home/tdhock/include/arrow/util/visibility.h
+-- Up-to-date: /home/tdhock/include/arrow/util/windows_compatibility.h
+-- Up-to-date: /home/tdhock/include/arrow/util/windows_fixup.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/ProducerConsumerQueue.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/strptime.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/xxhash.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/date.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/ios.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/tz.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/tz_private.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/datetime/visibility.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/bignum-dtoa.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/bignum.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/cached-powers.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/diy-fp.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/double-conversion.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/fast-dtoa.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/fixed-dtoa.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/ieee.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/strtod.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/double-conversion/utils.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/pcg/pcg_extras.hpp
+-- Up-to-date: /home/tdhock/include/arrow/vendored/pcg/pcg_random.hpp
+-- Up-to-date: /home/tdhock/include/arrow/vendored/pcg/pcg_uint128.hpp
+-- Up-to-date: /home/tdhock/include/arrow/vendored/portable-snippets/debug-trap.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/portable-snippets/safe-math.h
+-- Up-to-date: /home/tdhock/include/arrow/vendored/xxhash/xxhash.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/api.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/chunker.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/column_builder.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/column_decoder.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/converter.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/invalid_row.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/options.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/parser.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/reader.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/test_common.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/csv/writer.h
+-- Up-to-date: /home/tdhock/lib/pkgconfig/arrow-csv.pc
+-- Up-to-date: /home/tdhock/include/arrow/acero/accumulation_queue.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/aggregate_node.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/asof_join_node.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/benchmark_util.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/bloom_filter.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/exec_plan.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/groupby.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/hash_join.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/hash_join_dict.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/hash_join_node.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/map_node.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/options.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/order_by_impl.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/partition_util.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/pch.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/query_context.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/schema_util.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/task_util.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/test_nodes.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/tpch_node.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/util.h
+-- Up-to-date: /home/tdhock/include/arrow/acero/visibility.h
+-- Installing: /home/tdhock/lib/libarrow_acero.so.1300.0.0
+-- Up-to-date: /home/tdhock/lib/libarrow_acero.so.1300
+-- Set runtime path of "/home/tdhock/lib/libarrow_acero.so.1300.0.0" to ""
+-- Up-to-date: /home/tdhock/lib/libarrow_acero.so
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowAcero/ArrowAceroConfig.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowAcero/ArrowAceroConfigVersion.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowAcero/ArrowAceroTargets.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowAcero/ArrowAceroTargets-debug.cmake
+-- Up-to-date: /home/tdhock/lib/pkgconfig/arrow-acero.pc
+-- Up-to-date: /home/tdhock/include/arrow/dataset/api.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/dataset.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/dataset_writer.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/discovery.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/file_base.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/file_csv.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/file_ipc.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/file_json.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/file_orc.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/file_parquet.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/partition.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/pch.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/plan.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/projector.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/scanner.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/dataset/visibility.h
+-- Installing: /home/tdhock/lib/libarrow_dataset.so.1300.0.0
+-- Up-to-date: /home/tdhock/lib/libarrow_dataset.so.1300
+-- Set runtime path of "/home/tdhock/lib/libarrow_dataset.so.1300.0.0" to ""
+-- Up-to-date: /home/tdhock/lib/libarrow_dataset.so
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetConfig.cmake
+-- Up-to-date: /home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetConfigVersion.cmake
+-- Old export file "/home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetTargets.cmake" will be replaced.  Removing files [/home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetTargets-debug.cmake].
+-- Installing: /home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetTargets.cmake
+-- Installing: /home/tdhock/lib/cmake/ArrowDataset/ArrowDatasetTargets-debug.cmake
+-- Installing: /home/tdhock/lib/pkgconfig/arrow-dataset.pc
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/api.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/filesystem.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/gcsfs.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/hdfs.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/localfs.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/mockfs.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/path_util.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/s3_test_util.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/s3fs.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/test_util.h
+-- Up-to-date: /home/tdhock/include/arrow/filesystem/type_fwd.h
+-- Up-to-date: /home/tdhock/lib/pkgconfig/arrow-filesystem.pc
+-- Up-to-date: /home/tdhock/include/arrow/ipc/api.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/dictionary.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/feather.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/json_simple.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/message.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/options.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/reader.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/test_common.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/type_fwd.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/util.h
+-- Up-to-date: /home/tdhock/include/arrow/ipc/writer.h
+-- Up-to-date: /home/tdhock/include/arrow/json/api.h
+-- Up-to-date: /home/tdhock/include/arrow/json/chunked_builder.h
+-- Up-to-date: /home/tdhock/include/arrow/json/chunker.h
+-- Up-to-date: /home/tdhock/include/arrow/json/converter.h
+-- Up-to-date: /home/tdhock/include/arrow/json/object_parser.h
+-- Up-to-date: /home/tdhock/include/arrow/json/object_writer.h
+-- Up-to-date: /home/tdhock/include/arrow/json/options.h
+-- Up-to-date: /home/tdhock/include/arrow/json/parser.h
+-- Up-to-date: /home/tdhock/include/arrow/json/rapidjson_defs.h
+-- Up-to-date: /home/tdhock/include/arrow/json/reader.h
+-- Up-to-date: /home/tdhock/include/arrow/json/test_common.h
+-- Up-to-date: /home/tdhock/include/arrow/json/type_fwd.h
+-- Up-to-date: /home/tdhock/lib/pkgconfig/arrow-json.pc
+-- Up-to-date: /home/tdhock/include/arrow/extension/fixed_shape_tensor.h
+-- Installing: /home/tdhock/lib/libparquet.so.1300.0.0
+-- Installing: /home/tdhock/lib/libparquet.so.1300
+-- Set runtime path of "/home/tdhock/lib/libparquet.so.1300.0.0" to ""
+-- Installing: /home/tdhock/lib/libparquet.so
+-- Installing: /home/tdhock/lib/cmake/Parquet/ParquetConfig.cmake
+-- Installing: /home/tdhock/lib/cmake/Parquet/ParquetConfigVersion.cmake
+-- Installing: /home/tdhock/lib/cmake/Parquet/ParquetTargets.cmake
+-- Installing: /home/tdhock/lib/cmake/Parquet/ParquetTargets-debug.cmake
+-- Installing: /home/tdhock/lib/pkgconfig/parquet.pc
+-- Installing: /home/tdhock/include/parquet/bloom_filter.h
+-- Installing: /home/tdhock/include/parquet/bloom_filter_reader.h
+-- Installing: /home/tdhock/include/parquet/column_page.h
+-- Installing: /home/tdhock/include/parquet/column_reader.h
+-- Installing: /home/tdhock/include/parquet/column_scanner.h
+-- Installing: /home/tdhock/include/parquet/column_writer.h
+-- Installing: /home/tdhock/include/parquet/encoding.h
+-- Installing: /home/tdhock/include/parquet/exception.h
+-- Installing: /home/tdhock/include/parquet/file_reader.h
+-- Installing: /home/tdhock/include/parquet/file_writer.h
+-- Installing: /home/tdhock/include/parquet/hasher.h
+-- Installing: /home/tdhock/include/parquet/level_comparison.h
+-- Installing: /home/tdhock/include/parquet/level_comparison_inc.h
+-- Installing: /home/tdhock/include/parquet/level_conversion.h
+-- Installing: /home/tdhock/include/parquet/level_conversion_inc.h
+-- Installing: /home/tdhock/include/parquet/metadata.h
+-- Installing: /home/tdhock/include/parquet/page_index.h
+-- Installing: /home/tdhock/include/parquet/pch.h
+-- Installing: /home/tdhock/include/parquet/platform.h
+-- Installing: /home/tdhock/include/parquet/printer.h
+-- Installing: /home/tdhock/include/parquet/properties.h
+-- Installing: /home/tdhock/include/parquet/schema.h
+-- Installing: /home/tdhock/include/parquet/statistics.h
+-- Installing: /home/tdhock/include/parquet/stream_reader.h
+-- Installing: /home/tdhock/include/parquet/stream_writer.h
+-- Installing: /home/tdhock/include/parquet/test_util.h
+-- Installing: /home/tdhock/include/parquet/type_fwd.h
+-- Installing: /home/tdhock/include/parquet/types.h
+-- Installing: /home/tdhock/include/parquet/windows_compatibility.h
+-- Installing: /home/tdhock/include/parquet/windows_fixup.h
+-- Installing: /home/tdhock/include/parquet/xxhasher.h
+-- Installing: /home/tdhock/include/parquet/parquet_version.h
+-- Installing: /home/tdhock/include/parquet/api/io.h
+-- Installing: /home/tdhock/include/parquet/api/reader.h
+-- Installing: /home/tdhock/include/parquet/api/schema.h
+-- Installing: /home/tdhock/include/parquet/api/writer.h
+-- Installing: /home/tdhock/include/parquet/arrow/reader.h
+-- Installing: /home/tdhock/include/parquet/arrow/schema.h
+-- Installing: /home/tdhock/include/parquet/arrow/test_util.h
+-- Installing: /home/tdhock/include/parquet/arrow/writer.h
+-- Installing: /home/tdhock/include/parquet/encryption/crypto_factory.h
+-- Installing: /home/tdhock/include/parquet/encryption/encryption.h
+-- Installing: /home/tdhock/include/parquet/encryption/file_key_material_store.h
+-- Installing: /home/tdhock/include/parquet/encryption/file_key_unwrapper.h
+-- Installing: /home/tdhock/include/parquet/encryption/file_key_wrapper.h
+-- Installing: /home/tdhock/include/parquet/encryption/file_system_key_material_store.h
+-- Installing: /home/tdhock/include/parquet/encryption/key_encryption_key.h
+-- Installing: /home/tdhock/include/parquet/encryption/key_material.h
+-- Installing: /home/tdhock/include/parquet/encryption/key_metadata.h
+-- Installing: /home/tdhock/include/parquet/encryption/key_toolkit.h
+-- Installing: /home/tdhock/include/parquet/encryption/kms_client.h
+-- Installing: /home/tdhock/include/parquet/encryption/kms_client_factory.h
+-- Installing: /home/tdhock/include/parquet/encryption/local_wrap_kms_client.h
+-- Installing: /home/tdhock/include/parquet/encryption/test_encryption_util.h
+-- Installing: /home/tdhock/include/parquet/encryption/test_in_memory_kms.h
+-- Installing: /home/tdhock/include/parquet/encryption/two_level_cache_with_expiration.h
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig R CMD INSTALL ../../r
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Loading required package: grDevices
+Error in library(decor) : there is no package called ‘decor’
+Calls: suppressPackageStartupMessages -> withCallingHandlers -> library
+Execution halted
+*** Trying Arrow C++ found by pkg-config: /home/tdhock
+*** > Packages are both on development versions (13.0.0-SNAPSHOT, 12.0.0.9000)
+*** > If installation fails, rebuild the C++ library to match the R version
+*** > or retry with FORCE_BUNDLED_BUILD=true
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 10.1.0’
+using C++17
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c arrowExports.cpp -o arrowExports.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c bridge.cpp -o bridge.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c buffer.cpp -o buffer.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c chunkedarray.cpp -o chunkedarray.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c compression.cpp -o compression.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c compute-exec.cpp -o compute-exec.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c compute.cpp -o compute.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c config.cpp -o config.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c csv.cpp -o csv.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c dataset.cpp -o dataset.o
+dataset.cpp: In function ‘std::shared_ptr<arrow::dataset::ParquetFileFormat> dataset___ParquetFileFormat__Make(const std::shared_ptr<arrow::dataset::ParquetFragmentScanOptions>&, cpp11::strings)’:
+dataset.cpp:229:6: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::ParquetFileFormat’ {aka ‘class arrow::dataset::ParquetFileFormat’}
+  229 |   fmt->default_fragment_scan_options = std::move(options);
+      |      ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:80:7: note: forward declaration of ‘using element_type = class arrow::dataset::ParquetFileFormat’ {aka ‘class arrow::dataset::ParquetFileFormat’}
+   80 | class ParquetFileFormat;
+      |       ^~~~~~~~~~~~~~~~~
+dataset.cpp:232:16: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::ParquetFileFormat’ {aka ‘class arrow::dataset::ParquetFileFormat’}
+  232 |   auto& d = fmt->reader_options.dict_columns;
+      |                ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:80:7: note: forward declaration of ‘using element_type = class arrow::dataset::ParquetFileFormat’ {aka ‘class arrow::dataset::ParquetFileFormat’}
+   80 | class ParquetFileFormat;
+      |       ^~~~~~~~~~~~~~~~~
+dataset.cpp: In function ‘void dataset___ParquetFileWriteOptions__update(const std::shared_ptr<arrow::dataset::ParquetFileWriteOptions>&, const std::shared_ptr<parquet::WriterProperties>&, const std::shared_ptr<parquet::ArrowWriterProperties>&)’:
+dataset.cpp:251:10: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::ParquetFileWriteOptions’ {aka ‘class arrow::dataset::ParquetFileWriteOptions’}
+  251 |   options->writer_properties = writer_props;
+      |          ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:84:7: note: forward declaration of ‘using element_type = class arrow::dataset::ParquetFileWriteOptions’ {aka ‘class arrow::dataset::ParquetFileWriteOptions’}
+   84 | class ParquetFileWriteOptions;
+      |       ^~~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp:252:10: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::ParquetFileWriteOptions’ {aka ‘class arrow::dataset::ParquetFileWriteOptions’}
+  252 |   options->arrow_writer_properties = arrow_writer_props;
+      |          ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:84:7: note: forward declaration of ‘using element_type = class arrow::dataset::ParquetFileWriteOptions’ {aka ‘class arrow::dataset::ParquetFileWriteOptions’}
+   84 | class ParquetFileWriteOptions;
+      |       ^~~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp: In function ‘void dataset___CsvFileWriteOptions__update(const std::shared_ptr<arrow::dataset::CsvFileWriteOptions>&, const std::shared_ptr<arrow::csv::WriteOptions>&)’:
+dataset.cpp:278:15: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::CsvFileWriteOptions’ {aka ‘class arrow::dataset::CsvFileWriteOptions’}
+  278 |   *csv_options->write_options = *write_options;
+      |               ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:72:7: note: forward declaration of ‘using element_type = class arrow::dataset::CsvFileWriteOptions’ {aka ‘class arrow::dataset::CsvFileWriteOptions’}
+   72 | class CsvFileWriteOptions;
+      |       ^~~~~~~~~~~~~~~~~~~
+dataset.cpp: In function ‘std::shared_ptr<arrow::dataset::CsvFileFormat> dataset___CsvFileFormat__Make(const std::shared_ptr<arrow::csv::ParseOptions>&, const std::shared_ptr<arrow::csv::ConvertOptions>&, const std::shared_ptr<arrow::csv::ReadOptions>&)’:
+dataset.cpp:292:9: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::CsvFileFormat’ {aka ‘class arrow::dataset::CsvFileFormat’}
+  292 |   format->parse_options = *parse_options;
+      |         ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:70:7: note: forward declaration of ‘using element_type = class arrow::dataset::CsvFileFormat’ {aka ‘class arrow::dataset::CsvFileFormat’}
+   70 | class CsvFileFormat;
+      |       ^~~~~~~~~~~~~
+dataset.cpp:294:36: error: invalid use of incomplete type ‘using element_type = struct arrow::dataset::CsvFragmentScanOptions’ {aka ‘struct arrow::dataset::CsvFragmentScanOptions’}
+  294 |   if (convert_options) scan_options->convert_options = *convert_options;
+      |                                    ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:73:8: note: forward declaration of ‘using element_type = struct arrow::dataset::CsvFragmentScanOptions’ {aka ‘struct arrow::dataset::CsvFragmentScanOptions’}
+   73 | struct CsvFragmentScanOptions;
+      |        ^~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp:295:33: error: invalid use of incomplete type ‘using element_type = struct arrow::dataset::CsvFragmentScanOptions’ {aka ‘struct arrow::dataset::CsvFragmentScanOptions’}
+  295 |   if (read_options) scan_options->read_options = *read_options;
+      |                                 ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:73:8: note: forward declaration of ‘using element_type = struct arrow::dataset::CsvFragmentScanOptions’ {aka ‘struct arrow::dataset::CsvFragmentScanOptions’}
+   73 | struct CsvFragmentScanOptions;
+      |        ^~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp:296:9: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::CsvFileFormat’ {aka ‘class arrow::dataset::CsvFileFormat’}
+  296 |   format->default_fragment_scan_options = std::move(scan_options);
+      |         ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:70:7: note: forward declaration of ‘using element_type = class arrow::dataset::CsvFileFormat’ {aka ‘class arrow::dataset::CsvFileFormat’}
+   70 | class CsvFileFormat;
+      |       ^~~~~~~~~~~~~
+dataset.cpp: In function ‘std::shared_ptr<arrow::dataset::CsvFragmentScanOptions> dataset___CsvFragmentScanOptions__Make(const std::shared_ptr<arrow::csv::ConvertOptions>&, const std::shared_ptr<arrow::csv::ReadOptions>&)’:
+dataset.cpp:313:10: error: invalid use of incomplete type ‘using element_type = struct arrow::dataset::CsvFragmentScanOptions’ {aka ‘struct arrow::dataset::CsvFragmentScanOptions’}
+  313 |   options->convert_options = *convert_options;
+      |          ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:73:8: note: forward declaration of ‘using element_type = struct arrow::dataset::CsvFragmentScanOptions’ {aka ‘struct arrow::dataset::CsvFragmentScanOptions’}
+   73 | struct CsvFragmentScanOptions;
+      |        ^~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp:314:10: error: invalid use of incomplete type ‘using element_type = struct arrow::dataset::CsvFragmentScanOptions’ {aka ‘struct arrow::dataset::CsvFragmentScanOptions’}
+  314 |   options->read_options = *read_options;
+      |          ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:73:8: note: forward declaration of ‘using element_type = struct arrow::dataset::CsvFragmentScanOptions’ {aka ‘struct arrow::dataset::CsvFragmentScanOptions’}
+   73 | struct CsvFragmentScanOptions;
+      |        ^~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp: In function ‘std::shared_ptr<arrow::dataset::ParquetFragmentScanOptions> dataset___ParquetFragmentScanOptions__Make(bool, int64_t, bool)’:
+dataset.cpp:324:12: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+  324 |     options->reader_properties->enable_buffered_stream();
+      |            ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:82:7: note: forward declaration of ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+   82 | class ParquetFragmentScanOptions;
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp:326:12: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+  326 |     options->reader_properties->disable_buffered_stream();
+      |            ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:82:7: note: forward declaration of ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+   82 | class ParquetFragmentScanOptions;
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp:328:10: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+  328 |   options->reader_properties->set_buffer_size(buffer_size);
+      |          ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:82:7: note: forward declaration of ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+   82 | class ParquetFragmentScanOptions;
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp:329:10: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+  329 |   options->arrow_reader_properties->set_pre_buffer(pre_buffer);
+      |          ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:82:7: note: forward declaration of ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+   82 | class ParquetFragmentScanOptions;
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~
+dataset.cpp:331:12: error: invalid use of incomplete type ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+  331 |     options->arrow_reader_properties->set_cache_options(
+      |            ^~
+In file included from ./arrow_types.h:44,
+                 from dataset.cpp:18:
+/home/tdhock/include/arrow/dataset/type_fwd.h:82:7: note: forward declaration of ‘using element_type = class arrow::dataset::ParquetFragmentScanOptions’ {aka ‘class arrow::dataset::ParquetFragmentScanOptions’}
+   82 | class ParquetFragmentScanOptions;
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:56,
+                 from /home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:52,
+                 from /home/tdhock/include/c++/10.1.0/memory:84,
+                 from ././arrow_cpp11.h:20,
+                 from ./arrow_types.h:22,
+                 from dataset.cpp:18:
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h: In instantiation of ‘struct __gnu_cxx::__aligned_buffer<arrow::dataset::ParquetFileFormat>’:
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:538:35:   required from ‘class std::_Sp_counted_ptr_inplace<arrow::dataset::ParquetFileFormat, std::allocator<arrow::dataset::ParquetFileFormat>, __gnu_cxx::_S_atomic>::_Impl’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:599:13:   required from ‘class std::_Sp_counted_ptr_inplace<arrow::dataset::ParquetFileFormat, std::allocator<arrow::dataset::ParquetFileFormat>, __gnu_cxx::_S_atomic>’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:679:43:   required from ‘std::__shared_count<_Lp>::__shared_count(_Tp*&, std::_Sp_alloc_shared_tag<_Alloc>, _Args&& ...) [with _Tp = arrow::dataset::ParquetFileFormat; _Alloc = std::allocator<arrow::dataset::ParquetFileFormat>; _Args = {}; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:1371:71:   required from ‘std::__shared_ptr<_Tp, _Lp>::__shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<arrow::dataset::ParquetFileFormat>; _Args = {}; _Tp = arrow::dataset::ParquetFileFormat; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:408:59:   required from ‘std::shared_ptr<_Tp>::shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<arrow::dataset::ParquetFileFormat>; _Args = {}; _Tp = arrow::dataset::ParquetFileFormat]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:859:14:   required from ‘std::shared_ptr<_Tp> std::allocate_shared(const _Alloc&, _Args&& ...) [with _Tp = arrow::dataset::ParquetFileFormat; _Alloc = std::allocator<arrow::dataset::ParquetFileFormat>; _Args = {}]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:875:39:   required from ‘std::shared_ptr<_Tp> std::make_shared(_Args&& ...) [with _Tp = arrow::dataset::ParquetFileFormat; _Args = {}]’
+dataset.cpp:228:54:   required from here
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h:91:28: error: invalid application of ‘sizeof’ to incomplete type ‘arrow::dataset::ParquetFileFormat’
+   91 |     : std::aligned_storage<sizeof(_Tp), __alignof__(_Tp)>
+      |                            ^~~~~~~~~~~
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h:91:28: error: invalid application of ‘sizeof’ to incomplete type ‘arrow::dataset::ParquetFileFormat’
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h: In instantiation of ‘struct __gnu_cxx::__aligned_buffer<arrow::dataset::CsvFileFormat>’:
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:538:35:   required from ‘class std::_Sp_counted_ptr_inplace<arrow::dataset::CsvFileFormat, std::allocator<arrow::dataset::CsvFileFormat>, __gnu_cxx::_S_atomic>::_Impl’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:599:13:   required from ‘class std::_Sp_counted_ptr_inplace<arrow::dataset::CsvFileFormat, std::allocator<arrow::dataset::CsvFileFormat>, __gnu_cxx::_S_atomic>’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:679:43:   required from ‘std::__shared_count<_Lp>::__shared_count(_Tp*&, std::_Sp_alloc_shared_tag<_Alloc>, _Args&& ...) [with _Tp = arrow::dataset::CsvFileFormat; _Alloc = std::allocator<arrow::dataset::CsvFileFormat>; _Args = {}; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:1371:71:   required from ‘std::__shared_ptr<_Tp, _Lp>::__shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<arrow::dataset::CsvFileFormat>; _Args = {}; _Tp = arrow::dataset::CsvFileFormat; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:408:59:   required from ‘std::shared_ptr<_Tp>::shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<arrow::dataset::CsvFileFormat>; _Args = {}; _Tp = arrow::dataset::CsvFileFormat]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:859:14:   required from ‘std::shared_ptr<_Tp> std::allocate_shared(const _Alloc&, _Args&& ...) [with _Tp = arrow::dataset::CsvFileFormat; _Alloc = std::allocator<arrow::dataset::CsvFileFormat>; _Args = {}]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:875:39:   required from ‘std::shared_ptr<_Tp> std::make_shared(_Args&& ...) [with _Tp = arrow::dataset::CsvFileFormat; _Args = {}]’
+dataset.cpp:291:53:   required from here
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h:91:28: error: invalid application of ‘sizeof’ to incomplete type ‘arrow::dataset::CsvFileFormat’
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h:91:28: error: invalid application of ‘sizeof’ to incomplete type ‘arrow::dataset::CsvFileFormat’
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h: In instantiation of ‘struct __gnu_cxx::__aligned_buffer<arrow::dataset::CsvFragmentScanOptions>’:
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:538:35:   required from ‘class std::_Sp_counted_ptr_inplace<arrow::dataset::CsvFragmentScanOptions, std::allocator<arrow::dataset::CsvFragmentScanOptions>, __gnu_cxx::_S_atomic>::_Impl’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:599:13:   required from ‘class std::_Sp_counted_ptr_inplace<arrow::dataset::CsvFragmentScanOptions, std::allocator<arrow::dataset::CsvFragmentScanOptions>, __gnu_cxx::_S_atomic>’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:679:43:   required from ‘std::__shared_count<_Lp>::__shared_count(_Tp*&, std::_Sp_alloc_shared_tag<_Alloc>, _Args&& ...) [with _Tp = arrow::dataset::CsvFragmentScanOptions; _Alloc = std::allocator<arrow::dataset::CsvFragmentScanOptions>; _Args = {}; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:1371:71:   required from ‘std::__shared_ptr<_Tp, _Lp>::__shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<arrow::dataset::CsvFragmentScanOptions>; _Args = {}; _Tp = arrow::dataset::CsvFragmentScanOptions; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:408:59:   required from ‘std::shared_ptr<_Tp>::shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<arrow::dataset::CsvFragmentScanOptions>; _Args = {}; _Tp = arrow::dataset::CsvFragmentScanOptions]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:859:14:   required from ‘std::shared_ptr<_Tp> std::allocate_shared(const _Alloc&, _Args&& ...) [with _Tp = arrow::dataset::CsvFragmentScanOptions; _Alloc = std::allocator<arrow::dataset::CsvFragmentScanOptions>; _Args = {}]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:875:39:   required from ‘std::shared_ptr<_Tp> std::make_shared(_Args&& ...) [with _Tp = arrow::dataset::CsvFragmentScanOptions; _Args = {}]’
+dataset.cpp:293:68:   required from here
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h:91:28: error: invalid application of ‘sizeof’ to incomplete type ‘arrow::dataset::CsvFragmentScanOptions’
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h:91:28: error: invalid application of ‘sizeof’ to incomplete type ‘arrow::dataset::CsvFragmentScanOptions’
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h: In instantiation of ‘struct __gnu_cxx::__aligned_buffer<arrow::dataset::ParquetFragmentScanOptions>’:
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:538:35:   required from ‘class std::_Sp_counted_ptr_inplace<arrow::dataset::ParquetFragmentScanOptions, std::allocator<arrow::dataset::ParquetFragmentScanOptions>, __gnu_cxx::_S_atomic>::_Impl’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:599:13:   required from ‘class std::_Sp_counted_ptr_inplace<arrow::dataset::ParquetFragmentScanOptions, std::allocator<arrow::dataset::ParquetFragmentScanOptions>, __gnu_cxx::_S_atomic>’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:679:43:   required from ‘std::__shared_count<_Lp>::__shared_count(_Tp*&, std::_Sp_alloc_shared_tag<_Alloc>, _Args&& ...) [with _Tp = arrow::dataset::ParquetFragmentScanOptions; _Alloc = std::allocator<arrow::dataset::ParquetFragmentScanOptions>; _Args = {}; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr_base.h:1371:71:   required from ‘std::__shared_ptr<_Tp, _Lp>::__shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<arrow::dataset::ParquetFragmentScanOptions>; _Args = {}; _Tp = arrow::dataset::ParquetFragmentScanOptions; __gnu_cxx::_Lock_policy _Lp = __gnu_cxx::_S_atomic]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:408:59:   required from ‘std::shared_ptr<_Tp>::shared_ptr(std::_Sp_alloc_shared_tag<_Tp>, _Args&& ...) [with _Alloc = std::allocator<arrow::dataset::ParquetFragmentScanOptions>; _Args = {}; _Tp = arrow::dataset::ParquetFragmentScanOptions]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:859:14:   required from ‘std::shared_ptr<_Tp> std::allocate_shared(const _Alloc&, _Args&& ...) [with _Tp = arrow::dataset::ParquetFragmentScanOptions; _Alloc = std::allocator<arrow::dataset::ParquetFragmentScanOptions>; _Args = {}]’
+/home/tdhock/include/c++/10.1.0/bits/shared_ptr.h:875:39:   required from ‘std::shared_ptr<_Tp> std::make_shared(_Args&& ...) [with _Tp = arrow::dataset::ParquetFragmentScanOptions; _Args = {}]’
+dataset.cpp:322:67:   required from here
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h:91:28: error: invalid application of ‘sizeof’ to incomplete type ‘arrow::dataset::ParquetFragmentScanOptions’
+/home/tdhock/include/c++/10.1.0/ext/aligned_buffer.h:91:28: error: invalid application of ‘sizeof’ to incomplete type ‘arrow::dataset::ParquetFragmentScanOptions’
+/home/tdhock/lib/R/etc/Makeconf:198: recipe for target 'dataset.o' failed
+make: *** [dataset.o] Error 1
+ERROR: compilation failed for package ‘arrow’
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+```
+
+Above shows that progress has been made but there is still some
+parquet functionality missing.
