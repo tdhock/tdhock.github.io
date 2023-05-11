@@ -2382,7 +2382,8 @@ Réception d'objets: 100% (205778/205778), 155.98 Mio | 5.86 Mio/s, fait.
 Résolution des deltas: 100% (143268/143268), fait.
 Mise à jour des fichiers: 100% (6887/6887), fait.
 
-(base) tdhock@tdhock-MacBook:~/tdhock.github.io(master*)$ sudo apt install cmakeLecture des listes de paquets... Fait
+(base) tdhock@tdhock-MacBook:~/tdhock.github.io(master*)$ sudo apt install cmake
+Lecture des listes de paquets... Fait
 Construction de l'arbre des dépendances... Fait
 Lecture des informations d'état... Fait      
 Les paquets supplémentaires suivants seront installés : 
@@ -6177,5 +6178,2125 @@ Cleaning... 186 files.
 ```
 
 Now need to [tell R pkg arrow to use this
-arrow](https://arrow.apache.org/docs/3.0/r/articles/install.html#using-a-local-arrow-c-build)
+arrow](https://arrow.apache.org/docs/r/articles/install.html)
 instead of downloading binaries.
+
+The C++ arrow I built above is the development version from their git
+repo, so it would be good to install their R package from git as well,
+rather than `~/R/arrow_12` which is the source code for R package
+arrow release 12.
+
+I could test a MRE for GCC or proposed error message for arrow using
+monsoon which runs linux and has a CPU that supports the popcnt
+instruction, see flags below:
+
+```
+th798@wind:~$ lscpu 
+Architecture:        x86_64
+CPU op-mode(s):      32-bit, 64-bit
+Byte Order:          Little Endian
+CPU(s):              24
+On-line CPU(s) list: 0-23
+Thread(s) per core:  2
+Core(s) per socket:  6
+Socket(s):           2
+NUMA node(s):        2
+Vendor ID:           GenuineIntel
+CPU family:          6
+Model:               62
+Model name:          Intel(R) Xeon(R) CPU E5-2620 v2 @ 2.10GHz
+Stepping:            4
+CPU MHz:             2600.000
+CPU max MHz:         2600.0000
+CPU min MHz:         1200.0000
+BogoMIPS:            4200.19
+Virtualization:      VT-x
+L1d cache:           32K
+L1i cache:           32K
+L2 cache:            256K
+L3 cache:            15360K
+NUMA node0 CPU(s):   0,2,4,6,8,10,12,14,16,18,20,22
+NUMA node1 CPU(s):   1,3,5,7,9,11,13,15,17,19,21,23
+Flags:               fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm cpuid_fault pti ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms xsaveopt dtherm ida arat pln pts md_clear flush_l1d
+```
+
+Trying on another computer,
+
+```
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2
+-- Building using CMake version: 3.10.2
+-- Arrow version: 13.0.0 (full: '13.0.0-SNAPSHOT')
+-- Arrow SO version: 1300 (full: 1300.0.0)
+-- clang-tidy 14 not found
+-- clang-format 14 not found
+-- Could NOT find ClangTools (missing: CLANG_FORMAT_BIN CLANG_TIDY_BIN) 
+-- infer not found
+-- Found cpplint executable at /home/tdhock/arrow-git/cpp/build-support/cpplint.py
+-- System processor: x86_64
+-- Arrow build warning level: PRODUCTION
+-- Using ld linker
+-- Build Type: RELEASE
+-- Using CONDA approach to find dependencies
+-- Using CONDA_PREFIX for ARROW_PACKAGE_PREFIX: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Setting (unset) dependency *_ROOT variables: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- ARROW_ABSL_BUILD_VERSION: 20211102.0
+-- ARROW_ABSL_BUILD_SHA256_CHECKSUM: dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4
+-- ARROW_AWS_C_AUTH_BUILD_VERSION: v0.6.22
+-- ARROW_AWS_C_AUTH_BUILD_SHA256_CHECKSUM: 691a6b4418afcd3dc141351b6ad33fccd8e3ff84df0e9e045b42295d284ee14c
+-- ARROW_AWS_C_CAL_BUILD_VERSION: v0.5.20
+-- ARROW_AWS_C_CAL_BUILD_SHA256_CHECKSUM: acc352359bd06f8597415c366cf4ec4f00d0b0da92d637039a73323dd55b6cd0
+-- ARROW_AWS_C_COMMON_BUILD_VERSION: v0.8.9
+-- ARROW_AWS_C_COMMON_BUILD_SHA256_CHECKSUM: 2f3fbaf7c38eae5a00e2a816d09b81177f93529ae8ba1b82dc8f31407565327a
+-- ARROW_AWS_C_COMPRESSION_BUILD_VERSION: v0.2.16
+-- ARROW_AWS_C_COMPRESSION_BUILD_SHA256_CHECKSUM: 044b1dbbca431a07bde8255ef9ec443c300fc60d4c9408d4b862f65e496687f4
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_VERSION: v0.2.18
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_SHA256_CHECKSUM: 310ca617f713bf664e4c7485a3d42c1fb57813abd0107e49790d107def7cde4f
+-- ARROW_AWS_C_HTTP_BUILD_VERSION: v0.7.3
+-- ARROW_AWS_C_HTTP_BUILD_SHA256_CHECKSUM: 07e16c6bf5eba6f0dea96b6f55eae312a7c95b736f4d2e4a210000f45d8265ae
+-- ARROW_AWS_C_IO_BUILD_VERSION: v0.13.14
+-- ARROW_AWS_C_IO_BUILD_SHA256_CHECKSUM: 12b66510c3d9a4f7e9b714e9cfab2a5bf835f8b9ce2f909d20ae2a2128608c71
+-- ARROW_AWS_C_MQTT_BUILD_VERSION: v0.8.4
+-- ARROW_AWS_C_MQTT_BUILD_SHA256_CHECKSUM: 232eeac63e72883d460c686a09b98cdd811d24579affac47c5c3f696f956773f
+-- ARROW_AWS_C_S3_BUILD_VERSION: v0.2.3
+-- ARROW_AWS_C_S3_BUILD_SHA256_CHECKSUM: a00b3c9f319cd1c9aa2c3fa15098864df94b066dcba0deaccbb3caa952d902fe
+-- ARROW_AWS_C_SDKUTILS_BUILD_VERSION: v0.1.6
+-- ARROW_AWS_C_SDKUTILS_BUILD_SHA256_CHECKSUM: 8a2951344b2fb541eab1e9ca17c18a7fcbfd2aaff4cdd31d362d1fad96111b91
+-- ARROW_AWS_CHECKSUMS_BUILD_VERSION: v0.1.13
+-- ARROW_AWS_CHECKSUMS_BUILD_SHA256_CHECKSUM: 0f897686f1963253c5069a0e495b85c31635ba146cd3ac38cc2ea31eaf54694d
+-- ARROW_AWS_CRT_CPP_BUILD_VERSION: v0.18.16
+-- ARROW_AWS_CRT_CPP_BUILD_SHA256_CHECKSUM: 9e69bc1dc4b50871d1038aa9ff6ddeb4c9b28f7d6b5e5b1b69041ccf50a13483
+-- ARROW_AWS_LC_BUILD_VERSION: v1.3.0
+-- ARROW_AWS_LC_BUILD_SHA256_CHECKSUM: ae96a3567161552744fc0cae8b4d68ed88b1ec0f3d3c98700070115356da5a37
+-- ARROW_AWSSDK_BUILD_VERSION: 1.10.55
+-- ARROW_AWSSDK_BUILD_SHA256_CHECKSUM: 2d552fb1a84bef4a9b65e34aa7031851ed2aef5319e02cc6e4cb735c48aa30de
+-- ARROW_BOOST_BUILD_VERSION: 1.81.0
+-- ARROW_BOOST_BUILD_SHA256_CHECKSUM: 9e0ffae35528c35f90468997bc8d99500bf179cbae355415a89a600c38e13574
+-- ARROW_BROTLI_BUILD_VERSION: v1.0.9
+-- ARROW_BROTLI_BUILD_SHA256_CHECKSUM: f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46
+-- ARROW_BZIP2_BUILD_VERSION: 1.0.8
+-- ARROW_BZIP2_BUILD_SHA256_CHECKSUM: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
+-- ARROW_CARES_BUILD_VERSION: 1.17.2
+-- ARROW_CARES_BUILD_SHA256_CHECKSUM: 4803c844ce20ce510ef0eb83f8ea41fa24ecaae9d280c468c582d2bb25b3913d
+-- ARROW_CRC32C_BUILD_VERSION: 1.1.2
+-- ARROW_CRC32C_BUILD_SHA256_CHECKSUM: ac07840513072b7fcebda6e821068aa04889018f24e10e46181068fb214d7e56
+-- ARROW_GBENCHMARK_BUILD_VERSION: v1.7.1
+-- ARROW_GBENCHMARK_BUILD_SHA256_CHECKSUM: 6430e4092653380d9dc4ccb45a1e2dc9259d581f4866dc0759713126056bc1d7
+-- ARROW_GFLAGS_BUILD_VERSION: v2.2.2
+-- ARROW_GFLAGS_BUILD_SHA256_CHECKSUM: 34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf
+-- ARROW_GLOG_BUILD_VERSION: v0.5.0
+-- ARROW_GLOG_BUILD_SHA256_CHECKSUM: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_VERSION: v2.8.0
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_SHA256_CHECKSUM: 21fb441b5a670a18bb16b6826be8e0530888d0b94320847c538d46f5a54dddbc
+-- ARROW_GRPC_BUILD_VERSION: v1.46.3
+-- ARROW_GRPC_BUILD_SHA256_CHECKSUM: d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964
+-- ARROW_GTEST_BUILD_VERSION: 1.11.0
+-- ARROW_GTEST_BUILD_SHA256_CHECKSUM: b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+-- ARROW_JEMALLOC_BUILD_VERSION: 5.3.0
+-- ARROW_JEMALLOC_BUILD_SHA256_CHECKSUM: 2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
+-- ARROW_LZ4_BUILD_VERSION: v1.9.4
+-- ARROW_LZ4_BUILD_SHA256_CHECKSUM: 0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b
+-- ARROW_MIMALLOC_BUILD_VERSION: v2.0.6
+-- ARROW_MIMALLOC_BUILD_SHA256_CHECKSUM: 9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5
+-- ARROW_NLOHMANN_JSON_BUILD_VERSION: v3.10.5
+-- ARROW_NLOHMANN_JSON_BUILD_SHA256_CHECKSUM: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
+-- ARROW_OPENTELEMETRY_BUILD_VERSION: v1.8.1
+-- ARROW_OPENTELEMETRY_BUILD_SHA256_CHECKSUM: 3d640201594b07f08dade9cd1017bd0b59674daca26223b560b9bb6bf56264c2
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_VERSION: v0.17.0
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_SHA256_CHECKSUM: f269fbcb30e17b03caa1decd231ce826e59d7651c0f71c3b28eb5140b4bb5412
+-- ARROW_ORC_BUILD_VERSION: 1.8.3
+-- ARROW_ORC_BUILD_SHA256_CHECKSUM: a78678ec425c8129d63370cb8a9bacb54186aa66af1e2bec01ce92e7eaf72e20
+-- ARROW_PROTOBUF_BUILD_VERSION: v21.3
+-- ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM: 2f723218f6cb709ae4cdc4fb5ed56a5951fc5d466f0128ce4c946b8c78c8c49f
+-- ARROW_RAPIDJSON_BUILD_VERSION: 232389d4f1012dddec4ef84861face2d2ba85709
+-- ARROW_RAPIDJSON_BUILD_SHA256_CHECKSUM: b9290a9a6d444c8e049bd589ab804e0ccf2b05dc5984a19ed5ae75d090064806
+-- ARROW_RE2_BUILD_VERSION: 2022-06-01
+-- ARROW_RE2_BUILD_SHA256_CHECKSUM: f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f
+-- ARROW_SNAPPY_BUILD_VERSION: 1.1.9
+-- ARROW_SNAPPY_BUILD_SHA256_CHECKSUM: 75c1fbb3d618dd3a0483bff0e26d0a92b495bbe5059c8b4f1c962b478b6e06e7
+-- ARROW_SUBSTRAIT_BUILD_VERSION: v0.20.0
+-- ARROW_SUBSTRAIT_BUILD_SHA256_CHECKSUM: 5ceaa559ccef29a7825b5e5d4b5e7eed384830294f08bec913feecdd903a94cf
+-- ARROW_S2N_TLS_BUILD_VERSION: v1.3.35
+-- ARROW_S2N_TLS_BUILD_SHA256_CHECKSUM: 9d32b26e6bfcc058d98248bf8fc231537e347395dd89cf62bb432b55c5da990d
+-- ARROW_THRIFT_BUILD_VERSION: 0.16.0
+-- ARROW_THRIFT_BUILD_SHA256_CHECKSUM: f460b5c1ca30d8918ff95ea3eb6291b3951cf518553566088f3f2be8981f6209
+-- ARROW_UCX_BUILD_VERSION: 1.12.1
+-- ARROW_UCX_BUILD_SHA256_CHECKSUM: 9bef31aed0e28bf1973d28d74d9ac4f8926c43ca3b7010bd22a084e164e31b71
+-- ARROW_UTF8PROC_BUILD_VERSION: v2.7.0
+-- ARROW_UTF8PROC_BUILD_SHA256_CHECKSUM: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
+-- ARROW_XSIMD_BUILD_VERSION: 9.0.1
+-- ARROW_XSIMD_BUILD_SHA256_CHECKSUM: b1bb5f92167fd3a4f25749db0be7e61ed37e0a5d943490f3accdcd2cd2918cc0
+-- ARROW_ZLIB_BUILD_VERSION: 1.2.13
+-- ARROW_ZLIB_BUILD_SHA256_CHECKSUM: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+-- ARROW_ZSTD_BUILD_VERSION: 1.5.5
+-- ARROW_ZSTD_BUILD_SHA256_CHECKSUM: 9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4
+-- Building without OpenSSL support. Minimum OpenSSL version 1.0.2 required.
+-- Building jemalloc from source
+-- xsimd found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found hdfs.h at: /home/tdhock/arrow-git/cpp/thirdparty/hadoop/include/hdfs.h
+-- All bundled static libraries: jemalloc::jemalloc
+-- CMAKE_C_FLAGS:   -Wall -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_CXX_FLAGS:  -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_C_FLAGS_RELEASE: -O3 -DNDEBUG -O2 -ftree-vectorize
+-- CMAKE_CXX_FLAGS_RELEASE: -O3 -DNDEBUG -O2 -ftree-vectorize
+-- Creating bundled static library target arrow_bundled_dependencies at /home/tdhock/arrow-git/cpp/build/release/libarrow_bundled_dependencies.a
+-- Looking for backtrace
+-- Looking for backtrace - found
+-- backtrace facility detected in default set of libraries
+-- Found Backtrace: /usr/include  
+-- ---------------------------------------------------------------------
+-- Arrow version:                                 13.0.0-SNAPSHOT
+-- 
+-- Build configuration summary:
+--   Generator: Unix Makefiles
+--   Build type: RELEASE
+--   Source directory: /home/tdhock/arrow-git/cpp
+--   Install prefix: /home/tdhock
+-- 
+-- Compile and link options:
+-- 
+--   ARROW_CXXFLAGS=-march=core2 [default=""]
+--       Compiler flags to append when compiling Arrow
+--   ARROW_BUILD_STATIC=ON [default=ON]
+--       Build static libraries
+--   ARROW_BUILD_SHARED=ON [default=ON]
+--       Build shared libraries
+--   ARROW_PACKAGE_KIND="" [default=""]
+--       Arbitrary string that identifies the kind of package
+--       (for informational purposes)
+--   ARROW_GIT_ID=6d3fe6bda1c3b67b683ada2327194adeed09e9ca [default=""]
+--       The Arrow git commit id (if any)
+--   ARROW_GIT_DESCRIPTION=apache-arrow-13.0.0.dev-46-g6d3fe6bda [default=""]
+--       The Arrow git commit description (if any)
+--   ARROW_NO_DEPRECATED_API=OFF [default=OFF]
+--       Exclude deprecated APIs from build
+--   ARROW_POSITION_INDEPENDENT_CODE=ON [default=ON]
+--       Whether to create position-independent target
+--   ARROW_USE_CCACHE=ON [default=ON]
+--       Use ccache when compiling (if available)
+--   ARROW_USE_SCCACHE=ON [default=ON]
+--       Use sccache when compiling (if available),
+--       takes precedence over ccache if a storage backend is configured
+--   ARROW_USE_LD_GOLD=OFF [default=OFF]
+--       Use ld.gold for linking on Linux (if available)
+--   ARROW_USE_PRECOMPILED_HEADERS=OFF [default=OFF]
+--       Use precompiled headers when compiling
+--   ARROW_SIMD_LEVEL=SSE4_2 [default=NONE|SSE4_2|AVX2|AVX512|NEON|SVE|SVE128|SVE256|SVE512|DEFAULT]
+--       Compile-time SIMD optimization level
+--   ARROW_RUNTIME_SIMD_LEVEL=MAX [default=NONE|SSE4_2|AVX2|AVX512|MAX]
+--       Max runtime SIMD optimization level
+--   ARROW_ALTIVEC=ON [default=ON]
+--       Build with Altivec if compiler has support
+--   ARROW_RPATH_ORIGIN=OFF [default=OFF]
+--       Build Arrow libraries with RATH set to $ORIGIN
+--   ARROW_INSTALL_NAME_RPATH=ON [default=ON]
+--       Build Arrow libraries with install_name set to @rpath
+--   ARROW_GGDB_DEBUG=ON [default=ON]
+--       Pass -ggdb flag to debug builds
+--   ARROW_WITH_MUSL=OFF [default=OFF]
+--       Whether the system libc is musl or not
+-- 
+-- Test and benchmark options:
+-- 
+--   ARROW_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Arrow examples
+--   ARROW_BUILD_TESTS=OFF [default=OFF]
+--       Build the Arrow googletest unit tests
+--   ARROW_ENABLE_TIMING_TESTS=ON [default=ON]
+--       Enable timing-sensitive tests
+--   ARROW_BUILD_INTEGRATION=OFF [default=OFF]
+--       Build the Arrow integration test executables
+--   ARROW_BUILD_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow micro benchmarks
+--   ARROW_BUILD_BENCHMARKS_REFERENCE=OFF [default=OFF]
+--       Build the Arrow micro reference benchmarks
+--   ARROW_BUILD_OPENMP_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow benchmarks that rely on OpenMP
+--   ARROW_BUILD_DETAILED_BENCHMARKS=OFF [default=OFF]
+--       Build benchmarks that do a longer exploration of performance
+--   ARROW_TEST_LINKAGE=shared [default=shared|static]
+--       Linkage of Arrow libraries with unit tests executables.
+--   ARROW_FUZZING=OFF [default=OFF]
+--       Build Arrow Fuzzing executables
+--   ARROW_LARGE_MEMORY_TESTS=OFF [default=OFF]
+--       Enable unit tests which use large memory
+-- 
+-- Lint options:
+-- 
+--   ARROW_ONLY_LINT=OFF [default=OFF]
+--       Only define the lint and check-format targets
+--   ARROW_VERBOSE_LINT=OFF [default=OFF]
+--       If off, 'quiet' flags will be passed to linting tools
+--   ARROW_GENERATE_COVERAGE=OFF [default=OFF]
+--       Build with C++ code coverage enabled
+-- 
+-- Checks options:
+-- 
+--   ARROW_TEST_MEMCHECK=OFF [default=OFF]
+--       Run the test suite using valgrind --tool=memcheck
+--   ARROW_USE_ASAN=OFF [default=OFF]
+--       Enable Address Sanitizer checks
+--   ARROW_USE_TSAN=OFF [default=OFF]
+--       Enable Thread Sanitizer checks
+--   ARROW_USE_UBSAN=OFF [default=OFF]
+--       Enable Undefined Behavior sanitizer checks
+-- 
+-- Project component options:
+-- 
+--   ARROW_BUILD_UTILITIES=OFF [default=OFF]
+--       Build Arrow commandline utilities
+--   ARROW_COMPUTE=OFF [default=OFF]
+--       Build all Arrow Compute kernels
+--   ARROW_CSV=OFF [default=OFF]
+--       Build the Arrow CSV Parser Module
+--   ARROW_CUDA=OFF [default=OFF]
+--       Build the Arrow CUDA extensions (requires CUDA toolkit)
+--   ARROW_DATASET=OFF [default=OFF]
+--       Build the Arrow Dataset Modules
+--   ARROW_FILESYSTEM=OFF [default=OFF]
+--       Build the Arrow Filesystem Layer
+--   ARROW_FLIGHT=OFF [default=OFF]
+--       Build the Arrow Flight RPC System (requires GRPC, Protocol Buffers)
+--   ARROW_FLIGHT_SQL=OFF [default=OFF]
+--       Build the Arrow Flight SQL extension
+--   ARROW_GANDIVA=OFF [default=OFF]
+--       Build the Gandiva libraries
+--   ARROW_GCS=OFF [default=OFF]
+--       Build Arrow with GCS support (requires the GCloud SDK for C++)
+--   ARROW_HDFS=OFF [default=OFF]
+--       Build the Arrow HDFS bridge
+--   ARROW_IPC=ON [default=ON]
+--       Build the Arrow IPC extensions
+--   ARROW_JEMALLOC=ON [default=ON]
+--       Build the Arrow jemalloc-based allocator
+--   ARROW_JSON=OFF [default=OFF]
+--       Build Arrow with JSON support (requires RapidJSON)
+--   ARROW_MIMALLOC=OFF [default=OFF]
+--       Build the Arrow mimalloc-based allocator
+--   ARROW_PARQUET=OFF [default=OFF]
+--       Build the Parquet libraries
+--   ARROW_ORC=OFF [default=OFF]
+--       Build the Arrow ORC adapter
+--   ARROW_PYTHON=OFF [default=OFF]
+--       Build some components needed by PyArrow.
+--       (This is a deprecated option. Use CMake presets instead.)
+--   ARROW_S3=OFF [default=OFF]
+--       Build Arrow with S3 support (requires the AWS SDK for C++)
+--   ARROW_SKYHOOK=OFF [default=OFF]
+--       Build the Skyhook libraries
+--   ARROW_SUBSTRAIT=OFF [default=OFF]
+--       Build the Arrow Substrait Consumer Module
+--   ARROW_ACERO=OFF [default=OFF]
+--       Build the Arrow Acero Engine Module
+--   ARROW_TENSORFLOW=OFF [default=OFF]
+--       Build Arrow with TensorFlow support enabled
+--   ARROW_TESTING=OFF [default=OFF]
+--       Build the Arrow testing libraries
+-- 
+-- Thirdparty toolchain options:
+-- 
+--   ARROW_DEPENDENCY_SOURCE=CONDA [default=AUTO|BUNDLED|SYSTEM|CONDA|VCPKG|BREW]
+--       Method to use for acquiring arrow's build dependencies
+--   ARROW_VERBOSE_THIRDPARTY_BUILD=OFF [default=OFF]
+--       Show output from ExternalProjects rather than just logging to files
+--   ARROW_DEPENDENCY_USE_SHARED=ON [default=ON]
+--       Link to shared libraries
+--   ARROW_BOOST_USE_SHARED=ON [default=ON]
+--       Rely on Boost shared libraries where relevant
+--   ARROW_BROTLI_USE_SHARED=ON [default=ON]
+--       Rely on Brotli shared libraries where relevant
+--   ARROW_BZ2_USE_SHARED=ON [default=ON]
+--       Rely on Bz2 shared libraries where relevant
+--   ARROW_GFLAGS_USE_SHARED=ON [default=ON]
+--       Rely on GFlags shared libraries where relevant
+--   ARROW_GRPC_USE_SHARED=ON [default=ON]
+--       Rely on gRPC shared libraries where relevant
+--   ARROW_JEMALLOC_USE_SHARED=OFF [default=ON]
+--       Rely on jemalloc shared libraries where relevant
+--   ARROW_LZ4_USE_SHARED=ON [default=ON]
+--       Rely on lz4 shared libraries where relevant
+--   ARROW_OPENSSL_USE_SHARED=ON [default=ON]
+--       Rely on OpenSSL shared libraries where relevant
+--   ARROW_PROTOBUF_USE_SHARED=ON [default=ON]
+--       Rely on Protocol Buffers shared libraries where relevant
+--   ARROW_SNAPPY_USE_SHARED=ON [default=ON]
+--       Rely on snappy shared libraries where relevant
+--   ARROW_THRIFT_USE_SHARED=ON [default=ON]
+--       Rely on thrift shared libraries where relevant
+--   ARROW_UTF8PROC_USE_SHARED=ON [default=ON]
+--       Rely on utf8proc shared libraries where relevant
+--   ARROW_ZSTD_USE_SHARED=ON [default=ON]
+--       Rely on zstd shared libraries where relevant
+--   ARROW_USE_GLOG=OFF [default=OFF]
+--       Build libraries with glog support for pluggable logging
+--   ARROW_WITH_BACKTRACE=ON [default=ON]
+--       Build with backtrace support
+--   ARROW_WITH_OPENTELEMETRY=OFF [default=OFF]
+--       Build libraries with OpenTelemetry support for distributed tracing
+--   ARROW_WITH_BROTLI=OFF [default=OFF]
+--       Build with Brotli compression
+--   ARROW_WITH_BZ2=OFF [default=OFF]
+--       Build with BZ2 compression
+--   ARROW_WITH_LZ4=OFF [default=OFF]
+--       Build with lz4 compression
+--   ARROW_WITH_SNAPPY=OFF [default=OFF]
+--       Build with Snappy compression
+--   ARROW_WITH_ZLIB=OFF [default=OFF]
+--       Build with zlib compression
+--   ARROW_WITH_ZSTD=OFF [default=OFF]
+--       Build with zstd compression
+--   ARROW_WITH_UCX=OFF [default=OFF]
+--       Build with UCX transport for Arrow Flight
+--       (only used if ARROW_FLIGHT is ON)
+--   ARROW_WITH_UTF8PROC=OFF [default=ON]
+--       Build with support for Unicode properties using the utf8proc library
+--       (only used if ARROW_COMPUTE is ON or ARROW_GANDIVA is ON)
+--   ARROW_WITH_RE2=OFF [default=ON]
+--       Build with support for regular expressions using the re2 library
+--       (only used if ARROW_COMPUTE or ARROW_GANDIVA is ON)
+-- 
+-- Parquet options:
+-- 
+--   PARQUET_MINIMAL_DEPENDENCY=OFF [default=OFF]
+--       Depend only on Thirdparty headers to build libparquet.
+--       Always OFF if building binaries
+--   PARQUET_BUILD_EXECUTABLES=OFF [default=OFF]
+--       Build the Parquet executable CLI tools. Requires static libraries to be built.
+--   PARQUET_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Parquet examples. Requires static libraries to be built.
+--   PARQUET_REQUIRE_ENCRYPTION=OFF [default=OFF]
+--       Build support for encryption. Fail if OpenSSL is not found
+-- 
+-- Gandiva options:
+-- 
+--   ARROW_GANDIVA_STATIC_LIBSTDCPP=OFF [default=OFF]
+--       Include -static-libstdc++ -static-libgcc when linking with
+--       Gandiva static libraries
+--   ARROW_GANDIVA_PC_CXX_FLAGS="" [default=""]
+--       Compiler flags to append when pre-compiling Gandiva operations
+-- 
+-- Advanced developer options:
+-- 
+--   ARROW_EXTRA_ERROR_CONTEXT=OFF [default=OFF]
+--       Compile with extra error context (line numbers, code)
+--   ARROW_OPTIONAL_INSTALL=OFF [default=OFF]
+--       If enabled install ONLY targets that have already been built. Please be
+--       advised that if this is enabled 'install' will fail silently on components
+--       that have not been built
+--   ARROW_GDB_INSTALL_DIR="" [default=""]
+--       Use a custom install directory for GDB plugin.
+--       In general, you don't need to specify this because the default
+--       (CMAKE_INSTALL_FULL_BINDIR on Windows, CMAKE_INSTALL_FULL_LIBDIR otherwise)
+--       is reasonable.
+--   Outputting build configuration summary to /home/tdhock/arrow-git/cpp/cmake_summary.json
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/tdhock/arrow-git/cpp
+(base) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cmake --build .
+Error: could not load cache
+(base) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ ls
+(base) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. --preset -N ninja-debug-minimal -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2
+(base) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$  cmake .. --preset -N ninja-debug-minimal 
+(base) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$  cmake .. --preset ninja-debug-minimal 
+CMake Error: The source directory "/home/tdhock/arrow-git/cpp/build/ninja-debug-minimal" does not exist.
+Specify --help for usage, or press the help button on the CMake GUI.
+```
+
+Problems seem to be related to old cmake, fixed by installing new
+cmake from conda, versions shown below. The [arrow C++ building
+docs](https://arrow.apache.org/docs/developers/cpp/building.html)
+currently say it should work with cmake 3.5 or higher, but it does not
+work with my cmake 3.10.2, so I think this is a bug in their docs.
+
+```
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ /home/tdhock/.local/share/r-miniconda/envs/arrow/bin/cmake --version
+cmake version 3.22.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ /usr/bin/cmake --version
+cmake version 3.10.2
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+```
+
+install works with cmake from conda below.
+
+```
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cmake --version
+cmake version 3.22.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. --preset ninja-debug-minimal -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2
+Preset CMake variables:
+
+  ARROW_BUILD_INTEGRATION="OFF"
+  ARROW_BUILD_STATIC="OFF"
+  ARROW_BUILD_TESTS="OFF"
+  ARROW_EXTRA_ERROR_CONTEXT="ON"
+  ARROW_WITH_RE2="OFF"
+  ARROW_WITH_UTF8PROC="OFF"
+  CMAKE_BUILD_TYPE="Debug"
+
+-- Building using CMake version: 3.22.1
+-- The C compiler identification is GNU 10.1.0
+-- The CXX compiler identification is GNU 10.1.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /home/tdhock/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /home/tdhock/bin/g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Arrow version: 13.0.0 (full: '13.0.0-SNAPSHOT')
+-- Arrow SO version: 1300 (full: 1300.0.0)
+-- clang-tidy 14 not found
+-- clang-format 14 not found
+-- Could NOT find ClangTools (missing: CLANG_FORMAT_BIN CLANG_TIDY_BIN) 
+-- infer not found
+-- Found Python3: /usr/bin/python3.8 (found version "3.8.0") found components: Interpreter 
+-- Found cpplint executable at /home/tdhock/arrow-git/cpp/build-support/cpplint.py
+-- System processor: x86_64
+-- Performing Test CXX_SUPPORTS_SSE4_2
+-- Performing Test CXX_SUPPORTS_SSE4_2 - Success
+-- Performing Test CXX_SUPPORTS_AVX2
+-- Performing Test CXX_SUPPORTS_AVX2 - Success
+-- Performing Test CXX_SUPPORTS_AVX512
+-- Performing Test CXX_SUPPORTS_AVX512 - Success
+-- Arrow build warning level: CHECKIN
+-- Using ld linker
+-- Build Type: DEBUG
+-- Performing Test CXX_LINKER_SUPPORTS_VERSION_SCRIPT
+-- Performing Test CXX_LINKER_SUPPORTS_VERSION_SCRIPT - Success
+-- Using CONDA approach to find dependencies
+-- Using CONDA_PREFIX for ARROW_PACKAGE_PREFIX: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Setting (unset) dependency *_ROOT variables: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- ARROW_ABSL_BUILD_VERSION: 20211102.0
+-- ARROW_ABSL_BUILD_SHA256_CHECKSUM: dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4
+-- ARROW_AWS_C_AUTH_BUILD_VERSION: v0.6.22
+-- ARROW_AWS_C_AUTH_BUILD_SHA256_CHECKSUM: 691a6b4418afcd3dc141351b6ad33fccd8e3ff84df0e9e045b42295d284ee14c
+-- ARROW_AWS_C_CAL_BUILD_VERSION: v0.5.20
+-- ARROW_AWS_C_CAL_BUILD_SHA256_CHECKSUM: acc352359bd06f8597415c366cf4ec4f00d0b0da92d637039a73323dd55b6cd0
+-- ARROW_AWS_C_COMMON_BUILD_VERSION: v0.8.9
+-- ARROW_AWS_C_COMMON_BUILD_SHA256_CHECKSUM: 2f3fbaf7c38eae5a00e2a816d09b81177f93529ae8ba1b82dc8f31407565327a
+-- ARROW_AWS_C_COMPRESSION_BUILD_VERSION: v0.2.16
+-- ARROW_AWS_C_COMPRESSION_BUILD_SHA256_CHECKSUM: 044b1dbbca431a07bde8255ef9ec443c300fc60d4c9408d4b862f65e496687f4
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_VERSION: v0.2.18
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_SHA256_CHECKSUM: 310ca617f713bf664e4c7485a3d42c1fb57813abd0107e49790d107def7cde4f
+-- ARROW_AWS_C_HTTP_BUILD_VERSION: v0.7.3
+-- ARROW_AWS_C_HTTP_BUILD_SHA256_CHECKSUM: 07e16c6bf5eba6f0dea96b6f55eae312a7c95b736f4d2e4a210000f45d8265ae
+-- ARROW_AWS_C_IO_BUILD_VERSION: v0.13.14
+-- ARROW_AWS_C_IO_BUILD_SHA256_CHECKSUM: 12b66510c3d9a4f7e9b714e9cfab2a5bf835f8b9ce2f909d20ae2a2128608c71
+-- ARROW_AWS_C_MQTT_BUILD_VERSION: v0.8.4
+-- ARROW_AWS_C_MQTT_BUILD_SHA256_CHECKSUM: 232eeac63e72883d460c686a09b98cdd811d24579affac47c5c3f696f956773f
+-- ARROW_AWS_C_S3_BUILD_VERSION: v0.2.3
+-- ARROW_AWS_C_S3_BUILD_SHA256_CHECKSUM: a00b3c9f319cd1c9aa2c3fa15098864df94b066dcba0deaccbb3caa952d902fe
+-- ARROW_AWS_C_SDKUTILS_BUILD_VERSION: v0.1.6
+-- ARROW_AWS_C_SDKUTILS_BUILD_SHA256_CHECKSUM: 8a2951344b2fb541eab1e9ca17c18a7fcbfd2aaff4cdd31d362d1fad96111b91
+-- ARROW_AWS_CHECKSUMS_BUILD_VERSION: v0.1.13
+-- ARROW_AWS_CHECKSUMS_BUILD_SHA256_CHECKSUM: 0f897686f1963253c5069a0e495b85c31635ba146cd3ac38cc2ea31eaf54694d
+-- ARROW_AWS_CRT_CPP_BUILD_VERSION: v0.18.16
+-- ARROW_AWS_CRT_CPP_BUILD_SHA256_CHECKSUM: 9e69bc1dc4b50871d1038aa9ff6ddeb4c9b28f7d6b5e5b1b69041ccf50a13483
+-- ARROW_AWS_LC_BUILD_VERSION: v1.3.0
+-- ARROW_AWS_LC_BUILD_SHA256_CHECKSUM: ae96a3567161552744fc0cae8b4d68ed88b1ec0f3d3c98700070115356da5a37
+-- ARROW_AWSSDK_BUILD_VERSION: 1.10.55
+-- ARROW_AWSSDK_BUILD_SHA256_CHECKSUM: 2d552fb1a84bef4a9b65e34aa7031851ed2aef5319e02cc6e4cb735c48aa30de
+-- ARROW_BOOST_BUILD_VERSION: 1.81.0
+-- ARROW_BOOST_BUILD_SHA256_CHECKSUM: 9e0ffae35528c35f90468997bc8d99500bf179cbae355415a89a600c38e13574
+-- ARROW_BROTLI_BUILD_VERSION: v1.0.9
+-- ARROW_BROTLI_BUILD_SHA256_CHECKSUM: f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46
+-- ARROW_BZIP2_BUILD_VERSION: 1.0.8
+-- ARROW_BZIP2_BUILD_SHA256_CHECKSUM: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
+-- ARROW_CARES_BUILD_VERSION: 1.17.2
+-- ARROW_CARES_BUILD_SHA256_CHECKSUM: 4803c844ce20ce510ef0eb83f8ea41fa24ecaae9d280c468c582d2bb25b3913d
+-- ARROW_CRC32C_BUILD_VERSION: 1.1.2
+-- ARROW_CRC32C_BUILD_SHA256_CHECKSUM: ac07840513072b7fcebda6e821068aa04889018f24e10e46181068fb214d7e56
+-- ARROW_GBENCHMARK_BUILD_VERSION: v1.7.1
+-- ARROW_GBENCHMARK_BUILD_SHA256_CHECKSUM: 6430e4092653380d9dc4ccb45a1e2dc9259d581f4866dc0759713126056bc1d7
+-- ARROW_GFLAGS_BUILD_VERSION: v2.2.2
+-- ARROW_GFLAGS_BUILD_SHA256_CHECKSUM: 34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf
+-- ARROW_GLOG_BUILD_VERSION: v0.5.0
+-- ARROW_GLOG_BUILD_SHA256_CHECKSUM: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_VERSION: v2.8.0
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_SHA256_CHECKSUM: 21fb441b5a670a18bb16b6826be8e0530888d0b94320847c538d46f5a54dddbc
+-- ARROW_GRPC_BUILD_VERSION: v1.46.3
+-- ARROW_GRPC_BUILD_SHA256_CHECKSUM: d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964
+-- ARROW_GTEST_BUILD_VERSION: 1.11.0
+-- ARROW_GTEST_BUILD_SHA256_CHECKSUM: b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+-- ARROW_JEMALLOC_BUILD_VERSION: 5.3.0
+-- ARROW_JEMALLOC_BUILD_SHA256_CHECKSUM: 2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
+-- ARROW_LZ4_BUILD_VERSION: v1.9.4
+-- ARROW_LZ4_BUILD_SHA256_CHECKSUM: 0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b
+-- ARROW_MIMALLOC_BUILD_VERSION: v2.0.6
+-- ARROW_MIMALLOC_BUILD_SHA256_CHECKSUM: 9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5
+-- ARROW_NLOHMANN_JSON_BUILD_VERSION: v3.10.5
+-- ARROW_NLOHMANN_JSON_BUILD_SHA256_CHECKSUM: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
+-- ARROW_OPENTELEMETRY_BUILD_VERSION: v1.8.1
+-- ARROW_OPENTELEMETRY_BUILD_SHA256_CHECKSUM: 3d640201594b07f08dade9cd1017bd0b59674daca26223b560b9bb6bf56264c2
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_VERSION: v0.17.0
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_SHA256_CHECKSUM: f269fbcb30e17b03caa1decd231ce826e59d7651c0f71c3b28eb5140b4bb5412
+-- ARROW_ORC_BUILD_VERSION: 1.8.3
+-- ARROW_ORC_BUILD_SHA256_CHECKSUM: a78678ec425c8129d63370cb8a9bacb54186aa66af1e2bec01ce92e7eaf72e20
+-- ARROW_PROTOBUF_BUILD_VERSION: v21.3
+-- ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM: 2f723218f6cb709ae4cdc4fb5ed56a5951fc5d466f0128ce4c946b8c78c8c49f
+-- ARROW_RAPIDJSON_BUILD_VERSION: 232389d4f1012dddec4ef84861face2d2ba85709
+-- ARROW_RAPIDJSON_BUILD_SHA256_CHECKSUM: b9290a9a6d444c8e049bd589ab804e0ccf2b05dc5984a19ed5ae75d090064806
+-- ARROW_RE2_BUILD_VERSION: 2022-06-01
+-- ARROW_RE2_BUILD_SHA256_CHECKSUM: f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f
+-- ARROW_SNAPPY_BUILD_VERSION: 1.1.9
+-- ARROW_SNAPPY_BUILD_SHA256_CHECKSUM: 75c1fbb3d618dd3a0483bff0e26d0a92b495bbe5059c8b4f1c962b478b6e06e7
+-- ARROW_SUBSTRAIT_BUILD_VERSION: v0.20.0
+-- ARROW_SUBSTRAIT_BUILD_SHA256_CHECKSUM: 5ceaa559ccef29a7825b5e5d4b5e7eed384830294f08bec913feecdd903a94cf
+-- ARROW_S2N_TLS_BUILD_VERSION: v1.3.35
+-- ARROW_S2N_TLS_BUILD_SHA256_CHECKSUM: 9d32b26e6bfcc058d98248bf8fc231537e347395dd89cf62bb432b55c5da990d
+-- ARROW_THRIFT_BUILD_VERSION: 0.16.0
+-- ARROW_THRIFT_BUILD_SHA256_CHECKSUM: f460b5c1ca30d8918ff95ea3eb6291b3951cf518553566088f3f2be8981f6209
+-- ARROW_UCX_BUILD_VERSION: 1.12.1
+-- ARROW_UCX_BUILD_SHA256_CHECKSUM: 9bef31aed0e28bf1973d28d74d9ac4f8926c43ca3b7010bd22a084e164e31b71
+-- ARROW_UTF8PROC_BUILD_VERSION: v2.7.0
+-- ARROW_UTF8PROC_BUILD_SHA256_CHECKSUM: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
+-- ARROW_XSIMD_BUILD_VERSION: 9.0.1
+-- ARROW_XSIMD_BUILD_SHA256_CHECKSUM: b1bb5f92167fd3a4f25749db0be7e61ed37e0a5d943490f3accdcd2cd2918cc0
+-- ARROW_ZLIB_BUILD_VERSION: 1.2.13
+-- ARROW_ZLIB_BUILD_SHA256_CHECKSUM: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+-- ARROW_ZSTD_BUILD_VERSION: 1.5.5
+-- ARROW_ZSTD_BUILD_SHA256_CHECKSUM: 9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Check if compiler accepts -pthread
+-- Check if compiler accepts -pthread - yes
+-- Found Threads: TRUE  
+-- Looking for _M_ARM64
+-- Looking for _M_ARM64 - not found
+-- Looking for __SIZEOF_INT128__
+-- Looking for __SIZEOF_INT128__ - found
+-- Building without OpenSSL support. Minimum OpenSSL version 1.0.2 required.
+-- Building jemalloc from source
+-- xsimd found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found hdfs.h at: /home/tdhock/arrow-git/cpp/thirdparty/hadoop/include/hdfs.h
+-- All bundled static libraries: jemalloc::jemalloc
+-- CMAKE_C_FLAGS:   -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_CXX_FLAGS:  -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_C_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- CMAKE_CXX_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- Looking for backtrace
+-- Looking for backtrace - found
+-- backtrace facility detected in default set of libraries
+-- Found Backtrace: /usr/include  
+-- ---------------------------------------------------------------------
+-- Arrow version:                                 13.0.0-SNAPSHOT
+-- 
+-- Build configuration summary:
+--   Generator: Ninja
+--   Build type: DEBUG
+--   Source directory: /home/tdhock/arrow-git/cpp
+--   Install prefix: /home/tdhock
+-- 
+-- Compile and link options:
+-- 
+--   ARROW_CXXFLAGS=-march=core2 [default=""]
+--       Compiler flags to append when compiling Arrow
+--   ARROW_BUILD_STATIC=OFF [default=ON]
+--       Build static libraries
+--   ARROW_BUILD_SHARED=ON [default=ON]
+--       Build shared libraries
+--   ARROW_PACKAGE_KIND="" [default=""]
+--       Arbitrary string that identifies the kind of package
+--       (for informational purposes)
+--   ARROW_GIT_ID=6d3fe6bda1c3b67b683ada2327194adeed09e9ca [default=""]
+--       The Arrow git commit id (if any)
+--   ARROW_GIT_DESCRIPTION=apache-arrow-13.0.0.dev-46-g6d3fe6bda [default=""]
+--       The Arrow git commit description (if any)
+--   ARROW_NO_DEPRECATED_API=OFF [default=OFF]
+--       Exclude deprecated APIs from build
+--   ARROW_POSITION_INDEPENDENT_CODE=ON [default=ON]
+--       Whether to create position-independent target
+--   ARROW_USE_CCACHE=ON [default=ON]
+--       Use ccache when compiling (if available)
+--   ARROW_USE_SCCACHE=ON [default=ON]
+--       Use sccache when compiling (if available),
+--       takes precedence over ccache if a storage backend is configured
+--   ARROW_USE_LD_GOLD=OFF [default=OFF]
+--       Use ld.gold for linking on Linux (if available)
+--   ARROW_USE_PRECOMPILED_HEADERS=OFF [default=OFF]
+--       Use precompiled headers when compiling
+--   ARROW_SIMD_LEVEL=SSE4_2 [default=NONE|SSE4_2|AVX2|AVX512|NEON|SVE|SVE128|SVE256|SVE512|DEFAULT]
+--       Compile-time SIMD optimization level
+--   ARROW_RUNTIME_SIMD_LEVEL=MAX [default=NONE|SSE4_2|AVX2|AVX512|MAX]
+--       Max runtime SIMD optimization level
+--   ARROW_ALTIVEC=ON [default=ON]
+--       Build with Altivec if compiler has support
+--   ARROW_RPATH_ORIGIN=OFF [default=OFF]
+--       Build Arrow libraries with RATH set to $ORIGIN
+--   ARROW_INSTALL_NAME_RPATH=ON [default=ON]
+--       Build Arrow libraries with install_name set to @rpath
+--   ARROW_GGDB_DEBUG=ON [default=ON]
+--       Pass -ggdb flag to debug builds
+--   ARROW_WITH_MUSL=OFF [default=OFF]
+--       Whether the system libc is musl or not
+-- 
+-- Test and benchmark options:
+-- 
+--   ARROW_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Arrow examples
+--   ARROW_BUILD_TESTS=OFF [default=OFF]
+--       Build the Arrow googletest unit tests
+--   ARROW_ENABLE_TIMING_TESTS=ON [default=ON]
+--       Enable timing-sensitive tests
+--   ARROW_BUILD_INTEGRATION=OFF [default=OFF]
+--       Build the Arrow integration test executables
+--   ARROW_BUILD_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow micro benchmarks
+--   ARROW_BUILD_BENCHMARKS_REFERENCE=OFF [default=OFF]
+--       Build the Arrow micro reference benchmarks
+--   ARROW_BUILD_OPENMP_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow benchmarks that rely on OpenMP
+--   ARROW_BUILD_DETAILED_BENCHMARKS=OFF [default=OFF]
+--       Build benchmarks that do a longer exploration of performance
+--   ARROW_TEST_LINKAGE=shared [default=shared|static]
+--       Linkage of Arrow libraries with unit tests executables.
+--   ARROW_FUZZING=OFF [default=OFF]
+--       Build Arrow Fuzzing executables
+--   ARROW_LARGE_MEMORY_TESTS=OFF [default=OFF]
+--       Enable unit tests which use large memory
+-- 
+-- Lint options:
+-- 
+--   ARROW_ONLY_LINT=OFF [default=OFF]
+--       Only define the lint and check-format targets
+--   ARROW_VERBOSE_LINT=OFF [default=OFF]
+--       If off, 'quiet' flags will be passed to linting tools
+--   ARROW_GENERATE_COVERAGE=OFF [default=OFF]
+--       Build with C++ code coverage enabled
+-- 
+-- Checks options:
+-- 
+--   ARROW_TEST_MEMCHECK=OFF [default=OFF]
+--       Run the test suite using valgrind --tool=memcheck
+--   ARROW_USE_ASAN=OFF [default=OFF]
+--       Enable Address Sanitizer checks
+--   ARROW_USE_TSAN=OFF [default=OFF]
+--       Enable Thread Sanitizer checks
+--   ARROW_USE_UBSAN=OFF [default=OFF]
+--       Enable Undefined Behavior sanitizer checks
+-- 
+-- Project component options:
+-- 
+--   ARROW_BUILD_UTILITIES=OFF [default=OFF]
+--       Build Arrow commandline utilities
+--   ARROW_COMPUTE=OFF [default=OFF]
+--       Build all Arrow Compute kernels
+--   ARROW_CSV=OFF [default=OFF]
+--       Build the Arrow CSV Parser Module
+--   ARROW_CUDA=OFF [default=OFF]
+--       Build the Arrow CUDA extensions (requires CUDA toolkit)
+--   ARROW_DATASET=OFF [default=OFF]
+--       Build the Arrow Dataset Modules
+--   ARROW_FILESYSTEM=OFF [default=OFF]
+--       Build the Arrow Filesystem Layer
+--   ARROW_FLIGHT=OFF [default=OFF]
+--       Build the Arrow Flight RPC System (requires GRPC, Protocol Buffers)
+--   ARROW_FLIGHT_SQL=OFF [default=OFF]
+--       Build the Arrow Flight SQL extension
+--   ARROW_GANDIVA=OFF [default=OFF]
+--       Build the Gandiva libraries
+--   ARROW_GCS=OFF [default=OFF]
+--       Build Arrow with GCS support (requires the GCloud SDK for C++)
+--   ARROW_HDFS=OFF [default=OFF]
+--       Build the Arrow HDFS bridge
+--   ARROW_IPC=ON [default=ON]
+--       Build the Arrow IPC extensions
+--   ARROW_JEMALLOC=ON [default=ON]
+--       Build the Arrow jemalloc-based allocator
+--   ARROW_JSON=OFF [default=OFF]
+--       Build Arrow with JSON support (requires RapidJSON)
+--   ARROW_MIMALLOC=OFF [default=OFF]
+--       Build the Arrow mimalloc-based allocator
+--   ARROW_PARQUET=OFF [default=OFF]
+--       Build the Parquet libraries
+--   ARROW_ORC=OFF [default=OFF]
+--       Build the Arrow ORC adapter
+--   ARROW_PYTHON=OFF [default=OFF]
+--       Build some components needed by PyArrow.
+--       (This is a deprecated option. Use CMake presets instead.)
+--   ARROW_S3=OFF [default=OFF]
+--       Build Arrow with S3 support (requires the AWS SDK for C++)
+--   ARROW_SKYHOOK=OFF [default=OFF]
+--       Build the Skyhook libraries
+--   ARROW_SUBSTRAIT=OFF [default=OFF]
+--       Build the Arrow Substrait Consumer Module
+--   ARROW_ACERO=OFF [default=OFF]
+--       Build the Arrow Acero Engine Module
+--   ARROW_TENSORFLOW=OFF [default=OFF]
+--       Build Arrow with TensorFlow support enabled
+--   ARROW_TESTING=OFF [default=OFF]
+--       Build the Arrow testing libraries
+-- 
+-- Thirdparty toolchain options:
+-- 
+--   ARROW_DEPENDENCY_SOURCE=CONDA [default=AUTO|BUNDLED|SYSTEM|CONDA|VCPKG|BREW]
+--       Method to use for acquiring arrow's build dependencies
+--   ARROW_VERBOSE_THIRDPARTY_BUILD=OFF [default=OFF]
+--       Show output from ExternalProjects rather than just logging to files
+--   ARROW_DEPENDENCY_USE_SHARED=ON [default=ON]
+--       Link to shared libraries
+--   ARROW_BOOST_USE_SHARED=ON [default=ON]
+--       Rely on Boost shared libraries where relevant
+--   ARROW_BROTLI_USE_SHARED=ON [default=ON]
+--       Rely on Brotli shared libraries where relevant
+--   ARROW_BZ2_USE_SHARED=ON [default=ON]
+--       Rely on Bz2 shared libraries where relevant
+--   ARROW_GFLAGS_USE_SHARED=ON [default=ON]
+--       Rely on GFlags shared libraries where relevant
+--   ARROW_GRPC_USE_SHARED=ON [default=ON]
+--       Rely on gRPC shared libraries where relevant
+--   ARROW_JEMALLOC_USE_SHARED=OFF [default=ON]
+--       Rely on jemalloc shared libraries where relevant
+--   ARROW_LZ4_USE_SHARED=ON [default=ON]
+--       Rely on lz4 shared libraries where relevant
+--   ARROW_OPENSSL_USE_SHARED=ON [default=ON]
+--       Rely on OpenSSL shared libraries where relevant
+--   ARROW_PROTOBUF_USE_SHARED=ON [default=ON]
+--       Rely on Protocol Buffers shared libraries where relevant
+--   ARROW_SNAPPY_USE_SHARED=ON [default=ON]
+--       Rely on snappy shared libraries where relevant
+--   ARROW_THRIFT_USE_SHARED=ON [default=ON]
+--       Rely on thrift shared libraries where relevant
+--   ARROW_UTF8PROC_USE_SHARED=ON [default=ON]
+--       Rely on utf8proc shared libraries where relevant
+--   ARROW_ZSTD_USE_SHARED=ON [default=ON]
+--       Rely on zstd shared libraries where relevant
+--   ARROW_USE_GLOG=OFF [default=OFF]
+--       Build libraries with glog support for pluggable logging
+--   ARROW_WITH_BACKTRACE=ON [default=ON]
+--       Build with backtrace support
+--   ARROW_WITH_OPENTELEMETRY=OFF [default=OFF]
+--       Build libraries with OpenTelemetry support for distributed tracing
+--   ARROW_WITH_BROTLI=OFF [default=OFF]
+--       Build with Brotli compression
+--   ARROW_WITH_BZ2=OFF [default=OFF]
+--       Build with BZ2 compression
+--   ARROW_WITH_LZ4=OFF [default=OFF]
+--       Build with lz4 compression
+--   ARROW_WITH_SNAPPY=OFF [default=OFF]
+--       Build with Snappy compression
+--   ARROW_WITH_ZLIB=OFF [default=OFF]
+--       Build with zlib compression
+--   ARROW_WITH_ZSTD=OFF [default=OFF]
+--       Build with zstd compression
+--   ARROW_WITH_UCX=OFF [default=OFF]
+--       Build with UCX transport for Arrow Flight
+--       (only used if ARROW_FLIGHT is ON)
+--   ARROW_WITH_UTF8PROC=OFF [default=ON]
+--       Build with support for Unicode properties using the utf8proc library
+--       (only used if ARROW_COMPUTE is ON or ARROW_GANDIVA is ON)
+--   ARROW_WITH_RE2=OFF [default=ON]
+--       Build with support for regular expressions using the re2 library
+--       (only used if ARROW_COMPUTE or ARROW_GANDIVA is ON)
+-- 
+-- Parquet options:
+-- 
+--   PARQUET_MINIMAL_DEPENDENCY=OFF [default=OFF]
+--       Depend only on Thirdparty headers to build libparquet.
+--       Always OFF if building binaries
+--   PARQUET_BUILD_EXECUTABLES=OFF [default=OFF]
+--       Build the Parquet executable CLI tools. Requires static libraries to be built.
+--   PARQUET_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Parquet examples. Requires static libraries to be built.
+--   PARQUET_REQUIRE_ENCRYPTION=OFF [default=OFF]
+--       Build support for encryption. Fail if OpenSSL is not found
+-- 
+-- Gandiva options:
+-- 
+--   ARROW_GANDIVA_STATIC_LIBSTDCPP=OFF [default=OFF]
+--       Include -static-libstdc++ -static-libgcc when linking with
+--       Gandiva static libraries
+--   ARROW_GANDIVA_PC_CXX_FLAGS="" [default=""]
+--       Compiler flags to append when pre-compiling Gandiva operations
+-- 
+-- Advanced developer options:
+-- 
+--   ARROW_EXTRA_ERROR_CONTEXT=ON [default=OFF]
+--       Compile with extra error context (line numbers, code)
+--   ARROW_OPTIONAL_INSTALL=OFF [default=OFF]
+--       If enabled install ONLY targets that have already been built. Please be
+--       advised that if this is enabled 'install' will fail silently on components
+--       that have not been built
+--   ARROW_GDB_INSTALL_DIR="" [default=""]
+--       Use a custom install directory for GDB plugin.
+--       In general, you don't need to specify this because the default
+--       (CMAKE_INSTALL_FULL_BINDIR on Windows, CMAKE_INSTALL_FULL_LIBDIR otherwise)
+--       is reasonable.
+--   Outputting build configuration summary to /home/tdhock/arrow-git/cpp/build/cmake_summary.json
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/tdhock/arrow-git/cpp/build
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ /home/tdhock/.local/share/r-miniconda/envs/arrow/bin/cmake --version
+cmake version 3.22.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ /usr/bin/cmake --version
+cmake version 3.10.2
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cmake --build .
+[1/183] Creating directories for 'jemalloc_ep'
+[2/183] Performing download step (download, verify and extract) for 'jemalloc_ep'
+[3/183] No update step for 'jemalloc_ep'
+[4/183] Performing patch step for 'jemalloc_ep'
+[5/183] Performing configure step for 'jemalloc_ep'
+[6/183] Performing build step for 'jemalloc_ep'
+[7/183] Performing install step for 'jemalloc_ep'
+[8/183] Completed 'jemalloc_ep'
+[9/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/array_decimal.cc.o
+[10/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/array_binary.cc.o
+[11/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/array_nested.cc.o
+[12/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/array_primitive.cc.o
+[13/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/array_base.cc.o
+[14/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/array_dict.cc.o
+[15/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/array_run_end.cc.o
+[16/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/builder_adaptive.cc.o
+[17/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/builder_decimal.cc.o
+[18/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/builder_binary.cc.o
+[19/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/builder_base.cc.o
+[20/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/builder_run_end.cc.o
+[21/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/builder_nested.cc.o
+[22/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/builder_dict.cc.o
+[23/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/builder_primitive.cc.o
+[24/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/builder_union.cc.o
+[25/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/data.cc.o
+[26/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/concatenate.cc.o
+[27/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/validate.cc.o
+[28/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/diff.cc.o
+[29/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/buffer.cc.o
+[30/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/util.cc.o
+[31/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/chunk_resolver.cc.o
+[32/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/chunked_array.cc.o
+[33/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/config.cc.o
+[34/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compare.cc.o
+[35/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/device.cc.o
+[36/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/datum.cc.o
+[37/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/extension_type.cc.o
+[38/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/memory_pool.cc.o
+[39/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/builder.cc.o
+[40/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/record_batch.cc.o
+[41/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/pretty_print.cc.o
+[42/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/result.cc.o
+[43/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/status.cc.o
+[44/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/sparse_tensor.cc.o
+[45/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/table.cc.o
+[46/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/table_builder.cc.o
+[47/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/tensor.cc.o
+[48/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/tensor/coo_converter.cc.o
+[49/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/tensor/csf_converter.cc.o
+[50/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/tensor/csx_converter.cc.o
+[51/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/visitor.cc.o
+[52/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/scalar.cc.o
+[53/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/buffered.cc.o
+[54/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/c/bridge.cc.o
+[55/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/type.cc.o
+[56/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/caching.cc.o
+[57/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/hdfs.cc.o
+[58/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/compressed.cc.o
+[59/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/file.cc.o
+[60/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/hdfs_internal.cc.o
+[61/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/memory.cc.o
+[62/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/interfaces.cc.o
+[63/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/slow.cc.o
+[64/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/stdio.cc.o
+[65/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/io/transform.cc.o
+[66/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/align_util.cc.o
+[67/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/atfork_internal.cc.o
+[68/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/basic_decimal.cc.o
+[69/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/async_util.cc.o
+[70/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/bit_block_counter.cc.o
+[71/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/bit_run_reader.cc.o
+[72/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/bit_util.cc.o
+[73/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/bitmap_builders.cc.o
+[74/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/bitmap.cc.o
+[75/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/bitmap_ops.cc.o
+[76/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/bpacking.cc.o
+[77/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/cancel.cc.o
+[78/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/compression.cc.o
+[79/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/counting_semaphore.cc.o
+[80/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/byte_size.cc.o
+[81/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/debug.cc.o
+[82/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/crc32.cc.o
+[83/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/cpu_info.cc.o
+[84/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/delimiting.cc.o
+[85/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/formatting.cc.o
+[86/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/decimal.cc.o
+[87/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/future.cc.o
+[88/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/logging.cc.o
+[89/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/int_util.cc.o
+[90/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/io_util.cc.o
+[91/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/key_value_metadata.cc.o
+[92/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/mutex.cc.o
+[93/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/memory.cc.o
+[94/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/string.cc.o
+[95/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/string_builder.cc.o
+[96/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/ree_util.cc.o
+[97/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/tdigest.cc.o
+[98/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/task_group.cc.o
+[99/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/time.cc.o
+[100/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/tracing.cc.o
+[101/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/trie.cc.o
+[102/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/thread_pool.cc.o
+[103/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/unreachable.cc.o
+[104/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/union_util.cc.o
+[105/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/utf8.cc.o
+[106/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/uri.cc.o
+[107/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/base64.cpp.o
+[108/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/double-conversion/bignum.cc.o
+[109/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/value_parsing.cc.o
+[110/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/double-conversion/double-conversion.cc.o
+[111/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/double-conversion/fast-dtoa.cc.o
+[112/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/double-conversion/bignum-dtoa.cc.o
+[113/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/double-conversion/fixed-dtoa.cc.o
+[114/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/double-conversion/cached-powers.cc.o
+[115/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/double-conversion/diy-fp.cc.o
+[116/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/double-conversion/strtod.cc.o
+[117/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/datetime/tz.cpp.o
+[118/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/memory_pool_jemalloc.cc.o
+[119/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/bpacking_avx2.cc.o
+[120/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/util/bpacking_avx512.cc.o
+[121/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/api_aggregate.cc.o
+[122/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/api_vector.cc.o
+[123/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/cast.cc.o
+[124/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/api_scalar.cc.o
+[125/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/exec.cc.o
+[126/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/function.cc.o
+[127/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/function_internal.cc.o
+[128/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/expression.cc.o
+[129/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernel.cc.o
+[130/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/key_hash.cc.o
+[131/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/key_map.cc.o
+[132/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/ordering.cc.o
+[133/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/light_array.cc.o
+[134/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/registry.cc.o
+[135/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/codegen_internal.cc.o
+[136/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/ree_util_internal.cc.o
+[137/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/row_encoder.cc.o
+[138/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/scalar_cast_boolean.cc.o
+[139/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/scalar_cast_extension.cc.o
+[140/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/scalar_cast_dictionary.cc.o
+[141/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/scalar_cast_internal.cc.o
+[142/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/scalar_cast_nested.cc.o
+[143/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/scalar_cast_numeric.cc.o
+[144/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/scalar_cast_temporal.cc.o
+[145/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/util_internal.cc.o
+[146/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/scalar_cast_string.cc.o
+[147/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/row/encode_internal.cc.o
+[148/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/row/compare_internal.cc.o
+[149/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/vector_selection.cc.o
+[150/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/kernels/vector_hash.cc.o
+[151/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/row/row_internal.cc.o
+[152/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/util.cc.o
+[153/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/row/grouper.cc.o
+[154/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/key_map_avx2.cc.o
+[155/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/key_hash_avx2.cc.o
+[156/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/row/compare_internal_avx2.cc.o
+[157/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/row/encode_internal_avx2.cc.o
+[158/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/compute/util_avx2.cc.o
+[159/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/ipc/dictionary.cc.o
+[160/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/ipc/feather.cc.o
+[161/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/ipc/message.cc.o
+[162/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/ipc/options.cc.o
+[163/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/ipc/metadata_internal.cc.o
+[164/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/musl/strptime.c.o
+[165/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriCommon.c.o
+[166/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriCompare.c.o
+[167/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriEscape.c.o
+[168/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriFile.c.o
+[169/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriIp4Base.c.o
+[170/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriIp4.c.o
+[171/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriMemory.c.o
+[172/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriNormalizeBase.c.o
+[173/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriNormalize.c.o
+[174/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriParseBase.c.o
+[175/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriParse.c.o
+[176/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriQuery.c.o
+[177/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriRecompose.c.o
+[178/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriResolve.c.o
+[179/183] Building C object src/arrow/CMakeFiles/arrow_objlib.dir/vendored/uriparser/UriShorten.c.o
+[180/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/ipc/writer.cc.o
+[181/183] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/ipc/reader.cc.o
+[182/183] Linking CXX shared library debug/libarrow.so.1300.0.0
+[183/183] Creating library symlink debug/libarrow.so.1300 debug/libarrow.so
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cmake --install .
+-- Install configuration: "DEBUG"
+-- Installing: /home/tdhock/include/arrow/util/config.h
+-- Installing: /home/tdhock/share/doc/arrow/LICENSE.txt
+-- Installing: /home/tdhock/share/doc/arrow/NOTICE.txt
+-- Installing: /home/tdhock/share/doc/arrow/README.md
+-- Installing: /home/tdhock/share/arrow/gdb/gdb_arrow.py
+-- Installing: /home/tdhock/lib/libarrow.so.1300.0.0
+-- Installing: /home/tdhock/lib/libarrow.so.1300
+-- Installing: /home/tdhock/lib/libarrow.so
+-- Installing: /home/tdhock/lib/cmake/Arrow/ArrowConfig.cmake
+-- Installing: /home/tdhock/lib/cmake/Arrow/ArrowConfigVersion.cmake
+-- Installing: /home/tdhock/lib/cmake/Arrow/ArrowTargets.cmake
+-- Installing: /home/tdhock/lib/cmake/Arrow/ArrowTargets-debug.cmake
+-- Installing: /home/tdhock/lib/pkgconfig/arrow.pc
+-- Installing: /home/tdhock/share/gdb/auto-load/home/tdhock/lib/libarrow.so.1300.0.0-gdb.py
+-- Installing: /home/tdhock/include/arrow/api.h
+-- Installing: /home/tdhock/include/arrow/array.h
+-- Installing: /home/tdhock/include/arrow/buffer.h
+-- Installing: /home/tdhock/include/arrow/buffer_builder.h
+-- Installing: /home/tdhock/include/arrow/builder.h
+-- Installing: /home/tdhock/include/arrow/chunk_resolver.h
+-- Installing: /home/tdhock/include/arrow/chunked_array.h
+-- Installing: /home/tdhock/include/arrow/compare.h
+-- Installing: /home/tdhock/include/arrow/config.h
+-- Installing: /home/tdhock/include/arrow/datum.h
+-- Installing: /home/tdhock/include/arrow/device.h
+-- Installing: /home/tdhock/include/arrow/extension_type.h
+-- Installing: /home/tdhock/include/arrow/memory_pool.h
+-- Installing: /home/tdhock/include/arrow/memory_pool_test.h
+-- Installing: /home/tdhock/include/arrow/pch.h
+-- Installing: /home/tdhock/include/arrow/pretty_print.h
+-- Installing: /home/tdhock/include/arrow/record_batch.h
+-- Installing: /home/tdhock/include/arrow/result.h
+-- Installing: /home/tdhock/include/arrow/scalar.h
+-- Installing: /home/tdhock/include/arrow/sparse_tensor.h
+-- Installing: /home/tdhock/include/arrow/status.h
+-- Installing: /home/tdhock/include/arrow/stl.h
+-- Installing: /home/tdhock/include/arrow/stl_allocator.h
+-- Installing: /home/tdhock/include/arrow/stl_iterator.h
+-- Installing: /home/tdhock/include/arrow/table.h
+-- Installing: /home/tdhock/include/arrow/table_builder.h
+-- Installing: /home/tdhock/include/arrow/tensor.h
+-- Installing: /home/tdhock/include/arrow/type.h
+-- Installing: /home/tdhock/include/arrow/type_fwd.h
+-- Installing: /home/tdhock/include/arrow/type_traits.h
+-- Installing: /home/tdhock/include/arrow/visit_array_inline.h
+-- Installing: /home/tdhock/include/arrow/visit_data_inline.h
+-- Installing: /home/tdhock/include/arrow/visit_scalar_inline.h
+-- Installing: /home/tdhock/include/arrow/visit_type_inline.h
+-- Installing: /home/tdhock/include/arrow/visitor.h
+-- Installing: /home/tdhock/include/arrow/visitor_generate.h
+-- Installing: /home/tdhock/lib/cmake/Arrow/ArrowOptions.cmake
+-- Installing: /home/tdhock/lib/cmake/Arrow/arrow-config.cmake
+-- Installing: /home/tdhock/include/arrow/testing/async_test_util.h
+-- Installing: /home/tdhock/include/arrow/testing/builder.h
+-- Installing: /home/tdhock/include/arrow/testing/executor_util.h
+-- Installing: /home/tdhock/include/arrow/testing/extension_type.h
+-- Installing: /home/tdhock/include/arrow/testing/future_util.h
+-- Installing: /home/tdhock/include/arrow/testing/generator.h
+-- Installing: /home/tdhock/include/arrow/testing/gtest_compat.h
+-- Installing: /home/tdhock/include/arrow/testing/gtest_util.h
+-- Installing: /home/tdhock/include/arrow/testing/json_integration.h
+-- Installing: /home/tdhock/include/arrow/testing/matchers.h
+-- Installing: /home/tdhock/include/arrow/testing/pch.h
+-- Installing: /home/tdhock/include/arrow/testing/random.h
+-- Installing: /home/tdhock/include/arrow/testing/uniform_real.h
+-- Installing: /home/tdhock/include/arrow/testing/util.h
+-- Installing: /home/tdhock/include/arrow/testing/visibility.h
+-- Installing: /home/tdhock/include/arrow/array/array_base.h
+-- Installing: /home/tdhock/include/arrow/array/array_binary.h
+-- Installing: /home/tdhock/include/arrow/array/array_decimal.h
+-- Installing: /home/tdhock/include/arrow/array/array_dict.h
+-- Installing: /home/tdhock/include/arrow/array/array_nested.h
+-- Installing: /home/tdhock/include/arrow/array/array_primitive.h
+-- Installing: /home/tdhock/include/arrow/array/array_run_end.h
+-- Installing: /home/tdhock/include/arrow/array/builder_adaptive.h
+-- Installing: /home/tdhock/include/arrow/array/builder_base.h
+-- Installing: /home/tdhock/include/arrow/array/builder_binary.h
+-- Installing: /home/tdhock/include/arrow/array/builder_decimal.h
+-- Installing: /home/tdhock/include/arrow/array/builder_dict.h
+-- Installing: /home/tdhock/include/arrow/array/builder_nested.h
+-- Installing: /home/tdhock/include/arrow/array/builder_primitive.h
+-- Installing: /home/tdhock/include/arrow/array/builder_run_end.h
+-- Installing: /home/tdhock/include/arrow/array/builder_time.h
+-- Installing: /home/tdhock/include/arrow/array/builder_union.h
+-- Installing: /home/tdhock/include/arrow/array/concatenate.h
+-- Installing: /home/tdhock/include/arrow/array/data.h
+-- Installing: /home/tdhock/include/arrow/array/diff.h
+-- Installing: /home/tdhock/include/arrow/array/util.h
+-- Installing: /home/tdhock/include/arrow/array/validate.h
+-- Installing: /home/tdhock/include/arrow/c/abi.h
+-- Installing: /home/tdhock/include/arrow/c/bridge.h
+-- Installing: /home/tdhock/include/arrow/c/helpers.h
+-- Installing: /home/tdhock/include/arrow/compute/api.h
+-- Installing: /home/tdhock/include/arrow/compute/api_aggregate.h
+-- Installing: /home/tdhock/include/arrow/compute/api_scalar.h
+-- Installing: /home/tdhock/include/arrow/compute/api_vector.h
+-- Installing: /home/tdhock/include/arrow/compute/cast.h
+-- Installing: /home/tdhock/include/arrow/compute/exec.h
+-- Installing: /home/tdhock/include/arrow/compute/expression.h
+-- Installing: /home/tdhock/include/arrow/compute/function.h
+-- Installing: /home/tdhock/include/arrow/compute/kernel.h
+-- Installing: /home/tdhock/include/arrow/compute/key_hash.h
+-- Installing: /home/tdhock/include/arrow/compute/key_map.h
+-- Installing: /home/tdhock/include/arrow/compute/light_array.h
+-- Installing: /home/tdhock/include/arrow/compute/ordering.h
+-- Installing: /home/tdhock/include/arrow/compute/registry.h
+-- Installing: /home/tdhock/include/arrow/compute/type_fwd.h
+-- Installing: /home/tdhock/include/arrow/compute/util.h
+-- Installing: /home/tdhock/lib/pkgconfig/arrow-compute.pc
+-- Installing: /home/tdhock/include/arrow/compute/row/grouper.h
+-- Installing: /home/tdhock/include/arrow/io/api.h
+-- Installing: /home/tdhock/include/arrow/io/buffered.h
+-- Installing: /home/tdhock/include/arrow/io/caching.h
+-- Installing: /home/tdhock/include/arrow/io/compressed.h
+-- Installing: /home/tdhock/include/arrow/io/concurrency.h
+-- Installing: /home/tdhock/include/arrow/io/file.h
+-- Installing: /home/tdhock/include/arrow/io/hdfs.h
+-- Installing: /home/tdhock/include/arrow/io/interfaces.h
+-- Installing: /home/tdhock/include/arrow/io/memory.h
+-- Installing: /home/tdhock/include/arrow/io/mman.h
+-- Installing: /home/tdhock/include/arrow/io/slow.h
+-- Installing: /home/tdhock/include/arrow/io/stdio.h
+-- Installing: /home/tdhock/include/arrow/io/test_common.h
+-- Installing: /home/tdhock/include/arrow/io/transform.h
+-- Installing: /home/tdhock/include/arrow/io/type_fwd.h
+-- Installing: /home/tdhock/include/arrow/tensor/converter.h
+-- Installing: /home/tdhock/include/arrow/util/algorithm.h
+-- Installing: /home/tdhock/include/arrow/util/align_util.h
+-- Installing: /home/tdhock/include/arrow/util/aligned_storage.h
+-- Installing: /home/tdhock/include/arrow/util/async_generator.h
+-- Installing: /home/tdhock/include/arrow/util/async_generator_fwd.h
+-- Installing: /home/tdhock/include/arrow/util/async_util.h
+-- Installing: /home/tdhock/include/arrow/util/base64.h
+-- Installing: /home/tdhock/include/arrow/util/basic_decimal.h
+-- Installing: /home/tdhock/include/arrow/util/benchmark_util.h
+-- Installing: /home/tdhock/include/arrow/util/bit_block_counter.h
+-- Installing: /home/tdhock/include/arrow/util/bit_run_reader.h
+-- Installing: /home/tdhock/include/arrow/util/bit_stream_utils.h
+-- Installing: /home/tdhock/include/arrow/util/bit_util.h
+-- Installing: /home/tdhock/include/arrow/util/bitmap.h
+-- Installing: /home/tdhock/include/arrow/util/bitmap_builders.h
+-- Installing: /home/tdhock/include/arrow/util/bitmap_generate.h
+-- Installing: /home/tdhock/include/arrow/util/bitmap_ops.h
+-- Installing: /home/tdhock/include/arrow/util/bitmap_reader.h
+-- Installing: /home/tdhock/include/arrow/util/bitmap_visit.h
+-- Installing: /home/tdhock/include/arrow/util/bitmap_writer.h
+-- Installing: /home/tdhock/include/arrow/util/bitset_stack.h
+-- Installing: /home/tdhock/include/arrow/util/bpacking.h
+-- Installing: /home/tdhock/include/arrow/util/bpacking64_default.h
+-- Installing: /home/tdhock/include/arrow/util/bpacking_avx2.h
+-- Installing: /home/tdhock/include/arrow/util/bpacking_avx512.h
+-- Installing: /home/tdhock/include/arrow/util/bpacking_default.h
+-- Installing: /home/tdhock/include/arrow/util/bpacking_neon.h
+-- Installing: /home/tdhock/include/arrow/util/bpacking_simd128_generated.h
+-- Installing: /home/tdhock/include/arrow/util/bpacking_simd256_generated.h
+-- Installing: /home/tdhock/include/arrow/util/bpacking_simd512_generated.h
+-- Installing: /home/tdhock/include/arrow/util/byte_size.h
+-- Installing: /home/tdhock/include/arrow/util/byte_stream_split.h
+-- Installing: /home/tdhock/include/arrow/util/bytes_view.h
+-- Installing: /home/tdhock/include/arrow/util/cancel.h
+-- Installing: /home/tdhock/include/arrow/util/checked_cast.h
+-- Installing: /home/tdhock/include/arrow/util/compare.h
+-- Installing: /home/tdhock/include/arrow/util/compression.h
+-- Installing: /home/tdhock/include/arrow/util/concurrent_map.h
+-- Installing: /home/tdhock/include/arrow/util/config.h
+-- Installing: /home/tdhock/include/arrow/util/converter.h
+-- Installing: /home/tdhock/include/arrow/util/counting_semaphore.h
+-- Installing: /home/tdhock/include/arrow/util/cpu_info.h
+-- Installing: /home/tdhock/include/arrow/util/crc32.h
+-- Installing: /home/tdhock/include/arrow/util/debug.h
+-- Installing: /home/tdhock/include/arrow/util/decimal.h
+-- Installing: /home/tdhock/include/arrow/util/delimiting.h
+-- Installing: /home/tdhock/include/arrow/util/dispatch.h
+-- Installing: /home/tdhock/include/arrow/util/double_conversion.h
+-- Installing: /home/tdhock/include/arrow/util/endian.h
+-- Installing: /home/tdhock/include/arrow/util/formatting.h
+-- Installing: /home/tdhock/include/arrow/util/functional.h
+-- Installing: /home/tdhock/include/arrow/util/future.h
+-- Installing: /home/tdhock/include/arrow/util/hash_util.h
+-- Installing: /home/tdhock/include/arrow/util/hashing.h
+-- Installing: /home/tdhock/include/arrow/util/int_util.h
+-- Installing: /home/tdhock/include/arrow/util/int_util_overflow.h
+-- Installing: /home/tdhock/include/arrow/util/io_util.h
+-- Installing: /home/tdhock/include/arrow/util/iterator.h
+-- Installing: /home/tdhock/include/arrow/util/key_value_metadata.h
+-- Installing: /home/tdhock/include/arrow/util/launder.h
+-- Installing: /home/tdhock/include/arrow/util/logging.h
+-- Installing: /home/tdhock/include/arrow/util/macros.h
+-- Installing: /home/tdhock/include/arrow/util/map.h
+-- Installing: /home/tdhock/include/arrow/util/math_constants.h
+-- Installing: /home/tdhock/include/arrow/util/memory.h
+-- Installing: /home/tdhock/include/arrow/util/mutex.h
+-- Installing: /home/tdhock/include/arrow/util/parallel.h
+-- Installing: /home/tdhock/include/arrow/util/pcg_random.h
+-- Installing: /home/tdhock/include/arrow/util/print.h
+-- Installing: /home/tdhock/include/arrow/util/queue.h
+-- Installing: /home/tdhock/include/arrow/util/range.h
+-- Installing: /home/tdhock/include/arrow/util/ree_util.h
+-- Installing: /home/tdhock/include/arrow/util/regex.h
+-- Installing: /home/tdhock/include/arrow/util/rle_encoding.h
+-- Installing: /home/tdhock/include/arrow/util/rows_to_batches.h
+-- Installing: /home/tdhock/include/arrow/util/simd.h
+-- Installing: /home/tdhock/include/arrow/util/small_vector.h
+-- Installing: /home/tdhock/include/arrow/util/sort.h
+-- Installing: /home/tdhock/include/arrow/util/spaced.h
+-- Installing: /home/tdhock/include/arrow/util/stopwatch.h
+-- Installing: /home/tdhock/include/arrow/util/string.h
+-- Installing: /home/tdhock/include/arrow/util/string_builder.h
+-- Installing: /home/tdhock/include/arrow/util/task_group.h
+-- Installing: /home/tdhock/include/arrow/util/tdigest.h
+-- Installing: /home/tdhock/include/arrow/util/test_common.h
+-- Installing: /home/tdhock/include/arrow/util/thread_pool.h
+-- Installing: /home/tdhock/include/arrow/util/time.h
+-- Installing: /home/tdhock/include/arrow/util/tracing.h
+-- Installing: /home/tdhock/include/arrow/util/trie.h
+-- Installing: /home/tdhock/include/arrow/util/type_fwd.h
+-- Installing: /home/tdhock/include/arrow/util/type_traits.h
+-- Installing: /home/tdhock/include/arrow/util/ubsan.h
+-- Installing: /home/tdhock/include/arrow/util/union_util.h
+-- Installing: /home/tdhock/include/arrow/util/unreachable.h
+-- Installing: /home/tdhock/include/arrow/util/uri.h
+-- Installing: /home/tdhock/include/arrow/util/utf8.h
+-- Installing: /home/tdhock/include/arrow/util/value_parsing.h
+-- Installing: /home/tdhock/include/arrow/util/vector.h
+-- Installing: /home/tdhock/include/arrow/util/visibility.h
+-- Installing: /home/tdhock/include/arrow/util/windows_compatibility.h
+-- Installing: /home/tdhock/include/arrow/util/windows_fixup.h
+-- Installing: /home/tdhock/include/arrow/vendored/ProducerConsumerQueue.h
+-- Installing: /home/tdhock/include/arrow/vendored/datetime.h
+-- Installing: /home/tdhock/include/arrow/vendored/strptime.h
+-- Installing: /home/tdhock/include/arrow/vendored/xxhash.h
+-- Installing: /home/tdhock/include/arrow/vendored/datetime/date.h
+-- Installing: /home/tdhock/include/arrow/vendored/datetime/ios.h
+-- Installing: /home/tdhock/include/arrow/vendored/datetime/tz.h
+-- Installing: /home/tdhock/include/arrow/vendored/datetime/tz_private.h
+-- Installing: /home/tdhock/include/arrow/vendored/datetime/visibility.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/bignum-dtoa.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/bignum.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/cached-powers.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/diy-fp.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/double-conversion.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/fast-dtoa.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/fixed-dtoa.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/ieee.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/strtod.h
+-- Installing: /home/tdhock/include/arrow/vendored/double-conversion/utils.h
+-- Installing: /home/tdhock/include/arrow/vendored/pcg/pcg_extras.hpp
+-- Installing: /home/tdhock/include/arrow/vendored/pcg/pcg_random.hpp
+-- Installing: /home/tdhock/include/arrow/vendored/pcg/pcg_uint128.hpp
+-- Installing: /home/tdhock/include/arrow/vendored/portable-snippets/debug-trap.h
+-- Installing: /home/tdhock/include/arrow/vendored/portable-snippets/safe-math.h
+-- Installing: /home/tdhock/include/arrow/vendored/xxhash/xxhash.h
+-- Installing: /home/tdhock/include/arrow/ipc/api.h
+-- Installing: /home/tdhock/include/arrow/ipc/dictionary.h
+-- Installing: /home/tdhock/include/arrow/ipc/feather.h
+-- Installing: /home/tdhock/include/arrow/ipc/json_simple.h
+-- Installing: /home/tdhock/include/arrow/ipc/message.h
+-- Installing: /home/tdhock/include/arrow/ipc/options.h
+-- Installing: /home/tdhock/include/arrow/ipc/reader.h
+-- Installing: /home/tdhock/include/arrow/ipc/test_common.h
+-- Installing: /home/tdhock/include/arrow/ipc/type_fwd.h
+-- Installing: /home/tdhock/include/arrow/ipc/util.h
+-- Installing: /home/tdhock/include/arrow/ipc/writer.h
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/r(main)$ ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig R CMD INSTALL .
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Loading required package: grDevices
+Error in library(decor) : there is no package called ‘decor’
+Calls: suppressPackageStartupMessages -> withCallingHandlers -> library
+Execution halted
+*** Trying Arrow C++ found by pkg-config: /home/tdhock
+*** > Packages are both on development versions (13.0.0-SNAPSHOT, 12.0.0.9000)
+*** > If installation fails, rebuild the C++ library to match the R version
+*** > or retry with FORCE_BUNDLED_BUILD=true
+PKG_CFLAGS=-I/home/tdhock/include 
+PKG_LIBS=-L/home/tdhock/lib -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 10.1.0’
+using C++17
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c RTasks.cpp -o RTasks.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c altrep.cpp -o altrep.o
+In file included from altrep.cpp:18:
+./arrow_types.h:35:10: fatal error: arrow/csv/type_fwd.h: No such file or directory
+   35 | #include <arrow/csv/type_fwd.h>
+      |          ^~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+/home/tdhock/lib/R/etc/Makeconf:198: recipe for target 'altrep.o' failed
+make: *** [altrep.o] Error 1
+ERROR: compilation failed for package ‘arrow’
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+```
+
+The installation of the R package above fails. I guess this is because
+we used the minimal preset, which I suppose does not include
+`arrow/csv/*` files (they were not reported when running the install
+command). So below we try a non-minimal installation. Need to do conda
+install boost gflags openssl rapidjson.
+
+```
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2
+Preset CMake variables:
+
+  ARROW_BUILD_INTEGRATION="ON"
+  ARROW_BUILD_STATIC="OFF"
+  ARROW_BUILD_TESTS="ON"
+  ARROW_COMPUTE="ON"
+  ARROW_CSV="ON"
+  ARROW_DATASET="ON"
+  ARROW_EXTRA_ERROR_CONTEXT="ON"
+  ARROW_FILESYSTEM="ON"
+  ARROW_JSON="ON"
+  ARROW_WITH_RE2="OFF"
+  ARROW_WITH_UTF8PROC="OFF"
+  CMAKE_BUILD_TYPE="Debug"
+
+-- Building using CMake version: 3.22.1
+-- Arrow version: 13.0.0 (full: '13.0.0-SNAPSHOT')
+-- Arrow SO version: 1300 (full: 1300.0.0)
+-- clang-tidy 14 not found
+-- clang-format 14 not found
+-- Could NOT find ClangTools (missing: CLANG_FORMAT_BIN CLANG_TIDY_BIN) 
+-- infer not found
+-- Found cpplint executable at /home/tdhock/arrow-git/cpp/build-support/cpplint.py
+-- System processor: x86_64
+-- Arrow build warning level: CHECKIN
+-- Using ld linker
+-- Build Type: DEBUG
+-- Using CONDA approach to find dependencies
+-- Using CONDA_PREFIX for ARROW_PACKAGE_PREFIX: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Setting (unset) dependency *_ROOT variables: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- ARROW_ABSL_BUILD_VERSION: 20211102.0
+-- ARROW_ABSL_BUILD_SHA256_CHECKSUM: dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4
+-- ARROW_AWS_C_AUTH_BUILD_VERSION: v0.6.22
+-- ARROW_AWS_C_AUTH_BUILD_SHA256_CHECKSUM: 691a6b4418afcd3dc141351b6ad33fccd8e3ff84df0e9e045b42295d284ee14c
+-- ARROW_AWS_C_CAL_BUILD_VERSION: v0.5.20
+-- ARROW_AWS_C_CAL_BUILD_SHA256_CHECKSUM: acc352359bd06f8597415c366cf4ec4f00d0b0da92d637039a73323dd55b6cd0
+-- ARROW_AWS_C_COMMON_BUILD_VERSION: v0.8.9
+-- ARROW_AWS_C_COMMON_BUILD_SHA256_CHECKSUM: 2f3fbaf7c38eae5a00e2a816d09b81177f93529ae8ba1b82dc8f31407565327a
+-- ARROW_AWS_C_COMPRESSION_BUILD_VERSION: v0.2.16
+-- ARROW_AWS_C_COMPRESSION_BUILD_SHA256_CHECKSUM: 044b1dbbca431a07bde8255ef9ec443c300fc60d4c9408d4b862f65e496687f4
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_VERSION: v0.2.18
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_SHA256_CHECKSUM: 310ca617f713bf664e4c7485a3d42c1fb57813abd0107e49790d107def7cde4f
+-- ARROW_AWS_C_HTTP_BUILD_VERSION: v0.7.3
+-- ARROW_AWS_C_HTTP_BUILD_SHA256_CHECKSUM: 07e16c6bf5eba6f0dea96b6f55eae312a7c95b736f4d2e4a210000f45d8265ae
+-- ARROW_AWS_C_IO_BUILD_VERSION: v0.13.14
+-- ARROW_AWS_C_IO_BUILD_SHA256_CHECKSUM: 12b66510c3d9a4f7e9b714e9cfab2a5bf835f8b9ce2f909d20ae2a2128608c71
+-- ARROW_AWS_C_MQTT_BUILD_VERSION: v0.8.4
+-- ARROW_AWS_C_MQTT_BUILD_SHA256_CHECKSUM: 232eeac63e72883d460c686a09b98cdd811d24579affac47c5c3f696f956773f
+-- ARROW_AWS_C_S3_BUILD_VERSION: v0.2.3
+-- ARROW_AWS_C_S3_BUILD_SHA256_CHECKSUM: a00b3c9f319cd1c9aa2c3fa15098864df94b066dcba0deaccbb3caa952d902fe
+-- ARROW_AWS_C_SDKUTILS_BUILD_VERSION: v0.1.6
+-- ARROW_AWS_C_SDKUTILS_BUILD_SHA256_CHECKSUM: 8a2951344b2fb541eab1e9ca17c18a7fcbfd2aaff4cdd31d362d1fad96111b91
+-- ARROW_AWS_CHECKSUMS_BUILD_VERSION: v0.1.13
+-- ARROW_AWS_CHECKSUMS_BUILD_SHA256_CHECKSUM: 0f897686f1963253c5069a0e495b85c31635ba146cd3ac38cc2ea31eaf54694d
+-- ARROW_AWS_CRT_CPP_BUILD_VERSION: v0.18.16
+-- ARROW_AWS_CRT_CPP_BUILD_SHA256_CHECKSUM: 9e69bc1dc4b50871d1038aa9ff6ddeb4c9b28f7d6b5e5b1b69041ccf50a13483
+-- ARROW_AWS_LC_BUILD_VERSION: v1.3.0
+-- ARROW_AWS_LC_BUILD_SHA256_CHECKSUM: ae96a3567161552744fc0cae8b4d68ed88b1ec0f3d3c98700070115356da5a37
+-- ARROW_AWSSDK_BUILD_VERSION: 1.10.55
+-- ARROW_AWSSDK_BUILD_SHA256_CHECKSUM: 2d552fb1a84bef4a9b65e34aa7031851ed2aef5319e02cc6e4cb735c48aa30de
+-- ARROW_BOOST_BUILD_VERSION: 1.81.0
+-- ARROW_BOOST_BUILD_SHA256_CHECKSUM: 9e0ffae35528c35f90468997bc8d99500bf179cbae355415a89a600c38e13574
+-- ARROW_BROTLI_BUILD_VERSION: v1.0.9
+-- ARROW_BROTLI_BUILD_SHA256_CHECKSUM: f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46
+-- ARROW_BZIP2_BUILD_VERSION: 1.0.8
+-- ARROW_BZIP2_BUILD_SHA256_CHECKSUM: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
+-- ARROW_CARES_BUILD_VERSION: 1.17.2
+-- ARROW_CARES_BUILD_SHA256_CHECKSUM: 4803c844ce20ce510ef0eb83f8ea41fa24ecaae9d280c468c582d2bb25b3913d
+-- ARROW_CRC32C_BUILD_VERSION: 1.1.2
+-- ARROW_CRC32C_BUILD_SHA256_CHECKSUM: ac07840513072b7fcebda6e821068aa04889018f24e10e46181068fb214d7e56
+-- ARROW_GBENCHMARK_BUILD_VERSION: v1.7.1
+-- ARROW_GBENCHMARK_BUILD_SHA256_CHECKSUM: 6430e4092653380d9dc4ccb45a1e2dc9259d581f4866dc0759713126056bc1d7
+-- ARROW_GFLAGS_BUILD_VERSION: v2.2.2
+-- ARROW_GFLAGS_BUILD_SHA256_CHECKSUM: 34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf
+-- ARROW_GLOG_BUILD_VERSION: v0.5.0
+-- ARROW_GLOG_BUILD_SHA256_CHECKSUM: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_VERSION: v2.8.0
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_SHA256_CHECKSUM: 21fb441b5a670a18bb16b6826be8e0530888d0b94320847c538d46f5a54dddbc
+-- ARROW_GRPC_BUILD_VERSION: v1.46.3
+-- ARROW_GRPC_BUILD_SHA256_CHECKSUM: d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964
+-- ARROW_GTEST_BUILD_VERSION: 1.11.0
+-- ARROW_GTEST_BUILD_SHA256_CHECKSUM: b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+-- ARROW_JEMALLOC_BUILD_VERSION: 5.3.0
+-- ARROW_JEMALLOC_BUILD_SHA256_CHECKSUM: 2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
+-- ARROW_LZ4_BUILD_VERSION: v1.9.4
+-- ARROW_LZ4_BUILD_SHA256_CHECKSUM: 0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b
+-- ARROW_MIMALLOC_BUILD_VERSION: v2.0.6
+-- ARROW_MIMALLOC_BUILD_SHA256_CHECKSUM: 9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5
+-- ARROW_NLOHMANN_JSON_BUILD_VERSION: v3.10.5
+-- ARROW_NLOHMANN_JSON_BUILD_SHA256_CHECKSUM: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
+-- ARROW_OPENTELEMETRY_BUILD_VERSION: v1.8.1
+-- ARROW_OPENTELEMETRY_BUILD_SHA256_CHECKSUM: 3d640201594b07f08dade9cd1017bd0b59674daca26223b560b9bb6bf56264c2
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_VERSION: v0.17.0
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_SHA256_CHECKSUM: f269fbcb30e17b03caa1decd231ce826e59d7651c0f71c3b28eb5140b4bb5412
+-- ARROW_ORC_BUILD_VERSION: 1.8.3
+-- ARROW_ORC_BUILD_SHA256_CHECKSUM: a78678ec425c8129d63370cb8a9bacb54186aa66af1e2bec01ce92e7eaf72e20
+-- ARROW_PROTOBUF_BUILD_VERSION: v21.3
+-- ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM: 2f723218f6cb709ae4cdc4fb5ed56a5951fc5d466f0128ce4c946b8c78c8c49f
+-- ARROW_RAPIDJSON_BUILD_VERSION: 232389d4f1012dddec4ef84861face2d2ba85709
+-- ARROW_RAPIDJSON_BUILD_SHA256_CHECKSUM: b9290a9a6d444c8e049bd589ab804e0ccf2b05dc5984a19ed5ae75d090064806
+-- ARROW_RE2_BUILD_VERSION: 2022-06-01
+-- ARROW_RE2_BUILD_SHA256_CHECKSUM: f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f
+-- ARROW_SNAPPY_BUILD_VERSION: 1.1.9
+-- ARROW_SNAPPY_BUILD_SHA256_CHECKSUM: 75c1fbb3d618dd3a0483bff0e26d0a92b495bbe5059c8b4f1c962b478b6e06e7
+-- ARROW_SUBSTRAIT_BUILD_VERSION: v0.20.0
+-- ARROW_SUBSTRAIT_BUILD_SHA256_CHECKSUM: 5ceaa559ccef29a7825b5e5d4b5e7eed384830294f08bec913feecdd903a94cf
+-- ARROW_S2N_TLS_BUILD_VERSION: v1.3.35
+-- ARROW_S2N_TLS_BUILD_SHA256_CHECKSUM: 9d32b26e6bfcc058d98248bf8fc231537e347395dd89cf62bb432b55c5da990d
+-- ARROW_THRIFT_BUILD_VERSION: 0.16.0
+-- ARROW_THRIFT_BUILD_SHA256_CHECKSUM: f460b5c1ca30d8918ff95ea3eb6291b3951cf518553566088f3f2be8981f6209
+-- ARROW_UCX_BUILD_VERSION: 1.12.1
+-- ARROW_UCX_BUILD_SHA256_CHECKSUM: 9bef31aed0e28bf1973d28d74d9ac4f8926c43ca3b7010bd22a084e164e31b71
+-- ARROW_UTF8PROC_BUILD_VERSION: v2.7.0
+-- ARROW_UTF8PROC_BUILD_SHA256_CHECKSUM: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
+-- ARROW_XSIMD_BUILD_VERSION: 9.0.1
+-- ARROW_XSIMD_BUILD_SHA256_CHECKSUM: b1bb5f92167fd3a4f25749db0be7e61ed37e0a5d943490f3accdcd2cd2918cc0
+-- ARROW_ZLIB_BUILD_VERSION: 1.2.13
+-- ARROW_ZLIB_BUILD_SHA256_CHECKSUM: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+-- ARROW_ZSTD_BUILD_VERSION: 1.5.5
+-- ARROW_ZSTD_BUILD_SHA256_CHECKSUM: 9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4
+-- Boost include dir: /usr/include
+-- Building without OpenSSL support. Minimum OpenSSL version 1.0.2 required.
+-- Building jemalloc from source
+-- Could NOT find GTest (missing: GTest_DIR)
+-- Building gtest from source
+-- RapidJSON found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- xsimd found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found hdfs.h at: /home/tdhock/arrow-git/cpp/thirdparty/hadoop/include/hdfs.h
+-- All bundled static libraries: jemalloc::jemalloc
+-- CMAKE_C_FLAGS:   -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_CXX_FLAGS:  -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_C_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- CMAKE_CXX_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- ---------------------------------------------------------------------
+-- Arrow version:                                 13.0.0-SNAPSHOT
+-- 
+-- Build configuration summary:
+--   Generator: Ninja
+--   Build type: DEBUG
+--   Source directory: /home/tdhock/arrow-git/cpp
+--   Install prefix: /home/tdhock
+-- 
+-- Compile and link options:
+-- 
+--   ARROW_CXXFLAGS=-march=core2 [default=""]
+--       Compiler flags to append when compiling Arrow
+--   ARROW_BUILD_STATIC=OFF [default=ON]
+--       Build static libraries
+--   ARROW_BUILD_SHARED=ON [default=ON]
+--       Build shared libraries
+--   ARROW_PACKAGE_KIND="" [default=""]
+--       Arbitrary string that identifies the kind of package
+--       (for informational purposes)
+--   ARROW_GIT_ID=6d3fe6bda1c3b67b683ada2327194adeed09e9ca [default=""]
+--       The Arrow git commit id (if any)
+--   ARROW_GIT_DESCRIPTION=apache-arrow-13.0.0.dev-46-g6d3fe6bda [default=""]
+--       The Arrow git commit description (if any)
+--   ARROW_NO_DEPRECATED_API=OFF [default=OFF]
+--       Exclude deprecated APIs from build
+--   ARROW_POSITION_INDEPENDENT_CODE=ON [default=ON]
+--       Whether to create position-independent target
+--   ARROW_USE_CCACHE=ON [default=ON]
+--       Use ccache when compiling (if available)
+--   ARROW_USE_SCCACHE=ON [default=ON]
+--       Use sccache when compiling (if available),
+--       takes precedence over ccache if a storage backend is configured
+--   ARROW_USE_LD_GOLD=OFF [default=OFF]
+--       Use ld.gold for linking on Linux (if available)
+--   ARROW_USE_PRECOMPILED_HEADERS=OFF [default=OFF]
+--       Use precompiled headers when compiling
+--   ARROW_SIMD_LEVEL=SSE4_2 [default=NONE|SSE4_2|AVX2|AVX512|NEON|SVE|SVE128|SVE256|SVE512|DEFAULT]
+--       Compile-time SIMD optimization level
+--   ARROW_RUNTIME_SIMD_LEVEL=MAX [default=NONE|SSE4_2|AVX2|AVX512|MAX]
+--       Max runtime SIMD optimization level
+--   ARROW_ALTIVEC=ON [default=ON]
+--       Build with Altivec if compiler has support
+--   ARROW_RPATH_ORIGIN=OFF [default=OFF]
+--       Build Arrow libraries with RATH set to $ORIGIN
+--   ARROW_INSTALL_NAME_RPATH=ON [default=ON]
+--       Build Arrow libraries with install_name set to @rpath
+--   ARROW_GGDB_DEBUG=ON [default=ON]
+--       Pass -ggdb flag to debug builds
+--   ARROW_WITH_MUSL=OFF [default=OFF]
+--       Whether the system libc is musl or not
+-- 
+-- Test and benchmark options:
+-- 
+--   ARROW_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Arrow examples
+--   ARROW_BUILD_TESTS=ON [default=OFF]
+--       Build the Arrow googletest unit tests
+--   ARROW_ENABLE_TIMING_TESTS=ON [default=ON]
+--       Enable timing-sensitive tests
+--   ARROW_BUILD_INTEGRATION=ON [default=OFF]
+--       Build the Arrow integration test executables
+--   ARROW_BUILD_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow micro benchmarks
+--   ARROW_BUILD_BENCHMARKS_REFERENCE=OFF [default=OFF]
+--       Build the Arrow micro reference benchmarks
+--   ARROW_BUILD_OPENMP_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow benchmarks that rely on OpenMP
+--   ARROW_BUILD_DETAILED_BENCHMARKS=OFF [default=OFF]
+--       Build benchmarks that do a longer exploration of performance
+--   ARROW_TEST_LINKAGE=shared [default=shared|static]
+--       Linkage of Arrow libraries with unit tests executables.
+--   ARROW_FUZZING=OFF [default=OFF]
+--       Build Arrow Fuzzing executables
+--   ARROW_LARGE_MEMORY_TESTS=OFF [default=OFF]
+--       Enable unit tests which use large memory
+-- 
+-- Lint options:
+-- 
+--   ARROW_ONLY_LINT=OFF [default=OFF]
+--       Only define the lint and check-format targets
+--   ARROW_VERBOSE_LINT=OFF [default=OFF]
+--       If off, 'quiet' flags will be passed to linting tools
+--   ARROW_GENERATE_COVERAGE=OFF [default=OFF]
+--       Build with C++ code coverage enabled
+-- 
+-- Checks options:
+-- 
+--   ARROW_TEST_MEMCHECK=OFF [default=OFF]
+--       Run the test suite using valgrind --tool=memcheck
+--   ARROW_USE_ASAN=OFF [default=OFF]
+--       Enable Address Sanitizer checks
+--   ARROW_USE_TSAN=OFF [default=OFF]
+--       Enable Thread Sanitizer checks
+--   ARROW_USE_UBSAN=OFF [default=OFF]
+--       Enable Undefined Behavior sanitizer checks
+-- 
+-- Project component options:
+-- 
+--   ARROW_BUILD_UTILITIES=OFF [default=OFF]
+--       Build Arrow commandline utilities
+--   ARROW_COMPUTE=ON [default=OFF]
+--       Build all Arrow Compute kernels
+--   ARROW_CSV=ON [default=OFF]
+--       Build the Arrow CSV Parser Module
+--   ARROW_CUDA=OFF [default=OFF]
+--       Build the Arrow CUDA extensions (requires CUDA toolkit)
+--   ARROW_DATASET=ON [default=OFF]
+--       Build the Arrow Dataset Modules
+--   ARROW_FILESYSTEM=ON [default=OFF]
+--       Build the Arrow Filesystem Layer
+--   ARROW_FLIGHT=OFF [default=OFF]
+--       Build the Arrow Flight RPC System (requires GRPC, Protocol Buffers)
+--   ARROW_FLIGHT_SQL=OFF [default=OFF]
+--       Build the Arrow Flight SQL extension
+--   ARROW_GANDIVA=OFF [default=OFF]
+--       Build the Gandiva libraries
+--   ARROW_GCS=OFF [default=OFF]
+--       Build Arrow with GCS support (requires the GCloud SDK for C++)
+--   ARROW_HDFS=OFF [default=OFF]
+--       Build the Arrow HDFS bridge
+--   ARROW_IPC=ON [default=ON]
+--       Build the Arrow IPC extensions
+--   ARROW_JEMALLOC=ON [default=ON]
+--       Build the Arrow jemalloc-based allocator
+--   ARROW_JSON=ON [default=OFF]
+--       Build Arrow with JSON support (requires RapidJSON)
+--   ARROW_MIMALLOC=OFF [default=OFF]
+--       Build the Arrow mimalloc-based allocator
+--   ARROW_PARQUET=OFF [default=OFF]
+--       Build the Parquet libraries
+--   ARROW_ORC=OFF [default=OFF]
+--       Build the Arrow ORC adapter
+--   ARROW_PYTHON=OFF [default=OFF]
+--       Build some components needed by PyArrow.
+--       (This is a deprecated option. Use CMake presets instead.)
+--   ARROW_S3=OFF [default=OFF]
+--       Build Arrow with S3 support (requires the AWS SDK for C++)
+--   ARROW_SKYHOOK=OFF [default=OFF]
+--       Build the Skyhook libraries
+--   ARROW_SUBSTRAIT=OFF [default=OFF]
+--       Build the Arrow Substrait Consumer Module
+--   ARROW_ACERO=ON [default=OFF]
+--       Build the Arrow Acero Engine Module
+--   ARROW_TENSORFLOW=OFF [default=OFF]
+--       Build Arrow with TensorFlow support enabled
+--   ARROW_TESTING=ON [default=OFF]
+--       Build the Arrow testing libraries
+-- 
+-- Thirdparty toolchain options:
+-- 
+--   ARROW_DEPENDENCY_SOURCE=CONDA [default=AUTO|BUNDLED|SYSTEM|CONDA|VCPKG|BREW]
+--       Method to use for acquiring arrow's build dependencies
+--   ARROW_VERBOSE_THIRDPARTY_BUILD=OFF [default=OFF]
+--       Show output from ExternalProjects rather than just logging to files
+--   ARROW_DEPENDENCY_USE_SHARED=ON [default=ON]
+--       Link to shared libraries
+--   ARROW_BOOST_USE_SHARED=ON [default=ON]
+--       Rely on Boost shared libraries where relevant
+--   ARROW_BROTLI_USE_SHARED=ON [default=ON]
+--       Rely on Brotli shared libraries where relevant
+--   ARROW_BZ2_USE_SHARED=ON [default=ON]
+--       Rely on Bz2 shared libraries where relevant
+--   ARROW_GFLAGS_USE_SHARED=ON [default=ON]
+--       Rely on GFlags shared libraries where relevant
+--   ARROW_GRPC_USE_SHARED=ON [default=ON]
+--       Rely on gRPC shared libraries where relevant
+--   ARROW_JEMALLOC_USE_SHARED=OFF [default=ON]
+--       Rely on jemalloc shared libraries where relevant
+--   ARROW_LZ4_USE_SHARED=ON [default=ON]
+--       Rely on lz4 shared libraries where relevant
+--   ARROW_OPENSSL_USE_SHARED=ON [default=ON]
+--       Rely on OpenSSL shared libraries where relevant
+--   ARROW_PROTOBUF_USE_SHARED=ON [default=ON]
+--       Rely on Protocol Buffers shared libraries where relevant
+--   ARROW_SNAPPY_USE_SHARED=ON [default=ON]
+--       Rely on snappy shared libraries where relevant
+--   ARROW_THRIFT_USE_SHARED=ON [default=ON]
+--       Rely on thrift shared libraries where relevant
+--   ARROW_UTF8PROC_USE_SHARED=ON [default=ON]
+--       Rely on utf8proc shared libraries where relevant
+--   ARROW_ZSTD_USE_SHARED=ON [default=ON]
+--       Rely on zstd shared libraries where relevant
+--   ARROW_USE_GLOG=OFF [default=OFF]
+--       Build libraries with glog support for pluggable logging
+--   ARROW_WITH_BACKTRACE=ON [default=ON]
+--       Build with backtrace support
+--   ARROW_WITH_OPENTELEMETRY=OFF [default=OFF]
+--       Build libraries with OpenTelemetry support for distributed tracing
+--   ARROW_WITH_BROTLI=OFF [default=OFF]
+--       Build with Brotli compression
+--   ARROW_WITH_BZ2=OFF [default=OFF]
+--       Build with BZ2 compression
+--   ARROW_WITH_LZ4=OFF [default=OFF]
+--       Build with lz4 compression
+--   ARROW_WITH_SNAPPY=OFF [default=OFF]
+--       Build with Snappy compression
+--   ARROW_WITH_ZLIB=OFF [default=OFF]
+--       Build with zlib compression
+--   ARROW_WITH_ZSTD=OFF [default=OFF]
+--       Build with zstd compression
+--   ARROW_WITH_UCX=OFF [default=OFF]
+--       Build with UCX transport for Arrow Flight
+--       (only used if ARROW_FLIGHT is ON)
+--   ARROW_WITH_UTF8PROC=OFF [default=ON]
+--       Build with support for Unicode properties using the utf8proc library
+--       (only used if ARROW_COMPUTE is ON or ARROW_GANDIVA is ON)
+--   ARROW_WITH_RE2=OFF [default=ON]
+--       Build with support for regular expressions using the re2 library
+--       (only used if ARROW_COMPUTE or ARROW_GANDIVA is ON)
+-- 
+-- Parquet options:
+-- 
+--   PARQUET_MINIMAL_DEPENDENCY=OFF [default=OFF]
+--       Depend only on Thirdparty headers to build libparquet.
+--       Always OFF if building binaries
+--   PARQUET_BUILD_EXECUTABLES=OFF [default=OFF]
+--       Build the Parquet executable CLI tools. Requires static libraries to be built.
+--   PARQUET_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Parquet examples. Requires static libraries to be built.
+--   PARQUET_REQUIRE_ENCRYPTION=OFF [default=OFF]
+--       Build support for encryption. Fail if OpenSSL is not found
+-- 
+-- Gandiva options:
+-- 
+--   ARROW_GANDIVA_STATIC_LIBSTDCPP=OFF [default=OFF]
+--       Include -static-libstdc++ -static-libgcc when linking with
+--       Gandiva static libraries
+--   ARROW_GANDIVA_PC_CXX_FLAGS="" [default=""]
+--       Compiler flags to append when pre-compiling Gandiva operations
+-- 
+-- Advanced developer options:
+-- 
+--   ARROW_EXTRA_ERROR_CONTEXT=ON [default=OFF]
+--       Compile with extra error context (line numbers, code)
+--   ARROW_OPTIONAL_INSTALL=OFF [default=OFF]
+--       If enabled install ONLY targets that have already been built. Please be
+--       advised that if this is enabled 'install' will fail silently on components
+--       that have not been built
+--   ARROW_GDB_INSTALL_DIR="" [default=""]
+--       Use a custom install directory for GDB plugin.
+--       In general, you don't need to specify this because the default
+--       (CMAKE_INSTALL_FULL_BINDIR on Windows, CMAKE_INSTALL_FULL_LIBDIR otherwise)
+--       is reasonable.
+--   Outputting build configuration summary to /home/tdhock/arrow-git/cpp/build/cmake_summary.json
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/tdhock/arrow-git/cpp/build
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cmake --build .
+[0/1] Re-running CMake...
+-- Building using CMake version: 3.22.1
+-- Arrow version: 13.0.0 (full: '13.0.0-SNAPSHOT')
+-- Arrow SO version: 1300 (full: 1300.0.0)
+-- clang-tidy 14 not found
+-- clang-format 14 not found
+-- Could NOT find ClangTools (missing: CLANG_FORMAT_BIN CLANG_TIDY_BIN) 
+-- infer not found
+-- Found cpplint executable at /home/tdhock/arrow-git/cpp/build-support/cpplint.py
+-- System processor: x86_64
+-- Arrow build warning level: CHECKIN
+-- Using ld linker
+-- Build Type: DEBUG
+-- Using CONDA approach to find dependencies
+-- Using CONDA_PREFIX for ARROW_PACKAGE_PREFIX: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Setting (unset) dependency *_ROOT variables: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- ARROW_ABSL_BUILD_VERSION: 20211102.0
+-- ARROW_ABSL_BUILD_SHA256_CHECKSUM: dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4
+-- ARROW_AWS_C_AUTH_BUILD_VERSION: v0.6.22
+-- ARROW_AWS_C_AUTH_BUILD_SHA256_CHECKSUM: 691a6b4418afcd3dc141351b6ad33fccd8e3ff84df0e9e045b42295d284ee14c
+-- ARROW_AWS_C_CAL_BUILD_VERSION: v0.5.20
+-- ARROW_AWS_C_CAL_BUILD_SHA256_CHECKSUM: acc352359bd06f8597415c366cf4ec4f00d0b0da92d637039a73323dd55b6cd0
+-- ARROW_AWS_C_COMMON_BUILD_VERSION: v0.8.9
+-- ARROW_AWS_C_COMMON_BUILD_SHA256_CHECKSUM: 2f3fbaf7c38eae5a00e2a816d09b81177f93529ae8ba1b82dc8f31407565327a
+-- ARROW_AWS_C_COMPRESSION_BUILD_VERSION: v0.2.16
+-- ARROW_AWS_C_COMPRESSION_BUILD_SHA256_CHECKSUM: 044b1dbbca431a07bde8255ef9ec443c300fc60d4c9408d4b862f65e496687f4
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_VERSION: v0.2.18
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_SHA256_CHECKSUM: 310ca617f713bf664e4c7485a3d42c1fb57813abd0107e49790d107def7cde4f
+-- ARROW_AWS_C_HTTP_BUILD_VERSION: v0.7.3
+-- ARROW_AWS_C_HTTP_BUILD_SHA256_CHECKSUM: 07e16c6bf5eba6f0dea96b6f55eae312a7c95b736f4d2e4a210000f45d8265ae
+-- ARROW_AWS_C_IO_BUILD_VERSION: v0.13.14
+-- ARROW_AWS_C_IO_BUILD_SHA256_CHECKSUM: 12b66510c3d9a4f7e9b714e9cfab2a5bf835f8b9ce2f909d20ae2a2128608c71
+-- ARROW_AWS_C_MQTT_BUILD_VERSION: v0.8.4
+-- ARROW_AWS_C_MQTT_BUILD_SHA256_CHECKSUM: 232eeac63e72883d460c686a09b98cdd811d24579affac47c5c3f696f956773f
+-- ARROW_AWS_C_S3_BUILD_VERSION: v0.2.3
+-- ARROW_AWS_C_S3_BUILD_SHA256_CHECKSUM: a00b3c9f319cd1c9aa2c3fa15098864df94b066dcba0deaccbb3caa952d902fe
+-- ARROW_AWS_C_SDKUTILS_BUILD_VERSION: v0.1.6
+-- ARROW_AWS_C_SDKUTILS_BUILD_SHA256_CHECKSUM: 8a2951344b2fb541eab1e9ca17c18a7fcbfd2aaff4cdd31d362d1fad96111b91
+-- ARROW_AWS_CHECKSUMS_BUILD_VERSION: v0.1.13
+-- ARROW_AWS_CHECKSUMS_BUILD_SHA256_CHECKSUM: 0f897686f1963253c5069a0e495b85c31635ba146cd3ac38cc2ea31eaf54694d
+-- ARROW_AWS_CRT_CPP_BUILD_VERSION: v0.18.16
+-- ARROW_AWS_CRT_CPP_BUILD_SHA256_CHECKSUM: 9e69bc1dc4b50871d1038aa9ff6ddeb4c9b28f7d6b5e5b1b69041ccf50a13483
+-- ARROW_AWS_LC_BUILD_VERSION: v1.3.0
+-- ARROW_AWS_LC_BUILD_SHA256_CHECKSUM: ae96a3567161552744fc0cae8b4d68ed88b1ec0f3d3c98700070115356da5a37
+-- ARROW_AWSSDK_BUILD_VERSION: 1.10.55
+-- ARROW_AWSSDK_BUILD_SHA256_CHECKSUM: 2d552fb1a84bef4a9b65e34aa7031851ed2aef5319e02cc6e4cb735c48aa30de
+-- ARROW_BOOST_BUILD_VERSION: 1.81.0
+-- ARROW_BOOST_BUILD_SHA256_CHECKSUM: 9e0ffae35528c35f90468997bc8d99500bf179cbae355415a89a600c38e13574
+-- ARROW_BROTLI_BUILD_VERSION: v1.0.9
+-- ARROW_BROTLI_BUILD_SHA256_CHECKSUM: f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46
+-- ARROW_BZIP2_BUILD_VERSION: 1.0.8
+-- ARROW_BZIP2_BUILD_SHA256_CHECKSUM: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
+-- ARROW_CARES_BUILD_VERSION: 1.17.2
+-- ARROW_CARES_BUILD_SHA256_CHECKSUM: 4803c844ce20ce510ef0eb83f8ea41fa24ecaae9d280c468c582d2bb25b3913d
+-- ARROW_CRC32C_BUILD_VERSION: 1.1.2
+-- ARROW_CRC32C_BUILD_SHA256_CHECKSUM: ac07840513072b7fcebda6e821068aa04889018f24e10e46181068fb214d7e56
+-- ARROW_GBENCHMARK_BUILD_VERSION: v1.7.1
+-- ARROW_GBENCHMARK_BUILD_SHA256_CHECKSUM: 6430e4092653380d9dc4ccb45a1e2dc9259d581f4866dc0759713126056bc1d7
+-- ARROW_GFLAGS_BUILD_VERSION: v2.2.2
+-- ARROW_GFLAGS_BUILD_SHA256_CHECKSUM: 34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf
+-- ARROW_GLOG_BUILD_VERSION: v0.5.0
+-- ARROW_GLOG_BUILD_SHA256_CHECKSUM: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_VERSION: v2.8.0
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_SHA256_CHECKSUM: 21fb441b5a670a18bb16b6826be8e0530888d0b94320847c538d46f5a54dddbc
+-- ARROW_GRPC_BUILD_VERSION: v1.46.3
+-- ARROW_GRPC_BUILD_SHA256_CHECKSUM: d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964
+-- ARROW_GTEST_BUILD_VERSION: 1.11.0
+-- ARROW_GTEST_BUILD_SHA256_CHECKSUM: b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+-- ARROW_JEMALLOC_BUILD_VERSION: 5.3.0
+-- ARROW_JEMALLOC_BUILD_SHA256_CHECKSUM: 2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
+-- ARROW_LZ4_BUILD_VERSION: v1.9.4
+-- ARROW_LZ4_BUILD_SHA256_CHECKSUM: 0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b
+-- ARROW_MIMALLOC_BUILD_VERSION: v2.0.6
+-- ARROW_MIMALLOC_BUILD_SHA256_CHECKSUM: 9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5
+-- ARROW_NLOHMANN_JSON_BUILD_VERSION: v3.10.5
+-- ARROW_NLOHMANN_JSON_BUILD_SHA256_CHECKSUM: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
+-- ARROW_OPENTELEMETRY_BUILD_VERSION: v1.8.1
+-- ARROW_OPENTELEMETRY_BUILD_SHA256_CHECKSUM: 3d640201594b07f08dade9cd1017bd0b59674daca26223b560b9bb6bf56264c2
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_VERSION: v0.17.0
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_SHA256_CHECKSUM: f269fbcb30e17b03caa1decd231ce826e59d7651c0f71c3b28eb5140b4bb5412
+-- ARROW_ORC_BUILD_VERSION: 1.8.3
+-- ARROW_ORC_BUILD_SHA256_CHECKSUM: a78678ec425c8129d63370cb8a9bacb54186aa66af1e2bec01ce92e7eaf72e20
+-- ARROW_PROTOBUF_BUILD_VERSION: v21.3
+-- ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM: 2f723218f6cb709ae4cdc4fb5ed56a5951fc5d466f0128ce4c946b8c78c8c49f
+-- ARROW_RAPIDJSON_BUILD_VERSION: 232389d4f1012dddec4ef84861face2d2ba85709
+-- ARROW_RAPIDJSON_BUILD_SHA256_CHECKSUM: b9290a9a6d444c8e049bd589ab804e0ccf2b05dc5984a19ed5ae75d090064806
+-- ARROW_RE2_BUILD_VERSION: 2022-06-01
+-- ARROW_RE2_BUILD_SHA256_CHECKSUM: f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f
+-- ARROW_SNAPPY_BUILD_VERSION: 1.1.9
+-- ARROW_SNAPPY_BUILD_SHA256_CHECKSUM: 75c1fbb3d618dd3a0483bff0e26d0a92b495bbe5059c8b4f1c962b478b6e06e7
+-- ARROW_SUBSTRAIT_BUILD_VERSION: v0.20.0
+-- ARROW_SUBSTRAIT_BUILD_SHA256_CHECKSUM: 5ceaa559ccef29a7825b5e5d4b5e7eed384830294f08bec913feecdd903a94cf
+-- ARROW_S2N_TLS_BUILD_VERSION: v1.3.35
+-- ARROW_S2N_TLS_BUILD_SHA256_CHECKSUM: 9d32b26e6bfcc058d98248bf8fc231537e347395dd89cf62bb432b55c5da990d
+-- ARROW_THRIFT_BUILD_VERSION: 0.16.0
+-- ARROW_THRIFT_BUILD_SHA256_CHECKSUM: f460b5c1ca30d8918ff95ea3eb6291b3951cf518553566088f3f2be8981f6209
+-- ARROW_UCX_BUILD_VERSION: 1.12.1
+-- ARROW_UCX_BUILD_SHA256_CHECKSUM: 9bef31aed0e28bf1973d28d74d9ac4f8926c43ca3b7010bd22a084e164e31b71
+-- ARROW_UTF8PROC_BUILD_VERSION: v2.7.0
+-- ARROW_UTF8PROC_BUILD_SHA256_CHECKSUM: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
+-- ARROW_XSIMD_BUILD_VERSION: 9.0.1
+-- ARROW_XSIMD_BUILD_SHA256_CHECKSUM: b1bb5f92167fd3a4f25749db0be7e61ed37e0a5d943490f3accdcd2cd2918cc0
+-- ARROW_ZLIB_BUILD_VERSION: 1.2.13
+-- ARROW_ZLIB_BUILD_SHA256_CHECKSUM: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+-- ARROW_ZSTD_BUILD_VERSION: 1.5.5
+-- ARROW_ZSTD_BUILD_SHA256_CHECKSUM: 9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4
+-- Boost include dir: /usr/include
+-- Building without OpenSSL support. Minimum OpenSSL version 1.0.2 required.
+-- Building jemalloc from source
+-- Could NOT find GTest (missing: GTest_DIR)
+-- Building gtest from source
+-- RapidJSON found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- xsimd found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found hdfs.h at: /home/tdhock/arrow-git/cpp/thirdparty/hadoop/include/hdfs.h
+-- All bundled static libraries: jemalloc::jemalloc
+-- CMAKE_C_FLAGS:   -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_CXX_FLAGS:  -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -msse4.2 -march=core2
+-- CMAKE_C_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- CMAKE_CXX_FLAGS_DEBUG: -g -Werror -O0 -ggdb
+-- ---------------------------------------------------------------------
+-- Arrow version:                                 13.0.0-SNAPSHOT
+-- 
+-- Build configuration summary:
+--   Generator: Ninja
+--   Build type: DEBUG
+--   Source directory: /home/tdhock/arrow-git/cpp
+--   Install prefix: /home/tdhock
+-- 
+-- Compile and link options:
+-- 
+--   ARROW_CXXFLAGS=-march=core2 [default=""]
+--       Compiler flags to append when compiling Arrow
+--   ARROW_BUILD_STATIC=OFF [default=ON]
+--       Build static libraries
+--   ARROW_BUILD_SHARED=ON [default=ON]
+--       Build shared libraries
+--   ARROW_PACKAGE_KIND="" [default=""]
+--       Arbitrary string that identifies the kind of package
+--       (for informational purposes)
+--   ARROW_GIT_ID=6d3fe6bda1c3b67b683ada2327194adeed09e9ca [default=""]
+--       The Arrow git commit id (if any)
+--   ARROW_GIT_DESCRIPTION=apache-arrow-13.0.0.dev-46-g6d3fe6bda [default=""]
+--       The Arrow git commit description (if any)
+--   ARROW_NO_DEPRECATED_API=OFF [default=OFF]
+--       Exclude deprecated APIs from build
+--   ARROW_POSITION_INDEPENDENT_CODE=ON [default=ON]
+--       Whether to create position-independent target
+--   ARROW_USE_CCACHE=ON [default=ON]
+--       Use ccache when compiling (if available)
+--   ARROW_USE_SCCACHE=ON [default=ON]
+--       Use sccache when compiling (if available),
+--       takes precedence over ccache if a storage backend is configured
+--   ARROW_USE_LD_GOLD=OFF [default=OFF]
+--       Use ld.gold for linking on Linux (if available)
+--   ARROW_USE_PRECOMPILED_HEADERS=OFF [default=OFF]
+--       Use precompiled headers when compiling
+--   ARROW_SIMD_LEVEL=SSE4_2 [default=NONE|SSE4_2|AVX2|AVX512|NEON|SVE|SVE128|SVE256|SVE512|DEFAULT]
+--       Compile-time SIMD optimization level
+--   ARROW_RUNTIME_SIMD_LEVEL=MAX [default=NONE|SSE4_2|AVX2|AVX512|MAX]
+--       Max runtime SIMD optimization level
+--   ARROW_ALTIVEC=ON [default=ON]
+--       Build with Altivec if compiler has support
+--   ARROW_RPATH_ORIGIN=OFF [default=OFF]
+--       Build Arrow libraries with RATH set to $ORIGIN
+--   ARROW_INSTALL_NAME_RPATH=ON [default=ON]
+--       Build Arrow libraries with install_name set to @rpath
+--   ARROW_GGDB_DEBUG=ON [default=ON]
+--       Pass -ggdb flag to debug builds
+--   ARROW_WITH_MUSL=OFF [default=OFF]
+--       Whether the system libc is musl or not
+-- 
+-- Test and benchmark options:
+-- 
+--   ARROW_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Arrow examples
+--   ARROW_BUILD_TESTS=ON [default=OFF]
+--       Build the Arrow googletest unit tests
+--   ARROW_ENABLE_TIMING_TESTS=ON [default=ON]
+--       Enable timing-sensitive tests
+--   ARROW_BUILD_INTEGRATION=ON [default=OFF]
+--       Build the Arrow integration test executables
+--   ARROW_BUILD_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow micro benchmarks
+--   ARROW_BUILD_BENCHMARKS_REFERENCE=OFF [default=OFF]
+--       Build the Arrow micro reference benchmarks
+--   ARROW_BUILD_OPENMP_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow benchmarks that rely on OpenMP
+--   ARROW_BUILD_DETAILED_BENCHMARKS=OFF [default=OFF]
+--       Build benchmarks that do a longer exploration of performance
+--   ARROW_TEST_LINKAGE=shared [default=shared|static]
+--       Linkage of Arrow libraries with unit tests executables.
+--   ARROW_FUZZING=OFF [default=OFF]
+--       Build Arrow Fuzzing executables
+--   ARROW_LARGE_MEMORY_TESTS=OFF [default=OFF]
+--       Enable unit tests which use large memory
+-- 
+-- Lint options:
+-- 
+--   ARROW_ONLY_LINT=OFF [default=OFF]
+--       Only define the lint and check-format targets
+--   ARROW_VERBOSE_LINT=OFF [default=OFF]
+--       If off, 'quiet' flags will be passed to linting tools
+--   ARROW_GENERATE_COVERAGE=OFF [default=OFF]
+--       Build with C++ code coverage enabled
+-- 
+-- Checks options:
+-- 
+--   ARROW_TEST_MEMCHECK=OFF [default=OFF]
+--       Run the test suite using valgrind --tool=memcheck
+--   ARROW_USE_ASAN=OFF [default=OFF]
+--       Enable Address Sanitizer checks
+--   ARROW_USE_TSAN=OFF [default=OFF]
+--       Enable Thread Sanitizer checks
+--   ARROW_USE_UBSAN=OFF [default=OFF]
+--       Enable Undefined Behavior sanitizer checks
+-- 
+-- Project component options:
+-- 
+--   ARROW_BUILD_UTILITIES=OFF [default=OFF]
+--       Build Arrow commandline utilities
+--   ARROW_COMPUTE=ON [default=OFF]
+--       Build all Arrow Compute kernels
+--   ARROW_CSV=ON [default=OFF]
+--       Build the Arrow CSV Parser Module
+--   ARROW_CUDA=OFF [default=OFF]
+--       Build the Arrow CUDA extensions (requires CUDA toolkit)
+--   ARROW_DATASET=ON [default=OFF]
+--       Build the Arrow Dataset Modules
+--   ARROW_FILESYSTEM=ON [default=OFF]
+--       Build the Arrow Filesystem Layer
+--   ARROW_FLIGHT=OFF [default=OFF]
+--       Build the Arrow Flight RPC System (requires GRPC, Protocol Buffers)
+--   ARROW_FLIGHT_SQL=OFF [default=OFF]
+--       Build the Arrow Flight SQL extension
+--   ARROW_GANDIVA=OFF [default=OFF]
+--       Build the Gandiva libraries
+--   ARROW_GCS=OFF [default=OFF]
+--       Build Arrow with GCS support (requires the GCloud SDK for C++)
+--   ARROW_HDFS=OFF [default=OFF]
+--       Build the Arrow HDFS bridge
+--   ARROW_IPC=ON [default=ON]
+--       Build the Arrow IPC extensions
+--   ARROW_JEMALLOC=ON [default=ON]
+--       Build the Arrow jemalloc-based allocator
+--   ARROW_JSON=ON [default=OFF]
+--       Build Arrow with JSON support (requires RapidJSON)
+--   ARROW_MIMALLOC=OFF [default=OFF]
+--       Build the Arrow mimalloc-based allocator
+--   ARROW_PARQUET=OFF [default=OFF]
+--       Build the Parquet libraries
+--   ARROW_ORC=OFF [default=OFF]
+--       Build the Arrow ORC adapter
+--   ARROW_PYTHON=OFF [default=OFF]
+--       Build some components needed by PyArrow.
+--       (This is a deprecated option. Use CMake presets instead.)
+--   ARROW_S3=OFF [default=OFF]
+--       Build Arrow with S3 support (requires the AWS SDK for C++)
+--   ARROW_SKYHOOK=OFF [default=OFF]
+--       Build the Skyhook libraries
+--   ARROW_SUBSTRAIT=OFF [default=OFF]
+--       Build the Arrow Substrait Consumer Module
+--   ARROW_ACERO=ON [default=OFF]
+--       Build the Arrow Acero Engine Module
+--   ARROW_TENSORFLOW=OFF [default=OFF]
+--       Build Arrow with TensorFlow support enabled
+--   ARROW_TESTING=ON [default=OFF]
+--       Build the Arrow testing libraries
+-- 
+-- Thirdparty toolchain options:
+-- 
+--   ARROW_DEPENDENCY_SOURCE=CONDA [default=AUTO|BUNDLED|SYSTEM|CONDA|VCPKG|BREW]
+--       Method to use for acquiring arrow's build dependencies
+--   ARROW_VERBOSE_THIRDPARTY_BUILD=OFF [default=OFF]
+--       Show output from ExternalProjects rather than just logging to files
+--   ARROW_DEPENDENCY_USE_SHARED=ON [default=ON]
+--       Link to shared libraries
+--   ARROW_BOOST_USE_SHARED=ON [default=ON]
+--       Rely on Boost shared libraries where relevant
+--   ARROW_BROTLI_USE_SHARED=ON [default=ON]
+--       Rely on Brotli shared libraries where relevant
+--   ARROW_BZ2_USE_SHARED=ON [default=ON]
+--       Rely on Bz2 shared libraries where relevant
+--   ARROW_GFLAGS_USE_SHARED=ON [default=ON]
+--       Rely on GFlags shared libraries where relevant
+--   ARROW_GRPC_USE_SHARED=ON [default=ON]
+--       Rely on gRPC shared libraries where relevant
+--   ARROW_JEMALLOC_USE_SHARED=OFF [default=ON]
+--       Rely on jemalloc shared libraries where relevant
+--   ARROW_LZ4_USE_SHARED=ON [default=ON]
+--       Rely on lz4 shared libraries where relevant
+--   ARROW_OPENSSL_USE_SHARED=ON [default=ON]
+--       Rely on OpenSSL shared libraries where relevant
+--   ARROW_PROTOBUF_USE_SHARED=ON [default=ON]
+--       Rely on Protocol Buffers shared libraries where relevant
+--   ARROW_SNAPPY_USE_SHARED=ON [default=ON]
+--       Rely on snappy shared libraries where relevant
+--   ARROW_THRIFT_USE_SHARED=ON [default=ON]
+--       Rely on thrift shared libraries where relevant
+--   ARROW_UTF8PROC_USE_SHARED=ON [default=ON]
+--       Rely on utf8proc shared libraries where relevant
+--   ARROW_ZSTD_USE_SHARED=ON [default=ON]
+--       Rely on zstd shared libraries where relevant
+--   ARROW_USE_GLOG=OFF [default=OFF]
+--       Build libraries with glog support for pluggable logging
+--   ARROW_WITH_BACKTRACE=ON [default=ON]
+--       Build with backtrace support
+--   ARROW_WITH_OPENTELEMETRY=OFF [default=OFF]
+--       Build libraries with OpenTelemetry support for distributed tracing
+--   ARROW_WITH_BROTLI=OFF [default=OFF]
+--       Build with Brotli compression
+--   ARROW_WITH_BZ2=OFF [default=OFF]
+--       Build with BZ2 compression
+--   ARROW_WITH_LZ4=OFF [default=OFF]
+--       Build with lz4 compression
+--   ARROW_WITH_SNAPPY=OFF [default=OFF]
+--       Build with Snappy compression
+--   ARROW_WITH_ZLIB=OFF [default=OFF]
+--       Build with zlib compression
+--   ARROW_WITH_ZSTD=OFF [default=OFF]
+--       Build with zstd compression
+--   ARROW_WITH_UCX=OFF [default=OFF]
+--       Build with UCX transport for Arrow Flight
+--       (only used if ARROW_FLIGHT is ON)
+--   ARROW_WITH_UTF8PROC=OFF [default=ON]
+--       Build with support for Unicode properties using the utf8proc library
+--       (only used if ARROW_COMPUTE is ON or ARROW_GANDIVA is ON)
+--   ARROW_WITH_RE2=OFF [default=ON]
+--       Build with support for regular expressions using the re2 library
+--       (only used if ARROW_COMPUTE or ARROW_GANDIVA is ON)
+-- 
+-- Parquet options:
+-- 
+--   PARQUET_MINIMAL_DEPENDENCY=OFF [default=OFF]
+--       Depend only on Thirdparty headers to build libparquet.
+--       Always OFF if building binaries
+--   PARQUET_BUILD_EXECUTABLES=OFF [default=OFF]
+--       Build the Parquet executable CLI tools. Requires static libraries to be built.
+--   PARQUET_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Parquet examples. Requires static libraries to be built.
+--   PARQUET_REQUIRE_ENCRYPTION=OFF [default=OFF]
+--       Build support for encryption. Fail if OpenSSL is not found
+-- 
+-- Gandiva options:
+-- 
+--   ARROW_GANDIVA_STATIC_LIBSTDCPP=OFF [default=OFF]
+--       Include -static-libstdc++ -static-libgcc when linking with
+--       Gandiva static libraries
+--   ARROW_GANDIVA_PC_CXX_FLAGS="" [default=""]
+--       Compiler flags to append when pre-compiling Gandiva operations
+-- 
+-- Advanced developer options:
+-- 
+--   ARROW_EXTRA_ERROR_CONTEXT=ON [default=OFF]
+--       Compile with extra error context (line numbers, code)
+--   ARROW_OPTIONAL_INSTALL=OFF [default=OFF]
+--       If enabled install ONLY targets that have already been built. Please be
+--       advised that if this is enabled 'install' will fail silently on components
+--       that have not been built
+--   ARROW_GDB_INSTALL_DIR="" [default=""]
+--       Use a custom install directory for GDB plugin.
+--       In general, you don't need to specify this because the default
+--       (CMAKE_INSTALL_FULL_BINDIR on Windows, CMAKE_INSTALL_FULL_LIBDIR otherwise)
+--       is reasonable.
+--   Outputting build configuration summary to /home/tdhock/arrow-git/cpp/build/cmake_summary.json
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/tdhock/arrow-git/cpp/build
+[1/562] Creating directories for 'jemalloc_ep'
+[2/562] Creating directories for 'googletest_ep'
+[3/562] Performing download step (download, verify and extract) for 'jemalloc_ep'
+[4/562] No update step for 'jemalloc_ep'
+[5/562] Performing patch step for 'jemalloc_ep'
+[6/562] Performing download step (download, verify and extract) for 'googletest_ep'
+[7/562] No update step for 'googletest_ep'
+[8/562] No patch step for 'googletest_ep'
+...
+out of memory/freeze
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ cmake --build .
+
+[1/310] Building CXX object src/arrow/CMakeFiles/arrow-extension-type-test.dir/extension_type_test.cc.o
+[2/310] Building CXX object src/arrow/CMakeFiles/arrow-array-test.dir/array/array_binary_test.cc.o
+...
+```
+
+Looks like two processors are being used for compilation. If freeze
+again, we can maybe try using only one?
