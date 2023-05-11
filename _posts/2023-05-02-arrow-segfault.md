@@ -10228,4 +10228,689 @@ ERROR: compilation failed for package ‘arrow’
 ```
 
 Above shows that progress has been made but there is still some
-parquet functionality missing.
+parquet functionality missing. Or is it? github search says that
+ParquetFragmentScanOptions is defined in
+arrow/dataset/file_parquet.cc, and that is included from
+arrow/dataset/api.h if `ARROW_PARQUET` env var is defined, so the
+command line below works, is this a bug with the arrow build system?
+
+```
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/r/src(main)$ g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_PARQUET -DARROW_CSV -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -I/usr/local/include    -fpic  -g -O2  -c dataset.cpp -o dataset.o
+```
+
+At least I can work-around by putting the following in `~/.R/Makevars`:
+
+```
+CPPFLAGS=-DARROW_PARQUET -DARROW_CSV
+```
+
+Then to get the linking to work properly I had to add some flags:
+
+```
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/r/src(main)$ g++ -std=gnu++17 -shared -L/home/tdhock/lib/R/lib -L/usr/local/lib -o arrow.so RTasks.o altrep.o array.o array_to_vector.o arraydata.o arrowExports.o bridge.o buffer.o chunkedarray.o compression.o compute-exec.o compute.o config.o csv.o dataset.o datatype.o expression.o extension-impl.o feather.o field.o filesystem.o io.o json.o memorypool.o message.o parquet.o r_to_arrow.o recordbatch.o recordbatchreader.o recordbatchwriter.o safe-call-into-r-impl.o scalar.o schema.o symbols.o table.o threadpool.o type_infer.o -L/home/tdhock/lib -Wl,-rpath=$HOME/lib -L$CONDA_PREFIX/lib -Wl,-rpath=$CONDA_PREFIX/lib -larrow_acero -larrow_dataset -lparquet -larrow -L/home/tdhock/lib/R/lib -lR -lthrift && ldd arrow.so |grep not 
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libstdc++.so: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libstdc++.so: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+```
+
+This builds, links, and running still gives segfault:
+
+```
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/r/src(main)$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ..
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Loading required package: grDevices
+Error in library(decor) : there is no package called ‘decor’
+Calls: suppressPackageStartupMessages -> withCallingHandlers -> library
+Execution halted
+*** Trying Arrow C++ found by pkg-config: /home/tdhock
+*** > Packages are both on development versions (13.0.0-SNAPSHOT, 12.0.0.9000)
+*** > If installation fails, rebuild the C++ library to match the R version
+*** > or retry with FORCE_BUNDLED_BUILD=true
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 10.1.0’
+using C++17
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c RTasks.cpp -o RTasks.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c altrep.cpp -o altrep.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c array.cpp -o array.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c array_to_vector.cpp -o array_to_vector.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c arraydata.cpp -o arraydata.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c arrowExports.cpp -o arrowExports.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c bridge.cpp -o bridge.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c buffer.cpp -o buffer.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c chunkedarray.cpp -o chunkedarray.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c compression.cpp -o compression.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c compute-exec.cpp -o compute-exec.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c compute.cpp -o compute.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c config.cpp -o config.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c csv.cpp -o csv.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c dataset.cpp -o dataset.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c datatype.cpp -o datatype.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c expression.cpp -o expression.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c extension-impl.cpp -o extension-impl.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c feather.cpp -o feather.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c field.cpp -o field.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c filesystem.cpp -o filesystem.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c io.cpp -o io.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c json.cpp -o json.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c memorypool.cpp -o memorypool.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c message.cpp -o message.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c parquet.cpp -o parquet.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c r_to_arrow.cpp -o r_to_arrow.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c recordbatch.cpp -o recordbatch.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c recordbatchreader.cpp -o recordbatchreader.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c recordbatchwriter.cpp -o recordbatchwriter.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c safe-call-into-r-impl.cpp -o safe-call-into-r-impl.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c scalar.cpp -o scalar.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c schema.cpp -o schema.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c symbols.cpp -o symbols.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c table.cpp -o table.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c threadpool.cpp -o threadpool.o
+g++ -std=gnu++17 -I"/home/tdhock/lib/R/include" -DNDEBUG -I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON -I'/home/tdhock/lib/R/library/cpp11/include' -DARROW_PARQUET -DARROW_CSV    -fpic  -g -O2  -c type_infer.cpp -o type_infer.o
+g++ -std=gnu++17 -shared -L/home/tdhock/lib/R/lib -L/usr/local/lib -o arrow.so RTasks.o altrep.o array.o array_to_vector.o arraydata.o arrowExports.o bridge.o buffer.o chunkedarray.o compression.o compute-exec.o compute.o config.o csv.o dataset.o datatype.o expression.o extension-impl.o feather.o field.o filesystem.o io.o json.o memorypool.o message.o parquet.o r_to_arrow.o recordbatch.o recordbatchreader.o recordbatchwriter.o safe-call-into-r-impl.o scalar.o schema.o symbols.o table.o threadpool.o type_infer.o -L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow -L/home/tdhock/lib/R/lib -lR
+installing to /home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Loading required package: grDevices
+** help
+*** installing help indices
+** building package indices
+Loading required package: grDevices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+Loading required package: grDevices
+Error: package or namespace load failed for ‘arrow’ in dyn.load(file, DLLpath = DLLpath, ...):
+ unable to load shared object '/home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs/arrow.so':
+  libarrow_acero.so.1300: cannot open shared object file: No such file or directory
+Error: loading failed
+Execution halted
+ERROR: loading failed
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/r/src(main)$ g++ -std=gnu++17 -shared -L/home/tdhock/lib/R/lib -L/usr/local/lib -o arrow.so RTasks.o altrep.o array.o array_to_vector.o arraydata.o arrowExports.o bridge.o buffer.o chunkedarray.o compression.o compute-exec.o compute.o config.o csv.o dataset.o datatype.o expression.o extension-impl.o feather.o field.o filesystem.o io.o json.o memorypool.o message.o parquet.o r_to_arrow.o recordbatch.o recordbatchreader.o recordbatchwriter.o safe-call-into-r-impl.o scalar.o schema.o symbols.o table.o threadpool.o type_infer.o -L/home/tdhock/lib -Wl,-rpath=$HOME/lib -L$CONDA_PREFIX/lib -Wl,-rpath=$CONDA_PREFIX/lib -larrow_acero -larrow_dataset -lparquet -larrow -L/home/tdhock/lib/R/lib -lR -lthrift && ldd arrow.so |grep not 
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libstdc++.so: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libstdc++.so: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010001
+/usr/bin/ld: warning: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1: unsupported GNU_PROPERTY_TYPE (5) type: 0xc0010002
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/r/src(main)$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ..
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Loading required package: grDevices
+Error in library(decor) : there is no package called ‘decor’
+Calls: suppressPackageStartupMessages -> withCallingHandlers -> library
+Execution halted
+*** Trying Arrow C++ found by pkg-config: /home/tdhock
+*** > Packages are both on development versions (13.0.0-SNAPSHOT, 12.0.0.9000)
+*** > If installation fails, rebuild the C++ library to match the R version
+*** > or retry with FORCE_BUNDLED_BUILD=true
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 10.1.0’
+using C++17
+make: Nothing to be done for 'all'.
+installing to /home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Loading required package: grDevices
+** help
+*** installing help indices
+** building package indices
+Loading required package: grDevices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+Loading required package: grDevices
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+Loading required package: grDevices
+** testing if installed package keeps a record of temporary installation path
+* DONE (arrow)
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/r/src(main)$ R -d gdb
+GNU gdb (Ubuntu 10.2-0ubuntu1~18.04~2) 10.2
+Copyright (C) 2021 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/tdhock/lib/R/bin/exec/R...
+(gdb) run
+Starting program: /home/tdhock/lib/R/bin/exec/R 
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+R version 4.3.0 (2023-04-21) -- "Already Tomorrow"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+Loading required package: grDevices
+[Detaching after fork from child process 27646]
+[Detaching after fork from child process 27648]
+> system.file("arrow/lib/libarrow.so")
+[1] ""
+> system.file("arrow/libs/libarrow.so")
+[1] ""
+> system.file("libs/libarrow.so",package="arrow")
+[1] ""
+> system.file("libs/",package="arrow")
+[1] "/home/tdhock/lib/R/library/arrow/libs/"
+> dir(system.file("libs/",package="arrow"))
+[1] "arrow.so"
+> system.file("libs/arrow.so",package="arrow")
+[1] "/home/tdhock/lib/R/library/arrow/libs/arrow.so"
+> system(paste("ldd", system.file("libs/arrow.so",package="arrow")))
+[Detaching after fork from child process 27650]
+	linux-vdso.so.1 (0x00007ffff7ffa000)
+	libgtk3-nocsd.so.0 => /usr/lib/x86_64-linux-gnu/libgtk3-nocsd.so.0 (0x00007ffff76a6000)
+	libarrow_acero.so.1300 => /home/tdhock/lib/libarrow_acero.so.1300 (0x00007ffff6e1a000)
+	libarrow_dataset.so.1300 => /home/tdhock/lib/libarrow_dataset.so.1300 (0x00007ffff63a3000)
+	libparquet.so.1300 => /home/tdhock/lib/libparquet.so.1300 (0x00007ffff599b000)
+	libarrow.so.1300 => /home/tdhock/lib/libarrow.so.1300 (0x00007ffff1d75000)
+	libR.so => /home/tdhock/lib/R/lib/libR.so (0x00007ffff16ff000)
+	libthrift.so.0.15.0 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libthrift.so.0.15.0 (0x00007ffff7f44000)
+	libstdc++.so.6 => /usr/lib/x86_64-linux-gnu/libstdc++.so.6 (0x00007ffff12f2000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007ffff0f54000)
+	libgcc_s.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1 (0x00007ffff7efc000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007ffff0b63000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007ffff095f000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007ffff0740000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007ffff0538000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007ffff7dd3000)
+	libssl.so.1.1 => /usr/lib/x86_64-linux-gnu/libssl.so.1.1 (0x00007ffff02ab000)
+	libcrypto.so.1.1 => /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 (0x00007fffefddf000)
+	libblas.so.3 => /usr/lib/x86_64-linux-gnu/libblas.so.3 (0x00007fffefb72000)
+	libgfortran.so.5 => /usr/lib/x86_64-linux-gnu/libgfortran.so.5 (0x00007fffef6bc000)
+	libquadmath.so.0 => /usr/lib/x86_64-linux-gnu/libquadmath.so.0 (0x00007fffef475000)
+	libreadline.so.7 => /lib/x86_64-linux-gnu/libreadline.so.7 (0x00007fffef22c000)
+	libpcre2-8.so.0 => /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0 (0x00007fffeefaa000)
+	liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007fffeed84000)
+	libbz2.so.1.0 => /lib/x86_64-linux-gnu/libbz2.so.1.0 (0x00007fffeeb74000)
+	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007fffee957000)
+	libicuuc.so.60 => /usr/lib/x86_64-linux-gnu/libicuuc.so.60 (0x00007fffee59f000)
+	libicui18n.so.60 => /usr/lib/x86_64-linux-gnu/libicui18n.so.60 (0x00007fffee0fe000)
+	libgomp.so.1 => /usr/lib/x86_64-linux-gnu/libgomp.so.1 (0x00007fffedebb000)
+	libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007fffedc91000)
+	libicudata.so.60 => /usr/lib/x86_64-linux-gnu/libicudata.so.60 (0x00007fffec0e8000)
+> example("write_dataset",package="arrow")
+[New Thread 0x7fffe6897700 (LWP 27664)]
+[New Thread 0x7fffde3ff700 (LWP 27667)]
+Some features are not enabled in this build of Arrow. Run `arrow_info()` for more information.
+
+Attaching package: ‘arrow’
+
+The following object is masked from ‘package:utils’:
+
+    timestamp
+
+
+wrt_dt> ## Don't show: 
+wrt_dt> if (arrow_with_dataset() & arrow_with_parquet() & requireNamespace("dplyr", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)({ # examplesIf
+wrt_dt+ ## End(Don't show)
+wrt_dt+ # You can write datasets partitioned by the values in a column (here: "cyl").
+wrt_dt+ # This creates a structure of the form cyl=X/part-Z.parquet.
+wrt_dt+ one_level_tree <- tempfile()
+wrt_dt+ write_dataset(mtcars, one_level_tree, partitioning = "cyl")
+wrt_dt+ list.files(one_level_tree, recursive = TRUE)
+wrt_dt+ 
+wrt_dt+ # You can also partition by the values in multiple columns
+wrt_dt+ # (here: "cyl" and "gear").
+wrt_dt+ # This creates a structure of the form cyl=X/gear=Y/part-Z.parquet.
+wrt_dt+ two_levels_tree <- tempfile()
+wrt_dt+ write_dataset(mtcars, two_levels_tree, partitioning = c("cyl", "gear"))
+wrt_dt+ list.files(two_levels_tree, recursive = TRUE)
+wrt_dt+ 
+wrt_dt+ # In the two previous examples we would have:
+wrt_dt+ # X = {4,6,8}, the number of cylinders.
+wrt_dt+ # Y = {3,4,5}, the number of forward gears.
+wrt_dt+ # Z = {0,1,2}, the number of saved parts, starting from 0.
+wrt_dt+ 
+wrt_dt+ # You can obtain the same result as as the previous examples using arrow with
+wrt_dt+ # a dplyr pipeline. This will be the same as two_levels_tree above, but the
+wrt_dt+ # output directory will be different.
+wrt_dt+ library(dplyr)
+wrt_dt+ two_levels_tree_2 <- tempfile()
+wrt_dt+ mtcars %>%
+wrt_dt+   group_by(cyl, gear) %>%
+wrt_dt+   write_dataset(two_levels_tree_2)
+wrt_dt+ list.files(two_levels_tree_2, recursive = TRUE)
+wrt_dt+ 
+wrt_dt+ # And you can also turn off the Hive-style directory naming where the column
+wrt_dt+ # name is included with the values by using `hive_style = FALSE`.
+wrt_dt+ 
+wrt_dt+ # Write a structure X/Y/part-Z.parquet.
+wrt_dt+ two_levels_tree_no_hive <- tempfile()
+wrt_dt+ mtcars %>%
+wrt_dt+   group_by(cyl, gear) %>%
+wrt_dt+   write_dataset(two_levels_tree_no_hive, hive_style = FALSE)
+wrt_dt+ list.files(two_levels_tree_no_hive, recursive = TRUE)
+wrt_dt+ ## Don't show: 
+wrt_dt+ }) # examplesIf
+> one_level_tree <- tempfile()
+> write_dataset(mtcars, one_level_tree, partitioning = "cyl")
+[New Thread 0x7fffdd1f9700 (LWP 27668)]
+[New Thread 0x7fffd7fff700 (LWP 27669)]
+[New Thread 0x7fffd766e700 (LWP 27670)]
+[New Thread 0x7fffd6cdd700 (LWP 27671)]
+
+Thread 5 "R" received signal SIGILL, Illegal instruction.
+[Switching to Thread 0x7fffd7fff700 (LWP 27669)]
+0x00007fffe137eaa2 in arrow::compute::RowTableMetadata::FromColumnMetadataVector (this=0x7fffc80032e0, cols=std::vector of length 1, capacity 1 = {...}, 
+    in_row_alignment=8, in_string_alignment=8)
+    at /home/tdhock/arrow-git/cpp/src/arrow/compute/row/row_internal.cc:128
+128	        ARROW_POPCOUNT64(col.fixed_length) != 1) {
+(gdb) bt
+#0  0x00007fffe137eaa2 in arrow::compute::RowTableMetadata::FromColumnMetadataVector (this=0x7fffc80032e0, 
+    cols=std::vector of length 1, capacity 1 = {...}, in_row_alignment=8, 
+    in_string_alignment=8)
+    at /home/tdhock/arrow-git/cpp/src/arrow/compute/row/row_internal.cc:128
+#1  0x00007fffe13572b2 in arrow::compute::RowTableEncoder::Init (
+    this=0x7fffc80032e0, cols=std::vector of length 1, capacity 1 = {...}, 
+    row_alignment=8, string_alignment=8)
+    at /home/tdhock/arrow-git/cpp/src/arrow/compute/row/encode_internal.cc:26
+#2  0x00007fffe136be5d in arrow::compute::(anonymous namespace)::GrouperFastImpl::Make (keys=std::vector of length 1, capacity 1 = {...}, 
+    ctx=0x7fffe2f293e0 <arrow::compute::default_exec_context()::default_ctx>)
+    at /home/tdhock/arrow-git/cpp/src/arrow/compute/row/grouper.cc:566
+#3  0x00007fffe136f4bb in arrow::compute::Grouper::Make (
+    key_types=std::vector of length 1, capacity 1 = {...}, 
+    ctx=0x7fffe2f293e0 <arrow::compute::default_exec_context()::default_ctx>)
+    at /home/tdhock/arrow-git/cpp/src/arrow/compute/row/grouper.cc:870
+#4  0x00007fffe413df46 in arrow::dataset::KeyValuePartitioning::Partition (
+    this=0x1132f00, batch=
+    std::shared_ptr<arrow::RecordBatch> (use count 2, weak count 0) = {...})
+    at /home/tdhock/arrow-git/cpp/src/arrow/dataset/partition.cc:144
+#5  0x00007fffe40f4e81 in arrow::dataset::(anonymous namespace)::WriteBatch(std::shared_ptr<arrow::RecordBatch>, arrow::compute::Expression, arrow::dataset::FileSystemDatasetWriteOptions, std::function<arrow::Status(std::shared_ptr<arrow::RecordBatch>, const arrow::dataset::PartitionPathFormat&)>) (
+    batch=std::shared_ptr<arrow::RecordBatch> (use count 2, weak count 0) = {...}, guarantee=..., write_options=..., write=...)
+    at /home/tdhock/arrow-git/cpp/src/arrow/dataset/file_base.cc:363
+#6  0x00007fffe40f5d7c in arrow::dataset::(anonymous namespace)::DatasetWritingSinkNodeConsumer::WriteNextBatch (this=0x1efb2e0, 
+    batch=std::shared_ptr<arrow::RecordBatch> (use count 2, weak count 0) = {...}, guarantee=...)
+    at /home/tdhock/arrow-git/cpp/src/arrow/dataset/file_base.cc:434
+#7  0x00007fffe40f5ae7 in arrow::dataset::(anonymous namespace)::DatasetWritingSinkNodeConsumer::Consume (this=0x1efb2e0, batch=...)
+    at /home/tdhock/arrow-git/cpp/src/arrow/dataset/file_base.cc:415
+#8  0x00007fffe4a81b82 in arrow::acero::(anonymous namespace)::ConsumingSinkNode::Process (this=0x311c340, batch=...)
+    at /home/tdhock/arrow-git/cpp/src/arrow/acero/sink_node.cc:399
+#9  0x00007fffe49557a8 in arrow::acero::util::(anonymous namespace)::SerialSequencingQueueImpl::DoProcess (this=0xde3ac0, lk=...)
+    at /home/tdhock/arrow-git/cpp/src/arrow/acero/accumulation_queue.cc:148
+#10 0x00007fffe495561f in arrow::acero::util::(anonymous namespace)::SerialSequencingQueueImpl::InsertBatch (this=0xde3ac0, batch=...)
+    at /home/tdhock/arrow-git/cpp/src/arrow/acero/accumulation_queue.cc:133
+#11 0x00007fffe4a819f8 in arrow::acero::(anonymous namespace)::ConsumingSinkNode::InputReceived (this=0x311c340, input=0x68bca50, batch=...)
+    at /home/tdhock/arrow-git/cpp/src/arrow/acero/sink_node.cc:387
+#12 0x00007fffe4a8ca70 in operator() (__closure=0x7fffc8001690)
+    at /home/tdhock/arrow-git/cpp/src/arrow/acero/source_node.cc:119
+#13 0x00007fffe4a95292 in std::__invoke_impl<arrow::Status, arrow::acero::(anonymous namespace)::SourceNode::SliceAndDeliverMorsel(const arrow::compute::ExecBatch&)::<lambda()>&>(std::__invoke_other, struct {...} &) (__f=...)
+    at /home/tdhock/include/c++/10.1.0/bits/invoke.h:60
+#14 0x00007fffe4a93efa in std::__invoke_r<arrow::Status, arrow::acero::(anonymous namespace)::SourceNode::SliceAndDeliverMorsel(const arrow::compute::ExecBatch&)::<lambda()>&>(struct {...} &) (__fn=...)
+    at /home/tdhock/include/c++/10.1.0/bits/invoke.h:115
+#15 0x00007fffe4a924fb in std::_Function_handler<arrow::Status(), arrow::acero::(anonymous namespace)::SourceNode::SliceAndDeliverMorsel(const arrow::compute::ExecBatch&)::<lambda()> >::_M_invoke(const std::_Any_data &) (
+    __functor=...) at /home/tdhock/include/c++/10.1.0/bits/std_function.h:292
+#16 0x00007fffe495839b in std::function<arrow::Status ()>::operator()() const
+    (this=0x7fffc8001990)
+    at /home/tdhock/include/c++/10.1.0/bits/std_function.h:622
+#17 0x00007fffe4a7f289 in arrow::detail::ContinueFuture::operator()<std::function<arrow::Status ()>&, , arrow::Status, arrow::Future<arrow::internal::Empty> >(arrow::Future<arrow::internal::Empty>, std::function<arrow::Status ()>&) const (this=0x7fffc8001988, next=..., f=...)
+    at /home/tdhock/arrow-git/cpp/src/arrow/util/future.h:150
+#18 0x00007fffe4a7f224 in std::__invoke_impl<void, arrow::detail::ContinueFuture&, arrow::Future<arrow::internal::Empty>&, std::function<arrow::Status ()>&>(std::__invoke_other, arrow::detail::ContinueFuture&, arrow::Future<arrow::internal::Empty>&, std::function<arrow::Status ()>&) (__f=...)
+    at /home/tdhock/include/c++/10.1.0/bits/invoke.h:60
+#19 0x00007fffe4a7f165 in std::__invoke<arrow::detail::ContinueFuture&, arrow::Future<arrow::internal::Empty>&, std::function<arrow::Status ()>&>(arrow::detail::ContinueFuture&, arrow::Future<arrow::internal::Empty>&, std::function<arrow::Status ()>&) (__fn=...)
+    at /home/tdhock/include/c++/10.1.0/bits/invoke.h:95
+#20 0x00007fffe4a7f097 in std::_Bind<arrow::detail::ContinueFuture (arrow::Future<arrow::internal::Empty>, std::function<arrow::Status ()>)>::__call<void, , 0ul, 1ul>(std::tuple<>&&, std::_Index_tuple<0ul, 1ul>) (
+    this=0x7fffc8001988, __args=...)
+    at /home/tdhock/include/c++/10.1.0/functional:416
+#21 0x00007fffe4a7f018 in std::_Bind<arrow::detail::ContinueFuture (arrow::Future<arrow::internal::Empty>, std::function<arrow::Status ()>)>::operator()<, void>() (this=0x7fffc8001988)
+    at /home/tdhock/include/c++/10.1.0/functional:499
+#22 0x00007fffe4a7eff0 in arrow::internal::FnOnce<void ()>::FnImpl<std::_Bind<arrow::detail::ContinueFuture (arrow::Future<arrow::internal::Empty>, std::function<arrow::Status ()>)> >::invoke() (this=0x7fffc8001980)
+    at /home/tdhock/arrow-git/cpp/src/arrow/util/functional.h:152
+#23 0x00007fffe0f0fc3c in arrow::internal::FnOnce<void ()>::operator()() && (
+    this=0x7fffd7ffec80)
+    at /home/tdhock/arrow-git/cpp/src/arrow/util/functional.h:140
+#24 0x00007fffe0f0acfb in arrow::internal::WorkerLoop (
+    state=std::shared_ptr<arrow::internal::ThreadPool::State> (use count 5, weak count 1) = {...}, it={_M_id = {_M_thread = 140736817264384}})
+    at /home/tdhock/arrow-git/cpp/src/arrow/util/thread_pool.cc:269
+#25 0x00007fffe0f0b9e5 in operator() (__closure=0x36a17c8)
+    at /home/tdhock/arrow-git/cpp/src/arrow/util/thread_pool.cc:430
+#26 0x00007fffe0f0f402 in std::__invoke_impl<void, arrow::internal::ThreadPool::LaunchWorkersUnlocked(int)::<lambda()> >(std::__invoke_other, struct {...} &&) (__f=...) at /home/tdhock/include/c++/10.1.0/bits/invoke.h:60
+#27 0x00007fffe0f0f3b7 in std::__invoke<arrow::internal::ThreadPool::LaunchWorkersUnlocked(int)::<lambda()> >(struct {...} &&) (__fn=...)
+    at /home/tdhock/include/c++/10.1.0/bits/invoke.h:95
+#28 0x00007fffe0f0f364 in std::thread::_Invoker<std::tuple<arrow::internal::ThreadPool::LaunchWorkersUnlocked(int)::<lambda()> > >::_M_invoke<0>(std::_Index_tuple<0>) (this=0x36a17c8) at /home/tdhock/include/c++/10.1.0/thread:264
+#29 0x00007fffe0f0f338 in std::thread::_Invoker<std::tuple<arrow::internal::ThreadPool::LaunchWorkersUnlocked(int)::<lambda()> > >::operator()(void) (
+    this=0x36a17c8) at /home/tdhock/include/c++/10.1.0/thread:271
+#30 0x00007fffe0f0f31c in std::thread::_State_impl<std::thread::_Invoker<std::tuple<arrow::internal::ThreadPool::LaunchWorkersUnlocked(int)::<lambda()> > > >::_M_run(void) (this=0x36a17c0)
+    at /home/tdhock/include/c++/10.1.0/thread:215
+#31 0x00007ffff25544c0 in ?? () from /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+#32 0x00007ffff70fb6db in start_thread (arg=0x7fffd7fff700)
+    at pthread_create.c:463
+#33 0x00007ffff6e2461f in clone ()
+    at ../sysdeps/unix/sysv/linux/x86_64/clone.S:95
+(gdb) disassemble
+Dump of assembler code for function _ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii:
+   0x00007fffe137e886 <+0>:	push   %rbp
+   0x00007fffe137e887 <+1>:	mov    %rsp,%rbp
+   0x00007fffe137e88a <+4>:	push   %r12
+   0x00007fffe137e88c <+6>:	push   %rbx
+   0x00007fffe137e88d <+7>:	sub    $0x70,%rsp
+   0x00007fffe137e891 <+11>:	mov    %rdi,-0x68(%rbp)
+   0x00007fffe137e895 <+15>:	mov    %rsi,-0x70(%rbp)
+   0x00007fffe137e899 <+19>:	mov    %edx,-0x74(%rbp)
+   0x00007fffe137e89c <+22>:	mov    %ecx,-0x78(%rbp)
+   0x00007fffe137e89f <+25>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137e8a3 <+29>:	lea    0x18(%rax),%rbx
+   0x00007fffe137e8a7 <+33>:	mov    -0x70(%rbp),%rax
+   0x00007fffe137e8ab <+37>:	mov    %rax,%rdi
+   0x00007fffe137e8ae <+40>:	call   0x7fffe0845e70 <_ZNKSt6vectorIN5arrow7compute17KeyColumnMetadataESaIS2_EE4sizeEv@plt>
+   0x00007fffe137e8b3 <+45>:	mov    %rax,%rsi
+   0x00007fffe137e8b6 <+48>:	mov    %rbx,%rdi
+   0x00007fffe137e8b9 <+51>:	call   0x7fffe07fd950 <_ZNSt6vectorIN5arrow7compute17KeyColumnMetadataESaIS2_EE6resizeEm@plt>
+   0x00007fffe137e8be <+56>:	movq   $0x0,-0x18(%rbp)
+   0x00007fffe137e8c6 <+64>:	mov    -0x70(%rbp),%rax
+   0x00007fffe137e8ca <+68>:	mov    %rax,%rdi
+   0x00007fffe137e8cd <+71>:	call   0x7fffe0845e70 <_ZNKSt6vectorIN5arrow7compute17KeyColumnMetadataESaIS2_EE4sizeEv@plt>
+   0x00007fffe137e8d2 <+76>:	cmp    %rax,-0x18(%rbp)
+   0x00007fffe137e8d6 <+80>:	setb   %al
+   0x00007fffe137e8d9 <+83>:	test   %al,%al
+   0x00007fffe137e8db <+85>:	je     0x7fffe137e917 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+145>
+   0x00007fffe137e8dd <+87>:	mov    -0x18(%rbp),%rdx
+   0x00007fffe137e8e1 <+91>:	mov    -0x70(%rbp),%rax
+   0x00007fffe137e8e5 <+95>:	mov    %rdx,%rsi
+   0x00007fffe137e8e8 <+98>:	mov    %rax,%rdi
+   0x00007fffe137e8eb <+101>:	call   0x7fffe07d4240 <_ZNKSt6vectorIN5arrow7compute17KeyColumnMetadataESaIS2_EEixEm@plt>
+   0x00007fffe137e8f0 <+106>:	mov    %rax,%rbx
+   0x00007fffe137e8f3 <+109>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137e8f7 <+113>:	add    $0x18,%rax
+   0x00007fffe137e8fb <+117>:	mov    -0x18(%rbp),%rdx
+   0x00007fffe137e8ff <+121>:	mov    %rdx,%rsi
+   0x00007fffe137e902 <+124>:	mov    %rax,%rdi
+   0x00007fffe137e905 <+127>:	call   0x7fffe0862c10 <_ZNSt6vectorIN5arrow7compute17KeyColumnMetadataESaIS2_EEixEm@plt>
+   0x00007fffe137e90a <+132>:	mov    (%rbx),%rdx
+   0x00007fffe137e90d <+135>:	mov    %rdx,(%rax)
+   0x00007fffe137e910 <+138>:	addq   $0x1,-0x18(%rbp)
+   0x00007fffe137e915 <+143>:	jmp    0x7fffe137e8c6 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+64>
+   0x00007fffe137e917 <+145>:	mov    -0x70(%rbp),%rax
+   0x00007fffe137e91b <+149>:	mov    %rax,%rdi
+   0x00007fffe137e91e <+152>:	call   0x7fffe0845e70 <_ZNKSt6vectorIN5arrow7compute17KeyColumnMetadataESaIS2_EE4sizeEv@plt>
+   0x00007fffe137e923 <+157>:	mov    %eax,-0x30(%rbp)
+   0x00007fffe137e926 <+160>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137e92a <+164>:	lea    0x30(%rax),%rdx
+   0x00007fffe137e92e <+168>:	mov    -0x30(%rbp),%eax
+   0x00007fffe137e931 <+171>:	mov    %rax,%rsi
+   0x00007fffe137e934 <+174>:	mov    %rdx,%rdi
+   0x00007fffe137e937 <+177>:	call   0x7fffe135cd18 <_ZNSt6vectorIjSaIjEE6resizeEm>
+   0x00007fffe137e93c <+182>:	movl   $0x0,-0x1c(%rbp)
+   0x00007fffe137e943 <+189>:	mov    -0x1c(%rbp),%eax
+   0x00007fffe137e946 <+192>:	cmp    -0x30(%rbp),%eax
+   0x00007fffe137e949 <+195>:	jae    0x7fffe137e96c <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+230>
+   0x00007fffe137e94b <+197>:	mov    -0x1c(%rbp),%ebx
+   0x00007fffe137e94e <+200>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137e952 <+204>:	lea    0x30(%rax),%rdx
+   0x00007fffe137e956 <+208>:	mov    -0x1c(%rbp),%eax
+   0x00007fffe137e959 <+211>:	mov    %rax,%rsi
+   0x00007fffe137e95c <+214>:	mov    %rdx,%rdi
+   0x00007fffe137e95f <+217>:	
+    call   0x7fffe0d657fe <_ZNSt6vectorIjSaIjEEixEm>
+   0x00007fffe137e964 <+222>:	mov    %ebx,(%rax)
+   0x00007fffe137e966 <+224>:	addl   $0x1,-0x1c(%rbp)
+   0x00007fffe137e96a <+228>:	jmp    0x7fffe137e943 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+189>
+   0x00007fffe137e96c <+230>:	mov    -0x70(%rbp),%rbx
+   0x00007fffe137e970 <+234>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137e974 <+238>:	add    $0x30,%rax
+   0x00007fffe137e978 <+242>:	mov    %rax,%rdi
+   0x00007fffe137e97b <+245>:	call   0x7fffe0d6548c <_ZNSt6vectorIjSaIjEE3endEv>
+   0x00007fffe137e980 <+250>:	mov    %rax,%r12
+   0x00007fffe137e983 <+253>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137e987 <+257>:	add    $0x30,%rax
+   0x00007fffe137e98b <+261>:	mov    %rax,%rdi
+   0x00007fffe137e98e <+264>:	call   0x7fffe0d65466 <_ZNSt6vectorIjSaIjEE5beginEv>
+   0x00007fffe137e993 <+269>:	mov    %rbx,%rdx
+   0x00007fffe137e996 <+272>:	mov    %r12,%rsi
+   0x00007fffe137e999 <+275>:	mov    %rax,%rdi
+   0x00007fffe137e99c <+278>:	call   0x7fffe1380c87 <std::sort<__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int> >, arrow::compute::RowTableMetadata::FromColumnMetadataVector(const std::vector<arrow::compute::KeyColumnMetadata>&, int, int)::<lambda(uint32_t, uint32_t)> >(__gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, __gnu_cxx::__normal_iterator<unsigned int*, std::vector<unsigned int, std::allocator<unsigned int> > >, struct {...})>
+   0x00007fffe137e9a1 <+283>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137e9a5 <+287>:	lea    0x48(%rax),%rdx
+   0x00007fffe137e9a9 <+291>:	mov    -0x30(%rbp),%eax
+   0x00007fffe137e9ac <+294>:	mov    %rax,%rsi
+   0x00007fffe137e9af <+297>:	mov    %rdx,%rdi
+   0x00007fffe137e9b2 <+300>:	call   0x7fffe135cd18 <_ZNSt6vectorIjSaIjEE6resizeEm>
+   0x00007fffe137e9b7 <+305>:	movl   $0x0,-0x20(%rbp)
+   0x00007fffe137e9be <+312>:	mov    -0x20(%rbp),%eax
+   0x00007fffe137e9c1 <+315>:	cmp    -0x30(%rbp),%eax
+   0x00007fffe137e9c4 <+318>:	jae    0x7fffe137ea00 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+378>
+   0x00007fffe137e9c6 <+320>:	mov    -0x20(%rbp),%r12d
+   0x00007fffe137e9ca <+324>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137e9ce <+328>:	lea    0x48(%rax),%rbx
+   0x00007fffe137e9d2 <+332>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137e9d6 <+336>:	lea    0x30(%rax),%rdx
+   0x00007fffe137e9da <+340>:	mov    -0x20(%rbp),%eax
+   0x00007fffe137e9dd <+343>:	mov    %rax,%rsi
+   0x00007fffe137e9e0 <+346>:	mov    %rdx,%rdi
+   0x00007fffe137e9e3 <+349>:	call   0x7fffe0d657fe <_ZNSt6vectorIjSaIjEEixEm>
+   0x00007fffe137e9e8 <+354>:	mov    (%rax),%eax
+   0x00007fffe137e9ea <+356>:	mov    %eax,%eax
+   0x00007fffe137e9ec <+358>:	mov    %rax,%rsi
+   0x00007fffe137e9ef <+361>:	mov    %rbx,%rdi
+   0x00007fffe137e9f2 <+364>:	call   0x7fffe0d657fe <_ZNSt6vectorIjSaIjEEixEm>
+   0x00007fffe137e9f7 <+369>:	mov    %r12d,(%rax)
+   0x00007fffe137e9fa <+372>:	addl   $0x1,-0x20(%rbp)
+   0x00007fffe137e9fe <+376>:	jmp    0x7fffe137e9be <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+312>
+   0x00007fffe137ea00 <+378>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ea04 <+382>:	mov    -0x74(%rbp),%edx
+   0x00007fffe137ea07 <+385>:	mov    %edx,0x10(%rax)
+   0x00007fffe137ea0a <+388>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ea0e <+392>:	mov    -0x78(%rbp),%edx
+   0x00007fffe137ea11 <+395>:	mov    %edx,0x14(%rax)
+   0x00007fffe137ea14 <+398>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ea18 <+402>:	movl   $0x0,0x8(%rax)
+   0x00007fffe137ea1f <+409>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ea23 <+413>:	lea    0x60(%rax),%rdx
+   0x00007fffe137ea27 <+417>:	mov    -0x30(%rbp),%eax
+   0x00007fffe137ea2a <+420>:	mov    %rax,%rsi
+   0x00007fffe137ea2d <+423>:	mov    %rdx,%rdi
+   0x00007fffe137ea30 <+426>:	call   0x7fffe135cd18 <_ZNSt6vectorIjSaIjEE6resizeEm>
+   0x00007fffe137ea35 <+431>:	movl   $0x0,-0x24(%rbp)
+   0x00007fffe137ea3c <+438>:	movl   $0x0,-0x28(%rbp)
+   0x00007fffe137ea43 <+445>:	movl   $0x0,-0x2c(%rbp)
+   0x00007fffe137ea4a <+452>:	mov    -0x2c(%rbp),%eax
+   0x00007fffe137ea4d <+455>:	cmp    -0x30(%rbp),%eax
+   0x00007fffe137ea50 <+458>:	jae    0x7fffe137ebd3 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+845>
+   0x00007fffe137ea56 <+464>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ea5a <+468>:	lea    0x30(%rax),%rdx
+   0x00007fffe137ea5e <+472>:	mov    -0x2c(%rbp),%eax
+   0x00007fffe137ea61 <+475>:	mov    %rax,%rsi
+   0x00007fffe137ea64 <+478>:	mov    %rdx,%rdi
+   0x00007fffe137ea67 <+481>:	call   0x7fffe0d657fe <_ZNSt6vectorIjSaIjEEixEm>
+   0x00007fffe137ea6c <+486>:	mov    (%rax),%eax
+   0x00007fffe137ea6e <+488>:	mov    %eax,%edx
+   0x00007fffe137ea70 <+490>:	mov    -0x70(%rbp),%rax
+   0x00007fffe137ea74 <+494>:	mov    %rdx,%rsi
+   0x00007fffe137ea77 <+497>:	mov    %rax,%rdi
+   0x00007fffe137ea7a <+500>:	call   0x7fffe07d4240 <_ZNKSt6vectorIN5arrow7compute17KeyColumnMetadataESaIS2_EEixEm@plt>
+   0x00007fffe137ea7f <+505>:	mov    %rax,-0x38(%rbp)
+   0x00007fffe137ea83 <+509>:	mov    -0x38(%rbp),%rax
+   0x00007fffe137ea87 <+513>:	movzbl (%rax),%eax
+   0x00007fffe137ea8a <+516>:	test   %al,%al
+   0x00007fffe137ea8c <+518>:	je     0x7fffe137eac6 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+576>
+   0x00007fffe137ea8e <+520>:	mov    -0x38(%rbp),%rax
+   0x00007fffe137ea92 <+524>:	mov    0x4(%rax),%eax
+   0x00007fffe137ea95 <+527>:	test   %eax,%eax
+   0x00007fffe137ea97 <+529>:	je     0x7fffe137eac6 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+576>
+   0x00007fffe137ea99 <+531>:	mov    -0x38(%rbp),%rax
+   0x00007fffe137ea9d <+535>:	mov    0x4(%rax),%eax
+   0x00007fffe137eaa0 <+538>:	mov    %eax,%eax
+=> 0x00007fffe137eaa2 <+540>:	popcnt %rax,%rax
+   0x00007fffe137eaa7 <+545>:	cmp    $0x1,%eax
+   0x00007fffe137eaaa <+548>:	je     0x7fffe137eac6 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+576>
+   0x00007fffe137eaac <+550>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137eab0 <+554>:	mov    0x14(%rax),%ecx
+   0x00007fffe137eab3 <+557>:	mov    -0x38(%rbp),%rdx
+   0x00007fffe137eab7 <+561>:	mov    -0x28(%rbp),%eax
+   0x00007fffe137eaba <+564>:	mov    %ecx,%esi
+   0x00007fffe137eabc <+566>:	mov    %eax,%edi
+   0x00007fffe137eabe <+568>:	call   0x7fffe08343d0 <_ZN5arrow7compute16RowTableMetadata21padding_for_alignmentEjiRKNS0_17KeyColumnMetadataE@plt>
+   0x00007fffe137eac3 <+573>:	add    %eax,-0x28(%rbp)
+   0x00007fffe137eac6 <+576>:	mov    -0x28(%rbp),%ebx
+   0x00007fffe137eac9 <+579>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137eacd <+583>:	lea    0x60(%rax),%rdx
+   0x00007fffe137ead1 <+587>:	mov    -0x2c(%rbp),%eax
+   0x00007fffe137ead4 <+590>:	mov    %rax,%rsi
+   0x00007fffe137ead7 <+593>:	mov    %rdx,%rdi
+   0x00007fffe137eada <+596>:	call   0x7fffe0d657fe <_ZNSt6vectorIjSaIjEEixEm>
+   0x00007fffe137eadf <+601>:	mov    %ebx,(%rax)
+   0x00007fffe137eae1 <+603>:	mov    -0x38(%rbp),%rax
+   0x00007fffe137eae5 <+607>:	movzbl (%rax),%eax
+   0x00007fffe137eae8 <+610>:	xor    $0x1,%eax
+   0x00007fffe137eaeb <+613>:	test   %al,%al
+   0x00007fffe137eaed <+615>:	je     0x7fffe137ebaf <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+809>
+   0x00007fffe137eaf3 <+621>:	cmpl   $0x0,-0x24(%rbp)
+   0x00007fffe137eaf7 <+625>:	jne    0x7fffe137eb03 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+637>
+   0x00007fffe137eaf9 <+627>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137eafd <+631>:	mov    -0x28(%rbp),%edx
+   0x00007fffe137eb00 <+634>:	mov    %edx,0x8(%rax)
+   0x00007fffe137eb03 <+637>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137eb07 <+641>:	lea    0x60(%rax),%rdx
+   0x00007fffe137eb0b <+645>:	mov    -0x2c(%rbp),%eax
+   0x00007fffe137eb0e <+648>:	mov    %rax,%rsi
+   0x00007fffe137eb11 <+651>:	mov    %rdx,%rdi
+   0x00007fffe137eb14 <+654>:	call   0x7fffe0d657fe <_ZNSt6vectorIjSaIjEEixEm>
+   0x00007fffe137eb19 <+659>:	mov    (%rax),%edx
+   0x00007fffe137eb1b <+661>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137eb1f <+665>:	mov    0x8(%rax),%ecx
+   0x00007fffe137eb22 <+668>:	mov    %edx,%eax
+   0x00007fffe137eb24 <+670>:	sub    %ecx,%eax
+   0x00007fffe137eb26 <+672>:	mov    %eax,%edx
+   0x00007fffe137eb28 <+674>:	mov    -0x24(%rbp),%eax
+   0x00007fffe137eb2b <+677>:	shl    $0x2,%rax
+   0x00007fffe137eb2f <+681>:	cmp    %rax,%rdx
+   0x00007fffe137eb32 <+684>:	sete   %al
+   0x00007fffe137eb35 <+687>:	movzbl %al,%eax
+   0x00007fffe137eb38 <+690>:	mov    $0x0,%ebx
+   0x00007fffe137eb3d <+695>:	test   %rax,%rax
+   0x00007fffe137eb40 <+698>:	jne    0x7fffe137eb95 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+783>
+   0x00007fffe137eb42 <+700>:	lea    -0x60(%rbp),%rax
+   0x00007fffe137eb46 <+704>:	mov    $0x3,%ecx
+   0x00007fffe137eb4b <+709>:	mov    $0x89,%edx
+   0x00007fffe137eb50 <+714>:	lea    0xfaa6c1(%rip),%rsi        # 0x7fffe2329218
+   0x00007fffe137eb57 <+721>:	mov    %rax,%rdi
+   0x00007fffe137eb5a <+724>:	call   0x7fffe0884430 <_ZN5arrow4util8ArrowLogC1EPKciNS0_13ArrowLogLevelE@plt>
+   0x00007fffe137eb5f <+729>:	mov    $0x1,%ebx
+   0x00007fffe137eb64 <+734>:	lea    -0x60(%rbp),%rax
+   0x00007fffe137eb68 <+738>:	lea    0xfaa6f1(%rip),%rsi        # 0x7fffe2329260
+   0x00007fffe137eb6f <+745>:	mov    %rax,%rdi
+   0x00007fffe137eb72 <+748>:	call   0x7fffe0837d40 <_ZN5arrow4util12ArrowLogBaselsIA104_cEERS1_RKT_@plt>
+   0x00007fffe137eb77 <+753>:	mov    %rax,%r12
+   0x00007fffe137eb7a <+756>:	lea    -0x39(%rbp),%rax
+   0x00007fffe137eb7e <+760>:	mov    %rax,%rdi
+   0x00007fffe137eb81 <+763>:	call   0x7fffe0850a70 <_ZN5arrow4util7VoidifyC1Ev@plt>
+   0x00007fffe137eb86 <+768>:	lea    -0x39(%rbp),%rax
+   0x00007fffe137eb8a <+772>:	mov    %r12,%rsi
+   0x00007fffe137eb8d <+775>:	mov    %rax,%rdi
+   0x00007fffe137eb90 <+778>:	call   0x7fffe08a07f0 <_ZN5arrow4util7VoidifyanERNS0_12ArrowLogBaseE@plt>
+   0x00007fffe137eb95 <+783>:	test   %bl,%bl
+   0x00007fffe137eb97 <+785>:	je     0x7fffe137eba5 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+799>
+   0x00007fffe137eb99 <+787>:	lea    -0x60(%rbp),%rax
+   0x00007fffe137eb9d <+791>:	mov    %rax,%rdi
+   0x00007fffe137eba0 <+794>:	call   0x7fffe0907be0 <_ZN5arrow4util8ArrowLogD1Ev@plt>
+   0x00007fffe137eba5 <+799>:	addl   $0x1,-0x24(%rbp)
+   0x00007fffe137eba9 <+803>:	addl   $0x4,-0x28(%rbp)
+   0x00007fffe137ebad <+807>:	jmp    0x7fffe137ebca <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+836>
+   0x00007fffe137ebaf <+809>:	mov    -0x38(%rbp),%rax
+   0x00007fffe137ebb3 <+813>:	mov    0x4(%rax),%eax
+   0x00007fffe137ebb6 <+816>:	test   %eax,%eax
+   0x00007fffe137ebb8 <+818>:	jne    0x7fffe137ebc0 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+826>
+   0x00007fffe137ebba <+820>:	addl   $0x1,-0x28(%rbp)
+   0x00007fffe137ebbe <+824>:	jmp    0x7fffe137ebca <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+836>
+   0x00007fffe137ebc0 <+826>:	mov    -0x38(%rbp),%rax
+   0x00007fffe137ebc4 <+830>:	mov    0x4(%rax),%eax
+   0x00007fffe137ebc7 <+833>:	add    %eax,-0x28(%rbp)
+   0x00007fffe137ebca <+836>:	addl   $0x1,-0x2c(%rbp)
+   0x00007fffe137ebce <+840>:	jmp    0x7fffe137ea4a <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+452>
+   0x00007fffe137ebd3 <+845>:	cmpl   $0x0,-0x24(%rbp)
+   0x00007fffe137ebd7 <+849>:	sete   %al
+   0x00007fffe137ebda <+852>:	mov    -0x68(%rbp),%rdx
+   0x00007fffe137ebde <+856>:	mov    %al,(%rdx)
+   0x00007fffe137ebe0 <+858>:	cmpl   $0x0,-0x24(%rbp)
+   0x00007fffe137ebe4 <+862>:	jne    0x7fffe137ebef <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+873>
+   0x00007fffe137ebe6 <+864>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ebea <+868>:	mov    0x10(%rax),%eax
+   0x00007fffe137ebed <+871>:	jmp    0x7fffe137ebf6 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+880>
+   0x00007fffe137ebef <+873>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ebf3 <+877>:	mov    0x14(%rax),%eax
+   0x00007fffe137ebf6 <+880>:	mov    -0x28(%rbp),%edx
+   0x00007fffe137ebf9 <+883>:	mov    %eax,%esi
+   0x00007fffe137ebfb <+885>:	mov    %edx,%edi
+   0x00007fffe137ebfd <+887>:	call   0x7fffe081e520 <_ZN5arrow7compute16RowTableMetadata21padding_for_alignmentEji@plt>
+   0x00007fffe137ec02 <+892>:	mov    -0x28(%rbp),%edx
+   0x00007fffe137ec05 <+895>:	add    %eax,%edx
+   0x00007fffe137ec07 <+897>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ec0b <+901>:	mov    %edx,0x4(%rax)
+   0x00007fffe137ec0e <+904>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ec12 <+908>:	movl   $0x1,0xc(%rax)
+   0x00007fffe137ec19 <+915>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ec1d <+919>:	mov    0xc(%rax),%eax
+   0x00007fffe137ec20 <+922>:	shl    $0x3,%eax
+   0x00007fffe137ec23 <+925>:	cmp    %eax,-0x30(%rbp)
+   0x00007fffe137ec26 <+928>:	jbe    0x7fffe137ec59 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+979>
+   0x00007fffe137ec28 <+930>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ec2c <+934>:	mov    0xc(%rax),%eax
+   0x00007fffe137ec2f <+937>:	lea    (%rax,%rax,1),%edx
+   0x00007fffe137ec32 <+940>:	mov    -0x68(%rbp),%rax
+   0x00007fffe137ec36 <+944>:	mov    %edx,0xc(%rax)
+   0x00007fffe137ec39 <+947>:	jmp    0x7fffe137ec19 <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+915>
+   0x00007fffe137ec3b <+949>:	mov    %rax,%r12
+   0x00007fffe137ec3e <+952>:	test   %bl,%bl
+   0x00007fffe137ec40 <+954>:	je     0x7fffe137ec4e <_ZN5arrow7compute16RowTableMetadata24FromColumnMetadataVectorERKSt6vectorINS0_17KeyColumnMetadataESaIS3_EEii+968>
+   0x00007fffe137ec42 <+956>:	lea    -0x60(%rbp),%rax
+   0x00007fffe137ec46 <+960>:	mov    %rax,%rdi
+   0x00007fffe137ec49 <+963>:	call   0x7fffe0907be0 <_ZN5arrow4util8ArrowLogD1Ev@plt>
+   0x00007fffe137ec4e <+968>:	mov    %r12,%rax
+   0x00007fffe137ec51 <+971>:	mov    %rax,%rdi
+   0x00007fffe137ec54 <+974>:	call   0x7fffe0823860 <_Unwind_Resume@plt>
+   0x00007fffe137ec59 <+979>:	nop
+   0x00007fffe137ec5a <+980>:	add    $0x70,%rsp
+   0x00007fffe137ec5e <+984>:	pop    %rbx
+   0x00007fffe137ec5f <+985>:	pop    %r12
+   0x00007fffe137ec61 <+987>:	pop    %rbp
+   0x00007fffe137ec62 <+988>:	ret    
+End of assembler dump.
+(gdb) q
+A debugging session is active.
+
+	Inferior 1 [process 27642] will be killed.
+
+Quit anyway? (y or n) y
+```
+
+Could it be that the `-march=core2` flag is needed? TODO re-build
+libarrow with the core2 flag.
