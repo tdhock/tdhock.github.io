@@ -10962,3 +10962,6 @@ nehalem
 
 Why does lscpu say my CPU supports `sse4_1` but core2 apparently does
 not? 
+
+[List of Core processor info sheets](https://ark.intel.com/content/www/us/en/ark/products/series/79666/legacy-intel-core-processors.html),
+[Intel(R) Core(TM)2 Duo CPU P7350 info sheet](https://ark.intel.com/content/www/us/en/ark/products/36750/intel-core2-duo-processor-p7350-3m-cache-2-00-ghz-1066-mhz-fsb.html).
