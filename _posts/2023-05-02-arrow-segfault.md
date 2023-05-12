@@ -10913,4 +10913,52 @@ Quit anyway? (y or n) y
 ```
 
 Could it be that the `-march=core2` flag is needed? TODO re-build
-libarrow with the core2 flag.
+libarrow with the core2 flag. Before that we need to figure out:
+
+* Negative control: How to get a minimal C program that creates a
+  popcnt assembly instruction? Does gcc know to not use it on my
+  system? Can we tell it not to? 
+* How can we locate what line of (arrow?) C/C++ code is reponsible for
+  the popcnt instruction?
+* How can we inspect what command lines cmake is using to compile
+  libarrow? It says above that `-msse4.2` (enables the use of
+  instructions in the SSE4.2 extended instruction set) and
+  `-march=core2` (I put that) flags were used.  [wikipedia page for
+  Intel Core 2](https://en.wikipedia.org/wiki/Intel_Core_2) says that
+  "Core 2-branded processors feature Virtualization Technology without
+  EPT (with some exceptions), the NX bit and SSE3." and [SSE4
+  page](https://en.wikipedia.org/wiki/SSE4) says "What is now known as
+  SSSE3 (Supplemental Streaming SIMD Extensions 3), introduced in the
+  Intel Core 2 processor line, was referred to as SSE4 by some media
+  until Intel came up with the SSSE3 moniker. Internally dubbed Merom
+  New Instructions, Intel originally did not plan to assign a special
+  name to them, which was criticized by some journalists.[6] Intel
+  eventually cleared up the confusion and reserved the SSE4 name for
+  their next instruction set extension." and "Intel implements POPCNT
+  beginning with the Nehalem microarchitecture" and [Nehalem
+  page](https://en.wikipedia.org/wiki/Nehalem_(microarchitecture))
+  says that "Nehalem is the codename for Intel's 45 nm
+  microarchitecture released in November 2008.[2] It was used in the
+  first-generation of the Intel Core i5 and i7 processors, and
+  succeeds the older Core microarchitecture used on Core 2
+  processors." All of this info suggests that
+  * SSE4.2 includes popcnt.
+  * my Core 2 Duo is older and does not support popcnt.
+  * we need to turn off the `-msse4.2` flag, why is it present?
+  * this interpretation is consistent with the gcc man page:
+  
+```
+-march=cpu-type
+...
+core2
+   Intel Core 2 CPU with 64-bit extensions, MMX, SSE, SSE2, SSE3,
+   SSSE3, CX16, SAHF and FXSR instruction set support.
+
+nehalem
+   Intel Nehalem CPU with 64-bit extensions, MMX, SSE, SSE2, SSE3,
+   SSSE3, SSE4.1, SSE4.2, POPCNT, CX16, SAHF and FXSR instruction
+   set support.
+```
+
+Why does lscpu say my CPU supports `sse4_1` but core2 apparently does
+not? 
