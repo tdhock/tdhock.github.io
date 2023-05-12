@@ -10960,5 +10960,10 @@ nehalem
    set support.
 ```
 
-Why does lscpu say my CPU supports `sse4_1` but core2 apparently does
-not? 
+Why does lscpu say my Core 2 CPU supports `sse4_1` but the GCC man
+page says that core2 does not?
+
+There are [arrow
+docs](https://github.com/apache/arrow/blob/1624d5aaf4f524487079066dc730176d82b986f5/docs/source/cpp/env_vars.rst)
+about how to remove the `-msse4.2` flag, need to do `cmake
+-DARROW_SIMD_LEVEL=NONE`.
