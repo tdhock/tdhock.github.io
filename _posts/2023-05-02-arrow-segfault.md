@@ -10967,3 +10967,216 @@ There are [arrow
 docs](https://github.com/apache/arrow/blob/1624d5aaf4f524487079066dc730176d82b986f5/docs/source/cpp/env_vars.rst)
 about how to remove the `-msse4.2` flag, need to do `cmake
 -DARROW_SIMD_LEVEL=NONE`.
+
+Finally, it works!!! see below.
+
+```
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main*)$ CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE
+Preset CMake variables:
+
+  ARROW_BUILD_INTEGRATION="ON"
+  ARROW_BUILD_STATIC="OFF"
+  ARROW_BUILD_TESTS="ON"
+  ARROW_COMPUTE="ON"
+  ARROW_CSV="ON"
+  ARROW_DATASET="ON"
+  ARROW_EXTRA_ERROR_CONTEXT="ON"
+  ARROW_FILESYSTEM="ON"
+  ARROW_JSON="ON"
+  ARROW_WITH_RE2="OFF"
+  ARROW_WITH_UTF8PROC="OFF"
+  CMAKE_BUILD_TYPE="Debug"
+
+-- Building using CMake version: 3.22.1
+-- Arrow version: 13.0.0 (full: '13.0.0-SNAPSHOT')
+-- Arrow SO version: 1300 (full: 1300.0.0)
+...
+-- CMAKE_C_FLAGS:   -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -march=core2
+-- CMAKE_CXX_FLAGS:  -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -fno-semantic-interposition -march=core2
+...
+-- Compile and link options:
+-- 
+--   ARROW_CXXFLAGS=-march=core2 [default=""]
+--       Compiler flags to append when compiling Arrow
+...
+--   ARROW_SIMD_LEVEL=NONE [default=NONE|SSE4_2|AVX2|AVX512|NEON|SVE|SVE128|SVE256|SVE512|DEFAULT]
+--       Compile-time SIMD optimization level
+...
+-- Build files have been written to: /home/tdhock/arrow-git/cpp/build
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main*)$ cmake --build . --target clean 
+[0/1] Re-running CMake...
+-- Building using CMake version: 3.22.1
+-- Arrow version: 13.0.0 (full: '13.0.0-SNAPSHOT')
+-- Arrow SO version: 1300 (full: 1300.0.0)
+...
+-- Build files have been written to: /home/tdhock/arrow-git/cpp/build
+[1/1] Cleaning all built files...
+Cleaning... 653 files.
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main*)$ cmake --build . 
+[1/642] Creating directories for 'jemalloc_ep'
+[2/642] Creating directories for 'googletest_ep'
+[3/642] Performing download step (download, verify and extract) for 'googletest_ep'
+[4/642] No update step for 'googletest_ep'
+[5/642] No patch step for 'googletest_ep'
+[6/642] Performing download step (download, verify and extract) for 'jemalloc_ep'
+[7/642] No update step for 'jemalloc_ep'
+[8/642] Performing patch step for 'jemalloc_ep'
+[9/642] Performing configure step for 'googletest_ep'
+[10/642] Performing build step for 'googletest_ep'
+[11/642] Performing install step for 'googletest_ep'
+[12/642] Completed 'googletest_ep'
+[13/642] Performing configure step for 'jemalloc_ep'
+[14/642] Performing build step for 'jemalloc_ep'
+[15/642] Performing install step for 'jemalloc_ep'
+[16/642] Completed 'jemalloc_ep'
+[17/642] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/array/array_binary.cc.o
+...
+[641/642] Building CXX object src/parquet/CMakeFiles/parquet-arrow-test.dir/arrow/arrow_reader_writer_test.cc.o
+[642/642] Linking CXX executable debug/parquet-arrow-test
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main*)$ cmake --install . 
+-- Install configuration: "DEBUG"
+-- Up-to-date: /home/tdhock/lib/cmake/Arrow/FindThriftAlt.cmake
+-- Installing: /home/tdhock/include/arrow/util/config.h
+...
+-- Installing: /home/tdhock/lib/libparquet.so.1300.0.0
+-- Up-to-date: /home/tdhock/lib/libparquet.so.1300
+...
+-- Up-to-date: /home/tdhock/include/parquet/encryption/two_level_cache_with_expiration.h
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main*)$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ../../r
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+...
+** testing if installed package can be loaded from final location
+Loading required package: grDevices
+** testing if installed package keeps a record of temporary installation path
+* DONE (arrow)
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main*)$ R --vanilla -e 'example("write_dataset",package="arrow")'
+
+R version 4.3.0 (2023-04-21) -- "Already Tomorrow"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> example("write_dataset",package="arrow")
+Some features are not enabled in this build of Arrow. Run `arrow_info()` for more information.
+
+Attaching package: ‘arrow’
+
+The following object is masked from ‘package:utils’:
+
+    timestamp
+
+
+wrt_dt> ## Don't show: 
+wrt_dt> if (arrow_with_dataset() & arrow_with_parquet() & requireNamespace("dplyr", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)({ # examplesIf
+wrt_dt+ ## End(Don't show)
+wrt_dt+ # You can write datasets partitioned by the values in a column (here: "cyl").
+wrt_dt+ # This creates a structure of the form cyl=X/part-Z.parquet.
+wrt_dt+ one_level_tree <- tempfile()
+wrt_dt+ write_dataset(mtcars, one_level_tree, partitioning = "cyl")
+wrt_dt+ list.files(one_level_tree, recursive = TRUE)
+wrt_dt+ 
+wrt_dt+ # You can also partition by the values in multiple columns
+wrt_dt+ # (here: "cyl" and "gear").
+wrt_dt+ # This creates a structure of the form cyl=X/gear=Y/part-Z.parquet.
+wrt_dt+ two_levels_tree <- tempfile()
+wrt_dt+ write_dataset(mtcars, two_levels_tree, partitioning = c("cyl", "gear"))
+wrt_dt+ list.files(two_levels_tree, recursive = TRUE)
+wrt_dt+ 
+wrt_dt+ # In the two previous examples we would have:
+wrt_dt+ # X = {4,6,8}, the number of cylinders.
+wrt_dt+ # Y = {3,4,5}, the number of forward gears.
+wrt_dt+ # Z = {0,1,2}, the number of saved parts, starting from 0.
+wrt_dt+ 
+wrt_dt+ # You can obtain the same result as as the previous examples using arrow with
+wrt_dt+ # a dplyr pipeline. This will be the same as two_levels_tree above, but the
+wrt_dt+ # output directory will be different.
+wrt_dt+ library(dplyr)
+wrt_dt+ two_levels_tree_2 <- tempfile()
+wrt_dt+ mtcars %>%
+wrt_dt+   group_by(cyl, gear) %>%
+wrt_dt+   write_dataset(two_levels_tree_2)
+wrt_dt+ list.files(two_levels_tree_2, recursive = TRUE)
+wrt_dt+ 
+wrt_dt+ # And you can also turn off the Hive-style directory naming where the column
+wrt_dt+ # name is included with the values by using `hive_style = FALSE`.
+wrt_dt+ 
+wrt_dt+ # Write a structure X/Y/part-Z.parquet.
+wrt_dt+ two_levels_tree_no_hive <- tempfile()
+wrt_dt+ mtcars %>%
+wrt_dt+   group_by(cyl, gear) %>%
+wrt_dt+   write_dataset(two_levels_tree_no_hive, hive_style = FALSE)
+wrt_dt+ list.files(two_levels_tree_no_hive, recursive = TRUE)
+wrt_dt+ ## Don't show: 
+wrt_dt+ }) # examplesIf
+> one_level_tree <- tempfile()
+> write_dataset(mtcars, one_level_tree, partitioning = "cyl")
+> list.files(one_level_tree, recursive = TRUE)
+[1] "cyl=4/part-0.parquet" "cyl=6/part-0.parquet" "cyl=8/part-0.parquet"
+> two_levels_tree <- tempfile()
+> write_dataset(mtcars, two_levels_tree, partitioning = c("cyl", "gear"))
+> list.files(two_levels_tree, recursive = TRUE)
+[1] "cyl=4/gear=3/part-0.parquet" "cyl=4/gear=4/part-0.parquet"
+[3] "cyl=4/gear=5/part-0.parquet" "cyl=6/gear=3/part-0.parquet"
+[5] "cyl=6/gear=4/part-0.parquet" "cyl=6/gear=5/part-0.parquet"
+[7] "cyl=8/gear=3/part-0.parquet" "cyl=8/gear=5/part-0.parquet"
+> library(dplyr)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> two_levels_tree_2 <- tempfile()
+> mtcars %>% group_by(cyl, gear) %>% write_dataset(two_levels_tree_2)
+> list.files(two_levels_tree_2, recursive = TRUE)
+[1] "cyl=4/gear=3/part-0.parquet" "cyl=4/gear=4/part-0.parquet"
+[3] "cyl=4/gear=5/part-0.parquet" "cyl=6/gear=3/part-0.parquet"
+[5] "cyl=6/gear=4/part-0.parquet" "cyl=6/gear=5/part-0.parquet"
+[7] "cyl=8/gear=3/part-0.parquet" "cyl=8/gear=5/part-0.parquet"
+> two_levels_tree_no_hive <- tempfile()
+> mtcars %>% group_by(cyl, gear) %>% write_dataset(two_levels_tree_no_hive, 
++     hive_style = FALSE)
+> list.files(two_levels_tree_no_hive, recursive = TRUE)
+[1] "4/3/part-0.parquet" "4/4/part-0.parquet" "4/5/part-0.parquet"
+[4] "6/3/part-0.parquet" "6/4/part-0.parquet" "6/5/part-0.parquet"
+[7] "8/3/part-0.parquet" "8/5/part-0.parquet"
+
+wrt_dt> ## End(Don't show)
+wrt_dt> 
+wrt_dt> 
+wrt_dt> 
+> 
+> 
+(arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main*)$ 
+```
+
+Conclusions
+* Need `cmake -DARROW_CXXFLAGS=-march=core2 ...` to tell cmake to use
+  core2 gcc compilation flag. 
+* Need `cmake -DARROW_SIMD_LEVEL=NONE ...` to tell cmake to not use
+  `-msse4.2` gcc compilation flag.
+* Avoid installing pre-built arrow binaries on older CPUs.
+* Need to carefully read the libarrow installation docs, to see how to
+  configure the build for older CPUs.
+* Arrow R package and build system could have better CPU detection and
+  error messages to avoid these installation hassles.
