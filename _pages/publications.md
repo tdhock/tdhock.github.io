@@ -76,16 +76,17 @@ description: Peer-reviewed papers and preprints with links to code and data
  
 ### Accepted, in press
 
-- Tao F, Huang Y, Hungate BA, Manzoni S, Frey SD, Schmidt MWI,
-  Reichstein M, Carvalhais N, Ciais P, Jiang L, Lehmann J, Mishra U,
-  Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin K, Vargas R,
-  Yigini Y, Omuto C, Malik AA, Peralta G, Cuevas-Corona R, Di Paolo
-  LE, Luotto I, Liao C, Liang YS, Saynes VS, Huang X, Luo Y.
-  Microbial carbon use efficiency promoting global soil carbon
-  storage. Accepted in Nature.
-  
 ### 2023
 
+- Tao F, Huang Y, Hungate BA, Manzoni S, Frey SD, Schmidt MWI,
+  Reichstein M, Carvalhais N, Ciais P, Jiang L, Lehmann J, Mishra U,
+  Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin K, Vargas R, Yigini Y,
+  Omuto C, Malik AA, Peralta G, Cuevas-Corona R, Di Paolo LE, Luotto
+  I, Liao C, Liang YS, Saynes VS, Huang X, Luo Y. Microbial carbon use
+  efficiency promoting global soil carbon
+  storage. [Nature](https://www.nature.com/articles/s41586-023-06042-3)
+  (2023),
+  [DOI:10.1038/s41586-023-06042-3](https://doi.org/10.1038/s41586-023-06042-3).
 - Hillman J, Hocking TD. Optimizing ROC Curves with a Sort-Based
   Surrogate Loss Function for Binary Classification and Changepoint
   Detection. [Journal of Machine Learning
