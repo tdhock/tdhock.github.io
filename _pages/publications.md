@@ -59,8 +59,11 @@ description: Peer-reviewed papers and preprints with links to code and data
   Loss. Preprint [arXiv:2302.11062](https://arxiv.org/abs/2302.11062).
 - Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
   Partitioning. [arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
-- Hocking TD. Exact line search for Area Under the Minimum with a
-  margin parameter.
+- Hocking TD. Efficient line search optimization of penalty functions
+  in supervised changepoint detection. [Talk for JSM'23 Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810),
+  [Slides
+  PDF](https://github.com/tdhock/max-generalized-auc/blob/master/HOCKING-slides-toronto.pdf),
+  [source](https://github.com/tdhock/max-generalized-auc/#4-may-2023).
 - Hocking TD. Finite Sample Complexity Analysis of Binary Segmentation.
 - Hocking TD. Comparing binsegRcpp with other implementations of
   binary segmentation for changepoint detection.
