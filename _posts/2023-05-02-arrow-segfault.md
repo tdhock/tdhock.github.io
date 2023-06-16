@@ -7528,7 +7528,7 @@ The installation of the R package above fails. I guess this is because
 we used the minimal preset, which I suppose does not include
 `arrow/csv/*` files (they were not reported when running the install
 command). So below we try a non-minimal installation. 
-Need to do conda install boost gflags openssl rapidjson thrift-cpp (not thrift).
+Need to do conda install xsimd boost gflags openssl rapidjson thrift-cpp cmake (not thrift).
 
 ```
 (arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main)$ CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2
