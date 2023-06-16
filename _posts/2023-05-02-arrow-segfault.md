@@ -1,8 +1,11 @@
 ---
 layout: post
 title: Segfault using R arrow
-description: Reproducing an error
+description: Reproducing and fixing an error
 ---
+
+This post is a very long, detailed explanation of the steps I took to
+figure out how to install R arrow on an old Mac laptop.
 
 In `example(capture_first_glob,package="nc")` there is some code which
 uses `arrow::write_dataset`, that gives a segmentation fault using
@@ -11173,11 +11176,146 @@ wrt_dt>
 (arrow) tdhock@maude-MacBookPro:~/arrow-git/cpp/build(main*)$ 
 ```
 
-Conclusions
+## Problem with links
+
+I posted an issue about the R package arrow.so having a broken link to
+libthrift.so, as shown by ldd below,
+
+```
+(base) tdhock@maude-MacBookPro:~/R$ ldd /home/tdhock/arrow-git/r/src/arrow.so 
+	linux-vdso.so.1 (0x00007ffd6cbe9000)
+	libarrow_acero.so.1300 => /home/tdhock/lib/libarrow_acero.so.1300 (0x00007f8c4f323000)
+	libarrow_dataset.so.1300 => /home/tdhock/lib/libarrow_dataset.so.1300 (0x00007f8c4e8ac000)
+	libparquet.so.1300 => /home/tdhock/lib/libparquet.so.1300 (0x00007f8c4dea6000)
+	libarrow.so.1300 => /home/tdhock/lib/libarrow.so.1300 (0x00007f8c4a281000)
+	libR.so => /usr/lib/libR.so (0x00007f8c49c58000)
+	libstdc++.so.6 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libstdc++.so.6 (0x00007f8c49a44000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f8c496a6000)
+	libgcc_s.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgcc_s.so.1 (0x00007f8c502b2000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f8c492b5000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f8c490b1000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f8c48ea9000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f8c48c8a000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007f8c500d5000)
+	libthrift.so.0.15.0 => not found
+	libssl.so.1.1 => /usr/lib/x86_64-linux-gnu/libssl.so.1.1 (0x00007f8c489fd000)
+	libcrypto.so.1.1 => /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 (0x00007f8c48531000)
+	libblas.so.3 => /usr/lib/x86_64-linux-gnu/libblas.so.3 (0x00007f8c482c4000)
+	libreadline.so.7 => /lib/x86_64-linux-gnu/libreadline.so.7 (0x00007f8c4807b000)
+	libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007f8c47e0a000)
+	liblzma.so.5 => /lib/x86_64-linux-gnu/liblzma.so.5 (0x00007f8c47be4000)
+	libbz2.so.1.0 => /lib/x86_64-linux-gnu/libbz2.so.1.0 (0x00007f8c479d4000)
+	libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007f8c477b7000)
+	libicuuc.so.60 => /usr/lib/x86_64-linux-gnu/libicuuc.so.60 (0x00007f8c473ff000)
+	libicui18n.so.60 => /usr/lib/x86_64-linux-gnu/libicui18n.so.60 (0x00007f8c46f5e000)
+	libgomp.so.1 => /usr/lib/x86_64-linux-gnu/libgomp.so.1 (0x00007f8c46d1b000)
+	libtinfo.so.5 => /lib/x86_64-linux-gnu/libtinfo.so.5 (0x00007f8c46af1000)
+	libicudata.so.60 => /usr/lib/x86_64-linux-gnu/libicudata.so.60 (0x00007f8c44f48000)
+```
+
+I also saw a broken link in libparquet.so, but so broken links in
+libarrow.so, shown below.
+
+```
+(base) tdhock@maude-MacBookPro:~/lib$ for so in *.so;do echo $so;ldd $so|grep found;done
+libarrow_acero.so
+	libarrow.so.1300 => not found
+libarrow_dataset.so
+	libparquet.so.1300 => not found
+	libarrow_acero.so.1300 => not found
+	libarrow.so.1300 => not found
+libarrow.so
+ldd: ./libarrow.so: No such file or directory
+libarrow_testing.so
+	libarrow.so.1300 => not found
+	libgtestd.so.1.11.0 => not found
+libparquet.so
+	libarrow.so.1300 => not found
+	libthrift.so.0.15.0 => not found
+```
+
+So these shared objects are linked to each other, and to libthrift,
+and to libgtestd. libthrift is installed in my conda env (see below),
+but where is libgtestd?
+
+```
+(base) tdhock@maude-MacBookPro:~/lib$ ls ~/.local/share/r-miniconda/envs/arrow/lib/libthrift.so
+/home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libthrift.so
+(base) tdhock@maude-MacBookPro:~/lib$ ls ~/.local/share/r-miniconda/envs/arrow/lib/libgtestd.so
+ls: cannot access '/home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgtestd.so': No such file or directory
+```
+
+
+I tried to re-compile using conda lib as rpath,
+`-DCMAKE_INSTALL_RPATH=${CONDA_PREFIX}/lib` added below:
+
+```
+CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=${CONDA_PREFIX}/lib
+...
+-- Could NOT find GTest (missing: GTest_DIR)
+-- Building gtest from source
+...
+cmake --build . --target clean
+cmake --build . 
+cmake --install .
+```
+
+Running the above made the thrift broken link go away, but links to
+libraries installed under $HOME/lib are still broken. Trying again
+with $HOME/lib under rpath below,
+
+```
+CC=$HOME/bin/gcc CXX=$HOME/bin/g++ cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib:$CONDA_PREFIX/lib
+...
+CMake Error at /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/cmake/GTest/GTestTargets.cmake:115 (message):
+  The imported target "GTest::gmock" references the file
+
+     "/home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgmock.so.1.11.0"
+
+  but this file does not exist.  Possible reasons include:
+```
+
+above similar to [a conda
+issue](https://github.com/conda-forge/gtest-feedstock/issues/55), I
+tried solving using conda install gmock then another error from conda
+gtest, but looks like build system caught it and just used same gtest
+from source,
+
+```
+-- GTest can't be used with C++17.
+-- Use -DGTest_SOURCE=BUNDLED.
+-- Output:
+Change Dir: /home/tdhock/arrow-git/cpp/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/ninja cmTC_7c7ce && [1/2] Building CXX object CMakeFiles/cmTC_7c7ce.dir/gtest_cxx_standard_test.cc.o
+[2/2] Linking CXX executable cmTC_7c7ce
+FAILED: cmTC_7c7ce 
+: && /home/tdhock/bin/g++ -fdiagnostics-color=always  CMakeFiles/cmTC_7c7ce.dir/gtest_cxx_standard_test.cc.o -o cmTC_7c7ce  -Wl,-rpath,/home/tdhock/.local/share/r-miniconda/envs/arrow/lib  /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgtest_main.so.1.11.0  /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgtest.so.1.11.0  -pthread && :
+/home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libgtest.so.1.11.0: undefined reference to `std::__throw_bad_array_new_length()@GLIBCXX_3.4.29'
+collect2: error: ld returned 1 exit status
+ninja: build stopped: subcommand failed.
+
+
+-- Could NOT find GTestAlt (missing: GTestAlt_CXX_STANDARD_AVAILABLE) (Required is at least version "1.10.0")
+-- Building gtest from source
+```
+
+But then re-building and installing, without -lthrift in LDFLAGS in
+Makevars, works fine! If the link in a dependent library like
+libparquet.so is broken, then it is passed onto the arrow.so R package
+shared library. If the link works, then no -lthrift is needed (that
+dependency was already resolved in the previous linking step for
+libparquet.so).
+
+## Conclusions
+
 * Need `cmake -DARROW_CXXFLAGS=-march=core2 ...` to tell cmake to use
   core2 gcc compilation flag. 
 * Need `cmake -DARROW_SIMD_LEVEL=NONE ...` to tell cmake to not use
   `-msse4.2` gcc compilation flag.
+* Need `cmake -DCMAKE_INSTALL_RPATH=$HOME/lib:$CONDA_PREFIX/lib ...`
+  to tell cmake to link against libraries installed in non-standard
+  directories.
 * Avoid installing pre-built arrow binaries on older CPUs.
 * Need to carefully read the libarrow installation docs, to see how to
   configure the build for older CPUs.
