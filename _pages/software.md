@@ -11,11 +11,15 @@ methods described in my research papers (see below).
 
 ### R and statistical software research community
 
-- Since 2021, I am an editor for [rOpenSci Statistical
+- Since 2023, I serve as Associate Editor for the journal
+  [Stat](https://onlinelibrary.wiley.com/page/journal/20491573/homepage/editorialboard.html).
+- Since 2023, I serve as co-author for the [Omics CRAN Task
+  View](https://cran.r-project.org/web/views/Omics.html).
+- Since 2021, I serve as editor for [rOpenSci Statistical
   Software](https://ropensci.org/stat-software-review/).
-- Since 2018, I am an editor for [Journal of Statistical
+- Since 2018, I serve as editor for [Journal of Statistical
   Software](https://www.jstatsoft.org/about/editorialTeam).
-- Since 2012, I am co-administrator and mentor for the
+- Since 2012, I serve as co-administrator and mentor for the
   [R project in Google Summer of Code](https://github.com/rstats-gsoc/)
   -- I have been helping teach college students all over the world how
   to write R packages. Because of this work, the R Foundation gave me
