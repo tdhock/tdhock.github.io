@@ -199,7 +199,7 @@ The above output indicates that compilation works, but loading fails,
 due to some startup code that detects being in srun, but not using MPI
 which was configured for that.
 
-### --with-mpi is required
+### `--with-mpi` is required
 
 Above we used `configure.args` argument of `install.packages` to tell
 R the path of the MPI library (works), whereas below we omit that
