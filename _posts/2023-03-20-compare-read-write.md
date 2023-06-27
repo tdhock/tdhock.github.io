@@ -33,10 +33,10 @@ which implement reading/writing CSV data files. I used `atime` to
 compare the asymptotic complexity of these functions, with their
 analogs in base R and tidyverse. The code I used is in the
 [compare-data.table-tidyverse.Rmd](https://github.com/tdhock/atime/blob/e9ebd0bcf0feb2b207575a1e7aa1f34f1cfce4ad/vignettes/compare-data.table-tidyverse.Rmd)
-vignette, which was [rendered on a NAU monsoon
-compute node](https://rcdata.nau.edu/genomic-ml/atime/vignettes/compare-data.table-tidyverse.html)
-(up to 64 cores/threads), and my personal MacBook Pro laptop (up to 2
-cores/threads).
+vignette, which was rendered on a NAU monsoon compute node (up to 64
+cores/threads), and my personal MacBook Pro laptop (up to 2
+cores/threads), both running R-4.2.3 (more reproducibility details
+below).
 
 ### Reading CSV, variable number of rows
 
@@ -131,11 +131,12 @@ identified sub-optimal asymptotic complexity in the following
 functions:
 
 * `utils::read.csv()` could improve time usage, for large numbers of
-  columns.
+  columns, <https://github.com/tdhock/atime/issues/8>.
 * `utils::write.csv()` and `readr::write_csv()` could improve both
-  time and memory usage, for large numbers of columns.
+  time and memory usage, for large numbers of columns,
+  <https://github.com/tdhock/atime/issues/9>.
 * `utils::write.csv()` memory usage could be improved, for large
-  number of rows.
+  number of rows, <https://github.com/tdhock/atime/issues/10>.
 
 We observed that `data.table::fread()` and `data.table::fwrite()`
 provide implementations of CSV reading/writing that are asymptotically
@@ -143,11 +144,23 @@ optimal, in terms of both time and memory usage. For future work, we
 would like to create examples that more clearly show how
 multi-threading could be used for speed improvements.
 
-UPDATE 26 April 2023: Sebastian Meyer and Gabe Becker have helped to
-fix some of the issues in write.csv (and a related issue with
-replacing columns of data frames). I computed the [updated
-benchmarks](https://rcdata.nau.edu/genomic-ml/atime/vignettes/compare-data.table-tidyverse.html)
-using
+UPDATE 26 June 2023: Sebastian Meyer and Gabe Becker have helped to
+fix some of the issues in `write.csv` (and a related issue with
+replacing columns of data frames), which are available starting with
+R-4.3.0 (released 21 April 2023). I have computed the benchmarks above
+using several versions of R, for reproducibility:
+
+* [R-4.2.3](https://rcdata.nau.edu/genomic-ml/atime/vignettes/reproducible/4.2.3/compare-data.table-tidyverse.html),
+  which was the version of R used to create the figures above, the
+  last release version with `write.csv` that is quadratic in the
+  number of columns.
+* [R-4.3.0](https://rcdata.nau.edu/genomic-ml/atime/vignettes/reproducible/4.3.0/compare-data.table-tidyverse.html),
+  which was the first release of R with `write.csv` that is linear in
+  the number of columns.
+* [the most recent release of
+  R](https://rcdata.nau.edu/genomic-ml/atime/vignettes/compare-data.table-tidyverse.html),
+  to check when/if the other issues are solved.
+* To re-run benchmarks we can use the code below:
 
 ```
 th798@wind:~$ srun -t 24:00:00 --mem=32GB --cpus-per-task=4 --pty bash          srun: job 64668716 queued and waiting for resources
