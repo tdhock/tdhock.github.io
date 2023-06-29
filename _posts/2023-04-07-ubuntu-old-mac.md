@@ -377,3 +377,60 @@ brightness-controller
 
 brightness keys do work on 22.04.
 
+### update woes
+
+the init package was broken?
+
+Updating the kernel on 28 June 2023 resulted in a non-bootable
+machine. I ran apt autoremove and I think it removed the old working
+kernel before I actually tried the new kernel and found out it does
+not work. I guess the solution should be reinstalling the older
+kernel, but how?
+
+Hold down option to boot from live USB drive.
+
+https://askubuntu.com/questions/281119/how-do-you-run-update-grub
+
+```
+sudo su
+mount /dev/sda2 /mnt
+for f in sys dev proc ; do mount --bind /$f /mnt/$f ; done
+chroot /mnt
+sudo nano /etc/default/grub
+# uncomment GRUB_TERMINAL=console
+update-grub
+```
+
+Found linux images: 5.15.0-75 and 76 generic.
+
+Restart. boot menu now instead of black screen, select 75 generic,
+Loading initial ramdisk ... freeze.
+
+https://askubuntu.com/questions/1240152/boot-freezes-and-loading-initial-ramdisk
+says to try the following but that did not work for me:
+
+```
+GRUB_CMDLINE_LINUX_DEFAULT="dis_ucode_ldr"
+```
+
+Try installing from usb after chroot? it works with:
+
+```
+cp /media/ubuntu/*.deb /mnt/home/tdhock
+chroot /mnt
+dpkg -i /home/tdhock/*.deb
+```
+
+where *.deb files were manually downloaded from Ubuntu web site,
+https://launchpad.net/ubuntu/jammy/amd64/linux-image-generic/5.15.0.72.70
+
+```
+(base) tdhock@maude-MacBookPro:~/tdhock.github.io/_posts(master*)$ ls /media/tdhock/MA\ CL/*.deb
+'/media/tdhock/MA CL/linux-image-5.15.0-72-generic_5.15.0-72.79_amd64.deb'
+'/media/tdhock/MA CL/linux-image-generic_5.15.0.72.70_amd64.deb'
+'/media/tdhock/MA CL/linux-modules-5.15.0-72-generic_5.15.0-72.79_amd64.deb'
+'/media/tdhock/MA CL/linux-modules-extra-5.15.0-72-generic_5.15.0-72.79_amd64.deb'
+```
+
+Phew! Moral of the story: never run `apt autoremove` unless you have
+successfully restarted!
