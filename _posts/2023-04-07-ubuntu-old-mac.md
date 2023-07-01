@@ -422,15 +422,27 @@ dpkg -i /home/tdhock/*.deb
 ```
 
 where *.deb files were manually downloaded from Ubuntu web site,
-https://launchpad.net/ubuntu/jammy/amd64/linux-image-generic/5.15.0.72.70
+
+* <https://launchpad.net/ubuntu/jammy/amd64/linux-image-generic/5.15.0.72.70>
+* <https://launchpad.net/ubuntu/jammy/amd64/linux-headers-5.15.0-72-generic/5.15.0-72.79>
+* <https://launchpad.net/ubuntu/jammy/amd64/bcmwl-kernel-source>
 
 ```
-(base) tdhock@maude-MacBookPro:~/tdhock.github.io/_posts(master*)$ ls /media/tdhock/MA\ CL/*.deb
-'/media/tdhock/MA CL/linux-image-5.15.0-72-generic_5.15.0-72.79_amd64.deb'
-'/media/tdhock/MA CL/linux-image-generic_5.15.0.72.70_amd64.deb'
-'/media/tdhock/MA CL/linux-modules-5.15.0-72-generic_5.15.0-72.79_amd64.deb'
-'/media/tdhock/MA CL/linux-modules-extra-5.15.0-72-generic_5.15.0-72.79_amd64.deb'
+(base) tdhock@maude-MacBookPro:/media/tdhock/MA CL/2023-CSQ$ ls /media/tdhock/MA\ CL/ubuntu-jammy-old-linux-kernel-packages/
+bcmwl-kernel-source_6.30.223.271+bdcom-0ubuntu8_amd64.deb
+linux-headers-5.15.0-72_5.15.0-72.79_all.deb
+linux-image-5.15.0-72-generic_5.15.0-72.79_amd64.deb
+linux-image-generic_5.15.0.72.70_amd64.deb
+linux-modules-5.15.0-72-generic_5.15.0-72.79_amd64.deb
+linux-modules-extra-5.15.0-72-generic_5.15.0-72.79_amd64.deb
 ```
 
 Phew! Moral of the story: never run `apt autoremove` unless you have
 successfully restarted!
+
+Wi-fi was not working right away: to fix, need to first install via `dpkg -i` 
+
+* `linux-headers-5.15.0-72_5.15.0-72.79_all.deb`  then 
+* `bcmwl-kernel-source_6.30.223.271+bdcom-0ubuntu8_amd64.deb`
+
+(the machine will boot with the others but without these two, no wi-fi)
