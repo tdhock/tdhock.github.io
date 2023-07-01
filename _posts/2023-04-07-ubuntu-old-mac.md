@@ -446,3 +446,309 @@ Wi-fi was not working right away: to fix, need to first install via `dpkg -i`
 * `bcmwl-kernel-source_6.30.223.271+bdcom-0ubuntu8_amd64.deb`
 
 (the machine will boot with the others but without these two, no wi-fi)
+
+Now apt complains about being broken, how to fix? 
+
+[Launchpad](https://launchpad.net/ubuntu/+source/linux-meta)
+linux-meta package page says that there should be a version 25
+available from the main jammy repo. Do I have access to that from my
+current sources?
+
+```
+(base) tdhock@tdhock-MacBook:~$ apt-cache madison linux-generic
+linux-generic | 5.15.0.76.74 | http://archive.ubuntu.com/ubuntu jammy-security/main amd64 Packages
+linux-generic | 5.15.0.25.27 | http://archive.ubuntu.com/ubuntu jammy/main amd64 Packages
+(base) tdhock@tdhock-MacBook:~$ apt list linux-generic
+En train de lister... Fait
+linux-generic/jammy-security,now 5.15.0.76.74 amd64  [installé, automatique]
+N: Il y a une version supplémentaire 1. Veuillez utiliser l'opérande « -a » pour la voir.
+(base) tdhock@tdhock-MacBook:~$ apt -a list linux-generic
+En train de lister... Fait
+linux-generic/jammy-security,now 5.15.0.76.74 amd64  [installé, automatique]
+linux-generic/jammy 5.15.0.25.27 amd64
+
+(base) tdhock@tdhock-MacBook:~$ apt-cache policy linux-generic
+linux-generic:
+  Installé : 5.15.0.76.74
+  Candidat : 5.15.0.76.74
+ Table de version :
+ *** 5.15.0.76.74 500
+        500 http://archive.ubuntu.com/ubuntu jammy-security/main amd64 Packages
+        100 /var/lib/dpkg/status
+     5.15.0.25.27 500
+        500 http://archive.ubuntu.com/ubuntu jammy/main amd64 Packages
+```
+
+Yes the above output says the older `25.27` package is available from
+`jammy/main`. Let's try to install that old version using the commands
+below:
+
+```
+(base) tdhock@tdhock-MacBook:~$ sudo apt install linux-generic=5.15.0.25.27
+[sudo] Mot de passe de tdhock : 
+Désolé, essayez de nouveau.
+[sudo] Mot de passe de tdhock : 
+Lecture des listes de paquets... Fait
+Construction de l'arbre des dépendances... Fait
+Lecture des informations d'état... Fait      
+Vous pouvez lancer « apt --fix-broken install » pour corriger ces problèmes.
+Les paquets suivants contiennent des dépendances non satisfaites :
+ linux-generic : Dépend: linux-image-generic (= 5.15.0.25.27) mais 5.15.0.72.70 devra être installé
+                 Dépend: linux-headers-generic (= 5.15.0.25.27) mais 5.15.0.76.74 devra être installé
+E: Dépendances non satisfaites. Essayez « apt --fix-broken install » sans paquet
+   (ou indiquez une solution).
+(base) tdhock@tdhock-MacBook:~$ apt --fix-broken install
+E: Impossible d'ouvrir le fichier verrou /var/lib/dpkg/lock-frontend - open (13: Permission non accordée)
+E: Impossible d'obtenir le verrou de dpkg (/var/lib/dpkg/lock-frontend). Avez-vous les droits du superutilisateur ?
+(base) tdhock@tdhock-MacBook:~$ sudo apt --fix-broken install
+Lecture des listes de paquets... Fait
+Construction de l'arbre des dépendances... Fait
+Lecture des informations d'état... Fait      
+Correction des dépendances... Fait
+Les paquets suivants ont été installés automatiquement et ne sont plus nécessaires :
+  linux-headers-5.15.0-75 linux-headers-5.15.0-75-generic
+  linux-image-5.15.0-75-generic linux-modules-5.15.0-75-generic
+  linux-modules-extra-5.15.0-75-generic
+Veuillez utiliser « sudo apt autoremove » pour les supprimer.
+Les paquets supplémentaires suivants seront installés : 
+  linux-image-generic
+Les paquets suivants seront mis à jour :
+  linux-image-generic
+1 mis à jour, 0 nouvellement installés, 0 à enlever et 0 non mis à jour.
+1 partiellement installés ou enlevés.
+Il est nécessaire de prendre 2 494 o dans les archives.
+Après cette opération, 0 o d'espace disque supplémentaires seront utilisés.
+Souhaitez-vous continuer ? [O/n] 
+Réception de :1 http://archive.ubuntu.com/ubuntu jammy-security/main amd64 linux-image-generic amd64 5.15.0.76.74 [2 494 B]
+2 494 o réceptionnés en 0s (22,4 ko/s)              
+(Lecture de la base de données... 461237 fichiers et répertoires déjà installés.
+)
+Préparation du dépaquetage de .../linux-image-generic_5.15.0.76.74_amd64.deb ...
+Dépaquetage de linux-image-generic (5.15.0.76.74) sur (5.15.0.72.70) ...
+Paramétrage de linux-image-generic (5.15.0.76.74) ...
+Paramétrage de linux-headers-5.15.0-72-generic (5.15.0-72.79) ...
+/etc/kernel/header_postinst.d/dkms:
+ * dkms: running auto installation service for kernel 5.15.0-72-generic
+   ...done.
+(base) tdhock@tdhock-MacBook:~$ sudo apt install linux-generic=5.15.0.25.27
+Lecture des listes de paquets... Fait
+Construction de l'arbre des dépendances... Fait
+Lecture des informations d'état... Fait      
+Certains paquets ne peuvent être installés. Ceci peut signifier
+que vous avez demandé l'impossible, ou bien, si vous utilisez
+la distribution unstable, que certains paquets n'ont pas encore
+été créés ou ne sont pas sortis d'Incoming.
+L'information suivante devrait vous aider à résoudre la situation : 
+
+Les paquets suivants contiennent des dépendances non satisfaites :
+ linux-generic : Dépend: linux-image-generic (= 5.15.0.25.27) mais 5.15.0.76.74 devra être installé
+                 Dépend: linux-headers-generic (= 5.15.0.25.27) mais 5.15.0.76.74 devra être installé
+E: Impossible de corriger les problèmes, des paquets défectueux sont en mode « garder en l'état ».
+(base) tdhock@tdhock-MacBook:~$ sudo apt install linux-generic=5.15.0.25.27 linux-image-generic=5.15.0.25.27 linux-headers-generic=5.15.0.25.27
+Lecture des listes de paquets... Fait
+Construction de l'arbre des dépendances... Fait
+Lecture des informations d'état... Fait      
+Les paquets suivants ont été installés automatiquement et ne sont plus nécessaires :
+  linux-headers-5.15.0-75 linux-headers-5.15.0-75-generic
+  linux-image-5.15.0-75-generic linux-modules-5.15.0-75-generic
+  linux-modules-extra-5.15.0-75-generic
+Veuillez utiliser « sudo apt autoremove » pour les supprimer.
+Les paquets supplémentaires suivants seront installés : 
+  linux-headers-5.15.0-25 linux-headers-5.15.0-25-generic
+  linux-image-5.15.0-25-generic linux-modules-5.15.0-25-generic
+  linux-modules-extra-5.15.0-25-generic
+Paquets suggérés :
+  fdutils linux-doc | linux-source-5.15.0 linux-tools
+Les NOUVEAUX paquets suivants seront installés :
+  linux-headers-5.15.0-25 linux-headers-5.15.0-25-generic
+  linux-image-5.15.0-25-generic linux-modules-5.15.0-25-generic
+  linux-modules-extra-5.15.0-25-generic
+Les paquets suivants seront mis à une VERSION INFÉRIEURE :
+  linux-generic linux-headers-generic linux-image-generic
+0 mis à jour, 5 nouvellement installés, 3 remis à une version inférieure, 0 à enlever et 0 non mis à jour.
+Il est nécessaire de prendre 110 Mo dans les archives.
+Après cette opération, 560 Mo d'espace disque supplémentaires seront utilisés.
+Souhaitez-vous continuer ? [O/n] 
+Réception de :1 http://archive.ubuntu.com/ubuntu jammy/main amd64 linux-modules-5.15.0-25-generic amd64 5.15.0-25.25 [22,0 MB]
+Réception de :2 http://archive.ubuntu.com/ubuntu jammy/main amd64 linux-image-5.15.0-25-generic amd64 5.15.0-25.25 [10,9 MB]
+Réception de :3 http://archive.ubuntu.com/ubuntu jammy/main amd64 linux-modules-extra-5.15.0-25-generic amd64 5.15.0-25.25 [61,9 MB]
+Réception de :4 http://archive.ubuntu.com/ubuntu jammy/main amd64 linux-generic amd64 5.15.0.25.27 [1 696 B]
+Réception de :5 http://archive.ubuntu.com/ubuntu jammy/main amd64 linux-image-generic amd64 5.15.0.25.27 [2 564 B]
+Réception de :6 http://archive.ubuntu.com/ubuntu jammy/main amd64 linux-headers-5.15.0-25 all 5.15.0-25.25 [12,3 MB]
+Réception de :7 http://archive.ubuntu.com/ubuntu jammy/main amd64 linux-headers-5.15.0-25-generic amd64 5.15.0-25.25 [2 802 kB]
+Réception de :8 http://archive.ubuntu.com/ubuntu jammy/main amd64 linux-headers-generic amd64 5.15.0.25.27 [2 444 B]
+110 Mo réceptionnés en 8s (14,2 Mo/s)                                          
+Sélection du paquet linux-modules-5.15.0-25-generic précédemment désélectionné.
+(Lecture de la base de données... 461237 fichiers et répertoires déjà installés.
+)
+Préparation du dépaquetage de .../0-linux-modules-5.15.0-25-generic_5.15.0-25.25
+_amd64.deb ...
+Dépaquetage de linux-modules-5.15.0-25-generic (5.15.0-25.25) ...
+Sélection du paquet linux-image-5.15.0-25-generic précédemment désélectionné.
+Préparation du dépaquetage de .../1-linux-image-5.15.0-25-generic_5.15.0-25.25_a
+md64.deb ...
+Dépaquetage de linux-image-5.15.0-25-generic (5.15.0-25.25) ...
+Sélection du paquet linux-modules-extra-5.15.0-25-generic précédemment désélecti
+onné.
+Préparation du dépaquetage de .../2-linux-modules-extra-5.15.0-25-generic_5.15.0
+-25.25_amd64.deb ...
+Dépaquetage de linux-modules-extra-5.15.0-25-generic (5.15.0-25.25) ...
+dpkg: avertissement: dégradation (« downgrade ») de linux-generic depuis 5.15.0.
+76.74 vers 5.15.0.25.27
+Préparation du dépaquetage de .../3-linux-generic_5.15.0.25.27_amd64.deb ...
+Dépaquetage de linux-generic (5.15.0.25.27) sur (5.15.0.76.74) ...
+dpkg: avertissement: dégradation (« downgrade ») de linux-image-generic depuis 5
+.15.0.76.74 vers 5.15.0.25.27
+Préparation du dépaquetage de .../4-linux-image-generic_5.15.0.25.27_amd64.deb .
+..
+Dépaquetage de linux-image-generic (5.15.0.25.27) sur (5.15.0.76.74) ...
+Sélection du paquet linux-headers-5.15.0-25 précédemment désélectionné.
+Préparation du dépaquetage de .../5-linux-headers-5.15.0-25_5.15.0-25.25_all.deb
+ ...
+Dépaquetage de linux-headers-5.15.0-25 (5.15.0-25.25) ...
+Sélection du paquet linux-headers-5.15.0-25-generic précédemment désélectionné.
+Préparation du dépaquetage de .../6-linux-headers-5.15.0-25-generic_5.15.0-25.25
+_amd64.deb ...
+Dépaquetage de linux-headers-5.15.0-25-generic (5.15.0-25.25) ...
+dpkg: avertissement: dégradation (« downgrade ») de linux-headers-generic depuis
+ 5.15.0.76.74 vers 5.15.0.25.27
+Préparation du dépaquetage de .../7-linux-headers-generic_5.15.0.25.27_amd64.deb
+ ...
+Dépaquetage de linux-headers-generic (5.15.0.25.27) sur (5.15.0.76.74) ...
+Paramétrage de linux-headers-5.15.0-25 (5.15.0-25.25) ...
+Paramétrage de linux-headers-5.15.0-25-generic (5.15.0-25.25) ...
+/etc/kernel/header_postinst.d/dkms:
+ * dkms: running auto installation service for kernel 5.15.0-25-generic
+
+Kernel preparation unnecessary for this kernel. Skipping...
+applying patch 0002-Makefile.patch...patching file Makefile
+Hunk #1 succeeded at 113 with fuzz 1.
+Hunk #2 succeeded at 132 with fuzz 2 (offset 1 line).
+
+applying patch 0003-Make-up-for-missing-init_MUTEX.patch...patching file src/wl/
+sys/wl_linux.c
+Hunk #1 succeeded at 111 with fuzz 2 (offset 12 lines).
+
+applying patch 0010-change-the-network-interface-name-from-eth-to-wlan.patch...p
+atching file src/wl/sys/wl_linux.c
+Hunk #1 succeeded at 221 (offset -14 lines).
+
+applying patch 0013-gcc.patch...patching file Makefile
+
+applying patch 0019-broadcom-sta-6.30.223.248-3.18-null-pointer-fix.patch...patc
+hing file src/wl/sys/wl_linux.c
+Hunk #1 succeeded at 2169 (offset 12 lines).
+
+applying patch 0020-add-support-for-linux-4.3.patch...patching file src/shared/l
+inux_osl.c
+
+applying patch 0021-add-support-for-Linux-4.7.patch...patching file src/wl/sys/w
+l_cfg80211_hybrid.c
+
+applying patch 0022-add-support-for-Linux-4.8.patch...patching file src/wl/sys/w
+l_cfg80211_hybrid.c
+Hunk #1 succeeded at 2391 (offset 3 lines).
+Hunk #2 succeeded at 2501 (offset 3 lines).
+Hunk #3 succeeded at 2933 (offset 9 lines).
+
+applying patch 0023-add-support-for-Linux-4.11.patch...patching file src/include
+/linuxver.h
+patching file src/wl/sys/wl_linux.c
+Hunk #1 succeeded at 2919 (offset 4 lines).
+
+applying patch 0024-add-support-for-Linux-4.12.patch...patching file src/wl/sys/
+wl_cfg80211_hybrid.c
+Hunk #1 succeeded at 55 (offset 5 lines).
+Hunk #2 succeeded at 472 (offset 5 lines).
+Hunk #3 succeeded at 2371 (offset 5 lines).
+Hunk #4 succeeded at 2388 (offset 5 lines).
+
+applying patch 0025-add-support-for-Linux-4.14.patch...patching file src/shared/
+linux_osl.c
+Hunk #1 succeeded at 1080 (offset 4 lines).
+
+applying patch 0026-add-support-for-Linux-4.15.patch...patching file src/wl/sys/
+wl_linux.c
+Hunk #2 succeeded at 2306 (offset 4 lines).
+Hunk #3 succeeded at 2368 (offset 4 lines).
+
+applying patch 0027-add-support-for-linux-5.1.patch...patching file src/include/
+linuxver.h
+Hunk #1 succeeded at 595 (offset 4 lines).
+
+applying patch 0028-add-support-for-linux-5.6.patch...patching file src/shared/l
+inux_osl.c
+Hunk #1 succeeded at 946 (offset 4 lines).
+patching file src/wl/sys/wl_linux.c
+Hunk #1 succeeded at 590 (offset 8 lines).
+Hunk #2 succeeded at 784 (offset 8 lines).
+Hunk #3 succeeded at 3365 (offset 22 lines).
+
+applying patch 0029-Update-for-set_fs-removal-in-Linux-5.10.patch...patching fil
+e src/wl/sys/wl_cfg80211_hybrid.c
+patching file src/wl/sys/wl_iw.c
+patching file src/wl/sys/wl_linux.c
+patching file src/wl/sys/wl_linux.h
+
+
+Building module:
+cleaning build area...
+make -j2 KERNELRELEASE=5.15.0-25-generic -C /lib/modules/5.15.0-25-generic/build
+ M=/var/lib/dkms/bcmwl/6.30.223.271+bdcom/build.....
+Signing module:
+ - /var/lib/dkms/bcmwl/6.30.223.271+bdcom/5.15.0-25-generic/x86_64/module/wl.ko
+This system doesn't support Secure Boot
+Secure Boot not enabled on this system.
+cleaning build area...
+
+wl.ko:
+Running module version sanity check.
+ - Original module
+   - No original module exists within this kernel
+ - Installation
+   - Installing to /lib/modules/5.15.0-25-generic/updates/dkms/
+
+depmod....
+   ...done.
+Paramétrage de linux-headers-generic (5.15.0.25.27) ...
+Paramétrage de linux-image-5.15.0-25-generic (5.15.0-25.25) ...
+I: /boot/vmlinuz.old is now a symlink to vmlinuz-5.15.0-76-generic
+I: /boot/initrd.img.old is now a symlink to initrd.img-5.15.0-76-generic
+I: /boot/vmlinuz is now a symlink to vmlinuz-5.15.0-25-generic
+I: /boot/initrd.img is now a symlink to initrd.img-5.15.0-25-generic
+Paramétrage de linux-modules-5.15.0-25-generic (5.15.0-25.25) ...
+Paramétrage de linux-modules-extra-5.15.0-25-generic (5.15.0-25.25) ...
+Paramétrage de linux-image-generic (5.15.0.25.27) ...
+Paramétrage de linux-generic (5.15.0.25.27) ...
+Traitement des actions différées (« triggers ») pour linux-image-5.15.0-25-gener
+ic (5.15.0-25.25) ...
+/etc/kernel/postinst.d/dkms:
+ * dkms: running auto installation service for kernel 5.15.0-25-generic
+   ...done.
+/etc/kernel/postinst.d/initramfs-tools:
+update-initramfs: Generating /boot/initrd.img-5.15.0-25-generic
+/etc/kernel/postinst.d/zz-update-grub:
+Sourcing file `/etc/default/grub'
+Sourcing file `/etc/default/grub.d/init-select.cfg'
+Generating grub configuration file ...
+Found linux image: /boot/vmlinuz-5.15.0-76-generic
+Found initrd image: /boot/initrd.img-5.15.0-76-generic
+Found linux image: /boot/vmlinuz-5.15.0-75-generic
+Found initrd image: /boot/initrd.img-5.15.0-75-generic
+Found linux image: /boot/vmlinuz-5.15.0-72-generic
+Found initrd image: /boot/initrd.img-5.15.0-72-generic
+Found linux image: /boot/vmlinuz-5.15.0-25-generic
+Found initrd image: /boot/initrd.img-5.15.0-25-generic
+Memtest86+ needs a 16-bit boot, that is not available on EFI, exiting
+Warning: os-prober will not be executed to detect other bootable partitions.
+Systems on them will not be added to the GRUB boot configuration.
+Check GRUB_DISABLE_OS_PROBER documentation entry.
+done
+```
+
+From the output above, looks like the older 25 kernel is installed
+along with the 75/76 which do not work, and the 72 which does
+work. Also headers were installed.
+
+TODOS [Pin
+tutorial](https://askubuntu.com/questions/178324/how-to-skip-kernel-update)
