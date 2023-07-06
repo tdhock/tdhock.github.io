@@ -750,5 +750,32 @@ From the output above, looks like the older 25 kernel is installed
 along with the 75/76 which do not work, and the 72 which does
 work. Also headers were installed.
 
-TODOS [Pin
-tutorial](https://askubuntu.com/questions/178324/how-to-skip-kernel-update)
+### can not install anything
+
+```
+(base) tdhock@tdhock-MacBook:~$ sudo apt install zsnes
+[sudo] Mot de passe de tdhock : 
+Lecture des listes de paquets... Fait
+Construction de l'arbre des dépendances... Fait
+Lecture des informations d'état... Fait      
+Certains paquets ne peuvent être installés. Ceci peut signifier
+que vous avez demandé l'impossible, ou bien, si vous utilisez
+la distribution unstable, que certains paquets n'ont pas encore
+été créés ou ne sont pas sortis d'Incoming.
+L'information suivante devrait vous aider à résoudre la situation : 
+
+Les paquets suivants contiennent des dépendances non satisfaites :
+ init : Pré-Dépend: systemd-sysv
+E: Erreur, pkgProblem::Resolve a généré des ruptures, ce qui a pu être causé par les paquets devant être gardés en l'état.
+```
+
+The problem/solution was same as
+[this](https://askubuntu.com/questions/1457843/i-somehow-messed-up-package-management-and-dependencies),
+went into update manager, changed "only security updates" to "all
+updates" which adds jammy-updates source/repo to
+`/etc/apt/sources.list`.
+
+### TODOS
+
+[Pin tutorial](https://askubuntu.com/questions/178324/how-to-skip-kernel-update)
+
