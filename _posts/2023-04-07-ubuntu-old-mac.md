@@ -379,8 +379,6 @@ brightness keys do work on 22.04.
 
 ### update woes
 
-the init package was broken?
-
 Updating the kernel on 28 June 2023 resulted in a non-bootable
 machine. I ran apt autoremove and I think it removed the old working
 kernel before I actually tried the new kernel and found out it does
@@ -446,8 +444,6 @@ Wi-fi was not working right away: to fix, need to first install via `dpkg -i`
 * `bcmwl-kernel-source_6.30.223.271+bdcom-0ubuntu8_amd64.deb`
 
 (the machine will boot with the others but without these two, no wi-fi)
-
-Now apt complains about being broken, how to fix? 
 
 [Launchpad](https://launchpad.net/ubuntu/+source/linux-meta)
 linux-meta package page says that there should be a version 25
@@ -752,6 +748,9 @@ work. Also headers were installed.
 
 ### can not install anything
 
+Now apt complains about being broken, how to fix? 
+The init package was broken? See below.
+
 ```
 (base) tdhock@tdhock-MacBook:~$ sudo apt install zsnes
 [sudo] Mot de passe de tdhock : 
@@ -777,5 +776,7 @@ updates" which adds jammy-updates source/repo to
 
 ### TODOS
 
-[Pin tutorial](https://askubuntu.com/questions/178324/how-to-skip-kernel-update)
+[Pin
+tutorial](https://askubuntu.com/questions/178324/how-to-skip-kernel-update)
+to tell APT to use an old version of a package.
 
