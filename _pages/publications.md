@@ -71,9 +71,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   Continuous Improvement.
 - Hocking TD. Teaching Hidden Markov Models Using Interactive Data
   Visualization. Under review at ICER.
-- Harshe K, Williams J, Hocking TD, Lerner Z. Predicting Neuromuscular
-  Engagement to Improve Gait Training with a Robotic Ankle
-  Exoskeleton. Under review at IEEE Robotics and Automation Letters.
 - Gabi Thibault, TD Hocking, Alexis Achim. Predicting forest burn from
   satellite image data.
  
@@ -81,6 +78,11 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### 2023
 
+- Harshe K, Williams J, Hocking TD, Lerner Z. Predicting Neuromuscular
+  Engagement to Improve Gait Training with a Robotic Ankle
+  Exoskeleton. [IEEE Robotics and Automation
+  Letters](https://ieeexplore.ieee.org/document/10172008), vol. 8,
+  no. 8, pp. 5055-5060, Aug. 2023, doi: 10.1109/LRA.2023.3291919.
 - Tao F, Huang Y, Hungate BA, Manzoni S, Frey SD, Schmidt MWI,
   Reichstein M, Carvalhais N, Ciais P, Jiang L, Lehmann J, Mishra U,
   Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin K, Vargas R, Yigini Y,
