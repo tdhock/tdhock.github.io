@@ -60,8 +60,10 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
   Partitioning. [arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
 - Hocking TD. Efficient line search optimization of penalty functions
-  in supervised changepoint detection. [Talk for JSM'23 Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810),
-  [Slides
+  in supervised changepoint detection. [Talk announcement for JSM'23
+  Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810),
+  [Video of talk at Université Laval July
+  2023](https://www.youtube.com/watch?v=22ODpDTZ4VE), [Slides
   PDF](https://github.com/tdhock/max-generalized-auc/blob/master/HOCKING-slides-toronto.pdf),
   [source](https://github.com/tdhock/max-generalized-auc/#4-may-2023).
 - Hocking TD. Finite Sample Complexity Analysis of Binary Segmentation.
