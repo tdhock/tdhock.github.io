@@ -776,7 +776,7 @@ updates" which adds jammy-updates source/repo to
 
 ### TODOS
 
-[Pin
-tutorial](https://askubuntu.com/questions/178324/how-to-skip-kernel-update)
-to tell APT to use an old version of a package.
-
+* [Pin
+  tutorial](https://askubuntu.com/questions/178324/how-to-skip-kernel-update)
+  to tell APT to use an old version of a package,
+* [hold back](https://askubuntu.com/questions/51124/hold-packages-back-from-updates-without-apt-pin)
