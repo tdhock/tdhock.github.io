@@ -12,11 +12,14 @@ of progression plans with various specialties including machine
 learning](https://github.com/NAU-CS/progression-plans), which should
 be useful for planning what classes you take.
 
+- Fall 2023, CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/2023-08-artificial-intelligence).
+- Fall 2023, CS 599, Deep Learning, [my course materials](https://github.com/tdhock/2023-08-deep-learning).
+- Fall 2023, CS 599, Unsupervised Learning, [my course materials](https://github.com/tdhock/2023-08-unsupervised-learning).
 - Spring 2023, Introduction to Deep Learning in R, a 2 hour lecture
   for [Research Bazaar
   Arizona](https://researchbazaar.arizona.edu/resbaz/Arizona2023/),
   [my course materials](https://github.com/tdhock/2023-res-baz-az).
-- Spring 2023, CS 470, Artificial Intelligence,  [my course materials](https://github.com/tdhock/cs470-570-spring-2023).
+- Spring 2023, CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/cs470-570-spring-2023).
 - Fall 2022, CS 499-002 (5893), Deep Learning, [my course
   materials](https://github.com/tdhock/cs499-599-fall-2022).
 - Fall 2022, CS 105/205/305, Computing Tools, [my course materials](https://github.com/tdhock/cs105-205-305-fall-2022).
