@@ -56,9 +56,9 @@ description: Peer-reviewed papers and preprints with links to code and data
   [Reproducible](https://github.com/tdhock/iregnet-paper).
 - Rust K, Hocking TD. A Log-linear Gradient Descent Algorithm for
   Unbalanced Binary Classification using the All Pairs Squared Hinge
-  Loss. Preprint [arXiv:2302.11062](https://arxiv.org/abs/2302.11062).
+  Loss. [Preprint arXiv:2302.11062](https://arxiv.org/abs/2302.11062).
 - Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
-  Partitioning. [arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
+  Partitioning. [Preprint arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
 - Hocking TD. Efficient line search optimization of penalty functions
   in supervised changepoint detection. [Talk announcement for JSM'23
   Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810),
@@ -69,10 +69,8 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Hocking TD. Finite Sample Complexity Analysis of Binary Segmentation.
 - Hocking TD. Comparing binsegRcpp with other implementations of
   binary segmentation for changepoint detection.
-- Hocking TD, Jenson R. Predictive Modeling Framework for District
-  Continuous Improvement.
 - Hocking TD. Teaching Hidden Markov Models Using Interactive Data
-  Visualization. Under review at ICER.
+  Visualization. 
 - Gabi Thibault, TD Hocking, Alexis Achim. Predicting forest burn from
   satellite image data.
  
