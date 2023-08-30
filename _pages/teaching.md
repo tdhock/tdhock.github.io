@@ -89,6 +89,11 @@ See my [Lab Members web page](http://ml.nau.edu/members/).
 
 I have mentored the
 following students in coding free/open-source software.
+- [Arthur Pan](https://github.com/ampurrr), 2023, polars in R.
+- [Jocelyne Chen](https://github.com/ampurr), 2023, [animint2
+  documentation and bug fixes](https://gsoc.ampurr.com).
+- [Yufan Fei](https://github.com/Faye-yufan), 2023, animint2:
+  interactive grammar of graphics.
 - [Yufan Fei](https://github.com/Faye-yufan), 2022, [animint2: interactive
   grammar of
   graphics](https://github.com/Faye-yufan/gsoc22-animint/blob/master/README.md).
