@@ -1,0 +1,143 @@
+---
+layout: post
+title: Count unique students
+description: Regex and data table summarization
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2023-08-29-count-unique/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=7)
+if(FALSE){
+  knitr::knit("2023-08-29-count-unique.Rmd")
+}
+```
+
+The goal of this post is to show how to count the number of unique
+google summer of code students I have mentored. The data source is my
+[Teaching web
+page](https://github.com/tdhock/tdhock.github.io/blob/master/_pages/teaching.md),
+source code shown below:
+
+```{r}
+projects.string <- "
+I have mentored the
+following students in coding free/open-source software.
+- [Arthur Pan](https://github.com/ampurrr), 2023, polars in R.
+- [Jocelyne Chen](https://github.com/ampurr), 2023, [animint2
+  documentation and bug fixes](https://gsoc.ampurr.com).
+- [Yufan Fei](https://github.com/Faye-yufan), 2023, animint2:
+  interactive grammar of graphics.
+- [Yufan Fei](https://github.com/Faye-yufan), 2022, [animint2: interactive
+  grammar of
+  graphics](https://github.com/Faye-yufan/gsoc22-animint/blob/master/README.md).
+- [Fabrizio Sandri](https://github.com/FabrizioSandri), 2022,
+  [RcppDeepState: github action for fuzz testing C++ code in R
+  packages](https://fabriziosandri.github.io/gsoc-2022-blog/summary/2022/09/08/gsoc-summary.html).
+- [Daniel Agyapong](https://github.com/EngineerDanny), 2022, [Rperform
+  github action for performance testing R
+  packages](https://engineerdanny.github.io/GSOC22-RPerform-Blog/).
+- [Anirban Chetia](https://github.com/Anirban166), 2021, [directlabels
+  improvements](https://github.com/Anirban166/directlabels).
+- [Diego Urgell](https://github.com/diego-urgell), 2021,
+  [BinSeg](https://github.com/diego-urgell/BinSeg) efficient C++
+  implementation of binary segmentation.
+- [Mark Nawar](https://github.com/Mark-Nawar), 2021, [re2r back on CRAN](https://github.com/rstats-gsoc/gsoc2021/wiki/re2r-back-on-CRAN)
+- [Sanchit Saini](https://github.com/sanchit-saini), 2020,
+  [rtracklayer R package
+  improvements](https://github.com/rstats-gsoc/gsoc2020/wiki/rtracklayer-improvements).
+- [Himanshu Singh](https://github.com/lazycipher), 2020, [animint2:
+  interactive grammar of
+  graphics](https://github.com/tdhock/animint2).
+- [Julian Stanley](https://github.com/julianstanley), 2020, [Graphical
+  User Interface for gfpop R
+  package](https://github.com/julianstanley/gfpop-gui).
+- [Anirban Chetia](https://github.com/Anirban166), 2020,
+  [testComplexity R
+  package](https://github.com/Anirban166/testComplexity).
+- [Anuraag Srivastava](https://github.com/as4378), 2019, [Optimal
+  Partitioning algorithm and opart R
+  package](https://github.com/as4378/opart).
+- [Avinash Barnwal](https://github.com/avinashbarnwal/), 2019, [AFT
+  and Binomial loss functions for
+  xgboost](https://github.com/avinashbarnwal/GSOC-2019).
+- [Aditya Sam](https://github.com/theadityasam/), 2019, [Elastic net regularized interval regression and iregnet R package](https://theadityasam.github.io/GSOC2019/).
+- [Alan Williams](https://github.com/aw1231), 2018,
+  [SegAnnDB: machine learning system for DNA copy number analysis](https://github.com/tdhock/SegAnnDB),
+  [blog](https://medium.com/alans-gsoc-blog/work-product-a1080d175160).
+- [Vivek Kumar](https://github.com/vivekktiwari), 2018,
+  [animint2: interactive grammar of graphics](https://github.com/tdhock/animint2),
+  [blog](https://vivekktiwari.github.io/gsoc18/).
+- [Johan Larsson](https://github.com/jolars), 2018,
+  [sgdnet: SAGA algorithm for sparse linear models](https://github.com/jolars/sgdnet).
+- [Marlin Na](https://github.com/Marlin-Na), 2017,
+  [TnT: interactive genome browser](https://github.com/Marlin-Na/TnT).
+- [Rover Van](https://github.com/RoverVan), 2017, [iregnet: regularized interval regression](https://github.com/anujkhare/iregnet).
+- [Abhishek Shrivastava](https://github.com/abstatic), 2016,
+  [SegAnnDB: interactive system for labeling and machine learning in genomic data](https://github.com/tdhock/SegAnnDB).
+- [Faizan Khan](https://github.com/faizan-khan-iit), 2016--2017, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
+- [Anuj Khare](https://github.com/anujkhare), 2016, [iregnet: regularized interval regression](https://github.com/anujkhare/iregnet).
+- [Qin Wenfeng](https://github.com/qinwf), 2016, [re2r: regular expressions](https://github.com/qinwf/re2r).
+- [Akash Tandon](https://github.com/analyticalmonk), 2016, [Rperform: performance testing R packages](https://github.com/analyticalmonk/Rperform).
+- [Ishmael Belghazi](https://github.com/IshmaelBelghazi), 2015, [bigoptim: stochastic average gradient algorithm](https://github.com/IshmaelBelghazi/bigoptim).
+- [Kevin Ferris](https://github.com/kferris10), 2015, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
+- [Tony Tsai](https://github.com/caijun), 2015, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
+- [Carson Sievert](https://github.com/cpsievert), 2014, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
+- [Susan VanderPlas](https://github.com/srvanderplas), 2013, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
+"
+```
+
+The markdown code above has a regular structure: newline, dash, space,
+open square bracket, then student name. Later on there is a comma,
+space, then a year for the GSOC project. We can convert the text
+string above to a data table with columns for name and year, using the
+regular expression R code below.
+
+```{r}
+(projects.dt <- nc::capture_all_str(
+  projects.string,
+  "\n- \\[",
+  name="[^]]+",
+  ".*?, ",
+  year="[0-9]+", as.integer))
+```
+
+One way to get unique students is to use `by` inside of data table
+square brackets, as below:
+
+```{r}
+projects.dt[, .(projects=.N), by=.(student=name)]
+```
+
+Another way to do that is to `dcast`, which is shown below,
+
+```{r}
+data.table::dcast(
+  projects.dt,
+  name ~ .,
+  list(length, min, max),
+  value.var="year"
+)[, year_range := ifelse(
+  year_min==year_max,
+  year_min,
+  sprintf("%d-%d", year_min, year_max)
+)][order(year_range)]
+```
+
+The table above has 29 rows, one for each GSOC student I have
+mentored. There are a total of 31 projects; Anirban Chetia and Yufan
+Fei each did two consecutive years of GSOC.
+
+Note that the warning above about NAs is a false positive, [that I
+proposed to
+remove](https://github.com/Rdatatable/data.table/issues/5512).
+
+Exercise for the reader: add some code above to download the markdown
+text string of data to parse (`projects.string`), rather than defining
+it directly in R code.
