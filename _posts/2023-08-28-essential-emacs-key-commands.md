@@ -16,9 +16,9 @@ a cheat sheet of common commands.
 
 * C-h: help.
 * C-h t: tutorial. 
-* C-h k: describe key.
-* C-h v: describe variable.
-* C-h f: describe function.
+* C-h k: describe key (type a keyboard shortcut and emacs will tell you what it does).
+* C-h v: describe variable (see values which are used to configure emacs).
+* C-h f: describe function (see help about emacs functions).
 
 ### interactive execution
 
@@ -34,7 +34,7 @@ a cheat sheet of common commands.
 * C-x o: move cursor to next window.
 * C-x k: kill buffer.
 * C-x b: switch to buffer.
-* C-x f: find/open file.
+* C-x C-f: find/open file.
 * C-x C-s: save buffer.
 * C-x C-w: write file (save as).
 
@@ -47,6 +47,7 @@ a cheat sheet of common commands.
 * C-a, C-e: start, end of line.
 * C-v, M-v: down, up one page.
 * M-<, M->: beginning/end of buffer.
+* C-d, M-d: delete character, word after.
 
 ### editing
 
