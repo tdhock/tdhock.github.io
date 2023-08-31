@@ -61,13 +61,13 @@ instructions](http://ml.nau.edu/application.html).
   [Terry Speed](https://en.wikipedia.org/wiki/Terry_Speed).
 - [Full CV](HOCKING-cv.pdf), [Short Bio](http://ml.nau.edu/members/TDH-short-bio.html).
 
-Research interests: fast and accurate algorithms for convex
-optimization (clustering, regression, ranking, classification) and
-discrete optimization (changepoint detection, dynamic
-programming). The main application domain for the algorithms I develop
-are in genomic data analysis (DNA copy number, ChIP-seq, etc); other
-applications include neuroscience, audio, internet, sensors,
-recommendation and ranking systems.
+Research interests: fast, accurate, and interpretable algorithms for
+learning from large data, using continuous optimization (clustering,
+regression, ranking, classification) and discrete optimization
+(changepoint detection, dynamic programming). The main application
+domains for these algorithms are genomics, neuroscience, medicine,
+microbiome, cybersecurity, robotics, satellite/sonar imagery,
+climate/carbon modeling.
 
 I think reproducible research is important, so in addition to every
 paper I write, I also provide
