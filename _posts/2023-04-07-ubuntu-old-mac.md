@@ -249,6 +249,18 @@ make
 make install
 ```
 
+or below we additionally specify
+
+* PATH not including $HOME
+* CFLAGS/CXXFLAGS/CPPFLAGS with -march=core2
+* --enable-ld to build and install ld (linker not installed by
+  default, there may be problems using the $HOME/bin compilers with
+  /usr/bin/ld)
+
+```
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/snap/emacs/current/usr/bin CFLAGS=-march=core2 CXXFLAGS=-march=core2 CPPFLAGS=-march=core2 ./configure --prefix=$HOME --disable-multilib --enable-ld
+```
+
 ### no pango, R package vignette building fails, x11 font error
 
 Note that if the above configure does not have pango we will see:
