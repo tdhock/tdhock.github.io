@@ -11307,15 +11307,337 @@ shared library. If the link works, then no -lthrift is needed (that
 dependency was already resolved in the previous linking step for
 libparquet.so).
 
+### problems on new macbook
+
+```
+(arrow) path/to/gcc-12$ CFLAGS=-march=core2 CXXFLAGS=-march=core2 CPPFLAGS=-march=core2 ./configure --prefix=$HOME --disable-multilib
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /home/tdhock/libexec/gcc/x86_64-pc-linux-gnu/12.3.0
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the `-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the `LD_RUN_PATH' environment variable
+     during linking
+   - use the `-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+```
+
+Also in...
+
+```
+   /home/tdhock/lib/../lib64
+```
+
+So I tried adding `$HOME/lib64` to the `CMAKE_INSTALL_RPATH` below and
+that seems to work:
+
+```
+cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME
+...
+[443/443] Linking CXX executable debug/parquet-arrow-test
+```
+
+but then when building the R package I get a linker issue,
+libarrow_acero not found, below:
+
+```
+(arrow) tdhock@tdhock-MacBook:~/src/apache-arrow-13.0.0$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL r
+...
+g++ -std=gnu++17 -shared -L/home/tdhock/lib/R/lib -L/usr/local/lib -o arrow.so RTasks.o altrep.o array.o array_to_vector.o arraydata.o arrowExports.o bridge.o buffer.o chunkedarray.o compression.o compute-exec.o compute.o config.o csv.o dataset.o datatype.o expression.o extension-impl.o feather.o field.o filesystem.o io.o json.o memorypool.o message.o parquet.o r_to_arrow.o recordbatch.o recordbatchreader.o recordbatchwriter.o safe-call-into-r-impl.o scalar.o schema.o symbols.o table.o threadpool.o type_infer.o -L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow -L/home/tdhock/lib/R/lib -lR...
+** testing if installed package can be loaded from temporary location
+Le chargement a nécessité le package : grDevices
+Error: le chargement du package ou de l'espace de noms a échoué pour ‘arrow’ in dyn.load(file, DLLpath = DLLpath, ...) :
+impossible de charger l'objet partagé '/home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs/arrow.so' :
+  libarrow_acero.so.1300: Ne peut ouvrir le fichier d'objet partagé: Aucun fichier ou dossier de ce type
+Erreur : le chargement a échoué
+Exécution arrêtée
+ERROR: loading failed
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+```
+
+fixed by telling gcc/ld to look in `~/lib`, and not `~/lib64` nor
+`$CONDA_PREFIX/lib`, 
+
+```
+(arrow) tdhock@tdhock-MacBook:~/src/apache-arrow-13.0.0/r/src$ rm -f arrow.so && g++ -std=gnu++17 -shared -L/home/tdhock/lib/R/lib -L/home/tdhock/lib -Wl,-rpath=/home/tdhock/lib -o arrow.so RTasks.o altrep.o array.o array_to_vector.o arraydata.o arrowExports.o bridge.o buffer.o chunkedarray.o compression.o compute-exec.o compute.o config.o csv.o dataset.o datatype.o expression.o extension-impl.o feather.o field.o filesystem.o io.o json.o memorypool.o message.o parquet.o r_to_arrow.o recordbatch.o recordbatchreader.o recordbatchwriter.o safe-call-into-r-impl.o scalar.o schema.o symbols.o table.o threadpool.o type_infer.o -L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow -L/home/tdhock/lib/R/lib -lR && ldd arrow.so |grep acero
+	libarrow_acero.so.1300 => /home/tdhock/lib/libarrow_acero.so.1300 (0x00007fcc3fd5f000)
+(arrow) tdhock@tdhock-MacBook:~/src/apache-arrow-13.0.0/r/src$ ldd arrow.so |grep not
+```
+
+to get R to do that without having to hack the gcc line myself, I put
+the code below in `~/.R/Makevars`
+
+```
+LDFLAGS=-L${HOME}/lib -Wl,-rpath=${HOME}/lib
+```
+
+then it works, see below.
+
+```
+(arrow) tdhock@tdhock-MacBook:~/src/apache-arrow-13.0.0/r/src$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ..
+Le chargement a nécessité le package : grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Le chargement a nécessité le package : grDevices
+Erreur dans library(decor) : aucun package nommé ‘decor’ n'est trouvé
+Appels : suppressPackageStartupMessages -> withCallingHandlers -> library
+Exécution arrêtée
+*** Trying Arrow C++ found by pkg-config: /home/tdhock
+**** C++ and R library versions match: 13.0.0
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 12.3.0’
+using C++17
+g++ -std=gnu++17 -shared -L/home/tdhock/lib/R/lib -L/home/tdhock/lib -Wl,-rpath=/home/tdhock/lib -o arrow.so RTasks.o altrep.o array.o array_to_vector.o arraydata.o arrowExports.o bridge.o buffer.o chunkedarray.o compression.o compute-exec.o compute.o config.o csv.o dataset.o datatype.o expression.o extension-impl.o feather.o field.o filesystem.o io.o json.o memorypool.o message.o parquet.o r_to_arrow.o recordbatch.o recordbatchreader.o recordbatchwriter.o safe-call-into-r-impl.o scalar.o schema.o symbols.o table.o threadpool.o type_infer.o -L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow -L/home/tdhock/lib/R/lib -lR
+installing to /home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Le chargement a nécessité le package : grDevices
+** help
+*** installing help indices
+** building package indices
+Le chargement a nécessité le package : grDevices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+Le chargement a nécessité le package : grDevices
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+Le chargement a nécessité le package : grDevices
+** testing if installed package keeps a record of temporary installation path
+* DONE (arrow)
+```
+
+### Do we need `~/.R/Makevars`?
+
+Seems that if R is built with knowledge of the gcc flags, we should
+not need to put them in `~/.R/Makevars`, let's try that.
+
+```
+(base) tdhock@tdhock-MacBook:~/R/R-4.3.1$ CFLAGS="-march=core2 -I$HOME/include" CPPFLAGS="-march=core2 -I$HOME/include" LDFLAGS="-L$HOME/lib -Wl,-rpath=$HOME/lib" ./configure --prefix=$HOME --with-cairo --with-blas --with-lapack --enable-R-shlib --with-valgrind-instrumentation=2 --enable-memory-profiling
+...
+R is now configured for x86_64-pc-linux-gnu
+
+  Source directory:            .
+  Installation directory:      /home/tdhock
+
+  C compiler:                  gcc  -march=core2 -I/home/tdhock/include
+  Fortran fixed-form compiler: gfortran  -g -O2
+
+  Default C++ compiler:        g++ -std=gnu++17  -g -O2
+  C++11 compiler:              g++ -std=gnu++11  -g -O2
+  C++14 compiler:              g++ -std=gnu++14  -g -O2
+  C++17 compiler:              g++ -std=gnu++17  -g -O2
+  C++20 compiler:              g++ -std=gnu++20  -g -O2
+  C++23 compiler:              g++ -std=gnu++23  -g -O2
+  Fortran free-form compiler:  gfortran  -g -O2
+  Obj-C compiler:	       gcc -g -O2 -fobjc-exceptions
+
+  Interfaces supported:        X11, tcltk
+  External libraries:          pcre2, readline, BLAS(generic), LAPACK(generic), curl
+  Additional capabilities:     PNG, JPEG, TIFF, NLS, cairo, ICU
+  Options enabled:             shared R library, R profiling, memory profiling
+
+  Capabilities skipped:        
+  Options not enabled:         shared BLAS
+
+  Recommended packages:        yes
+  
+...
+gcc -I. -I. -I../../../src/include -I../../../src/include -march=core2 -I/home/tdhock/include -DHAVE_CONFIG_H   -fopenmp -fpic  -march=core2 -I/home/tdhock/include  -fvisibility=hidden -c regcomp.c -o regcomp.o
+```
+
+Note double `-march=core2` above. Do we need that on R configure? Yes, because
+without env vars in R configure we get below:
+
+```
+gcc -I. -I. -I../../../src/include -I../../../src/include -I/usr/local/include -DHAVE_CONFIG_H   -fopenmp -fpic  -g -O2  -fvisibility=hidden -c regcomp.c -o regcomp.o
+```
+
+Below we remove `~/.R/Makevars` after re-compiling R using new flags,
+to show that R arrow installation still works:
+
+```
+(base) tdhock@tdhock-MacBook:~/.R$ mv Makevars Makevars.old
+(base) tdhock@tdhock-MacBook:~/.R$ cd
+(base) tdhock@tdhock-MacBook:~$ cd src/apache-arrow-13.0.0/r/src/
+(base) tdhock@tdhock-MacBook:~/src/apache-arrow-13.0.0/r/src$ rm arrow.so 
+(base) tdhock@tdhock-MacBook:~/src/apache-arrow-13.0.0/r/src$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ..
+Le chargement a nécessité le package : grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Le chargement a nécessité le package : grDevices
+Erreur dans library(decor) : aucun package nommé ‘decor’ n'est trouvé
+Appels : suppressPackageStartupMessages -> withCallingHandlers -> library
+Exécution arrêtée
+*** Trying Arrow C++ found by pkg-config: /home/tdhock
+**** C++ and R library versions match: 13.0.0
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 12.3.0’
+using C++17
+g++ -std=gnu++17 -shared -L/home/tdhock/lib/R/lib -L/home/tdhock/lib -Wl,-rpath=/home/tdhock/lib -o arrow.so RTasks.o altrep.o array.o array_to_vector.o arraydata.o arrowExports.o bridge.o buffer.o chunkedarray.o compression.o compute-exec.o compute.o config.o csv.o dataset.o datatype.o expression.o extension-impl.o feather.o field.o filesystem.o io.o json.o memorypool.o message.o parquet.o r_to_arrow.o recordbatch.o recordbatchreader.o recordbatchwriter.o safe-call-into-r-impl.o scalar.o schema.o symbols.o table.o threadpool.o type_infer.o -L/home/tdhock/lib -larrow_acero -larrow_dataset -lparquet -larrow -L/home/tdhock/lib/R/lib -lR
+installing to /home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Le chargement a nécessité le package : grDevices
+** help
+*** installing help indices
+** building package indices
+Le chargement a nécessité le package : grDevices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+Le chargement a nécessité le package : grDevices
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+Le chargement a nécessité le package : grDevices
+** testing if installed package keeps a record of temporary installation path
+* DONE (arrow)
+(base) tdhock@tdhock-MacBook:~/src/apache-arrow-13.0.0/r/src$ R -e 'library(arrow);example(write_dataset)'
+
+R version 4.3.1 (2023-06-16) -- "Beagle Scouts"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R est un logiciel libre livré sans AUCUNE GARANTIE.
+Vous pouvez le redistribuer sous certaines conditions.
+Tapez 'license()' ou 'licence()' pour plus de détails.
+
+R est un projet collaboratif avec de nombreux contributeurs.
+Tapez 'contributors()' pour plus d'information et
+'citation()' pour la façon de le citer dans les publications.
+
+Tapez 'demo()' pour des démonstrations, 'help()' pour l'aide
+en ligne ou 'help.start()' pour obtenir l'aide au format HTML.
+Tapez 'q()' pour quitter R.
+
+Le chargement a nécessité le package : grDevices
+> library(arrow);example(write_dataset)
+Some features are not enabled in this build of Arrow. Run `arrow_info()` for more information.
+
+Attachement du package : ‘arrow’
+
+L'objet suivant est masqué depuis ‘package:utils’:
+
+    timestamp
+
+
+wrt_dt> ## Don't show: 
+wrt_dt> if (arrow_with_dataset() & arrow_with_parquet() & requireNamespace("dplyr", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)({ # examplesIf
+wrt_dt+ ## End(Don't show)
+wrt_dt+ # You can write datasets partitioned by the values in a column (here: "cyl").
+wrt_dt+ # This creates a structure of the form cyl=X/part-Z.parquet.
+wrt_dt+ one_level_tree <- tempfile()
+wrt_dt+ write_dataset(mtcars, one_level_tree, partitioning = "cyl")
+wrt_dt+ list.files(one_level_tree, recursive = TRUE)
+wrt_dt+ 
+wrt_dt+ # You can also partition by the values in multiple columns
+wrt_dt+ # (here: "cyl" and "gear").
+wrt_dt+ # This creates a structure of the form cyl=X/gear=Y/part-Z.parquet.
+wrt_dt+ two_levels_tree <- tempfile()
+wrt_dt+ write_dataset(mtcars, two_levels_tree, partitioning = c("cyl", "gear"))
+wrt_dt+ list.files(two_levels_tree, recursive = TRUE)
+wrt_dt+ 
+wrt_dt+ # In the two previous examples we would have:
+wrt_dt+ # X = {4,6,8}, the number of cylinders.
+wrt_dt+ # Y = {3,4,5}, the number of forward gears.
+wrt_dt+ # Z = {0,1,2}, the number of saved parts, starting from 0.
+wrt_dt+ 
+wrt_dt+ # You can obtain the same result as as the previous examples using arrow with
+wrt_dt+ # a dplyr pipeline. This will be the same as two_levels_tree above, but the
+wrt_dt+ # output directory will be different.
+wrt_dt+ library(dplyr)
+wrt_dt+ two_levels_tree_2 <- tempfile()
+wrt_dt+ mtcars %>%
+wrt_dt+   group_by(cyl, gear) %>%
+wrt_dt+   write_dataset(two_levels_tree_2)
+wrt_dt+ list.files(two_levels_tree_2, recursive = TRUE)
+wrt_dt+ 
+wrt_dt+ # And you can also turn off the Hive-style directory naming where the column
+wrt_dt+ # name is included with the values by using `hive_style = FALSE`.
+wrt_dt+ 
+wrt_dt+ # Write a structure X/Y/part-Z.parquet.
+wrt_dt+ two_levels_tree_no_hive <- tempfile()
+wrt_dt+ mtcars %>%
+wrt_dt+   group_by(cyl, gear) %>%
+wrt_dt+   write_dataset(two_levels_tree_no_hive, hive_style = FALSE)
+wrt_dt+ list.files(two_levels_tree_no_hive, recursive = TRUE)
+wrt_dt+ ## Don't show: 
+wrt_dt+ }) # examplesIf
+> one_level_tree <- tempfile()
+> write_dataset(mtcars, one_level_tree, partitioning = "cyl")
+> list.files(one_level_tree, recursive = TRUE)
+[1] "cyl=4/part-0.parquet" "cyl=6/part-0.parquet" "cyl=8/part-0.parquet"
+> two_levels_tree <- tempfile()
+> write_dataset(mtcars, two_levels_tree, partitioning = c("cyl", "gear"))
+> list.files(two_levels_tree, recursive = TRUE)
+[1] "cyl=4/gear=3/part-0.parquet" "cyl=4/gear=4/part-0.parquet"
+[3] "cyl=4/gear=5/part-0.parquet" "cyl=6/gear=3/part-0.parquet"
+[5] "cyl=6/gear=4/part-0.parquet" "cyl=6/gear=5/part-0.parquet"
+[7] "cyl=8/gear=3/part-0.parquet" "cyl=8/gear=5/part-0.parquet"
+> library(dplyr)
+
+Attachement du package : ‘dplyr’
+
+Les objets suivants sont masqués depuis ‘package:stats’:
+
+    filter, lag
+
+Les objets suivants sont masqués depuis ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> two_levels_tree_2 <- tempfile()
+> mtcars %>% group_by(cyl, gear) %>% write_dataset(two_levels_tree_2)
+> list.files(two_levels_tree_2, recursive = TRUE)
+[1] "cyl=4/gear=3/part-0.parquet" "cyl=4/gear=4/part-0.parquet"
+[3] "cyl=4/gear=5/part-0.parquet" "cyl=6/gear=3/part-0.parquet"
+[5] "cyl=6/gear=4/part-0.parquet" "cyl=6/gear=5/part-0.parquet"
+[7] "cyl=8/gear=3/part-0.parquet" "cyl=8/gear=5/part-0.parquet"
+> two_levels_tree_no_hive <- tempfile()
+> mtcars %>% group_by(cyl, gear) %>% write_dataset(two_levels_tree_no_hive, 
++     hive_style = FALSE)
+> list.files(two_levels_tree_no_hive, recursive = TRUE)
+[1] "4/3/part-0.parquet" "4/4/part-0.parquet" "4/5/part-0.parquet"
+[4] "6/3/part-0.parquet" "6/4/part-0.parquet" "6/5/part-0.parquet"
+[7] "8/3/part-0.parquet" "8/5/part-0.parquet"
+
+wrt_dt> ## End(Don't show)
+wrt_dt> 
+wrt_dt> 
+wrt_dt> 
+> 
+> 
+```
+
 ## Conclusions
 
 * Need `cmake -DARROW_CXXFLAGS=-march=core2 ...` to tell cmake to use
   core2 gcc compilation flag. 
 * Need `cmake -DARROW_SIMD_LEVEL=NONE ...` to tell cmake to not use
   `-msse4.2` gcc compilation flag.
-* Need `cmake -DCMAKE_INSTALL_RPATH=$HOME/lib:$CONDA_PREFIX/lib ...`
+* Need `cmake -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib ...`
   to tell cmake to link against libraries installed in non-standard
   directories.
+* When using gcc installed under home directory, need to tell R at
+  compilation or in `~/.R/Makevars` to link to libraries in `~/lib`.
 * Avoid installing pre-built arrow binaries on older CPUs.
 * Need to carefully read the libarrow installation docs, to see how to
   configure the build for older CPUs.

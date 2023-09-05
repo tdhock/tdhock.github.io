@@ -54,7 +54,7 @@ parse the news items into a data table...
 ```{r}
 change.dt <- nc::capture_all_str(
   NEWS.lines,
-  version="[0-9]+[.][0-9]+[.][0-9]+",
+  version="[0-9]+[.][0-9]+(?:[.][0-9]+)?",
   "\\s*\n",
   changes="(?:[^0-9].*\n*)*")
 change.dt[, .(version, changes=substr(changes,1,50))]
