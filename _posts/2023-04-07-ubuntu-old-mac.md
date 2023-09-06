@@ -226,9 +226,10 @@ git config --global user.email "toby.hocking@r-project.org"
 git config --global user.name "Toby Dylan Hocking"
 ```
 
-maybe install miniconda.
+maybe install python packages + miniconda.
 
 ```
+sudo apt install python3-pip python3-flake8 python3-setuptools python3-venv # for elpy
 conda create -n new-env
 conda activate new-env
 conda install python=3.10
