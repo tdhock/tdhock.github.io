@@ -1,9 +1,8 @@
 \documentclass[margin,line]{res}
 \usepackage{graphicx}
 \usepackage[cm]{fullpage}
-\usepackage{hyperref}
-\usepackage{url}
-\urlstyle{same} 
+%\usepackage{hyperref}
+\newcommand{\href}[2]{#2}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -43,18 +42,18 @@ Toby Dylan Hocking & Curriculum Vitae
  1295 S. Knoles Dr.  & Citizenship: USA. \\            
   Flagstaff, AZ 86011 & Languages: English (native), French
                         (fluent since 2009). \\
-  E-mail:  toby.hocking@nau.edu & Web: \url{http://tdhock.github.io}, \href{https://tdhock.github.io/blog/2022/erdos-number/}{Erd\H{o}s number = 3}. \\
+  E-mail:  toby.hocking@nau.edu & Erd\H{o}s number = 3. \\
 \end{tabular*}
 
 \section{\sc Research Interests}
 
-Machine learning algorithms, statistical software, and data
-visualization techniques. Emphasis on efficient algorithms for large
-datasets, based on constrained optimization (regression,
-classification, ranking, clustering, segmentation, changepoint
-detection, survival analysis). Collaborations and applications in
-fields such as climate, ecology, medicine, genomics, neuroscience,
-recommendation systems, image and text analysis.
+Fast, accurate, and interpretable algorithms for learning from large
+data, using continuous optimization (clustering, regression, ranking,
+classification) and discrete optimization (changepoint detection,
+dynamic programming). The main applications for these
+algorithms are in genomics, neuroscience, medicine, microbiome,
+cybersecurity, robotics, satellite/sonar imagery, climate/carbon
+modeling.
 
 \section{\sc Professional Experience \\ \hspace{0.1cm} \\ \includegraphics[width=3cm]{HOCKING-rectangle-lores.jpg}}
 
@@ -172,22 +171,6 @@ INRIA/INRA (French computer science and agricultural research institutes), Ph.D.
 UC Berkeley, Department of Statistics VIGRE research scholarship, 2001.
 
 %UC Berkeley, Cal Band George Miller scholarship, 2000.
-
-\section{\sc Papers in progress and under review}
-
-Runge V, {\bf Hocking TD}, Romano G, Afghah F, Fearnhead P, Rigaill
-G. gfpop: an R Package for Univariate Graph-Constrained Change-point
-Detection. Under review in {\it Journal of Statistical Software},
-arXiv:2002.03646.
-
-Kaufman J, Stenberg A, {\bf Hocking TD}. Functional Labeled Optimal
-Partitioning. Under review in {\it Journal of Computational and
-  Graphical Statistics}, arXiv:2210.02580.
-
-Rust K, {\bf Hocking TD}. A Log-linear Gradient Descent Algorithm for
-Unbalanced Binary Classification using the All Pairs Squared Hinge
-Loss. Under review in {\it Journal of Machine Learning Research},
-arXiv:2302.11062.
 
 \section{\sc Peer-reviewed journal papers}
 
@@ -390,9 +373,6 @@ Algorithm for Clustering using Convex Fusion Penalties. {\it International Confe
 
 \section{\sc Books, Chapters, Manuals}
 
-{\bf Hocking TD} and Killick R. {\it Changepoint detection algorithms
-  and applications in R}. Textbook in preparation.
-
 {\bf Hocking TD}. Introduction to Machine Learning and Neural
 Networks. Chapter in textbook {\it Land Carbon Cycle Modeling: Matrix
   Approach, Data Assimilation, and Ecological Forecasting}, edited by
@@ -410,35 +390,9 @@ detection algorithms, {\it useR} 2017.
 {\bf Hocking TD}, Ekstr\o m CT. Understanding and creating interactive
 graphics, {\it useR} 2016.
 
-\section{\sc Invited talks (selected)}
-
-ASU Data-oriented Mathematical and Statistical Sciences seminar, Joint
-Statistical Meetings Toronto, Universit\'e Laval (2023); Institute of
-Mathematical Statistics London, IEEE conference in Prescott Arizona,
-University of Arizona Math/Stats seminar (2022); ASU West ML Day,
-\href{https://arizona.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4e87c8d0-96d2-40d1-808c-ad16014c6962}{TRIPODS
-  University of Arizona}, IEEE NJACS (2021); NAU Math Department
-Colloquium (2018); University of Waterloo, Université de Montréal,
-Sainte-Justine Children's Hospital, University of Québec à Montréal,
-Polytechnique Montréal (2017); Universit\'e Laval (2016); McGill
-Barbados epigenomics workshop (2015); Sapporo Japan Workshop on
-Machine Learning and Applications to Biology (2013); Google Research
-New York, Universit\'e Rennes, Universit\'e Angers, INRIA Lille
-(2012); Institut de Biologie de Lille (2011).
-
-\section{\sc Consulting (selected)}
-
-Acronis SCS, cybersecurity company in Phoenix (2022). Interpretable
-and non-linear machine learning algorithms which use source code
-analysis to predict software vulnerabilities.
-
-Plotly, data visualization startup in Montreal (2015). Original author
-of ggplot functionality in plotly R package.
-
 \section{\sc Teaching}
 
-All of my course materials are freely available online,
-\url{https://tdhock.github.io/teaching/}
+All of my course materials are freely available on the web.
 
 Fall 2023, Northern Arizona University, CS 470, Artificial Intelligence.
 
@@ -526,20 +480,18 @@ Biology.
 
 Numerous original/novel free/open-source software contributions using R, C, C++,
 Python, and JavaScript. Available from standard repositories (CRAN for
-R, PyPI for Python) as well as GitHub:
-\url{https://github.com/tdhock}, links to my software contributions
-\url{https://tdhock.github.io/software/}
+R, PyPI for Python) as well as GitHub.
 
 {\bf R}: contributions to base R regex functionalty and data reshaping
-in data.table package. Maintainer of numerous R packages (17 on CRAN
+in data.table package. Creator of numerous R packages (17 on CRAN
 as of Feb 2022) for machine learning (changepoint detection,
 classification, regression, ranking, etc), directlabels for labeled
 figures, animint2 for animated interactive figures, inlinedocs for
 documentation generation.
 
-{\bf Python}: contributions to pandas module for data manipulation
-(str.extractall regex functionality), maintainer of GUI/web server
-software for labeling and changepoint detection in genomic data
+{\bf Python}: contributions to pandas (data manipulation,
+str.extractall regex functionality), creator of web
+software for labeling and changepoint detection 
 (annotate\_regions, SegAnnDB, PeakLearner).
 
 % Minimum qualifications:
@@ -547,42 +499,6 @@ software for labeling and changepoint detection in genomic data
 
 % Desirable Qualifications: Experience with data-science issues and applications in areas related to climate science, digitized/regenerative economies, smart cities.
 
-\section{\sc References}
- 
-\noindent {\bf Bruce Hungate}, collaborator on research papers and grants related to machine learning for ecological data analysis. \\
-Regents' Professor, Biological Sciences, Northern Arizona University\\
-E-mail: Bruce.Hungate@nau.edu. Telephone: 928-523-0925
-
-\noindent {\bf Yiqi Luo}, collaborator on research and teaching related to machine learning for climate science (summer school, textbook).\\
-Professor, School of Integrative Plant Science, Cornell University\\
-E-mail: yl2735@cornell.edu
-
-\noindent {\bf Eck Doerry}, collaborator on research and familiar with my teaching.\\
-Professor, School of Informatics, Computing and Cyber Systems, Northern Arizona University\\
-Phone: +1 (928) 523-9377, E-mail: Eck.Doerry@nau.edu, Web: \url{https://www.cefns.nau.edu/~edo}
-
-\noindent {\bf Jarrett ``Jay'' Barber}, colleague familiar with my teaching related to statistical machine learning.\\
-Associate Professor, School of Informatics, Computing and Cyber Systems,\\
-Northern Arizona University, 
-Phone: +1 (928) 523-6869, E-mail: Jarrett.Barber@nau.edu
-
-\noindent {\bf Alex Groce}, collaborator on research papers and grants.\\
-Associate Professor, School of Informatics, Computing and Cyber Systems,\\
-Northern Arizona University, 
-Phone: +1 (928) 523-8263, E-mail: Alex.Groce@nau.edu
-
-\noindent {\bf Fatemeh Afghah}, collaborator on research papers and grants.\\
-Associate Professor, Clemson University, Phone: +1 (864) 656-0100, E-mail: fafghah@clemson.edu, Web: \url{https://fafghah.people.clemson.edu/}
-
-\noindent {\bf Guillem Rigaill}, collaborator on research papers and grants.\\
-Researcher at INRAE (French Agronomy Research Institute)\\
-Phone: +33 (0) 1 64 85 35 44, E-mail: guillem.rigaill@inrae.fr\\
-Web: \url{http://www.math-evry.cnrs.fr/members/Grigaill/welcome}
-
-\noindent {\bf Rebecca Killick}, collaborator on a conference tutorial.\\
-Professor of Statistics at Lancaster University\\
-Phone: +44 (0)1524 593780, E-mail: r.killick@lancaster.ac.uk\\
-Web: \url{http://www.lancs.ac.uk/~killick/}
 
 \end{resume}
 \end{document}
