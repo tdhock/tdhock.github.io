@@ -5,10 +5,14 @@ description: Different options for internal and external sharing
 ---
 
 Here is a summary of my current understanding of cloud storage options
-available to us at NAU, and to our collaborators.
+available to us at NAU, and to our collaborators. [Link to official
+docs](https://in.nau.edu/its/filesharing-storage/).
 
-- [OneDrive](https://in.nau.edu/its/onedrive-for-business/): 1TB free.
-- [GoogleDrive](https://in.nau.edu/its/google-drive/): 25GB free.
+- [OneDrive](https://in.nau.edu/its/onedrive-for-business/): 1TB free,
+  unable to share with anyone on the internet (only with NAU or people
+  on a list who login, called to confirm this with ITS on 5 Sep 2023).
+- [GoogleDrive](https://in.nau.edu/its/google-drive/): 25GB free (able
+  to share with anyone on the internet without having them login).
 - [Dropbox](https://nau.service-now.com/sp?id=kb_article&article=KB0014469):
   unlimited for $180 per year.
 - [Bonsai](https://in.nau.edu/its/bonsai/): NAU students have access

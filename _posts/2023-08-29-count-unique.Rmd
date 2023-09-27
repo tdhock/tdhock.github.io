@@ -141,3 +141,6 @@ remove](https://github.com/Rdatatable/data.table/issues/5512).
 Exercise for the reader: add some code above to download the markdown
 text string of data to parse (`projects.string`), rather than defining
 it directly in R code.
+
+Exercise 2: modify the regex to capture additional information from
+the markdown (url, year, project).

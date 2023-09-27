@@ -44,12 +44,9 @@ when I double click them. same with firefox. Try Additional Drivers,
 NVIDIA Corporation: C79 [GeForce 9400M] (MacBook5, 1), change from
 Using X.Org X server to Using NVIDIA binary driver.
 
-firefox -> settings, 
-- privacy and security, 
-  - do not track always, 
-  - logins and password uncheck,
-add-ons and themes, ublock origin, add to firefox.
-- 
+firefox -> settings -> privacy and security -> do not track always,
+logins and password uncheck. add-ons and themes -> ublock origin, add
+to firefox.
 
 Settings, trackpad, natural scrolling off.
 
@@ -226,9 +223,10 @@ git config --global user.email "toby.hocking@r-project.org"
 git config --global user.name "Toby Dylan Hocking"
 ```
 
-maybe install miniconda.
+maybe install python packages + miniconda.
 
 ```
+sudo apt install python3-pip python3-flake8 python3-setuptools python3-venv # for elpy
 conda create -n new-env
 conda activate new-env
 conda install python=3.10
@@ -247,6 +245,18 @@ cd gcc-releases-gcc-13.1.0
 ./configure --prefix=$HOME --disable-multilib
 make
 make install
+```
+
+or below we additionally specify
+
+* PATH not including $HOME
+* CFLAGS/CXXFLAGS/CPPFLAGS with -march=core2
+* --enable-ld to build and install ld (linker not installed by
+  default, there may be problems using the $HOME/bin compilers with
+  /usr/bin/ld)
+
+```
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/snap/emacs/current/usr/bin CFLAGS=-march=core2 CXXFLAGS=-march=core2 CPPFLAGS=-march=core2 ./configure --prefix=$HOME --disable-multilib --enable-ld
 ```
 
 ### no pango, R package vignette building fails, x11 font error
@@ -365,8 +375,7 @@ At runtime it works:
 ### brightness buttons
 
 screen brightness buttons do not respond on 20.04,
-https://www.debugpoint.com/2-ways-fix-laptop-brightness-problem-ubuntu-linux/
-method 2 worked for changing the brightness
+[method 2 on this page](https://www.debugpoint.com/2-ways-fix-laptop-brightness-problem-ubuntu-linux/) worked for changing the brightness
 
 ```
 sudo add-apt-repository ppa:apandada1/brightness-controller
@@ -385,9 +394,7 @@ kernel before I actually tried the new kernel and found out it does
 not work. I guess the solution should be reinstalling the older
 kernel, but how?
 
-Hold down option to boot from live USB drive.
-
-https://askubuntu.com/questions/281119/how-do-you-run-update-grub
+[Hold down option to boot from live USB drive](https://askubuntu.com/questions/281119/how-do-you-run-update-grub).
 
 ```
 sudo su
@@ -404,8 +411,7 @@ Found linux images: 5.15.0-75 and 76 generic.
 Restart. boot menu now instead of black screen, select 75 generic,
 Loading initial ramdisk ... freeze.
 
-https://askubuntu.com/questions/1240152/boot-freezes-and-loading-initial-ramdisk
-says to try the following but that did not work for me:
+[This page](https://askubuntu.com/questions/1240152/boot-freezes-and-loading-initial-ramdisk) says to try the following but that did not work for me:
 
 ```
 GRUB_CMDLINE_LINUX_DEFAULT="dis_ucode_ldr"
