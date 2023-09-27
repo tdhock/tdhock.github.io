@@ -9,5 +9,7 @@ from my CS105 class. [Here is a good
 tutorial](http://www.ittc.ku.edu/~heechul/courses/eecs678/F16/labs/lab2/GDBLab.pdf),
 [archive](http://web.archive.org/web/20160928182818/http://www.ittc.ku.edu/~heechul/courses/eecs678/F16/labs/lab2/GDBLab.pdf)
 about how to use valgrind to find memory errors, and how to use gdb
-for debugging. TODO expand to show emacs integration.
+for debugging.
+
+[Another tutorial about gdb in emacs](https://kb.iu.edu/d/aqsy).
 
