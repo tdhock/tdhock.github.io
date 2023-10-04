@@ -25,7 +25,7 @@ package `data.table`. In the grant application, I made some figures
 that show how many other R packages depend on `data.table`, and I
 showed trends over time, thanks to the historical CRAN meta-data which
 is available on the The Microsoft R Application Network (MRAN) [time
-machine](https://mran.microsoft.com/documents/rro/reproducibility#timemachine),
+machine](https://web.archive.org/web/20230502043506mp_/https://mran.microsoft.com/package/CRAN-time-machine),
 which keeps daily CRAN snapshots, so we can access historical
 packages.rds files going back to its inception on September
 17th, 2014. However it is going offline in July 2023, so here we
@@ -112,3 +112,6 @@ nrow(packages.mat)
 
 The output above shows the number of packages available on the CRAN,
 as of 23 Feb 2023.
+
+UPDATE 21 Sep 2023: MRAN has been taken down so link above was changed
+to wayback machine.
