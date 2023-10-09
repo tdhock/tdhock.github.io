@@ -1,0 +1,203 @@
+---
+layout: post
+title: data.table asymptotic timings
+description: Motivational figures
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2023-10-08-dt-atime-figures/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=12,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+if(FALSE){
+  knitr::knit("2023-10-08-dt-atime-figures.Rmd")
+}
+```
+
+The purpose of this vignette is to make figures which show the
+efficiency of data.table.
+
+### fwrite: fast CSV writer
+
+```{r}
+library(data.table)
+library(readr)
+library(arrow)
+library(ggplot2)
+write.colors <- c(
+  "readr::write_csv"="#9970AB",
+  "data.table::fwrite"="#D6604D",
+  "write_csv_arrow"="#BF812D", 
+  "utils::write.csv"="deepskyblue")
+n.rows <- 100
+seconds.limit <- 1
+atime.write.vary.cols <- atime::atime(
+  N=as.integer(10^seq(2, 6, by=0.5)),
+  setup={
+    set.seed(1)
+    input.vec <- rnorm(n.rows*N)
+    input.mat <- matrix(input.vec, n.rows, N)
+    input.df <- data.frame(input.mat)
+  },
+  seconds.limit = seconds.limit,
+  "data.table::fwrite"={
+    data.table::fwrite(input.df, tempfile(), showProgress = FALSE)
+  },
+  "write_csv_arrow"={
+    arrow::write_csv_arrow(input.df, tempfile())
+  },
+  "readr::write_csv"={
+    readr::write_csv(input.df, tempfile(), progress = FALSE)
+  },
+  "utils::write.csv"=utils::write.csv(input.df, tempfile()))
+refs.write.vary.cols <- atime::references_best(atime.write.vary.cols)
+pred.write.vary.cols <- predict(refs.write.vary.cols)
+
+gg.write <- plot(pred.write.vary.cols)+
+  theme(text=element_text(size=20))+
+  ggtitle(sprintf("Write real numbers to CSV, %d x N", n.rows))+
+  scale_x_log10("N = number of columns to write")+
+  scale_y_log10("Computation time (seconds)
+median line, min/max band
+over 10 timings")+
+  facet_null()+
+  scale_fill_manual(values=write.colors)+
+  scale_color_manual(values=write.colors)
+gg.write
+
+png("2023-10-08-write.png", width=12, height=4, units="in", res=200)
+print(gg.write)
+dev.off()
+```
+
+### fread: fast CSV reader
+
+```{r}
+read.colors <- c(
+  "readr::read_csv\n(lazy=TRUE)"="#9970AB",
+  "readr::read_csv\n(lazy=FALSE)"="#9970AB",
+  "data.table::fread"="#D6604D",
+  "read_csv_arrow"="#BF812D", 
+  "utils::read.csv"="deepskyblue")
+atime.read.vary.cols <- atime::atime(
+  N=as.integer(10^seq(2, 6, by=0.5)),
+  setup={
+    set.seed(1)
+    input.vec <- rnorm(n.rows*N)
+    input.mat <- matrix(input.vec, n.rows, N)
+    input.df <- data.frame(input.mat)
+    input.csv <- tempfile()
+    fwrite(input.df, input.csv)
+  },
+  seconds.limit = seconds.limit,
+  "data.table::fread"={
+    data.table::fread(input.csv, showProgress = FALSE)
+  },
+  "read_csv_arrow"={
+    arrow::read_csv_arrow(input.csv)
+  },
+  "readr::read_csv\n(lazy=TRUE)"={
+    readr::read_csv(input.csv, progress = FALSE, show_col_types = FALSE, lazy=TRUE)
+  },
+  "readr::read_csv\n(lazy=FALSE)"={
+    readr::read_csv(input.csv, progress = FALSE, show_col_types = FALSE, lazy=FALSE)
+  },
+  "utils::read.csv"=utils::read.csv(input.csv))
+refs.read.vary.cols <- atime::references_best(atime.read.vary.cols)
+pred.read.vary.cols <- predict(refs.read.vary.cols)
+
+gg.read <- plot(pred.read.vary.cols)+
+  theme(text=element_text(size=20))+
+  ggtitle(sprintf("Read real numbers from CSV, %d x N", n.rows))+
+  scale_x_log10("N = number of columns to read")+
+  scale_y_log10("Computation time (seconds)
+median line, min/max band
+over 10 timings")+
+  facet_null()+
+  scale_fill_manual(values=read.colors)+
+  scale_color_manual(values=read.colors)
+gg.read
+
+png("2023-10-08-read.png", width=12, height=4, units="in", res=200)
+print(gg.read)
+dev.off()
+```
+
+### Summarize by group
+
+```{r}
+ml.colors <- c(
+  "dplyr::summarise"="#9970AB",
+  "[.data.table"="#D6604D",
+  "stats::aggregate"="deepskyblue")
+options(dplyr.summarise.inform=FALSE)
+n.folds <- 10
+ml.atime <- atime::atime(
+  N=as.integer(10^seq(0, 7, by=0.5)),
+  setup={
+    loss.dt <- data.table(
+      name="loss", 
+      fold=rep(1:n.folds, each=2*N),
+      loss=rnorm(2*N*n.folds),
+      set=rep(c("subtrain","validation"),each=N),
+      epoch=1:N,
+      key=c("set","epoch","fold"))
+  },
+  seconds.limit=seconds.limit,
+  "[.data.table"={
+    loss.dt[, .(
+      loss_length=.N,
+      loss_mean=mean(loss),
+      loss_sd=sd(loss)
+    ), by=.(set, epoch)]
+  },
+  "stats::aggregate"={
+    res <- stats::aggregate(
+      loss ~ set + epoch, 
+      loss.dt, 
+      function(values)list(c(
+        loss_length=length(values),
+        loss_mean=mean(values), 
+        loss_sd=sd(values))))
+    data.frame(
+      subset(res, select=-loss), 
+      do.call(rbind, res$loss))
+  },
+  "dplyr::summarise"={
+    loss.dt |> 
+      dplyr::group_by(set, epoch) |> 
+      dplyr::summarise(
+        loss_length=length(loss),
+        loss_mean=mean(loss), 
+        loss_sd=sd(loss))
+  })
+
+ml.refs <- atime::references_best(ml.atime)
+ml.pred <- predict(ml.refs)
+ml.gg <- plot(ml.pred)+
+  theme(text=element_text(size=20))+
+  ggtitle(sprintf("Mean,SD,Length over %d real numbers, N times", n.folds))+
+  scale_x_log10("N = number of Mean,SD,Length to compute")+
+  scale_y_log10("Computation time (seconds)
+median line, min/max band
+over 10 timings")+
+  facet_null()+
+  scale_fill_manual(values=ml.colors)+
+  scale_color_manual(values=ml.colors)
+ml.gg
+
+png("2023-10-08-summarize.png", width=12, height=4, units="in", res=200)
+print(ml.gg)
+dev.off()
+```
+
+### version info
+
+```{r}
+sessionInfo()
+```
