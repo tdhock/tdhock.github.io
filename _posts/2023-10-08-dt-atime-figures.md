@@ -24,6 +24,7 @@ write.colors <- c(
   "utils::write.csv"="deepskyblue")
 n.rows <- 100
 seconds.limit <- 1
+
 atime.write.vary.cols <- atime::atime(
   N=as.integer(10^seq(2, 6, by=0.5)),
   setup={
@@ -43,6 +44,13 @@ atime.write.vary.cols <- atime::atime(
     readr::write_csv(input.df, tempfile(), progress = FALSE)
   },
   "utils::write.csv"=utils::write.csv(input.df, tempfile()))
+```
+
+```
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+```
+
+```r
 refs.write.vary.cols <- atime::references_best(atime.write.vary.cols)
 pred.write.vary.cols <- predict(refs.write.vary.cols)
 
@@ -74,24 +82,6 @@ gg.write
 ```
 
 ![plot of chunk write](/assets/img/2023-10-08-dt-atime-figures/write-1.png)
-
-```r
-png("2023-10-08-write.png", width=12, height=4, units="in", res=200)
-print(gg.write)
-```
-
-```
-## Warning: Transformation introduced infinite values in continuous x-axis
-```
-
-```r
-dev.off()
-```
-
-```
-## X11cairo 
-##        2
-```
 
 ### fread: fast CSV reader
 
@@ -130,8 +120,7 @@ atime.read.vary.cols <- atime::atime(
 ```
 
 ```
-## Warning: Some expressions had a GC in every iteration; so filtering is
-## disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
 ```
 
 ```r
@@ -167,24 +156,6 @@ gg.read
 
 ![plot of chunk read](/assets/img/2023-10-08-dt-atime-figures/read-1.png)
 
-```r
-png("2023-10-08-read.png", width=12, height=4, units="in", res=200)
-print(gg.read)
-```
-
-```
-## Warning: Transformation introduced infinite values in continuous x-axis
-```
-
-```r
-dev.off()
-```
-
-```
-## X11cairo 
-##        2
-```
-
 ### Summarize by group
 
 
@@ -196,7 +167,7 @@ ml.colors <- c(
 options(dplyr.summarise.inform=FALSE)
 n.folds <- 10
 ml.atime <- atime::atime(
-  N=as.integer(10^seq(0, 7, by=0.5)),
+  N=as.integer(10^seq(2, 7, by=0.5)),
   setup={
     loss.dt <- data.table(
       name="loss", 
@@ -237,8 +208,7 @@ ml.atime <- atime::atime(
 ```
 
 ```
-## Warning: Some expressions had a GC in every iteration; so filtering is
-## disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
 ```
 
 ```r
@@ -273,23 +243,118 @@ ml.gg
 
 ![plot of chunk summarize](/assets/img/2023-10-08-dt-atime-figures/summarize-1.png)
 
+### Summarize by group, expanded
+
+The previous section is simpler to explain, whereas this section is
+more comprehensive/fair, because it shows versions of `data.table`
+with and without key. Both versions are much faster than the
+competitors, though.
+
+
 ```r
-png("2023-10-08-summarize.png", width=12, height=4, units="in", res=200)
-print(ml.gg)
+options(dplyr.summarise.inform=FALSE)
+n.folds <- 10
+ml.exp.atime <- atime::atime(
+  N=as.integer(10^seq(2, 7, by=0.5)),
+  setup={
+    loss.dt <- data.table(
+      name="loss", 
+      fold=rep(1:n.folds, each=2*N),
+      loss=rnorm(2*N*n.folds),
+      set=rep(c("subtrain","validation"),each=N),
+      epoch=1:N)
+    key.dt <- data.table(loss.dt, key=c("set","epoch","fold"))
+  },
+  seconds.limit=seconds.limit,
+  "[.data.table(no key)"={
+    loss.dt[, .(
+      loss_length=.N,
+      loss_mean=mean(loss),
+      loss_sd=sd(loss)
+    ), by=.(set, epoch)]
+  },
+  "[.data.table(key)"={
+    key.dt[, .(
+      loss_length=.N,
+      loss_mean=mean(loss),
+      loss_sd=sd(loss)
+    ), by=.(set, epoch)]
+  },
+  "stats::aggregate"={
+    res <- stats::aggregate(
+      loss ~ set + epoch, 
+      loss.dt, 
+      function(values)list(c(
+        loss_length=length(values),
+        loss_mean=mean(values), 
+        loss_sd=sd(values))))
+    data.frame(
+      subset(res, select=-loss), 
+      do.call(rbind, res$loss))
+  },
+  "dplyr::summarise"={
+    loss.dt |> 
+      dplyr::group_by(set, epoch) |> 
+      dplyr::summarise(
+        loss_length=length(loss),
+        loss_mean=mean(loss), 
+        loss_sd=sd(loss))
+  },
+  "collapse::fsummarise"={
+    loss.dt |> 
+      collapse::fgroup_by(set, epoch) |> 
+      collapse::fsummarise(
+        loss_length=length(loss),
+        loss_mean=mean(loss), 
+        loss_sd=sd(loss))
+  })
+```
+
+```
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+```
+
+```r
+ml.exp.refs <- atime::references_best(ml.exp.atime)
+ml.exp.pred <- predict(ml.exp.refs)
+ml.exp.colors <- c(
+  "collapse::fsummarise"="#5AAE61",
+  "dplyr::summarise"="#9970AB",
+  "[.data.table(key)"="#D6604D",
+  "[.data.table(no key)"="#B6604D",
+  "stats::aggregate"="deepskyblue")
+ml.exp.gg <- plot(ml.exp.pred)+
+  theme(text=element_text(size=20))+
+  ggtitle(sprintf("Mean,SD,Length over %d real numbers, N times", n.folds))+
+  scale_x_log10("N = number of Mean,SD,Length to compute")+
+  scale_y_log10("Computation time (seconds)
+median line, min/max band
+over 10 timings")+
+  facet_null()+
+  scale_fill_manual(values=ml.exp.colors)+
+  scale_color_manual(values=ml.exp.colors)
+```
+
+```
+## Scale for x is already present.
+## Adding another scale for x, which will replace the existing scale.
+## Scale for y is already present.
+## Adding another scale for y, which will replace the existing scale.
+```
+
+```r
+ml.exp.gg
 ```
 
 ```
 ## Warning: Transformation introduced infinite values in continuous x-axis
 ```
 
-```r
-dev.off()
-```
-
-```
-## X11cairo 
-##        2
-```
+![plot of chunk summarize-exp](/assets/img/2023-10-08-dt-atime-figures/summarize-exp-1.png)
 
 ### version info
 
@@ -308,12 +373,10 @@ sessionInfo()
 ## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C              
-##  [3] LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8   
-##  [7] LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-## [11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8       
+##  [4] LC_COLLATE=fr_FR.UTF-8     LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8   
+##  [7] LC_PAPER=fr_FR.UTF-8       LC_NAME=C                  LC_ADDRESS=C              
+## [10] LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
 ## time zone: America/Phoenix
 ## tzcode source: system (glibc)
@@ -325,20 +388,16 @@ sessionInfo()
 ## [1] ggplot2_3.4.3     arrow_13.0.0      readr_2.1.4       data.table_1.14.8
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] bit_4.0.5              gtable_0.3.4           highr_0.10            
-##  [4] dplyr_1.1.2            compiler_4.3.1         crayon_1.5.2          
-##  [7] tidyselect_1.2.0       parallel_4.3.1         assertthat_0.2.1      
-## [10] tidyr_1.3.0            textshaping_0.3.6      systemfonts_1.0.4     
-## [13] scales_1.2.1           directlabels_2023.8.25 lattice_0.21-8        
-## [16] R6_2.5.1               labeling_0.4.3         generics_0.1.3        
-## [19] knitr_1.43             tibble_3.2.1           munsell_0.5.0         
-## [22] atime_2023.4.27        pillar_1.9.0           tzdb_0.3.0            
-## [25] rlang_1.1.1            utf8_1.2.3             xfun_0.40             
-## [28] quadprog_1.5-8         bit64_4.0.5            cli_3.6.1             
-## [31] withr_2.5.0            magrittr_2.0.3         grid_4.3.1            
-## [34] vroom_1.6.3            hms_1.1.3              lifecycle_1.0.3       
-## [37] vctrs_0.6.3            bench_1.1.3            evaluate_0.21         
-## [40] glue_1.6.2             farver_2.1.1           ragg_1.2.5            
-## [43] profmem_0.6.0          fansi_1.0.4            colorspace_2.1-0      
-## [46] purrr_1.0.2            tools_4.3.1            pkgconfig_2.0.3
+##  [1] bit_4.0.5              gtable_0.3.4           highr_0.10             dplyr_1.1.2           
+##  [5] compiler_4.3.1         crayon_1.5.2           Rcpp_1.0.11            tidyselect_1.2.0      
+##  [9] collapse_1.9.6         parallel_4.3.1         assertthat_0.2.1       scales_1.2.1          
+## [13] directlabels_2023.8.25 lattice_0.21-8         R6_2.5.1               generics_0.1.3        
+## [17] knitr_1.43             tibble_3.2.1           munsell_0.5.0          atime_2023.10.9       
+## [21] pillar_1.9.0           tzdb_0.3.0             rlang_1.1.1            utf8_1.2.3            
+## [25] xfun_0.40              quadprog_1.5-8         bit64_4.0.5            cli_3.6.1             
+## [29] withr_2.5.0            magrittr_2.0.3         grid_4.3.1             vroom_1.6.3           
+## [33] hms_1.1.3              lifecycle_1.0.3        vctrs_0.6.3            bench_1.1.3           
+## [37] evaluate_0.21          glue_1.6.2             farver_2.1.1           profmem_0.6.0         
+## [41] fansi_1.0.4            colorspace_2.1-0       purrr_1.0.2            tools_4.3.1           
+## [45] pkgconfig_2.0.3
 ```
