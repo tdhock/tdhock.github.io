@@ -1,0 +1,192 @@
+---
+layout: post
+title: data.table CRAN diffs
+description: Verifying consistency between CRAN and github
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2023-11-01-dt-cran-diffs/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=12,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+if(FALSE){
+  knitr::knit("2023-11-01-dt-cran-diffs.Rmd")
+}
+```
+
+As a part of my NSF POSE funded project about expanding the ecosystem
+of users and contributors around the `data.table` package in R, it
+will be important to create tools that increase developer confidence
+in the release process. One tool that could be useful is monitoring
+the CRAN code to see if it is consistent with the corresponding tag in
+the github repo. In this post I aim to create a proof of concept. 
+
+## Getting old versions from CRAN archive
+
+The data.table cran archive is
+
+https://cran.r-project.org/src/contrib/Archive/data.table/
+
+A [previous post](https://tdhock.github.io/blog/2022/release-history/)
+explained how to parse the Archive, which we do using the code below:
+
+```{r}
+R.dir <- "~/R"
+Archive.dir <- file.path(R.dir, "Archive")
+dir.create(Archive.dir, showWarnings = FALSE)
+Archive.url <- "https://cloud.r-project.org/src/contrib/Archive/"
+get_Archive <- function(Package){
+  pkg.html <- file.path(Archive.dir, paste0(Package, ".html"))
+  if(!file.exists(pkg.html)){
+    u <- paste0(Archive.url, Package)
+    download.file(u, pkg.html)
+  }
+  nc::capture_all_str(
+    pkg.html,
+    tar.gz=list(
+      paste0(Package, "_"),
+      version="[0-9.-]+",
+      "[.]tar[.]gz"),
+    "</a>\\s+",
+    date.str=".*?",
+    "\\s"
+  )[order(date.str)]
+}
+(Archive.dt <- get_Archive("data.table"))
+```
+
+The table above contains one row for every CRAN release of
+`data.table`. 
+
+## github repo tags
+
+Which of the versions above has a corresponding tag on github? First
+we get all the tags in the github repo:
+
+```{r}
+dt.dir <- file.path(R.dir, "data.table")
+(tag.tib <- gert::git_tag_list(repo=dt.dir))
+```
+
+## intersection of tags and CRAN versions
+
+The table below shows what versions are different between the github
+tags and CRAN:
+
+```{r}
+library(data.table)
+tag.dt <- data.table(tag.tib)[, .(version=name)]
+setkey(tag.dt, version)
+setkey(Archive.dt, version)
+tag.dt[!Archive.dt]
+Archive.dt[!tag.dt]
+```
+
+The tables above show that there are currently 7 tags which were never
+submitted to CRAN, and there are 5 CRAN versions which never got a
+tag. For this analysis, I am interested in the intersection (versions
+with both a tag on github, and a release on CRAN):
+
+```{r}
+(both.dt <- tag.dt[Archive.dt, nomatch=0L])
+```
+
+The table above shows the versions in the intersection. 
+
+## git status and diff
+
+Below we do the following steps for each version:
+
+* clone github repo and checkout that version/tag,
+* download source package from CRAN, then untar it so that the files
+  over-write the files in the github clone,
+* run git status and git diff to see what files have changed or have
+  been added.
+
+```{r}
+versions.dir <- file.path(R.dir,"data.table-versions")
+versions.dt.dir <- file.path(versions.dir, "data.table")
+diff.csv <- file.path(versions.dir,"diff.csv")
+status.csv <- file.path(versions.dir,"status.csv")
+dir.create(versions.dir, showWarnings = FALSE)
+if(file.exists(diff.csv)){
+  diff.dt <- fread(diff.csv)
+  status.dt <- fread(status.csv)
+}else{
+  diff.dt.list <- list()
+  status.dt.list <- list()
+  for(version.i in 1:nrow(both.dt)){
+    version.row <- both.dt[version.i]
+    system(paste("cd",versions.dir,"&& git clone",dt.dir))
+    system(paste("cd",versions.dt.dir,"&& git checkout",version.row$version))
+    version.url <- paste0(Archive.url,"data.table/",version.row$tar.gz)
+    version.tar.gz <- file.path(versions.dir,version.row$tar.gz)
+    if(!file.exists(version.tar.gz))download.file(version.url, version.tar.gz)
+    system(paste("cd",versions.dir,"&& tar xf",version.row$tar.gz))
+    meta.row <- version.row[,.(version)]
+    status.dt.list[[version.i]] <- data.table(
+      meta.row, gert::git_status(repo=versions.dt.dir))
+    diff.dt.list[[version.i]] <- data.table(
+      meta.row, gert::git_diff(repo=versions.dt.dir))
+    dest.dir <- file.path(versions.dir,version.row$version)
+    unlink(dest.dir,recursive = TRUE)
+    file.rename(versions.dt.dir,dest.dir)
+  }
+  diff.dt <- rbindlist(diff.dt.list)
+  status.dt <- rbindlist(status.dt.list)
+  fwrite(diff.dt, diff.csv)
+  fwrite(status.dt, status.csv)
+}
+```
+
+Below we look at the status of the most recent dot zero versions:
+
+```{r}
+status.dt[version=="1.14.0"]
+status.dt[version=="1.13.0"]
+status.dt[version=="1.12.0"]
+status.dt[version=="1.11.0"]
+```
+
+Among the files which have been modified, `init.c` is the only
+code. How many modifications to C and R files are there over all
+versions?
+
+```{r}
+status.dt[grepl("[cR]$",file)&status=="modified"]
+```
+
+The table above has 33 rows for modified code files. 19 of them are in
+version 1.2 (very old). Four rows are 1.11.* R code files. The rest
+are init.c modifications in 1.12.0 and newer.
+
+```{r}
+init.dt <- diff.dt[new=="src/init.c"]
+cat(init.dt[1, patch])
+cat(init.dt[.N, patch])
+```
+
+
+The above output shows that the only difference is the version number
+(+ 1.14.0 is from CRAN, -1.14.1 is from github). This is consistent
+with what Matt wrote in [`CRAN_Release.cmd`](https://github.com/Rdatatable/data.table/blob/master/.dev/CRAN_Release.cmd):
+"DO NOT commit or push to GitHub. Leave 4 files
+(.dev/CRAN_Release.cmd, DESCRIPTION, NEWS and init.c) edited and not
+committed. Include these in a single and final bump commit below.  DO
+NOT even use a PR. Because PRs build binaries and we don't want any
+binary versions of even release numbers available from anywhere other
+than CRAN... Bump dllVersion() in init.c ... Push to master ... run
+`git tag 1.14.8 96c..sha..d77` then `git push origin 1.14.8`"
+
+
+## Conclusions
+
+This code can be used to automatically create a report of differences
+and files added in CRAN, with respect to the corresponding github
+tag. This analysis may be useful for encouraging developer
+confidence/trust in the CRAN maintainer.
