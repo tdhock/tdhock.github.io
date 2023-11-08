@@ -89,66 +89,80 @@ See my [Lab Members web page](http://ml.nau.edu/members/).
 
 I have mentored the
 following students in coding free/open-source software.
-- [Arthur Pan](https://github.com/ampurrr), 2023, polars in R.
+- [Arthur Pan](https://github.com/ampurrr), 2023, [polars in
+  R](https://sicheng-pan.github.io/GSoC-2023/).
 - [Jocelyne Chen](https://github.com/ampurr), 2023, [animint2
-  documentation and bug fixes](https://gsoc.ampurr.com).
-- [Yufan Fei](https://github.com/Faye-yufan), 2023, animint2:
-  interactive grammar of graphics.
-- [Yufan Fei](https://github.com/Faye-yufan), 2022, [animint2: interactive
-  grammar of
-  graphics](https://github.com/Faye-yufan/gsoc22-animint/blob/master/README.md).
+  documentation and bug fixes](https://gsoc.ampurr.com) (primary mentor).
+- [Yufan Fei](https://github.com/Faye-yufan),
+  [2022](https://github.com/Faye-yufan/gsoc22-animint/blob/master/README.md)-[2023](https://faye-yufan.github.io/gsoc22-animint/2023-11-04-gsoc23-summary/),
+  animint2: interactive grammar of graphics (primary mentor).
 - [Fabrizio Sandri](https://github.com/FabrizioSandri), 2022,
   [RcppDeepState: github action for fuzz testing C++ code in R
-  packages](https://fabriziosandri.github.io/gsoc-2022-blog/summary/2022/09/08/gsoc-summary.html).
+  packages](https://fabriziosandri.github.io/gsoc-2022-blog/summary/2022/09/08/gsoc-summary.html) (primary mentor).
 - [Daniel Agyapong](https://github.com/EngineerDanny), 2022, [Rperform
   github action for performance testing R
-  packages](https://engineerdanny.github.io/GSOC22-RPerform-Blog/).
+  packages](https://engineerdanny.github.io/GSOC22-RPerform-Blog/)
+  (primary mentor).
 - [Anirban Chetia](https://github.com/Anirban166), 2021, [directlabels
-  improvements](https://github.com/Anirban166/directlabels).
+  improvements](https://github.com/Anirban166/directlabels) (primary mentor).
 - [Diego Urgell](https://github.com/diego-urgell), 2021,
   [BinSeg](https://github.com/diego-urgell/BinSeg) efficient C++
-  implementation of binary segmentation.
-- [Mark Nawar](https://github.com/Mark-Nawar), 2021, [re2r back on CRAN](https://github.com/rstats-gsoc/gsoc2021/wiki/re2r-back-on-CRAN)
+  implementation of binary segmentation (primary mentor).
+- [Mark Nawar](https://github.com/Mark-Nawar), 2021, [re2r back on CRAN](https://github.com/rstats-gsoc/gsoc2021/wiki/re2r-back-on-CRAN) (primary mentor).
 - [Sanchit Saini](https://github.com/sanchit-saini), 2020,
   [rtracklayer R package
   improvements](https://github.com/rstats-gsoc/gsoc2020/wiki/rtracklayer-improvements).
 - [Himanshu Singh](https://github.com/lazycipher), 2020, [animint2:
   interactive grammar of
-  graphics](https://github.com/tdhock/animint2).
+  graphics](https://github.com/tdhock/animint2) (primary mentor).
 - [Julian Stanley](https://github.com/julianstanley), 2020, [Graphical
   User Interface for gfpop R
-  package](https://github.com/julianstanley/gfpop-gui).
+  package](https://github.com/julianstanley/gfpop-gui) (primary mentor).
 - [Anirban Chetia](https://github.com/Anirban166), 2020,
   [testComplexity R
-  package](https://github.com/Anirban166/testComplexity).
+  package](https://github.com/Anirban166/testComplexity) (primary mentor).
 - [Anuraag Srivastava](https://github.com/as4378), 2019, [Optimal
   Partitioning algorithm and opart R
-  package](https://github.com/as4378/opart).
+  package](https://github.com/as4378/opart) (primary mentor).
 - [Avinash Barnwal](https://github.com/avinashbarnwal/), 2019, [AFT
   and Binomial loss functions for
-  xgboost](https://github.com/avinashbarnwal/GSOC-2019).
-- [Aditya Sam](https://github.com/theadityasam/), 2019, [Elastic net regularized interval regression and iregnet R package](https://theadityasam.github.io/GSOC2019/).
+  xgboost](https://github.com/avinashbarnwal/GSOC-2019) (primary mentor).
+- [Aditya Sam](https://github.com/theadityasam/), 2019, [Elastic net regularized interval regression and iregnet R package](https://theadityasam.github.io/GSOC2019/) (primary mentor).
 - [Alan Williams](https://github.com/aw1231), 2018,
   [SegAnnDB: machine learning system for DNA copy number analysis](https://github.com/tdhock/SegAnnDB),
-  [blog](https://medium.com/alans-gsoc-blog/work-product-a1080d175160).
+  [blog](https://medium.com/alans-gsoc-blog/work-product-a1080d175160) (primary mentor).
 - [Vivek Kumar](https://github.com/vivekktiwari), 2018,
   [animint2: interactive grammar of graphics](https://github.com/tdhock/animint2),
-  [blog](https://vivekktiwari.github.io/gsoc18/).
+  [blog](https://vivekktiwari.github.io/gsoc18/) (primary mentor).
 - [Johan Larsson](https://github.com/jolars), 2018,
   [sgdnet: SAGA algorithm for sparse linear models](https://github.com/jolars/sgdnet).
 - [Marlin Na](https://github.com/Marlin-Na), 2017,
   [TnT: interactive genome browser](https://github.com/Marlin-Na/TnT).
-- [Rover Van](https://github.com/RoverVan), 2017, [iregnet: regularized interval regression](https://github.com/anujkhare/iregnet).
+- [Rover Van](https://github.com/RoverVan), 2017, [iregnet: regularized interval regression](https://github.com/anujkhare/iregnet) (primary mentor).
+- [Faizan Khan](https://github.com/faizan-khan-iit), 2016--2017, [animint: interactive grammar of graphics](https://github.com/tdhock/animint) (primary mentor).
 - [Abhishek Shrivastava](https://github.com/abstatic), 2016,
-  [SegAnnDB: interactive system for labeling and machine learning in genomic data](https://github.com/tdhock/SegAnnDB).
-- [Faizan Khan](https://github.com/faizan-khan-iit), 2016--2017, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
-- [Anuj Khare](https://github.com/anujkhare), 2016, [iregnet: regularized interval regression](https://github.com/anujkhare/iregnet).
-- [Qin Wenfeng](https://github.com/qinwf), 2016, [re2r: regular expressions](https://github.com/qinwf/re2r).
-- [Akash Tandon](https://github.com/analyticalmonk), 2016, [Rperform: performance testing R packages](https://github.com/analyticalmonk/Rperform).
-- [Ishmael Belghazi](https://github.com/IshmaelBelghazi), 2015, [bigoptim: stochastic average gradient algorithm](https://github.com/IshmaelBelghazi/bigoptim).
-- [Kevin Ferris](https://github.com/kferris10), 2015, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
-- [Tony Tsai](https://github.com/caijun), 2015, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
-- [Carson Sievert](https://github.com/cpsievert), 2014, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
-- [Susan VanderPlas](https://github.com/srvanderplas), 2013, [animint: interactive grammar of graphics](https://github.com/tdhock/animint).
+  [SegAnnDB: interactive system for labeling and machine learning in genomic data](https://github.com/tdhock/SegAnnDB) (primary mentor).
+- [Anuj Khare](https://github.com/anujkhare), 2016, [iregnet: regularized interval regression](https://github.com/anujkhare/iregnet) (primary mentor).
+- [Qin Wenfeng](https://github.com/qinwf), 2016, [re2r: regular expressions](https://github.com/qinwf/re2r) (primary mentor).
+- [Akash Tandon](https://github.com/analyticalmonk), 2016, [Rperform:
+  performance testing R
+  packages](https://github.com/analyticalmonk/Rperform) (primary
+  mentor).
+- [Ishmael Belghazi](https://github.com/IshmaelBelghazi), 2015,
+  [bigoptim: stochastic average gradient
+  algorithm](https://github.com/IshmaelBelghazi/bigoptim) (primary
+  mentor).
+- [Kevin Ferris](https://github.com/kferris10), 2015, [animint:
+  interactive grammar of graphics](https://github.com/tdhock/animint)
+  (primary mentor).
+- [Tony Tsai](https://github.com/caijun), 2015, [animint: interactive
+  grammar of graphics](https://github.com/tdhock/animint) (primary
+  mentor).
+- [Carson Sievert](https://github.com/cpsievert), 2014, [animint:
+  interactive grammar of graphics](https://github.com/tdhock/animint)
+  (primary mentor).
+- [Susan VanderPlas](https://github.com/srvanderplas), 2013, [animint:
+  interactive grammar of graphics](https://github.com/tdhock/animint)
+  (primary mentor).
 
 
