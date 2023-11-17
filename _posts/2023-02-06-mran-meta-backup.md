@@ -1424,7 +1424,9 @@ number of fields/features per package (ncol) has generally increased
 over time, from 41 in 2014, to more than 60 currently. (the one
 exception is when a field was removed in 2019)
 
-UPDATE 23 Feb 2023: I run a cron job every day on NAU Monsoon, and you
+## UPDATE 23 Feb 2023
+
+I run a cron job every day on NAU Monsoon, and you
 can download the CRAN meta-data using:
 
 
@@ -1442,3 +1444,10 @@ nrow(packages.mat)
 
 The output above shows the number of packages available on the CRAN,
 as of 23 Feb 2023.
+
+## UPDATE 17 Nov 2023
+
+MRAN has been taken offline, but you can still see what it looked like
+by [using the wayback
+machine](https://mran.microsoft.com/documents/rro/reproducibility#timemachine).
+
