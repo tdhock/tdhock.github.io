@@ -1,0 +1,266 @@
+---
+layout: post
+title: Comparing machine learning frameworks in R
+description: for loop, mlr3, tidymodels
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2023-11-28-comparing-ml-frameworks/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=12,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+if(FALSE){
+  knitr::knit("2023-11-28-comparing-ml-frameworks.Rmd")
+}
+```
+
+The purpose of this article is to compare coding cross-validation /
+machine learning experiments, using various techniques in R:
+
+* good old for loop
+* mlr3
+* tidymodels
+
+### download data
+
+Say we want to compare prediction accuracy of two machine learning
+algorithms (linear model and nearest neighbors), on two different data
+sets (spam and zip). First we download the data, using the code below:
+
+```{r write}
+library(data.table)
+data.url <- "https://hastie.su.domains/ElemStatLearn/datasets/"
+data.set <- function(data.name, data.file, label.col){
+  data.table(data.name, data.file, label.col)
+}
+data.meta <- rbind(
+  data.set("zip", "zip.test.gz", 1),
+  data.set("spam", "spam.data", 58))
+data.list <- list()
+for(data.i in 1:nrow(data.meta)){
+  data.row <- data.meta[data.i]
+  if(!file.exists(data.row$data.file)){
+    download.file(paste0(data.url,data.row$data.file),data.row$data.file)
+  }
+  data.dt <- data.table::fread(data.row$data.file)
+  data.list[[data.row$data.name]] <- list(
+    input.mat=as.matrix(data.dt[, -data.row$label.col, with=FALSE]),
+    output.vec=factor(data.dt[[data.row$label.col]]))
+}
+str(data.list)
+```
+
+### good old for loop
+
+```{r}
+n.folds <- 3
+uniq.folds <- 1:n.folds
+accuracy.dt.list <- list()
+for(data.name in names(data.list)){
+  one.data <- data.list[[data.name]]
+  n.obs <- length(one.data$output.vec)
+  set.seed(1)
+  fold.vec <- sample(rep(uniq.folds, l=n.obs))
+  for(test.fold in uniq.folds){
+    is.test <- fold.vec==test.fold
+    is.set.list <- list(test=is.test, train=!is.test)
+    one.data.split <- list()
+    for(set.name in names(is.set.list)){
+      is.set <- is.set.list[[set.name]]
+      one.data.split[[set.name]] <- list(
+        set.obs=sum(is.set),
+        input.mat=one.data$input.mat[is.set,],
+        output.vec=one.data$output.vec[is.set])
+    }
+    label.counts <- data.table(label=one.data.split$train$output.vec)[
+    , .(count=.N), by=label
+    ][
+      order(-count)
+    ]
+    most.freq.label <- label.counts$label[1]
+    glmnet.model <- with(one.data.split$train, glmnet::cv.glmnet(
+      input.mat, output.vec, family="multinomial"))
+    pred.list <- list(
+      cv_glmnet=factor(predict(
+        glmnet.model, one.data.split$test$input.mat, type="class")),
+      featureless=rep(most.freq.label, one.data.split$test$set.obs),
+      "1nn"=class::knn(
+        one.data.split$train$input.mat,
+        one.data.split$test$input.mat,
+        one.data.split$train$output.vec))
+    for(algorithm in names(pred.list)){
+      pred.vec <- pred.list[[algorithm]]
+      is.correct <- pred.vec == one.data.split$test$output.vec
+      accuracy.percent <- 100*mean(is.correct)
+      accuracy.dt.list[[
+        paste(data.name, test.fold, algorithm)
+        ]] <- data.table(
+          data.name, test.fold, algorithm, accuracy.percent)
+    }
+  }
+}
+(accuracy.dt <- rbindlist(accuracy.dt.list))
+```
+
+The results can be visualized using the figure below,
+
+```{r}
+library(ggplot2)
+ggplot()+
+  geom_point(aes(
+    accuracy.percent, algorithm),
+    shape=1,
+    data=accuracy.dt)+
+  facet_grid(. ~ data.name, labeller=label_both, scales="free")
+```
+
+### mlr3
+
+https://mlr3book.mlr-org.com/chapters/chapter3/evaluation_and_benchmarking.html#sec-benchmarking is what we did above, they call it benchmarking.
+
+https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.kknn.html man page for nearest neighbors classification.
+
+https://mlr3.mlr-org.com/reference/Task.html create your own task from a data table.
+
+https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.cv_glmnet.html man page for regularized linear model.
+
+https://mlr3.mlr-org.com/reference/Learner.html#setting-hyperparameters how to set hyper-params.
+
+```{r}
+list.of.tasks <- list()
+for(data.name in names(data.list)){
+  one.data <- data.list[[data.name]]
+  one.dt <- with(one.data, data.table(input.mat, output.vec))
+  list.of.tasks[[data.name]] <- mlr3::TaskClassif$new(
+    data.name, one.dt, target="output.vec")
+}
+list.of.tasks
+```
+
+The code above defines the list of tasks / data sets. 
+
+The code below defines the learning algorithms. Note how we set
+hyper-parameters to obtain a consistent result with previous for loop
+code.
+
+```{r}
+library(mlr3learners)
+list.of.learners <- mlr3::lrns(c(
+  "classif.cv_glmnet",
+  "classif.featureless"))
+(nn.learner <- mlr3learners::LearnerClassifKKNN$new())
+nn.learner$param_set$values <- list(k=1, scale=FALSE)
+nn.learner$id <- "classif.1nn"
+list.of.learners[["classif.1nn"]] <- nn.learner
+list.of.learners
+```
+
+Below we define the benchmark grid, (combinations of data sets and
+learning algorithms)
+
+```{r}
+set.seed(1)
+(benchmark.design <- mlr3::benchmark_grid(
+  list.of.tasks,
+  list.of.learners,
+  mlr3::rsmp("cv", folds = n.folds)))
+```
+
+Below we run the experiment,
+
+```{r}
+benchmark.result <- mlr3::benchmark(benchmark.design)
+(score.dt <- benchmark.result$score())
+```
+
+Below we convert column names for consistency with the previous
+section,
+
+```{r}
+(mlr3.dt <- score.dt[, .(
+  data.name=task_id,
+  test.fold=iteration,
+  algorithm=factor(
+    sub("classif.", "", learner_id),
+    c("featureless","cv_glmnet","kknn")),
+  accuracy.percent = 100*(1-classif.ce)
+)])
+```
+
+Below we plot the results,
+
+```{r}
+ggplot()+
+  geom_point(aes(
+    accuracy.percent, algorithm),
+    shape=1,
+    data=mlr3.dt)+
+  facet_grid(. ~ data.name, labeller=label_both, scales="free")
+```
+
+### Comparison
+
+Below we compute the combined data table,
+
+```{r}
+(compare.dt <- rbind(
+  data.table(package="base", accuracy.dt),
+  data.table(package="mlr3", mlr3.dt)))
+```
+
+Below we plot the numbers from different frameworks together for comparison,
+
+```{r}
+ggplot()+
+  geom_point(aes(
+    accuracy.percent, algorithm, color=package),
+    shape=1,
+    data=compare.dt)+
+  facet_grid(. ~ data.name, labeller=label_both, scales="free")
+```
+
+### tidymodels
+
+https://parsnip.tidymodels.org/reference/nearest_neighbor.html
+
+https://parsnip.tidymodels.org/reference/details_multinom_reg_glmnet.html
+
+https://www.tidymodels.org/start/resampling/#fit-resamples is the analog of benchmark
+
+TODO specify data set in vfold_cv?
+
+```{r}
+cell_split <- initial_split(cells %>% select(-case), 
+                            strata = class)
+cell_train <- training(cell_split)
+folds <- vfold_cv(cell_train, v = 10)
+rf_wf <- 
+  workflow() %>%
+  add_model(rf_mod) %>%
+  add_formula(class ~ .)
+
+set.seed(456)
+rf_fit_rs <- 
+  rf_wf %>% 
+  fit_resamples(folds)
+```
+
+### version info
+
+```{r}
+sessionInfo()
+```
+
+### TODO
+
+Coming soon, another blog post about how to do generalization to
+different subsets in R, similar to [my previous python
+blog](https://tdhock.github.io/blog/2022/generalization-to-new-subsets/),
+using
+https://mlr3.mlr-org.com/reference/mlr_resamplings_custom_cv.html ->
+provide your own vector for defining CV folds!
