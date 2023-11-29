@@ -1,0 +1,31 @@
+---
+layout: post
+title: Comparing machine learning frameworks in R
+description: for loop, mlr3, tidymodels
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2023-11-29-gen-new-subsets/"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=12,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+if(FALSE){
+  knitr::knit("2023-11-29-gen-new-subsets.Rmd")
+}
+```
+
+### TODO
+
+Coming soon, another blog post about how to do generalization to
+different subsets in R, similar to [my previous python
+blog](https://tdhock.github.io/blog/2022/generalization-to-new-subsets/),
+is it possible using 
+https://mlr3.mlr-org.com/reference/mlr_resamplings_custom_cv.html ->
+provide your own vector for defining CV folds!
+
+  

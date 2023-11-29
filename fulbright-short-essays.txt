@@ -1,0 +1,108 @@
+Country Selection (up to 2,000 characters, including spaces and punctuation)
+
+France is the best match for my project because Paris is a hub for
+change-point detection research. My host Charles Truong is an
+internationally renowned expert who has published several research
+papers in the area of change-point detection algorithms, and he has
+published a widely used Python open-source software package. We began
+communicating with each other on the web, with regards to his
+software, and we met in person for the first time in Summer 2022, when
+I gave a research talk in his lab in Paris, and he participated in the
+invited session that I organized at the Institute for Mathematical
+Statistics meeting in London. We have not yet collaborated on research
+papers, but we have discussed the potential for collaboration for some
+time, so a Fulbright award now would facilitate our working together
+for the first time, on new state-of-the-art algorithms and software
+for change-point detection in large data sequences.
+
+My previous experiences, in graduate school, and in research
+collaborations since then, have prepared me to undertake my project in
+France. In particular, I did both my Master and PHD in Paris
+(2008-2012), where I collaborated with researchers at the Institut
+Curie on change-point detection algorithms for large genomic data,
+with applications to childhood cancer diagnosis. Since then, I have
+been working in Japan (2013), Canada (2014-2018) and USA
+(2018-present) while continuing this line of research in about 10
+collaborative papers with French colleagues (with several short visits
+to France since 2012). Furthermore, I am fluent in French since 2009,
+and I practice French every day with my Canadian wife who is a native
+French speaker.
+
+Career Trajectory (up to 1,500 characters, including spaces and punctuation)
+
+My career path started with undergraduate and Master level study in
+Statistics, then became more computational during my PHD, which I did
+in two Machine Learning research labs, with advisors Jean-Philippe
+Vert (Ecole des Mines, Institut Curie) and Francis Bach (INRIA,
+ENS). My post-docs were focused on developing new change-point
+detection algorithms for large genomic data sets, for which I
+developed substantial expertise and an international reputation. Since
+my current professor job at NAU SICCS, I have published several new
+machine learning research papers about change-point detection
+algorithms, but I have also begun research projects in several
+different areas (microbiome interaction detection, image segmentation,
+deep learning, etc). I am already an internationally renowned expert
+in change-point detection, as evidenced by invitations to talk on this
+subject at recent conferences (for example, Joint Statistical Meetings
+2023 in Toronto). A future goal is to write a textbook about
+computational methods for change-point detection, and this Fulbright
+award would help me to achieve this goal by allowing me to continue
+work on change-point detection algorithms, with a new collaborator
+that will certainly share a unique perspective, with new data sets and
+new research directions, that will be useful for my future textbook
+project.
+
+Cultural Preparation (up to 2,000 characters, including spaces and punctuation)
+
+    Please address your familiarity with the host culture, and any other global experiences that prepare you to adjust successfully to life in the host country.
+
+I am very familiar with the culture in France, as I have lived there
+for over four years, during my Master and PHD (2008-2012). I am
+Francophile, meaning that I love French cuisine, visual arts, music,
+etc. I am fluent in French and I have been continuously practicing
+French since 2009. I lived in Montreal (2014-2018) where the official
+language is French, and I married a French-speaking Canadian, with
+whom I practice French every day. I know how to search for housing in
+Paris, and I know how to get around there on public transport or
+bike. Therefore I anticipate no problem at all in adjusting
+successfully to life in France.
+
+From previous experience, a challenge is the French visa system. In
+the past, even if I submitted all required paper work on time, the
+French system would often not be able to get me my official documents
+on time (for example, carte de séjour). To address this challenge, I
+plan to do the visa paper work as soon as I am notified about the
+Fulbright award, and I hope the people at Fulbright can help simplify
+the process in some way.
+
+I am outgoing, extroverted, adaptable, flexible, and culturally
+sensitive, so I would be an ideal cultural ambassador for the US in
+Paris. For example, I have been living married to a French Canadian
+since 2014, and I am sensitive and adaptable to our differences in
+culture. Another example is that I have maintained friendships with
+French people in Paris, who often invite me to social activities, and
+even to sleep at their houses, if I come to visit. Finally, my
+collegiality is evidence by my continued collaborations with French
+colleagues, with whom I have written several research papers on the
+subject of change-point detection algorithms.
+
+Teaching Preparation (only required if your award activity includes teaching) (up to 1,500 characters, including spaces and punctuation)
+
+    How will you make your teaching relevant to the culture(s) and language(s) of the host country?
+
+Almost all of my teaching materials are written in English, and in my
+experience, most researchers in the Paris region have a good
+understanding of written English. When I give a lecture for a
+French-native audience, I typically begin by asking whether they would
+prefer if I speak in French or English, and in the past I have given
+lectures in French. I also invite members of the audience to ask
+questions in French, if they prefer. In all lectures (even with native
+English speaking audiences), when I am asked a question, I verbally
+repeat the question, to ensure that I have understood, before I
+attempt to answer the question. If necessary, I could also translate
+written materials from English to French. Finally, in casual
+conversation with colleagues and students (for example, over coffee or
+lunch, not in a lecture), most people prefer to speak French, in my
+experience, and it will be my pleasure to speak French on these
+occasions.
+

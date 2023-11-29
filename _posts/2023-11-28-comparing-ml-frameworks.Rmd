@@ -11,9 +11,9 @@ fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
   fig.path=fig.path,
-  fig.width=12,
+  fig.width=8,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
+  fig.height=2)
 if(FALSE){
   knitr::knit("2023-11-28-comparing-ml-frameworks.Rmd")
 }
@@ -35,27 +35,34 @@ sets (spam and zip). First we download the data, using the code below:
 ```{r write}
 library(data.table)
 data.url <- "https://hastie.su.domains/ElemStatLearn/datasets/"
-data.set <- function(data.name, data.file, label.col){
+meta <- function(data.name, data.file, label.col){
   data.table(data.name, data.file, label.col)
 }
-data.meta <- rbind(
-  data.set("zip", "zip.test.gz", 1),
-  data.set("spam", "spam.data", 58))
+meta.dt <- rbind(
+  meta("zip", "zip.test.gz", 1),
+  meta("spam", "spam.data", 58))
 data.list <- list()
-for(data.i in 1:nrow(data.meta)){
-  data.row <- data.meta[data.i]
-  if(!file.exists(data.row$data.file)){
-    download.file(paste0(data.url,data.row$data.file),data.row$data.file)
+for(data.i in 1:nrow(meta.dt)){
+  meta.row <- meta.dt[data.i]
+  if(!file.exists(meta.row$data.file)){
+    download.file(paste0(data.url,meta.row$data.file),meta.row$data.file)
   }
-  data.dt <- data.table::fread(data.row$data.file)
-  data.list[[data.row$data.name]] <- list(
-    input.mat=as.matrix(data.dt[, -data.row$label.col, with=FALSE]),
-    output.vec=factor(data.dt[[data.row$label.col]]))
+  data.dt <- data.table::fread(meta.row$data.file)
+  data.list[[meta.row$data.name]] <- list(
+    input.mat=as.matrix(data.dt[, -meta.row$label.col, with=FALSE]),
+    output.vec=factor(data.dt[[meta.row$label.col]]))
 }
 str(data.list)
 ```
 
+The output above shows how the data sets are represented in R, as a
+named list, with one element for each data set. Each element is a list
+of inputs and outputs.
+
 ### good old for loop
+
+One way to code cross-validation in R is to use for loop over data
+sets, fold IDs, split sets (train/test), and algorithms, as in the code below.
 
 ```{r}
 n.folds <- 3
@@ -97,19 +104,23 @@ for(data.name in names(data.list)){
       pred.vec <- pred.list[[algorithm]]
       is.correct <- pred.vec == one.data.split$test$output.vec
       accuracy.percent <- 100*mean(is.correct)
-      accuracy.dt.list[[
-        paste(data.name, test.fold, algorithm)
-        ]] <- data.table(
-          data.name, test.fold, algorithm, accuracy.percent)
+      accuracy.dt.list[[paste(
+        data.name, test.fold, algorithm
+      )]] <- data.table(
+        data.name, test.fold, algorithm, accuracy.percent)
     }
   }
 }
-(accuracy.dt <- rbindlist(accuracy.dt.list))
+(accuracy.dt <- data.table::rbindlist(accuracy.dt.list))
 ```
 
-The results can be visualized using the figure below,
+In each iteration of the inner for loop over algorithm, we compute the
+test accuracy, and store it in a 1-row `data.table` in
+`accuracy.dt.list`. After the for loop, we use `rbindlist` to combine
+each of those rows into a single data table of results, which can be
+visualized using the figure below,
 
-```{r}
+```{r forloop}
 library(ggplot2)
 ggplot()+
   geom_point(aes(
@@ -121,15 +132,25 @@ ggplot()+
 
 ### mlr3
 
-https://mlr3book.mlr-org.com/chapters/chapter3/evaluation_and_benchmarking.html#sec-benchmarking is what we did above, they call it benchmarking.
+There are a number of differences between the code we wrote above, and
+the code we write using the mlr3 framework.
 
-https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.kknn.html man page for nearest neighbors classification.
-
-https://mlr3.mlr-org.com/reference/Task.html create your own task from a data table.
-
-https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.cv_glmnet.html man page for regularized linear model.
-
-https://mlr3.mlr-org.com/reference/Learner.html#setting-hyperparameters how to set hyper-params.
+* in mlr3 terms, we did [benchmarking](https://mlr3book.mlr-org.com/chapters/chapter3/evaluation_and_benchmarking.html#sec-benchmarking).
+* in mlr3 we need to use Learners (instances of R6 class) rather than
+ directly calling the learn/predict functions. 
+* [man page for nearest neighbors
+  classification](https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.kknn.html).
+* [man page for regularized linear
+  model](https://mlr3learners.mlr-org.com/reference/mlr_learners_classif.cv_glmnet.html).
+* in mlr3 terms, each data set is represented as a
+  [Task](https://mlr3.mlr-org.com/reference/Task.html), which can be
+  created from a data table.
+* [reference about how to set hyper-params in
+  mlr3](https://mlr3.mlr-org.com/reference/Learner.html#setting-hyperparameters)
+  (in for loop code above we can set number of neighbors when calling
+  knn function, and it defaulted to 1).
+  
+First we create a list of tasks, each one representing a data set:
 
 ```{r}
 list.of.tasks <- list()
@@ -145,19 +166,17 @@ list.of.tasks
 The code above defines the list of tasks / data sets. 
 
 The code below defines the learning algorithms. Note how we set
-hyper-parameters to obtain a consistent result with previous for loop
-code.
+hyper-parameters (k=1 neighbor, scale=FALSE) to obtain a consistent
+result with previous for loop code.
 
 ```{r}
-library(mlr3learners)
-list.of.learners <- mlr3::lrns(c(
-  "classif.cv_glmnet",
-  "classif.featureless"))
-(nn.learner <- mlr3learners::LearnerClassifKKNN$new())
+nn.learner <- mlr3learners::LearnerClassifKKNN$new()
 nn.learner$param_set$values <- list(k=1, scale=FALSE)
 nn.learner$id <- "classif.1nn"
-list.of.learners[["classif.1nn"]] <- nn.learner
-list.of.learners
+(list.of.learners <- list(
+  nn.learner,
+  mlr3learners::LearnerClassifCVGlmnet$new(),
+  mlr3::LearnerClassifFeatureless$new()))
 ```
 
 Below we define the benchmark grid, (combinations of data sets and
@@ -178,28 +197,156 @@ benchmark.result <- mlr3::benchmark(benchmark.design)
 (score.dt <- benchmark.result$score())
 ```
 
-Below we convert column names for consistency with the previous
-section,
+Above we see the output of the score function, which returns the
+evaluation metrics on the test set. Overall the code above is very
+well organized, and we only need a for loop over data sets (other for
+loops over the provided lists/rsmp folds happen inside of the
+benchmark function call). Below we convert column names for
+consistency with the previous section,
 
 ```{r}
 (mlr3.dt <- score.dt[, .(
   data.name=task_id,
   test.fold=iteration,
-  algorithm=factor(
-    sub("classif.", "", learner_id),
-    c("featureless","cv_glmnet","kknn")),
+  algorithm=sub("classif.", "", learner_id),
   accuracy.percent = 100*(1-classif.ce)
 )])
 ```
 
 Below we plot the results,
 
-```{r}
+```{r mlr3}
 ggplot()+
   geom_point(aes(
     accuracy.percent, algorithm),
     shape=1,
     data=mlr3.dt)+
+  facet_grid(. ~ data.name, labeller=label_both, scales="free")
+```
+
+What if we wanted to tune the number of neighbors? (select the best
+value using cross-validation, rather than just using 1 neighbor which
+may overfit) Exercise for the reader: use
+[mlr3tuning::auto_tuner](https://mlr3tuning.mlr-org.com/reference/auto_tuner.html)
+to implement that as another learner in this section.
+
+### tidymodels
+
+Tidymodels is newer framework with similar goals as mlr3, but it has
+some disadvantages.
+* since it is newer, there is some functionality which is not yet
+  implemented, such as running models on several data sets (equivalent
+  of mlr3's list of tasks in benchmark_grid). The closest analog would
+  be [workflowsets](https://workflowsets.tidymodels.org/) which allows
+  one to specify a list of models/learners, but currently you have to
+  use a for loop over data sets.
+* the nomenclature on data splitting is unclear and potentially
+  confusing (see discussion below).
+
+https://www.tidymodels.org/start/case-study/#data-split explains has confusing/conflicting names for sets.
+* The nomenclature I typically use is derived from the [Deep Learning
+  book](https://www.deeplearningbook.org/). The full data set is split
+  into train and test sets, then the train set is split into subtrain
+  and validation sets. This nomenclature is great because it is
+  unambiguous, unlike the tidymodels nomenclature which uses multiple
+  names for the same set, and the same name for multiple different
+  sets.
+* the functions `initial_split`, `training` and `testing` are used,
+  "let's reserve 25% of the stays to the test set" - I believe this is my
+  train/test split.
+* "we've relied on 10-fold cross-validation as the primary resampling
+  method using rsample::vfold_cv(). This has created 10 different
+  resamples of the training set (which we further split into analysis
+  and assessment sets)" - I believe tidymodels "training" is my train
+  set, split into "analysis" (my subtrain) and "assessment" (my
+  validation).
+* "let's create a single resample called a validation set. In
+  tidymodels, a validation set is treated as a single iteration of
+  resampling. This will be a split from the 37,500 stays that were not
+  used for testing, which we called hotel_other" - I believe
+  tidymodels "other" is my train set.
+* "This split creates two new datasets: the set held out for the
+  purpose of measuring performance, called the validation set, and the
+  remaining data used to fit the model, called the training set." - I
+  believe tidymodels "validation" is the same as mine, whereas
+  tidymodels "training" is my subtrain.
+* Overall the tidymodels nomenclature can be potentially confusing. 
+  * my train set is called "other" or "training" in tidymodels.
+  * my subtrain set is called "analysis" or "training" in tidymodels.
+  * my validation set is called "assessment" or "validation" in tidymodels.
+  
+[Chapter 11 of Tidy Modeling With R online
+book](https://www.tmwr.org/compare) explains how to use workflowsets
+to compare models with resampling (testing).  [Getting started
+materials](https://www.tidymodels.org/start/resampling/#fit-resamples)
+has an intro to resampling in tidymodels.
+
+
+Models/algorithms
+* [null
+  model](https://parsnip.tidymodels.org/reference/null_model.html) is
+  featureless baseline.
+* [nearest
+  neighbors](https://parsnip.tidymodels.org/reference/nearest_neighbor.html)
+* [Regularized linear
+  model](https://parsnip.tidymodels.org/reference/details_multinom_reg_glmnet.html)
+
+```{r}
+tidy.stats.dt.list <- list()
+tidy.acc.dt.list <- list()
+for(data.name in names(data.list)){
+  one.data <- data.list[[data.name]]
+  one.dt <- with(one.data, data.table(input.mat, output.vec))
+  vfold.obj <- rsample::vfold_cv(one.dt, n.folds)
+  my.workflow.set <- workflowsets::workflow_set(
+    preproc = list(
+      base=recipes::recipe(output.vec ~ ., data=one.dt)),
+    models = list(
+      featureless = parsnip::null_model(mode="classification") |>
+        parsnip::set_engine("parsnip"),
+      ## TODO: how to fix error? 2 of 3 resampling: base_cv_glmnet failed with: 1 argument has been tagged for tuning in this component: model_spec. Please use one of the tuning functions (e.g. `tune_grid()`) to optimize them.
+      ## cv_glmnet = parsnip::multinom_reg(penalty = tune::tune(), mixture = 1) |>
+      ##   parsnip::set_engine("glmnet"),
+      "1nn" = parsnip::nearest_neighbor(mode="classification", neighbors=1)
+    )
+  ) |> workflowsets::workflow_map(
+    "fit_resamples", 
+    ## Options to `workflow_map()`: 
+    seed = 1101, verbose = TRUE,
+    ## Options to `fit_resamples()`: 
+    resamples = vfold.obj)
+  tidy.stats.dt.list[[data.name]] <- data.table(
+    data.name, 
+    workflowsets::collect_metrics(my.workflow.set)
+  )[.metric=="accuracy"]
+  for(algo.i in seq_along(my.workflow.set$result)){
+    result.tib <- my.workflow.set$result[[algo.i]]
+    tidy.acc.dt.list[[paste(data.name, algo.i)]] <- data.table::rbindlist(
+      result.tib[[".metrics"]]
+    )[.metric=="accuracy", .(
+      data.name, 
+      test.fold=as.integer(sub("Fold", "", result.tib$id)),
+      algorithm=sub("base_", "", my.workflow.set$wflow_id[algo.i]),
+      accuracy.percent=.estimate*100
+    )]
+  }
+}
+(tidy.stats.dt <- rbindlist(tidy.stats.dt.list))
+(tidy.acc.dt <- rbindlist(tidy.acc.dt.list))
+```
+
+The code above computes nearest neighbors and featureless predictions,
+and stores prediction accuracy for each test set in `tidy.acc.dt`
+(which is rather complicated). It is a bit easier to compute
+`tidy.stats.dt` which is the mean and SD of accuracy over test
+folds. We visualize this data below,
+
+```{r tidymodels}
+ggplot()+
+  geom_point(aes(
+    accuracy.percent, algorithm),
+    shape=1,
+    data=tidy.acc.dt)+
   facet_grid(. ~ data.name, labeller=label_both, scales="free")
 ```
 
@@ -210,45 +357,43 @@ Below we compute the combined data table,
 ```{r}
 (compare.dt <- rbind(
   data.table(package="base", accuracy.dt),
+  data.table(package="tidymodels", tidy.acc.dt),
   data.table(package="mlr3", mlr3.dt)))
 ```
 
 Below we plot the numbers from different frameworks together for comparison,
 
-```{r}
+```{r comparison, fig.height=5}
 ggplot()+
   geom_point(aes(
-    accuracy.percent, algorithm, color=package),
+    accuracy.percent, package),
     shape=1,
     data=compare.dt)+
-  facet_grid(. ~ data.name, labeller=label_both, scales="free")
+  facet_grid(algorithm ~ data.name, labeller=label_both, scales="free")
 ```
 
-### tidymodels
+In the plot above we see that the nearest neighbors algorithm is more
+accuracy in tidymodels, which is because I could not figure out a way
+to turn off scaling. Exercise for the reader: modify the for loop and
+mlr3 code to do scaling, so that the nearest neighbors algorithm is as
+accurate as in tidymodels.
 
-https://parsnip.tidymodels.org/reference/nearest_neighbor.html
+### Conclusions
 
-https://parsnip.tidymodels.org/reference/details_multinom_reg_glmnet.html
+We have explored how to code cross-validation using three methods:
+base R for loop, mlr3 package, tidymodels package. We have seen that
+mlr3 gives consistent results with the base R for loop, whereas
+tidymodels has some limitations (no easy way to implement auto tuning
+glmnet, no consistent names for split sets, not easy to compute test
+accuracy for each fold, etc). Overall I would recommend using base R
+for loops for full control, or mlr3 if you are doing standard
+cross-validation experiments like the one we explored above.
 
-https://www.tidymodels.org/start/resampling/#fit-resamples is the analog of benchmark
+### Related work
 
-TODO specify data set in vfold_cv?
-
-```{r}
-cell_split <- initial_split(cells %>% select(-case), 
-                            strata = class)
-cell_train <- training(cell_split)
-folds <- vfold_cv(cell_train, v = 10)
-rf_wf <- 
-  workflow() %>%
-  add_model(rf_mod) %>%
-  add_formula(class ~ .)
-
-set.seed(456)
-rf_fit_rs <- 
-  rf_wf %>% 
-  fit_resamples(folds)
-```
+Louis Aslett wrote lecture notes for
+[tidymodels](https://www.louisaslett.com/StatML/labs/lab1.html) and
+[mlr3](https://www.louisaslett.com/StatML/labs/lab2.html).
 
 ### version info
 
@@ -256,11 +401,3 @@ rf_fit_rs <-
 sessionInfo()
 ```
 
-### TODO
-
-Coming soon, another blog post about how to do generalization to
-different subsets in R, similar to [my previous python
-blog](https://tdhock.github.io/blog/2022/generalization-to-new-subsets/),
-using
-https://mlr3.mlr-org.com/reference/mlr_resamplings_custom_cv.html ->
-provide your own vector for defining CV folds!
