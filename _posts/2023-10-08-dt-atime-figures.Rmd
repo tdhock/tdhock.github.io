@@ -80,6 +80,7 @@ read.colors <- c(
   "readr::read_csv\n(lazy=FALSE)"="#9970AB",
   "data.table::fread"="#D6604D",
   "read_csv_arrow"="#BF812D", 
+  "read_csv_arrow\n(asDF=FALSE)"="#9F812D", 
   "utils::read.csv"="deepskyblue")
 atime.read.vary.cols <- atime::atime(
   N=as.integer(10^seq(2, 6, by=0.5)),
@@ -97,6 +98,10 @@ atime.read.vary.cols <- atime::atime(
   },
   "read_csv_arrow"={
     arrow::read_csv_arrow(input.csv)
+  },
+  "read_csv_arrow(asDF=FALSE)"={
+    ## https://francoismichonneau.net/2022/10/import-big-csv/
+    arrow::read_csv_arrow(input.csv, as_data_frame=FALSE)
   },
   "readr::read_csv\n(lazy=TRUE)"={
     readr::read_csv(input.csv, progress = FALSE, show_col_types = FALSE, lazy=TRUE)
@@ -205,6 +210,7 @@ ml.exp.atime <- atime::atime(
       set=rep(c("subtrain","validation"),each=N),
       epoch=1:N)
     key.dt <- data.table(loss.dt, key=c("set","epoch","fold"))
+    loss.arrow <- arrow::as_arrow_table(loss.dt)
   },
   seconds.limit=seconds.limit,
   "[.data.table(no key)"={
@@ -241,6 +247,22 @@ ml.exp.atime <- atime::atime(
         loss_mean=mean(loss), 
         loss_sd=sd(loss))
   },
+  ## "arrow:::summarise.ArrowTabular"={
+  ##   loss.arrow |> 
+  ##     dplyr::group_by(set, epoch) |> 
+  ##     dplyr::summarise(
+  ##       ##loss_length=length(loss),#Expression length(loss) is not an aggregate expression or is not supported in Arrow; pulling data into R
+  ##       loss_mean=mean(loss), 
+  ##       loss_sd=sd(loss))
+  ## },
+  "collapse::fnobs/fmean/fsd"={
+    g <- loss.dt[, paste(set, epoch)]
+    x <- loss.dt$loss
+    data.frame(
+      loss_length=collapse::fnobs(x, g),
+      loss_mean=collapse::fmean(x, g),
+      loss_sd=collapse::fsd(x, g))
+  },
   "collapse::fsummarise"={
     loss.dt |> 
       collapse::fgroup_by(set, epoch) |> 
@@ -253,6 +275,8 @@ ml.exp.atime <- atime::atime(
 ml.exp.refs <- atime::references_best(ml.exp.atime)
 ml.exp.pred <- predict(ml.exp.refs)
 ml.exp.colors <- c(
+  "arrow:::summarise.ArrowTabular"="#BF812D",
+  "collapse::fnobs/fmean/fsd"="#3AAE61",
   "collapse::fsummarise"="#5AAE61",
   "dplyr::summarise"="#9970AB",
   "[.data.table(key)"="#D6604D",
