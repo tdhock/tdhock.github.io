@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Comparing machine learning frameworks in R
-description: for loop, mlr3, tidymodels
+title: Generalization to new subsets in R
+description: Coding non-standard cross-validation 
 ---
 
 ```{r Ropts, echo=FALSE}
@@ -27,5 +27,210 @@ blog](https://tdhock.github.io/blog/2022/generalization-to-new-subsets/),
 is it possible using 
 https://mlr3.mlr-org.com/reference/mlr_resamplings_custom_cv.html ->
 provide your own vector for defining CV folds!
-
+https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html
   
+```{r}
+## adapted from https://github.com/mlr-org/mlr3/blob/HEAD/R/ResamplingCustomCV.R
+ResamplingCustomCV = R6Class("ResamplingCustomCV", inherit = Resampling,
+  public = list(
+    initialize = function() {
+      super$initialize(id = "custom_cv", duplicated_ids = FALSE,
+        label = "Custom Split Cross-Validation", man = "mlr3::mlr_resamplings_custom_cv")
+    },
+    instantiate = function(task, f = NULL, col = NULL) {
+      task = assert_task(as_task(task))
+      if (!xor(is.null(f), is.null(col))) {
+        stopf("Either `f` or `col` must be provided")
+      }
+      if (!is.null(col)) {
+        assert_choice(col, task$col_info$id)
+        f = task$data(cols = col)[[1L]]
+        assert_atomic_vector(f, all.missing = FALSE)
+      } else {
+        assert_factor(f, len = task$nrow, all.missing = FALSE)
+      }
+      self$instance = split(task$row_ids, f, drop = TRUE)
+      self$task_hash = task$hash
+      self$task_nrow = task$nrow
+      invisible(self)
+    }
+  ),
+  active = list(
+    #' @template field_iters
+    iters = function(rhs) {
+      assert_ro_binding(rhs)
+      if (self$is_instantiated) length(self$instance) else NA_integer_
+    }
+  ),
+  private = list(
+    .get_train = function(i) {
+      unlist(self$instance[-i], use.names = FALSE) %??% integer()
+    },
+    .get_test = function(i) {
+      self$instance[[i]]
+    }
+  )
+  )
+
+
+task = mlr3::tsk("penguins")
+task$filter(1:10)
+custom = mlr3::rsmp("custom")
+train_sets = list(1:5, 5:10)
+test_sets = list(5:10, 1:5)
+custom$instantiate(task, train_sets, test_sets)
+custom$train_set(2)
+custom$test_set(2)
+```
+
+Let's say there are 1000 rows,
+
+```{r}
+N <- 1000
+library(data.table)
+(full.dt <- data.table(
+  label=factor(rep(c("burned","no burn"), l=N)),
+  image=c(rep(1, 0.4*N), rep(2, 0.4*N), rep(3, 0.1*N), rep(4, 0.1*N))
+)[, signal := ifelse(label=="no burn", 0, 1)*image][])
+```
+
+Above each row has an image ID between 1 and 4. We also generate/simulate some features:
+
+```{r}
+set.seed(1)
+n.images <- length(unique(full.dt$image))
+for(image.i in 1:n.images){
+  set(full.dt, j=paste0("feature_easy_noise",image.i), value=rnorm(N))
+  full.dt[, paste0("feature_impossible",image.i) := ifelse(
+    image==image.i, signal, 0)+rnorm(N)]
+}
+set(full.dt, j="feature_easy_signal", value=rnorm(N)+full.dt$signal)
+```
+
+There are two sets of four features:
+
+* For easy features, four are random noise (`feature_easy_noise1`
+  etc), and one is correlated with the label (`feature_easy_signal`),
+  so the algorithm just needs to learn to ignore the noise features,
+  and concentrate on the signal feature. That should be possible given
+  data from any image (same signal in each image).
+* Each impossible feature is correlated with the label (when feature
+  number same as image number), or is just noise (when image number
+  different from feature number). So if the algorithm has access to
+  the correct image (same as test, say image 2), then it needs to
+  learn to use the corresponding feature `feature_impossible2`. But if
+  the algorithm does not have access to that image, then the best it
+  can do is same as featureless (predict most frequent class label in
+  train data).
+  
+The signal is stronger for larger image numbers (image number 4 is
+easier to learn from than image number 1).
+
+We would like to fix a test image, and then compare models trained on
+either the same image, or on different images (or all images). To
+create a K-fold cross-validation experiment (say K=3 folds), we
+therefore need to assign fold IDs in a way such that each image is
+present in each fold. One way to do that would be to just use random
+integers,
+
+```{r}
+n.folds <- 3
+set.seed(1)
+full.dt[, random.fold := sample(n.folds, size=N, replace=TRUE)]
+full.dt[, table(random.fold, image)]
+```
+
+In the output above we see that for each image, there is not an equal
+number of data assigned to each fold. How could we do that?
+
+```{r}
+uniq.folds <- 1:n.folds
+full.dt[, fold := sample(rep(uniq.folds, l=.N)), by=image]
+full.dt[, table(fold, image)]
+```
+
+The table above shows that for each image, the number of data per fold
+is equal (or off by one).
+
+### For loop
+
+We can use these fold IDs with a for loop:
+
+```{r}
+for(test.fold in uniq.folds){
+  full.dt[, set := ifelse(fold==test.fold, "test", "train")]
+  print(dcast(full.dt, fold + set ~ image, length))
+}
+```
+
+The output above indicates that there are equal proportions of each
+image in each set (train and test). So we can fix a test fold, say 2,
+and also a test image, say 4. Then there are 33 data points in that
+test set. We can try to predict them by using machine learning
+algorithms on several different train sets: 
+
+* same: train folds (3 and 1) and same image (4), there are 34+33=67
+  train data in this set.
+* other: train folds (3 and 1) and other images (1-3), there are 601
+  train data in this set.
+* all: train folds (3 and 1) and all images (1-4), there are 668 train
+  data in this set.
+
+For each of the three trained models, we compute prediction error on
+the test set (image 4, fold 2), then compare the error rates to
+determine how much error changes when we train on a different set of
+images.
+
+* Because there are relatively few data from image 4, it may be
+  beneficial to train on a larger data set (including images 1-3),
+  even if those data are somewhat different. (and other/all error may
+  actually be smaller than same error)
+* Conversely, if the data in images 1-3 are substantially different,
+  then it may not help at all to use different images. (in this case,
+  same error would be smaller than other/all error)
+  
+Typically if there are a reasonable number of train data, the same
+model should do better than other/all, but you have to do the
+computational experiment to find out what is true for your particular
+data set. The code to do that should look something like below,
+
+TODO
+
+### mlr3
+
+```{r}
+train.test.dt.list <- list()
+for(test.fold in uniq.folds){
+  full.dt[, set := ifelse(fold==test.fold, "test", "train")]
+  for(test.image in 1:n.images){
+    is.test.image <- full.dt$image == test.image
+    test.i <- list(which(is.test.image & full.dt$set=="test"))
+    train.list <- list(
+      same=is.test.image,
+      other=!is.test.image,
+      all=rep(TRUE, nrow(full.dt)))
+    for(train.name in names(train.list)){
+      is.train.image <- train.list[[train.name]]
+      train.i <- list(which(is.train.image & full.dt$set=="train"))
+      train.test.dt.list[[paste(
+        test.fold, test.image, train.name
+      )]] <- data.table(
+        test.fold, test.image, train.name, train.i, test.i
+      )
+    }
+  }
+}
+(train.test.dt <- data.table::rbindlist(mlr3.custom.dt.list))
+
+data.table(features=c("easy","impossible"))[, {
+  feature.name.vec <- grep(
+    features, names(full.dt), value=TRUE, fixed=TRUE)
+  some.dt <- full.dt[, c("label", feature.name.vec), with=FALSE]
+  task <- mlr3::TaskClassif$new(features, some.dt, target="label")
+  train.test.dt[, {
+    custom = mlr3::rsmp("custom")
+    custom$instantiate(task, train.i, test.i)
+    data.table(task=list(task), resampling=list(custom))
+  }, by=.(test.image, train.name)]
+}, by=features]
+```
