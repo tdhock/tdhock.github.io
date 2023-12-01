@@ -60,8 +60,6 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Rust K, Hocking TD. A Log-linear Gradient Descent Algorithm for
   Unbalanced Binary Classification using the All Pairs Squared Hinge
   Loss. [Preprint arXiv:2302.11062](https://arxiv.org/abs/2302.11062).
-- Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
-  Partitioning. [Preprint arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
 - Hocking TD. Efficient line search optimization of penalty functions
   in supervised changepoint detection. [Talk announcement for JSM'23
   Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810),
@@ -89,6 +87,10 @@ description: Peer-reviewed papers and preprints with links to code and data
  
 ### Accepted, in press
 
+- Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
+  Partitioning. [Preprint
+  arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
+  
 ### 2023
 
 - Harshe K, Williams J, Hocking TD, Lerner Z. Predicting Neuromuscular
