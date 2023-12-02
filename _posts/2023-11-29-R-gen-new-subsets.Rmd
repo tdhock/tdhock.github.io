@@ -25,63 +25,7 @@ Coming soon, another blog post about how to do generalization to
 different subsets in R, similar to [my previous python
 blog](https://tdhock.github.io/blog/2022/generalization-to-new-subsets/),
 is it possible using 
-https://mlr3.mlr-org.com/reference/mlr_resamplings_custom_cv.html ->
-provide your own vector for defining CV folds!
 https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html
-  
-```{r}
-## adapted from https://github.com/mlr-org/mlr3/blob/HEAD/R/ResamplingCustomCV.R
-ResamplingCustomCV = R6Class("ResamplingCustomCV", inherit = Resampling,
-  public = list(
-    initialize = function() {
-      super$initialize(id = "custom_cv", duplicated_ids = FALSE,
-        label = "Custom Split Cross-Validation", man = "mlr3::mlr_resamplings_custom_cv")
-    },
-    instantiate = function(task, f = NULL, col = NULL) {
-      task = assert_task(as_task(task))
-      if (!xor(is.null(f), is.null(col))) {
-        stopf("Either `f` or `col` must be provided")
-      }
-      if (!is.null(col)) {
-        assert_choice(col, task$col_info$id)
-        f = task$data(cols = col)[[1L]]
-        assert_atomic_vector(f, all.missing = FALSE)
-      } else {
-        assert_factor(f, len = task$nrow, all.missing = FALSE)
-      }
-      self$instance = split(task$row_ids, f, drop = TRUE)
-      self$task_hash = task$hash
-      self$task_nrow = task$nrow
-      invisible(self)
-    }
-  ),
-  active = list(
-    #' @template field_iters
-    iters = function(rhs) {
-      assert_ro_binding(rhs)
-      if (self$is_instantiated) length(self$instance) else NA_integer_
-    }
-  ),
-  private = list(
-    .get_train = function(i) {
-      unlist(self$instance[-i], use.names = FALSE) %??% integer()
-    },
-    .get_test = function(i) {
-      self$instance[[i]]
-    }
-  )
-  )
-
-
-task = mlr3::tsk("penguins")
-task$filter(1:10)
-custom = mlr3::rsmp("custom")
-train_sets = list(1:5, 5:10)
-test_sets = list(5:10, 1:5)
-custom$instantiate(task, train_sets, test_sets)
-custom$train_set(2)
-custom$test_set(2)
-```
 
 Let's say there are 1000 rows,
 
@@ -199,6 +143,11 @@ TODO
 ### mlr3
 
 ```{r}
+data.table::CJ(
+  test.fold=uniq.folds,
+  test.image=1:n.images,
+  train.name=c("same","other","all"),
+  features=c("easy","impossible"))
 train.test.dt.list <- list()
 for(test.fold in uniq.folds){
   full.dt[, set := ifelse(fold==test.fold, "test", "train")]
@@ -220,9 +169,10 @@ for(test.fold in uniq.folds){
     }
   }
 }
-(train.test.dt <- data.table::rbindlist(mlr3.custom.dt.list))
+options(width=100)
+(train.test.dt <- data.table::rbindlist(train.test.dt.list))
 
-data.table(features=c("easy","impossible"))[, {
+mlr3.dt <- data.table(features=c("easy","impossible"))[, {
   feature.name.vec <- grep(
     features, names(full.dt), value=TRUE, fixed=TRUE)
   some.dt <- full.dt[, c("label", feature.name.vec), with=FALSE]

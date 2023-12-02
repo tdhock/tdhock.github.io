@@ -88,7 +88,8 @@ description: Peer-reviewed papers and preprints with links to code and data
 ### Accepted, in press
 
 - Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
-  Partitioning. [Preprint
+  Partitioning. Accepted in Journal of Computational and Graphical
+  Statistics. [Preprint
   arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
   
 ### 2023

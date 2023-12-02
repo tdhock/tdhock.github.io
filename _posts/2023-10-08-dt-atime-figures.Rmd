@@ -6,21 +6,22 @@ description: Motivational figures
 
 ```{r Ropts, echo=FALSE}
 repo.dir <- normalizePath("..")
-post.id <- "2023-10-08-dt-atime-figures/"
+post.id <- "2023-10-08-dt-atime-figures"
 fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
-  fig.path=fig.path,
-  fig.width=12,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=20,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
+  fig.height=6)
 if(FALSE){
   knitr::knit("2023-10-08-dt-atime-figures.Rmd")
 }
 ```
 
 The purpose of this vignette is to make figures which show the
-efficiency of data.table.
+efficiency of `data.table`, relative to other R packages which provide
+similar functionality.
 
 ### fwrite: fast CSV writer
 
@@ -99,7 +100,7 @@ atime.read.vary.cols <- atime::atime(
   "read_csv_arrow"={
     arrow::read_csv_arrow(input.csv)
   },
-  "read_csv_arrow(asDF=FALSE)"={
+  "read_csv_arrow\n(asDF=FALSE)"={
     ## https://francoismichonneau.net/2022/10/import-big-csv/
     arrow::read_csv_arrow(input.csv, as_data_frame=FALSE)
   },
@@ -247,14 +248,15 @@ ml.exp.atime <- atime::atime(
         loss_mean=mean(loss), 
         loss_sd=sd(loss))
   },
-  ## "arrow:::summarise.ArrowTabular"={
-  ##   loss.arrow |> 
-  ##     dplyr::group_by(set, epoch) |> 
-  ##     dplyr::summarise(
-  ##       ##loss_length=length(loss),#Expression length(loss) is not an aggregate expression or is not supported in Arrow; pulling data into R
-  ##       loss_mean=mean(loss), 
-  ##       loss_sd=sd(loss))
-  ## },
+  "arrow:::summarise.ArrowTabular"={
+    loss.arrow |> 
+      dplyr::group_by(set, epoch) |> 
+      dplyr::summarise(
+        ##loss_length=length(loss),#Expression length(loss) is not an aggregate expression or is not supported in Arrow; pulling data into R
+        loss_mean=mean(loss), 
+        loss_sd=sd(loss)) |>
+      data.frame()
+  },
   "collapse::fnobs/fmean/fsd"={
     g <- loss.dt[, paste(set, epoch)]
     x <- loss.dt$loss
@@ -295,8 +297,9 @@ over 10 timings")+
 ml.exp.gg
 ```
 
-### version info
+### cpu and version info
 
 ```{r}
+benchmarkme::get_cpu()
 sessionInfo()
 ```
