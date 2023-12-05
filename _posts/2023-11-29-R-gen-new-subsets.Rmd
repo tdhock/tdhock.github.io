@@ -148,11 +148,12 @@ data set.
 The code below defines a table with one row for each train/test split.
 
 ```{r}
+feature.types <- c("easy","impossible")
 (split.dt <- data.table::CJ(
   test.fold=uniq.folds,
   test.image=1:n.images,
   train.name=c("same","other","all"),
-  features=c("easy","impossible")))
+  features=feature.types))
 ```
 
 The table above has a row for every unique combination of test fold,
@@ -190,9 +191,9 @@ get_set_list <- function(data.dt, split.info){
   }
   out.list
 }
-meta.dt <- setkey(full.dt[, .(image, fold)])[, row := .I]
 easy.dt <- setkey(split.dt[features=="easy"], train.name, test.image, test.fold)
 (one.easy <- easy.dt[1])
+meta.dt <- setkey(full.dt[, .(image, fold)])[, row := .I]
 (train.test.list <- get_set_list(meta.dt, one.easy))
 ```
 
@@ -236,6 +237,7 @@ for(split.i in 1:nrow(easy.dt)){
       split.i, set, split.row, seg.dt)
   }
 }
+options(width=100)
 (index.dt <- data.table::rbindlist(index.dt.list))
 ```
 
@@ -267,6 +269,12 @@ ggplot()+
     xmax=split.i+rect.expand, ymax=end,
     fill=set),
     data=index.dt)+
+  geom_text(aes(
+    ifelse(group=="image", 25, 36),
+    (min.row+max.row)/2,
+    hjust=ifelse(group=="image", 0, 1),
+    label=sprintf("%s=%d", group, ifelse(group=="image", image, fold))),
+    data=data.table(train.name="same", image.rows))+
   scale_x_continuous(
     "Split number", breaks=seq(0, 100, by=2))+
   scale_y_continuous(
@@ -304,6 +312,11 @@ ggplot()+
     xmax=new.split.i+rect.expand, ymax=end,
     fill=set),
     data=some.indices)+
+  geom_text(aes(
+    ifelse(group=="image", 1.5, 2.5),
+    (min.row+max.row)/2,
+    label=sprintf("%s=%d", group, ifelse(group=="image", image, fold))),
+    data=data.table(test.fold=1, image.rows))+
   geom_text(aes(
     new.split.i, Inf, label=train.name),
     vjust=1.2,
@@ -384,42 +397,33 @@ ggplot()+
 
 ### mlr3
 
-In this section we show how it is possible using [mlr3::ResamplingCustom](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html)
+In this section we show how it is possible using [mlr3::ResamplingCustom](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) to do the same computations as we did above.
 
 ```{r}
-train.test.dt.list <- list()
-for(test.fold in uniq.folds){
-  full.dt[, set := ifelse(fold==test.fold, "test", "train")]
-  for(test.image in 1:n.images){
-    is.test.image <- full.dt$image == test.image
-    test.i <- list(which(is.test.image & full.dt$set=="test"))
-    train.list <- list(
-      same=is.test.image,
-      other=!is.test.image,
-      all=rep(TRUE, nrow(full.dt)))
-    for(train.name in names(train.list)){
-      is.train.image <- train.list[[train.name]]
-      train.i <- list(which(is.train.image & full.dt$set=="train"))
-      train.test.dt.list[[paste(
-        test.fold, test.image, train.name
-      )]] <- data.table(
-        test.fold, test.image, train.name, train.i, test.i
-      )
-    }
-  }
-}
-options(width=100)
-(train.test.dt <- data.table::rbindlist(train.test.dt.list))
-
-mlr3.dt <- data.table(features=c("easy","impossible"))[, {
+for(feat in feature.types){
   feature.name.vec <- grep(
-    features, names(full.dt), value=TRUE, fixed=TRUE)
+    feat, names(full.dt), value=TRUE, fixed=TRUE)
   some.dt <- full.dt[, c("label", feature.name.vec), with=FALSE]
-  task <- mlr3::TaskClassif$new(features, some.dt, target="label")
-  train.test.dt[, {
-    custom = mlr3::rsmp("custom")
-    custom$instantiate(task, train.i, test.i)
-    data.table(task=list(task), resampling=list(custom))
+  task <- mlr3::TaskClassif$new(feat, some.dt, target="label")
+  split.feat <- split.dt[features==feat]
+  for(split.i in 1:nrow(split.feat)){
+    split.row <- split.feat[split.i]
+    full.set.list <- get_set_list(meta.dt, split.row)
+    split.feat[
+      split.i,
+      names(full.set.list) := lapply(
+        full.set.list, function(DT)list(DT$row)
+      )
+    ]
+  }
+  split.feat[, {
+    custom <- mlr3::rsmp("custom")
+    custom$instantiate(task, train, test)
+    browser()
+    mlr3::benchmark_grid(
+      task,
+      list(TODO)
+    )
   }, by=.(test.image, train.name)]
-}, by=features]
+}
 ```
