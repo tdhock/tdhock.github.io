@@ -6,11 +6,11 @@ description: Coding non-standard cross-validation
 
 ```{r Ropts, echo=FALSE}
 repo.dir <- normalizePath("..")
-post.id <- "2023-11-29-gen-new-subsets/"
+post.id <- "2023-11-29-gen-new-subsets"
 fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
-  fig.path=fig.path,
+  fig.path=paste0(fig.path, "/"),
   fig.width=8,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)

@@ -6,11 +6,11 @@ description: for loop, mlr3, tidymodels
 
 ```{r Ropts, echo=FALSE}
 repo.dir <- normalizePath("..")
-post.id <- "2023-11-28-comparing-ml-frameworks/"
+post.id <- "2023-11-28-comparing-ml-frameworks"
 fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
-  fig.path=fig.path,
+  fig.path=paste0(fig.path, "/"),
   fig.width=8,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=2)
@@ -229,6 +229,25 @@ value using cross-validation, rather than just using 1 neighbor which
 may overfit) Exercise for the reader: use
 [mlr3tuning::auto_tuner](https://mlr3tuning.mlr-org.com/reference/auto_tuner.html)
 to implement that as another learner in this section.
+
+What if we wanted to compute AUC in addition to accuracy? [mlr3
+docs](https://mlr3.mlr-org.com/reference/benchmark.html#predict-sets)
+explain that you can provide measures as an argument to the `$score()`
+function. Exercise for the reader:
+
+* set `learner$predict_type <- "prob"` so that a real-valued score is
+  output (rather than a class).
+* for binary you can use typical AUC, [see
+  mlr3 measure docs](https://mlr3.mlr-org.com/reference/mlr_measures_classif.auc.html).
+* for multiclass you can use an AUC generalization, [see mlr3 measure
+  docs](https://mlr3.mlr-org.com/reference/mlr_measures_classif.mauc_aunu.html).
+* use `benchmark.result$score(list.of.measures)` to compute a table of
+  results.
+  
+What if you wanted to run the benchmark experiment in parallel?
+Exercise for the reader: declare a `future::plan("multisession")` to
+do that, [see mlr3 benchmark
+docs](https://mlr3.mlr-org.com/reference/benchmark.html#parallelization).
 
 ### tidymodels
 

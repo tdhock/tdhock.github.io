@@ -121,7 +121,6 @@ for(data.name in names(data.list)){
 
 ```
 ##     data.name test.fold   algorithm accuracy.percent
-##        <char>     <int>      <char>            <num>
 ##  1:       zip         1   cv_glmnet         85.65022
 ##  2:       zip         1 featureless         16.29297
 ##  3:       zip         1         1nn         89.38714
@@ -285,14 +284,13 @@ set.seed(1)
 ```
 
 ```
-##      task             learner resampling
-##    <char>              <char>     <char>
-## 1:    zip         classif.1nn         cv
-## 2:    zip   classif.cv_glmnet         cv
-## 3:    zip classif.featureless         cv
-## 4:   spam         classif.1nn         cv
-## 5:   spam   classif.cv_glmnet         cv
-## 6:   spam classif.featureless         cv
+##    task             learner resampling
+## 1:  zip         classif.1nn         cv
+## 2:  zip   classif.cv_glmnet         cv
+## 3:  zip classif.featureless         cv
+## 4: spam         classif.1nn         cv
+## 5: spam   classif.cv_glmnet         cv
+## 6: spam classif.featureless         cv
 ```
 
 Below we run the experiment,
@@ -303,26 +301,26 @@ benchmark.result <- mlr3::benchmark(benchmark.design)
 ```
 
 ```
-## INFO  [07:20:34.318] [mlr3] Running benchmark with 18 resampling iterations
-## INFO  [07:20:34.342] [mlr3] Applying learner 'classif.1nn' on task 'zip' (iter 1/3)
-## INFO  [07:20:36.354] [mlr3] Applying learner 'classif.1nn' on task 'zip' (iter 2/3)
-## INFO  [07:20:38.349] [mlr3] Applying learner 'classif.1nn' on task 'zip' (iter 3/3)
-## INFO  [07:20:40.390] [mlr3] Applying learner 'classif.cv_glmnet' on task 'zip' (iter 1/3)
-## INFO  [07:22:33.355] [mlr3] Applying learner 'classif.cv_glmnet' on task 'zip' (iter 2/3)
-## INFO  [07:24:36.000] [mlr3] Applying learner 'classif.cv_glmnet' on task 'zip' (iter 3/3)
-## INFO  [07:26:38.671] [mlr3] Applying learner 'classif.featureless' on task 'zip' (iter 1/3)
-## INFO  [07:26:38.723] [mlr3] Applying learner 'classif.featureless' on task 'zip' (iter 2/3)
-## INFO  [07:26:38.776] [mlr3] Applying learner 'classif.featureless' on task 'zip' (iter 3/3)
-## INFO  [07:26:38.829] [mlr3] Applying learner 'classif.1nn' on task 'spam' (iter 1/3)
-## INFO  [07:26:39.527] [mlr3] Applying learner 'classif.1nn' on task 'spam' (iter 2/3)
-## INFO  [07:26:40.185] [mlr3] Applying learner 'classif.1nn' on task 'spam' (iter 3/3)
-## INFO  [07:26:40.875] [mlr3] Applying learner 'classif.cv_glmnet' on task 'spam' (iter 1/3)
-## INFO  [07:27:18.436] [mlr3] Applying learner 'classif.cv_glmnet' on task 'spam' (iter 2/3)
-## INFO  [07:27:50.231] [mlr3] Applying learner 'classif.cv_glmnet' on task 'spam' (iter 3/3)
-## INFO  [07:28:16.617] [mlr3] Applying learner 'classif.featureless' on task 'spam' (iter 1/3)
-## INFO  [07:28:16.670] [mlr3] Applying learner 'classif.featureless' on task 'spam' (iter 2/3)
-## INFO  [07:28:16.723] [mlr3] Applying learner 'classif.featureless' on task 'spam' (iter 3/3)
-## INFO  [07:28:16.795] [mlr3] Finished benchmark
+## INFO  [14:44:07.045] [mlr3] Running benchmark with 18 resampling iterations
+## INFO  [14:44:07.125] [mlr3] Applying learner 'classif.1nn' on task 'zip' (iter 1/3)
+## INFO  [14:44:07.203] [mlr3] Applying learner 'classif.1nn' on task 'zip' (iter 2/3)
+## INFO  [14:44:07.289] [mlr3] Applying learner 'classif.1nn' on task 'zip' (iter 3/3)
+## INFO  [14:44:07.370] [mlr3] Applying learner 'classif.cv_glmnet' on task 'zip' (iter 1/3)
+## INFO  [14:44:07.448] [mlr3] Applying learner 'classif.cv_glmnet' on task 'zip' (iter 2/3)
+## INFO  [14:44:07.538] [mlr3] Applying learner 'classif.cv_glmnet' on task 'zip' (iter 3/3)
+## INFO  [14:44:07.607] [mlr3] Applying learner 'classif.featureless' on task 'zip' (iter 1/3)
+## INFO  [14:44:07.703] [mlr3] Applying learner 'classif.featureless' on task 'zip' (iter 2/3)
+## INFO  [14:44:07.778] [mlr3] Applying learner 'classif.featureless' on task 'zip' (iter 3/3)
+## INFO  [14:44:07.848] [mlr3] Applying learner 'classif.1nn' on task 'spam' (iter 1/3)
+## INFO  [14:44:07.923] [mlr3] Applying learner 'classif.1nn' on task 'spam' (iter 2/3)
+## INFO  [14:44:08.015] [mlr3] Applying learner 'classif.1nn' on task 'spam' (iter 3/3)
+## INFO  [14:44:08.425] [mlr3] Applying learner 'classif.cv_glmnet' on task 'spam' (iter 1/3)
+## INFO  [14:44:08.530] [mlr3] Applying learner 'classif.cv_glmnet' on task 'spam' (iter 2/3)
+## INFO  [14:44:08.639] [mlr3] Applying learner 'classif.cv_glmnet' on task 'spam' (iter 3/3)
+## INFO  [14:44:09.364] [mlr3] Applying learner 'classif.featureless' on task 'spam' (iter 1/3)
+## INFO  [14:44:10.077] [mlr3] Applying learner 'classif.featureless' on task 'spam' (iter 2/3)
+## INFO  [14:44:10.786] [mlr3] Applying learner 'classif.featureless' on task 'spam' (iter 3/3)
+## INFO  [14:44:34.848] [mlr3] Finished benchmark
 ```
 
 ```r
@@ -330,26 +328,25 @@ benchmark.result <- mlr3::benchmark(benchmark.design)
 ```
 
 ```
-##        nr task_id          learner_id resampling_id iteration classif.ce
-##     <int>  <char>              <char>        <char>     <int>      <num>
-##  1:     1     zip         classif.1nn            cv         1 0.10612855
-##  2:     1     zip         classif.1nn            cv         2 0.07772795
-##  3:     1     zip         classif.1nn            cv         3 0.09715994
-##  4:     2     zip   classif.cv_glmnet            cv         1 0.14200299
-##  5:     2     zip   classif.cv_glmnet            cv         2 0.11509716
-##  6:     2     zip   classif.cv_glmnet            cv         3 0.12556054
-##  7:     3     zip classif.featureless            cv         1 0.83707025
-##  8:     3     zip classif.featureless            cv         2 0.81016442
-##  9:     3     zip classif.featureless            cv         3 0.81614350
-## 10:     4    spam         classif.1nn            cv         1 0.19035202
-## 11:     4    spam         classif.1nn            cv         2 0.19361147
-## 12:     4    spam         classif.1nn            cv         3 0.19439008
-## 13:     5    spam   classif.cv_glmnet            cv         1 0.07822686
-## 14:     5    spam   classif.cv_glmnet            cv         2 0.08148631
-## 15:     5    spam   classif.cv_glmnet            cv         3 0.08284410
-## 16:     6    spam classif.featureless            cv         1 0.39178618
-## 17:     6    spam classif.featureless            cv         2 0.37092568
-## 18:     6    spam classif.featureless            cv         3 0.41943901
+##     nr task_id          learner_id resampling_id iteration classif.ce
+##  1:  1     zip         classif.1nn            cv         1 0.10612855
+##  2:  1     zip         classif.1nn            cv         2 0.07772795
+##  3:  1     zip         classif.1nn            cv         3 0.09715994
+##  4:  2     zip   classif.cv_glmnet            cv         1 0.14200299
+##  5:  2     zip   classif.cv_glmnet            cv         2 0.11509716
+##  6:  2     zip   classif.cv_glmnet            cv         3 0.12556054
+##  7:  3     zip classif.featureless            cv         1 0.83707025
+##  8:  3     zip classif.featureless            cv         2 0.81016442
+##  9:  3     zip classif.featureless            cv         3 0.81614350
+## 10:  4    spam         classif.1nn            cv         1 0.19035202
+## 11:  4    spam         classif.1nn            cv         2 0.19361147
+## 12:  4    spam         classif.1nn            cv         3 0.19439008
+## 13:  5    spam   classif.cv_glmnet            cv         1 0.07822686
+## 14:  5    spam   classif.cv_glmnet            cv         2 0.08148631
+## 15:  5    spam   classif.cv_glmnet            cv         3 0.08284410
+## 16:  6    spam classif.featureless            cv         1 0.39178618
+## 17:  6    spam classif.featureless            cv         2 0.37092568
+## 18:  6    spam classif.featureless            cv         3 0.41943901
 ## Hidden columns: uhash, task, learner, resampling, prediction
 ```
 
@@ -372,7 +369,6 @@ consistency with the previous section,
 
 ```
 ##     data.name test.fold   algorithm accuracy.percent
-##        <char>     <int>      <char>            <num>
 ##  1:       zip         1         1nn         89.38714
 ##  2:       zip         2         1nn         92.22720
 ##  3:       zip         3         1nn         90.28401
@@ -412,6 +408,25 @@ value using cross-validation, rather than just using 1 neighbor which
 may overfit) Exercise for the reader: use
 [mlr3tuning::auto_tuner](https://mlr3tuning.mlr-org.com/reference/auto_tuner.html)
 to implement that as another learner in this section.
+
+What if we wanted to compute AUC in addition to accuracy? [mlr3
+docs](https://mlr3.mlr-org.com/reference/benchmark.html#predict-sets)
+explain that you can provide measures as an argument to the `$score()`
+function. Exercise for the reader:
+
+* set `learner$predict_type <- "prob"` so that a real-valued score is
+  output (rather than a class).
+* for binary you can use typical AUC, [see
+  mlr3 measure docs](https://mlr3.mlr-org.com/reference/mlr_measures_classif.auc.html).
+* for multiclass you can use an AUC generalization, [see mlr3 measure
+  docs](https://mlr3.mlr-org.com/reference/mlr_measures_classif.mauc_aunu.html).
+* use `benchmark.result$score(list.of.measures)` to compute a table of
+  results.
+  
+What if you wanted to run the benchmark experiment in parallel?
+Exercise for the reader: declare a `future::plan("multisession")` to
+do that, [see mlr3 benchmark
+docs](https://mlr3.mlr-org.com/reference/benchmark.html#parallelization).
 
 ### tidymodels
 
@@ -522,7 +537,7 @@ for(data.name in names(data.list)){
 ```
 
 ```
-## ✔ 1 of 2 resampling: base_featureless (4.5s)
+## ✔ 1 of 2 resampling: base_featureless (721ms)
 ```
 
 ```
@@ -530,7 +545,7 @@ for(data.name in names(data.list)){
 ```
 
 ```
-## ✔ 2 of 2 resampling: base_1nn (37.9s)
+## ✔ 2 of 2 resampling: base_1nn (3.2s)
 ```
 
 ```
@@ -538,7 +553,7 @@ for(data.name in names(data.list)){
 ```
 
 ```
-## ✔ 1 of 2 resampling: base_featureless (1.1s)
+## ✔ 1 of 2 resampling: base_featureless (200ms)
 ```
 
 ```
@@ -546,7 +561,7 @@ for(data.name in names(data.list)){
 ```
 
 ```
-## ✔ 2 of 2 resampling: base_1nn (26.3s)
+## ✔ 2 of 2 resampling: base_1nn (2.8s)
 ```
 
 ```r
@@ -555,17 +570,15 @@ for(data.name in names(data.list)){
 
 ```
 ##    data.name         wflow_id              .config preproc            model
-##       <char>           <char>               <char>  <char>           <char>
 ## 1:       zip base_featureless Preprocessor1_Model1  recipe       null_model
 ## 2:       zip         base_1nn Preprocessor1_Model1  recipe nearest_neighbor
 ## 3:      spam base_featureless Preprocessor1_Model1  recipe       null_model
 ## 4:      spam         base_1nn Preprocessor1_Model1  recipe nearest_neighbor
-##     .metric .estimator      mean     n      std_err
-##      <char>     <char>     <num> <int>        <num>
-## 1: accuracy multiclass 0.1788739     3 0.0114923394
-## 2: accuracy multiclass 0.8883906     3 0.0070287673
-## 3: accuracy     binary 0.6059550     3 0.0008453037
-## 4: accuracy     binary 0.9034998     3 0.0019782561
+##     .metric .estimator      mean n      std_err
+## 1: accuracy multiclass 0.1788739 3 0.0114923394
+## 2: accuracy multiclass 0.8883906 3 0.0070287673
+## 3: accuracy     binary 0.6059550 3 0.0008453037
+## 4: accuracy     binary 0.9034998 3 0.0019782561
 ```
 
 ```r
@@ -574,7 +587,6 @@ for(data.name in names(data.list)){
 
 ```
 ##     data.name test.fold   algorithm accuracy.percent
-##        <char>     <int>      <char>            <num>
 ##  1:       zip         1 featureless         15.69507
 ##  2:       zip         2 featureless         18.38565
 ##  3:       zip         3 featureless         19.58146
@@ -621,7 +633,6 @@ Below we compute the combined data table,
 
 ```
 ##        package data.name test.fold   algorithm accuracy.percent
-##         <char>    <char>     <int>      <char>            <num>
 ##  1:       base       zip         1   cv_glmnet         85.65022
 ##  2:       base       zip         1 featureless         16.29297
 ##  3:       base       zip         1         1nn         89.38714
@@ -718,60 +729,59 @@ sessionInfo()
 ```
 
 ```
-## R Under development (unstable) (2023-11-10 r85507)
-## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 22.04.3 LTS
+## R version 4.3.2 (2023-10-31 ucrt)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19045)
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C              
-##  [3] LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8   
-##  [7] LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-## [11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## [1] LC_COLLATE=English_United States.utf8 
+## [2] LC_CTYPE=English_United States.utf8   
+## [3] LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.utf8    
 ## 
 ## time zone: America/Phoenix
-## tzcode source: system (glibc)
+## tzcode source: internal
 ## 
 ## attached base packages:
-## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] kknn_1.3.1        parsnip_1.1.1     recipes_1.0.8     dplyr_1.1.3      
-## [5] mlr3_0.17.0       ggplot2_3.4.4     data.table_1.14.9
+## [1] kknn_1.3.1        parsnip_1.1.1     recipes_1.0.8     dplyr_1.1.4      
+## [5] ggplot2_3.4.4     data.table_1.14.8
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] tidyselect_1.2.0     timeDate_4022.108    farver_2.1.1        
-##  [4] R.utils_2.12.2       paradox_0.11.1       digest_0.6.33       
-##  [7] rpart_4.1.21         timechange_0.2.0     lifecycle_1.0.3     
+##  [4] R.utils_2.12.3       paradox_0.11.1       digest_0.6.33       
+##  [7] rpart_4.1.21         timechange_0.2.0     lifecycle_1.0.4     
 ## [10] ellipsis_0.3.2       yardstick_1.2.0      survival_3.5-7      
-## [13] magrittr_2.0.3       compiler_4.4.0       rlang_1.1.1         
-## [16] tools_4.4.0          igraph_1.5.1         utf8_1.2.4          
-## [19] knitr_1.44           prettyunits_1.2.0    labeling_0.4.3      
-## [22] DiceDesign_1.9       withr_2.5.1          purrr_1.0.2         
+## [13] magrittr_2.0.3       compiler_4.3.2       rlang_1.1.2         
+## [16] tools_4.3.2          igraph_1.5.1         utf8_1.2.4          
+## [19] knitr_1.45           prettyunits_1.2.0    labeling_0.4.3      
+## [22] DiceDesign_1.9       withr_2.5.2          purrr_1.0.2         
 ## [25] mlr3misc_0.13.0      workflows_1.1.3      R.oo_1.25.0         
-## [28] nnet_7.3-19          grid_4.4.0           tune_1.1.2          
+## [28] nnet_7.3-19          grid_4.3.2           tune_1.1.2          
 ## [31] fansi_1.0.5          mlr3measures_0.5.0   colorspace_2.1-0    
-## [34] future_1.33.0        globals_0.16.2       scales_1.2.1        
-## [37] iterators_1.0.14     MASS_7.3-60.1        cli_3.6.1           
+## [34] future_1.33.0        globals_0.16.2       scales_1.3.0        
+## [37] iterators_1.0.14     MASS_7.3-60          cli_3.6.1           
 ## [40] crayon_1.5.2         generics_0.1.3       future.apply_1.11.0 
-## [43] splines_4.4.0        dials_1.2.0          parallel_4.4.0      
+## [43] splines_4.3.2        dials_1.2.0          parallel_4.3.2      
 ## [46] vctrs_0.6.4          hardhat_1.3.0        glmnet_4.1-8        
-## [49] Matrix_1.6-1.1       listenv_0.9.0        mlr3learners_0.5.7  
+## [49] Matrix_1.6-3         listenv_0.9.0        mlr3learners_0.5.7  
 ## [52] foreach_1.5.2        lgr_0.4.4            gower_1.0.1         
 ## [55] tidyr_1.3.0          glue_1.6.2           parallelly_1.36.0   
 ## [58] codetools_0.2-19     rsample_1.2.0        lubridate_1.9.3     
-## [61] shape_1.4.6          gtable_0.3.4         palmerpenguins_0.1.1
-## [64] munsell_0.5.0        GPfit_1.0-8          tibble_3.2.1        
-## [67] furrr_0.3.1          pillar_1.9.0         workflowsets_1.0.1  
-## [70] ipred_0.9-14         lava_1.7.3           R6_2.5.1            
-## [73] lhs_1.1.6            evaluate_0.22        lattice_0.22-5      
-## [76] R.methodsS3_1.8.2    backports_1.4.1      class_7.3-22        
-## [79] Rcpp_1.0.11          uuid_1.1-1           prodlim_2023.08.28  
-## [82] checkmate_2.2.0      xfun_0.40            pkgconfig_2.0.3
+## [61] shape_1.4.6          gtable_0.3.4         mlr3_0.17.0         
+## [64] palmerpenguins_0.1.1 munsell_0.5.0        GPfit_1.0-8         
+## [67] tibble_3.2.1         furrr_0.3.1          pillar_1.9.0        
+## [70] workflowsets_1.0.1   ipred_0.9-14         lava_1.7.3          
+## [73] R6_2.5.1             lhs_1.1.6            evaluate_0.23       
+## [76] lattice_0.22-5       highr_0.10           R.methodsS3_1.8.2   
+## [79] backports_1.4.1      class_7.3-22         Rcpp_1.0.11         
+## [82] uuid_1.1-1           prodlim_2023.08.28   checkmate_2.3.0     
+## [85] xfun_0.41            pkgconfig_2.0.3
 ```
 
