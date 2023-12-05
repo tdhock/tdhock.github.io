@@ -11,7 +11,7 @@ fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
   fig.path=fig.path,
-  fig.width=12,
+  fig.width=8,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
 if(FALSE){
@@ -19,15 +19,16 @@ if(FALSE){
 }
 ```
 
-### TODO
-
-Coming soon, another blog post about how to do generalization to
-different subsets in R, similar to [my previous python
+The goal of this blog post is to explain how to quantify the extent to
+which it is possible to train on one data subset (say a geographic
+region such as Europe), and predict on another data subset (say North
+America). The ideas are similar to [my previous python
 blog](https://tdhock.github.io/blog/2022/generalization-to-new-subsets/),
-is it possible using 
-https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html
+but the code below is in R. 
 
-Let's say there are 1000 rows,
+### Simulated data
+
+Assume there is a data set with 1000 rows,
 
 ```{r}
 N <- 1000
@@ -49,6 +50,7 @@ for(image.i in 1:n.images){
     image==image.i, signal, 0)+rnorm(N)]
 }
 set(full.dt, j="feature_easy_signal", value=rnorm(N)+full.dt$signal)
+str(full.dt)
 ```
 
 There are two sets of four features:
@@ -70,6 +72,8 @@ There are two sets of four features:
 The signal is stronger for larger image numbers (image number 4 is
 easier to learn from than image number 1).
 
+### Assign cross-validation folds
+
 We would like to fix a test image, and then compare models trained on
 either the same image, or on different images (or all images). To
 create a K-fold cross-validation experiment (say K=3 folds), we
@@ -80,8 +84,9 @@ integers,
 ```{r}
 n.folds <- 3
 set.seed(1)
-full.dt[, random.fold := sample(n.folds, size=N, replace=TRUE)]
-full.dt[, table(random.fold, image)]
+full.dt[
+, random.fold := sample(n.folds, size=N, replace=TRUE)
+][, table(random.fold, image)]
 ```
 
 In the output above we see that for each image, there is not an equal
@@ -89,20 +94,20 @@ number of data assigned to each fold. How could we do that?
 
 ```{r}
 uniq.folds <- 1:n.folds
-full.dt[, fold := sample(rep(uniq.folds, l=.N)), by=image]
-full.dt[, table(fold, image)]
+full.dt[
+, fold := sample(rep(uniq.folds, l=.N)), by=image
+][, table(fold, image)]
 ```
 
 The table above shows that for each image, the number of data per fold
 is equal (or off by one).
 
-### For loop
-
-We can use these fold IDs with a for loop:
+We can visualize the different split sets using these fold IDs with a for loop:
 
 ```{r}
 for(test.fold in uniq.folds){
   full.dt[, set := ifelse(fold==test.fold, "test", "train")]
+  cat("\nSplit=",test.fold,"\n")
   print(dcast(full.dt, fold + set ~ image, length))
 }
 ```
@@ -136,18 +141,252 @@ images.
 Typically if there are a reasonable number of train data, the same
 model should do better than other/all, but you have to do the
 computational experiment to find out what is true for your particular
-data set. The code to do that should look something like below,
+data set. 
 
-TODO
+### Define train and test sets
 
-### mlr3
+The code below defines a table with one row for each train/test split.
 
 ```{r}
-data.table::CJ(
+(split.dt <- data.table::CJ(
   test.fold=uniq.folds,
   test.image=1:n.images,
   train.name=c("same","other","all"),
-  features=c("easy","impossible"))
+  features=c("easy","impossible")))
+```
+
+The table above has a row for every unique combination of test fold,
+test image, train set name, and data set input features. Why do we
+need a separate column for test fold and test image? We are interested
+to see the extent to which it is possible to train on one image (say,
+from Europe), and test on another image (say, from North America). We
+therefore fix one image as the test image, and we would like to
+compare how two different models predict on this image: (1) one model
+trained on the same image, (2) another model trained on other
+images. We therefore need to assign data from each image into folds,
+so that we can train on data from the same image, while setting some
+of the data from this image aside as a test set.
+
+The code below computes data tables with indices of train and test
+sets for all of the splits in the experiment.
+
+```{r}
+get_set_list <- function(data.dt, split.info){
+  out.list <- list()
+  is.set.image <- list(
+    test=data.dt[["image"]] == split.info[["test.image"]])
+  is.set.image[["train"]] <- switch(
+    split.info[["train.name"]],
+    same=is.set.image[["test"]],
+    other=!is.set.image[["test"]],
+    all=rep(TRUE, nrow(data.dt)))
+  is.set.fold <- list(
+    test=data.dt[["fold"]] == split.info[["test.fold"]])
+  is.set.fold[["train"]] <- !is.set.fold[["test"]]
+  for(set in names(is.set.fold)){
+    is.image <- is.set.image[[set]]
+    is.fold <- is.set.fold[[set]]
+    out.list[[set]] <- data.dt[is.image & is.fold]
+  }
+  out.list
+}
+meta.dt <- setkey(full.dt[, .(image, fold)])[, row := .I]
+easy.dt <- setkey(split.dt[features=="easy"], train.name, test.image, test.fold)
+(one.easy <- easy.dt[1])
+(train.test.list <- get_set_list(meta.dt, one.easy))
+```
+
+The function `get_set_list` returns a list with named elements `train`
+and `test`, each of which is a data table with one row per data point
+to use for either training or testing in a particular split. Below, we
+summarize those tables, by condensing contiguous runs of rows into a
+single row with start/end columns.
+
+```{r}
+point2seg <- function(DT){
+  mid.end.i <- data.table(DT)[
+  , diff := c(diff(row),NA)
+  ][,which(diff!=1)]
+  start.i <- c(1,mid.end.i+1)
+  DT[, .(
+    DT[start.i],
+    start=row[start.i],
+    end=row[c(mid.end.i,.N)]
+  )]
+}
+lapply(train.test.list, point2seg)
+```
+
+The result above shows that there are four contiguous runs of data to
+train on (from row 135 to 400, 535 to 800, etc), whereas there is a
+single contiguous run of test data (from row 1 to 134).  In the code
+below, we use these two functions to construct a single table that
+describes all of the train and test splits in our computational
+cross-validation experiment.
+
+```{r}
+index.dt.list <- list()
+for(split.i in 1:nrow(easy.dt)){
+  split.row <- easy.dt[split.i]
+  meta.set.list <- get_set_list(meta.dt, split.row)
+  for(set in names(meta.set.list)){
+    point.dt <- meta.set.list[[set]]
+    seg.dt <- point2seg(point.dt)
+    index.dt.list[[paste(split.i, set)]] <- data.table(
+      split.i, set, split.row, seg.dt)
+  }
+}
+(index.dt <- data.table::rbindlist(index.dt.list))
+```
+
+There is one row in the table above for every contiguous block of data
+in each set (assuming rows are sorted by image and then fold).
+These data are visualized below,
+
+```{r allSplitsDiagram}
+library(ggplot2)
+rect.expand <- 0.25
+image.rows <- rbind(
+  meta.dt[, .(group="image", min.row=min(row), max.row=max(row)), by=image][, fold := NA],
+  meta.dt[, .(group="fold", min.row=min(row), max.row=max(row)), by=.(image, fold)])
+ggplot()+
+  ggtitle("All train/test splits to compute")+
+  theme_bw()+
+  facet_grid(. ~ train.name, labeller=label_both, scales="free", space="free")+
+  scale_size_manual(values=c(image=3, fold=1))+
+  scale_color_manual(values=c(image="black", fold="grey50"))+
+  geom_rect(aes(
+    xmin=-Inf, xmax=Inf,
+    color=group,
+    size=group,
+    ymin=min.row, ymax=max.row),
+    fill=NA,
+    data=image.rows)+
+  geom_rect(aes(
+    xmin=split.i-rect.expand, ymin=start,
+    xmax=split.i+rect.expand, ymax=end,
+    fill=set),
+    data=index.dt)+
+  scale_x_continuous(
+    "Split number", breaks=seq(0, 100, by=2))+
+  scale_y_continuous(
+    "Row number (data sorted by image, fold)")
+```
+
+The plot above shows all splits to compute. Each panel shows the splits for one kind of train set (all, other, or same). 
+
+* The `all` panel shows what happens when testing on a given image, and training on all images (including the same image). Example: Split number 12 is testing on image 4, test fold 3, training on test folds 1-2 from all four images.
+* The `other` panel shows what happens when testing on a given image, but training on other images (not the same image). Example: Split number 24 is testing on image 4, test fold 3, training on test folds 1-2 from other three images.
+* The `same` panel shows the usual cross-validation setup run on each image separately. Train on one image, test on same image (but not the same rows/data). Example: Split number 36 is testing on image 4, test fold 3, training on test folds 1-2 from same image (number 4).
+
+The plot below emphasizes the differences between the three train sets, for a particular test image, and for each fold. Note that the split numbers in the plot below are not the same as in the plot above.
+
+```{r oneTargetImage}
+target.image <- 2
+some.split.test <- setkey(index.dt[set=="test" & image==target.image], fold, train.name)[
+, new.split.i := .I]
+some.indices <- index.dt[some.split.test[, .(new.split.i, split.i)], on="split.i"]
+ggplot()+
+  ggtitle(paste0("Train/test splits to compute for image=", target.image))+
+  theme_bw()+
+  scale_size_manual(values=c(image=3, fold=1))+
+  scale_color_manual(values=c(image="black", fold="grey50"))+
+  facet_grid(. ~ test.fold, labeller=label_both, scales="free", space="free")+
+  geom_rect(aes(
+    xmin=-Inf, xmax=Inf,
+    color=group,
+    size=group,
+    ymin=min.row, ymax=max.row),
+    fill=NA,
+    data=image.rows)+
+  geom_rect(aes(
+    xmin=new.split.i-rect.expand, ymin=start,
+    xmax=new.split.i+rect.expand, ymax=end,
+    fill=set),
+    data=some.indices)+
+  geom_text(aes(
+    new.split.i, Inf, label=train.name),
+    vjust=1.2,
+    data=some.split.test)+
+  scale_x_continuous(
+    "Split number", breaks=seq(0, 100, by=1))+
+  scale_y_continuous(
+    "Row number (data sorted by image, fold)")
+```
+
+The plot above shows three panels, one for each test fold. In each panel the difference between the three train sets (all, other, same) is clear.
+
+### For loop
+
+The code to compute test accuracy for one of the splits should look
+something like below,
+
+```{r}
+OneSplit <- function(test.fold, test.image, train.name, features){
+  split.meta <- data.table(test.fold, test.image, train.name, features)
+  full.set.list <- get_set_list(full.dt, split.meta)
+  X.list <- list()
+  y.list <- list()
+  for(set in names(full.set.list)){
+    set.dt <- full.set.list[[set]]
+    feature.name.vec <- grep(
+      features, names(set.dt), value=TRUE, fixed=TRUE)
+    X.list[[set]] <- as.matrix(set.dt[, feature.name.vec, with=FALSE])
+    y.list[[set]] <- set.dt[["label"]]
+  }
+  fit <- glmnet::cv.glmnet(X.list[["train"]], y.list[["train"]], family="binomial")
+  most.freq.label <- full.set.list[["train"]][
+  , .(count=.N), by=label
+  ][order(-count), paste(label)][1]
+  pred.list <- list(
+    cv.glmnet=paste(predict(fit, X.list[["test"]], type="class")),
+    featureless=rep(most.freq.label, nrow(X.list[["test"]])))
+  acc.dt.list <- list()
+  for(pred.name in names(pred.list)){
+    pred.vec <- pred.list[[pred.name]]
+    is.correct <- pred.vec==y.list[["test"]]
+    acc.dt.list[[paste(pred.name)]] <- data.table(
+      pred.name,
+      accuracy.percent=100*mean(is.correct))
+  }
+  data.table(split.meta, rbindlist(acc.dt.list))
+}
+do.call(OneSplit, split.dt[1])
+```
+
+The code above uses a helper function `OneSplit` which is to be called
+with meta data from one of the rows of `split.dt`. So the result for
+each split [can be computed in parallel on a cluster such as NAU
+Monsoon, using
+batchtools](https://tdhock.github.io/blog/2020/monsoon-batchtools/)
+(exercise for the reader).
+Below I do the computation in serial on my laptop,
+
+```{r}
+loop.acc.dt.list <- list()
+for(split.i in 1:nrow(split.dt)){
+  split.row <- split.dt[split.i]
+  loop.acc.dt.list[[split.i]] <- do.call(OneSplit, split.row)
+}
+(loop.acc.dt <- rbindlist(loop.acc.dt.list))
+```
+
+Below we plot the accuracy numbers,
+
+```{r}
+ggplot()+
+  geom_point(aes(
+    accuracy.percent, train.name, color=pred.name),
+    shape=1,
+    data=loop.acc.dt)+
+  facet_grid(features ~ test.image, labeller=label_both)
+```
+
+### mlr3
+
+In this section we show how it is possible using [mlr3::ResamplingCustom](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html)
+
+```{r}
 train.test.dt.list <- list()
 for(test.fold in uniq.folds){
   full.dt[, set := ifelse(fold==test.fold, "test", "train")]

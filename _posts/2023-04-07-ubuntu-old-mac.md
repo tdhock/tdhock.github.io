@@ -780,6 +780,256 @@ went into update manager, changed "only security updates" to "all
 updates" which adds jammy-updates source/repo to
 `/etc/apt/sources.list`.
 
+### Nvidia binary driver
+
+This is the graphics card I have:
+
+```
+(base) tdhock@tdhock-MacBook:~$ lspci|grep VGA
+02:00.0 VGA compatible controller: NVIDIA Corporation C79 [GeForce 9400M] (rev b1)
+```
+
+This [NVIDIA web
+page](https://www.nvidia.com/Download/driverResults.aspx/123709/en-us/)
+says that GeForce 9400M is a supported product of the Version: 304.137
+driver, Release Date: 2017.9.19.
+
+Looks like it is no longer supported by Ubuntu but [this guy has a PPA](https://launchpad.net/~dokomix/+archive/ubuntu/legacygpu-jammy):
+
+```
+(base) tdhock@tdhock-MacBook:~/tdhock.github.io(master*)$ sudo apt install nvidia-304
+Lecture des listes de paquets... Fait
+Construction de l'arbre des dépendances... Fait
+Lecture des informations d'état... Fait      
+Les paquets suivants ont été installés automatiquement et ne sont plus nécessaires :
+  amd64-microcode emacs-bin-common emacs-common emacs-el intel-microcode
+  iucode-tool libm17n-0 libotf1 libwmf0.2-7 libxatracker2 m17n-db thermald
+  xcvt xserver-xorg-video-vmware
+Veuillez utiliser « sudo apt autoremove » pour les supprimer.
+Les paquets supplémentaires suivants seront installés : 
+  lib32gcc-s1 libcuda1-304 libxfont1 libxnvctrl0 nvidia-opencl-icd-304
+  nvidia-settings screen-resolution-extra xserver-common xserver-xorg-core
+  xserver-xorg-input-libinput xserver-xorg-video-vmware
+Les paquets suivants seront ENLEVÉS :
+  nvidia-340 xserver-xorg-input-wacom xserver-xorg-video-all
+  xserver-xorg-video-amdgpu xserver-xorg-video-ati xserver-xorg-video-fbdev
+  xserver-xorg-video-intel xserver-xorg-video-nouveau xserver-xorg-video-qxl
+  xserver-xorg-video-radeon xserver-xorg-video-vesa
+Les NOUVEAUX paquets suivants seront installés :
+  lib32gcc-s1 libcuda1-304 libxfont1 libxnvctrl0 nvidia-304
+  nvidia-opencl-icd-304 nvidia-settings screen-resolution-extra
+Les paquets suivants seront mis à jour :
+  xserver-common xserver-xorg-core xserver-xorg-input-libinput
+  xserver-xorg-video-vmware
+4 mis à jour, 8 nouvellement installés, 11 à enlever et 19 non mis à jour.
+Il est nécessaire de prendre 57,6 Mo dans les archives.
+Après cette opération, 214 Mo d'espace disque supplémentaires seront utilisés.
+Souhaitez-vous continuer ? [O/n] 
+Réception de :1 http://archive.ubuntu.com/ubuntu jammy-security/main amd64 lib32gcc-s1 amd64 12.3.0-1ubuntu1~22.04 [63,9 kB]
+Réception de :2 http://archive.ubuntu.com/ubuntu jammy/main amd64 libxnvctrl0 amd64 510.47.03-0ubuntu1 [11,5 kB]
+Réception de :3 http://archive.ubuntu.com/ubuntu jammy/main amd64 screen-resolution-extra all 0.18.2 [4 396 B]
+Réception de :4 http://archive.ubuntu.com/ubuntu jammy/main amd64 nvidia-settings amd64 510.47.03-0ubuntu1 [960 kB]
+Réception de :5 https://ppa.launchpadcontent.net/dokomix/legacygpu-jammy/ubuntu jammy/main amd64 libcuda1-304 amd64 304.137-0ubuntu2+dokomix1 [6 945 kB]
+Réception de :6 https://ppa.launchpadcontent.net/dokomix/legacygpu-jammy/ubuntu jammy/main amd64 libxfont1 amd64 1:1.5.2-4ubuntu2+dokomix1 [106 kB]
+Réception de :7 https://ppa.launchpadcontent.net/dokomix/legacygpu-jammy/ubuntu jammy/main amd64 xserver-xorg-video-vmware amd64 2:13.3.0-3+dokomix1 [81,5 kB]
+Réception de :8 https://ppa.launchpadcontent.net/dokomix/legacygpu-jammy/ubuntu jammy/main amd64 xserver-xorg-input-libinput amd64 1:0.30.0-1ubuntu1+dokomix1 [38,3 kB]
+Réception de :9 https://ppa.launchpadcontent.net/dokomix/legacygpu-jammy/ubuntu jammy/main amd64 xserver-common all 3:1.17.3-2ubuntu4+dokomix1 [1 919 kB]
+Réception de :10 https://ppa.launchpadcontent.net/dokomix/legacygpu-jammy/ubuntu jammy/main amd64 xserver-xorg-core amd64 3:1.17.3-2ubuntu4+dokomix1 [1 569 kB]
+Réception de :11 https://ppa.launchpadcontent.net/dokomix/legacygpu-jammy/ubuntu jammy/main amd64 nvidia-304 amd64 304.137-0ubuntu2+dokomix1 [40,1 MB]
+Réception de :12 https://ppa.launchpadcontent.net/dokomix/legacygpu-jammy/ubuntu jammy/main amd64 nvidia-opencl-icd-304 amd64 304.137-0ubuntu2+dokomix1 [5 829 kB]
+57,6 Mo réceptionnés en 11s (5 142 ko/s)                                       
+(Lecture de la base de données... 491408 fichiers et répertoires déjà installés.
+)
+Suppression de nvidia-340 (340.108-0ubuntu8) ...
+Suppression de xserver-xorg-input-wacom (1:1.0.0-3ubuntu1) ...
+Suppression de xserver-xorg-video-all (1:7.7+23ubuntu2) ...
+Suppression de xserver-xorg-video-amdgpu (22.0.0-1ubuntu0.2) ...
+Suppression de xserver-xorg-video-ati (1:19.1.0-2ubuntu1) ...
+Suppression de xserver-xorg-video-fbdev (1:0.5.0-2build1) ...
+Suppression de xserver-xorg-video-intel (2:2.99.917+git20210115-1) ...
+Suppression de xserver-xorg-video-nouveau (1:1.0.17-2build1) ...
+Suppression de xserver-xorg-video-qxl (0.1.5+git20200331-3) ...
+Suppression de xserver-xorg-video-radeon (1:19.1.0-2ubuntu1) ...
+Suppression de xserver-xorg-video-vesa (1:2.5.0-1build4) ...
+Sélection du paquet lib32gcc-s1 précédemment désélectionné.
+(Lecture de la base de données... 491310 fichiers et répertoires déjà installés.
+)
+Préparation du dépaquetage de .../00-lib32gcc-s1_12.3.0-1ubuntu1~22.04_amd64.deb
+ ...
+Dépaquetage de lib32gcc-s1 (12.3.0-1ubuntu1~22.04) ...
+Sélection du paquet libcuda1-304 précédemment désélectionné.
+Préparation du dépaquetage de .../01-libcuda1-304_304.137-0ubuntu2+dokomix1_amd6
+4.deb ...
+Dépaquetage de libcuda1-304 (304.137-0ubuntu2+dokomix1) ...
+Sélection du paquet libxfont1:amd64 précédemment désélectionné.
+Préparation du dépaquetage de .../02-libxfont1_1%3a1.5.2-4ubuntu2+dokomix1_amd64
+.deb ...
+Dépaquetage de libxfont1:amd64 (1:1.5.2-4ubuntu2+dokomix1) ...
+Sélection du paquet libxnvctrl0:amd64 précédemment désélectionné.
+Préparation du dépaquetage de .../03-libxnvctrl0_510.47.03-0ubuntu1_amd64.deb ..
+.
+Dépaquetage de libxnvctrl0:amd64 (510.47.03-0ubuntu1) ...
+Préparation du dépaquetage de .../04-xserver-xorg-video-vmware_2%3a13.3.0-3+doko
+mix1_amd64.deb ...
+Dépaquetage de xserver-xorg-video-vmware (2:13.3.0-3+dokomix1) sur (1:13.3.0-3bu
+ild1) ...
+Préparation du dépaquetage de .../05-xserver-xorg-input-libinput_1%3a0.30.0-1ubu
+ntu1+dokomix1_amd64.deb ...
+Dépaquetage de xserver-xorg-input-libinput (1:0.30.0-1ubuntu1+dokomix1) sur (1.2
+.1-1) ...
+Préparation du dépaquetage de .../06-xserver-common_3%3a1.17.3-2ubuntu4+dokomix1
+_all.deb ...
+Dépaquetage de xserver-common (3:1.17.3-2ubuntu4+dokomix1) sur (2:21.1.4-2ubuntu
+1.7~22.04.2) ...
+Préparation du dépaquetage de .../07-xserver-xorg-core_3%3a1.17.3-2ubuntu4+dokom
+ix1_amd64.deb ...
+Dépaquetage de xserver-xorg-core (3:1.17.3-2ubuntu4+dokomix1) sur (2:21.1.4-2ubu
+ntu1.7~22.04.2) ...
+dpkg: erreur de traitement de l'archive /tmp/apt-dpkg-install-2ChVh4/07-xserver-
+xorg-core_3%3a1.17.3-2ubuntu4+dokomix1_amd64.deb (--unpack) :
+ tentative de remplacement de « /usr/bin/cvt », qui appartient aussi au paquet x
+cvt 0.1.1-3
+dpkg-deb: erreur: le sous-processus coller a été tué par le signal (Relais brisé
+ (pipe))
+Sélection du paquet nvidia-304 précédemment désélectionné.
+Préparation du dépaquetage de .../08-nvidia-304_304.137-0ubuntu2+dokomix1_amd64.
+deb ...
+Dépaquetage de nvidia-304 (304.137-0ubuntu2+dokomix1) ...
+Sélection du paquet nvidia-opencl-icd-304 précédemment désélectionné.
+Préparation du dépaquetage de .../09-nvidia-opencl-icd-304_304.137-0ubuntu2+doko
+mix1_amd64.deb ...
+Dépaquetage de nvidia-opencl-icd-304 (304.137-0ubuntu2+dokomix1) ...
+Sélection du paquet screen-resolution-extra précédemment désélectionné.
+Préparation du dépaquetage de .../10-screen-resolution-extra_0.18.2_all.deb ...
+Dépaquetage de screen-resolution-extra (0.18.2) ...
+Sélection du paquet nvidia-settings précédemment désélectionné.
+Préparation du dépaquetage de .../11-nvidia-settings_510.47.03-0ubuntu1_amd64.de
+b ...
+Dépaquetage de nvidia-settings (510.47.03-0ubuntu1) ...
+Des erreurs ont été rencontrées pendant l'exécution :
+ /tmp/apt-dpkg-install-2ChVh4/07-xserver-xorg-core_3%3a1.17.3-2ubuntu4+dokomix1_
+amd64.deb
+E: Sub-process /usr/bin/dpkg returned an error code (1)
+```
+
+To fix that, [this page](https://unix.stackexchange.com/questions/537546/e-unmet-dependencies-try-apt-fix-broken-install-with-no-packages-or-speci) says to try to force overwrite:
+
+```
+(base) tdhock@tdhock-MacBook:~/tdhock.github.io(master*)$ sudo dpkg --configure --force-overwrite -a
+dpkg: des problèmes de dépendances empêchent la configuration de nvidia-304 :
+ nvidia-304 dépend de xorg-video-abi-11 | xorg-video-abi-12 | xorg-video-abi-13 | xorg-video-abi-14 | xorg-video-abi-15 | xorg-video-abi-18 | xorg-video-abi-19 | xorg-video-abi-20 | xorg-video-abi-23 ; cependant :
+  Le paquet xorg-video-abi-11 n'est pas installé.
+  Le paquet xorg-video-abi-12 n'est pas installé.
+  Le paquet xorg-video-abi-13 n'est pas installé.
+  Le paquet xorg-video-abi-14 n'est pas installé.
+  Le paquet xorg-video-abi-15 n'est pas installé.
+  Le paquet xorg-video-abi-18 n'est pas installé.
+  Le paquet xorg-video-abi-19 n'est pas installé.
+  Le paquet xorg-video-abi-20 n'est pas installé.
+  Le paquet xorg-video-abi-23 n'est pas installé.
+
+dpkg: erreur de traitement du paquet nvidia-304 (--configure) :
+ problèmes de dépendances - laissé non configuré
+dpkg: des problèmes de dépendances empêchent la configuration de xserver-xorg-input-libinput :
+ xserver-xorg-input-libinput dépend de xorg-input-abi-21 ; cependant :
+  Le paquet xorg-input-abi-21 n'est pas installé.
+
+dpkg: erreur de traitement du paquet xserver-xorg-input-libinput (--configure) :
+ problèmes de dépendances - laissé non configuré
+Paramétrage de libxnvctrl0:amd64 (510.47.03-0ubuntu1) ...
+Paramétrage de lib32gcc-s1 (12.3.0-1ubuntu1~22.04) ...
+dpkg: des problèmes de dépendances empêchent la configuration de xserver-xorg-video-vmware :
+ xserver-xorg-video-vmware dépend de xorg-video-abi-19 ; cependant :
+  Le paquet xorg-video-abi-19 n'est pas installé.
+
+dpkg: erreur de traitement du paquet xserver-xorg-video-vmware (--configure) :
+ problèmes de dépendances - laissé non configuré
+Paramétrage de screen-resolution-extra (0.18.2) ...
+Paramétrage de libxfont1:amd64 (1:1.5.2-4ubuntu2+dokomix1) ...
+Paramétrage de nvidia-settings (510.47.03-0ubuntu1) ...
+Paramétrage de libcuda1-304 (304.137-0ubuntu2+dokomix1) ...
+Paramétrage de xserver-common (3:1.17.3-2ubuntu4+dokomix1) ...
+Paramétrage de nvidia-opencl-icd-304 (304.137-0ubuntu2+dokomix1) ...
+Traitement des actions différées (« triggers ») pour bamfdaemon (0.5.6+22.04.20220217-0ubuntu1) ...
+Rebuilding /usr/share/applications/bamf-2.index...
+Traitement des actions différées (« triggers ») pour desktop-file-utils (0.26-1ubuntu3) ...
+Traitement des actions différées (« triggers ») pour gnome-menus (3.36.0-1ubuntu3) ...
+Traitement des actions différées (« triggers ») pour libc-bin (2.35-0ubuntu3.4) ...
+Traitement des actions différées (« triggers ») pour man-db (2.10.2-1) ...
+Traitement des actions différées (« triggers ») pour mailcap (3.70+nmu1ubuntu1) ...
+Des erreurs ont été rencontrées pendant l'exécution :
+ nvidia-304
+ xserver-xorg-input-libinput
+ xserver-xorg-video-vmware
+(base) tdhock@tdhock-MacBook:~/tdhock.github.io(master*)$ 
+```
+
+This is not working, let's try removing:
+
+```
+(base) tdhock@tdhock-MacBook:~/tdhock.github.io(master*)$ sudo add-apt-repository --remove ppa:dokomix/legacygpu-jammy
+Dépôt : « deb https://ppa.launchpadcontent.net/dokomix/legacygpu-jammy/ubuntu/ jammy main »
+Plus d'informations : https://launchpad.net/~dokomix/+archive/ubuntu/legacygpu-jammy
+Suppression du dépôt.
+Appuyez sur [ENTRÉE] pour continuer ou Ctrl-c pour annuler
+Disabling deb entry in /etc/apt/sources.list.d/dokomix-ubuntu-legacygpu-jammy-jammy.list
+Removing disabled deb entry from /etc/apt/sources.list.d/dokomix-ubuntu-legacygpu-jammy-jammy.list
+Removing disabled deb-src entry from /etc/apt/sources.list.d/dokomix-ubuntu-legacygpu-jammy-jammy.list
+Atteint :1 http://security.ubuntu.com/ubuntu jammy-security InRelease
+Atteint :2 http://archive.ubuntu.com/ubuntu jammy InRelease
+Atteint :3 http://archive.ubuntu.com/ubuntu jammy-security InRelease
+Atteint :4 http://archive.ubuntu.com/ubuntu jammy-updates InRelease
+Atteint :5 http://archive.ubuntu.com/ubuntu jammy-backports InRelease
+Lecture des listes de paquets... Fait
+(base) tdhock@tdhock-MacBook:~/tdhock.github.io(master*)$ sudo apt remove nvidia-304
+Lecture des listes de paquets... Fait
+Construction de l'arbre des dépendances... Fait
+Lecture des informations d'état... Fait      
+Vous pouvez lancer « apt --fix-broken install » pour corriger ces problèmes.
+Les paquets suivants contiennent des dépendances non satisfaites :
+ xserver-xorg-input-libinput : Dépend: xorg-input-abi-21 mais il n'est pas installable
+ xserver-xorg-video-vmware : Dépend: xorg-video-abi-19 mais il n'est pas installable
+E: Dépendances non satisfaites. Essayez « apt --fix-broken install » sans paquet
+   (ou indiquez une solution).
+(base) tdhock@tdhock-MacBook:~/tdhock.github.io(master*)$ sudo apt install --fix-broken
+Lecture des listes de paquets... Fait
+Construction de l'arbre des dépendances... Fait
+Lecture des informations d'état... Fait      
+Correction des dépendances... Fait
+Les paquets suivants ont été installés automatiquement et ne sont plus nécessaires :
+  amd64-microcode emacs-bin-common emacs-common emacs-el intel-microcode
+  iucode-tool lib32gcc-s1 libcuda1-304 libm17n-0 libotf1 libwmf0.2-7
+  libxatracker2 libxfont1 libxnvctrl0 m17n-db nvidia-settings
+  screen-resolution-extra thermald x11-apps x11-session-utils xbitmaps xinit
+  xinput
+Veuillez utiliser « sudo apt autoremove » pour les supprimer.
+Les paquets suivants seront ENLEVÉS :
+  nvidia-304 ubuntu-desktop ubuntu-desktop-minimal xorg xserver-xorg
+  xserver-xorg-input-all xserver-xorg-input-libinput xserver-xorg-video-vmware
+0 mis à jour, 0 nouvellement installés, 8 à enlever et 4 non mis à jour.
+3 partiellement installés ou enlevés.
+Après cette opération, 177 Mo d'espace disque seront libérés.
+Souhaitez-vous continuer ? [O/n] 
+(Lecture de la base de données... 491563 fichiers et répertoires déjà installés.
+)
+Suppression de nvidia-304 (304.137-0ubuntu2+dokomix1) ...
+update-initramfs: deferring update (trigger activated)
+Suppression de ubuntu-desktop (1.481.1) ...
+Suppression de ubuntu-desktop-minimal (1.481.1) ...
+Suppression de xorg (1:7.7+23ubuntu2) ...
+Suppression de xserver-xorg (1:7.7+23ubuntu2) ...
+Suppression de xserver-xorg-input-all (1:7.7+23ubuntu2) ...
+Suppression de xserver-xorg-input-libinput (1:0.30.0-1ubuntu1+dokomix1) ...
+Suppression de xserver-xorg-video-vmware (2:13.3.0-3+dokomix1) ...
+Traitement des actions différées (« triggers ») pour libc-bin (2.35-0ubuntu3.4) 
+...
+Traitement des actions différées (« triggers ») pour man-db (2.10.2-1) ...
+Traitement des actions différées (« triggers ») pour initramfs-tools (0.140ubunt
+u13.4) ...
+update-initramfs: Generating /boot/initrd.img-5.15.0-79-generic
+(base) tdhock@tdhock-MacBook:~/tdhock.github.io(master*)$
+```
+
 ### TODOS
 
 * [Pin
