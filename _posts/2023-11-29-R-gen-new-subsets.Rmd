@@ -100,7 +100,10 @@ full.dt[
 ```
 
 The table above shows that for each image, the number of data per fold
-is equal (or off by one).
+is equal (or off by one). The first method of fold assignment above is
+called simple random sampling, and the second is called stratified
+random sampling, which can also be implemented in
+[mlr3](https://mlr3book.mlr-org.com/chapters/chapter3/evaluation_and_benchmarking.html#stratified-sampling).
 
 We can visualize the different split sets using these fold IDs with a for loop:
 
@@ -351,6 +354,7 @@ OneSplit <- function(test.fold, test.image, train.name, features){
   most.freq.label <- full.set.list[["train"]][
   , .(count=.N), by=label
   ][order(-count), paste(label)][1]
+  set.seed(1)
   pred.list <- list(
     cv.glmnet=paste(predict(fit, X.list[["test"]], type="class")),
     featureless=rep(most.freq.label, nrow(X.list[["test"]])))
@@ -369,11 +373,13 @@ do.call(OneSplit, split.dt[1])
 
 The code above uses a helper function `OneSplit` which is to be called
 with meta data from one of the rows of `split.dt`. So the result for
-each split [can be computed in parallel on a cluster such as NAU
+each split can be computed in parallel on a cluster such as NAU
 Monsoon, using
-batchtools](https://tdhock.github.io/blog/2020/monsoon-batchtools/)
-(exercise for the reader).
-Below I do the computation in serial on my laptop,
+[batchtools](https://tdhock.github.io/blog/2020/monsoon-batchtools/)
+or
+[future.batchtools](https://tdhock.github.io/blog/2019/future-batchtools/).
+(exercise for the reader).  Below I do the computation in parallel on my
+personal computer,
 
 ```{r}
 loop.acc.dt.list <- list()
@@ -386,7 +392,7 @@ for(split.i in 1:nrow(split.dt)){
 
 Below we plot the accuracy numbers,
 
-```{r}
+```{r loopAccuracy}
 ggplot()+
   geom_point(aes(
     accuracy.percent, train.name, color=pred.name),
@@ -395,11 +401,45 @@ ggplot()+
   facet_grid(features ~ test.image, labeller=label_both)
 ```
 
+### Parallelization
+
+The result for each split can be computed in parallel. Below I do the
+computation in parallel on my personal computer, by declaring a future
+plan, and then using
+[future_lapply](https://cloud.r-project.org/web/packages/future.apply/vignettes/future.apply-1-overview.html):
+
+```{r}
+future::plan("multisession")
+future.acc.dt.list <- future.apply::future_lapply(1:nrow(split.dt), function(split.i){
+  split.row <- split.dt[split.i]
+  do.call(OneSplit, split.row)
+}, future.seed=TRUE)
+(future.acc.dt <- rbindlist(future.acc.dt.list))
+```
+
+Below we plot the accuracy numbers,
+
+```{r futureAccuracy}
+ggplot()+
+  geom_point(aes(
+    accuracy.percent, train.name, color=pred.name),
+    shape=1,
+    data=future.acc.dt)+
+  facet_grid(features ~ test.image, labeller=label_both)
+```
+
+Exercise for the reader: do the same computation on a cluster such as
+NAU Monsoon, using
+[batchtools](https://tdhock.github.io/blog/2020/monsoon-batchtools/)
+or
+[future.batchtools](https://tdhock.github.io/blog/2019/future-batchtools/).
+
 ### mlr3
 
 In this section we show how it is possible using [mlr3::ResamplingCustom](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) to do the same computations as we did above.
 
 ```{r}
+bench.acc.dt.list <- list()
 for(feat in feature.types){
   feature.name.vec <- grep(
     feat, names(full.dt), value=TRUE, fixed=TRUE)
@@ -416,14 +456,104 @@ for(feat in feature.types){
       )
     ]
   }
-  split.feat[, {
+  score.dt <- split.feat[, {
     custom <- mlr3::rsmp("custom")
     custom$instantiate(task, train, test)
-    browser()
-    mlr3::benchmark_grid(
+    benchmark.design <- mlr3::benchmark_grid(
       task,
-      list(TODO)
-    )
+      list(
+        mlr3learners::LearnerClassifCVGlmnet$new(),
+        mlr3::LearnerClassifFeatureless$new()),
+      custom)
+    benchmark.result <- mlr3::benchmark(benchmark.design)
+    benchmark.result$score()
   }, by=.(test.image, train.name)]
+  bench.acc.dt.list[[feat]] <- score.dt[, .(
+    test.fold=iteration,
+    test.image,
+    train.name,
+    features=feat,
+    pred.name=sub("classif.", "", learner_id, fixed=TRUE),
+    accuracy.percent=100*(1-classif.ce))]
 }
+(bench.acc.dt <- data.table::rbindlist(bench.acc.dt.list))
 ```
+
+The mlr3 code above is more or less the same size/complexity as the
+`OneSplit` function we defined previously in the section using for
+loops. Implementing this kind of cross-validation is not significantly
+easier, using mlr3, compared to base R. The results are visualized below:
+
+```{r mlr3Accuracy}
+ggplot()+
+  geom_point(aes(
+    accuracy.percent, train.name, color=pred.name),
+    shape=1,
+    data=bench.acc.dt)+
+  facet_grid(features ~ test.image, labeller=label_both)
+```
+
+Exercise for the reader: parallelize the mlr3 computation by using
+`future::plan("multisession")`.
+
+### Custom mlr3 Resampling class
+
+Using mlr3 would be easier if there was a Resampling sub-class that
+supported the kind of cross-validation experiment we have implemented
+above.
+
+
+```{r}
+strat.dt <- full.dt[, c("label", "image", feature.name.vec), with=FALSE]
+tsk_str = mlr3::TaskClassif$new(feat, strat.dt, target="label")
+tsk_str$set_col_roles("label", c("target", "stratum"))
+tsk_str$set_col_roles("image", "stratum")
+task.list <- list(stratified=tsk_str, random=task)
+rsmp_cv3 = mlr3::rsmp("cv", folds = n.folds)
+sampling.dt.list <- list()
+for(sampling.type in names(task.list)){
+  sampling.task <- task.list[[sampling.type]]
+  rsmp_cv3$instantiate(sampling.task)
+  for(test.fold in uniq.folds){
+    test.i <- rsmp_cv3$test_set(test.fold)
+    sampling.dt.list[[paste(
+      sampling.type, test.fold
+    )]] <- data.table(
+      sampling.type, test.fold,
+      strat.dt[test.i]
+    )
+  }
+}
+sampling.dt <- data.table::rbindlist(sampling.dt.list)
+data.table::dcast(
+  sampling.dt,
+  sampling.type + label + test.fold ~ image,
+  length)
+```
+
+In the first 6 rows of the table above (random sampling), we see that
+there are not necessarily equal numbers of samples of each
+class/image, across folds. In the bottom 6 rows of the table above
+(stratified sampling), we see that there are equal numbers of samples
+of each class/image (up to a difference of 1), across folds.
+
+Where is this stratification implemented? Inside `instantiate` method
+of
+[Resampling](https://github.com/mlr-org/mlr3/blob/main/R/Resampling.R),
+it uses `strata` element:
+
+```{r}
+tsk_str$strata
+rsmp_cv3$instance
+```
+
+[Grouped
+Resampling](https://mlr3book.mlr-org.com/chapters/chapter3/evaluation_and_benchmarking.html#grouped-resampling)
+is a mlr3 concept which is related to the idea we explored in this
+blog post. It is implemented via `tsk_grp$set_col_roles("year",
+"group")` which makes sure that resampling will not put any items from
+the same group in different sets. So we could use that for quantifying the accuracy of training on one image, and testing on another image. There is [an error message in the
+source
+code](https://github.com/mlr-org/mlr3/blob/main/R/Resampling.R#L184)
+`stopf("Cannot combine stratification with grouping")`, why not?
+
