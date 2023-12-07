@@ -508,9 +508,13 @@ strat.dt <- full.dt[, c("label", "image", feature.name.vec), with=FALSE]
 tsk_str = mlr3::TaskClassif$new(feat, strat.dt, target="label")
 tsk_str$set_col_roles("label", c("target", "stratum"))
 tsk_str$set_col_roles("image", "stratum")
-task.list <- list(stratified=tsk_str, random=task)
+tsk_grp = mlr3::TaskClassif$new(feat, strat.dt, target="label")
+tsk_grp$set_col_roles("image", "group")
+task.list <- list(stratified=tsk_str, random=task, grouped=tsk_grp)
 rsmp_cv3 = mlr3::rsmp("cv", folds = n.folds)
+
 sampling.dt.list <- list()
+set.seed(1)
 for(sampling.type in names(task.list)){
   sampling.task <- task.list[[sampling.type]]
   rsmp_cv3$instantiate(sampling.task)
@@ -531,11 +535,12 @@ data.table::dcast(
   length)
 ```
 
-In the first 6 rows of the table above (random sampling), we see that
-there are not necessarily equal numbers of samples of each
-class/image, across folds. In the bottom 6 rows of the table above
-(stratified sampling), we see that there are equal numbers of samples
-of each class/image (up to a difference of 1), across folds.
+The table above shows the number of data points/labels assigned to
+each test fold, for each image and sampling type.
+
+* In the first 6 rows of the table above (grouped sampling), we see that data from each image have all been assigned to a single test fold.
+* In the second 6 rows (random sampling), we see that there are not necessarily equal numbers of samples of each class/image, across folds. 
+* In the bottom 6 rows (stratified sampling), we see that there are equal numbers of samples of each class/image (up to a difference of 1), across folds.
 
 Where is this stratification implemented? Inside `instantiate` method
 of
@@ -544,7 +549,6 @@ it uses `strata` element:
 
 ```{r}
 tsk_str$strata
-rsmp_cv3$instance
 ```
 
 [Grouped
@@ -552,8 +556,212 @@ Resampling](https://mlr3book.mlr-org.com/chapters/chapter3/evaluation_and_benchm
 is a mlr3 concept which is related to the idea we explored in this
 blog post. It is implemented via `tsk_grp$set_col_roles("year",
 "group")` which makes sure that resampling will not put any items from
-the same group in different sets. So we could use that for quantifying the accuracy of training on one image, and testing on another image. There is [an error message in the
-source
+the same group in different sets. So we could use that for quantifying
+the accuracy of training on one image, and testing on another
+image. There is [an error message in the source
 code](https://github.com/mlr-org/mlr3/blob/main/R/Resampling.R#L184)
-`stopf("Cannot combine stratification with grouping")`, why not?
+`stopf("Cannot combine stratification with grouping")`, why not? On
+that page in the doc comments it is also written that instance is an
+internal object that may not necessarily be the row ids of the
+original data:
 
+```r
+ #' @field instance (any)\cr
+    #'   During `instantiate()`, the instance is stored in this slot in an arbitrary format.
+    #'   Note that if a grouping variable is present in the [Task], a [Resampling] may operate on the
+    #'   group ids internally instead of the row ids (which may lead to confusion).
+    #'
+    #'   It is advised to not work directly with the `instance`, but instead only use the getters
+    #'   `$train_set()` and `$test_set()`.
+```
+
+Below we show the `instance` element for each task,
+
+```{r}
+lapply(task.list, function(my_task){
+  rsmp_cv3$instantiate(my_task)
+  rsmp_cv3$instance
+})
+```
+
+Above we see that for the task with group defined (grouped sampling),
+the `row_id` is actually the group value (image from 1 to 4). This
+suggests that the logic for interpreting groups is contained in the
+`Resampling` class, so we would need to write a replacement to get the
+kind of cross-validation experiment that we want. That is confirmed by
+reading the documentation of `Resampling`:
+
+```
+#' @section Stratification:
+#' All derived classes support stratified sampling.
+#' The stratification variables are assumed to be discrete and must be stored in the [Task] with column role `"stratum"`.
+#' In case of multiple stratification variables, each combination of the values of the stratification variables forms a strata.
+#'
+#' First, the observations are divided into subpopulations based one or multiple stratification variables (assumed to be discrete), c.f. `task$strata`.
+#'
+#' Second, the sampling is performed in each of the `k` subpopulations separately.
+#' Each subgroup is divided into `iter` training sets and `iter` test sets by the derived `Resampling`.
+#' These sets are merged based on their iteration number:
+#' all training sets from all subpopulations with iteration 1 are combined, then all training sets with iteration 2, and so on.
+#' Same is done for all test sets.
+#' The merged sets can be accessed via `$train_set(i)` and `$test_set(i)`, respectively.
+#' Note that this procedure can lead to set sizes that are slightly different from those
+#' without stratification.
+#'
+#'
+#' @section Grouping / Blocking:
+#' All derived classes support grouping of observations.
+#' The grouping variable is assumed to be discrete and must be stored in the [Task] with column role `"group"`.
+#'
+#' Observations in the same group are treated like a "block" of observations which must be kept together.
+#' These observations either all go together into the training set or together into the test set.
+#'
+#' The sampling is performed by the derived [Resampling] on the grouping variable.
+#' Next, the grouping information is replaced with the respective row ids to generate training and test sets.
+#' The sets can be accessed via `$train_set(i)` and `$test_set(i)`, respectively.
+```
+
+### Generalization to new groups resampler
+
+The goal of this section is to define a replacement for
+`mlr3::Resampling`, which will interpret group and stratum variables
+differently, in order to create cross-validation experiments that
+will be able to compare models trained on same/other/all group(s).
+
+```{r}
+MyResampling = R6::R6Class("MyResampling",
+  public = list(
+    id = NULL,
+    label = NULL,
+    param_set = NULL,
+    instance = NULL,
+    task_hash = NA_character_,
+    task_nrow = NA_integer_,
+    duplicated_ids = NULL,
+    man = NULL,
+    initialize = function(id, param_set = ps(), duplicated_ids = FALSE, label = NA_character_, man = NA_character_) {
+      self$id = checkmate::assert_string(id, min.chars = 1L)
+      self$label = checkmate::assert_string(label, na.ok = TRUE)
+      self$param_set = paradox::assert_param_set(param_set)
+      self$duplicated_ids = checkmate::assert_flag(duplicated_ids)
+      self$man = checkmate::assert_string(man, na.ok = TRUE)
+    },
+    format = function(...) {
+      sprintf("<%s>", class(self)[1L])
+    },
+    print = function(...) {
+      cat(format(self), if (is.null(self$label) || is.na(self$label)) "" else paste0(": ", self$label))
+      cat("\n* Iterations:", self$iters)
+      cat("\n* Instantiated:", self$is_instantiated)
+      cat("\n* Parameters:\n")
+      str(self$param_set$values)
+    },
+    help = function() {
+      self$man
+    },
+    instantiate = function(task) {
+      task = mlr3::assert_task(mlr3::as_task(task))
+      strata = task$strata
+      groups = task$groups
+      if (is.null(strata)) {
+        if (is.null(groups)) {
+          instance = private$.sample(task$row_ids, task = task)
+        } else {
+          private$.groups = groups
+          instance = private$.sample(unique(groups$group), task = task)
+        }
+      } else {
+        if (!is.null(groups)) {
+          stopf("Cannot combine stratification with grouping")
+        }
+        instance = private$.combine(lapply(strata$row_id, private$.sample, task = task))
+      }
+      self$instance = instance
+      self$task_hash = task$hash
+      self$task_nrow = task$nrow
+      invisible(self)
+    },
+    train_set = function(i) {
+      private$.get_set(private$.get_train, i)
+    },
+    test_set = function(i) {
+      private$.get_set(private$.get_test, i)
+    }
+  ),
+  active = list(
+    is_instantiated = function(rhs) {
+      !is.null(self$instance)
+    },
+    hash = function(rhs) {
+      if (!self$is_instantiated) {
+        return(NA_character_)
+      }
+      calculate_hash(list(class(self), self$id, self$param_set$values, self$instance))
+    }
+  ),
+  private = list(
+    .groups = NULL,
+    .get_set = function(getter, i) {
+      if (!self$is_instantiated) {
+        stopf("Resampling '%s' has not been instantiated yet", self$id)
+      }
+      i = checkmate::assert_int(i, lower = 1L, upper = self$iters, coerce = TRUE)
+      ids = getter(i)
+      if (is.null(private$.groups)) {
+        return(ids)
+      }
+      private$.groups[list(ids), on = "group", allow.cartesian = TRUE][[1L]]
+    }
+  )
+)
+MyResamplingCV = R6::R6Class("MyResamplingCV", inherit = MyResampling,
+  public = list(
+    initialize = function() {
+      ps = paradox::ps(
+        folds = paradox::p_int(2L, tags = "required")
+      )
+      ps$values = list(folds = 10L)
+      super$initialize(
+        id = "cv",
+        param_set = ps,
+        label = "Cross-Validation",
+        man = "TODO")
+    }
+  ),
+  active = list(
+    iters = function(rhs) {
+      as.integer(self$param_set$values$folds)
+    }
+  ),
+  private = list(
+    .sample = function(ids, ...) {
+      data.table(
+        row_id = ids,
+        fold = sample(seq(0, length(ids)-1) %% as.integer(self$param_set$values$folds) + 1L),
+        key = "fold"
+      )
+    },
+    .get_train = function(i) {
+      self$instance[!list(i), "row_id", on = "fold"][[1L]]
+    },
+    .get_test = function(i) {
+      self$instance[list(i), "row_id", on = "fold"][[1L]]
+    },
+    .combine = function(instances) {
+      rbindlist(instances, use.names = TRUE)
+    },
+    deep_clone = function(name, value) {
+      switch(name,
+        "instance" = copy(value),
+        "param_set" = value$clone(deep = TRUE),
+        value
+        )
+    }
+  )
+)
+mycv <- MyResamplingCV$new()
+mycv$param_set$values$folds <- 3
+mycv$instantiate(tsk_grp)
+mycv$instance
+mycv$test_set(1)
+```
