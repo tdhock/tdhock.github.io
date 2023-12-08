@@ -6,7 +6,7 @@ description: Coding non-standard cross-validation
 
 ```{r Ropts, echo=FALSE}
 repo.dir <- normalizePath("..")
-post.id <- "2023-11-29-gen-new-subsets"
+post.id <- "2023-11-29-R-gen-new-subsets"
 fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
 if(FALSE){
-  knitr::knit("2023-11-29-gen-new-subsets.Rmd")
+  knitr::knit("2023-11-29-R-gen-new-subsets.Rmd")
 }
 ```
 
@@ -248,7 +248,7 @@ There is one row in the table above for every contiguous block of data
 in each set (assuming rows are sorted by image and then fold).
 These data are visualized below,
 
-```{r allSplitsDiagram}
+```{r allSplitsDiagram, fig.height=6}
 library(ggplot2)
 rect.expand <- 0.25
 image.rows <- rbind(
@@ -292,7 +292,7 @@ The plot above shows all splits to compute. Each panel shows the splits for one 
 
 The plot below emphasizes the differences between the three train sets, for a particular test image, and for each fold. Note that the split numbers in the plot below are not the same as in the plot above.
 
-```{r oneTargetImage}
+```{r oneTargetImage, fig.height=6}
 target.image <- 2
 some.split.test <- setkey(index.dt[set=="test" & image==target.image], fold, train.name)[
 , new.split.i := .I]
@@ -434,7 +434,7 @@ NAU Monsoon, using
 or
 [future.batchtools](https://tdhock.github.io/blog/2019/future-batchtools/).
 
-### mlr3
+### mlr3 with ResamplingCustom
 
 In this section we show how it is possible using [mlr3::ResamplingCustom](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) to do the same computations as we did above.
 
@@ -496,11 +496,11 @@ ggplot()+
 Exercise for the reader: parallelize the mlr3 computation by using
 `future::plan("multisession")`.
 
-### Custom mlr3 Resampling class
+### Is it possible to implement this using existing mlr3 classes? No.
 
-Using mlr3 would be easier if there was a Resampling sub-class that
-supported the kind of cross-validation experiment we have implemented
-above.
+Using mlr3 would be easier if there was a different kind of Resampling
+class that supported the kind of cross-validation experiment we have
+implemented above.
 
 
 ```{r}
@@ -621,15 +621,17 @@ reading the documentation of `Resampling`:
 #' The sets can be accessed via `$train_set(i)` and `$test_set(i)`, respectively.
 ```
 
-### Generalization to new groups resampler
+### My generalization to new groups resampler
 
 The goal of this section is to define a replacement for
 `mlr3::Resampling`, which will interpret group and stratum variables
-differently, in order to create cross-validation experiments that
-will be able to compare models trained on same/other/all group(s).
+differently, in order to create cross-validation experiments that will
+be able to compare models trained on same/other/all group(s).  We
+begin by defining a new class which contains most of the important
+logic in the `instantiate` method:
 
-```{r}
-MyResampling = R6::R6Class("MyResampling",
+```{r MyResampling}
+MyResampling = R6::R6Class("Resampling",
   public = list(
     id = NULL,
     label = NULL,
@@ -661,31 +663,45 @@ MyResampling = R6::R6Class("MyResampling",
     },
     instantiate = function(task) {
       task = mlr3::assert_task(mlr3::as_task(task))
-      strata = task$strata
-      groups = task$groups
-      if (is.null(strata)) {
-        if (is.null(groups)) {
-          instance = private$.sample(task$row_ids, task = task)
-        } else {
-          private$.groups = groups
-          instance = private$.sample(unique(groups$group), task = task)
+      folds = private$.combine(lapply(task$strata$row_id, private$.sample, task = task))
+      id.fold.groups <- folds[task$groups, on="row_id"]
+      uniq.fold.groups <- setkey(unique(id.fold.groups[, .(
+        test.fold=fold, test.group=group)]))
+      self$instance <- list(
+        iteration.dt=data.table(train.groups=c("all","same","other"))[
+        , data.table(uniq.fold.groups), by=train.groups][, iteration := .I],
+        id.dt=id.fold.groups)
+      for(iteration.i in 1:nrow(self$instance$iteration.dt)){
+        split.info <- self$instance$iteration.dt[iteration.i]
+        is.set.group <- list(
+          test=id.fold.groups[["group"]] == split.info[["test.group"]])
+        is.set.group[["train"]] <- switch(
+          split.info[["train.groups"]],
+          same=is.set.group[["test"]],
+          other=!is.set.group[["test"]],
+          all=rep(TRUE, nrow(id.fold.groups)))
+        is.set.fold <- list(
+          test=id.fold.groups[["fold"]] == split.info[["test.fold"]])
+        is.set.fold[["train"]] <- !is.set.fold[["test"]]
+        for(set.name in names(is.set.fold)){
+          is.group <- is.set.group[[set.name]]
+          is.fold <- is.set.fold[[set.name]]
+          set(
+            self$instance$iteration.dt,
+            i=iteration.i,
+            j=set.name,
+            value=list(id.fold.groups[is.group & is.fold, row_id]))
         }
-      } else {
-        if (!is.null(groups)) {
-          stopf("Cannot combine stratification with grouping")
-        }
-        instance = private$.combine(lapply(strata$row_id, private$.sample, task = task))
       }
-      self$instance = instance
       self$task_hash = task$hash
       self$task_nrow = task$nrow
       invisible(self)
     },
     train_set = function(i) {
-      private$.get_set(private$.get_train, i)
+      self$instance$iteration.dt$train[[i]]
     },
     test_set = function(i) {
-      private$.get_set(private$.get_test, i)
+      self$instance$iteration.dt$test[[i]]
     }
   ),
   active = list(
@@ -696,24 +712,23 @@ MyResampling = R6::R6Class("MyResampling",
       if (!self$is_instantiated) {
         return(NA_character_)
       }
-      calculate_hash(list(class(self), self$id, self$param_set$values, self$instance))
-    }
-  ),
-  private = list(
-    .groups = NULL,
-    .get_set = function(getter, i) {
-      if (!self$is_instantiated) {
-        stopf("Resampling '%s' has not been instantiated yet", self$id)
-      }
-      i = checkmate::assert_int(i, lower = 1L, upper = self$iters, coerce = TRUE)
-      ids = getter(i)
-      if (is.null(private$.groups)) {
-        return(ids)
-      }
-      private$.groups[list(ids), on = "group", allow.cartesian = TRUE][[1L]]
+      mlr3misc::calculate_hash(list(class(self), self$id, self$param_set$values, self$instance))
     }
   )
 )
+```
+
+The code above is a modification of the `Resampling` class from
+mlr3. The important changes are in the `instantiate` method, which
+computes `iteration.dt`, a table with one row per train/test split to
+compute. The `train_set` and `test_set` methods are also modified to
+extract indices from the train/test columns of that table.
+
+
+Below we define a slightly modified version of the `ResamplingCV`
+class from mlr3.
+
+```{r MyResamplingCV}
 MyResamplingCV = R6::R6Class("MyResamplingCV", inherit = MyResampling,
   public = list(
     initialize = function() {
@@ -722,7 +737,7 @@ MyResamplingCV = R6::R6Class("MyResamplingCV", inherit = MyResampling,
       )
       ps$values = list(folds = 10L)
       super$initialize(
-        id = "cv",
+        id = "mycv",
         param_set = ps,
         label = "Cross-Validation",
         man = "TODO")
@@ -730,7 +745,7 @@ MyResamplingCV = R6::R6Class("MyResamplingCV", inherit = MyResampling,
   ),
   active = list(
     iters = function(rhs) {
-      as.integer(self$param_set$values$folds)
+      nrow(mycv$instance$iteration.dt)
     }
   ),
   private = list(
@@ -740,12 +755,6 @@ MyResamplingCV = R6::R6Class("MyResamplingCV", inherit = MyResampling,
         fold = sample(seq(0, length(ids)-1) %% as.integer(self$param_set$values$folds) + 1L),
         key = "fold"
       )
-    },
-    .get_train = function(i) {
-      self$instance[!list(i), "row_id", on = "fold"][[1L]]
-    },
-    .get_test = function(i) {
-      self$instance[list(i), "row_id", on = "fold"][[1L]]
     },
     .combine = function(instances) {
       rbindlist(instances, use.names = TRUE)
@@ -759,9 +768,108 @@ MyResamplingCV = R6::R6Class("MyResamplingCV", inherit = MyResampling,
     }
   )
 )
+```
+
+There are a couple of private methods deleted in the code above, and
+the `id` is changed to `mycv`.
+
+Below we define a new task with both groups and strata.
+
+```{r}
+tsk_grp_str <- mlr3::TaskClassif$new(feat, strat.dt, target="label")
+tsk_grp_str$set_col_roles("label", c("target", "stratum"))
+tsk_grp_str$set_col_roles("image", c("stratum", "group"))
+tsk_grp_str
+```
+
+The output above shows that we have defined a standard mlr3 task, with
+groups and strata. The `mlr3::Resampling` does not allow both strata
+and groups, but my modifications allow it, as can be seen in the code
+and output below,
+
+```{r}
 mycv <- MyResamplingCV$new()
 mycv$param_set$values$folds <- 3
-mycv$instantiate(tsk_grp)
+mycv$instantiate(tsk_grp_str)
 mycv$instance
-mycv$test_set(1)
 ```
+
+Usually `instance` is a table with just two columns: `row_id` and
+`fold`, but in the output above it is a list of two data tables:
+
+* `iteration.dt` has one row for each train/test split, and
+* `id.dt` has one row for each data point (group and fold assignments).
+
+Below we create two tasks to plug into the benchmark,
+
+```{r}
+grouped.task.list <- list()
+for(feat in feature.types){
+  feature.name.vec <- grep(
+    feat, names(full.dt), value=TRUE, fixed=TRUE)
+  some.dt <- full.dt[, c("label", "image", feature.name.vec), with=FALSE]
+  feat.task <- mlr3::TaskClassif$new(feat, some.dt, target="label")
+  feat.task$set_col_roles("label", c("target", "stratum"))
+  feat.task$set_col_roles("image", c("stratum", "group"))
+  grouped.task.list[[feat]] <- feat.task
+}
+grouped.task.list
+```
+
+The output above shows that we have created two tasks (easy and impossible).
+The code below creates a benchmark design using these two tasks, the same two learners as above,
+and my new CV class.
+
+```{r}
+(benchmark.design <- mlr3::benchmark_grid(
+  grouped.task.list,
+  list(
+    mlr3learners::LearnerClassifCVGlmnet$new(),
+    mlr3::LearnerClassifFeatureless$new()),
+  mycv))
+```
+
+The output above shows one row for each combination of task, learner, and resampling.
+the code below computes the benchmark result and score table.
+
+```{r}
+benchmark.result <- mlr3::benchmark(benchmark.design)
+(my.score.dt <- benchmark.result$score()[mycv$instance$iteration.dt, .(
+  test.fold,
+  test.image=test.group,
+  train.name=train.groups,
+  features=task_id,
+  pred.name=sub("classif.", "", learner_id, fixed=TRUE),
+  accuracy.percent=100*(1-classif.ce)), on="iteration"])
+```
+
+The output above shows the result table with test accuracy for each
+test fold, test image, train set, feature set, and algorithm.
+Below we plot these results.
+
+```{r MyResamplingPlot}
+ggplot()+
+  geom_point(aes(
+    accuracy.percent, train.name, color=pred.name),
+    shape=1,
+    data=my.score.dt)+
+  facet_grid(features ~ test.image, labeller=label_both)
+```
+
+The plot above shows a result which is very similar to what we
+observed above, using the for loop/future/ResamplingCustom.  But we
+have moved the split logic to a new class, which makes the user code
+much simpler: all the user has to define in this framework are two
+lists: data sets and algorithms.
+
+### Conclusion
+
+I have shown various R coding techniques which can be used to code
+cross-validation, for quantifying the extent to which models can
+generalize/predict on new groups. Whereas this is possible but
+somewhat complex to code using existing techniques, I have proposed a
+new `MyResampling` class which works with the mlr3 framework, and
+greatly simplifies the code necessary for this kind of computational
+experiment. For future work, I plan to move this new code to an R
+package, published on CRAN, to make these methods easier to implement
+for non-experts.
