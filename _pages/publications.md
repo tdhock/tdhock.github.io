@@ -116,6 +116,13 @@ description: Peer-reviewed papers and preprints with links to code and data
   arXiv:2107.01285](https://arxiv.org/abs/2107.01285),
   [Software](https://github.com/tdhock/aum),
   [Reproducible](https://github.com/tdhock/max-generalized-auc).
+- Hocking TD, Srivastava A. Labeled Optimal Partitioning. Published in
+  [Computational Statistics](https://rdcu.be/cQ8qM), (2023) 38:461-480.
+  DOI:10.1007/s00180-022-01238-z, [Preprint
+  arXiv:2006.13967](https://arxiv.org/abs/2006.13967),
+  [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
+  [Software](https://github.com/tdhock/LOPART),
+  [Reproducible](https://github.com/tdhock/LOPART-paper).
 
 ### 2022
 
@@ -144,13 +151,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   published by Taylor and Francis, [download whole book](https://www.taylorfrancis.com/books/oa-edit/10.1201/9780429155659/land-carbon-cycle-modeling-yiqi-luo-benjamin-smith),
   [download my chapter](https://raw.githubusercontent.com/tdhock/2020-yiqi-summer-school/master/HOCKING-chapter.pdf),
   [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school#prepared-for-the-summer-school-4th-year-2021).
-- Hocking TD, Srivastava A. Labeled Optimal Partitioning. Published in
-  [Computational Statistics](https://rdcu.be/cQ8qM),
-  DOI:10.1007/s00180-022-01238-z, [Preprint
-  arXiv:2006.13967](https://arxiv.org/abs/2006.13967),
-  [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
-  [Software](https://github.com/tdhock/LOPART),
-  [Reproducible](https://github.com/tdhock/LOPART-paper).
 - Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
   failure time model in XGBoost. [Journal of Computational and
   Graphical Statistics](https://www.tandfonline.com/doi/full/10.1080/10618600.2022.2067548) (doi:10.1080/10618600.2022.2067548). [Preprint
