@@ -14,6 +14,7 @@ knitr::opts_chunk$set(
   fig.width=8,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
+options(width=120)
 if(FALSE){
   knitr::knit("2023-11-29-R-gen-new-subsets.Rmd")
 }
@@ -240,7 +241,6 @@ for(split.i in 1:nrow(easy.dt)){
       split.i, set, split.row, seg.dt)
   }
 }
-options(width=100)
 (index.dt <- data.table::rbindlist(index.dt.list))
 ```
 
@@ -372,13 +372,7 @@ do.call(OneSplit, split.dt[1])
 ```
 
 The code above uses a helper function `OneSplit` which is to be called
-with meta data from one of the rows of `split.dt`. So the result for
-each split can be computed in parallel on a cluster such as NAU
-Monsoon, using
-[batchtools](https://tdhock.github.io/blog/2020/monsoon-batchtools/)
-or
-[future.batchtools](https://tdhock.github.io/blog/2019/future-batchtools/).
-(exercise for the reader).  Below I do the computation in parallel on my
+with meta data from one of the rows of `split.dt`. Below I do the computation in sequence on my
 personal computer,
 
 ```{r}
@@ -859,7 +853,7 @@ ggplot()+
 The plot above shows a result which is very similar to what we
 observed above, using the for loop/future/ResamplingCustom.  But we
 have moved the split logic to a new class, which makes the user code
-much simpler: all the user has to define in this framework are two
+much simpler. All the user has to define in this framework are two
 lists: data sets and algorithms.
 
 ### Conclusion
@@ -873,3 +867,11 @@ greatly simplifies the code necessary for this kind of computational
 experiment. For future work, I plan to move this new code to an R
 package, published on CRAN, to make these methods easier to implement
 for non-experts.
+
+### Session/version info
+
+```{r}
+sessionInfo()
+```
+
+
