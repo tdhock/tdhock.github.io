@@ -12800,9 +12800,144 @@ Try to fix via [conda install protobuf](https://anaconda.org/anaconda/protobuf) 
 ...
 ```
 
+However building R package says there is an undefined symbol (but ldd
+does not say anything is not found), maybe this is because a different
+compiler was used for R and for arrow?
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ../../r
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Loading required package: grDevices
+Error in library(decor) : there is no package called ‘decor’
+Calls: suppressPackageStartupMessages -> withCallingHandlers -> library
+Execution halted
+*** Arrow C++ libraries found via pkg-config at /home/tdhock/lib
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_SUBSTRAIT -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_substrait -larrow_acero -larrow_dataset -lparquet -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 10.1.0’
+using C++17
+make: Nothing to be done for 'all'.
+installing to /home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Loading required package: grDevices
+** help
+*** installing help indices
+** building package indices
+Loading required package: grDevices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+libgcc_s.so.1 must be installed for pthread_cancel to work
+Loading required package: grDevices
+Error: package or namespace load failed for ‘arrow’ in dyn.load(file, DLLpath = DLLpath, ...):
+ unable to load shared object '/home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs/arrow.so':
+  /home/tdhock/lib/libarrow.so.1200: undefined symbol: ZSTD_minCLevel
+Error: loading failed
+Execution halted
+Aborted (core dumped)
+ERROR: loading failed
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ ldd /home/tdhock/lib/libarrow.so
+	linux-vdso.so.1 (0x00007ffc02cdc000)
+	libbrotlienc.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libbrotlienc.so.1 (0x00007fe495f7e000)
+	libbrotlidec.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libbrotlidec.so.1 (0x00007fe495f70000)
+	libutf8proc.so.2 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libutf8proc.so.2 (0x00007fe495f1b000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe4941d0000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007fe493fc8000)
+	libbz2.so.1.0 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libbz2.so.1.0 (0x00007fe495ed9000)
+	liblz4.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/liblz4.so.1 (0x00007fe495eab000)
+	libsnappy.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libsnappy.so.1 (0x00007fe495e9f000)
+	libz.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libz.so.1 (0x00007fe495e81000)
+	libzstd.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libzstd.so.1 (0x00007fe493eb8000)
+	libre2.so.9 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libre2.so.9 (0x00007fe493e42000)
+	libstdc++.so.6 => /home/tdhock/lib64/libstdc++.so.6 (0x00007fe493a6f000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fe4936d1000)
+	libgcc_s.so.1 => /home/tdhock/lib64/libgcc_s.so.1 (0x00007fe4934b9000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fe49329a000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe492ea9000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fe495df7000)
+	libbrotlicommon.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/./libbrotlicommon.so.1 (0x00007fe495e5c000)
+```
+
+Below we removed build then specify to use same gcc under home,
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ CC=gcc cmake .. --preset ninja-release -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME  && grep CMAKE_CXX_COMPILER: CMakeCache.txt
+Preset CMake variables:
+
+  ARROW_ACERO="ON"
+...
+  CMAKE_BUILD_TYPE="Release"
+
+-- Building using CMake version: 3.22.1
+-- The C compiler identification is GNU 10.1.0
+-- The CXX compiler identification is GNU 10.1.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /home/tdhock/bin/gcc - skipped
+...
+-- Build files have been written to: /home/tdhock/src/apache-arrow-12.0.0/cpp/build
+CMAKE_CXX_COMPILER:FILEPATH=/home/tdhock/bin/c++
+```
+
+The build above worked, but the R package installation below still failed, which indicates the compiler was not the issue:
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ../../r
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Loading required package: grDevices
+Error in library(decor) : there is no package called ‘decor’
+Calls: suppressPackageStartupMessages -> withCallingHandlers -> library
+Execution halted
+*** Arrow C++ libraries found via pkg-config at /home/tdhock/lib
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_SUBSTRAIT -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_substrait -larrow_acero -larrow_dataset -lparquet -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 10.1.0’
+using C++17
+make: Nothing to be done for 'all'.
+installing to /home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Loading required package: grDevices
+** help
+*** installing help indices
+** building package indices
+Loading required package: grDevices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+libgcc_s.so.1 must be installed for pthread_cancel to work
+Loading required package: grDevices
+Error: package or namespace load failed for ‘arrow’ in dyn.load(file, DLLpath = DLLpath, ...):
+ unable to load shared object '/home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs/arrow.so':
+  /home/tdhock/lib/libarrow.so.1200: undefined symbol: ZSTD_minCLevel
+Error: loading failed
+Execution halted
+Aborted (core dumped)
+ERROR: loading failed
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+```
+
+The issue must be something in the release build. Better to stick with
+ninja-debug-basic.
+
 ## Conclusions
 
-* Download recent release from https://arrow.apache.org/release/ save under ~/src
+* Download release (12 is most recent which compiles on my old mac)
+  from https://arrow.apache.org/release/ save under ~/src
 * cd ~/src, tar xf arrow.tar.gz, cd arrow-version/cpp, mkdir build, cd build, conda activate arrow, 
 * `cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME`
 * `cmake --build .`
