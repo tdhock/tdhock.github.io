@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
 if(FALSE){
-  knitr::knit("2023-12-07-dt-particularities.Rmd")
+  knitr::knit(paste0(post.id, ".Rmd"))
 }
 ```
 
