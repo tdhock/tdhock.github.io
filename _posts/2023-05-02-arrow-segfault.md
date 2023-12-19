@@ -11627,8 +11627,1322 @@ wrt_dt>
 > 
 ```
 
+## New compilation failure for 14.0.1
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-14.0.1/cpp/build$ cmake --build .
+[1/626] Creating directories for 'jemalloc_ep'
+...
+[140/626] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/integration/json_internal.cc.o
+FAILED: src/arrow/CMakeFiles/arrow_objlib.dir/integration/json_internal.cc.o 
+/usr/bin/c++ -DARROW_EXPORTING -DARROW_EXTRA_ERROR_CONTEXT -DARROW_HAVE_RUNTIME_AVX2 -DARROW_HAVE_RUNTIME_AVX512 -DARROW_HAVE_RUNTIME_BMI2 -DARROW_HAVE_RUNTIME_SSE4_2 -DARROW_WITH_BACKTRACE -DARROW_WITH_TIMING_TESTS -DBOOST_ALL_NO_LIB -DURI_STATIC_BUILD -I/home/tdhock/src/apache-arrow-14.0.1/cpp/build/src -I/home/tdhock/src/apache-arrow-14.0.1/cpp/src -I/home/tdhock/src/apache-arrow-14.0.1/cpp/src/generated -isystem /home/tdhock/src/apache-arrow-14.0.1/cpp/thirdparty/flatbuffers/include -isystem /home/tdhock/src/apache-arrow-14.0.1/cpp/thirdparty/hadoop/include -isystem /home/tdhock/.local/share/r-miniconda/envs/arrow/include -isystem /home/tdhock/src/apache-arrow-14.0.1/cpp/build/jemalloc_ep-prefix/src -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -Wdate-time -fno-semantic-interposition -march=core2 -g -Werror -O0 -ggdb  -fPIC -pthread -std=c++1z -MD -MT src/arrow/CMakeFiles/arrow_objlib.dir/integration/json_internal.cc.o -MF src/arrow/CMakeFiles/arrow_objlib.dir/integration/json_internal.cc.o.d -o src/arrow/CMakeFiles/arrow_objlib.dir/integration/json_internal.cc.o -c /home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc
+In file included from /home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:50:0:
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h: In instantiation of ‘constexpr const arrow::internal::<lambda()> [with I = int]::<unnamed struct> arrow::internal::Enumerate<int>’:
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:122:50:   required from here
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h:256:2: error: call to non-constexpr function ‘arrow::internal::<lambda()> [with I = int]’
+ constexpr auto Enumerate = [] {
+                            ~~~~
+   struct {
+   ~~~~~~~~
+     struct sentinel {};
+     ~~~~~~~~~~~~~~~~~~~
+     constexpr sentinel end() const { return {}; }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+   
+     struct iterator {
+     ~~~~~~~~~~~~~~~~~
+       I value{0};
+       ~~~~~~~~~~~
+ 
+   
+       constexpr I operator*() { return value; }
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+   
+       constexpr iterator& operator++() {
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         ++value;
+         ~~~~~~~~
+         return *this;
+         ~~~~~~~~~~~~~
+       }
+       ~
+ 
+   
+       constexpr std::true_type operator!=(sentinel) const { return {}; }
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     };
+     ~~
+     constexpr iterator begin() const { return {}; }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   } out;
+   ~~~~~~
+ 
+   
+   return out;
+   ~~~~~~~~~~~
+ }();
+ ~^~
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h:235:29: note: ‘arrow::internal::<lambda()> [with I = int]’ is not usable as a constexpr function because:
+ constexpr auto Enumerate = [] {
+                             ^
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h:253:5: error: uninitialized variable ‘out’ in ‘constexpr’ function
+   } out;
+     ^~~
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc: In member function ‘arrow::enable_if_base_binary<T, arrow::Status> arrow::internal::integration::json::{anonymous}::ArrayReader::Visit(const T&)’:
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:1308:59: error: no matching function for call to ‘quoted(std::string_view&)’
+           return Status::Invalid("Value ", std::quoted(val),
+                                                           ^
+In file included from /home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:22:0:
+/usr/include/c++/7/iomanip:461:5: note: candidate: template<class _CharT> auto std::quoted(const _CharT*, _CharT, _CharT)
+     quoted(const _CharT* __string,
+     ^~~~~~
+/usr/include/c++/7/iomanip:461:5: note:   template argument deduction/substitution failed:
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:1308:59: note:   mismatched types ‘const _CharT*’ and ‘std::basic_string_view<char>’
+           return Status::Invalid("Value ", std::quoted(val),
+                                                           ^
+In file included from /home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:22:0:
+/usr/include/c++/7/iomanip:470:5: note: candidate: template<class _CharT, class _Traits, class _Alloc> auto std::quoted(const std::__cxx11::basic_string<_CharT, _Traits, _Alloc>&, _CharT, _CharT)
+     quoted(const basic_string<_CharT, _Traits, _Alloc>& __string,
+     ^~~~~~
+/usr/include/c++/7/iomanip:470:5: note:   template argument deduction/substitution failed:
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:1308:59: note:   ‘std::string_view {aka std::basic_string_view<char>}’ is not derived from ‘const std::__cxx11::basic_string<_CharT, _Traits, _Alloc>’
+           return Status::Invalid("Value ", std::quoted(val),
+                                                           ^
+In file included from /home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:22:0:
+/usr/include/c++/7/iomanip:480:5: note: candidate: template<class _CharT, class _Traits, class _Alloc> auto std::quoted(std::__cxx11::basic_string<_CharT, _Traits, _Alloc>&, _CharT, _CharT)
+     quoted(basic_string<_CharT, _Traits, _Alloc>& __string,
+     ^~~~~~
+/usr/include/c++/7/iomanip:480:5: note:   template argument deduction/substitution failed:
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:1308:59: note:   ‘std::string_view {aka std::basic_string_view<char>}’ is not derived from ‘std::__cxx11::basic_string<_CharT, _Traits, _Alloc>’
+           return Status::Invalid("Value ", std::quoted(val),
+                                                           ^
+In file included from /home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:50:0:
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h: In instantiation of ‘constexpr const arrow::internal::<lambda()> [with I = unsigned int]::<unnamed struct> arrow::internal::Enumerate<unsigned int>’:
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:1450:30:   required from ‘arrow::Status arrow::internal::integration::json::{anonymous}::ArrayReader::GetIntArray(const RjArray&, int32_t, std::shared_ptr<arrow::Buffer>*) [with T = unsigned char; RjArray = arrow::rapidjson::GenericArray<true, arrow::rapidjson::GenericValue<arrow::rapidjson::UTF8<> > >; int32_t = int]’
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/integration/json_internal.cc:1521:75:   required from here
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h:256:2: error: call to non-constexpr function ‘arrow::internal::<lambda()> [with I = unsigned int]’
+ constexpr auto Enumerate = [] {
+                            ~~~~
+   struct {
+   ~~~~~~~~
+     struct sentinel {};
+     ~~~~~~~~~~~~~~~~~~~
+     constexpr sentinel end() const { return {}; }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+   
+     struct iterator {
+     ~~~~~~~~~~~~~~~~~
+       I value{0};
+       ~~~~~~~~~~~
+ 
+   
+       constexpr I operator*() { return value; }
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+   
+       constexpr iterator& operator++() {
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         ++value;
+         ~~~~~~~~
+         return *this;
+         ~~~~~~~~~~~~~
+       }
+       ~
+ 
+   
+       constexpr std::true_type operator!=(sentinel) const { return {}; }
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     };
+     ~~
+     constexpr iterator begin() const { return {}; }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   } out;
+   ~~~~~~
+ 
+   
+   return out;
+   ~~~~~~~~~~~
+ }();
+ ~^~
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h:235:29: note: ‘arrow::internal::<lambda()> [with I = unsigned int]’ is not usable as a constexpr function because:
+ constexpr auto Enumerate = [] {
+                             ^
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h:253:5: error: uninitialized variable ‘out’ in ‘constexpr’ function
+   } out;
+     ^~~
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h: At global scope:
+/home/tdhock/src/apache-arrow-14.0.1/cpp/src/arrow/util/range.h:196:12: error: ‘arrow::internal::Zip<std::tuple<_Tps ...>, std::integer_sequence<long unsigned int, __indices ...> >::Zip(Ranges ...) [with Ranges = {const arrow::internal::<lambda()> [with I = unsigned int]::<unnamed struct>&, const arrow::rapidjson::GenericArray<true, arrow::rapidjson::GenericValue<arrow::rapidjson::UTF8<char>, arrow::rapidjson::MemoryPoolAllocator<arrow::rapidjson::CrtAllocator> > >&}; long unsigned int ...I = {0, 1}]’, declared using unnamed type, is used but never defined [-fpermissive]
+   explicit Zip(Ranges... ranges) : ranges_(std::forward<Ranges>(ranges)...) {}
+            ^~~
+[141/626] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/csv/column_builder.cc.o
+[142/626] Building CXX object src/arrow/CMakeFiles/arrow_objlib.dir/csv/converter.cc.o
+ninja: build stopped: subcommand failed.
+```
+
+Looks like cmake is using an old c++ compiler is used above, is that
+the reason why the build fails?
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-13.0.0/cpp/build$ /usr/bin/c++ --version
+c++ (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0
+Copyright (C) 2017 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-13.0.0/cpp/build$ c++ --version
+c++ (GCC) 10.1.0
+Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-13.0.0/cpp/build$ cmake --version
+cmake version 3.22.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+```
+
+[Building Arrow C++
+page](https://arrow.apache.org/docs/developers/cpp/building.html) says
+"Building requires: A C++17-enabled compiler. On Linux, gcc 7.1 and
+higher should be sufficient...CMake 3.16 or higher" so my setup
+satisfies these requirements, which means something about arrow is
+incorrect (either the docs or the build code).
+
+Below we see the same problem with arrow 13.0.0:
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-13.0.0/cpp/build$ cmake --build .
+[1/629] Creating directories for 'jemalloc_ep'
+...
+[254/629] Building CXX object src/arrow/CMakeFiles/arrow_testing_objlib.dir/testing/json_internal.cc.o
+FAILED: src/arrow/CMakeFiles/arrow_testing_objlib.dir/testing/json_internal.cc.o 
+/usr/bin/c++ -DARROW_EXTRA_ERROR_CONTEXT -DARROW_HAVE_RUNTIME_AVX2 -DARROW_HAVE_RUNTIME_AVX512 -DARROW_HAVE_RUNTIME_BMI2 -DARROW_HAVE_RUNTIME_SSE4_2 -DARROW_TESTING_EXPORTING -DARROW_WITH_TIMING_TESTS -DBOOST_ALL_NO_LIB -DGTEST_LINKED_AS_SHARED_LIBRARY=1 -DURI_STATIC_BUILD -I/home/tdhock/src/apache-arrow-13.0.0/cpp/build/src -I/home/tdhock/src/apache-arrow-13.0.0/cpp/src -I/home/tdhock/src/apache-arrow-13.0.0/cpp/src/generated -isystem /home/tdhock/src/apache-arrow-13.0.0/cpp/thirdparty/flatbuffers/include -isystem /home/tdhock/.local/share/r-miniconda/envs/arrow/include -isystem /home/tdhock/src/apache-arrow-13.0.0/cpp/thirdparty/hadoop/include -isystem /home/tdhock/src/apache-arrow-13.0.0/cpp/build/jemalloc_ep-prefix/src -isystem /home/tdhock/src/apache-arrow-13.0.0/cpp/build/googletest_ep-prefix/include -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -Wno-conversion -Wno-sign-conversion -Wunused-result -Wdate-time -fno-semantic-interposition -march=core2 -g -Werror -O0 -ggdb  -fPIC -pthread -std=c++1z -MD -MT src/arrow/CMakeFiles/arrow_testing_objlib.dir/testing/json_internal.cc.o -MF src/arrow/CMakeFiles/arrow_testing_objlib.dir/testing/json_internal.cc.o.d -o src/arrow/CMakeFiles/arrow_testing_objlib.dir/testing/json_internal.cc.o -c /home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc
+In file included from /home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:50:0:
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h: In instantiation of ‘constexpr const arrow::internal::<lambda()> [with I = int]::<unnamed struct> arrow::internal::Enumerate<int>’:
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:125:50:   required from here
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h:256:2: error: call to non-constexpr function ‘arrow::internal::<lambda()> [with I = int]’
+ constexpr auto Enumerate = [] {
+                            ~~~~
+   struct {
+   ~~~~~~~~
+     struct sentinel {};
+     ~~~~~~~~~~~~~~~~~~~
+     constexpr sentinel end() const { return {}; }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+   
+     struct iterator {
+     ~~~~~~~~~~~~~~~~~
+       I value{0};
+       ~~~~~~~~~~~
+ 
+   
+       constexpr I operator*() { return value; }
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+   
+       constexpr iterator& operator++() {
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         ++value;
+         ~~~~~~~~
+         return *this;
+         ~~~~~~~~~~~~~
+       }
+       ~
+ 
+   
+       constexpr std::true_type operator!=(sentinel) const { return {}; }
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     };
+     ~~
+     constexpr iterator begin() const { return {}; }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   } out;
+   ~~~~~~
+ 
+   
+   return out;
+   ~~~~~~~~~~~
+ }();
+ ~^~
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h:235:29: note: ‘arrow::internal::<lambda()> [with I = int]’ is not usable as a constexpr function because:
+ constexpr auto Enumerate = [] {
+                             ^
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h:253:5: error: uninitialized variable ‘out’ in ‘constexpr’ function
+   } out;
+     ^~~
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc: In member function ‘arrow::enable_if_base_binary<T, arrow::Status> arrow::testing::json::{anonymous}::ArrayReader::Visit(const T&)’:
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:1343:59: error: no matching function for call to ‘quoted(std::string_view&)’
+           return Status::Invalid("Value ", std::quoted(val),
+                                                           ^
+In file included from /home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:22:0:
+/usr/include/c++/7/iomanip:461:5: note: candidate: template<class _CharT> auto std::quoted(const _CharT*, _CharT, _CharT)
+     quoted(const _CharT* __string,
+     ^~~~~~
+/usr/include/c++/7/iomanip:461:5: note:   template argument deduction/substitution failed:
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:1343:59: note:   mismatched types ‘const _CharT*’ and ‘std::basic_string_view<char>’
+           return Status::Invalid("Value ", std::quoted(val),
+                                                           ^
+In file included from /home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:22:0:
+/usr/include/c++/7/iomanip:470:5: note: candidate: template<class _CharT, class _Traits, class _Alloc> auto std::quoted(const std::__cxx11::basic_string<_CharT, _Traits, _Alloc>&, _CharT, _CharT)
+     quoted(const basic_string<_CharT, _Traits, _Alloc>& __string,
+     ^~~~~~
+/usr/include/c++/7/iomanip:470:5: note:   template argument deduction/substitution failed:
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:1343:59: note:   ‘std::string_view {aka std::basic_string_view<char>}’ is not derived from ‘const std::__cxx11::basic_string<_CharT, _Traits, _Alloc>’
+           return Status::Invalid("Value ", std::quoted(val),
+                                                           ^
+In file included from /home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:22:0:
+/usr/include/c++/7/iomanip:480:5: note: candidate: template<class _CharT, class _Traits, class _Alloc> auto std::quoted(std::__cxx11::basic_string<_CharT, _Traits, _Alloc>&, _CharT, _CharT)
+     quoted(basic_string<_CharT, _Traits, _Alloc>& __string,
+     ^~~~~~
+/usr/include/c++/7/iomanip:480:5: note:   template argument deduction/substitution failed:
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:1343:59: note:   ‘std::string_view {aka std::basic_string_view<char>}’ is not derived from ‘std::__cxx11::basic_string<_CharT, _Traits, _Alloc>’
+           return Status::Invalid("Value ", std::quoted(val),
+                                                           ^
+In file included from /home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:50:0:
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h: In instantiation of ‘constexpr const arrow::internal::<lambda()> [with I = unsigned int]::<unnamed struct> arrow::internal::Enumerate<unsigned int>’:
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:1485:30:   required from ‘arrow::Status arrow::testing::json::{anonymous}::ArrayReader::GetIntArray(const RjArray&, int32_t, std::shared_ptr<arrow::Buffer>*) [with T = unsigned char; RjArray = arrow::rapidjson::GenericArray<true, arrow::rapidjson::GenericValue<arrow::rapidjson::UTF8<> > >; int32_t = int]’
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/testing/json_internal.cc:1556:75:   required from here
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h:256:2: error: call to non-constexpr function ‘arrow::internal::<lambda()> [with I = unsigned int]’
+ constexpr auto Enumerate = [] {
+                            ~~~~
+   struct {
+   ~~~~~~~~
+     struct sentinel {};
+     ~~~~~~~~~~~~~~~~~~~
+     constexpr sentinel end() const { return {}; }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+   
+     struct iterator {
+     ~~~~~~~~~~~~~~~~~
+       I value{0};
+       ~~~~~~~~~~~
+ 
+   
+       constexpr I operator*() { return value; }
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 
+   
+       constexpr iterator& operator++() {
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         ++value;
+         ~~~~~~~~
+         return *this;
+         ~~~~~~~~~~~~~
+       }
+       ~
+ 
+   
+       constexpr std::true_type operator!=(sentinel) const { return {}; }
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     };
+     ~~
+     constexpr iterator begin() const { return {}; }
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   } out;
+   ~~~~~~
+ 
+   
+   return out;
+   ~~~~~~~~~~~
+ }();
+ ~^~
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h:235:29: note: ‘arrow::internal::<lambda()> [with I = unsigned int]’ is not usable as a constexpr function because:
+ constexpr auto Enumerate = [] {
+                             ^
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h:253:5: error: uninitialized variable ‘out’ in ‘constexpr’ function
+   } out;
+     ^~~
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h: At global scope:
+/home/tdhock/src/apache-arrow-13.0.0/cpp/src/arrow/util/range.h:196:12: error: ‘arrow::internal::Zip<std::tuple<_Tps ...>, std::integer_sequence<long unsigned int, __indices ...> >::Zip(Ranges ...) [with Ranges = {const arrow::internal::<lambda()> [with I = unsigned int]::<unnamed struct>&, const arrow::rapidjson::GenericArray<true, arrow::rapidjson::GenericValue<arrow::rapidjson::UTF8<char>, arrow::rapidjson::MemoryPoolAllocator<arrow::rapidjson::CrtAllocator> > >&}; long unsigned int ...I = {0, 1}]’, declared using unnamed type, is used but never defined [-fpermissive]
+   explicit Zip(Ranges... ranges) : ranges_(std::forward<Ranges>(ranges)...) {}
+            ^~~
+[255/629] Building CXX object src/arrow/CMakeFiles/arrow_testing_objlib.dir/testing/gtest_util.cc.o
+[256/629] Linking CXX shared library debug/libarrow.so.1300.0.0
+ninja: build stopped: subcommand failed.
+```
+
+## Comparing build versions?
+
+Above we used ninja-debug-minimal but we may consider using
+ninja-release or other,
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-13.0.0/cpp/build$ cmake .. --list-presets
+Available configure presets:
+
+  "ninja-debug-minimal"          - Debug build without anything enabled
+  "ninja-debug-basic"            - Debug build with tests and reduced dependencies
+...
+  "ninja-release-minimal"        - Release build without anything enabled
+  "ninja-release-basic"          - Release build with reduced dependencies
+  "ninja-release"                - Release build with more optional components
+```
+
+ninja-release gives snappy not found error below:
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ cmake .. --preset ninja-release -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME
+Preset CMake variables:
+
+  ARROW_ACERO="ON"
+...
+-- Found Boost: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/cmake/Boost-1.73.0/BoostConfig.cmake (found suitable version "1.73.0", minimum required is "1.58")  
+-- Boost include dir: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+CMake Warning at cmake_modules/FindSnappyAlt.cmake:29 (find_package):
+  By not providing "FindSnappy.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "Snappy", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "Snappy" with any
+  of the following names:
+
+    SnappyConfig.cmake
+    snappy-config.cmake
+
+  Add the installation prefix of "Snappy" to CMAKE_PREFIX_PATH or set
+  "Snappy_DIR" to a directory containing one of the above files.  If "Snappy"
+  provides a separate development package or SDK, be sure it has been
+  installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:1305 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+CMake Error at /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:230 (message):
+  Could NOT find SnappyAlt (missing: Snappy_LIB Snappy_INCLUDE_DIR)
+Call Stack (most recent call first):
+  /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:594 (_FPHSA_FAILURE_MESSAGE)
+  cmake_modules/FindSnappyAlt.cmake:93 (find_package_handle_standard_args)
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:1305 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Configuring incomplete, errors occurred!
+```
+
+after that conda install snappy fixed above, we get brotli not found below:
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ cmake .. --preset ninja-release -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME
+...
+-- Boost include dir: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Providing CMake module for SnappyAlt as part of Arrow CMake package
+-- Checking for modules 'libbrotlicommon;libbrotlienc;libbrotlidec'
+--   No package 'libbrotlicommon' found
+--   No package 'libbrotlienc' found
+--   No package 'libbrotlidec' found
+CMake Error at /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:230 (message):
+  Could NOT find BrotliAlt (missing: BROTLI_COMMON_LIBRARY BROTLI_ENC_LIBRARY
+  BROTLI_DEC_LIBRARY BROTLI_INCLUDE_DIR)
+Call Stack (most recent call first):
+  /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:594 (_FPHSA_FAILURE_MESSAGE)
+  cmake_modules/FindBrotliAlt.cmake:148 (find_package_handle_standard_args)
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:1378 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Configuring incomplete, errors occurred!
+```
+
+conda install brotli fixed above, then we get protobuf not found below
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ cmake .. --preset ninja-release -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME
+...
+-- Boost include dir: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Providing CMake module for SnappyAlt as part of Arrow CMake package
+-- Checking for modules 'libbrotlicommon;libbrotlienc;libbrotlidec'
+--   Found libbrotlicommon, version 1.0.9
+--   Found libbrotlienc, version 1.0.9
+--   Found libbrotlidec, version 1.0.9
+-- Found BrotliAlt: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libbrotlicommon.so  
+-- Providing CMake module for BrotliAlt as part of Arrow CMake package
+-- Building without OpenSSL support. Minimum OpenSSL version 1.0.2 required.
+-- Found thrift: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Found ZLIB: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libz.so (found version "1.2.13") 
+-- Found OpenSSL: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libcrypto.so (found version "1.1.1w")  
+-- Found libevent include directory: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_core.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_extra.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_openssl.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_pthreads.so
+-- Found libevent 2.1.12 in /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Providing CMake module for ThriftAlt as part of Arrow CMake package
+-- Found Protobuf: /usr/lib/x86_64-linux-gnu/libprotobuf.so;-pthread (found suitable version "3.0.0", minimum required is "3.0.0") 
+-- Providing CMake module for ProtobufAlt as part of Arrow CMake package
+CMake Error at cmake_modules/ThirdpartyToolchain.cmake:1804 (message):
+  libprotoc was set to Protobuf_PROTOC_LIBRARY-NOTFOUND
+Call Stack (most recent call first):
+  CMakeLists.txt:506 (include)
+
+
+-- Configuring incomplete, errors occurred!
+```
+
+fix above via [conda install libprotobuf](https://anaconda.org/anaconda/libprotobuf) then got error below:
+
+```
+...
+-- Found libevent 2.1.12 in /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Providing CMake module for ThriftAlt as part of Arrow CMake package
+CMake Warning at /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindProtobuf.cmake:524 (message):
+  Protobuf compiler version 3.20.3 doesn't match library version 3.0.0
+Call Stack (most recent call first):
+  cmake_modules/FindProtobufAlt.cmake:31 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:1769 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Providing CMake module for ProtobufAlt as part of Arrow CMake package
+-- Found protoc: /home/tdhock/.local/share/r-miniconda/envs/arrow/bin/protoc
+-- Building Substrait from source
+-- Building jemalloc from source
+-- Building (vendored) mimalloc from source
+-- RapidJSON found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- xsimd found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+CMake Warning at cmake_modules/Findlz4Alt.cmake:29 (find_package):
+  By not providing "Findlz4.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "lz4", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "lz4" with any of
+  the following names:
+
+    lz4Config.cmake
+    lz4-config.cmake
+
+  Add the installation prefix of "lz4" to CMAKE_PREFIX_PATH or set "lz4_DIR"
+  to a directory containing one of the above files.  If "lz4" provides a
+  separate development package or SDK, be sure it has been installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2523 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Checking for module 'liblz4'
+--   Found liblz4, version 1.9.4
+-- Found lz4Alt: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/liblz4.so  
+-- Providing CMake module for lz4Alt as part of Arrow CMake package
+-- Providing CMake module for zstdAlt as part of Arrow CMake package
+-- Found Zstandard: zstd::libzstd_shared
+CMake Warning at cmake_modules/Findre2Alt.cmake:29 (find_package):
+  By not providing "Findre2.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "re2", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "re2" with any of
+  the following names:
+
+    re2Config.cmake
+    re2-config.cmake
+
+  Add the installation prefix of "re2" to CMAKE_PREFIX_PATH or set "re2_DIR"
+  to a directory containing one of the above files.  If "re2" provides a
+  separate development package or SDK, be sure it has been installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2644 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+CMake Error at /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:230 (message):
+  Could NOT find re2Alt (missing: RE2_LIB RE2_INCLUDE_DIR)
+Call Stack (most recent call first):
+  /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:594 (_FPHSA_FAILURE_MESSAGE)
+  cmake_modules/Findre2Alt.cmake:84 (find_package_handle_standard_args)
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2644 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Configuring incomplete, errors occurred!
+```
+
+fix above via conda install [lz4](https://anaconda.org/anaconda/lz4) [re2](https://anaconda.org/anaconda/re2), then got error below:
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ conda install re2 lz4
+Collecting package metadata (current_repodata.json): done
+Solving environment: done
+
+
+==> WARNING: A newer version of conda exists. <==
+  current version: 22.9.0
+  latest version: 23.11.0
+
+Please update conda by running
+
+    $ conda update -n base -c defaults conda
+
+
+
+## Package Plan ##
+
+  environment location: /home/tdhock/.local/share/r-miniconda/envs/arrow
+
+  added / updated specs:
+    - lz4
+    - re2
+
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    lz4-4.3.2                  |  py310h5eee18b_0          35 KB
+    re2-2022.04.01             |       h295c915_0         210 KB
+    ------------------------------------------------------------
+                                           Total:         245 KB
+
+The following NEW packages will be INSTALLED:
+
+  lz4                pkgs/main/linux-64::lz4-4.3.2-py310h5eee18b_0 None
+  re2                pkgs/main/linux-64::re2-2022.04.01-h295c915_0 None
+
+
+Proceed ([y]/n)? 
+
+
+Downloading and Extracting Packages
+lz4-4.3.2            | 35 KB     | ##################################### | 100% 
+re2-2022.04.01       | 210 KB    | ##################################### | 100% 
+Preparing transaction: done
+Verifying transaction: done
+Executing transaction: done
+Retrieving notices: ...working... done
+
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ cmake .. --preset ninja-release -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME
+...
+-- Found protoc: /home/tdhock/.local/share/r-miniconda/envs/arrow/bin/protoc
+-- Building Substrait from source
+-- Building jemalloc from source
+-- Building (vendored) mimalloc from source
+-- RapidJSON found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- xsimd found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+CMake Warning at cmake_modules/Findlz4Alt.cmake:29 (find_package):
+  By not providing "Findlz4.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "lz4", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "lz4" with any of
+  the following names:
+
+    lz4Config.cmake
+    lz4-config.cmake
+
+  Add the installation prefix of "lz4" to CMAKE_PREFIX_PATH or set "lz4_DIR"
+  to a directory containing one of the above files.  If "lz4" provides a
+  separate development package or SDK, be sure it has been installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2523 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Providing CMake module for lz4Alt as part of Arrow CMake package
+-- Providing CMake module for zstdAlt as part of Arrow CMake package
+-- Found Zstandard: zstd::libzstd_shared
+-- Providing CMake module for re2Alt as part of Arrow CMake package
+-- Found BZip2: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libbz2.so (found version "1.0.8") 
+-- Looking for BZ2_bzCompressInit
+-- Looking for BZ2_bzCompressInit - found
+CMake Error at /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:230 (message):
+  Could NOT find utf8proc: Found unsuitable version "", but required is at
+  least "2.2.0" (found utf8proc_LIB-NOTFOUND)
+Call Stack (most recent call first):
+  /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindPackageHandleStandardArgs.cmake:592 (_FPHSA_FAILURE_MESSAGE)
+  cmake_modules/Findutf8proc.cmake:107 (find_package_handle_standard_args)
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2763 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Configuring incomplete, errors occurred!
+```
+
+fix above via [conda install -c conda-forge lz4-c](https://anaconda.org/conda-forge/lz4-c) and [conda install utf8proc](https://anaconda.org/anaconda/utf8proc), then got config success below!
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ cmake .. --preset ninja-release -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME
+Preset CMake variables:
+
+  ARROW_ACERO="ON"
+  ARROW_BUILD_STATIC="OFF"
+  ARROW_COMPUTE="ON"
+  ARROW_CSV="ON"
+  ARROW_DATASET="ON"
+  ARROW_FILESYSTEM="ON"
+  ARROW_JSON="ON"
+  ARROW_MIMALLOC="ON"
+  ARROW_SUBSTRAIT="ON"
+  ARROW_WITH_BROTLI="ON"
+  ARROW_WITH_BZ2="ON"
+  ARROW_WITH_LZ4="ON"
+  ARROW_WITH_RE2="ON"
+  ARROW_WITH_SNAPPY="ON"
+  ARROW_WITH_UTF8PROC="ON"
+  ARROW_WITH_ZLIB="ON"
+  ARROW_WITH_ZSTD="ON"
+  CMAKE_BUILD_TYPE="Release"
+
+-- Building using CMake version: 3.22.1
+-- Arrow version: 12.0.0 (full: '12.0.0')
+-- Arrow SO version: 1200 (full: 1200.0.0)
+-- clang-tidy 14 not found
+-- clang-format 14 not found
+-- Could NOT find ClangTools (missing: CLANG_FORMAT_BIN CLANG_TIDY_BIN) 
+-- infer not found
+fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+-- Found cpplint executable at /home/tdhock/src/apache-arrow-12.0.0/cpp/build-support/cpplint.py
+-- System processor: x86_64
+-- Arrow build warning level: PRODUCTION
+-- Using ld linker
+-- Build Type: RELEASE
+-- Using CONDA approach to find dependencies
+-- Using CONDA_PREFIX for ARROW_PACKAGE_PREFIX: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Setting (unset) dependency *_ROOT variables: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- ARROW_ABSL_BUILD_VERSION: 20211102.0
+-- ARROW_ABSL_BUILD_SHA256_CHECKSUM: dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4
+-- ARROW_AWS_C_AUTH_BUILD_VERSION: v0.6.22
+-- ARROW_AWS_C_AUTH_BUILD_SHA256_CHECKSUM: 691a6b4418afcd3dc141351b6ad33fccd8e3ff84df0e9e045b42295d284ee14c
+-- ARROW_AWS_C_CAL_BUILD_VERSION: v0.5.20
+-- ARROW_AWS_C_CAL_BUILD_SHA256_CHECKSUM: acc352359bd06f8597415c366cf4ec4f00d0b0da92d637039a73323dd55b6cd0
+-- ARROW_AWS_C_COMMON_BUILD_VERSION: v0.8.9
+-- ARROW_AWS_C_COMMON_BUILD_SHA256_CHECKSUM: 2f3fbaf7c38eae5a00e2a816d09b81177f93529ae8ba1b82dc8f31407565327a
+-- ARROW_AWS_C_COMPRESSION_BUILD_VERSION: v0.2.16
+-- ARROW_AWS_C_COMPRESSION_BUILD_SHA256_CHECKSUM: 044b1dbbca431a07bde8255ef9ec443c300fc60d4c9408d4b862f65e496687f4
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_VERSION: v0.2.18
+-- ARROW_AWS_C_EVENT_STREAM_BUILD_SHA256_CHECKSUM: 310ca617f713bf664e4c7485a3d42c1fb57813abd0107e49790d107def7cde4f
+-- ARROW_AWS_C_HTTP_BUILD_VERSION: v0.7.3
+-- ARROW_AWS_C_HTTP_BUILD_SHA256_CHECKSUM: 07e16c6bf5eba6f0dea96b6f55eae312a7c95b736f4d2e4a210000f45d8265ae
+-- ARROW_AWS_C_IO_BUILD_VERSION: v0.13.14
+-- ARROW_AWS_C_IO_BUILD_SHA256_CHECKSUM: 12b66510c3d9a4f7e9b714e9cfab2a5bf835f8b9ce2f909d20ae2a2128608c71
+-- ARROW_AWS_C_MQTT_BUILD_VERSION: v0.8.4
+-- ARROW_AWS_C_MQTT_BUILD_SHA256_CHECKSUM: 232eeac63e72883d460c686a09b98cdd811d24579affac47c5c3f696f956773f
+-- ARROW_AWS_C_S3_BUILD_VERSION: v0.2.3
+-- ARROW_AWS_C_S3_BUILD_SHA256_CHECKSUM: a00b3c9f319cd1c9aa2c3fa15098864df94b066dcba0deaccbb3caa952d902fe
+-- ARROW_AWS_C_SDKUTILS_BUILD_VERSION: v0.1.6
+-- ARROW_AWS_C_SDKUTILS_BUILD_SHA256_CHECKSUM: 8a2951344b2fb541eab1e9ca17c18a7fcbfd2aaff4cdd31d362d1fad96111b91
+-- ARROW_AWS_CHECKSUMS_BUILD_VERSION: v0.1.13
+-- ARROW_AWS_CHECKSUMS_BUILD_SHA256_CHECKSUM: 0f897686f1963253c5069a0e495b85c31635ba146cd3ac38cc2ea31eaf54694d
+-- ARROW_AWS_CRT_CPP_BUILD_VERSION: v0.18.16
+-- ARROW_AWS_CRT_CPP_BUILD_SHA256_CHECKSUM: 9e69bc1dc4b50871d1038aa9ff6ddeb4c9b28f7d6b5e5b1b69041ccf50a13483
+-- ARROW_AWS_LC_BUILD_VERSION: v1.3.0
+-- ARROW_AWS_LC_BUILD_SHA256_CHECKSUM: ae96a3567161552744fc0cae8b4d68ed88b1ec0f3d3c98700070115356da5a37
+-- ARROW_AWSSDK_BUILD_VERSION: 1.10.55
+-- ARROW_AWSSDK_BUILD_SHA256_CHECKSUM: 2d552fb1a84bef4a9b65e34aa7031851ed2aef5319e02cc6e4cb735c48aa30de
+-- ARROW_BOOST_BUILD_VERSION: 1.81.0
+-- ARROW_BOOST_BUILD_SHA256_CHECKSUM: 9e0ffae35528c35f90468997bc8d99500bf179cbae355415a89a600c38e13574
+-- ARROW_BROTLI_BUILD_VERSION: v1.0.9
+-- ARROW_BROTLI_BUILD_SHA256_CHECKSUM: f9e8d81d0405ba66d181529af42a3354f838c939095ff99930da6aa9cdf6fe46
+-- ARROW_BZIP2_BUILD_VERSION: 1.0.8
+-- ARROW_BZIP2_BUILD_SHA256_CHECKSUM: ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269
+-- ARROW_CARES_BUILD_VERSION: 1.17.2
+-- ARROW_CARES_BUILD_SHA256_CHECKSUM: 4803c844ce20ce510ef0eb83f8ea41fa24ecaae9d280c468c582d2bb25b3913d
+-- ARROW_CRC32C_BUILD_VERSION: 1.1.2
+-- ARROW_CRC32C_BUILD_SHA256_CHECKSUM: ac07840513072b7fcebda6e821068aa04889018f24e10e46181068fb214d7e56
+-- ARROW_GBENCHMARK_BUILD_VERSION: v1.7.1
+-- ARROW_GBENCHMARK_BUILD_SHA256_CHECKSUM: 6430e4092653380d9dc4ccb45a1e2dc9259d581f4866dc0759713126056bc1d7
+-- ARROW_GFLAGS_BUILD_VERSION: v2.2.2
+-- ARROW_GFLAGS_BUILD_SHA256_CHECKSUM: 34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf
+-- ARROW_GLOG_BUILD_VERSION: v0.5.0
+-- ARROW_GLOG_BUILD_SHA256_CHECKSUM: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_VERSION: v2.8.0
+-- ARROW_GOOGLE_CLOUD_CPP_BUILD_SHA256_CHECKSUM: 21fb441b5a670a18bb16b6826be8e0530888d0b94320847c538d46f5a54dddbc
+-- ARROW_GRPC_BUILD_VERSION: v1.46.3
+-- ARROW_GRPC_BUILD_SHA256_CHECKSUM: d6cbf22cb5007af71b61c6be316a79397469c58c82a942552a62e708bce60964
+-- ARROW_GTEST_BUILD_VERSION: 1.11.0
+-- ARROW_GTEST_BUILD_SHA256_CHECKSUM: b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+-- ARROW_JEMALLOC_BUILD_VERSION: 5.3.0
+-- ARROW_JEMALLOC_BUILD_SHA256_CHECKSUM: 2db82d1e7119df3e71b7640219b6dfe84789bc0537983c3b7ac4f7189aecfeaa
+-- ARROW_LZ4_BUILD_VERSION: v1.9.4
+-- ARROW_LZ4_BUILD_SHA256_CHECKSUM: 0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b
+-- ARROW_MIMALLOC_BUILD_VERSION: v2.0.6
+-- ARROW_MIMALLOC_BUILD_SHA256_CHECKSUM: 9f05c94cc2b017ed13698834ac2a3567b6339a8bde27640df5a1581d49d05ce5
+-- ARROW_NLOHMANN_JSON_BUILD_VERSION: v3.10.5
+-- ARROW_NLOHMANN_JSON_BUILD_SHA256_CHECKSUM: 5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4
+-- ARROW_OPENTELEMETRY_BUILD_VERSION: v1.8.1
+-- ARROW_OPENTELEMETRY_BUILD_SHA256_CHECKSUM: 3d640201594b07f08dade9cd1017bd0b59674daca26223b560b9bb6bf56264c2
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_VERSION: v0.17.0
+-- ARROW_OPENTELEMETRY_PROTO_BUILD_SHA256_CHECKSUM: f269fbcb30e17b03caa1decd231ce826e59d7651c0f71c3b28eb5140b4bb5412
+-- ARROW_ORC_BUILD_VERSION: 1.8.3
+-- ARROW_ORC_BUILD_SHA256_CHECKSUM: a78678ec425c8129d63370cb8a9bacb54186aa66af1e2bec01ce92e7eaf72e20
+-- ARROW_PROTOBUF_BUILD_VERSION: v21.3
+-- ARROW_PROTOBUF_BUILD_SHA256_CHECKSUM: 2f723218f6cb709ae4cdc4fb5ed56a5951fc5d466f0128ce4c946b8c78c8c49f
+-- ARROW_RAPIDJSON_BUILD_VERSION: 232389d4f1012dddec4ef84861face2d2ba85709
+-- ARROW_RAPIDJSON_BUILD_SHA256_CHECKSUM: b9290a9a6d444c8e049bd589ab804e0ccf2b05dc5984a19ed5ae75d090064806
+-- ARROW_RE2_BUILD_VERSION: 2022-06-01
+-- ARROW_RE2_BUILD_SHA256_CHECKSUM: f89c61410a072e5cbcf8c27e3a778da7d6fd2f2b5b1445cd4f4508bee946ab0f
+-- ARROW_SNAPPY_BUILD_VERSION: 1.1.9
+-- ARROW_SNAPPY_BUILD_SHA256_CHECKSUM: 75c1fbb3d618dd3a0483bff0e26d0a92b495bbe5059c8b4f1c962b478b6e06e7
+-- ARROW_SUBSTRAIT_BUILD_VERSION: v0.20.0
+-- ARROW_SUBSTRAIT_BUILD_SHA256_CHECKSUM: 5ceaa559ccef29a7825b5e5d4b5e7eed384830294f08bec913feecdd903a94cf
+-- ARROW_S2N_TLS_BUILD_VERSION: v1.3.35
+-- ARROW_S2N_TLS_BUILD_SHA256_CHECKSUM: 9d32b26e6bfcc058d98248bf8fc231537e347395dd89cf62bb432b55c5da990d
+-- ARROW_THRIFT_BUILD_VERSION: 0.16.0
+-- ARROW_THRIFT_BUILD_SHA256_CHECKSUM: f460b5c1ca30d8918ff95ea3eb6291b3951cf518553566088f3f2be8981f6209
+-- ARROW_UCX_BUILD_VERSION: 1.12.1
+-- ARROW_UCX_BUILD_SHA256_CHECKSUM: 9bef31aed0e28bf1973d28d74d9ac4f8926c43ca3b7010bd22a084e164e31b71
+-- ARROW_UTF8PROC_BUILD_VERSION: v2.7.0
+-- ARROW_UTF8PROC_BUILD_SHA256_CHECKSUM: 4bb121e297293c0fd55f08f83afab6d35d48f0af4ecc07523ad8ec99aa2b12a1
+-- ARROW_XSIMD_BUILD_VERSION: 9.0.1
+-- ARROW_XSIMD_BUILD_SHA256_CHECKSUM: b1bb5f92167fd3a4f25749db0be7e61ed37e0a5d943490f3accdcd2cd2918cc0
+-- ARROW_ZLIB_BUILD_VERSION: 1.2.13
+-- ARROW_ZLIB_BUILD_SHA256_CHECKSUM: b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30
+-- ARROW_ZSTD_BUILD_VERSION: 1.5.5
+-- ARROW_ZSTD_BUILD_SHA256_CHECKSUM: 9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4
+-- Boost include dir: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Providing CMake module for SnappyAlt as part of Arrow CMake package
+-- Providing CMake module for BrotliAlt as part of Arrow CMake package
+-- Building without OpenSSL support. Minimum OpenSSL version 1.0.2 required.
+-- Found thrift: /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Found libevent include directory: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_core.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_extra.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_openssl.so
+-- Found libevent component: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libevent_pthreads.so
+-- Found libevent 2.1.12 in /home/tdhock/.local/share/r-miniconda/envs/arrow
+-- Providing CMake module for ThriftAlt as part of Arrow CMake package
+CMake Warning at /home/tdhock/.local/share/r-miniconda/envs/arrow/share/cmake-3.22/Modules/FindProtobuf.cmake:524 (message):
+  Protobuf compiler version 3.20.3 doesn't match library version 3.0.0
+Call Stack (most recent call first):
+  cmake_modules/FindProtobufAlt.cmake:31 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:1769 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Providing CMake module for ProtobufAlt as part of Arrow CMake package
+-- Found protoc: /home/tdhock/.local/share/r-miniconda/envs/arrow/bin/protoc
+-- Building Substrait from source
+-- Building jemalloc from source
+-- Building (vendored) mimalloc from source
+-- RapidJSON found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+-- xsimd found. Headers: /home/tdhock/.local/share/r-miniconda/envs/arrow/include
+CMake Warning at cmake_modules/Findlz4Alt.cmake:29 (find_package):
+  By not providing "Findlz4.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "lz4", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "lz4" with any of
+  the following names:
+
+    lz4Config.cmake
+    lz4-config.cmake
+
+  Add the installation prefix of "lz4" to CMAKE_PREFIX_PATH or set "lz4_DIR"
+  to a directory containing one of the above files.  If "lz4" provides a
+  separate development package or SDK, be sure it has been installed.
+Call Stack (most recent call first):
+  cmake_modules/ThirdpartyToolchain.cmake:286 (find_package)
+  cmake_modules/ThirdpartyToolchain.cmake:2523 (resolve_dependency)
+  CMakeLists.txt:506 (include)
+
+
+-- Providing CMake module for lz4Alt as part of Arrow CMake package
+-- Providing CMake module for zstdAlt as part of Arrow CMake package
+-- Found Zstandard: zstd::libzstd_shared
+-- Providing CMake module for re2Alt as part of Arrow CMake package
+-- Found utf8proc: /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libutf8proc.so (found suitable version "2.6.1", minimum required is "2.2.0") 
+-- Providing CMake module for utf8proc as part of Arrow CMake package
+-- Found hdfs.h at: /home/tdhock/src/apache-arrow-12.0.0/cpp/thirdparty/hadoop/include/hdfs.h
+-- All bundled static libraries: substrait;jemalloc::jemalloc;mimalloc::mimalloc
+-- CMAKE_C_FLAGS:   -Wall -fno-semantic-interposition -march=core2
+-- CMAKE_CXX_FLAGS:  -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -fno-semantic-interposition -march=core2
+-- CMAKE_C_FLAGS_RELEASE: -O3 -DNDEBUG -O2 -ftree-vectorize
+-- CMAKE_CXX_FLAGS_RELEASE: -O3 -DNDEBUG -O2 -ftree-vectorize
+-- Looking for backtrace
+-- Looking for backtrace - found
+-- backtrace facility detected in default set of libraries
+-- Found Backtrace: /usr/include  
+-- ---------------------------------------------------------------------
+-- Arrow version:                                 12.0.0
+-- 
+-- Build configuration summary:
+--   Generator: Ninja
+--   Build type: RELEASE
+--   Source directory: /home/tdhock/src/apache-arrow-12.0.0/cpp
+--   Install prefix: /home/tdhock
+-- 
+-- Compile and link options:
+-- 
+--   ARROW_CXXFLAGS=-march=core2 [default=""]
+--       Compiler flags to append when compiling Arrow
+--   ARROW_BUILD_STATIC=OFF [default=ON]
+--       Build static libraries
+--   ARROW_BUILD_SHARED=ON [default=ON]
+--       Build shared libraries
+--   ARROW_PACKAGE_KIND="" [default=""]
+--       Arbitrary string that identifies the kind of package
+--       (for informational purposes)
+--   ARROW_GIT_ID="" [default=""]
+--       The Arrow git commit id (if any)
+--   ARROW_GIT_DESCRIPTION="" [default=""]
+--       The Arrow git commit description (if any)
+--   ARROW_NO_DEPRECATED_API=OFF [default=OFF]
+--       Exclude deprecated APIs from build
+--   ARROW_POSITION_INDEPENDENT_CODE=ON [default=ON]
+--       Whether to create position-independent target
+--   ARROW_USE_CCACHE=ON [default=ON]
+--       Use ccache when compiling (if available)
+--   ARROW_USE_SCCACHE=ON [default=ON]
+--       Use sccache when compiling (if available),
+--       takes precedence over ccache if a storage backend is configured
+--   ARROW_USE_LD_GOLD=OFF [default=OFF]
+--       Use ld.gold for linking on Linux (if available)
+--   ARROW_USE_PRECOMPILED_HEADERS=OFF [default=OFF]
+--       Use precompiled headers when compiling
+--   ARROW_SIMD_LEVEL=NONE [default=NONE|SSE4_2|AVX2|AVX512|NEON|SVE|SVE128|SVE256|SVE512|DEFAULT]
+--       Compile-time SIMD optimization level
+--   ARROW_RUNTIME_SIMD_LEVEL=MAX [default=NONE|SSE4_2|AVX2|AVX512|MAX]
+--       Max runtime SIMD optimization level
+--   ARROW_ALTIVEC=ON [default=ON]
+--       Build with Altivec if compiler has support
+--   ARROW_RPATH_ORIGIN=OFF [default=OFF]
+--       Build Arrow libraries with RATH set to $ORIGIN
+--   ARROW_INSTALL_NAME_RPATH=ON [default=ON]
+--       Build Arrow libraries with install_name set to @rpath
+--   ARROW_GGDB_DEBUG=ON [default=ON]
+--       Pass -ggdb flag to debug builds
+--   ARROW_WITH_MUSL=OFF [default=OFF]
+--       Whether the system libc is musl or not
+-- 
+-- Test and benchmark options:
+-- 
+--   ARROW_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Arrow examples
+--   ARROW_BUILD_TESTS=OFF [default=OFF]
+--       Build the Arrow googletest unit tests
+--   ARROW_ENABLE_TIMING_TESTS=ON [default=ON]
+--       Enable timing-sensitive tests
+--   ARROW_BUILD_INTEGRATION=OFF [default=OFF]
+--       Build the Arrow integration test executables
+--   ARROW_BUILD_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow micro benchmarks
+--   ARROW_BUILD_BENCHMARKS_REFERENCE=OFF [default=OFF]
+--       Build the Arrow micro reference benchmarks
+--   ARROW_BUILD_OPENMP_BENCHMARKS=OFF [default=OFF]
+--       Build the Arrow benchmarks that rely on OpenMP
+--   ARROW_BUILD_DETAILED_BENCHMARKS=OFF [default=OFF]
+--       Build benchmarks that do a longer exploration of performance
+--   ARROW_TEST_LINKAGE=shared [default=shared|static]
+--       Linkage of Arrow libraries with unit tests executables.
+--   ARROW_FUZZING=OFF [default=OFF]
+--       Build Arrow Fuzzing executables
+--   ARROW_LARGE_MEMORY_TESTS=OFF [default=OFF]
+--       Enable unit tests which use large memory
+-- 
+-- Lint options:
+-- 
+--   ARROW_ONLY_LINT=OFF [default=OFF]
+--       Only define the lint and check-format targets
+--   ARROW_VERBOSE_LINT=OFF [default=OFF]
+--       If off, 'quiet' flags will be passed to linting tools
+--   ARROW_GENERATE_COVERAGE=OFF [default=OFF]
+--       Build with C++ code coverage enabled
+-- 
+-- Checks options:
+-- 
+--   ARROW_TEST_MEMCHECK=OFF [default=OFF]
+--       Run the test suite using valgrind --tool=memcheck
+--   ARROW_USE_ASAN=OFF [default=OFF]
+--       Enable Address Sanitizer checks
+--   ARROW_USE_TSAN=OFF [default=OFF]
+--       Enable Thread Sanitizer checks
+--   ARROW_USE_UBSAN=OFF [default=OFF]
+--       Enable Undefined Behavior sanitizer checks
+-- 
+-- Project component options:
+-- 
+--   ARROW_BUILD_UTILITIES=OFF [default=OFF]
+--       Build Arrow commandline utilities
+--   ARROW_COMPUTE=ON [default=OFF]
+--       Build all Arrow Compute kernels
+--   ARROW_CSV=ON [default=OFF]
+--       Build the Arrow CSV Parser Module
+--   ARROW_CUDA=OFF [default=OFF]
+--       Build the Arrow CUDA extensions (requires CUDA toolkit)
+--   ARROW_DATASET=ON [default=OFF]
+--       Build the Arrow Dataset Modules
+--   ARROW_FILESYSTEM=ON [default=OFF]
+--       Build the Arrow Filesystem Layer
+--   ARROW_FLIGHT=OFF [default=OFF]
+--       Build the Arrow Flight RPC System (requires GRPC, Protocol Buffers)
+--   ARROW_FLIGHT_SQL=OFF [default=OFF]
+--       Build the Arrow Flight SQL extension
+--   ARROW_GANDIVA=OFF [default=OFF]
+--       Build the Gandiva libraries
+--   ARROW_GCS=OFF [default=OFF]
+--       Build Arrow with GCS support (requires the GCloud SDK for C++)
+--   ARROW_HDFS=OFF [default=OFF]
+--       Build the Arrow HDFS bridge
+--   ARROW_IPC=ON [default=ON]
+--       Build the Arrow IPC extensions
+--   ARROW_JEMALLOC=ON [default=ON]
+--       Build the Arrow jemalloc-based allocator
+--   ARROW_JSON=ON [default=OFF]
+--       Build Arrow with JSON support (requires RapidJSON)
+--   ARROW_MIMALLOC=ON [default=OFF]
+--       Build the Arrow mimalloc-based allocator
+--   ARROW_PARQUET=ON [default=OFF]
+--       Build the Parquet libraries
+--   ARROW_ORC=OFF [default=OFF]
+--       Build the Arrow ORC adapter
+--   ARROW_PYTHON=OFF [default=OFF]
+--       Build some components needed by PyArrow.
+--       (This is a deprecated option. Use CMake presets instead.)
+--   ARROW_S3=OFF [default=OFF]
+--       Build Arrow with S3 support (requires the AWS SDK for C++)
+--   ARROW_SKYHOOK=OFF [default=OFF]
+--       Build the Skyhook libraries
+--   ARROW_SUBSTRAIT=ON [default=OFF]
+--       Build the Arrow Substrait Consumer Module
+--   ARROW_ACERO=ON [default=OFF]
+--       Build the Arrow Acero Engine Module
+--   ARROW_TENSORFLOW=OFF [default=OFF]
+--       Build Arrow with TensorFlow support enabled
+--   ARROW_TESTING=OFF [default=OFF]
+--       Build the Arrow testing libraries
+-- 
+-- Thirdparty toolchain options:
+-- 
+--   ARROW_DEPENDENCY_SOURCE=CONDA [default=AUTO|BUNDLED|SYSTEM|CONDA|VCPKG|BREW]
+--       Method to use for acquiring arrow's build dependencies
+--   ARROW_VERBOSE_THIRDPARTY_BUILD=OFF [default=OFF]
+--       Show output from ExternalProjects rather than just logging to files
+--   ARROW_DEPENDENCY_USE_SHARED=ON [default=ON]
+--       Link to shared libraries
+--   ARROW_BOOST_USE_SHARED=ON [default=ON]
+--       Rely on Boost shared libraries where relevant
+--   ARROW_BROTLI_USE_SHARED=ON [default=ON]
+--       Rely on Brotli shared libraries where relevant
+--   ARROW_BZ2_USE_SHARED=ON [default=ON]
+--       Rely on Bz2 shared libraries where relevant
+--   ARROW_GFLAGS_USE_SHARED=ON [default=ON]
+--       Rely on GFlags shared libraries where relevant
+--   ARROW_GRPC_USE_SHARED=ON [default=ON]
+--       Rely on gRPC shared libraries where relevant
+--   ARROW_JEMALLOC_USE_SHARED=OFF [default=ON]
+--       Rely on jemalloc shared libraries where relevant
+--   ARROW_LZ4_USE_SHARED=ON [default=ON]
+--       Rely on lz4 shared libraries where relevant
+--   ARROW_OPENSSL_USE_SHARED=ON [default=ON]
+--       Rely on OpenSSL shared libraries where relevant
+--   ARROW_PROTOBUF_USE_SHARED=ON [default=ON]
+--       Rely on Protocol Buffers shared libraries where relevant
+--   ARROW_SNAPPY_USE_SHARED=ON [default=ON]
+--       Rely on snappy shared libraries where relevant
+--   ARROW_THRIFT_USE_SHARED=ON [default=ON]
+--       Rely on thrift shared libraries where relevant
+--   ARROW_UTF8PROC_USE_SHARED=ON [default=ON]
+--       Rely on utf8proc shared libraries where relevant
+--   ARROW_ZSTD_USE_SHARED=ON [default=ON]
+--       Rely on zstd shared libraries where relevant
+--   ARROW_USE_GLOG=OFF [default=OFF]
+--       Build libraries with glog support for pluggable logging
+--   ARROW_WITH_BACKTRACE=ON [default=ON]
+--       Build with backtrace support
+--   ARROW_WITH_OPENTELEMETRY=OFF [default=OFF]
+--       Build libraries with OpenTelemetry support for distributed tracing
+--   ARROW_WITH_BROTLI=ON [default=OFF]
+--       Build with Brotli compression
+--   ARROW_WITH_BZ2=ON [default=OFF]
+--       Build with BZ2 compression
+--   ARROW_WITH_LZ4=ON [default=OFF]
+--       Build with lz4 compression
+--   ARROW_WITH_SNAPPY=ON [default=OFF]
+--       Build with Snappy compression
+--   ARROW_WITH_ZLIB=ON [default=OFF]
+--       Build with zlib compression
+--   ARROW_WITH_ZSTD=ON [default=OFF]
+--       Build with zstd compression
+--   ARROW_WITH_UCX=OFF [default=OFF]
+--       Build with UCX transport for Arrow Flight
+--       (only used if ARROW_FLIGHT is ON)
+--   ARROW_WITH_UTF8PROC=ON [default=ON]
+--       Build with support for Unicode properties using the utf8proc library
+--       (only used if ARROW_COMPUTE is ON or ARROW_GANDIVA is ON)
+--   ARROW_WITH_RE2=ON [default=ON]
+--       Build with support for regular expressions using the re2 library
+--       (only used if ARROW_COMPUTE or ARROW_GANDIVA is ON)
+-- 
+-- Parquet options:
+-- 
+--   PARQUET_MINIMAL_DEPENDENCY=OFF [default=OFF]
+--       Depend only on Thirdparty headers to build libparquet.
+--       Always OFF if building binaries
+--   PARQUET_BUILD_EXECUTABLES=OFF [default=OFF]
+--       Build the Parquet executable CLI tools. Requires static libraries to be built.
+--   PARQUET_BUILD_EXAMPLES=OFF [default=OFF]
+--       Build the Parquet examples. Requires static libraries to be built.
+--   PARQUET_REQUIRE_ENCRYPTION=OFF [default=OFF]
+--       Build support for encryption. Fail if OpenSSL is not found
+-- 
+-- Gandiva options:
+-- 
+--   ARROW_GANDIVA_STATIC_LIBSTDCPP=OFF [default=OFF]
+--       Include -static-libstdc++ -static-libgcc when linking with
+--       Gandiva static libraries
+--   ARROW_GANDIVA_PC_CXX_FLAGS="" [default=""]
+--       Compiler flags to append when pre-compiling Gandiva operations
+-- 
+-- Advanced developer options:
+-- 
+--   ARROW_EXTRA_ERROR_CONTEXT=OFF [default=OFF]
+--       Compile with extra error context (line numbers, code)
+--   ARROW_OPTIONAL_INSTALL=OFF [default=OFF]
+--       If enabled install ONLY targets that have already been built. Please be
+--       advised that if this is enabled 'install' will fail silently on components
+--       that have not been built
+--   ARROW_GDB_INSTALL_DIR="" [default=""]
+--       Use a custom install directory for GDB plugin.
+--       In general, you don't need to specify this because the default
+--       (CMAKE_INSTALL_FULL_BINDIR on Windows, CMAKE_INSTALL_FULL_LIBDIR otherwise)
+--       is reasonable.
+--   Outputting build configuration summary to /home/tdhock/src/apache-arrow-12.0.0/cpp/build/cmake_summary.json
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/tdhock/src/apache-arrow-12.0.0/cpp/build
+```
+
+Strangely I get a header not found when building below,
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ cmake --build .
+[1/363] Creating directories for 'mimalloc_ep'
+[2/363] Creating directories for 'substrait_ep'
+[3/363] Creating directories for 'jemalloc_ep'
+[4/363] Performing download step (download, verify and extract) for 'substrait_ep'
+[5/363] No update step for 'substrait_ep'
+[6/363] No patch step for 'substrait_ep'
+[7/363] No configure step for 'substrait_ep'
+[8/363] No build step for 'substrait_ep'
+[9/363] No install step for 'substrait_ep'
+[10/363] Completed 'substrait_ep'
+[11/363] Performing download step (download, verify and extract) for 'mimalloc_ep'
+[12/363] Performing download step (download, verify and extract) for 'jemalloc_ep'
+[13/363] Generating substrait_ep-generated/substrait/extensions/extensions.pb.cc, substrait_ep-generated/substrait/extensions/extensions.pb.h
+[14/363] Generating substrait_ep-generated/substrait/plan.pb.cc, substrait_ep-generated/substrait/plan.pb.h
+[15/363] Generating substrait_ep-generated/substrait/extension_rels.pb.cc, substrait_ep-generated/substrait/extension_rels.pb.h
+[16/363] No update step for 'jemalloc_ep'
+[17/363] Generating substrait_ep-generated/substrait/type.pb.cc, substrait_ep-generated/substrait/type.pb.h
+[18/363] No update step for 'mimalloc_ep'
+[19/363] No patch step for 'mimalloc_ep'
+[20/363] Generating substrait_ep-generated/substrait/algebra.pb.cc, substrait_ep-generated/substrait/algebra.pb.h
+[21/363] Performing patch step for 'jemalloc_ep'
+[22/363] Building CXX object CMakeFiles/substrait.dir/substrait_ep-generated/substrait/extensions/extensions.pb.cc.o
+FAILED: CMakeFiles/substrait.dir/substrait_ep-generated/substrait/extensions/extensions.pb.cc.o 
+/usr/bin/c++ -DARROW_HAVE_RUNTIME_AVX2 -DARROW_HAVE_RUNTIME_AVX512 -DARROW_HAVE_RUNTIME_BMI2 -DARROW_HAVE_RUNTIME_SSE4_2 -DARROW_MIMALLOC -DARROW_WITH_RE2 -DARROW_WITH_TIMING_TESTS -DARROW_WITH_UTF8PROC -I/home/tdhock/src/apache-arrow-12.0.0/cpp/build/substrait_ep-generated -I/home/tdhock/src/apache-arrow-12.0.0/cpp/build/src -I/home/tdhock/src/apache-arrow-12.0.0/cpp/src -I/home/tdhock/src/apache-arrow-12.0.0/cpp/src/generated -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -fno-semantic-interposition -march=core2 -O3 -DNDEBUG -O2 -ftree-vectorize -fPIC -std=c++1z -MD -MT CMakeFiles/substrait.dir/substrait_ep-generated/substrait/extensions/extensions.pb.cc.o -MF CMakeFiles/substrait.dir/substrait_ep-generated/substrait/extensions/extensions.pb.cc.o.d -o CMakeFiles/substrait.dir/substrait_ep-generated/substrait/extensions/extensions.pb.cc.o -c /home/tdhock/src/apache-arrow-12.0.0/cpp/build/substrait_ep-generated/substrait/extensions/extensions.pb.cc
+In file included from /home/tdhock/src/apache-arrow-12.0.0/cpp/build/substrait_ep-generated/substrait/extensions/extensions.pb.cc:4:0:
+/home/tdhock/src/apache-arrow-12.0.0/cpp/build/substrait_ep-generated/substrait/extensions/extensions.pb.h:10:10: fatal error: google/protobuf/port_def.inc: No such file or directory
+ #include <google/protobuf/port_def.inc>
+          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+[23/363] Building CXX object CMakeFiles/substrait.dir/substrait_ep-generated/substrait/algebra.pb.cc.o
+FAILED: CMakeFiles/substrait.dir/substrait_ep-generated/substrait/algebra.pb.cc.o 
+/usr/bin/c++ -DARROW_HAVE_RUNTIME_AVX2 -DARROW_HAVE_RUNTIME_AVX512 -DARROW_HAVE_RUNTIME_BMI2 -DARROW_HAVE_RUNTIME_SSE4_2 -DARROW_MIMALLOC -DARROW_WITH_RE2 -DARROW_WITH_TIMING_TESTS -DARROW_WITH_UTF8PROC -I/home/tdhock/src/apache-arrow-12.0.0/cpp/build/substrait_ep-generated -I/home/tdhock/src/apache-arrow-12.0.0/cpp/build/src -I/home/tdhock/src/apache-arrow-12.0.0/cpp/src -I/home/tdhock/src/apache-arrow-12.0.0/cpp/src/generated -Wno-noexcept-type  -fdiagnostics-color=always  -Wall -fno-semantic-interposition -march=core2 -O3 -DNDEBUG -O2 -ftree-vectorize -fPIC -std=c++1z -MD -MT CMakeFiles/substrait.dir/substrait_ep-generated/substrait/algebra.pb.cc.o -MF CMakeFiles/substrait.dir/substrait_ep-generated/substrait/algebra.pb.cc.o.d -o CMakeFiles/substrait.dir/substrait_ep-generated/substrait/algebra.pb.cc.o -c /home/tdhock/src/apache-arrow-12.0.0/cpp/build/substrait_ep-generated/substrait/algebra.pb.cc
+In file included from /home/tdhock/src/apache-arrow-12.0.0/cpp/build/substrait_ep-generated/substrait/algebra.pb.cc:4:0:
+/home/tdhock/src/apache-arrow-12.0.0/cpp/build/substrait_ep-generated/substrait/algebra.pb.h:10:10: fatal error: google/protobuf/port_def.inc: No such file or directory
+ #include <google/protobuf/port_def.inc>
+          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+[24/363] Performing configure step for 'mimalloc_ep'
+ninja: build stopped: subcommand failed.
+```
+
+Try to fix via [conda install protobuf](https://anaconda.org/anaconda/protobuf) then remove build dir, re-configure, re-build below:
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ cmake --build .
+[1/363] Creating directories for 'jemalloc_ep'
+[2/363] Creating directories for 'mimalloc_ep'
+[3/363] Creating directories for 'substrait_ep'
+[4/363] Performing download step (download, verify and extract) for 'substrait_ep'
+[5/363] No update step for 'substrait_ep'
+[6/363] No patch step for 'substrait_ep'
+[7/363] No configure step for 'substrait_ep'
+[8/363] No build step for 'substrait_ep'
+[9/363] No install step for 'substrait_ep'
+[10/363] Completed 'substrait_ep'
+[11/363] Performing download step (download, verify and extract) for 'jemalloc_ep'
+[12/363] Generating substrait_ep-generated/substrait/extension_rels.pb.cc, substrait_ep-generated/substrait/extension_rels.pb.h
+[13/363] Generating substrait_ep-generated/substrait/extensions/extensions.pb.cc, substrait_ep-generated/substrait/extensions/extensions.pb.h
+[14/363] Performing download step (download, verify and extract) for 'mimalloc_ep'
+[15/363] Generating substrait_ep-generated/substrait/plan.pb.cc, substrait_ep-generated/substrait/plan.pb.h
+[16/363] No update step for 'jemalloc_ep'
+[17/363] Performing patch step for 'jemalloc_ep'
+[18/363] Generating substrait_ep-generated/substrait/type.pb.cc, substrait_ep-generated/substrait/type.pb.h
+[19/363] No update step for 'mimalloc_ep'
+[20/363] No patch step for 'mimalloc_ep'
+[21/363] Generating substrait_ep-generated/substrait/algebra.pb.cc, substrait_ep-generated/substrait/algebra.pb.h
+[22/363] Performing configure step for 'mimalloc_ep'
+[23/363] Building CXX object CMakeFiles/substrait.dir/substrait_ep-generated/substrait/extensions/extensions.pb.cc.o
+[24/363] Building CXX object CMakeFiles/substrait.dir/substrait_ep-generated/substrait/plan.pb.cc.o
+[25/363] Building CXX object CMakeFiles/substrait.dir/substrait_ep-generated/substrait/type.pb.cc.o
+[26/363] Building CXX object CMakeFiles/substrait.dir/substrait_ep-generated/substrait/extension_rels.pb.cc.o
+[27/363] Performing build step for 'mimalloc_ep'
+[28/363] Performing install step for 'mimalloc_ep'
+[29/363] Completed 'mimalloc_ep'
+[30/363] Building CXX object CMakeFiles/substrait.dir/substrait_ep-generated/substrait/algebra.pb.cc.o
+[31/363] Linking CXX static library release/libsubstrait.a
+[32/363] Performing configure step for 'jemalloc_ep'
+...
+```
+
+However building R package says there is an undefined symbol (but ldd
+does not say anything is not found), maybe this is because a different
+compiler was used for R and for arrow?
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ../../r
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Loading required package: grDevices
+Error in library(decor) : there is no package called ‘decor’
+Calls: suppressPackageStartupMessages -> withCallingHandlers -> library
+Execution halted
+*** Arrow C++ libraries found via pkg-config at /home/tdhock/lib
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_SUBSTRAIT -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_substrait -larrow_acero -larrow_dataset -lparquet -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 10.1.0’
+using C++17
+make: Nothing to be done for 'all'.
+installing to /home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Loading required package: grDevices
+** help
+*** installing help indices
+** building package indices
+Loading required package: grDevices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+libgcc_s.so.1 must be installed for pthread_cancel to work
+Loading required package: grDevices
+Error: package or namespace load failed for ‘arrow’ in dyn.load(file, DLLpath = DLLpath, ...):
+ unable to load shared object '/home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs/arrow.so':
+  /home/tdhock/lib/libarrow.so.1200: undefined symbol: ZSTD_minCLevel
+Error: loading failed
+Execution halted
+Aborted (core dumped)
+ERROR: loading failed
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ ldd /home/tdhock/lib/libarrow.so
+	linux-vdso.so.1 (0x00007ffc02cdc000)
+	libbrotlienc.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libbrotlienc.so.1 (0x00007fe495f7e000)
+	libbrotlidec.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libbrotlidec.so.1 (0x00007fe495f70000)
+	libutf8proc.so.2 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libutf8proc.so.2 (0x00007fe495f1b000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe4941d0000)
+	librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007fe493fc8000)
+	libbz2.so.1.0 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libbz2.so.1.0 (0x00007fe495ed9000)
+	liblz4.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/liblz4.so.1 (0x00007fe495eab000)
+	libsnappy.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libsnappy.so.1 (0x00007fe495e9f000)
+	libz.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libz.so.1 (0x00007fe495e81000)
+	libzstd.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libzstd.so.1 (0x00007fe493eb8000)
+	libre2.so.9 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/libre2.so.9 (0x00007fe493e42000)
+	libstdc++.so.6 => /home/tdhock/lib64/libstdc++.so.6 (0x00007fe493a6f000)
+	libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fe4936d1000)
+	libgcc_s.so.1 => /home/tdhock/lib64/libgcc_s.so.1 (0x00007fe4934b9000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fe49329a000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe492ea9000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fe495df7000)
+	libbrotlicommon.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/./libbrotlicommon.so.1 (0x00007fe495e5c000)
+```
+
+Below we removed build then specify to use same gcc under home,
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ CC=gcc cmake .. --preset ninja-release -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME  && grep CMAKE_CXX_COMPILER: CMakeCache.txt
+Preset CMake variables:
+
+  ARROW_ACERO="ON"
+...
+  CMAKE_BUILD_TYPE="Release"
+
+-- Building using CMake version: 3.22.1
+-- The C compiler identification is GNU 10.1.0
+-- The CXX compiler identification is GNU 10.1.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /home/tdhock/bin/gcc - skipped
+...
+-- Build files have been written to: /home/tdhock/src/apache-arrow-12.0.0/cpp/build
+CMAKE_CXX_COMPILER:FILEPATH=/home/tdhock/bin/c++
+```
+
+The build above worked, but the R package installation below still failed, which indicates the compiler was not the issue:
+
+```
+(arrow) tdhock@maude-MacBookPro:~/src/apache-arrow-12.0.0/cpp/build$ ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ../../r
+Loading required package: grDevices
+* installing to library ‘/home/tdhock/lib/R/library’
+* installing *source* package ‘arrow’ ...
+** using staged installation
+*** Generating code with data-raw/codegen.R
+Loading required package: grDevices
+Error in library(decor) : there is no package called ‘decor’
+Calls: suppressPackageStartupMessages -> withCallingHandlers -> library
+Execution halted
+*** Arrow C++ libraries found via pkg-config at /home/tdhock/lib
+PKG_CFLAGS=-I/home/tdhock/include  -DARROW_R_WITH_PARQUET -DARROW_R_WITH_DATASET -DARROW_R_WITH_ACERO -DARROW_R_WITH_SUBSTRAIT -DARROW_R_WITH_JSON
+PKG_LIBS=-L/home/tdhock/lib -larrow_substrait -larrow_acero -larrow_dataset -lparquet -larrow
+** libs
+using C++ compiler: ‘g++ (GCC) 10.1.0’
+using C++17
+make: Nothing to be done for 'all'.
+installing to /home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+Loading required package: grDevices
+** help
+*** installing help indices
+** building package indices
+Loading required package: grDevices
+** installing vignettes
+** testing if installed package can be loaded from temporary location
+libgcc_s.so.1 must be installed for pthread_cancel to work
+Loading required package: grDevices
+Error: package or namespace load failed for ‘arrow’ in dyn.load(file, DLLpath = DLLpath, ...):
+ unable to load shared object '/home/tdhock/lib/R/library/00LOCK-r/00new/arrow/libs/arrow.so':
+  /home/tdhock/lib/libarrow.so.1200: undefined symbol: ZSTD_minCLevel
+Error: loading failed
+Execution halted
+Aborted (core dumped)
+ERROR: loading failed
+* removing ‘/home/tdhock/lib/R/library/arrow’
+* restoring previous ‘/home/tdhock/lib/R/library/arrow’
+```
+
+The issue must be something in the release build. Better to stick with
+ninja-debug-basic.
+
 ## Conclusions
 
+* Download release (12 is most recent which compiles on my old mac)
+  from https://arrow.apache.org/release/ save under ~/src
+* cd ~/src, tar xf arrow.tar.gz, cd arrow-version/cpp, mkdir build, cd build, conda activate arrow, 
+* `cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME`
+* `cmake --build .`
+* `cmake --install .`
+* `ARROW_PARQUET=true ARROW_R_WITH_PARQUET=true ARROW_DEPENDENCY_SOURCE=SYSTEM ARROW_R_DEV=true LIBARROW_BINARY=false PKG_CONFIG_PATH=$HOME/lib/pkgconfig:$CONDA_PREFIX/lib/pkgconfig R CMD INSTALL ../../r`
 * Need `cmake -DARROW_CXXFLAGS=-march=core2 ...` to tell cmake to use
   core2 gcc compilation flag. 
 * Need `cmake -DARROW_SIMD_LEVEL=NONE ...` to tell cmake to not use
