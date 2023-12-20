@@ -4,7 +4,7 @@ title: Upgrading R arrow
 description: More build debugging
 ---
 
-This post is the second in a (boring? helpful?) series of very long,
+This post is the second in a (helpful? boring?) series of very long,
 detailed explanations of the steps I took to figure out how to install
 R arrow on old Mac laptops.
 
@@ -110,7 +110,8 @@ linking to conda `zstd.so.1`.
 	libbrotlicommon.so.1 => /home/tdhock/.local/share/r-miniconda/envs/arrow/lib/./libbrotlicommon.so.1 (0x00007fe495e5c000)
 ```
 
-Above ldd output was for C++ `libarrow.so` TODO check below for maude-MacBookPro.
+Above ldd output was for C++ `libarrow.so` TODO check below for
+maude-MacBookPro.
 
 Below output is for `arrow.so` on tdhock-MacBook.
 
@@ -136,6 +137,9 @@ minor/patch versions, but same major version(1):
 
 Above does not make sense as the source of the issue, because same
 major versions are supposed to be binary compatible.
+
+I re-built using preset ninja-release-basic, and it actually worked
+fine, why?
 
 ### Problem 2: arrow C++ 13+ compilation errors
 
