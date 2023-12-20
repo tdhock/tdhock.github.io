@@ -12936,8 +12936,9 @@ ninja-debug-basic.
 
 ## Conclusions
 
-* Download release (12 is most recent which compiles on my old mac)
-  from https://arrow.apache.org/release/ save under ~/src
+* Download release (12 is most recent which compiles on my old MacBook
+  Pro circa 2010) from https://arrow.apache.org/release/ save under
+  ~/src
 * cd ~/src, tar xf arrow.tar.gz, cd arrow-version/cpp, mkdir build, cd build, conda activate arrow, 
 * `cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME`
 * `cmake --build .`
