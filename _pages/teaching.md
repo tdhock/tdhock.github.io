@@ -88,7 +88,7 @@ See my [Lab Members web page](http://ml.nau.edu/members/).
 "Science is a cooperative enterprise, spanning the generations. It's
 the passing of a torch from teacher to student to teacher. A community
 of minds reaching back to antiquity and forward to the stars." Neil
-DeGrasse Tyson, Cosmos (2014).
+DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
 
 ### Google Summer of Code students mentored
 

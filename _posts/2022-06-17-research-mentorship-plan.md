@@ -49,6 +49,7 @@ Students should expect to do the following:
   asking questions to help clarify your understanding, are important
   steps in advancing the frontier of knowledge (both your knowledge,
   and our collective knowledge).
+  "Science works on the frontier between knowledge and ignorance. We're not afraid to admit what we don't know. There's no shame in that. The only shame is to pretend that we have all the answers." Neil DeGrasse Tyson, Cosmos (2014), Episode 2: Some of the Things That Molecules Do.
 - make backups of data which are important for doing the above
   activities, by keeping copies in 2+ of the following: 
   (1) your personal computer, 
