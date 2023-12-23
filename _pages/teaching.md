@@ -85,6 +85,11 @@ Topics without links below are on my TODO list.
 
 See my [Lab Members web page](http://ml.nau.edu/members/).
 
+"Science is a cooperative enterprise, spanning the generations. It's
+the passing of a torch from teacher to student to teacher. A community
+of minds reaching back to antiquity and forward to the stars." Neil
+DeGrasse Tyson, Cosmos (2014).
+
 ### Google Summer of Code students mentored
 
 I have mentored the
