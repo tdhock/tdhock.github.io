@@ -31,7 +31,7 @@ I finally got it working by following the steps below.
 * After doing the above, test the working installation by running
   `example(write_dataset,package="arrow")` in R.
 
-### Problem 1
+### Problem 1: R package fails to install using arrow C++ ninja-release 
 
 Above we used preset `ninja-debug-basic` but other presets like
 `ninja-release-basic` do not work. C++ build works, but R package
@@ -315,3 +315,62 @@ range.h:253:5: error: uninitialized variable ‘out’ in ‘constexpr’ functi
 [Searching the arrow issue tracker for
 non-constexpr](https://github.com/apache/arrow/issues?q=is%3Aissue++non-constexpr+),
 I did not find any issues that match this one.
+
+I tried building arrow C++ 14.0.2 using my other Mac laptop (with more
+recent Ubuntu), and it actually works fine, see below.
+
+```
+(arrow) tdhock@tdhock-MacBook:~/src/apache-arrow-14.0.2/cpp/build-debug-basic$ cmake .. --preset ninja-debug-basic -DCMAKE_INSTALL_PREFIX=$HOME -DARROW_CXXFLAGS=-march=core2 -DARROW_PARQUET=ON -DARROW_SIMD_LEVEL=NONE -DCMAKE_INSTALL_RPATH=$HOME/lib64:$HOME/lib:$CONDA_PREFIX/lib -DCMAKE_PREFIX_PATH=$HOME -DCMAKE_FIND_ROOT_PATH=$HOME
+Preset CMake variables:
+...
+-- Build files have been written to: /home/tdhock/src/apache-arrow-14.0.2/cpp/build-debug-basic
+
+(arrow) tdhock@tdhock-MacBook:~/src/apache-arrow-14.0.2/cpp/build-debug-basic$ cmake --build .
+[1/626] Creating directories for 'jemalloc_ep'
+...
+[626/626] Linking CXX executable debug/parquet-arrow-test
+```
+
+
+This suggests there is
+some issue with the software in the old Ubuntu, probably the compiler
+does not support some new feature that is being used in arrow 13 and
+newer.
+
+### Rebuild R with conda?
+
+Fails below, why?
+
+```
+(arrow) tdhock@tdhock-MacBook:~/R/R-devel$ CFLAGS=-march=core2 CPPFLAGS="-I$HOME/include -march=core2" LDFLAGS="-L$HOME/lib -Wl,-rpath=$HOME/lib" ./configure --prefix=$HOME --with-cairo --with-blas --with-lapack --enable-R-shlib --with-valgrind-instrumentation=2 --enable-memory-profiling
+checking build system type... x86_64-pc-linux-gnu
+...
+checking for curl-config... /home/tdhock/miniconda3/envs/arrow/bin/curl-config
+checking libcurl version ... 8.4.0
+checking for curl/curl.h... yes
+checking if libcurl is >= 7.28.0... no
+configure: error: libcurl >= 7.28.0 library and headers are required with support for https
+```
+
+R wants libcurl >= 7.28.0, but conda provides libcurl 8.4.0 which should satisfy.
+
+Below we try without conda.
+
+```
+(base) tdhock@tdhock-MacBook:~/R/R-devel$ CFLAGS=-march=core2 CPPFLAGS="-I$HOME/include -march=core2" LDFLAGS="-L$HOME/lib -Wl,-rpath=$HOME/lib" ./configure --prefix=$HOME --with-cairo --with-blas --with-lapack --enable-R-shlib --with-valgrind-instrumentation=2 --enable-memory-profiling
+checking build system type... x86_64-pc-linux-gnu
+...
+checking for curl-config... /usr/bin/curl-config
+checking libcurl version ... 7.81.0
+checking for curl/curl.h... yes
+checking if libcurl is >= 7.28.0... yes
+...
+  External libraries:          pcre2, readline, BLAS(generic), LAPACK(generic), curl, libdeflate
+  Additional capabilities:     PNG, JPEG, TIFF, NLS, cairo, ICU
+  Options enabled:             shared R library, R profiling, memory profiling, libdeflate for lazyload
+
+  Capabilities skipped:        
+  Options not enabled:         shared BLAS
+
+  Recommended packages:        yes
+```
