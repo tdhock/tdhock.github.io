@@ -1,0 +1,115 @@
+---
+layout: post
+title: Weighted binary classification
+description: An interesting real-world example
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2023-12-30-weighted-binary-classification"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this blog post is to explain weighted binary classification.
+
+### Introduction
+
+
+
+### Moonwalking with Einstein, by Joshua Foer, The Penguin Press (2011), pages 50 to 52.
+
+"From the perspective of the poultry farmer, male chickens are
+useless. They can't lay eggs, their meat is stringy, and they're
+ornery to the hens that do all the hard work of putting food on our
+tables."
+
+"The sooner they can be disposed of---often they're ground into animal
+feed---the better. But a costly problem has vexed egg farmers for
+millennia: It's virtually impossible to tell the difference between
+male and female chickens until they're four to six weeks old, when
+they begin to grow distinctive feathers and secondary sex
+characteristics like the rooster's comb. Until then, they're all just
+indistinguishable fluff balls that have to be housed and fed---at
+considerable expense."
+
+TDH: karyotype sexing is technically possible but expensive. 
+
+"Somehow it took until the 1920s before anyone figured out a solution to this costly dilemma. The momentous discovery was made by a group of Japanese veterinary scientists, who realized that just inside the chick's rear end there is a constellation of folds, marks, spots, and bumps that to the untrained eye appear arbitrary, but when properly read, can divulge the sex of a day-old bird. When this discovery was unveiled at the 1927 World Poultry Congress in Ottawa, it revolutionized the global hathery industry and eventually lowered the price of eggs worldwide."
+
+"Chicken sexing is a delicate art, requiring Zen-like concentration and a brain surgeon's dexterity. The bird is cradled in the left hand and given a gentle squeeze...the sexer flips the bird over and parts a small flap on its hindquarters to expose the cloaca, a tiny vent where both the genitals and anus are situated, and peers deep inside. In the simple cases---the ones that the sexer can actually explain---he's looking for a barely perceptible protuberance called the "bead," about the size of a pinhead. If the bead is convex, the bird is a boy, and gets thrown to the left; concave or flat and it's a girl, sent down a chute to the right...But it roughly 80 percent of the chicks, the bead is not obvious and there is no single distinguishing trait the sexer can point to."
+
+TDH: multi-variate decision rule.
+
+"By some estimates there are as many as a thousand different vent configurations that a sexer has to learn to become competent. The job is made even more difficult by the fact that the sexer has to diagnose the bird with just a glance. There is no time for conscious reasoning. If he hesistates for even a couple seconds, his grip on the bird can cause a pullet's vent to swell to look unquestionably like a cockerel's."
+
+TDH: overlap of classes in feature space (not separable).
+
+"Mistakes are costly. In the 1960s, one hatchery paid its sexers a penny for each correctly sexed chick and deducted 35 cents for each one they got wrong."
+
+TDH: female/pullet/positive, male/cockerel/negative, 35 cents is cost
+of false positive, which is when the sexer mistakenly sends a
+male/cockerel/negative down the right/female/pullet/positive chute.
+
+"The best in the business can sex 1,200 chicks an hour with 98 to 99
+percent accuracy. In Japan, a few superheroes of the industry have
+learned how to double clutch the chicks and sex them two at a time, at
+the rate of 1,700 per hour."
+
+TDH: compute money.
+
+```{r}
+library(data.table)
+(rate.per.hour.dt <- CJ(
+  chicks=c(1200, 1700),
+  accuracy.rate=c(50,98,99)/100
+)[, `:=`(
+  chicks.correct=chicks*accuracy.rate,
+  chicks.incorrect=chicks*(1-accuracy.rate)
+)][
+, cents := chicks.correct-35*chicks.incorrect
+][])
+```
+
+The [wikipedia page about USA minimum
+wage](https://en.wikipedia.org/wiki/Minimum_wage_in_the_United_States)
+says that 1968 minimum wage was $1.60, so by my estimates above,
+chicken sexers were making decent wages. But my estimates are not
+consistent with "five hundred dollars a day" wages for graduates of
+the Nippon Chick Sexing School.
+
+"What makes chicken sexing such a captivating subject...is that even
+the best professional sexers can't decribe how they determine gender
+in the toughest, most ambiguous cases. Their art is inexplicable. They
+say that within three seconds they just "know" whether a bird is a boy
+or girl, but they can't say how they know."
+
+TDH: explicable ML.
+
+### Genetic basis of chicken sex determination 
+
+Discussed on [wikipedia
+ZW_sex-determination_system](https://en.wikipedia.org/wiki/ZW_sex-determination_system).
+
+* Males are ZZ
+* Females are ZW
+* Ovum determines sex. Why? Every male contributes Z, but female
+  contributes 50% Z, 50% W.
+* In this system, half of offspring are male, half are female.
+
+### Modern references 
+
+Discussed on [wikipedia In-ovo
+sexing](https://en.wikipedia.org/wiki/In-ovo_sexing). Companies in
+Europe are now sexing eggs prior to hatching, which is touted as more
+humane and less costly.
+
