@@ -868,6 +868,12 @@ experiment. For future work, I plan to move this new code to an R
 package, published on CRAN, to make these methods easier to implement
 for non-experts.
 
+UPDATE Dec 2023:
+[mlr3resampling::ResamplingSameOtherCV](https://cloud.r-project.org/web/packages/mlr3resampling/)
+is now on CRAN, see
+[?score](https://github.com/tdhock/mlr3resampling/blob/main/man/score.Rd)
+for an example.
+
 ### Session/version info
 
 ```{r}

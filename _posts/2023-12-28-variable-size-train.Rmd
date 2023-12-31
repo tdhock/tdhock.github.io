@@ -1,0 +1,282 @@
+---
+layout: post
+title: Cross-validation with variable size train sets
+description: Determining how many samples are necessary for optimal prediction
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2023-12-28-variable-size-train"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this blog post is to explain how to use cross-validation,
+as implemented in `mlr3resampling::ResamplingVariableSizeTrain`, for
+determining how many samples are necessary for optimal prediction.
+
+### Simulated data
+
+The code below creates data for simulated regression problems. First
+we define a vector of input values,
+
+```{r}
+N <- 3000
+abs.x <- 10
+set.seed(1)
+x.vec <- runif(N, -abs.x, abs.x)
+str(x.vec)
+```
+
+Below we define a list of two true regression functions (tasks in mlr3
+terminology) for our simulated data,
+
+```{r}
+reg.pattern.list <- list(
+  sin=sin,
+  step=function(x)ifelse(x>0,1,0),
+  linear=function(x)x/abs.x,
+  quadratic=function(x)(x/abs.x)^2,
+  constant=function(x)0)
+```
+
+The constant function represents a regression problem which can be
+solved by always predicting the mean value of outputs (featureless is
+the best possible learning algorithm). The other functions will be
+used to generate data with a pattern that will need to be
+learned. Below we use a for loop over these functions/tasks, to
+simulate the data which will be used as input to the learning
+algorithms:
+
+```{r}
+library(data.table)
+reg.task.list <- list()
+reg.data.list <- list()
+for(task_id in names(reg.pattern.list)){
+  f <- reg.pattern.list[[task_id]]
+  task.dt <- data.table(
+    x=x.vec,
+    y = f(x.vec)+rnorm(N,sd=0.5))
+  reg.data.list[[task_id]] <- data.table(task_id, task.dt)
+  reg.task.list[[task_id]] <- mlr3::TaskRegr$new(
+    task_id, task.dt, target="y"
+  )
+}
+(reg.data <- rbindlist(reg.data.list))
+```
+
+In the table above, the input is x, and the output is y. Below we
+visualize these data, with one task in each facet/panel:
+
+```{r simulatedData}
+if(require(animint2)){
+  ggplot()+
+    geom_point(aes(
+      x, y),
+      shape=1,
+      data=reg.data)+
+    facet_grid(. ~ task_id, labeller=label_both)
+}
+```
+
+In the plot above we can see two different simulated data sets
+(constant and sin).  Note that the code above used the `animint2`
+package, which provides interactive extensions to the static graphics
+of the `ggplot2` package (see below section Interactive data viz). 
+
+### Visualizing instance table
+
+In the code below, we define a K-fold cross-validation experiment,
+with K=3 folds.
+
+```{r}
+reg_size_cv <- mlr3resampling::ResamplingVariableSizeTrainCV$new()
+reg_size_cv$param_set$values$train_sizes <- 20
+reg_size_cv
+```
+
+In the output above we can see the parameters of the resampling
+object, all of which should be integer scalars:
+
+* `folds` is the number of cross-validation folds.
+* `min_train_data` is the minimum number of train data to consider.
+* `random_seeds` is the number of random seeds, each of which
+  determines a different random ordering of the train data. The random
+  ordering determines which data are included in small train set
+  sizes.
+* `train_sizes` is the number of train set sizes, evenly spaced on a
+  log scale, from `min_train_data` to the max number of train data
+  (determined by `folds`).
+
+Below we instantiate the resampling on one of the tasks:
+
+```{r}
+reg_size_cv$instantiate(reg.task.list[["sin"]])
+reg_size_cv$instance
+```
+
+Above we see the instance, which need not be examined by the user, but
+for informational purposes, it contains the following data:
+
+* `iteration.dt` has one row for each train/test split,
+* `id.dt` has one row for each data point.
+
+### Benchmark: computing test error
+
+In the code below, we define two learners to compare,
+
+```{r}
+(reg.learner.list <- list(
+  if(requireNamespace("rpart"))mlr3::LearnerRegrRpart$new(),
+  mlr3::LearnerRegrFeatureless$new()))
+```
+
+The code above defines 
+
+* `regr.rpart`: Regression Tree learning algorithm, which should be
+  able to learn the non-linear pattern in the sin data (if there are
+  enough data in the train set).
+* `regr.featureless`: Featureless Regression learning algorithm, which
+  should be optimal for the constant data, and can be used as a
+  baseline in the sin data. When the rpart learner gets smaller
+  prediction error rates than featureless, then we know that it has
+  learned some non-trivial relationship between inputs and outputs.
+
+In the code below, we define the benchmark grid, which is all
+combinations of tasks (constant and sin), learners (rpart and
+featureless), and the one resampling method.
+
+```{r}
+(reg.bench.grid <- mlr3::benchmark_grid(
+  reg.task.list,
+  reg.learner.list,
+  reg_size_cv))
+```
+
+In the code below, we execute the benchmark experiment (optionally in parallel
+using the multisession future plan).
+
+```{r}
+if(require(future))plan("multisession")
+(reg.bench.result <- mlr3::benchmark(
+  reg.bench.grid, store_models = TRUE))
+```
+
+The code below computes the test error for each split, and visualizes
+the information stored in the first row of the result:
+
+```{r}
+reg.bench.score <- mlr3resampling::score(reg.bench.result)
+reg.bench.score[1]
+```
+
+The output above contains all of the results related to a particular
+train/test split. In particular for our purposes, the interesting
+columns are:
+
+* `test.fold` is the cross-validation fold ID.
+* `seed` is the random seed used to determine the train set order.
+* `train_size` is the number of data in the train set.
+* `train` and `test` are vectors of row numbers assigned to each set.
+* `iteration` is an ID for the train/test split, for a particular
+  learning algorithm and task. It is the row number of `iteration.dt`
+  (see instance above), which has one row for each unique combination
+  of `test.fold`, `seed`, and `train_size`.
+* `learner` is the mlr3 learner object, which can be used to compute
+  predictions on new data (including a grid of inputs, to show
+  predictions in the visualization below).
+* `regr.mse` is the mean squared error on the test set.
+* `algorithm` is the name of the learning algorithm (same as
+  `learner_id` but without `regr.` prefix).
+
+The code below visualizes the resulting test accuracy numbers.
+
+```{r testErrorSeeds}
+train_size_vec <- unique(reg.bench.score$train_size)
+if(require(animint2)){
+  ggplot()+
+    scale_x_log10()+
+    scale_y_log10(
+      "Mean squared error on test set")+
+    geom_line(aes(
+      train_size, regr.mse,
+      group=paste(algorithm, seed),
+      color=algorithm),
+      shape=1,
+      data=reg.bench.score)+
+    geom_point(aes(
+      train_size, regr.mse, color=algorithm),
+      shape=1,
+      data=reg.bench.score)+
+    facet_grid(
+      test.fold~task_id,
+      labeller=label_both,
+      scales="free")
+}
+```
+
+Above we plot the test error for each fold and train set size. 
+There is a different panel for each task and test fold.
+Each line represents a random seed (ordering of data in train set), 
+and each dot represents a specific train set size.
+So the plot above shows that some variation in test error, for a given test fold, 
+is due to the random ordering of the train data.
+
+Below we summarize each train set size, by taking the mean and standard deviation over each random seed.
+
+```{r testErrorSummary}
+reg.mean.dt <- dcast(
+  reg.bench.score,
+  task_id + train_size + test.fold + algorithm ~ .,
+  list(mean, sd),
+  value.var="regr.mse")
+if(require(animint2)){
+  ggplot()+
+    scale_x_log10()+
+    scale_y_log10(
+      "Mean squared error on test set
+(Mean +/- SD over 3 random orderings of train data)")+
+    geom_ribbon(aes(
+      train_size,
+      ymin=regr.mse_mean-regr.mse_sd,
+      ymax=regr.mse_mean+regr.mse_sd,
+      fill=algorithm),
+      alpha=0.5,
+      data=reg.mean.dt)+
+    geom_line(aes(
+      train_size, regr.mse_mean, color=algorithm),
+      shape=1,
+      data=reg.mean.dt)+
+    facet_grid(
+      test.fold~task_id,
+      labeller=label_both,
+      scales="free")
+}
+```
+
+The plot above shows a line for the mean, 
+and a ribbon for the standard deviation, 
+over the three random seeds.
+It is clear from the plot above that 
+
+* in constant task, rpart
+  sometimes overfits for intermediate sample sizes.
+* in other tasks, rpart shows the expected test error curve, which
+  decreases as train size increases.
+* Test error curves are mostly flat when there are 1000 train samples,
+  which indicates that gathering even more samples is not necessary.
+  
+### Session info
+
+```{r}
+sessionInfo()
+```
