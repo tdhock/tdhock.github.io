@@ -11,6 +11,8 @@ methods described in my research papers (see below).
 
 ### R and statistical software research community
 
+- Program Committee, international useR 2024 conference, Salzburg,
+  Austria, July 8-11.
 - Since 2023, I serve as Associate Editor for the journal
   [Stat](https://onlinelibrary.wiley.com/page/journal/20491573/homepage/editorialboard.html).
 - Since 2023, I serve as co-author for the [Omics CRAN Task
