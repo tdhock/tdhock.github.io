@@ -21,6 +21,13 @@ Assume there is a data set with 1000 rows,
 ```r
 N <- 1000
 library(data.table)
+```
+
+```
+## data.table 1.14.99 IN DEVELOPMENT built 2023-12-18 16:20:35 UTC using 6 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+```r
 (full.dt <- data.table(
   label=factor(rep(c("burned","no burn"), l=N)),
   image=c(rep(1, 0.4*N), rep(2, 0.4*N), rep(3, 0.1*N), rep(4, 0.1*N))
@@ -512,6 +519,13 @@ ggplot()+
     "Row number (data sorted by image, fold)")
 ```
 
+```
+## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
+```
+
 ![plot of chunk allSplitsDiagram](/assets/img/2023-11-29-R-gen-new-subsets/allSplitsDiagram-1.png)
 
 The plot above shows all splits to compute. Each panel shows the splits for one kind of train set (all, other, or same). 
@@ -712,6 +726,14 @@ or
 ### mlr3 with ResamplingCustom
 
 In this section we show how it is possible using [mlr3::ResamplingCustom](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) to do the same computations as we did above.
+First we turn off logging, to reduce noisy output:
+
+
+```r
+lgr::get_logger("mlr3")$set_threshold("warn")
+```
+
+Then we use for loops over splits with mlr3 custom resampling:
 
 
 ```r
@@ -752,204 +774,6 @@ for(feat in feature.types){
     pred.name=sub("classif.", "", learner_id, fixed=TRUE),
     accuracy.percent=100*(1-classif.ce))]
 }
-```
-
-```
-## INFO  [22:37:19.241] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:19.858] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:20.527] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:21.168] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:21.563] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:21.809] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:21.997] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:22.056] [mlr3] Finished benchmark
-## INFO  [22:37:23.229] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:23.503] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:23.722] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:24.170] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:24.489] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:24.800] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:24.999] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:25.066] [mlr3] Finished benchmark
-## INFO  [22:37:26.333] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:26.605] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:26.877] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:27.213] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:27.483] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:27.788] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:27.979] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:28.052] [mlr3] Finished benchmark
-## INFO  [22:37:29.268] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:29.561] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:29.841] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:30.337] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:30.567] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:30.837] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:31.095] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:31.169] [mlr3] Finished benchmark
-## INFO  [22:37:32.399] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:32.682] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:32.949] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:33.427] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:33.657] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:33.949] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:34.163] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:34.235] [mlr3] Finished benchmark
-## INFO  [22:37:35.565] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:35.857] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:36.129] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:36.506] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:36.808] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:37.086] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:37.304] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:37.366] [mlr3] Finished benchmark
-## INFO  [22:37:38.527] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:38.831] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:39.009] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:39.637] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:39.854] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:40.099] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:40.355] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:40.424] [mlr3] Finished benchmark
-## INFO  [22:37:41.675] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:41.950] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:42.203] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:42.793] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:43.021] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:43.223] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:43.507] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:43.577] [mlr3] Finished benchmark
-## INFO  [22:37:44.800] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:45.077] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:45.330] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:45.799] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:46.045] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:46.338] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:46.535] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:46.609] [mlr3] Finished benchmark
-## INFO  [22:37:47.780] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:48.066] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:48.344] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:48.872] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:49.103] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:49.373] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:49.663] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:49.736] [mlr3] Finished benchmark
-## INFO  [22:37:50.961] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:51.234] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:51.489] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:52.029] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:52.246] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:52.551] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:52.755] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:52.828] [mlr3] Finished benchmark
-## INFO  [22:37:54.000] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:54.273] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 1/3)
-## INFO  [22:37:54.509] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 2/3)
-## INFO  [22:37:54.942] [mlr3] Applying learner 'classif.cv_glmnet' on task 'easy' (iter 3/3)
-## INFO  [22:37:55.290] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 1/3)
-## INFO  [22:37:55.518] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 2/3)
-## INFO  [22:37:55.723] [mlr3] Applying learner 'classif.featureless' on task 'easy' (iter 3/3)
-## INFO  [22:37:55.797] [mlr3] Finished benchmark
-## INFO  [22:37:57.236] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:37:57.551] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:37:57.774] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:37:58.278] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:37:58.562] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:37:58.886] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:37:59.116] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:37:59.185] [mlr3] Finished benchmark
-## INFO  [22:38:00.369] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:00.645] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:00.869] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:01.467] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:01.685] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:01.925] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:02.139] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:02.236] [mlr3] Finished benchmark
-## INFO  [22:38:03.526] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:03.811] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:04.087] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:04.409] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:04.764] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:05.015] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:05.214] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:05.268] [mlr3] Finished benchmark
-## INFO  [22:38:06.476] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:06.748] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:06.986] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:07.473] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:07.721] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:07.983] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:08.203] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:08.272] [mlr3] Finished benchmark
-## INFO  [22:38:09.442] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:09.715] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:09.930] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:10.334] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:10.614] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:10.902] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:11.106] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:11.165] [mlr3] Finished benchmark
-## INFO  [22:38:12.390] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:12.654] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:12.909] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:13.314] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:13.643] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:13.922] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:14.119] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:14.190] [mlr3] Finished benchmark
-## INFO  [22:38:15.353] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:15.630] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:15.910] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:16.328] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:16.602] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:16.867] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:17.116] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:17.178] [mlr3] Finished benchmark
-## INFO  [22:38:18.429] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:18.703] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:18.925] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:19.438] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:19.729] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:20.021] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:20.259] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:20.334] [mlr3] Finished benchmark
-## INFO  [22:38:21.559] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:21.834] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:22.037] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:22.604] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:22.848] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:23.115] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:23.319] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:23.390] [mlr3] Finished benchmark
-## INFO  [22:38:24.815] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:25.129] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:25.431] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:25.922] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:26.154] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:26.389] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:26.632] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:26.704] [mlr3] Finished benchmark
-## INFO  [22:38:27.927] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:28.201] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:28.454] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:28.974] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:29.160] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:29.506] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:29.709] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:29.771] [mlr3] Finished benchmark
-## INFO  [22:38:30.941] [mlr3] Running benchmark with 6 resampling iterations
-## INFO  [22:38:31.226] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 1/3)
-## INFO  [22:38:31.470] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 2/3)
-## INFO  [22:38:31.877] [mlr3] Applying learner 'classif.cv_glmnet' on task 'impossible' (iter 3/3)
-## INFO  [22:38:32.108] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 1/3)
-## INFO  [22:38:32.377] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 2/3)
-## INFO  [22:38:32.664] [mlr3] Applying learner 'classif.featureless' on task 'impossible' (iter 3/3)
-## INFO  [22:38:32.737] [mlr3] Finished benchmark
-```
-
-```r
 (bench.acc.dt <- data.table::rbindlist(bench.acc.dt.list))
 ```
 
@@ -1514,737 +1338,6 @@ the code below computes the benchmark result and score table.
 
 ```r
 benchmark.result <- mlr3::benchmark(benchmark.design)
-```
-
-```
-## INFO  [22:38:38.002] [mlr3] Running benchmark with 144 resampling iterations
-```
-
-```
-## Warning: [2023-12-07 22:38:38.319] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:38.659] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:39.106] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:39.457] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:39.950] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:40.266] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:40.786] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:41.109] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:41.623] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:41.990] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:42.406] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:42.869] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:43.182] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:43.671] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:43.917] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:44.394] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:44.674] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:45.105] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:45.418] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:45.870] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:46.654] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:46.913] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:47.361] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:47.637] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:48.011] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:48.370] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:48.801] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:49.127] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:49.666] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:49.930] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:50.550] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:50.815] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:51.344] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:51.673] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:52.142] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:52.443] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:52.925] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:53.115] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:53.352] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:53.584] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:53.822] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:54.063] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:54.282] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:54.525] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:54.752] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:54.990] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:55.217] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:55.436] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:55.654] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:55.879] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:56.098] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:56.326] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:56.550] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:56.785] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:57.051] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:57.253] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:57.509] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:57.735] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:57.979] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:58.209] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:58.467] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:58.715] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:58.914] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:59.162] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:59.406] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:59.623] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:38:59.869] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:00.086] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:00.279] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:00.505] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:00.722] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:00.938] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:01.183] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:01.413] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:01.991] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:02.229] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:02.774] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:03.053] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:03.709] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:04.037] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:04.446] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:04.887] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:05.218] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:05.702] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:06.038] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:06.477] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:06.803] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:07.163] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:07.494] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:07.981] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:08.266] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:08.609] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:09.178] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:09.444] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:10.174] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:10.445] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:10.894] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:11.183] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:11.733] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:12.017] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:12.497] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:12.818] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:13.237] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:13.606] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:14.030] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:14.410] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:14.765] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:15.171] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:15.559] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:15.838] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:16.056] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:16.287] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:16.518] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:16.741] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:16.965] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:17.179] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:17.402] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:17.617] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:17.863] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:18.201] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:18.454] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:18.698] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:18.947] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:19.179] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:19.413] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:19.625] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:19.878] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:20.111] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:20.357] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:20.581] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:20.810] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:21.041] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:21.271] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:21.498] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:21.729] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:21.968] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:22.177] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:22.422] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:22.645] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:22.883] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:23.121] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:23.373] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:23.621] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## Warning: [2023-12-07 22:39:23.858] mlr3 ~ error in `lg$info("%s learner '%s' on task '%s' (iter %i/%i)", if (mode ==
-## "train") "Applying" else "Hotstarting", learner$id, task$id, iteration, resampling$iters)`: objet 'mycv' introuvable
-```
-
-```
-## INFO  [22:39:24.341] [mlr3] Finished benchmark
-```
-
-```r
 (my.score.dt <- benchmark.result$score()[mycv$instance$iteration.dt, .(
   test.fold,
   test.image=test.group,
@@ -2304,6 +1397,12 @@ experiment. For future work, I plan to move this new code to an R
 package, published on CRAN, to make these methods easier to implement
 for non-experts.
 
+UPDATE Dec 2023:
+[mlr3resampling::ResamplingSameOtherCV](https://cloud.r-project.org/web/packages/mlr3resampling/)
+is now on CRAN, see
+[?score](https://github.com/tdhock/mlr3resampling/blob/main/man/score.Rd)
+for an example.
+
 ### Session/version info
 
 
@@ -2312,41 +1411,39 @@ sessionInfo()
 ```
 
 ```
-## R Under development (unstable) (2023-11-10 r85507)
-## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 22.04.3 LTS
+## R version 4.3.2 (2023-10-31 ucrt)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19045)
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
 ## 
 ## time zone: America/Phoenix
-## tzcode source: system (glibc)
+## tzcode source: internal
 ## 
 ## attached base packages:
-## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_3.4.4     data.table_1.14.9
+## [1] ggplot2_3.4.4      data.table_1.14.99
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] utf8_1.2.4           future_1.33.0        generics_0.1.3       shape_1.4.6          lattice_0.22-5      
-##  [6] listenv_0.9.0        digest_0.6.33        magrittr_2.0.3       evaluate_0.22        grid_4.4.0          
-## [11] iterators_1.0.14     foreach_1.5.2        glmnet_4.1-8         Matrix_1.6-1.1       backports_1.4.1     
-## [16] mlr3learners_0.5.7   survival_3.5-7       fansi_1.0.5          scales_1.2.1         mlr3_0.17.0         
-## [21] codetools_0.2-19     mlr3measures_0.5.0   palmerpenguins_0.1.1 cli_3.6.1            rlang_1.1.1         
-## [26] crayon_1.5.2         parallelly_1.36.0    future.apply_1.11.0  munsell_0.5.0        splines_4.4.0       
-## [31] withr_2.5.1          tools_4.4.0          parallel_4.4.0       uuid_1.1-1           checkmate_2.2.0     
-## [36] dplyr_1.1.3          colorspace_2.1-0     globals_0.16.2       vctrs_0.6.4          R6_2.5.1            
-## [41] lifecycle_1.0.3      mlr3misc_0.13.0      pkgconfig_2.0.3      pillar_1.9.0         gtable_0.3.4        
-## [46] glue_1.6.2           Rcpp_1.0.11          lgr_0.4.4            paradox_0.11.1       xfun_0.40           
-## [51] tibble_3.2.1         tidyselect_1.2.0     knitr_1.44           farver_2.1.1         labeling_0.4.3      
-## [56] compiler_4.4.0
+##  [6] listenv_0.9.0        digest_0.6.33        magrittr_2.0.3       evaluate_0.23        grid_4.3.2          
+## [11] iterators_1.0.14     foreach_1.5.2        glmnet_4.1-8         Matrix_1.6-4         backports_1.4.1     
+## [16] mlr3learners_0.5.7   survival_3.5-7       fansi_1.0.6          scales_1.3.0         mlr3_0.17.0         
+## [21] mlr3measures_0.5.0   codetools_0.2-19     palmerpenguins_0.1.1 cli_3.6.2            rlang_1.1.2         
+## [26] crayon_1.5.2         parallelly_1.36.0    future.apply_1.11.0  munsell_0.5.0        splines_4.3.2       
+## [31] withr_2.5.2          tools_4.3.2          parallel_4.3.2       uuid_1.1-1           checkmate_2.3.1     
+## [36] dplyr_1.1.4          colorspace_2.1-0     globals_0.16.2       vctrs_0.6.5          R6_2.5.1            
+## [41] lifecycle_1.0.4      mlr3misc_0.13.0      pkgconfig_2.0.3      pillar_1.9.0         gtable_0.3.4        
+## [46] glue_1.6.2           Rcpp_1.0.11          lgr_0.4.4            paradox_0.11.1       xfun_0.41           
+## [51] tibble_3.2.1         tidyselect_1.2.0     highr_0.10           knitr_1.45           farver_2.1.1        
+## [56] labeling_0.4.3       compiler_4.3.2
 ```
 
 

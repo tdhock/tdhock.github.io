@@ -431,6 +431,13 @@ or
 ### mlr3 with ResamplingCustom
 
 In this section we show how it is possible using [mlr3::ResamplingCustom](https://mlr3.mlr-org.com/reference/mlr_resamplings_custom.html) to do the same computations as we did above.
+First we turn off logging, to reduce noisy output:
+
+```{r}
+lgr::get_logger("mlr3")$set_threshold("warn")
+```
+
+Then we use for loops over splits with mlr3 custom resampling:
 
 ```{r}
 bench.acc.dt.list <- list()
