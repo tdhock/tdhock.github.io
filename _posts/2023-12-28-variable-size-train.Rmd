@@ -88,10 +88,14 @@ if(require(animint2)){
 }
 ```
 
-In the plot above we can see two different simulated data sets
-(constant and sin).  Note that the code above used the `animint2`
+In the plot above we can see several different simulated data sets
+(one in each panel). Note that the code above used the `animint2`
 package, which provides interactive extensions to the static graphics
-of the `ggplot2` package (see below section Interactive data viz). 
+of the `ggplot2` package (for an example see [animint
+gallery](https://tdhock.github.io/2023-12-26-train-sizes-regression/),
+and [source
+code](https://github.com/tdhock/mlr3resampling/blob/main/vignettes/ResamplingVariableSizeTrainCV.Rmd)
+in ResamplingVariableSizeTrainCV vignette).
 
 ### Visualizing instance table
 
@@ -143,17 +147,16 @@ In the code below, we define two learners to compare,
 The code above defines 
 
 * `regr.rpart`: Regression Tree learning algorithm, which should be
-  able to learn the non-linear pattern in the sin data (if there are
+  able to learn any of the patterns (if there are
   enough data in the train set).
 * `regr.featureless`: Featureless Regression learning algorithm, which
   should be optimal for the constant data, and can be used as a
-  baseline in the sin data. When the rpart learner gets smaller
+  baseline in the other data. When the rpart learner gets smaller
   prediction error rates than featureless, then we know that it has
   learned some non-trivial relationship between inputs and outputs.
 
 In the code below, we define the benchmark grid, which is all
-combinations of tasks (constant and sin), learners (rpart and
-featureless), and the one resampling method.
+combinations of tasks, learners, and the one resampling method.
 
 ```{r}
 (reg.bench.grid <- mlr3::benchmark_grid(
@@ -167,6 +170,7 @@ using the multisession future plan).
 
 ```{r}
 if(require(future))plan("multisession")
+lgr::get_logger("mlr3")$set_threshold("warn")
 (reg.bench.result <- mlr3::benchmark(
   reg.bench.grid, store_models = TRUE))
 ```
@@ -275,8 +279,11 @@ It is clear from the plot above that
 * Test error curves are mostly flat when there are 1000 train samples,
   which indicates that gathering even more samples is not necessary.
   
-### Session info
+### Session info and citation
 
 ```{r}
 sessionInfo()
 ```
+
+This blog post has been adapted from the [ResamplingVariableSizeTrainCV vignette](https://github.com/tdhock/mlr3resampling/blob/main/vignettes/ResamplingVariableSizeTrainCV.Rmd),
+but uses larger data.
