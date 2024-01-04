@@ -23,6 +23,8 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### In progress
 
+- Hocking TD. mlr3resampling: an R implementation of cross-validation
+  for comparing models learned using different train sets.
 - Agyapong D, Propster JR, Marks J, Hocking TD. Cross-Validation for
   Training and Testing Co-occurrence Network Inference
   Algorithms. [Preprint arXiv:2309.15225](https://arxiv.org/abs/2309.15225).

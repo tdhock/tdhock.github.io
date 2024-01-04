@@ -55,8 +55,15 @@ XGBoost](https://www.tandfonline.com/doi/full/10.1080/10618600.2022.2067548)
 the AFT objectives in xgboost,
 [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
 [Video](https://www.youtube.com/watch?v=HuWRnzgGuIo).
- 
-  
+
+### mlr3resampling: cross-validation for mlr3 framework in R
+
+mlr3 is a framework for machine learning in R. To support an upcoming
+research paper about applications of cross-validation, we created the
+[mlr3resampling](https://github.com/tdhock/mlr3resampling) R package,
+which provides reference implementations of useful non-standard
+cross-validation algorithms.
+   
 ### aum: Area Under Min(FP,FN)
 
 To support our [JMLR 2023
