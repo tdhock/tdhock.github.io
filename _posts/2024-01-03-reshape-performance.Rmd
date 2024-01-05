@@ -182,7 +182,7 @@ seconds.limit <- 1
 plot(atime.result)
 ```
 
-The result aboe shows that the new version of nc uses less time and
+The result above shows that the new version of nc uses less time and
 memory, by a constant factor (same asymptotic slopes on log-log plot).
 Below we add asymptotic reference lines, to show the estimated asymptotic time and memory complexity, 
 
