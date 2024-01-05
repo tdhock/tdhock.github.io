@@ -25,11 +25,55 @@ The goal of this blog post is to explain how to use
 performance (time and memory usage) of different versions of an R
 package.
 
-## Example: wide to long reshape using nc
+## Example: wide to long reshape 
+
+Data reshaping means changing the shape of the data, in order to get
+it into a more appropriate format, for learning/plotting/etc.  Here we
+consider wide to long reshape, which means we start with a wide table
+(many columns) and end up with a long table (fewer columns). One
+example is the iris data, which starts wide
+
+```{r}
+library(data.table)
+(iris.wide <- data.table(iris)[, flower := .I][])
+```
+
+If we wanted to make a histogram of each numeric variable, we first
+need to reshape, for example using the code below,
+
+```{r}
+(iris.long <- melt(iris.wide, measure.vars = patterns(".*[.].*")))
+```
+
+The output above is a table with 600 rows, which is four times the
+usual 150 rows in the iris data, because we have reshaped the four
+numeric columns. Using this format, we can create a multi-panel
+histogram using the code below,
+
+```{r irisHist}
+library(ggplot2)
+ggplot()+
+  geom_histogram(aes(
+    value),
+    data=iris.long)+
+  facet_wrap(~variable)
+```
+
+The figure above shows a panel for each numeric variable in the iris
+data, with a histogram in each panel.
+
+## Reshape using nc package
 
 [nc](https://github.com/tdhock/nc), short for named capture, is a
 package which supports wide to long data reshaping, using the
-`capture_melt_single` and `capture_melt_multiple` functions. Both use
+`capture_melt_single` and `capture_melt_multiple` functions, such as in the code below,
+
+```{r}
+nc::capture_melt_single(iris.wide, variable=".*[.].*")
+```
+
+The result above is exactly the same as from `melt`. In fact,
+nc uses
 `data.table::melt` under the hood, so will benefit from the
 [improvements I
 proposed](https://github.com/Rdatatable/data.table/pull/4731), which
@@ -54,25 +98,118 @@ and which will hopefully soon appear in a CRAN release of `data.table`
   is less efficient.
   
 In this blog post we will compare the computational efficiency of
-these two versions of nc.
+these two versions of nc. But first, here we explain the advantages of
+the new reshape features. Consider the code below, which does a
+similar reshape as above, but with two named arguments (part and dim)
+instead of one (variable).
+
+```{r}
+nc::capture_melt_single(iris.wide, part=".*", "[.]", dim=".*")
+```
+
+The result above has a column for each named argument (part and dim),
+in which the values come from the text captured by the regular
+expression, from the corresponding substring of the column name
+(Sepal/Length/Petal/Width). In the old version of nc, the result above
+was computed by first doing the reshape, then doing a join with the
+meta-data from the regular expression parsing of column names
+(relatively inefficient because of the join/copy). In the new version
+of nc, we use the new data table reshape feature, which allows
+meta-data columns (part and dim) to be created at the same time as the
+reshape table (no copy necessary). The analogous new
+`data.table::melt` code would be:
+
+```{r}
+melt(iris.wide, measure.vars=measure(part, dim, pattern="(.*)[.](.*)"))
+```
+
+Note that the result above is the same, and the pattern is slightly
+different.  In `data.table::measure()` we need to specify each capture
+group using a pair of parentheses (typical for regex engines), whereas
+in nc we simply use named arguments (no parentheses necessary).
 
 ## Comparison code
 
-```{r}
-library(data.table)
-(iris.dt <- data.table(iris)[, flower := .I][])
-(row.numbers <- rep(1:nrow(iris.dt), l=200))
-(wide.dt <- iris.dt[row.numbers])
-nc::capture_melt_single(wide.dt, part="Sepal|Petal", "[.]", dim="Width|Length")
-melt(wide.dt, measure.vars=measure(part,dim,pattern="(Sepal|Petal)[.](Width|Length)"))
-melt(wide.dt, measure.vars=measure(part,dim,sep="."))
+In this section we compare the computational efficiency of the
+different reshape operations explained above. To explore computational
+efficiency, we will need to compute time/memory usage for different
+data sizes. To do that with the iris data, we will generate index
+vectors of a given size, as below.
 
-(expr.list <- atime::atime_versions_exprs(
-  "~/R/nc", 
-  nc::capture_melt_single(wide.dt, part="Sepal|Petal", "[.]", dim="Width|Length"),
+```{r}
+N <- 200
+(row.numbers <- rep(1:nrow(iris), l=N))
+(iris.wide.N <- iris.wide[row.numbers])
+```
+
+The output above shows the indices used to construct a data table
+which will be the input of the wide to long reshape operation.  The
+idea is to do the same as above, but for different sizes `N`, varying
+from 10 to 100 to 1000, etc.
+The code below computes an R expression to execute for each version of nc.
+
+* the first argument `pkg.path` is a path to a git repository containing the R package,
+* the second argument `expr` is an R expression, which will be run for each different version of the R package.
+* the third and fourth arguments specify R package versions (names are identifiers that will appear in plots/output, and values are SHA1 hash values identifying commits).
+
+```{r}
+(nc.expr.list <- atime::atime_versions_exprs(
+  pkg.path = "~/R/nc", 
+  expr = nc::capture_melt_single(iris.wide.N, part=".*", "[.]", dim=".*"),
   "nc(old)"="8a045299302bd431eb9dcfacca83c2cd0e83600d",
   "nc(new)"="eecced8ea46fbd26c295293fe70e761561a27726"))
+```
 
+The output above shows how `atime` works, by replacing each package name double colon prefix in `expr` (`nc::`), with a new package name that depends on the commit (for example `nc.eecced8ea46fbd26c295293fe70e761561a27726::`).
+In fact `atime` creates and installs a package with a new name, that depends on the commit, for every version specified.
+Below we measure asymptotic time/memory usage for the two versions,
+
+* The first argument `N` is a sequence of data sizes,
+* The second argument `setup` is an R expression that will be evaluated for each value in `N`, to create data of a given size,
+* The third argument `expr.list` is the list of expressions for which time/memory usage will be measured. 
+* Finally, `seconds.limit` may optionally be specified. If an expression is slower than this limit for any data size, then no larger data sizes will be measured.
+
+```{r atimeResult}
+seconds.limit <- 1
+(atime.result <- atime::atime(
+  N=10^seq(1, 6, by=0.5),
+  setup={
+    row.numbers <- rep(1:nrow(iris), l=N)
+    iris.wide.N <- iris.wide[row.numbers]
+  }, 
+  expr.list=nc.expr.list,
+  seconds.limit=seconds.limit))  
+plot(atime.result)
+```
+
+The result aboe shows that the new version of nc uses less time and
+memory, by a constant factor (same asymptotic slopes on log-log plot).
+Below we add asymptotic reference lines, to show the estimated asymptotic time and memory complexity, 
+
+```{r atimeRefs}
+(atime.refs <- atime::references_best(atime.result))
+plot(atime.refs)
+```
+
+The output and figure above includes violet reference lines, in which
+the text labels can be interpreted in terms of big O notation
+(asymptotic time and memory usage). Two violet reference lines are
+shown (closest upper and lower bound of empirical data). For both new
+and old versions of nc, linear O(N) seems to be a good fit.
+A third step/plot is computed below,
+
+```{r atimePred}
+(atime.pred <- predict(atime.refs, seconds=seconds.limit, kilobytes=10000))
+plot(atime.pred)
+```
+
+In the plot above, the data size `N` which can be handled in a given
+amount of time/memory is shown. It is clear that the new version of nc
+can handle a larger `N` for the given time/memory limit.
+
+## Comparison with `data.table::melt`
+
+```{r}
 meas.lang <- quote(measure(part,dim))
 lang.list <- list()
 meas.arg.list <- list(sep=".", pattern="(Sepal|Petal)[.](Width|Length)")
@@ -83,21 +220,6 @@ for(meas.arg.name in names(meas.arg.list)){
   lang.list[[out.name]] <- substitute(melt(wide.dt, measure.vars=M), list(M=this.lang))
 }
 lang.list
-
-(atime.result <- atime::atime(
-  N=10^seq(1, 6, by=0.5),
-  setup={
-    row.numbers <- rep(1:nrow(iris.dt), l=N)
-    wide.dt <- iris.dt[row.numbers]
-  },
-  seconds.limit=0.01,
-  expr.list=c(lang.list, expr.list)))
-plot(atime.result)
-
-(atime.refs <- atime::references_best(atime.result))
-plot(atime.refs)
-
-(atime.pred <- predict(atime.refs))
 ```
 
 ## Session info
