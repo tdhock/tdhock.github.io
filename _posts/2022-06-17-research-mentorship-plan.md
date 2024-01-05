@@ -9,6 +9,15 @@ Research Mentorship Plan of Toby Dylan Hocking
 My main goal when mentoring research students is to help them to make
 progress toward becoming independent researchers. Students should
 expect to learn how to:
+- use the scientific method, as described by Ann Druyan in Cosmos:
+  Possible Worlds (2020), page 26. "What's real must matter more than
+  what we wish to believe. But how do we tell the difference? I know a
+  way to part the curtains of darkness that prevent us from having a
+  complete experience of nature. Here it is, the basic rules of the
+  road for science: Test ideas by experiment and observation. Build on
+  those ideas that pass the test. Reject the ones that fail. Follow
+  the evidence wherever it leads. And *question everything*, including
+  authority. Do these things and the cosmos is yours."
 - read research papers, think about possible new ideas and future
   research directions, and review the literature to understand what
   similar ideas have already been researched.
