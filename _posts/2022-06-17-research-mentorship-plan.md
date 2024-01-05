@@ -92,3 +92,5 @@ you.
 
 Updated 21 April 2023: added that students are expected to ask
 questions and keep backups of all important data.
+
+Updated 4 Jan 2024: added Druyan quote about scientific method.
