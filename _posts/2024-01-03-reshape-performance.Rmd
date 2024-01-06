@@ -212,7 +212,7 @@ In this section, we explain how to compare nc with the computational requirement
 `data.table::melt`. 
 The simplest method is to simply add another argument to `atime`, as in the code below.
 
-```{r}
+```{r atimeMelt}
 (atime.melt <- atime::atime(
   N=10^seq(1, 6, by=0.5),
   setup={

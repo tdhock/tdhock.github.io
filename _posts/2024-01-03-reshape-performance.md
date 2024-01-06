@@ -350,8 +350,8 @@ A third step/plot is computed below,
 ## atime_prediction object
 ##         unit expr.name unit.value         N
 ##       <char>    <char>      <num>     <num>
-## 1:   seconds   nc(old)      1e-01  52117.07
-## 2:   seconds   nc(new)      1e-01 178807.34
+## 1:   seconds   nc(old)      1e-01  51789.80
+## 2:   seconds   nc(new)      1e-01 179941.83
 ## 3: kilobytes   nc(old)      1e+04  24468.05
 ## 4: kilobytes   nc(new)      1e+04  57627.11
 ```
@@ -400,7 +400,7 @@ The simplest method is to simply add another argument to `atime`, as in the code
 plot(atime.melt)
 ```
 
-![plot of chunk unnamed-chunk-8](/assets/img/2024-01-03-reshape-performance/unnamed-chunk-8-1.png)
+![plot of chunk atimeMelt](/assets/img/2024-01-03-reshape-performance/atimeMelt-1.png)
 
 Because the curves in the plot above have the same asymptotic slope,
 that shows that melt uses the same asymptotic computational resources
