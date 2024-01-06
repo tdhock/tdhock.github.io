@@ -291,7 +291,6 @@ Below we measure asymptotic time/memory usage for the two versions,
 
 
 ```r
-seconds.limit <- 1
 (atime.result <- atime::atime(
   N=10^seq(1, 6, by=0.5),
   setup={
@@ -299,17 +298,13 @@ seconds.limit <- 1
     iris.wide.N <- iris.wide[row.numbers]
   }, 
   expr.list=nc.expr.list,
-  seconds.limit=seconds.limit))  
+  seconds.limit=0.1))
 ```
 
 ```
-## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
-```
-
-```
-## atime list with 22 measurements for
-## nc(new)(N=10 to 1e+06)
-## nc(old)(N=10 to 1e+06)
+## atime list with 19 measurements for
+## nc(new)(N=10 to 316227.766016838)
+## nc(old)(N=10 to 1e+05)
 ```
 
 ```r
@@ -318,7 +313,7 @@ plot(atime.result)
 
 ![plot of chunk atimeResult](/assets/img/2024-01-03-reshape-performance/atimeResult-1.png)
 
-The result aboe shows that the new version of nc uses less time and
+The result above shows that the new version of nc uses less time and
 memory, by a constant factor (same asymptotic slopes on log-log plot).
 Below we add asymptotic reference lines, to show the estimated asymptotic time and memory complexity, 
 
@@ -328,9 +323,9 @@ Below we add asymptotic reference lines, to show the estimated asymptotic time a
 ```
 
 ```
-## references_best list with 44 measurements, best fit complexity:
-## nc(old) (N kilobytes, N log N seconds)
-## nc(new) (N kilobytes, N log N seconds)
+## references_best list with 38 measurements, best fit complexity:
+## nc(old) (N kilobytes, N seconds)
+## nc(new) (N kilobytes, N seconds)
 ```
 
 ```r
@@ -348,16 +343,17 @@ A third step/plot is computed below,
 
 
 ```r
-(atime.pred <- predict(atime.refs, seconds=seconds.limit, kilobytes=10000))
+(atime.pred <- predict(atime.refs, seconds=0.1, kilobytes=10000))
 ```
 
 ```
 ## atime_prediction object
 ##         unit expr.name unit.value         N
 ##       <char>    <char>      <num>     <num>
-## 1:   seconds   nc(old)          1 517652.88
-## 2: kilobytes   nc(old)      10000  24468.05
-## 3: kilobytes   nc(new)      10000  57627.11
+## 1:   seconds   nc(old)      1e-01  52117.07
+## 2:   seconds   nc(new)      1e-01 178807.34
+## 3: kilobytes   nc(old)      1e+04  24468.05
+## 4: kilobytes   nc(new)      1e+04  57627.11
 ```
 
 ```r
@@ -376,27 +372,62 @@ can handle a larger `N` for the given time/memory limit.
 
 ## Comparison with `data.table::melt`
 
+In this section, we explain how to compare nc with the computational requirements for
+`data.table::melt`. 
+The simplest method is to simply add another argument to `atime`, as in the code below.
+
 
 ```r
-meas.lang <- quote(measure(part,dim))
-lang.list <- list()
-meas.arg.list <- list(sep=".", pattern="(Sepal|Petal)[.](Width|Length)")
-for(meas.arg.name in names(meas.arg.list)){
-  this.lang <- meas.lang
-  this.lang[[meas.arg.name]] <- meas.arg.list[[meas.arg.name]]
-  out.name <- sprintf("measure(%s)", meas.arg.name)
-  lang.list[[out.name]] <- substitute(melt(wide.dt, measure.vars=M), list(M=this.lang))
-}
-lang.list
+(atime.melt <- atime::atime(
+  N=10^seq(1, 6, by=0.5),
+  setup={
+    row.numbers <- rep(1:nrow(iris), l=N)
+    iris.wide.N <- iris.wide[row.numbers]
+  }, 
+  expr.list=nc.expr.list,
+  melt=melt(iris.wide.N, measure.vars=measure(part, dim, pattern="(.*)[.](.*)")),
+  seconds.limit=0.1))
 ```
 
 ```
-## $`measure(sep)`
-## melt(wide.dt, measure.vars = measure(part, dim, sep = "."))
-## 
-## $`measure(pattern)`
-## melt(wide.dt, measure.vars = measure(part, dim, pattern = "(Sepal|Petal)[.](Width|Length)"))
+## atime list with 29 measurements for
+## melt(N=10 to 316227.766016838)
+## nc(new)(N=10 to 316227.766016838)
+## nc(old)(N=10 to 1e+05)
 ```
+
+```r
+plot(atime.melt)
+```
+
+![plot of chunk unnamed-chunk-8](/assets/img/2024-01-03-reshape-performance/unnamed-chunk-8-1.png)
+
+Because the curves in the plot above have the same asymptotic slope,
+that shows that melt uses the same asymptotic computational resources
+as nc (but melt is more efficient by a constant factor, which makes
+sense, because it is used by nc). 
+
+## Conclusions and Exercises
+
+In this post, we have shown how to use `atime` to compare asymptotic
+time and memory usage of R expressions that depend on some data size
+`N`. The two kinds of comparisons we explored were different versions
+of an R package (new and old version of nc), and different packages
+which implement the same computation (nc versus melt for
+reshape). Consider doing the exercises below, if you want practice
+using `atime`.
+
+* In the code above, we used `N` as the number of rows. Modify the
+  code so that `N` is used as the number of columns, and make the
+  analogous plots. Are the trends similar?
+* Another way of comparing melt to nc would be to add the melt code as
+  another expression in the list passed as the `expr.list` argument to
+  `atime`. Use `quote` to add another expression to `nc.expr.list`,
+  then re-run the comparison above between melt and nc. Is the result
+  the same as when you used the code above? It should be!
+* If you use `melt(measure.vars=measure(part,dim,sep="."))`, that is
+  use `sep` instead of `pattern` in `measure()`, is there any
+  difference in computational efficiency?
 
 ## Session info
 
