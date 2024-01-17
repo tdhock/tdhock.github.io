@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Interpretation of learning algorithms
-description: Regularized linear model
+description: Regularized linear model and decision tree
 ---
 
 ```{r Ropts, echo=FALSE}
@@ -49,99 +49,109 @@ algorithm using base R.
 For the purposes of simulation, we use the simulated data below:
 
 ```{r}
-N <- 200
+N <- 3000
 library(data.table)
 (full.dt <- data.table(
-  label=factor(rep(c("spam","not spam"), l=N)),
-  person=rep(1:2, each=0.5*N)
-)[, signal := ifelse(label=="not spam", 0, 3)][])
+  label=factor(rep(c("spam","not spam"), l=N))
+))
+signal <- ifelse(full.dt$label=="not spam", 0, 1)
 ```
 
-Above each row has an person ID between 1 and 2. 
-We can imagine a spam filtering system, that has training data for multiple people (here just two).
-Each row in the table above represents a message which has been labeled as spam or not, by one of the two people.
-Can we train on one person, and accurately predict on the other person? And can we interpret what input features are important for each person?
+We can imagine a spam filtering system, with training data for which each row in the table above represents a message which has been labeled as spam or not.
 To do that we will need some features, which we generate/simulate below:
 
 ```{r}
 set.seed(1)
-n.people <- length(unique(full.dt$person))
-for(person.i in 1:n.people){
-  use.signal.vec <- list(
-    easy=rep(if(person.i==1)TRUE else FALSE, N),
-    impossible=full.dt$person==person.i)
-  for(task_id in names(use.signal.vec)){
-    use.signal <- use.signal.vec[[task_id]]
-    full.dt[
-    , paste0("x",person.i,"_",task_id) := ifelse(
-      use.signal, signal, 0
-    )+rnorm(N)][]
-  }
-}
-full.dt
+n.noise <- 20
+full.dt[
+, x0 := signal+rnorm(N)
+][
+, paste0("x",1:n.noise) := replicate(n.noise, rnorm(N), simplify=FALSE)
+][]
 ```
 
-In the table above, there are two sets of two features:
+In the table above, there are two sets of features:
 
-* For easy features, one is correlated with the label (`x1_easy`), and
-  one is random noise (`x2_easy`), so the algorithm just needs to
-  learn to ignore the noise feature, and concentrate on the signal
-  feature. That should be possible given data from either person (same
-  signal in each person).
-* Each impossible feature is correlated with the label (when feature
-  number same as person number), or is just noise (when person number
-  different from feature number). So if the algorithm has access to
-  the correct person (same as test, say person 2), then it needs to
-  learn to use the corresponding feature `x2_impossible`. But if
-  the algorithm does not have access to that person, then the best it
-  can do is same as featureless (predict most frequent class label in
-  train data).
-  
-### Static visualization of simulated data
-
-Below we reshape the data to a table which is more suitable for visualization:
-
-```{r}
-(scatter.dt <- nc::capture_melt_multiple(
-  full.dt,
-  column="x[12]",
-  "_",
-  task_id="easy|impossible"))
-```
-
-Below we visualize the pattern for each person and feature type:
-
-```{r}
-if(require(animint2)){
-  ggplot()+
-    geom_point(aes(
-      x1, x2, color=label),
-      shape=1,
-      data=scatter.dt)+
-    facet_grid(
-      task_id ~ person,
-      labeller=label_both)
-}
-```
-
-In the plot above, it is apparent that 
-
-* for easy features (left), the two label classes differ in x1 values
-  for both people (and x2 is not important for prediction). So it
-  should be possible/easy to train on person 1, and predict accurately
-  on person 2, by only using x1.
-* for impossible features (right), the two people have different label
-  patterns. For person 1, the two label classes differ in x1 values
-  (x2 is not important), whereas for person 2, the two label classes
-  differ in x2 values (x1 is not important). So it should be
-  impossible to train on person 1, and predict accurately on
-  person 2. And when interpreting the learned linear model
-  coefficients/weights, we should see these different features as
-  being important for the two different people.
+* `x0` is the only feature which is correlated with the output `label` (should be the only feature used in the best prediction function)
+* `x1` through `x20` are noise features which are random (should be ignored by the best prediction function)
   
 In the next section, we run the L1 regularized linear learning
 algorithm on these data.
 
 ### mlr3 training
 
-TODO interpretation of glmnet models, after running a mlr3 benchmark.
+```{r}
+(task.classif <- mlr3::TaskClassif$new(
+  "simulated", full.dt, target="label"
+)$set_col_roles("label", c("target", "stratum")))
+size_cv <- mlr3resampling::ResamplingVariableSizeTrainCV$new()
+size_cv$param_set$values$min_train_data <- 20
+cv_glmnet <- mlr3learners::LearnerClassifCVGlmnet$new()
+cv_glmnet$param_set$values$nfolds <- 5
+(learner.list <- list(
+  cv_glmnet,
+  mlr3::LearnerClassifRpart$new(),
+  mlr3::LearnerClassifFeatureless$new()))
+(bench.grid <- mlr3::benchmark_grid(
+  task.classif,
+  learner.list,
+  size_cv))
+if(require(future))plan("multisession")
+lgr::get_logger("mlr3")$set_threshold("warn")
+(bench.result <- mlr3::benchmark(
+  bench.grid, store_models = TRUE))
+
+bench.score <- mlr3resampling::score(bench.result)
+bench.score[1]
+
+train_size_vec <- unique(bench.score$train_size)
+if(require(animint2)){
+  ggplot()+
+    scale_x_log10()+
+    scale_y_log10(
+      "Classification error on test set")+
+    geom_line(aes(
+      train_size, classif.ce,
+      group=paste(algorithm, seed),
+      color=algorithm),
+      shape=1,
+      data=bench.score)+
+    geom_point(aes(
+      train_size, classif.ce, color=algorithm),
+      shape=1,
+      data=bench.score)+
+    facet_grid(
+      test.fold~task_id,
+      labeller=label_both,
+      scales="free")
+}
+
+library(glmnet)
+glmnet.score <- bench.score[algorithm=="cv_glmnet"]
+weight.dt.list <- list()
+levs <- names(full.dt)[-1]
+for(score.i in 1:nrow(glmnet.score)){
+  score.row <- glmnet.score[score.i]
+  fit <- score.row$learner[[1]]$model
+  weight.mat <- coef(fit)[-1,]
+  weight.dt.list[[score.i]] <- score.row[, .(
+    test.fold, seed, train_size,
+    weight=as.numeric(weight.mat),
+    variable=factor(names(weight.mat), levs))]
+}
+(weight.dt <- rbindlist(weight.dt.list))
+
+ggplot()+
+  facet_grid(test.fold ~ train_size, labeller=label_both)+
+  scale_y_discrete(breaks=levs,drop=FALSE)+
+  geom_tile(aes(
+    seed, variable, fill=weight),
+    data=weight.dt[weight!=0])+
+  scale_fill_gradient2()
+    
+```
+
+TODO for each variable, count folds with non-zero weight -- 10 folds
+instead of 3?
+
+TODO rpart interpretation.

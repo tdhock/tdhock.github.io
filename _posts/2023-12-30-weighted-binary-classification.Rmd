@@ -24,7 +24,12 @@ The goal of this blog post is to explain weighted binary classification.
 
 ### Introduction
 
+### Airport screening example
 
+* Positive: somebody getting on an airplane with something dangerous.
+* Negative: somebody not getting on an airplane.
+* Positive: somebody has something dangerous at the checkpoint.
+* Negative: somebody does not have something dangerous at the checkpoint.
 
 ### Moonwalking with Einstein, by Joshua Foer, The Penguin Press (2011), pages 50 to 52.
 
