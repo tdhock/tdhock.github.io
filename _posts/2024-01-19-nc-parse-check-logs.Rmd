@@ -1,0 +1,72 @@
+---
+layout: post
+title: Parsing check logs using regular expressions
+description: A demonstration of nc R package
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-01-19-nc-parse-check-logs"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this blog post is to explain how to use
+[nc](https://github.com/tdhock/nc) to parse log files, as we did in
+[data.table-revdeps issue#7](
+https://github.com/tdhock/data.table-revdeps/issues/7), to support our
+NSF POSE funded project about expanding the open-source ecosystem
+around R `data.table`.
+
+## Example data to parse
+
+```{r}
+"
+* checking package dependencies ... ERROR
+Package required but not available: 'Rcmdr'
+
+Package suggested but not available for checking: 'tkrplot'
+
+See section 'The DESCRIPTION file' in the 'Writing R Extensions'
+manual.
+
+* checking package dependencies ... ERROR
+Packages required but not available:
+  'adjclust', 'BiocGenerics', 'csaw', 'InteractionSet', 'limma',
+  'SummarizedExperiment', 'HiCDOC'
+
+* checking package dependencies ... NOTE
+Package suggested but not available for checking: 'gWidgets2tcltk'
+* checking if this is a source package ... OK
+
+* checking package dependencies ... ERROR
+Packages required but not available: 'maftools', 'NMF'
+
+Packages suggested but not available for checking:
+  'Biobase', 'Biostrings', 'BSgenome', 'BSgenome.Hsapiens.UCSC.hg19',
+  'GenomicRanges', 'GenSA', 'IRanges'
+
+See section 'The DESCRIPTION file' in the 'Writing R Extensions'
+manual.
+* DONE
+"
+```
+
+## Data files to parse
+
+TODO download CSV and check not.avail column to download log files.
+
+## Session info
+
+```{r}
+sessionInfo()
+```
