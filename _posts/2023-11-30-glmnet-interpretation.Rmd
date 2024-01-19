@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Interpretation of learning algorithms
+title: Interpretable learning algorithms with built-in feature selection
 description: Regularized linear model and decision tree
 ---
 
@@ -62,7 +62,7 @@ To do that we will need some features, which we generate/simulate below:
 
 ```{r}
 set.seed(1)
-n.noise <- 20
+n.noise <- 15
 full.dt[
 , x0 := signal+rnorm(N)
 ][
@@ -73,42 +73,126 @@ full.dt[
 In the table above, there are two sets of features:
 
 * `x0` is the only feature which is correlated with the output `label` (should be the only feature used in the best prediction function)
-* `x1` through `x20` are noise features which are random (should be ignored by the best prediction function)
+* `x1` through `x10` are noise features which are random (should be ignored by the best prediction function)
   
 In the next section, we run the L1 regularized linear learning
-algorithm on these data.
+algorithm on these data, along with another interpretable algorithm
+(decision tree).
 
 ### mlr3 training
+
+To use the mlr3 framework on our simulated data, we begin by
+converting the data table to a task in the code below,
 
 ```{r}
 (task.classif <- mlr3::TaskClassif$new(
   "simulated", full.dt, target="label"
 )$set_col_roles("label", c("target", "stratum")))
+```
+
+The output above shows that we have created a task named simulated,
+with target column named label, and with 21 features (from x0 to
+x9). The output also indicates the label column is used as a stratum,
+which means that when sampling, the proportion of each label in the
+subsample should match the proportion in the total data.
+
+Below we create a resampling object that will vary the size of the train set,
+
+```{r}
 size_cv <- mlr3resampling::ResamplingVariableSizeTrainCV$new()
 size_cv$param_set$values$min_train_data <- 20
+size_cv$param_set$values$random_seeds <- 4
+size_cv
+```
+
+The output above indicates the resampling involves 3 cross-validation
+fols, 20 min train data, 4 random seeds, and 5 train sizes. All of
+these choices are arbitrary, and do not have a large effect on the end
+results. Exercise for the reader: play with these values, re-do the
+computations, and see if you get similar results. (you should!)
+
+Below we define a list of learning algorithms, and note the
+`cv_glmnet` learner uses cross-validation, with the given number of
+folds (below 6), to select the optimal degree of L1 regularization
+(which maximizes prediction accuracy). Note that this `nfolds`
+parameter controls the subtrain/validation split, and is different
+from the `folds` parameter of `size_cv` (which controls the train/test
+split, useful for comparing prediction accuracy of learning
+algorithms).
+
+```{r}
 cv_glmnet <- mlr3learners::LearnerClassifCVGlmnet$new()
-cv_glmnet$param_set$values$nfolds <- 5
+cv_glmnet$param_set$values$nfolds <- 6
 (learner.list <- list(
   cv_glmnet,
   mlr3::LearnerClassifRpart$new(),
   mlr3::LearnerClassifFeatureless$new()))
+```
+
+The output above shows a list of three learning algorithms. 
+
+* `cv_glmnet` is the L1 regularized linear model, which will set some
+  weights to zero (selecting the other features).
+* `rpart` is another learning algorithm with built-in feature
+  selection, which will be discussed below.
+* `featureless` is a baseline learning algorithm which always predicts
+  the most frequent label in the train set. This should always be run
+  for comparison with the real learning algorithms (which will be more
+  accurate if they have learned some non-trivial relationship between
+  inputs/features and output/target).
+  
+Below we define a benchmark grid, which combines our task, with
+learners, and the resampling,
+
+```{r}
 (bench.grid <- mlr3::benchmark_grid(
   task.classif,
   learner.list,
   size_cv))
+```
+
+The output above is a table with one row for each combination of task,
+learner, and resampling. 
+
+Below we first define a future plan to do the computations in
+parallel, then set log threshold to reduce output, then compute the
+benchmark result.
+
+```{r}
 if(require(future))plan("multisession")
 lgr::get_logger("mlr3")$set_threshold("warn")
 (bench.result <- mlr3::benchmark(
   bench.grid, store_models = TRUE))
+```
 
+The output above shows the number of resampling iterations computed.
+
+### interpreting prediction error rates on test set
+
+The code below computes scores (test error), for each resampling iteration.
+
+```{r}
 bench.score <- mlr3resampling::score(bench.result)
 bench.score[1]
+```
 
-train_size_vec <- unique(bench.score$train_size)
+The output above shows the result of one resampling
+iteration. Important columns include
+
+* `train_size`, number of samples in train set.
+* `classif.ce`, test error (mis-classification rate).
+* `algorithm`, learning algorithm.
+* `test.fold`, test fold number in cross-validation.
+* `seed`, random seed used to determine sampling order through train set.
+
+Below we plot the results,
+
+```{r testError}
 if(require(animint2)){
+  train_size_vec <- unique(bench.score$train_size)
   ggplot()+
-    scale_x_log10()+
-    scale_y_log10(
+    scale_x_log10(breaks=train_size_vec)+
+    scale_y_continuous(
       "Classification error on test set")+
     geom_line(aes(
       train_size, classif.ce,
@@ -122,10 +206,29 @@ if(require(animint2)){
       data=bench.score)+
     facet_grid(
       test.fold~task_id,
-      labeller=label_both,
-      scales="free")
+      labeller=label_both)
 }
+```
 
+The figure above has a panel for each test fold in cross-validation.
+There is a line for each algorithm, and for each random seed.  The
+plot is test error as a function of train size, so we can see how many
+samples are required to learn a reasonable prediction function.  It is
+clear that a small number of samples (20) is not sufficient for either
+learning algorithm, and a large number of samples (2000) is enough to
+learn good predictions (with significantly smaller error rate than
+featureless). Interestingly, the linear model is actually more
+accurate than the decision tree, for intermediate train sizes (200).
+
+### interpreting linear model
+
+In this section we show how to interpret the learned linear models, in
+terms of the weights. First we consider the subset of score table rows
+which correspond to the linear model. Then we loop over each row,
+computing the weight vector learned in each train/test split.
+We then combine the learned weights together in a single data table.
+
+```{r}
 library(glmnet)
 glmnet.score <- bench.score[algorithm=="cv_glmnet"]
 weight.dt.list <- list()
@@ -140,7 +243,14 @@ for(score.i in 1:nrow(glmnet.score)){
     variable=factor(names(weight.mat), levs))]
 }
 (weight.dt <- rbindlist(weight.dt.list))
+```
 
+The output above shows one row for each weight learned in each
+train/test split. Most weights are zero (not used for prediction), due
+to L1 regularization.
+We use the code below to visualize these weights.
+
+```{r linearWeights}
 ggplot()+
   facet_grid(test.fold ~ train_size, labeller=label_both)+
   scale_y_discrete(breaks=levs,drop=FALSE)+
@@ -148,10 +258,54 @@ ggplot()+
     seed, variable, fill=weight),
     data=weight.dt[weight!=0])+
   scale_fill_gradient2()
-    
 ```
+
+The heat map above shows a tile for each seed, train size, test fold,
+and variable. Missing tiles (grey background) indicate zero weights
+(not used for prediction. Recall that in our simulated data, there was
+only one signal feature (x0) and the others are noise that should be
+ignored. It is clear that at small train sizes, there are some false
+positive non-zero weights, and there are also false negatives (weight
+for x0 should not be zero). For large train sizes, the L1
+regularization does a good job of selecting only the important
+variable (x0 has negative weight, and others have zero weight).
+
+TODO explain positive vs negative weight, https://github.com/mlr-org/mlr3learners/issues/281
 
 TODO for each variable, count folds with non-zero weight -- 10 folds
 instead of 3?
 
-TODO rpart interpretation.
+### interpreting decision tree
+
+```{r}
+rpart.score <- bench.score[algorithm=="rpart"]
+decision.dt.list <- list()
+for(rpart.i in 1:nrow(rpart.score)){
+  rpart.row <- rpart.score[rpart.i]
+  rfit <- rpart.row$learner[[1]]$model
+  decision.dt.list[[rpart.i]] <- rpart.row[, .(
+    test.fold, seed, train_size,
+    rfit$frame
+  )][var!="<leaf>"]
+}
+(decision.dt <- rbindlist(decision.dt.list))
+
+(var.dt <- decision.dt[, .(
+  samples=sum(n),
+  splits=.N
+), by=.(test.fold, seed, train_size, variable=factor(var, levs))])
+var.dt[
+, split.sample.prop := samples/sum(samples)
+, by=.(test.fold, seed, train_size)
+][]
+
+ggplot()+
+  facet_grid(test.fold ~ train_size, labeller=label_both)+
+  geom_tile(aes(
+    seed, variable, fill=split.sample.prop),
+    data=var.dt)+
+  scale_y_discrete(breaks=levs,drop=FALSE)+
+  scale_fill_gradient(low="white", high="red")
+```
+
+TODO summary plot, facet by number of splits which use the variable.
