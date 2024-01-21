@@ -30,7 +30,8 @@ around R `data.table`.
 ## Example data to parse
 
 ```{r}
-"
+
+some.check.out <- "
 * checking package dependencies ... ERROR
 Package required but not available: 'Rcmdr'
 
@@ -59,6 +60,25 @@ See section 'The DESCRIPTION file' in the 'Writing R Extensions'
 manual.
 * DONE
 "
+
+type.not.avail.pattern <- list(
+  type='.*?',
+  ' but not available')
+nc::capture_all_str(some.check.out, type.not.avail.pattern)
+
+up.to.colon.pattern <- list(
+  type.not.avail.pattern,
+  before.colon='.*?',
+  ':')
+nc::capture_all_str(some.check.out, up.to.colon.pattern)
+
+one.or.more.line.non.greedy <- '(?:.*\n)+?'
+up.to.deps.pattern <- list(
+  up.to.colon.pattern,
+  deps=one.or.more.line.non.greedy,
+  "[*|\n]")
+some.check.dt <- nc::capture_all_str(some.check.out, up.to.deps.pattern)
+some.check.dt$deps
 ```
 
 ## Data files to parse
