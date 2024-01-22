@@ -85,6 +85,37 @@ some.check.dt$deps
 
 TODO download CSV and check not.avail column to download log files.
 
+```{r}
+local.dir <- "~/teaching/regex-tutorial/cran-check-logs"
+dir.create(local.dir, showWarnings = FALSE)
+```
+
+TODO
+
+```{r}
+remote.url.prefix <- "https://rcdata.nau.edu/genomic-ml/data.table-revdeps/analyze/2024-01-21/"
+remote.csv <- paste0(remote.url.prefix, "full_list_of_jobs.csv")
+jobs.dt <- data.table::fread(remote.csv)
+not.avail.logs <- jobs.dt[not.avail>0]
+for(pkg.i in 1:nrow(not.avail.logs)){
+  pkg.row <- not.avail.logs[pkg.i]
+  pkg.txt <- paste0(pkg.row$Package, ".txt")
+  local.txt <- file.path(local.dir, pkg.txt)
+  if(!file.exists(local.txt)){
+    remote.txt <- paste0(remote.url.prefix, pkg.txt)
+    download.file(remote.txt, local.txt)
+  }
+}
+```
+
+TODO
+
+```{r}
+log.txt.vec <- Sys.glob(file.path(local.dir, "*.txt"))
+```
+
+TODO
+
 ## Session info
 
 ```{r}
