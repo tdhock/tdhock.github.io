@@ -62,7 +62,7 @@ manual.
 "
 
 type.not.avail.pattern <- list(
-  type='.*?',
+  type='suggested|enhances|required',
   ' but not available')
 nc::capture_all_str(some.check.out, type.not.avail.pattern)
 
@@ -93,7 +93,11 @@ dir.create(local.dir, showWarnings = FALSE)
 TODO
 
 ```{r}
-remote.url.prefix <- "https://rcdata.nau.edu/genomic-ml/data.table-revdeps/analyze/2024-01-21/"
+analyze.url <- "https://rcdata.nau.edu/genomic-ml/data.table-revdeps/analyze/"
+remote.url.prefix <- paste0(
+  analyze.url,
+  strftime(Sys.time(), "%Y-%m-%d"),
+  "/")
 remote.csv <- paste0(remote.url.prefix, "full_list_of_jobs.csv")
 jobs.dt <- data.table::fread(remote.csv)
 not.avail.logs <- jobs.dt[not.avail>0]
@@ -112,6 +116,22 @@ TODO
 
 ```{r}
 log.txt.vec <- Sys.glob(file.path(local.dir, "*.txt"))
+(one.not.avail.dt <- nc::capture_all_str(log.txt.vec[4], up.to.deps.pattern))
+quoted.pattern <- list("'", dep=".*?", "'")
+dep.dt <- one.not.avail.dt[
+, nc::capture_all_str(deps, quoted.pattern)
+, by=.(type, deps)]
+read_log <- function(log.txt){
+  nc::capture_all_str(
+    log.txt, up.to.deps.pattern
+  )[
+  , nc::capture_all_str(deps, quoted.pattern)
+  , by=.(type, deps)
+  ][
+  , .(type, dep)
+  ]
+}
+read_log(log.txt.vec[4])
 ```
 
 TODO
