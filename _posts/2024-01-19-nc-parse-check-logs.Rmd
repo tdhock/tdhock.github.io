@@ -21,17 +21,54 @@ if(FALSE){
 ```
 
 The goal of this blog post is to explain how to use
-[nc](https://github.com/tdhock/nc) to parse log files, as we did in
-[data.table-revdeps issue#7](
+[nc](https://github.com/tdhock/nc) to parse CRAN check log files, as
+we did in [data.table-revdeps issue#7](
 https://github.com/tdhock/data.table-revdeps/issues/7), to support our
 NSF POSE funded project about expanding the open-source ecosystem
 around R `data.table`.
 
 ## Example data to parse
 
-```{r}
+For our project we want to create a system that automatically checks
+reverse dependencies (revdeps) of `data.table`, meaning all the other
+R packages which depend on it (or Import etc).  The system checks each
+revdep, using two versions of `data.table` (GitHub master and CRAN
+release), and then reports if there are any differences in check
+results. If there is a failure in the revdep check using `data.table`
+GitHub master, but not using CRAN release, then we know there is some
+revdep issue which should be addressed before sending the current
+GitHub version to CRAN.
 
+However, if a revdep does not have its dependencies available at check
+time, then the check will always fail with an ERROR, or skip some
+checks (for both versions of `data.table`), thereby creating the
+possibility of a false negative (there could be a significant
+difference due to the new code on GitHub, but we will not be able to
+detect it). So ideally the system should also detect and report these
+dependencies which are not available, which appear in the check result
+as below,
+
+```{r}
 some.check.out <- "
+* this is package 'scoper' version '1.3.0'
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... ERROR
+Packages required but not available: 'alakazam', 'shazam'
+
+See section 'The DESCRIPTION file' in the 'Writing R Extensions'
+manual.
+* DONE
+
+Status: 1 ERROR
+
+* this is package 'margins' version '0.3.26'
+* checking package namespace information ... OK
+* checking package dependencies ... NOTE
+Packages which this enhances but not available for checking:
+  'AER', 'betareg', 'ordinal', 'survey'
+* checking if this is a source package ... OK
+
 * checking package dependencies ... ERROR
 Package required but not available: 'Rcmdr'
 
@@ -60,37 +97,94 @@ See section 'The DESCRIPTION file' in the 'Writing R Extensions'
 manual.
 * DONE
 "
+```
 
+How to parse the wide variety of data in the text above? We would like to extract
+
+* the type of dependency (required/suggested/enhances), which always
+  appears before the phrase "but not available" and
+* the names of the dependent packages, which always appear inside
+  single quotes, after a colon (maybe on several lines).
+  
+Since the data are regularly structured text, we can parse them using
+regular expressions (regex).
+
+### Parsing using nc
+
+[nc](https://cloud.r-project.org/web/packages/nc/) is my R package for
+named capture regex, which we will use for this text parsing
+task. First, the code below defines a regex to capture the dependency
+type, 
+
+```{r}
 type.not.avail.pattern <- list(
   type='suggested|enhances|required',
   ' but not available')
-nc::capture_all_str(some.check.out, type.not.avail.pattern)
+```
 
+When using the nc package, we define a regex as a list.
+
+* Values in the list are concatenated to form the regex, and
+* names of list elements are used to define capture groups, and the
+  names used in R code become the column names in the resulting data.
+
+We use the regex in the code below to parse the dependency types, 
+
+```{r}
+nc::capture_all_str(some.check.out, type.not.avail.pattern)
+```
+
+The output above is a data table with one row for every match, and one
+column for every capture group (only one, `type`).
+One advantage of the nc package is that it makes it easy to build complex regex from simple pieces.
+For example consider the code below, which starts with the previous regex, 
+then adds another group `before.colon`, and matches up to the colon:
+
+```{r}
 up.to.colon.pattern <- list(
   type.not.avail.pattern,
   before.colon='.*?',
   ':')
 nc::capture_all_str(some.check.out, up.to.colon.pattern)
+```
 
+The output above contains a new column `before.colon` which contains
+the text captured before the colon.
+Below we define a new regex that captures the text after the colon,
+one or more lines (non-greedy), up to the next line which starts with star or newline.
+
+```{r}
 one.or.more.line.non.greedy <- '(?:.*\n)+?'
 up.to.deps.pattern <- list(
   up.to.colon.pattern,
   deps=one.or.more.line.non.greedy,
   "[*|\n]")
-some.check.dt <- nc::capture_all_str(some.check.out, up.to.deps.pattern)
-some.check.dt$deps
+(some.check.dt <- nc::capture_all_str(some.check.out, up.to.deps.pattern))
 ```
 
-## Data files to parse
+The output above contains a new column `deps` with all of the text
+(over possibly several lines) that contains the dependent package
+names. Another way to view the dependent packages is shown below as a
+character string,
 
-TODO download CSV and check not.avail column to download log files.
+```{r}
+some.check.dt[["deps"]]
+```
+
+### Data files to parse
+
+In this section we use the regex that we created in the previous
+section, to parse several check log files.
+First in the code below, 
+we define a local directory to save the log files,
 
 ```{r}
 local.dir <- "~/teaching/regex-tutorial/cran-check-logs"
 dir.create(local.dir, showWarnings = FALSE)
 ```
 
-TODO
+Then, in the code below, we download a CSV summary of most recent
+checks from the revdep check server:
 
 ```{r}
 analyze.url <- "https://rcdata.nau.edu/genomic-ml/data.table-revdeps/analyze/"
@@ -99,8 +193,20 @@ remote.url.prefix <- paste0(
   strftime(Sys.time(), "%Y-%m-%d"),
   "/")
 remote.csv <- paste0(remote.url.prefix, "full_list_of_jobs.csv")
-jobs.dt <- data.table::fread(remote.csv)
-not.avail.logs <- jobs.dt[not.avail>0]
+(jobs.dt <- data.table::fread(remote.csv))
+```
+
+The table above contains one row for each revdep of `data.table`. 
+The `not.avail` column indicates the number of "not available" 
+messages which were output while checking the revdep.
+
+```{r}
+(not.avail.logs <- jobs.dt[not.avail>0])
+```
+
+TODO
+
+```{r}
 for(pkg.i in 1:nrow(not.avail.logs)){
   pkg.row <- not.avail.logs[pkg.i]
   pkg.txt <- paste0(pkg.row$Package, ".txt")
@@ -109,18 +215,23 @@ for(pkg.i in 1:nrow(not.avail.logs)){
     remote.txt <- paste0(remote.url.prefix, pkg.txt)
     download.file(remote.txt, local.txt)
   }
+  if(file.size(local.txt)>1024*1024){
+    unlink(local.txt)
+  }
 }
 ```
 
 TODO
 
 ```{r}
-log.txt.vec <- Sys.glob(file.path(local.dir, "*.txt"))
-(one.not.avail.dt <- nc::capture_all_str(log.txt.vec[4], up.to.deps.pattern))
-quoted.pattern <- list("'", dep=".*?", "'")
-dep.dt <- one.not.avail.dt[
+log.glob <- file.path(local.dir, "*.txt")
+(log.txt.vec <- Sys.glob(log.glob))
+(one.log.txt <- log.txt.vec[4])
+(one.not.avail.dt <- nc::capture_all_str(one.log.txt, up.to.deps.pattern))
+quoted.pattern <- list("'", dep.pkg=".*?", "'")
+one.not.avail.dt[
 , nc::capture_all_str(deps, quoted.pattern)
-, by=.(type, deps)]
+, by=.(deps, type)]
 read_log <- function(log.txt){
   nc::capture_all_str(
     log.txt, up.to.deps.pattern
@@ -128,10 +239,17 @@ read_log <- function(log.txt){
   , nc::capture_all_str(deps, quoted.pattern)
   , by=.(type, deps)
   ][
-  , .(type, dep)
+  , .(type, dep.pkg)
   ]
 }
-read_log(log.txt.vec[4])
+read_log(one.log.txt)
+
+(log.dt <- nc::capture_first_glob(
+  log.glob,
+  Package="[^/]+", "[.]txt$",
+  READ=read_log))
+
+log.dt[, .SD[1], keyby=.(type, dep.pkg)]
 ```
 
 TODO
