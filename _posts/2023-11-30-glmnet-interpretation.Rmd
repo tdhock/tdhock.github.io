@@ -24,7 +24,7 @@ prediction function. This post is about interpreting that prediction
 function, in terms of what input features in the data are used to
 compute predictions. 
 
-### Introduction to model interpretation
+## Introduction to model interpretation
 
 Most machine learning algorithms output a prediction function that
 uses all of the input features in the train data set. In the special
@@ -44,7 +44,7 @@ different input feature subsets:
 In the next sections, we explain how to compute and interpret this
 algorithm using base R.
 
-### Data simulation
+## Data simulation
 
 For the purposes of simulation, we use the simulated data below:
 
@@ -79,7 +79,7 @@ In the next section, we run the L1 regularized linear learning
 algorithm on these data, along with another interpretable algorithm
 (decision tree).
 
-### mlr3 training
+## mlr3 training
 
 To use the mlr3 framework on our simulated data, we begin by
 converting the data table to a task in the code below,
@@ -167,7 +167,7 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 
 The output above shows the number of resampling iterations computed.
 
-### interpreting prediction error rates on test set
+## interpreting prediction error rates on test set
 
 The code below computes scores (test error), for each resampling iteration.
 
@@ -220,7 +220,7 @@ learn good predictions (with significantly smaller error rate than
 featureless). Interestingly, the linear model is actually more
 accurate than the decision tree, for intermediate train sizes (200).
 
-### interpreting linear model
+## interpreting linear model
 
 In this section we show how to interpret the learned linear models, in
 terms of the weights. First we consider the subset of score table rows
@@ -251,12 +251,13 @@ to L1 regularization.
 We use the code below to visualize these weights.
 
 ```{r linearWeights}
+weight.non.zero <- weight.dt[weight!=0]
 ggplot()+
   facet_grid(test.fold ~ train_size, labeller=label_both)+
   scale_y_discrete(breaks=levs,drop=FALSE)+
   geom_tile(aes(
     seed, variable, fill=weight),
-    data=weight.dt[weight!=0])+
+    data=weight.non.zero)+
   scale_fill_gradient2()
 ```
 
@@ -270,12 +271,64 @@ for x0 should not be zero). For large train sizes, the L1
 regularization does a good job of selecting only the important
 variable (x0 has negative weight, and others have zero weight).
 
-TODO explain positive vs negative weight, https://github.com/mlr-org/mlr3learners/issues/281
+Typically positive weights mean that larger feature values mean more
+likelihood of being classified as positive (and negative
+weights/smaller feature values would be the opposite), but mlr3 seems
+to invert the glmnet weights, [which I reported as an
+issue](https://github.com/mlr-org/mlr3learners/issues/281).
 
-TODO for each variable, count folds with non-zero weight -- 10 folds
-instead of 3?
+Another method which I typically use for interpreting L1 regularized
+linear models involves counting folds/splits with non-zero weight, for each
+variable. To do that we can use the code below,
 
-### interpreting decision tree
+```{r weightsForEachSeedSize}
+weight.non.zero[, non.zero.folds := .N, by=.(seed, train_size, variable)]
+ggplot()+
+  scale_y_discrete(breaks=levs,drop=FALSE)+
+  theme_bw()+
+  geom_vline(xintercept=0, color="grey50")+
+  geom_point(aes(
+    weight, variable),
+    shape=1,
+    data=weight.non.zero)+
+  facet_grid(seed ~ train_size, labeller=label_both)
+```
+
+The plot above shows a point for each non-zero linear model weight,
+with one panel for each seed and train size. There is a vertical grey
+line to emphasize a weight value of zero. It is clear that large train
+sizes result in three points/folds with non-zero weights, for the
+signal feature `x0`, and zero weights for the other noise features.
+
+We can also use the number of folds with non zero weights as a metric
+for variable importance, as we compute in the code below.
+
+```{r facetNonZero}
+(one.panel <- weight.non.zero[train_size==63 & seed==3])
+var.ord.dt <- one.panel[, .(
+  mean.weight=mean(weight)
+), by=.(variable, non.zero.folds)
+][order(-non.zero.folds, -abs(mean.weight))]
+var.ord.levs <- paste(var.ord.dt$variable)
+one.panel[, Variable := factor(variable, var.ord.levs)]
+ggplot()+
+  theme_bw()+
+  geom_vline(xintercept=0, color="grey50")+
+  geom_point(aes(
+    weight, Variable),
+    shape=1,
+    data=one.panel)+
+  facet_grid(non.zero.folds ~ ., scales="free", space="free")
+```
+
+The plot above has a panel for each value of `non.zero.folds` -- the
+variables that appear in the larger panel numbers are more important
+(have non-zero weights in more folds).
+
+## interpreting decision tree
+
+Another machine learning algorithm with built-in feature selection is
+the decision tree, which we can interpret using the code below.
 
 ```{r}
 rpart.score <- bench.score[algorithm=="rpart"]
@@ -289,16 +342,36 @@ for(rpart.i in 1:nrow(rpart.score)){
   )][var!="<leaf>"]
 }
 (decision.dt <- rbindlist(decision.dt.list))
+```
 
+The code above examines the splits which are used in each decision
+tree, and outputs a table above with one row per split used.  The code
+below computes a table with one row per variable, with additional
+columns splits and samples to measure importance.
+
+```{r}
 (var.dt <- decision.dt[, .(
   samples=sum(n),
   splits=.N
 ), by=.(test.fold, seed, train_size, variable=factor(var, levs))])
+```
+
+The code below computes the proportion of samples used in each split,
+which is another measure of importance.
+
+```{r}
 var.dt[
 , split.sample.prop := samples/sum(samples)
 , by=.(test.fold, seed, train_size)
 ][]
+```
 
+The code below makes a heatmap with a tile for each variable which was
+used in at least one split of the learned decision tree. Larger values
+of `split.sample.prop` (more red) indicate variables which are more
+important (used with more samples).
+
+```{r rpartHeatmap}
 ggplot()+
   facet_grid(test.fold ~ train_size, labeller=label_both)+
   geom_tile(aes(
@@ -306,6 +379,13 @@ ggplot()+
     data=var.dt)+
   scale_y_discrete(breaks=levs,drop=FALSE)+
   scale_fill_gradient(low="white", high="red")
+```
+
+Finally we make an analogous plot to the linear model below.
+
+```{r}
+(one.rpart <- var.dt[train_size==63 & seed==4])
+one.rpart[, TODO]
 ```
 
 TODO summary plot, facet by number of splits which use the variable.
