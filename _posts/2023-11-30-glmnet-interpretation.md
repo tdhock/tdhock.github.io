@@ -33,7 +33,8 @@ algorithm using base R.
 
 ## Data simulation
 
-For the purposes of simulation, we use the simulated data below:
+For the purposes of demonstrating the feature selection algorithms, we
+use the simulated data below:
 
 
 ```r
@@ -129,7 +130,7 @@ Below we create a resampling object that will vary the size of the train set,
 
 ```r
 size_cv <- mlr3resampling::ResamplingVariableSizeTrainCV$new()
-size_cv$param_set$values$min_train_data <- 10
+size_cv$param_set$values$min_train_data <- 15
 size_cv$param_set$values$random_seeds <- 4
 size_cv
 ```
@@ -141,25 +142,26 @@ size_cv
 ## * Parameters:
 ## List of 4
 ##  $ folds         : int 3
-##  $ min_train_data: int 10
+##  $ min_train_data: int 15
 ##  $ random_seeds  : int 4
 ##  $ train_sizes   : int 5
 ```
 
 The output above indicates the resampling involves 3 cross-validation
-fols, 20 min train data, 4 random seeds, and 5 train sizes. All of
-these choices are arbitrary, and do not have a large effect on the end
-results. Exercise for the reader: play with these values, re-do the
-computations, and see if you get similar results. (you should!)
+folds, 15 min train data (in smallest stratum), 4 random seeds, and 5
+train sizes. All of these choices are arbitrary, and do not have a
+large effect on the end results. Exercise for the reader: play with
+these values, re-do the computations, and see if you get similar
+results. (you should!)
 
 Below we define a list of learning algorithms, and note the
-`cv_glmnet` learner uses cross-validation, with the given number of
-folds (below 6), to select the optimal degree of L1 regularization
-(which maximizes prediction accuracy). Note that this `nfolds`
-parameter controls the subtrain/validation split, and is different
-from the `folds` parameter of `size_cv` (which controls the train/test
-split, useful for comparing prediction accuracy of learning
-algorithms).
+`cv_glmnet` learner internally uses cross-validation, with the given
+number of folds (below 6), to select the optimal degree of L1
+regularization (which maximizes prediction accuracy). Note that this
+`nfolds` parameter controls the subtrain/validation split (used to
+learn model complexity hyper-parameters), and is different from the
+`folds` parameter of `size_cv` (which controls the train/test split,
+useful for comparing prediction accuracy of learning algorithms).
 
 
 ```r
@@ -250,74 +252,9 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 ```
 
 ```
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
-
-## Warning in lognet(xd, is.sparse, ix, jx, y, weights, offset, alpha, nobs, : one
-## multinomial or binomial class has fewer than 8 observations; dangerous ground
+## Warning: from glmnet C++ code (error code -96); Convergence for 96th lambda
+## value not reached after maxit=100000 iterations; solutions for larger lambdas
+## returned
 ```
 
 ```
@@ -343,13 +280,13 @@ bench.score[1]
 ```
 ##    test.fold  seed small_stratum_size train_size_i train_size
 ##        <int> <int>              <int>        <int>      <int>
-## 1:         1     1                 10            1         20
+## 1:         1     1                 15            1         30
 ##                                train                  test iteration
 ##                               <list>                <list>     <int>
 ## 1: 2071,1092, 723,2654,  49,2834,...  3,11,20,21,26,34,...         1
 ##    train_min_size                                uhash    nr
 ##             <int>                               <char> <int>
-## 1:             20 119b712d-eae4-4662-88b8-cb7d84cdce64     1
+## 1:             30 107bff96-e0b9-49c1-bf7e-6140ddbfd84a     1
 ##                       task   task_id                                    learner
 ##                     <list>    <char>                                     <list>
 ## 1: <TaskClassif:simulated> simulated <LearnerClassifCVGlmnet:classif.cv_glmnet>
@@ -358,13 +295,17 @@ bench.score[1]
 ## 1: classif.cv_glmnet <ResamplingVariableSizeTrainCV> variable_size_train_cv
 ##             prediction classif.ce algorithm
 ##                 <list>      <num>    <char>
-## 1: <PredictionClassif>  0.2237762 cv_glmnet
+## 1: <PredictionClassif>  0.2557443 cv_glmnet
 ```
 
 The output above shows the result of one resampling
 iteration. Important columns include
 
 * `train_size`, number of samples in train set.
+* `train_size_i`, train set sample size iteration number.
+* `train_min_size`, min of `train_size` over all values of
+  `train_size_i`, useful for plotting because there may be slight
+  variations in `train_size` between folds.
 * `classif.ce`, test error (mis-classification rate).
 * `algorithm`, learning algorithm.
 * `test.fold`, test fold number in cross-validation.
@@ -435,19 +376,19 @@ for(score.i in 1:nrow(glmnet.score)){
 ```
 
 ```
-##      test.fold  seed train_min_size     weight variable
-##          <int> <int>          <int>      <num>   <fctr>
-##   1:         1     1             20 -3.0357723       x1
-##   2:         1     1             20 -0.2249535       x2
-##   3:         1     1             20  0.9407032       x3
-##   4:         1     1             20  1.0432882       x4
-##   5:         1     1             20  0.4785757       x5
-##  ---                                                   
-## 536:         3     4           1999  0.0000000       x5
-## 537:         3     4           1999  0.0000000       x6
-## 538:         3     4           1999  0.0000000       x7
-## 539:         3     4           1999  0.0000000       x8
-## 540:         3     4           1999  0.0000000       x9
+##      test.fold  seed train_min_size      weight variable
+##          <int> <int>          <int>       <num>   <fctr>
+##   1:         1     1             30 -1.80753945       x1
+##   2:         1     1             30 -0.12733950       x2
+##   3:         1     1             30  0.21719221       x3
+##   4:         1     1             30  0.09392049       x4
+##   5:         1     1             30  0.00000000       x5
+##  ---                                                    
+## 536:         3     4           1999  0.00000000       x5
+## 537:         3     4           1999  0.00000000       x6
+## 538:         3     4           1999  0.00000000       x7
+## 539:         3     4           1999  0.00000000       x8
+## 540:         3     4           1999  0.00000000       x9
 ```
 
 The output above shows one row for each weight learned in each
@@ -538,7 +479,9 @@ ggplot()+
   facet_grid(non.zero.folds ~ ., scales="free", space="free")
 ```
 
-![plot of chunk facetNonZero](/assets/img/2023-11-30-glmnet-interpretation/facetNonZero-1.png)
+```
+## Error: Faceting variables must have at least one value
+```
 
 The plot above has a panel for each value of `non.zero.folds` -- the
 variables that appear in the larger panel numbers are more important
@@ -568,43 +511,43 @@ for(rpart.i in 1:nrow(rpart.score)){
 ```
 ##      test.fold  seed train_min_size    var     n    wt   dev  yval complexity
 ##          <int> <int>          <int> <char> <int> <num> <num> <num>      <num>
-##   1:         1     1             20     x1    20    20    10     1 0.80000000
-##   2:         1     1             64     x1    64    64    32     1 0.62500000
-##   3:         1     1             64     x4    42    42    11     1 0.06250000
-##   4:         1     1             64     x1    23    23    11     1 0.06250000
-##   5:         1     1            201     x1   201   201   100     1 0.47000000
+##   1:         1     1             30     x1    30    30    15     1 0.80000000
+##   2:         1     1             86     x1    86    86    43     1 0.58139535
+##   3:         1     1             86     x4    59    59    17     1 0.11627907
+##   4:         1     1             86     x2    21    21     8     2 0.09302326
+##   5:         1     1            245     x1   245   245   122     1 0.45901639
 ##  ---                                                                         
-## 334:         3     4           1999     x4   162   162    77     1 0.01955868
-## 335:         3     4           1999     x4   912   912   232     2 0.04012036
-## 336:         3     4           1999     x1   313   313   139     1 0.04012036
-## 337:         3     4           1999     x2   238   238    79     1 0.02006018
-## 338:         3     4           1999     x4    82    82    31     2 0.01203611
+## 365:         3     4           1999     x4   162   162    77     1 0.01955868
+## 366:         3     4           1999     x4   912   912   232     2 0.04012036
+## 367:         3     4           1999     x1   313   313   139     1 0.04012036
+## 368:         3     4           1999     x2   238   238    79     1 0.02006018
+## 369:         3     4           1999     x4    82    82    31     2 0.01203611
 ##      ncompete nsurrogate yval2.V1 yval2.V2 yval2.V3  yval2.V4  yval2.V5
 ##         <int>      <int>    <num>    <num>    <num>     <num>     <num>
-##   1:        4          5        1       10       10 0.5000000 0.5000000
-##   2:        4          5        1       32       32 0.5000000 0.5000000
-##   3:        4          5        1       31       11 0.7380952 0.2619048
-##   4:        4          2        1       12       11 0.5217391 0.4782609
-##   5:        4          5        1      101      100 0.5024876 0.4975124
+##   1:        4          5        1       15       15 0.5000000 0.5000000
+##   2:        4          3        1       43       43 0.5000000 0.5000000
+##   3:        4          5        1       42       17 0.7118644 0.2881356
+##   4:        4          5        2        8       13 0.3809524 0.6190476
+##   5:        4          5        1      123      122 0.5020408 0.4979592
 ##  ---                                                                   
-## 334:        4          5        1       85       77 0.5246914 0.4753086
-## 335:        4          5        2      232      680 0.2543860 0.7456140
-## 336:        4          3        1      174      139 0.5559105 0.4440895
-## 337:        4          5        1      159       79 0.6680672 0.3319328
-## 338:        4          1        2       31       51 0.3780488 0.6219512
+## 365:        4          5        1       85       77 0.5246914 0.4753086
+## 366:        4          5        2      232      680 0.2543860 0.7456140
+## 367:        4          3        1      174      139 0.5559105 0.4440895
+## 368:        4          5        1      159       79 0.6680672 0.3319328
+## 369:        4          1        2       31       51 0.3780488 0.6219512
 ##      yval2.nodeprob
 ##               <num>
 ##   1:     1.00000000
 ##   2:     1.00000000
-##   3:     0.65625000
-##   4:     0.35937500
+##   3:     0.68604651
+##   4:     0.24418605
 ##   5:     1.00000000
 ##  ---               
-## 334:     0.08095952
-## 335:     0.45577211
-## 336:     0.15642179
-## 337:     0.11894053
-## 338:     0.04097951
+## 365:     0.08095952
+## 366:     0.45577211
+## 367:     0.15642179
+## 368:     0.11894053
+## 369:     0.04097951
 ```
 
 The code above examines the splits which are used in each decision
@@ -623,17 +566,17 @@ columns splits and samples to measure importance.
 ```
 ##      test.fold  seed train_min_size variable samples splits
 ##          <int> <int>          <int>   <fctr>   <int>  <int>
-##   1:         1     1             20       x1      20      1
-##   2:         1     1             64       x1      87      2
-##   3:         1     1             64       x4      42      1
-##   4:         1     1            201       x1     247      2
-##   5:         1     1            201       x4     223      3
+##   1:         1     1             30       x1      30      1
+##   2:         1     1             86       x1      86      1
+##   3:         1     1             86       x4      59      1
+##   4:         1     1             86       x2      21      1
+##   5:         1     1            245       x1     335      3
 ##  ---                                                       
-## 171:         3     4            632       x2      95      1
-## 172:         3     4           1999       x1    2836      3
-## 173:         3     4           1999       x4    2245      4
-## 174:         3     4           1999       x3     348      1
-## 175:         3     4           1999       x2     238      1
+## 177:         3     4            700       x2     140      2
+## 178:         3     4           1999       x1    2836      3
+## 179:         3     4           1999       x4    2245      4
+## 180:         3     4           1999       x3     348      1
+## 181:         3     4           1999       x2     238      1
 ```
 
 The code below computes the proportion of samples used in each split,
@@ -650,17 +593,17 @@ var.dt[
 ```
 ##      test.fold  seed train_min_size variable samples splits split.sample.prop
 ##          <int> <int>          <int>   <fctr>   <int>  <int>             <num>
-##   1:         1     1             20       x1      20      1        1.00000000
-##   2:         1     1             64       x1      87      2        0.67441860
-##   3:         1     1             64       x4      42      1        0.32558140
-##   4:         1     1            201       x1     247      2        0.52553191
-##   5:         1     1            201       x4     223      3        0.47446809
+##   1:         1     1             30       x1      30      1        1.00000000
+##   2:         1     1             86       x1      86      1        0.51807229
+##   3:         1     1             86       x4      59      1        0.35542169
+##   4:         1     1             86       x2      21      1        0.12650602
+##   5:         1     1            245       x1     335      3        0.45827633
 ##  ---                                                                         
-## 171:         3     4            632       x2      95      1        0.04598258
-## 172:         3     4           1999       x1    2836      3        0.50044115
-## 173:         3     4           1999       x4    2245      4        0.39615317
-## 174:         3     4           1999       x3     348      1        0.06140815
-## 175:         3     4           1999       x2     238      1        0.04199753
+## 177:         3     4            700       x2     140      2        0.06068487
+## 178:         3     4           1999       x1    2836      3        0.50044115
+## 179:         3     4           1999       x4    2245      4        0.39615317
+## 180:         3     4           1999       x3     348      1        0.06140815
+## 181:         3     4           1999       x2     238      1        0.04199753
 ```
 
 The code below makes a heatmap with a tile for each variable which was
@@ -707,7 +650,9 @@ ggplot()+
   facet_grid(non.zero.folds ~ ., scales="free", space="free")
 ```
 
-![plot of chunk rpartNonZero](/assets/img/2023-11-30-glmnet-interpretation/rpartNonZero-1.png)
+```
+## Error: Faceting variables must have at least one value
+```
 
 The plot above shows variable importance in the learned rpart model
 (decision tree).  It shows the mean proportion of samples used in each

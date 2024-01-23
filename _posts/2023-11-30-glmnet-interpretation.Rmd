@@ -11,9 +11,9 @@ fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
   fig.path=paste0(fig.path,"/"),
-  fig.width=8,
+  fig.width=9,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
+  fig.height=6)
 if(FALSE){
   knitr::knit(paste0(post.id, ".Rmd"))
 }
@@ -46,7 +46,8 @@ algorithm using base R.
 
 ## Data simulation
 
-For the purposes of simulation, we use the simulated data below:
+For the purposes of demonstrating the feature selection algorithms, we
+use the simulated data below:
 
 ```{r}
 N <- 3000
@@ -92,25 +93,26 @@ Below we create a resampling object that will vary the size of the train set,
 
 ```{r}
 size_cv <- mlr3resampling::ResamplingVariableSizeTrainCV$new()
-size_cv$param_set$values$min_train_data <- 10
+size_cv$param_set$values$min_train_data <- 15
 size_cv$param_set$values$random_seeds <- 4
 size_cv
 ```
 
 The output above indicates the resampling involves 3 cross-validation
-fols, 20 min train data, 4 random seeds, and 5 train sizes. All of
-these choices are arbitrary, and do not have a large effect on the end
-results. Exercise for the reader: play with these values, re-do the
-computations, and see if you get similar results. (you should!)
+folds, 15 min train data (in smallest stratum), 4 random seeds, and 5
+train sizes. All of these choices are arbitrary, and do not have a
+large effect on the end results. Exercise for the reader: play with
+these values, re-do the computations, and see if you get similar
+results. (you should!)
 
 Below we define a list of learning algorithms, and note the
-`cv_glmnet` learner uses cross-validation, with the given number of
-folds (below 6), to select the optimal degree of L1 regularization
-(which maximizes prediction accuracy). Note that this `nfolds`
-parameter controls the subtrain/validation split, and is different
-from the `folds` parameter of `size_cv` (which controls the train/test
-split, useful for comparing prediction accuracy of learning
-algorithms).
+`cv_glmnet` learner internally uses cross-validation, with the given
+number of folds (below 6), to select the optimal degree of L1
+regularization (which maximizes prediction accuracy). Note that this
+`nfolds` parameter controls the subtrain/validation split (used to
+learn model complexity hyper-parameters), and is different from the
+`folds` parameter of `size_cv` (which controls the train/test split,
+useful for comparing prediction accuracy of learning algorithms).
 
 ```{r}
 cv_glmnet <- mlr3learners::LearnerClassifCVGlmnet$new()
@@ -172,6 +174,10 @@ The output above shows the result of one resampling
 iteration. Important columns include
 
 * `train_size`, number of samples in train set.
+* `train_size_i`, train set sample size iteration number.
+* `train_min_size`, min of `train_size` over all values of
+  `train_size_i`, useful for plotting because there may be slight
+  variations in `train_size` between folds.
 * `classif.ce`, test error (mis-classification rate).
 * `algorithm`, learning algorithm.
 * `test.fold`, test fold number in cross-validation.
