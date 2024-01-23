@@ -51,29 +51,21 @@ For the purposes of simulation, we use the simulated data below:
 ```{r}
 N <- 3000
 library(data.table)
-(full.dt <- data.table(
-  label=factor(rep(c("spam","not spam"), l=N))
-))
-signal <- ifelse(full.dt$label=="not spam", 0, 1)
+set.seed(1)
+n.features <- 9
+(full.dt <- data.table()[
+, paste0("x",1:n.features) := replicate(n.features, rnorm(N), simplify=FALSE)
+][
+, label := factor(ifelse(x1*2+x2-x3-x4*2+rnorm(N) < 0, "not spam", "spam"))
+][])
+table(full.dt$label)
 ```
 
 We can imagine a spam filtering system, with training data for which each row in the table above represents a message which has been labeled as spam or not.
-To do that we will need some features, which we generate/simulate below:
-
-```{r}
-set.seed(1)
-n.noise <- 15
-full.dt[
-, x0 := signal+rnorm(N)
-][
-, paste0("x",1:n.noise) := replicate(n.noise, rnorm(N), simplify=FALSE)
-][]
-```
-
 In the table above, there are two sets of features:
 
-* `x0` is the only feature which is correlated with the output `label` (should be the only feature used in the best prediction function)
-* `x1` through `x10` are noise features which are random (should be ignored by the best prediction function)
+* `x1` to `x4` are used to define the output `label` (and should be used in the best prediction function)
+* other features are random noise (should be ignored by the best prediction function)
   
 In the next section, we run the L1 regularized linear learning
 algorithm on these data, along with another interpretable algorithm
@@ -91,8 +83,8 @@ converting the data table to a task in the code below,
 ```
 
 The output above shows that we have created a task named simulated,
-with target column named label, and with 21 features (from x0 to
-x9). The output also indicates the label column is used as a stratum,
+with target column named label, and with several features (x1
+etc). The output also indicates the label column is used as a stratum,
 which means that when sampling, the proportion of each label in the
 subsample should match the proportion in the total data.
 
@@ -100,7 +92,7 @@ Below we create a resampling object that will vary the size of the train set,
 
 ```{r}
 size_cv <- mlr3resampling::ResamplingVariableSizeTrainCV$new()
-size_cv$param_set$values$min_train_data <- 20
+size_cv$param_set$values$min_train_data <- 10
 size_cv$param_set$values$random_seeds <- 4
 size_cv
 ```
@@ -188,26 +180,25 @@ iteration. Important columns include
 Below we plot the results,
 
 ```{r testError}
-if(require(animint2)){
-  train_size_vec <- unique(bench.score$train_size)
-  ggplot()+
-    scale_x_log10(breaks=train_size_vec)+
-    scale_y_continuous(
-      "Classification error on test set")+
-    geom_line(aes(
-      train_size, classif.ce,
-      group=paste(algorithm, seed),
-      color=algorithm),
-      shape=1,
-      data=bench.score)+
-    geom_point(aes(
-      train_size, classif.ce, color=algorithm),
-      shape=1,
-      data=bench.score)+
-    facet_grid(
-      test.fold~task_id,
-      labeller=label_both)
-}
+train_min_size_vec <- unique(bench.score[["train_min_size"]])
+library(animint2)
+ggplot()+
+  scale_x_log10(breaks=train_min_size_vec)+
+  scale_y_continuous(
+    "Classification error on test set")+
+  geom_line(aes(
+    train_min_size, classif.ce,
+    group=paste(algorithm, seed),
+    color=algorithm),
+    shape=1,
+    data=bench.score)+
+  geom_point(aes(
+    train_min_size, classif.ce, color=algorithm),
+    shape=1,
+    data=bench.score)+
+  facet_grid(
+    test.fold~task_id,
+    labeller=label_both)
 ```
 
 The figure above has a panel for each test fold in cross-validation.
@@ -218,7 +209,8 @@ clear that a small number of samples (20) is not sufficient for either
 learning algorithm, and a large number of samples (2000) is enough to
 learn good predictions (with significantly smaller error rate than
 featureless). Interestingly, the linear model is actually more
-accurate than the decision tree, for intermediate train sizes (200).
+accurate than the decision tree, for intermediate and large data sizes.
+This makes sense, because `label` was defined using a linear function.
 
 ## interpreting linear model
 
@@ -232,13 +224,13 @@ We then combine the learned weights together in a single data table.
 library(glmnet)
 glmnet.score <- bench.score[algorithm=="cv_glmnet"]
 weight.dt.list <- list()
-levs <- names(full.dt)[-1]
+levs <- grep("^x", names(full.dt), value=TRUE)
 for(score.i in 1:nrow(glmnet.score)){
   score.row <- glmnet.score[score.i]
   fit <- score.row$learner[[1]]$model
   weight.mat <- coef(fit)[-1,]
   weight.dt.list[[score.i]] <- score.row[, .(
-    test.fold, seed, train_size,
+    test.fold, seed, train_min_size,
     weight=as.numeric(weight.mat),
     variable=factor(names(weight.mat), levs))]
 }
@@ -253,12 +245,14 @@ We use the code below to visualize these weights.
 ```{r linearWeights}
 weight.non.zero <- weight.dt[weight!=0]
 ggplot()+
-  facet_grid(test.fold ~ train_size, labeller=label_both)+
+  facet_grid(test.fold ~ seed, labeller=label_both)+
   scale_y_discrete(breaks=levs,drop=FALSE)+
   geom_tile(aes(
-    seed, variable, fill=weight),
+    train_min_size, variable, fill=weight),
     data=weight.non.zero)+
-  scale_fill_gradient2()
+  scale_fill_gradient2()+
+  scale_x_log10(breaks=train_min_size_vec)+
+  theme(axis.text.x=element_text(angle=60, hjust=1))
 ```
 
 The heat map above shows a tile for each seed, train size, test fold,
@@ -282,7 +276,6 @@ linear models involves counting folds/splits with non-zero weight, for each
 variable. To do that we can use the code below,
 
 ```{r weightsForEachSeedSize}
-weight.non.zero[, non.zero.folds := .N, by=.(seed, train_size, variable)]
 ggplot()+
   scale_y_discrete(breaks=levs,drop=FALSE)+
   theme_bw()+
@@ -291,7 +284,7 @@ ggplot()+
     weight, variable),
     shape=1,
     data=weight.non.zero)+
-  facet_grid(seed ~ train_size, labeller=label_both)
+  facet_grid(seed ~ train_min_size, labeller=label_both)
 ```
 
 The plot above shows a point for each non-zero linear model weight,
@@ -304,7 +297,11 @@ We can also use the number of folds with non zero weights as a metric
 for variable importance, as we compute in the code below.
 
 ```{r facetNonZero}
-(one.panel <- weight.non.zero[train_size==63 & seed==3])
+(one.panel <- weight.non.zero[
+  train_min_size==64 & seed==2
+][
+, non.zero.folds := .N, by=variable
+])
 var.ord.dt <- one.panel[, .(
   mean.weight=mean(weight)
 ), by=.(variable, non.zero.folds)
@@ -324,6 +321,7 @@ ggplot()+
 The plot above has a panel for each value of `non.zero.folds` -- the
 variables that appear in the larger panel numbers are more important
 (have non-zero weights in more folds).
+Also, within each panel, the most important variables (with largest absolute weight) appear near the bottom.
 
 ## interpreting decision tree
 
@@ -337,7 +335,7 @@ for(rpart.i in 1:nrow(rpart.score)){
   rpart.row <- rpart.score[rpart.i]
   rfit <- rpart.row$learner[[1]]$model
   decision.dt.list[[rpart.i]] <- rpart.row[, .(
-    test.fold, seed, train_size,
+    test.fold, seed, train_min_size,
     rfit$frame
   )][var!="<leaf>"]
 }
@@ -353,7 +351,7 @@ columns splits and samples to measure importance.
 (var.dt <- decision.dt[, .(
   samples=sum(n),
   splits=.N
-), by=.(test.fold, seed, train_size, variable=factor(var, levs))])
+), by=.(test.fold, seed, train_min_size, variable=factor(var, levs))])
 ```
 
 The code below computes the proportion of samples used in each split,
@@ -362,7 +360,7 @@ which is another measure of importance.
 ```{r}
 var.dt[
 , split.sample.prop := samples/sum(samples)
-, by=.(test.fold, seed, train_size)
+, by=.(test.fold, seed, train_min_size)
 ][]
 ```
 
@@ -373,19 +371,58 @@ important (used with more samples).
 
 ```{r rpartHeatmap}
 ggplot()+
-  facet_grid(test.fold ~ train_size, labeller=label_both)+
+  facet_grid(test.fold ~ seed, labeller=label_both)+
   geom_tile(aes(
-    seed, variable, fill=split.sample.prop),
+    train_min_size, variable, fill=split.sample.prop),
     data=var.dt)+
   scale_y_discrete(breaks=levs,drop=FALSE)+
-  scale_fill_gradient(low="white", high="red")
+  scale_fill_gradient(low="white", high="red")+
+  scale_x_log10(breaks=train_min_size_vec)+
+  theme(axis.text.x=element_text(angle=60, hjust=1))
 ```
 
 Finally we make an analogous plot to the linear model below.
 
-```{r}
-(one.rpart <- var.dt[train_size==63 & seed==4])
-one.rpart[, TODO]
+```{r rpartNonZero}
+(one.rpart <- var.dt[
+  train_min_size==632 & seed==4
+][
+, non.zero.folds := .N, by=variable
+])
+rpart.ord.dt <- one.rpart[, .(
+  mean.prop=mean(split.sample.prop)
+), by=.(variable, non.zero.folds)
+][order(-non.zero.folds, -mean.prop)]
+rpart.ord.levs <- paste(rpart.ord.dt$variable)
+one.rpart[, Variable := factor(variable, rpart.ord.levs)]
+ggplot()+
+  theme_bw()+
+  geom_point(aes(
+    split.sample.prop, Variable),
+    shape=1,
+    data=one.rpart)+
+  facet_grid(non.zero.folds ~ ., scales="free", space="free")
 ```
 
-TODO summary plot, facet by number of splits which use the variable.
+The plot above shows variable importance in the learned rpart model
+(decision tree).  It shows the mean proportion of samples used in each
+split of the decision tree, for each variable, with one point for each
+fold in which that variable appeared in the decision tree (un-used
+variables do not appear in the plot).  The number in the panel shows
+the number of folds for which this variable was used in the decision
+tree. The most important variables are sorted to the bottom of the
+plot (and x1 and x4 correctly appear there).
+
+## Conclusions
+
+We have shown how to interpret two kinds of feature selection machine
+learning algorithms, L1 regularized linear models and decision trees,
+after having learned them using the mlr3 framework in R.
+
+## Session info
+
+```{r}
+sessionInfo()
+```
+
+
