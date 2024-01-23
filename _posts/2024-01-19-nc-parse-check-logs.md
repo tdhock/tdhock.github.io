@@ -113,8 +113,8 @@ type.not.avail.pattern <- list(
 When using the nc package, we define a regex as a list.
 
 * Values in the list are concatenated to form the regex, and
-* names of list elements are used to define capture groups, and the
-  names used in R code become the column names in the resulting data.
+* each named list element becomes a capture group, and the
+  name used in R code becomes the column name in the resulting data table.
 
 We use the regex in the code below to parse the dependency types, 
 
@@ -225,7 +225,7 @@ some.check.dt[["deps"]]
 
 ## Downloading log files
 
-In this section, download some log files which we can analyze using the approach in the previous section.
+In this section, we download some log files which we can analyze using the approach in the previous section.
 First in the code below, 
 we define a local directory to save the log files,
 
@@ -235,15 +235,18 @@ local.dir <- "~/teaching/regex-tutorial/cran-check-logs"
 dir.create(local.dir, showWarnings = FALSE)
 ```
 
-Then, in the code below, we download a CSV summary of most recent
-checks from the revdep check server:
+Note that the directory defined above is actually in a clone of my
+[regex-tutorial](https://github.com/tdhock/regex-tutorial) repo (which
+has a copy of these data).
+Then in the code below, we download a CSV
+summary of checks from the revdep check server:
 
 
 ```r
 analyze.url <- "https://rcdata.nau.edu/genomic-ml/data.table-revdeps/analyze/"
 remote.url.prefix <- paste0(
   analyze.url,
-  strftime(Sys.time(), "%Y-%m-%d"),
+  "2024-01-22", #strftime(Sys.time(), "%Y-%m-%d"),
   "/")
 remote.csv <- paste0(remote.url.prefix, "full_list_of_jobs.csv")
 (jobs.dt <- data.table::fread(remote.csv))
@@ -375,7 +378,7 @@ of `quoted.pattern` happens for each unique value of `deps`.
 ```r
 one.not.avail.dt[
 , nc::capture_all_str(deps, quoted.pattern)
-, by=.(deps, type)]
+, by=.(deps,type)]
 ```
 
 ```
@@ -483,19 +486,19 @@ interpreted as follows:
 ```
 
 ```
-##            Package      type        dep.pkg
-##             <char>    <char>         <char>
-##   1:         actel suggested gWidgets2tcltk
-##   2: agriutilities  enhances         asreml
-##   3:           AMR  enhances        cleaner
-##   4:           AMR  enhances        janitor
-##   5:           AMR  enhances          skimr
-##  ---                                       
-## 244:        WGScan  required           SKAT
-## 245:          wiad suggested          rgdal
-## 246:        wilson  required         DESeq2
-## 247:           wTO  required          Rfast
-## 248:      xplorerr suggested         rbokeh
+##       Package      type dep.pkg
+##        <char>    <char>  <char>
+##   1:      AMR  enhances cleaner
+##   2:      AMR  enhances janitor
+##   3:      AMR  enhances   skimr
+##   4:      AMR  enhances tsibble
+##   5: Anaconda  required  DESeq2
+##  ---                           
+## 244: vaersvax suggested vaersND
+## 245:      wTO  required   Rfast
+## 246:     wiad suggested   rgdal
+## 247:   wilson  required  DESeq2
+## 248: xplorerr suggested  rbokeh
 ```
 
 The output above is a data table, which has one row for each missing
@@ -529,7 +532,7 @@ the output is sorted by `type`, then by `dep.pkg`.
 ## 159: suggested     vaers vaersNDvax
 ## 160: suggested   vaersND vaersNDvax
 ## 161: suggested       wTO     CoDiNA
-## 162: suggested      xcms   enviGCMS
+## 162: suggested      xcms     LCMSQA
 ```
 
 The table above has one row for each unique combination of `type` and
@@ -541,7 +544,7 @@ reported that missing dependency.
 We have seen how to use the `nc` R package to parse CRAN check log
 files. More generally, `nc` is useful whenever you have regularly
 structured text data/files, from which you would like to extract a
-data table.
+data table, with one column for each capture group in a regex.
 
 * `nc::capture_all_str` matches a regex to a text string/file, and
   returns a data table with one row for each match.
@@ -580,26 +583,24 @@ sessionInfo()
 ```
 
 ```
-## R Under development (unstable) (2023-12-22 r85721)
-## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 22.04.3 LTS
+## R version 4.3.2 (2023-10-31 ucrt)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19045)
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
 ## 
 ## time zone: America/Phoenix
-## tzcode source: system (glibc)
+## tzcode source: internal
 ## 
 ## attached base packages:
-## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## loaded via a namespace (and not attached):
-## [1] compiler_4.4.0     nc_2024.1.4        tools_4.4.0        data.table_1.14.99 knitr_1.45         xfun_0.41         
+## [1] compiler_4.3.2     nc_2023.8.24       tools_4.3.2        data.table_1.14.99 knitr_1.45         xfun_0.41         
 ## [7] evaluate_0.23
 ```

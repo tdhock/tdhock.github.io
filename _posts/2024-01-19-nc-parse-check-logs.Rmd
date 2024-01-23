@@ -125,8 +125,8 @@ type.not.avail.pattern <- list(
 When using the nc package, we define a regex as a list.
 
 * Values in the list are concatenated to form the regex, and
-* names of list elements are used to define capture groups, and the
-  names used in R code become the column names in the resulting data.
+* each named list element becomes a capture group, and the
+  name used in R code becomes the column name in the resulting data table.
 
 We use the regex in the code below to parse the dependency types, 
 
@@ -173,7 +173,7 @@ some.check.dt[["deps"]]
 
 ## Downloading log files
 
-In this section, download some log files which we can analyze using the approach in the previous section.
+In this section, we download some log files which we can analyze using the approach in the previous section.
 First in the code below, 
 we define a local directory to save the log files,
 
@@ -182,14 +182,17 @@ local.dir <- "~/teaching/regex-tutorial/cran-check-logs"
 dir.create(local.dir, showWarnings = FALSE)
 ```
 
-Then, in the code below, we download a CSV summary of most recent
-checks from the revdep check server:
+Note that the directory defined above is actually in a clone of my
+[regex-tutorial](https://github.com/tdhock/regex-tutorial) repo (which
+has a copy of these data).
+Then in the code below, we download a CSV
+summary of checks from the revdep check server:
 
 ```{r}
 analyze.url <- "https://rcdata.nau.edu/genomic-ml/data.table-revdeps/analyze/"
 remote.url.prefix <- paste0(
   analyze.url,
-  strftime(Sys.time(), "%Y-%m-%d"),
+  "2024-01-22", #strftime(Sys.time(), "%Y-%m-%d"),
   "/")
 remote.csv <- paste0(remote.url.prefix, "full_list_of_jobs.csv")
 (jobs.dt <- data.table::fread(remote.csv))
@@ -254,7 +257,7 @@ of `quoted.pattern` happens for each unique value of `deps`.
 ```{r}
 one.not.avail.dt[
 , nc::capture_all_str(deps, quoted.pattern)
-, by=.(deps, type)]
+, by=.(deps,type)]
 ```
 
 The output above is a table with one row per dependent package that
@@ -343,7 +346,7 @@ reported that missing dependency.
 We have seen how to use the `nc` R package to parse CRAN check log
 files. More generally, `nc` is useful whenever you have regularly
 structured text data/files, from which you would like to extract a
-data table.
+data table, with one column for each capture group in a regex.
 
 * `nc::capture_all_str` matches a regex to a text string/file, and
   returns a data table with one row for each match.
