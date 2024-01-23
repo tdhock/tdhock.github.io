@@ -4,21 +4,7 @@ title: Parsing check logs using regular expressions
 description: A demonstration of nc R package
 ---
 
-```{r Ropts, echo=FALSE}
-repo.dir <- normalizePath("..")
-post.id <- "2024-01-19-nc-parse-check-logs"
-fig.path <- file.path(repo.dir, "assets", "img", post.id)
-knitr::opts_chunk$set(
-  dpi=100,
-  fig.path=paste0(fig.path, "/"),
-  fig.width=8,
-  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
-options(width=120)
-if(FALSE){
-  knitr::knit(paste0(post.id, ".Rmd"))
-}
-```
+
 
 The goal of this blog post is to explain how to use
 [nc](https://github.com/tdhock/nc) to parse CRAN check log files, as
@@ -48,7 +34,8 @@ detect it). So ideally the system should also detect and report these
 dependencies which are not available, which appear in the check result
 as below,
 
-```{r}
+
+```r
 some.check.out <- "
 * this is package 'scoper' version '1.3.0'
 * package encoding: UTF-8
@@ -116,7 +103,8 @@ named capture regex, which we will use for this text parsing
 task. First, the code below defines a regex to capture the dependency
 type, 
 
-```{r}
+
+```r
 type.not.avail.pattern <- list(
   type='suggested|enhances|required',
   ' but not available')
@@ -130,8 +118,22 @@ When using the nc package, we define a regex as a list.
 
 We use the regex in the code below to parse the dependency types, 
 
-```{r}
+
+```r
 nc::capture_all_str(some.check.out, type.not.avail.pattern)
+```
+
+```
+##         type
+##       <char>
+## 1:  required
+## 2:  enhances
+## 3:  required
+## 4: suggested
+## 5:  required
+## 6: suggested
+## 7:  required
+## 8: suggested
 ```
 
 The output above is a data table with one row for every match, and one
@@ -140,7 +142,8 @@ One advantage of the nc package is that it makes it easy to build complex regex 
 For example consider the code below, which starts with the previous regex, 
 then adds another group `before.colon`, and matches up to the colon:
 
-```{r}
+
+```r
 up.to.colon.pattern <- list(
   type.not.avail.pattern,
   before.colon='.*?',
@@ -148,12 +151,26 @@ up.to.colon.pattern <- list(
 nc::capture_all_str(some.check.out, up.to.colon.pattern)
 ```
 
+```
+##         type  before.colon
+##       <char>        <char>
+## 1:  required              
+## 2:  enhances  for checking
+## 3:  required              
+## 4: suggested  for checking
+## 5:  required              
+## 6: suggested  for checking
+## 7:  required              
+## 8: suggested  for checking
+```
+
 The output above contains a new column `before.colon` which contains
 the text captured before the colon.
 Below we define a new regex that captures the text after the colon,
 one or more lines (non-greedy), up to the next line which starts with star or newline.
 
-```{r}
+
+```r
 one.or.more.lines.non.greedy <- '(?:.*\n)+?'
 up.to.deps.pattern <- list(
   up.to.colon.pattern,
@@ -162,13 +179,48 @@ up.to.deps.pattern <- list(
 (some.check.dt <- nc::capture_all_str(some.check.out, up.to.deps.pattern))
 ```
 
+```
+##         type  before.colon
+##       <char>        <char>
+## 1:  required              
+## 2:  enhances  for checking
+## 3:  required              
+## 4: suggested  for checking
+## 5:  required              
+## 6: suggested  for checking
+## 7:  required              
+## 8: suggested  for checking
+##                                                                                                                deps
+##                                                                                                              <char>
+## 1:                                                                                           'alakazam', 'shazam'\n
+## 2:                                                                      \n  'AER', 'betareg', 'ordinal', 'survey'\n
+## 3:                                                                                                        'Rcmdr'\n
+## 4:                                                                                                      'tkrplot'\n
+## 5:         \n  'adjclust', 'BiocGenerics', 'csaw', 'InteractionSet', 'limma',\n  'SummarizedExperiment', 'HiCDOC'\n
+## 6:                                                                                               'gWidgets2tcltk'\n
+## 7:                                                                                              'maftools', 'NMF'\n
+## 8: \n  'Biobase', 'Biostrings', 'BSgenome', 'BSgenome.Hsapiens.UCSC.hg19',\n  'GenomicRanges', 'GenSA', 'IRanges'\n
+```
+
 The output above contains a new column `deps` with all of the text
 (over possibly several lines) that contains the dependent package
 names. Another way to view the dependent packages is shown below as a
 character string,
 
-```{r}
+
+```r
 some.check.dt[["deps"]]
+```
+
+```
+## [1] " 'alakazam', 'shazam'\n"                                                                                         
+## [2] "\n  'AER', 'betareg', 'ordinal', 'survey'\n"                                                                     
+## [3] " 'Rcmdr'\n"                                                                                                      
+## [4] " 'tkrplot'\n"                                                                                                    
+## [5] "\n  'adjclust', 'BiocGenerics', 'csaw', 'InteractionSet', 'limma',\n  'SummarizedExperiment', 'HiCDOC'\n"        
+## [6] " 'gWidgets2tcltk'\n"                                                                                             
+## [7] " 'maftools', 'NMF'\n"                                                                                            
+## [8] "\n  'Biobase', 'Biostrings', 'BSgenome', 'BSgenome.Hsapiens.UCSC.hg19',\n  'GenomicRanges', 'GenSA', 'IRanges'\n"
 ```
 
 ## Downloading log files
@@ -177,7 +229,8 @@ In this section, download some log files which we can analyze using the approach
 First in the code below, 
 we define a local directory to save the log files,
 
-```{r}
+
+```r
 local.dir <- "~/teaching/regex-tutorial/cran-check-logs"
 dir.create(local.dir, showWarnings = FALSE)
 ```
@@ -185,7 +238,8 @@ dir.create(local.dir, showWarnings = FALSE)
 Then, in the code below, we download a CSV summary of most recent
 checks from the revdep check server:
 
-```{r}
+
+```r
 analyze.url <- "https://rcdata.nau.edu/genomic-ml/data.table-revdeps/analyze/"
 remote.url.prefix <- paste0(
   analyze.url,
@@ -195,12 +249,45 @@ remote.csv <- paste0(remote.url.prefix, "full_list_of_jobs.csv")
 (jobs.dt <- data.table::fread(remote.csv))
 ```
 
+```
+##        task     time    MB     State        Package sig.diffs not.avail config.fail dl.fail
+##       <int>   <char> <int>    <char>         <char>     <int>     <int>       <int>   <int>
+##    1:     1 00:03:32   291 COMPLETED         Ac3net         0         0           0       0
+##    2:     2 00:06:04   558 COMPLETED  accessibility         0         0           0       0
+##    3:     3 00:10:47   443 COMPLETED          acdcR         0         0           0       0
+##    4:     4 00:08:20   389 COMPLETED       Achilles         0         0           0       0
+##    5:     5 00:11:11   478 COMPLETED          actel         0         1           1       0
+##   ---                                                                                      
+## 1463:  1463 00:02:28   207 COMPLETED  youngSwimmers         0         0           0       0
+## 1464:  1464 00:05:08   549 COMPLETED           zebu         0         0           0       0
+## 1465:  1465 00:07:37   586 COMPLETED       zeitgebr         0         0           0       0
+## 1466:  1466 00:05:51   413 COMPLETED         ZIprop         0         0           0       0
+## 1467:  1467 00:57:27  1283 COMPLETED zoomGroupStats         0         0           0       0
+```
+
 The table above contains one row for each revdep of `data.table`. 
 The `not.avail` column indicates the number of "not available" 
 messages which were output while checking the revdep.
 
-```{r}
+
+```r
 (not.avail.logs <- jobs.dt[not.avail>0])
+```
+
+```
+##       task     time    MB     State       Package sig.diffs not.avail config.fail dl.fail
+##      <int>   <char> <int>    <char>        <char>     <int>     <int>       <int>   <int>
+##   1:     5 00:11:11   478 COMPLETED         actel         0         1           1       0
+##   2:    16 00:11:27   489 COMPLETED agriutilities         0         1           0       0
+##   3:    27 00:09:09   413 COMPLETED           AMR         0         4           0       0
+##   4:    29 00:08:31   585 COMPLETED      Anaconda         0         1           0       0
+##   5:    41 00:24:53  1280 COMPLETED         aPEAR         0         4           0       0
+##  ---                                                                                     
+## 149:  1434 00:03:33   354 COMPLETED        WGScan         0         1           0       0
+## 150:  1437 00:13:18  1461 COMPLETED          wiad         0         1           0       0
+## 151:  1439 00:10:54   598 COMPLETED        wilson         0         1           0       0
+## 152:  1449 00:02:53   534 COMPLETED           wTO         0         1           0       0
+## 153:  1461 00:05:31   577 COMPLETED      xplorerr         0         1           0       0
 ```
 
 The table above has one row for every package that depends/imports/etc
@@ -208,7 +295,8 @@ The table above has one row for every package that depends/imports/etc
 at checking.  The code block below is a for loop which downloads the
 log for for each of those packages.
 
-```{r eval=FALSE}
+
+```r
 for(pkg.i in 1:nrow(not.avail.logs)){
   pkg.row <- not.avail.logs[pkg.i]
   pkg.txt <- paste0(pkg.row$Package, ".txt")
@@ -228,9 +316,40 @@ for(pkg.i in 1:nrow(not.avail.logs)){
 Next, we use the previous regex to parse one 
 representative log file using the code below.
 
-```{r}
+
+```r
 (one.log.txt <- file.path(local.dir, "CNVScope.txt"))
+```
+
+```
+## [1] "~/teaching/regex-tutorial/cran-check-logs/CNVScope.txt"
+```
+
+```r
 (one.not.avail.dt <- nc::capture_all_str(one.log.txt, up.to.deps.pattern))
+```
+
+```
+##         type  before.colon
+##       <char>        <char>
+## 1:  required              
+## 2: suggested  for checking
+## 3:  required              
+## 4: suggested  for checking
+## 5:  required              
+## 6: suggested  for checking
+## 7:  required              
+## 8: suggested  for checking
+##                                                                                                            deps
+##                                                                                                          <char>
+## 1:                                                        \n  'GenomicInteractions', 'biomaRt', 'rtracklayer'\n
+## 2: \n  'InteractionSet', 'GenomicRanges', 'GenomicFeatures', 'GenomeInfoDb',\n  'BSgenome.Hsapiens.UCSC.hg19'\n
+## 3:                                                        \n  'GenomicInteractions', 'biomaRt', 'rtracklayer'\n
+## 4: \n  'InteractionSet', 'GenomicRanges', 'GenomicFeatures', 'GenomeInfoDb',\n  'BSgenome.Hsapiens.UCSC.hg19'\n
+## 5:                                                        \n  'GenomicInteractions', 'biomaRt', 'rtracklayer'\n
+## 6: \n  'InteractionSet', 'GenomicRanges', 'GenomicFeatures', 'GenomeInfoDb',\n  'BSgenome.Hsapiens.UCSC.hg19'\n
+## 7:                                                        \n  'GenomicInteractions', 'biomaRt', 'rtracklayer'\n
+## 8: \n  'InteractionSet', 'GenomicRanges', 'GenomicFeatures', 'GenomeInfoDb',\n  'BSgenome.Hsapiens.UCSC.hg19'\n
 ```
 
 The code above parses the log file using the same regex as in the
@@ -244,17 +363,42 @@ each row, using the code below. Note we use a new regex
 * then match can capture zero or more (non-greedy) of anything except a newline, (this will capture the missing dependent package name)
 * then match another single quote.
 
-```{r}
+
+```r
 quoted.pattern <- list("'", dep.pkg=".*?", "'")
 ```
 
 In the code below, we use `by=.(deps,type)` so that the regex matching
 of `quoted.pattern` happens for each unique value of `deps`.
 
-```{r}
+
+```r
 one.not.avail.dt[
 , nc::capture_all_str(deps, quoted.pattern)
 , by=.(deps, type)]
+```
+
+```
+##                                                                                                            deps
+##                                                                                                          <char>
+## 1:                                                        \n  'GenomicInteractions', 'biomaRt', 'rtracklayer'\n
+## 2:                                                        \n  'GenomicInteractions', 'biomaRt', 'rtracklayer'\n
+## 3:                                                        \n  'GenomicInteractions', 'biomaRt', 'rtracklayer'\n
+## 4: \n  'InteractionSet', 'GenomicRanges', 'GenomicFeatures', 'GenomeInfoDb',\n  'BSgenome.Hsapiens.UCSC.hg19'\n
+## 5: \n  'InteractionSet', 'GenomicRanges', 'GenomicFeatures', 'GenomeInfoDb',\n  'BSgenome.Hsapiens.UCSC.hg19'\n
+## 6: \n  'InteractionSet', 'GenomicRanges', 'GenomicFeatures', 'GenomeInfoDb',\n  'BSgenome.Hsapiens.UCSC.hg19'\n
+## 7: \n  'InteractionSet', 'GenomicRanges', 'GenomicFeatures', 'GenomeInfoDb',\n  'BSgenome.Hsapiens.UCSC.hg19'\n
+## 8: \n  'InteractionSet', 'GenomicRanges', 'GenomicFeatures', 'GenomeInfoDb',\n  'BSgenome.Hsapiens.UCSC.hg19'\n
+##         type                     dep.pkg
+##       <char>                      <char>
+## 1:  required         GenomicInteractions
+## 2:  required                     biomaRt
+## 3:  required                 rtracklayer
+## 4: suggested              InteractionSet
+## 5: suggested               GenomicRanges
+## 6: suggested             GenomicFeatures
+## 7: suggested                GenomeInfoDb
+## 8: suggested BSgenome.Hsapiens.UCSC.hg19
 ```
 
 The output above is a table with one row per dependent package that
@@ -275,7 +419,8 @@ we can use the square brackets to define a chain/pipeline of operations.
   table, with one row for each missing dependent package,
 * Finally, return only the `type` and `dep.pkg` columns.
 
-```{r}
+
+```r
 read_log <- function(log.txt){
   nc::capture_all_str(
     log.txt, up.to.deps.pattern
@@ -289,6 +434,19 @@ read_log <- function(log.txt){
 read_log(one.log.txt)
 ```
 
+```
+##         type                     dep.pkg
+##       <char>                      <char>
+## 1:  required         GenomicInteractions
+## 2:  required                     biomaRt
+## 3:  required                 rtracklayer
+## 4: suggested              InteractionSet
+## 5: suggested               GenomicRanges
+## 6: suggested             GenomicFeatures
+## 7: suggested                GenomeInfoDb
+## 8: suggested BSgenome.Hsapiens.UCSC.hg19
+```
+
 The output above includes one row for each dependent package which was
 missing during the package check (same as before, but now in a
 function, and omitting the `deps` column).
@@ -300,8 +458,13 @@ section, to parse several check log files.
 The code below defines a glob, for defining a set of log
 files to analyze,
 
-```{r}
+
+```r
 (log.glob <- file.path(local.dir, "*.txt"))
+```
+
+```
+## [1] "~/teaching/regex-tutorial/cran-check-logs/*.txt"
 ```
 
 The call to `nc:capture_first_glob` in the code below can be
@@ -311,11 +474,28 @@ interpreted as follows:
 * the argument named `READ` is a function that is used to read each file, (should return a data table)
 * and the other arguments specify a regex which is matched to each file name: the `Package` name to capture is anything except slash, one or more (up to `.txt`).
 
-```{r}
+
+```r
 (log.dt <- nc::capture_first_glob(
   log.glob,
   Package="[^/]+", "[.]txt$",
   READ=read_log))
+```
+
+```
+##            Package      type        dep.pkg
+##             <char>    <char>         <char>
+##   1:         actel suggested gWidgets2tcltk
+##   2: agriutilities  enhances         asreml
+##   3:           AMR  enhances        cleaner
+##   4:           AMR  enhances        janitor
+##   5:           AMR  enhances          skimr
+##  ---                                       
+## 244:        WGScan  required           SKAT
+## 245:          wiad suggested          rgdal
+## 246:        wilson  required         DESeq2
+## 247:           wTO  required          Rfast
+## 248:      xplorerr suggested         rbokeh
 ```
 
 The output above is a data table, which has one row for each missing
@@ -330,8 +510,26 @@ a missing dependent package, we can use the code below. Note that
 current `by` group. And `keyby` is used instead of `by` to ensure that
 the output is sorted by `type`, then by `dep.pkg`.
 
-```{r}
+
+```r
 (first.missing <- log.dt[, .SD[1], keyby=.(type, dep.pkg)])
+```
+
+```
+## Key: <type, dep.pkg>
+##           type   dep.pkg    Package
+##         <char>    <char>     <char>
+##   1:  enhances       AER    margins
+##   2:  enhances       MNP prediction
+##   3:  enhances      VGAM prediction
+##   4:  enhances     WGCNA dendextend
+##   5:  enhances       aod prediction
+##  ---                               
+## 158: suggested toscaData      tosca
+## 159: suggested     vaers vaersNDvax
+## 160: suggested   vaersND vaersNDvax
+## 161: suggested       wTO     CoDiNA
+## 162: suggested      xcms   enviGCMS
 ```
 
 The table above has one row for each unique combination of `type` and
@@ -360,7 +558,8 @@ It is reported in the package check log, so try to modify the regex
 code to parse that out of each log file. Hint: the relevant part of
 the log is below. 
 
-```{r}
+
+```r
 partial.log <- "
 * using session charset: ASCII
 * checking for file 'actel/DESCRIPTION' ... OK
@@ -375,6 +574,32 @@ Package suggested but not available for checking: 'gWidgets2tcltk'
 
 ## Session info
 
-```{r}
+
+```r
 sessionInfo()
+```
+
+```
+## R Under development (unstable) (2023-12-22 r85721)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 22.04.3 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
+## locale:
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: America/Phoenix
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## 
+## loaded via a namespace (and not attached):
+## [1] compiler_4.4.0     nc_2024.1.4        tools_4.4.0        data.table_1.14.99 knitr_1.45         xfun_0.41         
+## [7] evaluate_0.23
 ```
