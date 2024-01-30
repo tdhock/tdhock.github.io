@@ -149,6 +149,8 @@ lgr::get_logger("mlr3")$set_threshold("warn")
   bench.grid, store_models = TRUE))
 bench.score <- bench.result$score(mlr3::msrs(c("time_train","regr.mse")))
 
+bench.score[, .(count=.N), keyby=.(algorithm,selected)]
+
 only.tuned <- bench.score[learner_id=="regr.kknn.tuned"]
 one.learner <- only.tuned$learner[[1]]
 one.learner$tuning_result$k
@@ -165,6 +167,7 @@ bench.score[
 ][
 , algorithm := factor(learner_id, algo.levs)
 ][]
+table(sprintf("%.1e",bench.score$selected))
 
 ggplot()+
   geom_point(aes(
