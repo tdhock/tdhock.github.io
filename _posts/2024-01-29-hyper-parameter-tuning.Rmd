@@ -1,3 +1,4 @@
+
 ---
 layout: post
 title: The importance of hyper-parameter tuning
@@ -76,6 +77,9 @@ sub-optimal for others).
 
 ## Simulation
 
+[mlr3tuningspaces](https://mlr-org.com/tuning_spaces.html) is a useful
+reference for what are typical values for each hyper-parameter.
+
 ```{r}
 min.x <- -10
 max.x <- 10
@@ -96,7 +100,7 @@ for(fun.name in names(fun.list)){
   true.vec <- f(input.vec)
   task.dt <- data.table(
     input=input.vec,
-    output=true.vec+rnorm(N))
+    output=true.vec+rnorm(N,sd=2))
   task.list[[fun.name]] <- mlr3::TaskRegr$new(
     fun.name, task.dt, target="output"
   )
@@ -115,12 +119,37 @@ subtrain.valid.cv$param_set$values$folds <- 5
 
 xgboost.learner <- mlr3learners::LearnerRegrXgboost$new()
 xgboost.learner$param_set$values$eta <- paradox::to_tune(0.001, 1, log=TRUE)
+xgboost.learner$param_set$values$nrounds <- paradox::to_tune(1, 100)
+grid.search.5 <- mlr3tuning::TunerGridSearch$new()
+grid.search.5$param_set$values$resolution <- 5
 xgboost.tuned = mlr3tuning::auto_tuner(
-  tuner = mlr3tuning::TunerGridSearch$new(),
+  tuner = grid.search.5,
   learner = xgboost.learner,
   resampling = subtrain.valid.cv,
   measure = mlr3::msr("regr.mse"))
 
+## rpart
+rpart.learner <- mlr3::LearnerRegrRpart$new()
+rpart.learner$param_set$values$cp <- paradox::to_tune(0.001, 1, log=TRUE)
+rpart.tuned = mlr3tuning::auto_tuner(
+  tuner = mlr3tuning::TunerGridSearch$new(),
+  learner = rpart.learner,
+  resampling = subtrain.valid.cv,
+  measure = mlr3::msr("regr.mse"))
+rpart.tuned = mlr3tuning::auto_tuner(
+  tuner = grid.search.5,
+  learner = mlr3tuningspaces::lts(mlr3::LearnerRegrRpart$new()),
+  resampling = subtrain.valid.cv,
+  measure = mlr3::msr("regr.mse"))
+
+## ranger
+ranger.tuned = mlr3tuning::auto_tuner(
+  tuner = grid.search.5,
+  learner = mlr3tuningspaces::lts(mlr3learners::LearnerRegrRanger$new()),
+  resampling = subtrain.valid.cv,
+  measure = mlr3::msr("regr.mse"))
+
+## knn
 knn.learner <- mlr3learners::LearnerRegrKKNN$new()
 knn.learner$param_set$values$k <- paradox::to_tune(1, 20)
 knn.tuned = mlr3tuning::auto_tuner(
@@ -132,9 +161,12 @@ nn1 <- mlr3learners::LearnerRegrKKNN$new()
 nn1$id <- "1 nearest neighbor"
 nn1$param_set$values$k <- 1
 nn.default <- mlr3learners::LearnerRegrKKNN$new()
-(nn.default$id <- sprintf("%d-NN (default)", nn.default$param_set$values$k))
+
+## list of learners
 learner.list <- list(
   mlr3::LearnerRegrFeatureless$new(),
+  mlr3::LearnerRegrRpart$new(), rpart.tuned,
+  mlr3learners::LearnerRegrRanger$new(), ranger.tuned,
   mlr3learners::LearnerRegrXgboost$new(), xgboost.tuned,
   knn.tuned, nn1, nn.default)
 train.test.cv <- mlr3::ResamplingCV$new()
@@ -147,28 +179,31 @@ if(require(future))plan("multisession")
 lgr::get_logger("mlr3")$set_threshold("warn")
 (bench.result <- mlr3::benchmark(
   bench.grid, store_models = TRUE))
+
 bench.score <- bench.result$score(mlr3::msrs(c("time_train","regr.mse")))
-
-bench.score[, .(count=.N), keyby=.(algorithm,selected)]
-
 only.tuned <- bench.score[learner_id=="regr.kknn.tuned"]
 one.learner <- only.tuned$learner[[1]]
 one.learner$tuning_result$k
 algo.levs <- c(
+  "regr.rpart.tuned", "regr.rpart", 
+  "regr.ranger.tuned", "regr.ranger", 
   "regr.xgboost.tuned", "regr.xgboost", 
   "regr.kknn.tuned", nn.default$id, nn1$id,
   "regr.featureless")
 bench.score[
-  learner_id=="regr.xgboost.tuned",
-  selected := sapply(learner, function(L)L$tuning_result$eta)
+  ## learner_id=="regr.xgboost.tuned",
+  ## selected := sapply(learner, function(L)exp(L$tuning_result$eta))
 ][
   learner_id=="regr.kknn.tuned",
   selected := sapply(learner, function(L)L$tuning_result$k)
 ][
 , algorithm := factor(learner_id, algo.levs)
 ][]
-table(sprintf("%.1e",bench.score$selected))
-
+bench.score[, .(count=.N), keyby=.(algorithm,selected)]
+bench.score[
+  algorithm=="regr.xgboost.tuned",
+  learner[[1]]$tuning_result,
+  by=.(task_id, iteration)]
 ggplot()+
   geom_point(aes(
     regr.mse, algorithm),
@@ -176,6 +211,27 @@ ggplot()+
   ggrepel::geom_text_repel(aes(
     regr.mse, learner_id, label=selected),
     hjust=0, vjust=0,
+    data=bench.score)+
+  facet_grid(. ~ task_id, labeller=label_both, scales="free")+
+  scale_x_log10(
+    "Mean squared prediction error on the test set")
+nc::capture_first_df(
+  bench.score,
+  learner_id=list(
+    base.learner=".*?",
+    nc::alternatives(
+      list(
+        "[.]",
+        hyper.parameters="tuned", function(x)ifelse(x=="", "fixed", x)
+      ),
+      ""),
+    "$"))
+table(bench.score$hyper.parameters)
+
+ggplot()+
+  geom_point(aes(
+    regr.mse, base.learner, color=hyper.parameters),
+    shape=1,
     data=bench.score)+
   facet_grid(. ~ task_id, labeller=label_both, scales="free")+
   scale_x_log10(
@@ -189,6 +245,14 @@ ggplot()+
   scale_x_log10(
     "Training time (seconds)")
 
+ggplot()+
+  geom_point(aes(
+    time_train, base.learner, color=hyper.parameters),
+    shape=1,
+    data=bench.score)+
+  facet_grid(. ~ task_id, labeller=label_both, scales="free")+
+  scale_x_log10(
+    "Training time (seconds)")
 
 ```
   
