@@ -1,0 +1,199 @@
+---
+layout: post
+title: The importance of hyper-parameter tuning
+description: Comparing with no tuning
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-01-29-hyper-parameter-tuning"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this blog post is to compare a machine learning
+algorithms, and demonstrate the importance of learning model
+complexity hyper-parameters, if the goal is to minimize prediction
+error (and that is always the goal in ML).
+
+## Theoretical discussion and visualizations
+
+What is model complexity and why does it need to be controlled? Model
+complexity is the ability of a learning algorithm to fit complex
+patterns which are encoded in the train set. There is a different
+measure of model complexity for every learning algorithm:
+
+* number of neighbors in K-nearest-neighbors,
+* degree of L1 regularization in LASSO (as implemented in glmnet package in R),
+* degree of polynomial in linear model basis expansion,
+* cost parameter in support vector machines,
+* number of iterations and learning rate in boosting (as implemented
+  in xgboost package in R),
+* number of gradient descent iterations (epochs), learning rate,
+  number of hidden units, number of layers, etc, in neural networks.
+
+In each machine learning algorithm, the model complexity must be
+controlled, by selecting a good value for the corresponding
+hyper-parameter. I created [a data
+visualization](https://tdhock.github.io/2023-12-04-degree-neighbors/)
+which shows how this works using nearest neighbors (need to learn
+number of neighbors) and linear models (need to learn the degree of the
+polynomial basis expansion), for several regression problems.
+
+* There are four different simulated data sets, each with a pattern of
+  different complexity (constant, linear, quadratic, cubic).
+* The linear model polynomial degree varies from 0 (constant
+  prediction function, most regularized, least complex) to 9 (very
+  wiggly prediction function that perfectly interpolates every train
+  data point, least regularized, most complex).
+* The number of neighbors varies from 1 (very wiggly prediction
+  function that perfectly interpolates every train data point, least
+  regularized, most complex) to 10 (constant prediction function, most
+  regularized, least complex).
+* These two learning algorithms are interesting examples to compare,
+  because the least complex model (in both cases) always predicts the
+  average of the train labels. That turns out to be the best
+  prediction function, in the case of the constant data/pattern.
+* But for the other data/patterns, a more complex regularization
+  parameter must be used to get optimal prediction accuracy. For
+  example, the regularization parameters which gives minimal test
+  error for the linear data/pattern are 3 nearest neighbors, and
+  polynomial degree 1.
+
+The goal of this blog is to demonstrate how to use mlr3 auto tuner to
+properly learn such hyper-parameters, and show that approach is more
+accurate than using the defaults (which may be ok for some data, but
+sub-optimal for others).
+
+## Simulation
+
+```{r}
+min.x <- -10
+max.x <- 10
+fun.list <- list(
+  constant=function(x)1,
+  linear=function(x)x/3,
+  quadratic=function(x)x^2/max.x-5,
+  sin=function(x)4*sin(x),
+  step=function(x)ifelse(x<0, 4, -4))
+N <- 200
+set.seed(1)
+input.vec <- runif(N, min.x, max.x)
+library(data.table)
+task.list <- list()
+sim.dt.list <- list()
+for(fun.name in names(fun.list)){
+  f <- fun.list[[fun.name]]
+  true.vec <- f(input.vec)
+  task.dt <- data.table(
+    input=input.vec,
+    output=true.vec+rnorm(N))
+  task.list[[fun.name]] <- mlr3::TaskRegr$new(
+    fun.name, task.dt, target="output"
+  )
+  sim.dt.list[[fun.name]] <- data.table(fun.name, task.dt)
+}
+(sim.dt <- rbindlist(sim.dt.list))
+library(ggplot2)
+ggplot()+
+  geom_point(aes(
+    input, output),
+    data=sim.dt)+
+  facet_grid(. ~ fun.name, labeller=label_both)
+
+subtrain.valid.cv <- mlr3::ResamplingCV$new()
+subtrain.valid.cv$param_set$values$folds <- 5
+
+xgboost.learner <- mlr3learners::LearnerRegrXgboost$new()
+xgboost.learner$param_set$values$eta <- paradox::to_tune(0.01, 1, log=TRUE)
+xgboost.tuned = mlr3tuning::auto_tuner(
+  tuner = mlr3tuning::TunerGridSearch$new(),
+  learner = xgboost.learner,
+  resampling = subtrain.valid.cv,
+  measure = mlr3::msr("regr.mse"))
+
+knn.learner <- mlr3learners::LearnerRegrKKNN$new()
+knn.learner$param_set$values$k <- paradox::to_tune(1, 20)
+knn.tuned = mlr3tuning::auto_tuner(
+  tuner = mlr3tuning::TunerGridSearch$new(),
+  learner = knn.learner,
+  resampling = subtrain.valid.cv,
+  measure = mlr3::msr("regr.mse"))
+nn1 <- mlr3learners::LearnerRegrKKNN$new()
+nn1$id <- "1 nearest neighbor"
+nn1$param_set$values$k <- 1
+nn.default <- mlr3learners::LearnerRegrKKNN$new()
+(nn.default$id <- sprintf("%d-NN (default)", nn.default$param_set$values$k))
+learner.list <- list(
+  mlr3::LearnerRegrFeatureless$new(),
+  mlr3learners::LearnerRegrXgboost$new(), xgboost.tuned,
+  knn.tuned, nn1, nn.default)
+train.test.cv <- mlr3::ResamplingCV$new()
+train.test.cv$param_set$values$folds <- 3
+(bench.grid <- mlr3::benchmark_grid( 
+  tasks=task.list,
+  learners=learner.list,
+  resamplings=train.test.cv))
+if(require(future))plan("multisession")
+lgr::get_logger("mlr3")$set_threshold("warn")
+(bench.result <- mlr3::benchmark(
+  bench.grid, store_models = TRUE))
+bench.score <- bench.result$score(mlr3::msrs(c("time_train","regr.mse")))
+
+only.tuned <- bench.score[learner_id=="regr.kknn.tuned"]
+one.learner <- only.tuned$learner[[1]]
+one.learner$tuning_result$k
+bench.score[
+  learner_id=="regr.xgboost.tuned",
+  selected := sapply(learner, function(L)L$tuning_result$eta)
+][
+  learner_id=="regr.kknn.tuned",
+  selected := sapply(learner, function(L)L$tuning_result$k)
+][
+, algorithm := factor(
+    learner_id,
+    c("regr.kknn.tuned", nn.default$id, nn1$id, "regr.featureless"))
+][]
+
+ggplot()+
+  geom_point(aes(
+    regr.mse, algorithm),
+    data=bench.score)+
+  ggrepel::geom_text_repel(aes(
+    regr.mse, learner_id, label=selected),
+    hjust=0, vjust=0,
+    data=bench.score)+
+  facet_grid(. ~ task_id, labeller=label_both, scales="free")+
+  scale_x_log10(
+    "Mean squared prediction error on the test set")
+
+ggplot()+
+  geom_point(aes(
+    time_train, algorithm),
+    data=bench.score)+
+  facet_grid(. ~ task_id, labeller=label_both, scales="free")+
+  scale_x_log10(
+    "Training time (seconds)")
+
+
+```
+  
+## Conclusions
+
+TODO
+
+## Session info
+
+```{r}
+sessionInfo()
+```
+
