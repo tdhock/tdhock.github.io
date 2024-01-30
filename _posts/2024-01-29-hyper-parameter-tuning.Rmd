@@ -114,7 +114,7 @@ subtrain.valid.cv <- mlr3::ResamplingCV$new()
 subtrain.valid.cv$param_set$values$folds <- 5
 
 xgboost.learner <- mlr3learners::LearnerRegrXgboost$new()
-xgboost.learner$param_set$values$eta <- paradox::to_tune(0.01, 1, log=TRUE)
+xgboost.learner$param_set$values$eta <- paradox::to_tune(0.001, 1, log=TRUE)
 xgboost.tuned = mlr3tuning::auto_tuner(
   tuner = mlr3tuning::TunerGridSearch$new(),
   learner = xgboost.learner,
@@ -152,6 +152,10 @@ bench.score <- bench.result$score(mlr3::msrs(c("time_train","regr.mse")))
 only.tuned <- bench.score[learner_id=="regr.kknn.tuned"]
 one.learner <- only.tuned$learner[[1]]
 one.learner$tuning_result$k
+algo.levs <- c(
+  "regr.xgboost.tuned", "regr.xgboost", 
+  "regr.kknn.tuned", nn.default$id, nn1$id,
+  "regr.featureless")
 bench.score[
   learner_id=="regr.xgboost.tuned",
   selected := sapply(learner, function(L)L$tuning_result$eta)
@@ -159,9 +163,7 @@ bench.score[
   learner_id=="regr.kknn.tuned",
   selected := sapply(learner, function(L)L$tuning_result$k)
 ][
-, algorithm := factor(
-    learner_id,
-    c("regr.kknn.tuned", nn.default$id, nn1$id, "regr.featureless"))
+, algorithm := factor(learner_id, algo.levs)
 ][]
 
 ggplot()+
