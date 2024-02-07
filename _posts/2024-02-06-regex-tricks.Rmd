@@ -1,0 +1,269 @@
+---
+layout: post
+title: Capturing regular expressions
+description: Extracting data from loosely structured text
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-02-06-regex-tricks"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this blog post is to explain a couple of interesting
+regular expression parsing techniques that were useful in my recent
+work.
+
+## nc intro
+
+`nc` is my R package for named capture regular expressions (regex). It
+provides functions that make it easy to capture data from regularly
+structured text, and output a data table.  For example, we can
+consider the problem of converting a typical text representation of
+elapsed time, `98:76:54` (98 hours, 76 minutes, 54 seconds) to a
+numeric variable. Below we define the text data to parse, which is
+called a "subject" in the context of regex matching:
+
+```{r}
+elapsed.subject <- c("98:76:54","01:23:45")
+```
+
+Next we define a regex sub-pattern to match an integer,
+
+```{r}
+int.pattern <- list("[0-9]+", as.integer)
+```
+
+Note in the code above that we define the regex sub-pattern as a list
+in R, which combines the pattern string with a conversion function.
+Next we use that sub-pattern list three times to create an overall
+pattern for matching to the subject/time text,
+
+```{r}
+elapsed.pattern <- list(
+  hours=int.pattern, ":",
+  minutes=int.pattern, ":",
+  seconds=int.pattern)
+```
+
+The pattern is defined in the code above as a list with five
+elements. Each of the three named elements becomes a capture group,
+and the name is used as a column name in the output (see below). The
+two un-named elements (both colons) define text to match between the
+capture groups. All elements of the pattern list are concatenated to
+obtain the final regex which is matched to each subject, using the
+code below.
+
+```{r}
+(elapsed.dt <- nc::capture_first_vec(elapsed.subject, elapsed.pattern))
+```
+
+The output above is a data table with one row per subject, and one
+column per capture group. Each column is an integer, because
+`as.integer` was specified as the type conversion for `int.pattern` in
+the code above. To compute the overall time, we can use the code below,
+
+```{r}
+elapsed.dt[
+  , overall.minutes := seconds/60+minutes+hours*60
+][]
+```
+
+## Parsing log files
+
+Now suppose we have a bunch of log files, created from using the time
+command, as below.
+
+```{r}
+R.commands <- c('R.version','library(nc);example(capture_all_str)')
+log.subject <- character()
+for(cmd.i in seq_along(R.commands)){
+  R.cmd <- R.commands[[cmd.i]]
+  time.cmd <- sprintf("time R -e '%s' 2>&1", R.cmd)
+  log.lines <- system(time.cmd, intern=TRUE)
+  print(tail(log.lines))
+  log.subject[[R.cmd]] <- paste(log.lines, collapse="\n")
+}
+```
+
+Above we see the last few lines in each time command log.
+The timings shown are in seconds (for user, system, elapsed).
+Another way to view the data is via the last few characters of each log, via the code below.
+
+```{r}
+substr(log.subject, nchar(log.subject)-150, nchar(log.subject))
+```
+
+In both cases above, we see the number of seconds is a numeric variable with a decimal point.
+Below we define a pattern to match a numeric variable encoded in text,
+
+```{r}
+num.pattern <- list("[0-9.]+", as.numeric)
+```
+
+Below we combine the sub-pattern above with a suffix to get a first
+partial match. Note that we use `capture_all_str` inside of
+`by=R.cmd`, so that it is run for each unique value of `R.cmd`. Since
+the log files have the same name as the command that was run,
+`capture_all_str` will read each log file, and find each 
+
+```{r}
+user.pattern <- list(user=num.pattern, "user")
+nc::capture_first_vec(log.subject, user.pattern)
+```
+
+The output above is a data table with one row per log file, and one
+column per capture group defined in the regex.  Below we define a more
+complex pattern, to additionally capture the system time,
+
+```{r}
+user.system.pattern <- list(user.pattern, " ", system=num.pattern, "system")
+nc::capture_first_vec(log.subject, user.system.pattern)
+```
+
+Exercise for the reader: modify the pattern to additional capture
+elapsed, CPU, etc.
+
+## Parsing multi-line log files
+
+Now suppose we had to parse POSIX instead of GNU time, as in the code
+below, which includes the `-p` flag to `time`.
+
+```{r}
+posix.subject <- character()
+for(cmd.i in seq_along(R.commands)){
+  R.cmd <- R.commands[[cmd.i]]
+  time.cmd <- sprintf("time -p R -e '%s' 2>&1", R.cmd)
+  log.lines <- system(time.cmd, intern=TRUE)
+  print(tail(log.lines))
+  posix.subject[[R.cmd]] <- paste(log.lines, collapse="\n")
+}
+```
+
+Another way to view the data is via the last few characters of each
+log, via the code below.
+
+```{r}
+substr(posix.subject, nchar(posix.subject)-50, nchar(posix.subject))
+```
+
+Again we can parse using a regex, which we begin to build in the code below.
+
+```{r}
+real.pattern <- list("real ", real=num.pattern)
+nc::capture_first_vec(posix.subject, real.pattern)
+```
+
+We build a more complex regex in the code below,
+
+```{r}
+real.user.pattern <- list(real.pattern, "\nuser ", user=num.pattern)
+nc::capture_first_vec(posix.subject, real.user.pattern)
+```
+
+Exercise for the reader: create a more complex regex that additionally
+matches the sys time.
+
+## Parse all times in log 
+
+In the last sections, we created a new pattern for each of the
+times. But is it possible to have a single regex that matches all of
+the times? Yes! We can use `capture_all_str`, which inputs a text
+string (or file) to parse with a regex. To get that to work with
+multiple subjects, each which is a multi-line log string/file, we need
+to use it inside of a data table `by` clause, as below,
+
+```{r}
+data.table(R.cmd=R.commands)[, nc::capture_all_str(
+  posix.subject[[R.cmd]], type="real|user|sys", " ", seconds=num.pattern
+), by=R.cmd]
+```
+
+Exercise for the reader: do something similar with `log.subject`
+instead of `posix.subject`.
+
+## More complex regex 
+
+For a more challenging example, let us consider data from python doc
+strings, taken from torchvision.
+
+```{r}
+doc.strings <- c('`The Rendered SST2 Dataset <https://github.com/openai/CLIP/blob/main/data/rendered-sst2.md>`_.\n\n    Rendered SST2 is an image classification dataset used to evaluate the models capability on optical\n    character recognition. This dataset was generated by rendering sentences in the Standford Sentiment\n    Treebank v2 dataset.\n\n    This dataset contains two classes (positive and negative) and is divided in three splits: a  train\n    split containing 6920 images (3610 positive and 3310 negative), a validation split containing 872 images\n    (444 positive and 428 negative), and a test split containing 1821 images (909 positive and 912 negative).\n\n    Args:\n        root (string): Root directory of the dataset.\n        split (string, optional): The dataset split, supports ``"train"`` (default), `"val"` and ``"test"``.\n        transform (callable, optional): A function/transform that  takes in an PIL image and returns a transformed\n            version. E.g, ``transforms.RandomCrop``.\n        target_transform (callable, optional): A function/transform that takes in the target and transforms it.\n        download (bool, optional): If True, downloads the dataset from the internet and\n            puts it in root directory. If dataset is already downloaded, it is not\n            downloaded again. Default is False.\n    ', "`WIDERFace <http://shuoyang1213.me/WIDERFACE/>`_ Dataset.\n\n    Args:\n        root (string): Root directory where images and annotations are downloaded to.\n            Expects the following folder structure if download=False:\n\n            .. code::\n\n                <root>\n                    \u2514\u2500\u2500 widerface\n                        \u251c\u2500\u2500 wider_face_split ('wider_face_split.zip' if compressed)\n                        \u251c\u2500\u2500 WIDER_train ('WIDER_train.zip' if compressed)\n                        \u251c\u2500\u2500 WIDER_val ('WIDER_val.zip' if compressed)\n                        \u2514\u2500\u2500 WIDER_test ('WIDER_test.zip' if compressed)\n        split (string): The dataset split to use. One of {``train``, ``val``, ``test``}.\n            Defaults to ``train``.\n        transform (callable, optional): A function/transform that  takes in a PIL image\n            and returns a transformed version. E.g, ``transforms.RandomCrop``\n        target_transform (callable, optional): A function/transform that takes in the\n            target and transforms it.\n        download (bool, optional): If true, downloads the dataset from the internet and\n            puts it in root directory. If dataset is already downloaded, it is not\n            downloaded again.\n\n    ", '`EMNIST <https://www.westernsydney.edu.au/bens/home/reproducible_research/emnist>`_ Dataset.\n\n    Args:\n        root (string): Root directory of dataset where ``EMNIST/raw/train-images-idx3-ubyte``\n            and  ``EMNIST/raw/t10k-images-idx3-ubyte`` exist.\n        split (string): The dataset has 6 different splits: ``byclass``, ``bymerge``,\n            ``balanced``, ``letters``, ``digits`` and ``mnist``. This argument specifies\n            which one to use.\n        train (bool, optional): If True, creates dataset from ``training.pt``,\n            otherwise from ``test.pt``.\n        download (bool, optional): If True, downloads the dataset from the internet and\n            puts it in root directory. If dataset is already downloaded, it is not\n            downloaded again.\n        transform (callable, optional): A function/transform that  takes in an PIL image\n            and returns a transformed version. E.g, ``transforms.RandomCrop``\n        target_transform (callable, optional): A function/transform that takes in the\n            target and transforms it.\n    ')
+cat(doc.strings, sep="\n\n-----\n\n")
+```
+
+There is some structure in these doc strings, so it is possible to
+parse them using regex.
+
+* Title and URL on first line.
+* optional multi-line description below.
+* Args: section below.
+* Each arg name (type): description.
+
+Here we focus just on parsing each argument (others are exercises for the reader).
+The pattern is relatively straightforward, if we want to just get one line:
+
+```{r}
+before.name <- " +"
+name.pattern <- "[^ ]+"
+after.name <- " [(]"
+name.type.pattern <- list(before.name, name=name.pattern, after.name, type=".*?", "[)]: ")
+nc::capture_all_str(doc.strings, name.type.pattern, description=".*")
+```
+
+But what if we want to get all of the lines of the description? We
+could try a multi-line greedy match, but that gives us only one row
+with too much in the description.
+
+```{r}
+str(nc::capture_all_str(doc.strings, name.type.pattern, description="(?:.*\n)*"))
+```
+
+The trick to getting this to work is to be more specific about what
+kinds of lines are allowed to match in the description. Basically, we
+can add a line if it is not going to match another argument. To do
+that we need negative lookahead.
+
+```{r}
+not.arg <- list(
+  "(?!",#negative lookahead, makes match fail if another argument name on this line.
+  before.name, name.pattern, after.name, ")")
+desc.pattern <- list(description=list(
+  ".*\n",#first line
+  nc::quantifier(not.arg, ".*\n", "*")))
+arg.dt <- nc::capture_all_str(doc.strings, name.type.pattern, desc.pattern)
+arg.dt[, .(name, type, desc=substr(description, 1, 40))]
+arg.dt[, cat(sprintf("%s (%s): %s", name, type, description),sep="\n")]
+```
+
+Note how the above output indeed captures each argument description,
+but some of them include more than necessary (title of next data set
+is included in download arg description). Exercise for the reader: fix
+this by putting `capture_all_str` inside of `by` and creating a new
+regex to parse out the different sections of the doc string (title,
+url, args), and then use the regex that we created above to parse the
+args section.
+
+## Conclusion
+
+We have seen various applications of regular expressions using `nc` in
+R. For even more practice, I recommend reading my
+[regex-tutorial](https://github.com/tdhock/regex-tutorial) repo.
+
+## Session info
+
+```{r}
+sessionInfo()
+```
+
+
