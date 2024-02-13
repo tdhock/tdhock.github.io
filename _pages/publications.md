@@ -96,6 +96,9 @@ description: Peer-reviewed papers and preprints with links to code and data
   Computational and Graphical Statistics,
   [DOI:10.1080/10618600.2023.2293216](https://doi.org/10.1080/10618600.2023.2293216). [Preprint
   arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
+  [Software](https://github.com/tdhock/FLOPART),
+  [Reproducible](https://github.com/jkaufy/Flopart-Paper),
+  [Preliminary code](https://github.com/tdhock/LabeledFPOP-paper).
   
 ### 2023
 

@@ -146,7 +146,8 @@ can be interpreted in terms of peaks (after up changes) and background
   paper](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf).
 - [FLOPART](https://github.com/tdhock/FLOPART), Functional Labeled
   Optimal Partitioning, provides a supervised peak detection algorithm
-  with label constraints. (paper in progress)
+  with label constraints, as described in our [JCGS'24
+  paper](https://doi.org/10.1080/10618600.2023.2293216).
 - [CROCS](https://github.com/aLiehrmann/CROCS) supports our [BMC
   Bioinformatics
   (2021)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-04221-5),
