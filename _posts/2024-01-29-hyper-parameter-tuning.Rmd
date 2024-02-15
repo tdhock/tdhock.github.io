@@ -69,19 +69,20 @@ polynomial basis expansion), for several regression problems.
   error for the linear data/pattern are 3 nearest neighbors, and
   polynomial degree 1.
 
-The goal of this blog is to demonstrate how to use mlr3 auto tuner to
-properly learn such hyper-parameters, and show that approach is more
-accurate than using the defaults (which may be ok for some data, but
-sub-optimal for others).
+The goal of this blog is to demonstrate how to use [mlr3 auto
+tuner](https://mlr3book.mlr-org.com/chapters/chapter4/hyperparameter_optimization.html#sec-autotuner)
+to properly learn such hyper-parameters, and show that approach is
+more accurate than using the defaults (which may be ok for some data,
+but sub-optimal for others).
 
 ## Simulation
 
-[mlr3tuningspaces](https://mlr-org.com/tuning_spaces.html) is a useful
-reference for what are typical values for each hyper-parameter.
+Below we define some simulated data, for five different regression
+problems, of varying complexity.
 
 ```{r}
-min.x <- -10
-max.x <- 10
+max.x <- 12
+min.x <- -max.x
 fun.list <- list(
   constant=function(x)1,
   linear=function(x)x/3,
@@ -112,10 +113,88 @@ ggplot()+
     input, output),
     data=sim.dt)+
   facet_grid(. ~ fun.name, labeller=label_both)
+```
 
+The plot above visualizes the simulated data. The goal of each
+learning algorithm is to learn the pattern in each of the five
+different data sets. To do that, we define a few different learning
+algorithms in the next section.
+
+## Learning algorithm definitions
+
+Perhaps the simplest learning algorithm is nearest neighbors, which
+can be implemented in the mlr3 framework using the code below.
+
+```{r}
+nn.default <- mlr3learners::LearnerRegrKKNN$new()
+nn.default$param_set
+```
+
+The code above defines the default nearest neighbors regressor, which
+has a default value of `k=7` (that is the number of neighbors).  As
+discussed above, the number of neighbors is an important model
+complexity hyper-parameter, which must be tuned for optimal prediction
+accuracy. In other words, the default value 7 may provide sub-optimal
+prediction accuracy, depending on the data set. Another option is to
+manually select a different value for the number of neighbors, which
+we do in the code below,
+
+```{r}
+nn1 <- mlr3learners::LearnerRegrKKNN$new()
+nn1$id <- "1 nearest neighbor"
+nn1$param_set$values$k <- 1
+```
+
+The code above defines another nearest neighbor regressor, which uses
+1 nearest neighbor, instead of the default 7. That may be better for
+some data sets, but in general, we would like to choose a different
+number of neighbors for each data set. We can do that using
+cross-validation, by dividing the train set into subtrain/validation
+sets, where the validation set is used to determine the optimal number
+of neighbors. The code below defines 5-fold cross-validation as the
+method to use,
+
+```{r}
 subtrain.valid.cv <- mlr3::ResamplingCV$new()
 subtrain.valid.cv$param_set$values$folds <- 5
+```
 
+Next, in the code below, we define a new nearest neighbor regressor,
+and tell mlr3 to tune the number of neighbors.
+
+```{r}
+knn.learner <- mlr3learners::LearnerRegrKKNN$new()
+knn.learner$param_set$values$k <- paradox::to_tune(1, 20)
+```
+
+To convert that to a learning algorithm that can be used in a
+benchmark experiment, we need to use as the `learner` in an
+`auto_tuner`, as in the code below,
+
+```{r}
+knn.tuned = mlr3tuning::auto_tuner(
+  tuner = mlr3tuning::TunerGridSearch$new(),
+  learner = knn.learner,
+  resampling = subtrain.valid.cv,
+  measure = mlr3::msr("regr.mse"))
+```
+
+The code above says that we want to tune the learner using grid
+search, 5-fold CV, and select the model which minimizes MSE on the
+validation set.
+
+Another non-linear regression algorithm is boosting, which can be
+implemented in mlr3 using the code below. Again there are several
+hyper-parameters which control model complexity, and in the code below
+we tune two of them (eta=step size, nrounds=number of boosting
+iterations). Note that some parameters should be tuned on the log
+scale (like eta with `log=TRUE` in the code below), and others can be
+tuned on the linear scale (like nrounds). Finally note in the code
+below that we use a grid search with resolution 5 in order to save
+time (default is 10 so with 2 hyper-parameters that would make 100
+combinations, exercise for the reader to try that instead).
+
+```{r}
 xgboost.learner <- mlr3learners::LearnerRegrXgboost$new()
 xgboost.learner$param_set$values$eta <- paradox::to_tune(0.001, 1, log=TRUE)
 xgboost.learner$param_set$values$nrounds <- paradox::to_tune(1, 100)
@@ -126,65 +205,99 @@ xgboost.tuned = mlr3tuning::auto_tuner(
   learner = xgboost.learner,
   resampling = subtrain.valid.cv,
   measure = mlr3::msr("regr.mse"))
+```
 
-## rpart
-rpart.learner <- mlr3::LearnerRegrRpart$new()
-rpart.learner$param_set$values$cp <- paradox::to_tune(0.001, 1, log=TRUE)
-rpart.tuned = mlr3tuning::auto_tuner(
-  tuner = mlr3tuning::TunerGridSearch$new(),
-  learner = rpart.learner,
-  resampling = subtrain.valid.cv,
-  measure = mlr3::msr("regr.mse"))
-rpart.tuned = mlr3tuning::auto_tuner(
-  tuner = grid.search.5,
-  learner = mlr3tuningspaces::lts(mlr3::LearnerRegrRpart$new()),
-  resampling = subtrain.valid.cv,
-  measure = mlr3::msr("regr.mse"))
+You might wonder about the code above, how did I know to tune eta from
+0.001 to 1, and nrounds from 1 to 100? What are the good min/max
+values for each hyper-parameter?
+[mlr3tuningspaces](https://mlr-org.com/tuning_spaces.html) is a useful
+reference with data describing typical values for each
+hyper-parameter.  And in fact, if you want to use the hyper-parameter
+ranges defined in that package, you can use code like below (ranger
+package for random forest).
 
-## ranger
+```{r}
 ranger.tuned = mlr3tuning::auto_tuner(
   tuner = grid.search.5,
   learner = mlr3tuningspaces::lts(mlr3learners::LearnerRegrRanger$new()),
   resampling = subtrain.valid.cv,
   measure = mlr3::msr("regr.mse"))
+```
 
-## knn
-knn.learner <- mlr3learners::LearnerRegrKKNN$new()
-knn.learner$param_set$values$k <- paradox::to_tune(1, 20)
-knn.tuned = mlr3tuning::auto_tuner(
-  tuner = mlr3tuning::TunerGridSearch$new(),
-  learner = knn.learner,
-  resampling = subtrain.valid.cv,
-  measure = mlr3::msr("regr.mse"))
-nn1 <- mlr3learners::LearnerRegrKKNN$new()
-nn1$id <- "1 nearest neighbor"
-nn1$param_set$values$k <- 1
-nn.default <- mlr3learners::LearnerRegrKKNN$new()
+## Define benchmark experiment
 
-## list of learners
+After having defined the learning algorithms in the previous section,
+we combine them in the list below.
+
+```{r}
 learner.list <- list(
   mlr3::LearnerRegrFeatureless$new(),
-  mlr3::LearnerRegrRpart$new(), rpart.tuned,
   mlr3learners::LearnerRegrRanger$new(), ranger.tuned,
   mlr3learners::LearnerRegrXgboost$new(), xgboost.tuned,
   knn.tuned, nn1, nn.default)
+```
+
+To see which of the learning algorithms is most accurate in each data
+set, we will use 3-fold cross-validation, as defined in ht code below.
+
+```{r}
 train.test.cv <- mlr3::ResamplingCV$new()
 train.test.cv$param_set$values$folds <- 3
+```
+
+In the code below, we define a benchmark grid, which combines tasks
+(data sets), with learners (algorithms), and resamplings (actually
+just one, 3-fold CV).
+
+```{r}
 (bench.grid <- mlr3::benchmark_grid( 
   tasks=task.list,
   learners=learner.list,
   resamplings=train.test.cv))
+```
+
+In the code below, we declare a multisession future plan to compute
+each benchmark iteration in parallel on this computer (data set,
+learning algorithm, cross-validation fold). 
+
+```{r}
 if(require(future))plan("multisession")
+```
+
+For a few dozen
+iterations, using the multisession backend is probably sufficient (I
+have 12 CPUs on this computer). But it is better to use a
+super-computer for larger experiments, with more data sets, learning
+algorithms, and cross-validation folds. For example I have recently
+computed some machine learning experiments with over 1000 benchmark
+iterations, each of which can be computed in parallel (and very
+quickly using NAU Monsoon which has 4000 CPUs). See
+[mlr3batchmark](https://mlr3batchmark.mlr-org.com/) for computing
+these iterations in parallel using the batchtools R package (which
+supports backends such as SLURM, which is how things are parallelized
+on super-computers such as NAU Monsoon). See my [R batchtools on
+Monsoon](https://tdhock.github.io/blog/2020/monsoon-batchtools/)
+tutorial for more info.
+
+In the code below we tell the mlr3 logger to suppress most messages,
+then we run the benchmark experiment.
+
+```{r}
 lgr::get_logger("mlr3")$set_threshold("warn")
 (bench.result <- mlr3::benchmark(
   bench.grid, store_models = TRUE))
+```
 
+If you are following along, now is the time to grab a cup of tea or coffee.
+
+## Scoring and interpretation
+
+```{r}
 bench.score <- bench.result$score(mlr3::msrs(c("time_train","regr.mse")))
 only.tuned <- bench.score[learner_id=="regr.kknn.tuned"]
 one.learner <- only.tuned$learner[[1]]
 one.learner$tuning_result$k
 algo.levs <- c(
-  "regr.rpart.tuned", "regr.rpart", 
   "regr.ranger.tuned", "regr.ranger", 
   "regr.xgboost.tuned", "regr.xgboost", 
   "regr.kknn.tuned", nn.default$id, nn1$id,
