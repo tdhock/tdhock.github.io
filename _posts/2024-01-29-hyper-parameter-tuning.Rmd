@@ -80,7 +80,7 @@ but sub-optimal for others).
 Below we define some simulated data, for five different regression
 problems, of varying complexity.
 
-```{r}
+```{r simData}
 max.x <- 12
 min.x <- -max.x
 fun.list <- list(
@@ -290,65 +290,117 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 
 If you are following along, now is the time to grab a cup of tea or coffee.
 
-## Scoring and interpretation
+## Comparing tuned to default/fixed hyper-parameters
+
+After having computed the benchmark result in the previous section, we
+use the score method below to compute a data table with columns for
+train time and mean squared test error.
 
 ```{r}
 bench.score <- bench.result$score(mlr3::msrs(c("time_train","regr.mse")))
-only.tuned <- bench.score[learner_id=="regr.kknn.tuned"]
-one.learner <- only.tuned$learner[[1]]
-one.learner$tuning_result$k
+bench.score[1]
+```
+
+First, we create a new algorithm factor column in the code below, and
+take the subset of results for the nearest neighbors learning algorithms. 
+
+```{r}
 algo.levs <- c(
   "regr.ranger.tuned", "regr.ranger", 
   "regr.xgboost.tuned", "regr.xgboost", 
   "regr.kknn.tuned", nn.default$id, nn1$id,
   "regr.featureless")
-bench.score[
-  ## learner_id=="regr.xgboost.tuned",
-  ## selected := sapply(learner, function(L)exp(L$tuning_result$eta))
-][
-  learner_id=="regr.kknn.tuned",
-  selected := sapply(learner, function(L)L$tuning_result$k)
-][
+only.nn <- bench.score[
 , algorithm := factor(learner_id, algo.levs)
-][]
-bench.score[, .(count=.N), keyby=.(algorithm,selected)]
-bench.score[
-  algorithm=="regr.xgboost.tuned",
-  learner[[1]]$tuning_result,
-  by=.(task_id, iteration)]
+][
+  grepl("kknn", algorithm)
+]
+```
+
+We use the code below to visualize the nearest neighbors test error
+values.
+
+```{r nnError}
 ggplot()+
   geom_point(aes(
     regr.mse, algorithm),
-    data=bench.score)+
-  ggrepel::geom_text_repel(aes(
-    regr.mse, learner_id, label=selected),
-    hjust=0, vjust=0,
-    data=bench.score)+
+    data=only.nn)+
   facet_grid(. ~ task_id, labeller=label_both, scales="free")+
   scale_x_log10(
     "Mean squared prediction error on the test set")
-nc::capture_first_df(
-  bench.score,
-  learner_id=list(
-    base.learner=".*?",
-    nc::alternatives(
-      list(
-        "[.]",
-        hyper.parameters="tuned", function(x)ifelse(x=="", "fixed", x)
-      ),
-      ""),
-    "$"))
-table(bench.score$hyper.parameters)
+```
 
+The plot above shows the mean squared prediction error on the X axis, and the learning algorithm on the Y axis. TODO
+
+The code below computes the selected number of neighbors for the tuned
+nearest neighbor algorithms:
+
+```{r}
+only.nn[
+  grepl("tuned", algorithm),
+  sapply(learner, function(L)L$tuning_result$k)
+]
+```
+
+It is clear that the tuning procedure selected numbers of neighbors
+which are different from the fixed values we used in the other
+learners (1 and 7).
+
+Next, we examine the test error rates of the random forest learners.
+
+```{r rangerError}
+only.ranger <- bench.score[grepl("ranger", algorithm)]
 ggplot()+
   geom_point(aes(
-    regr.mse, base.learner, color=hyper.parameters),
-    shape=1,
-    data=bench.score)+
+    regr.mse, algorithm),
+    data=only.ranger)+
   facet_grid(. ~ task_id, labeller=label_both, scales="free")+
   scale_x_log10(
     "Mean squared prediction error on the test set")
+```
 
+It is clear from the plot above that the tuned version is at least as
+accurate as the default, for each data set. TODO
+
+Next, we examine the test error rates of the xgboost learners.
+
+```{r xgboostError}
+only.xgboost <- bench.score[grepl("xgboost", algorithm)]
+ggplot()+
+  geom_point(aes(
+    regr.mse, algorithm),
+    data=only.xgboost)+
+  facet_grid(. ~ task_id, labeller=label_both, scales="free")+
+  scale_x_log10(
+    "Mean squared prediction error on the test set")
+```
+
+The plot above shows that the tuned learner is at least as accurate as
+the default, for each data set.
+
+## Comparing learning algorithms
+
+In this section we compare the tuned versions of the learning
+algorithms with each other.
+
+```{r tunedError}
+only.tuned <- bench.score[grepl("tuned", algorithm)]
+ggplot()+
+  geom_point(aes(
+    regr.mse, algorithm),
+    data=only.tuned)+
+  facet_grid(. ~ task_id, labeller=label_both, scales="free")+
+  scale_x_log10(
+    "Mean squared prediction error on the test set")
+```
+
+It is clear that the most accurate algorithm is TODO.
+
+## Comparing train time
+
+In this section we compare the time it takes to train the algorithms.
+
+```{r}
 ggplot()+
   geom_point(aes(
     time_train, algorithm),
@@ -356,16 +408,6 @@ ggplot()+
   facet_grid(. ~ task_id, labeller=label_both, scales="free")+
   scale_x_log10(
     "Training time (seconds)")
-
-ggplot()+
-  geom_point(aes(
-    time_train, base.learner, color=hyper.parameters),
-    shape=1,
-    data=bench.score)+
-  facet_grid(. ~ task_id, labeller=label_both, scales="free")+
-  scale_x_log10(
-    "Training time (seconds)")
-
 ```
   
 ## Conclusions
