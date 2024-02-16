@@ -4,21 +4,7 @@ title: The importance of hyper-parameter tuning
 description: And parallellizing machine learning experiments in R
 ---
 
-```{r Ropts, echo=FALSE}
-repo.dir <- normalizePath("..")
-post.id <- "2024-01-29-hyper-parameter-tuning"
-fig.path <- file.path(repo.dir, "assets", "img", post.id)
-knitr::opts_chunk$set(
-  dpi=100,
-  fig.path=paste0(fig.path, "/"),
-  fig.width=8,
-  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
-options(width=120)
-if(FALSE){
-  knitr::knit(paste0(post.id, ".Rmd"))
-}
-```
+
 
 The goal of this blog post is to compare a machine learning
 algorithms, and demonstrate the importance of learning model
@@ -80,7 +66,8 @@ but sub-optimal for others).
 Below we define some simulated data, for five different regression
 problems, of varying complexity.
 
-```{r simData}
+
+```r
 max.x <- 12
 min.x <- -max.x
 fun.list <- list(
@@ -107,6 +94,25 @@ for(fun.name in names(fun.list)){
   sim.dt.list[[fun.name]] <- data.table(fun.name, task.dt)
 }
 (sim.dt <- rbindlist(sim.dt.list))
+```
+
+```
+##       fun.name     input     output
+##         <char>     <num>      <num>
+##    1: constant -5.627792 -0.2407334
+##    2: constant -3.069026  1.0842317
+##    3: constant  1.748481 -0.8218433
+##    4: constant  9.796987  1.3160575
+##    5: constant -7.159634 -0.3091693
+##   ---                              
+##  996:     step  2.173756 -8.1816922
+##  997:     step -9.351345  7.3947878
+##  998:     step  8.172169 -1.8722377
+##  999:     step -4.368872  2.4667667
+## 1000:     step  6.788432 -3.2359849
+```
+
+```r
 library(ggplot2)
 ggplot()+
   geom_point(aes(
@@ -114,6 +120,8 @@ ggplot()+
     data=sim.dt)+
   facet_grid(. ~ fun.name, labeller=label_both)
 ```
+
+![plot of chunk simData](/assets/img/2024-01-29-hyper-parameter-tuning/simData-1.png)
 
 The plot above visualizes the simulated data. The goal of each
 learning algorithm is to learn the pattern in each of the five
@@ -125,9 +133,22 @@ algorithms in the next section.
 Perhaps the simplest learning algorithm is nearest neighbors, which
 can be implemented in the mlr3 framework using the code below.
 
-```{r}
+
+```r
 nn.default <- mlr3learners::LearnerRegrKKNN$new()
 nn.default$param_set
+```
+
+```
+## <ParamSet>
+##             id    class lower upper nlevels default  value
+##         <char>   <char> <num> <num>   <num>  <list> <list>
+## 1:           k ParamInt     1   Inf     Inf       7      7
+## 2:    distance ParamDbl     0   Inf     Inf       2       
+## 3:      kernel ParamFct    NA    NA      10 optimal       
+## 4:       scale ParamLgl    NA    NA       2    TRUE       
+## 5:     ykernel ParamUty    NA    NA     Inf               
+## 6: store_model ParamLgl    NA    NA       2   FALSE
 ```
 
 The code above defines the default nearest neighbors regressor, which
@@ -139,7 +160,8 @@ prediction accuracy, depending on the data set. Another option is to
 manually select a different value for the number of neighbors, which
 we do in the code below,
 
-```{r}
+
+```r
 nn1 <- mlr3learners::LearnerRegrKKNN$new()
 nn1$id <- "1 nearest neighbor"
 nn1$param_set$values$k <- 1
@@ -154,7 +176,8 @@ sets, where the validation set is used to determine the optimal number
 of neighbors. The code below defines 5-fold cross-validation as the
 method to use,
 
-```{r}
+
+```r
 subtrain.valid.cv <- mlr3::ResamplingCV$new()
 subtrain.valid.cv$param_set$values$folds <- 5
 ```
@@ -162,7 +185,8 @@ subtrain.valid.cv$param_set$values$folds <- 5
 Next, in the code below, we define a new nearest neighbor regressor,
 and tell mlr3 to tune the number of neighbors.
 
-```{r}
+
+```r
 knn.learner <- mlr3learners::LearnerRegrKKNN$new()
 knn.learner$param_set$values$k <- paradox::to_tune(1, 20)
 ```
@@ -171,7 +195,8 @@ To convert that to a learning algorithm that can be used in a
 benchmark experiment, we need to use as the `learner` in an
 `auto_tuner`, as in the code below,
 
-```{r}
+
+```r
 knn.tuned = mlr3tuning::auto_tuner(
   tuner = mlr3tuning::TunerGridSearch$new(),
   learner = knn.learner,
@@ -194,7 +219,8 @@ below that we use a grid search with resolution 5 in order to save
 time (default is 10 so with 2 hyper-parameters that would make 100
 combinations, exercise for the reader to try that instead).
 
-```{r}
+
+```r
 xgboost.learner <- mlr3learners::LearnerRegrXgboost$new()
 xgboost.learner$param_set$values$eta <- paradox::to_tune(0.001, 1, log=TRUE)
 xgboost.learner$param_set$values$nrounds <- paradox::to_tune(1, 100)
@@ -216,7 +242,8 @@ hyper-parameter.  And in fact, if you want to use the hyper-parameter
 ranges defined in that package, you can use code like below (ranger
 package for random forest).
 
-```{r}
+
+```r
 ranger.tuned = mlr3tuning::auto_tuner(
   tuner = grid.search.5,
   learner = mlr3tuningspaces::lts(mlr3learners::LearnerRegrRanger$new()),
@@ -229,7 +256,8 @@ ranger.tuned = mlr3tuning::auto_tuner(
 After having defined the learning algorithms in the previous section,
 we combine them in the list below.
 
-```{r}
+
+```r
 learner.list <- list(
   mlr3::LearnerRegrFeatureless$new(),
   mlr3learners::LearnerRegrRanger$new(), ranger.tuned,
@@ -240,7 +268,8 @@ learner.list <- list(
 To see which of the learning algorithms is most accurate in each data
 set, we will use 3-fold cross-validation, as defined in ht code below.
 
-```{r}
+
+```r
 train.test.cv <- mlr3::ResamplingCV$new()
 train.test.cv$param_set$values$folds <- 3
 ```
@@ -249,11 +278,58 @@ In the code below, we define a benchmark grid, which combines tasks
 (data sets), with learners (algorithms), and resamplings (actually
 just one, 3-fold CV).
 
-```{r}
+
+```r
 (bench.grid <- mlr3::benchmark_grid( 
   tasks=task.list,
   learners=learner.list,
   resamplings=train.test.cv))
+```
+
+```
+##          task            learner resampling
+##        <char>             <char>     <char>
+##  1:  constant   regr.featureless         cv
+##  2:  constant        regr.ranger         cv
+##  3:  constant  regr.ranger.tuned         cv
+##  4:  constant       regr.xgboost         cv
+##  5:  constant regr.xgboost.tuned         cv
+##  6:  constant    regr.kknn.tuned         cv
+##  7:  constant 1 nearest neighbor         cv
+##  8:  constant          regr.kknn         cv
+##  9:    linear   regr.featureless         cv
+## 10:    linear        regr.ranger         cv
+## 11:    linear  regr.ranger.tuned         cv
+## 12:    linear       regr.xgboost         cv
+## 13:    linear regr.xgboost.tuned         cv
+## 14:    linear    regr.kknn.tuned         cv
+## 15:    linear 1 nearest neighbor         cv
+## 16:    linear          regr.kknn         cv
+## 17: quadratic   regr.featureless         cv
+## 18: quadratic        regr.ranger         cv
+## 19: quadratic  regr.ranger.tuned         cv
+## 20: quadratic       regr.xgboost         cv
+## 21: quadratic regr.xgboost.tuned         cv
+## 22: quadratic    regr.kknn.tuned         cv
+## 23: quadratic 1 nearest neighbor         cv
+## 24: quadratic          regr.kknn         cv
+## 25:       sin   regr.featureless         cv
+## 26:       sin        regr.ranger         cv
+## 27:       sin  regr.ranger.tuned         cv
+## 28:       sin       regr.xgboost         cv
+## 29:       sin regr.xgboost.tuned         cv
+## 30:       sin    regr.kknn.tuned         cv
+## 31:       sin 1 nearest neighbor         cv
+## 32:       sin          regr.kknn         cv
+## 33:      step   regr.featureless         cv
+## 34:      step        regr.ranger         cv
+## 35:      step  regr.ranger.tuned         cv
+## 36:      step       regr.xgboost         cv
+## 37:      step regr.xgboost.tuned         cv
+## 38:      step    regr.kknn.tuned         cv
+## 39:      step 1 nearest neighbor         cv
+## 40:      step          regr.kknn         cv
+##          task            learner resampling
 ```
 
 In the code below we tell the mlr3 logger to suppress most messages,
@@ -276,7 +352,8 @@ on super-computers such as NAU Monsoon). See my [R batchtools on
 Monsoon](https://tdhock.github.io/blog/2020/monsoon-batchtools/)
 tutorial for more info.
 
-```{r}
+
+```r
 lgr::get_logger("mlr3")$set_threshold("warn")
 cache.RData <- "2024-01-29-hyper-parameter-tuning.RData"
 if(file.exists(cache.RData)){
@@ -327,15 +404,24 @@ After having computed the benchmark result in the previous section, we
 use the score method below to compute a data table with columns for
 train time and mean squared test error.
 
-```{r}
+
+```r
 bench.score <- bench.result$score(mlr3::msrs(c("time_train","regr.mse")))
 bench.score[1]
+```
+
+```
+##       nr  task_id       learner_id resampling_id iteration time_train regr.mse
+##    <int>   <char>           <char>        <char>     <int>      <num>    <num>
+## 1:     1 constant regr.featureless            cv         1       0.01 4.650449
+## Hidden columns: uhash, task, learner, resampling, prediction
 ```
 
 First, we create a new algorithm factor column in the code below, and
 take the subset of results for the nearest neighbors learning algorithms. 
 
-```{r}
+
+```r
 algo.levs <- c(
   "regr.ranger.tuned", "regr.ranger", 
   "regr.xgboost.tuned", "regr.xgboost", 
@@ -351,7 +437,8 @@ only.nn <- bench.score[
 We use the code below to visualize the nearest neighbors test error
 values.
 
-```{r nnError, fig.height=2}
+
+```r
 ggplot()+
   geom_point(aes(
     regr.mse, algorithm),
@@ -361,6 +448,8 @@ ggplot()+
   scale_x_log10(
     "Mean squared prediction error on the test set")
 ```
+
+![plot of chunk nnError](/assets/img/2024-01-29-hyper-parameter-tuning/nnError-1.png)
 
 The plot above shows the mean squared prediction error on the X axis,
 and the learning algorithm on the Y axis. The three versions of
@@ -381,13 +470,34 @@ train labels). It is clear that
 The code below computes the selected number of neighbors for the tuned
 nearest neighbor algorithms:
 
-```{r}
+
+```r
 only.nn[
   grepl("tuned", algorithm),
   data.table(
     task_id,
     neighbors=sapply(learner, function(L)L$tuning_result$k))
 ]
+```
+
+```
+##       task_id neighbors
+##        <char>     <int>
+##  1:  constant        16
+##  2:  constant        20
+##  3:  constant        20
+##  4:    linear        20
+##  5:    linear        20
+##  6:    linear        20
+##  7: quadratic         9
+##  8: quadratic         7
+##  9: quadratic        12
+## 10:       sin         9
+## 11:       sin         9
+## 12:       sin         7
+## 13:      step        16
+## 14:      step         7
+## 15:      step        12
 ```
 
 It is clear that the tuning procedure selected numbers of neighbors
@@ -397,7 +507,8 @@ neighbors for the simpler patterns (constant and linear).
 
 Next, we examine the test error rates of the random forest learners.
 
-```{r rangerError, fig.height=2}
+
+```r
 only.ranger <- bench.score[grepl("featureless|ranger", algorithm)]
 ggplot()+
   geom_point(aes(
@@ -409,6 +520,8 @@ ggplot()+
     "Mean squared prediction error on the test set")
 ```
 
+![plot of chunk rangerError](/assets/img/2024-01-29-hyper-parameter-tuning/rangerError-1.png)
+
 It is clear from the plot above that the tuned version is at least as
 accurate as the default, for each data set. In the case of the simpler
 tasks (constant and linear), the tuned version is substantially
@@ -416,7 +529,8 @@ better.
 
 Next, we examine the test error rates of the xgboost learners.
 
-```{r xgboostError, fig.height=2}
+
+```r
 only.xgboost <- bench.score[grepl("xgboost|featureless", algorithm)]
 ggplot()+
   geom_point(aes(
@@ -428,6 +542,8 @@ ggplot()+
     "Mean squared prediction error on the test set")
 ```
 
+![plot of chunk xgboostError](/assets/img/2024-01-29-hyper-parameter-tuning/xgboostError-1.png)
+
 The plot above shows that the tuned learner is at least as accurate as
 the default, for each data set. The tuned learner has significantly
 smaller prediction error for the more complex patterns (quadratic,
@@ -438,7 +554,8 @@ sin, step).
 In this section we compare the tuned versions of the learning
 algorithms with each other.
 
-```{r tunedError, fig.height=2}
+
+```r
 only.tuned <- bench.score[grepl("tuned|featureless", algorithm)]
 ggplot()+
   geom_point(aes(
@@ -450,6 +567,8 @@ ggplot()+
     "Mean squared prediction error on the test set")
 ```
 
+![plot of chunk tunedError](/assets/img/2024-01-29-hyper-parameter-tuning/tunedError-1.png)
+
 The plot above shows that there is no one algorithm that is the best
 for every data set, which is to be expected (no free lunch theorem).
 The best algorithm for task=step seems to be xgboost, whereas the
@@ -460,7 +579,8 @@ optimality on the other non-trivial tasks (linear, quadratic, sin).
 
 In this section we compare the time it takes to train the algorithms.
 
-```{r trainTime, fig.height=3}
+
+```r
 ref <- function(seconds, unit){
   data.table(seconds, label=paste0("1 ", unit, " "))
 }
@@ -490,6 +610,8 @@ ggplot()+
     breaks=10^seq(-2,2,by=2))
 ```
 
+![plot of chunk trainTime](/assets/img/2024-01-29-hyper-parameter-tuning/trainTime-1.png)
+
 It is clear from the plot above that the hyper-parameter tuning takes
 significantly more time than the learning algorithms with
 default/fixed hyper-parameters. This is to be expected, because an
@@ -510,7 +632,45 @@ mlr3batchmark/batchtools packages.
 
 ## Session info
 
-```{r}
+
+```r
 sessionInfo()
+```
+
+```
+## R version 4.3.2 (2023-10-31)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 22.04.3 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
+## locale:
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: America/Phoenix
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## 
+## other attached packages:
+## [1] future_1.33.1     ggplot2_3.4.4     data.table_1.15.0
+## 
+## loaded via a namespace (and not attached):
+##  [1] future.apply_1.11.1    gtable_0.3.4           highr_0.10             dplyr_1.1.4            compiler_4.3.2        
+##  [6] crayon_1.5.2           tidyselect_1.2.0       parallel_4.3.2         globals_0.16.2         scales_1.3.0          
+## [11] uuid_1.2-0             RhpcBLASctl_0.23-42    R6_2.5.1               mlr3tuning_0.19.2      labeling_0.4.3        
+## [16] generics_0.1.3         knitr_1.45.11          palmerpenguins_0.1.1   backports_1.4.1        checkmate_2.3.1       
+## [21] tibble_3.2.1           munsell_0.5.0          paradox_0.11.1         pillar_1.9.0           mlr3tuningspaces_0.4.0
+## [26] mlr3measures_0.5.0     rlang_1.1.3            utf8_1.2.4             xfun_0.41.10           lgr_0.4.4             
+## [31] mlr3_0.17.2            mlr3misc_0.13.0        cli_3.6.2              withr_3.0.0            magrittr_2.0.3        
+## [36] digest_0.6.34          grid_4.3.2             mlr3learners_0.5.8     bbotk_0.7.3            lifecycle_1.0.4       
+## [41] vctrs_0.6.5            evaluate_0.23          glue_1.7.0             farver_2.1.1           listenv_0.9.1         
+## [46] codetools_0.2-19       parallelly_1.36.0      fansi_1.0.6            colorspace_2.1-0       tools_4.3.2           
+## [51] pkgconfig_2.0.3
 ```
 
