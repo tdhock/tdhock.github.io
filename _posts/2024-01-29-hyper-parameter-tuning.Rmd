@@ -256,17 +256,14 @@ just one, 3-fold CV).
   resamplings=train.test.cv))
 ```
 
-In the code below, we declare a multisession future plan to compute
-each benchmark iteration in parallel on this computer (data set,
-learning algorithm, cross-validation fold). 
-
-```{r}
-if(require(future))plan("multisession")
-```
-
-For a few dozen
-iterations, using the multisession backend is probably sufficient (I
-have 12 CPUs on this computer). But it is better to use a
+In the code below we tell the mlr3 logger to suppress most messages,
+then we run the benchmark experiment. Actually, if the results have
+already been computed and saved in the cache RData file, we just read
+that. Otherwise, you should run the code below that
+interactively, either on your own computer, or on a SLURM super-computer cluster.
+There are only 120 iterations in this case, but if you run that on a
+super-computer cluster, then it could potentially run 120x faster.
+It is better to use a
 super-computer for larger experiments, with more data sets, learning
 algorithms, and cross-validation folds. For example I have recently
 computed some machine learning experiments with over 1000 benchmark
@@ -279,13 +276,47 @@ on super-computers such as NAU Monsoon). See my [R batchtools on
 Monsoon](https://tdhock.github.io/blog/2020/monsoon-batchtools/)
 tutorial for more info.
 
-In the code below we tell the mlr3 logger to suppress most messages,
-then we run the benchmark experiment.
-
 ```{r}
 lgr::get_logger("mlr3")$set_threshold("warn")
-(bench.result <- mlr3::benchmark(
-  bench.grid, store_models = TRUE))
+cache.RData <- "2024-01-29-hyper-parameter-tuning.RData"
+if(file.exists(cache.RData)){
+  load(cache.RData)
+}else{#code below should be run interactively.
+  if(on.cluster){
+    reg.dir <- "2024-01-29-hyper-parameter-tuning-registry"
+    unlink(reg.dir, recursive=TRUE)
+    reg = batchtools::makeExperimentRegistry(
+      file.dir = reg.dir,
+      seed = 1,
+      packages = "mlr3verse"
+    )
+    mlr3batchmark::batchmark(
+      bench.grid, store_models = TRUE, reg=reg)
+    job.table <- batchtools::getJobTable(reg=reg)
+    chunks <- data.frame(job.table, chunk=1)
+    batchtools::submitJobs(chunks, resources=list(
+      walltime = 60*60,#seconds
+      memory = 2000,#megabytes per cpu
+      ncpus=1,  #>1 for multicore/parallel jobs.
+      ntasks=1, #>1 for MPI jobs.
+      chunks.as.arrayjobs=TRUE), reg=reg)
+    batchtools::getStatus(reg=reg)
+    jobs.after <- batchtools::getJobTable(reg=reg)
+    table(jobs.after$error)
+    ids <- jobs.after[is.na(error), job.id]
+    bench.result <- mlr3batchmark::reduceResultsBatchmark(ids, reg = reg)
+  }else{
+    ## In the code below, we declare a multisession future plan to
+    ## compute each benchmark iteration in parallel on this computer
+    ## (data set, learning algorithm, cross-validation fold). For a
+    ## few dozen iterations, using the multisession backend is
+    ## probably sufficient (I have 12 CPUs on my work PC).
+    if(require(future))plan("multisession")
+    bench.result <- mlr3::benchmark(
+      bench.grid, store_models = TRUE)
+  }    
+  save(bench.result, file=cache.RData)
+}
 ```
 
 If you are following along, now is the time to grab a cup of tea or coffee.
