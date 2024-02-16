@@ -31,6 +31,10 @@ The goal of this blog post is to explain weighted binary classification.
 * Positive: somebody has something dangerous at the checkpoint.
 * Negative: somebody does not have something dangerous at the checkpoint.
 
+### Bike braking example
+
+TODO
+
 ### Moonwalking with Einstein, by Joshua Foer, The Penguin Press (2011), pages 50 to 52.
 
 "From the perspective of the poultry farmer, male chickens are
