@@ -286,7 +286,7 @@ bench.score[1]
 ## 1: 2071,1092, 723,2654,  49,2834,...  3,11,20,21,26,34,...         1
 ##    train_min_size                                uhash    nr
 ##             <int>                               <char> <int>
-## 1:             30 107bff96-e0b9-49c1-bf7e-6140ddbfd84a     1
+## 1:             30 e0d7addd-b05b-450b-82ab-a582a74531a9     1
 ##                       task   task_id                                    learner
 ##                     <list>    <char>                                     <list>
 ## 1: <TaskClassif:simulated> simulated <LearnerClassifCVGlmnet:classif.cv_glmnet>
@@ -459,7 +459,7 @@ for variable importance, as we compute in the code below.
 
 ```r
 (one.panel <- weight.non.zero[
-  train_min_size==64 & seed==2
+  train_min_size==86 & seed==2
 ][
 , non.zero.folds := .N, by=variable
 ])
@@ -479,9 +479,7 @@ ggplot()+
   facet_grid(non.zero.folds ~ ., scales="free", space="free")
 ```
 
-```
-## Error: Faceting variables must have at least one value
-```
+![plot of chunk facetNonZero](/assets/img/2023-11-30-glmnet-interpretation/facetNonZero-1.png)
 
 The plot above has a panel for each value of `non.zero.folds` -- the
 variables that appear in the larger panel numbers are more important
@@ -677,8 +675,8 @@ sessionInfo()
 ```
 
 ```
-## R version 4.3.2 (2023-10-31 ucrt)
-## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## R Under development (unstable) (2024-01-23 r85822 ucrt)
+## Platform: x86_64-w64-mingw32/x64
 ## Running under: Windows 10 x64 (build 19045)
 ## 
 ## Matrix products: default
@@ -698,27 +696,28 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] glmnet_4.1-8        Matrix_1.6-4        animint2_2023.12.14
-## [4] future_1.33.0       data.table_1.14.99 
+## [1] glmnet_4.1-8       Matrix_1.6-5       animint2_2024.1.24 future_1.33.1     
+## [5] data.table_1.15.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] gtable_0.3.4             future.apply_1.11.0      highr_0.10              
-##  [4] compiler_4.3.2           crayon_1.5.2             rpart_4.1.23            
-##  [7] Rcpp_1.0.11              stringr_1.5.1            parallel_4.3.2          
-## [10] splines_4.3.2            globals_0.16.2           scales_1.3.0            
-## [13] uuid_1.1-1               lattice_0.22-5           R6_2.5.1                
-## [16] plyr_1.8.9               labeling_0.4.3           shape_1.4.6             
-## [19] knitr_1.45               iterators_1.0.14         palmerpenguins_0.1.1    
-## [22] backports_1.4.1          checkmate_2.3.1          munsell_0.5.0           
-## [25] paradox_0.11.1           mlr3measures_0.5.0       rlang_1.1.2             
-## [28] stringi_1.8.3            lgr_0.4.4                xfun_0.41               
-## [31] mlr3_0.17.0              mlr3misc_0.13.0          RJSONIO_1.3-1.9         
-## [34] cli_3.6.2                magrittr_2.0.3           foreach_1.5.2           
-## [37] digest_0.6.33            grid_4.3.2               mlr3learners_0.5.7      
-## [40] lifecycle_1.0.4          evaluate_0.23            glue_1.6.2              
-## [43] farver_2.1.1             listenv_0.9.0            codetools_0.2-19        
-## [46] survival_3.5-7           parallelly_1.36.0        colorspace_2.1-0        
-## [49] reshape2_1.4.4           tools_4.3.2              mlr3resampling_2024.1.23
+##  [1] gtable_0.3.4             future.apply_1.11.1      highr_0.10              
+##  [4] compiler_4.4.0           BiocManager_1.30.22      crayon_1.5.2            
+##  [7] rpart_4.1.23             Rcpp_1.0.12              stringr_1.5.1           
+## [10] parallel_4.4.0           splines_4.4.0            globals_0.16.2          
+## [13] scales_1.3.0             uuid_1.2-0               RhpcBLASctl_0.23-42     
+## [16] lattice_0.22-5           R6_2.5.1                 plyr_1.8.9              
+## [19] labeling_0.4.3           shape_1.4.6              knitr_1.45              
+## [22] iterators_1.0.14         palmerpenguins_0.1.1     backports_1.4.1         
+## [25] checkmate_2.3.1          munsell_0.5.0            paradox_0.11.1          
+## [28] mlr3measures_0.5.0       rlang_1.1.3              stringi_1.8.3           
+## [31] lgr_0.4.4                xfun_0.41                mlr3_0.17.2             
+## [34] mlr3misc_0.14.0          RJSONIO_1.3-1.9          cli_3.6.2               
+## [37] magrittr_2.0.3           foreach_1.5.2            digest_0.6.34           
+## [40] grid_4.4.0               mlr3learners_0.5.8       lifecycle_1.0.4         
+## [43] evaluate_0.23            glue_1.7.0               farver_2.1.1            
+## [46] listenv_0.9.1            codetools_0.2-19         survival_3.5-7          
+## [49] parallelly_1.36.0        colorspace_2.1-0         reshape2_1.4.4          
+## [52] tools_4.4.0              mlr3resampling_2024.1.23
 ```
 
 

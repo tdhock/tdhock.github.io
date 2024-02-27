@@ -304,7 +304,7 @@ for variable importance, as we compute in the code below.
 
 ```{r facetNonZero}
 (one.panel <- weight.non.zero[
-  train_min_size==64 & seed==2
+  train_min_size==86 & seed==2
 ][
 , non.zero.folds := .N, by=variable
 ])
