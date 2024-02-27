@@ -34,14 +34,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   [slides](https://github.com/tdhock/functional-pruning-theory#readme),
   [IEEE NJACS](https://events.vtools.ieee.org/m/280515), [ASU West ML
   Day](https://newcollege.asu.edu/machine-learning-day-1).
-- Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
-  G. gfpop: an R Package for Univariate Graph-Constrained Change-point
-  Detection. Under review at Journal of Statistical
-  Software, [Preprint
-  arXiv:2002.03646](https://arxiv.org/abs/2002.03646),
-  [Software (gfpop)](https://github.com/vrunge/gfpop),
-  [Software (gfpopgui)](https://github.com/julianstanley/gfpopgui),
-  [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd).
 - Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
   comparison machines. [Preprint
   arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under review at
@@ -124,6 +116,15 @@ description: Peer-reviewed papers and preprints with links to code and data
   arXiv:2107.01285](https://arxiv.org/abs/2107.01285),
   [Software](https://github.com/tdhock/aum),
   [Reproducible](https://github.com/tdhock/max-generalized-auc).
+- Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
+  G. gfpop: an R Package for Univariate Graph-Constrained Change-point
+  Detection. [Journal of Statistical
+  Software](https://www.jstatsoft.org/article/view/v106i06), Volume
+  106, Issue 6. [Preprint
+  arXiv:2002.03646](https://arxiv.org/abs/2002.03646), [Software
+  (gfpop)](https://github.com/vrunge/gfpop), [Software
+  (gfpopgui)](https://github.com/julianstanley/gfpopgui),
+  [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd).
 - Hocking TD, Srivastava A. Labeled Optimal Partitioning. Published in
   [Computational Statistics](https://rdcu.be/cQ8qM), (2023) 38:461-480.
   DOI:10.1007/s00180-022-01238-z, [Preprint
