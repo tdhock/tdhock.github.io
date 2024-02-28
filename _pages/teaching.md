@@ -12,6 +12,7 @@ of progression plans with various specialties including machine
 learning](https://github.com/NAU-CS/progression-plans), which should
 be useful for planning what classes you take.
 
+- Spring 2024, NAU SES graduate seminar on R Package development, [my slides](https://docs.google.com/presentation/d/1_ErpxRSYfBhM6Jl2RTprisT2c6iebvzd1cstcwuxUjg/edit?usp=sharing).
 - Fall 2023, CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/2023-08-artificial-intelligence).
 - Fall 2023, CS 599, Deep Learning, [my course materials](https://github.com/tdhock/2023-08-deep-learning).
 - Fall 2023, CS 599, Unsupervised Learning, [my course materials](https://github.com/tdhock/2023-08-unsupervised-learning).
