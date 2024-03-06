@@ -83,6 +83,14 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### 2024
 
+- Tao F, Houlton BZ, Frey SD, Lehmann J, Manzoni S, Huang Y, Jiang L,
+  Mishra U, Hungate BA, Schmidt MWI, Reichstein M, Carvalhais N, Ciais
+  P, Wang Y-P, Ahrens B, Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin
+  K, Vargas R, Yigini Y, Omuto C, Malik AA, Peralta G, Cuevas-Corona
+  R, Di Paolo LE, Luotto I, Liao C, Liang Y-S, Saynes VS, Huang X, Luo
+  Y. Reply to: Model uncertainty obscures major driver of soil
+  carbon. [Nature](https://www.nature.com/articles/s41586-023-07000-9)
+  volume 627, pages E4-E6 (2024).
 - Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
   Partitioning. Published online 05 Jan 2024 by Journal of
   Computational and Graphical Statistics,
