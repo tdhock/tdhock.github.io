@@ -68,16 +68,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   Visualization. 
 - Gabi Thibault, TD Hocking, Alexis Achim. Predicting forest burn from
   satellite image data.
-- Feng Tao, Johannes Lehmann, Ying-Ping Wang, Lifen Jiang, Bernhard
-  Ahrens, Kostiantyn Viatkin, Stefano Manzoni, Benjamin Z. Houlton,
-  Yuanyuan Huang, Bruce A. Hungate, Serita D. Frey, Michael Schmidt,
-  Markus Reichstein, Nuno Carvalhais, Philippe Ciais, Umakant Mishra,
-  Gustaf Hugelius, Toby D. Hocking, Xingjie Lu, Zheng Shi, Ronald
-  Vargas, Yusuf Yigini, Christian Omuto, Ashish A. Malik, Guillermo
-  Peralta, Rosa Cuevas-Corona, Luciano E. Di Paolo, Isabel Luotto,
-  Cuijuan Liao, Yi-Shuang Liang, Vinisa S. Saynes, Xiaomeng Huang,
-  Yiqi Luo. Reply to: Beyond microbial carbon use efficiency. Preprint
-  [EarthArXiv:6125](https://eartharxiv.org/repository/view/6125/).
  
 ### Accepted, in press
 
@@ -90,7 +80,8 @@ description: Peer-reviewed papers and preprints with links to code and data
   R, Di Paolo LE, Luotto I, Liao C, Liang Y-S, Saynes VS, Huang X, Luo
   Y. Reply to: Model uncertainty obscures major driver of soil
   carbon. [Nature](https://www.nature.com/articles/s41586-023-07000-9)
-  volume 627, pages E4-E6 (2024).
+  volume 627, pages E4-E6 (2024). Preprint
+  [EarthArXiv:6125](https://eartharxiv.org/repository/view/6125/).
 - Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
   Partitioning. Published online 05 Jan 2024 by Journal of
   Computational and Graphical Statistics,
