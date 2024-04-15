@@ -391,7 +391,7 @@ Finally we make an analogous plot to the linear model below.
 
 ```{r rpartNonZero}
 (one.rpart <- var.dt[
-  train_min_size==632 & seed==4
+  train_min_size==700 & seed==4
 ][
 , non.zero.folds := .N, by=variable
 ])

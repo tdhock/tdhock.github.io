@@ -286,7 +286,7 @@ bench.score[1]
 ## 1: 2071,1092, 723,2654,  49,2834,...  3,11,20,21,26,34,...         1
 ##    train_min_size                                uhash    nr
 ##             <int>                               <char> <int>
-## 1:             30 e0d7addd-b05b-450b-82ab-a582a74531a9     1
+## 1:             30 a3a36ae1-132b-4432-83f6-e3ee3536960d     1
 ##                       task   task_id                                    learner
 ##                     <list>    <char>                                     <list>
 ## 1: <TaskClassif:simulated> simulated <LearnerClassifCVGlmnet:classif.cv_glmnet>
@@ -629,7 +629,7 @@ Finally we make an analogous plot to the linear model below.
 
 ```r
 (one.rpart <- var.dt[
-  train_min_size==632 & seed==4
+  train_min_size==700 & seed==4
 ][
 , non.zero.folds := .N, by=variable
 ])
@@ -648,9 +648,7 @@ ggplot()+
   facet_grid(non.zero.folds ~ ., scales="free", space="free")
 ```
 
-```
-## Error: Faceting variables must have at least one value
-```
+![plot of chunk rpartNonZero](/assets/img/2023-11-30-glmnet-interpretation/rpartNonZero-1.png)
 
 The plot above shows variable importance in the learned rpart model
 (decision tree).  It shows the mean proportion of samples used in each
@@ -696,28 +694,28 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] glmnet_4.1-8       Matrix_1.6-5       animint2_2024.1.24 future_1.33.1     
+## [1] glmnet_4.1-8       Matrix_1.6-5       animint2_2024.1.24 future_1.33.2     
 ## [5] data.table_1.15.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] gtable_0.3.4             future.apply_1.11.1      highr_0.10              
+##  [1] gtable_0.3.4             future.apply_1.11.2      highr_0.10              
 ##  [4] compiler_4.4.0           BiocManager_1.30.22      crayon_1.5.2            
 ##  [7] rpart_4.1.23             Rcpp_1.0.12              stringr_1.5.1           
-## [10] parallel_4.4.0           splines_4.4.0            globals_0.16.2          
+## [10] parallel_4.4.0           splines_4.4.0            globals_0.16.3          
 ## [13] scales_1.3.0             uuid_1.2-0               RhpcBLASctl_0.23-42     
 ## [16] lattice_0.22-5           R6_2.5.1                 plyr_1.8.9              
-## [19] labeling_0.4.3           shape_1.4.6              knitr_1.45              
+## [19] labeling_0.4.3           shape_1.4.6.1            knitr_1.46              
 ## [22] iterators_1.0.14         palmerpenguins_0.1.1     backports_1.4.1         
-## [25] checkmate_2.3.1          munsell_0.5.0            paradox_0.11.1          
+## [25] checkmate_2.3.1          munsell_0.5.1            paradox_0.11.1          
 ## [28] mlr3measures_0.5.0       rlang_1.1.3              stringi_1.8.3           
-## [31] lgr_0.4.4                xfun_0.41                mlr3_0.17.2             
-## [34] mlr3misc_0.14.0          RJSONIO_1.3-1.9          cli_3.6.2               
+## [31] lgr_0.4.4                xfun_0.43                mlr3_0.18.0             
+## [34] mlr3misc_0.15.0          RJSONIO_1.3-1.9          cli_3.6.2               
 ## [37] magrittr_2.0.3           foreach_1.5.2            digest_0.6.34           
 ## [40] grid_4.4.0               mlr3learners_0.5.8       lifecycle_1.0.4         
 ## [43] evaluate_0.23            glue_1.7.0               farver_2.1.1            
 ## [46] listenv_0.9.1            codetools_0.2-19         survival_3.5-7          
-## [49] parallelly_1.36.0        colorspace_2.1-0         reshape2_1.4.4          
-## [52] tools_4.4.0              mlr3resampling_2024.1.23
+## [49] parallelly_1.37.1        colorspace_2.1-0         reshape2_1.4.4          
+## [52] tools_4.4.0              mlr3resampling_2024.4.14
 ```
 
 

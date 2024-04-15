@@ -75,7 +75,7 @@ ggplot()+
     data=task.dt)
 ```
 
-![plot of chunk simulationScatter](/assets/img/2024-01-26-when-is-all-better-than-same/simulationScatter-1.png)
+![plot of chunk simulationScatter](/assets/img/2024-04-15-cv-all-same-new/simulationScatter-1.png)
 
 Above we see a scatterplot of the simulated data. The goal of the
 learning algorithm will be to predict y from x.
@@ -83,13 +83,58 @@ learning algorithm will be to predict y from x.
 ### Visualizing test error as a function of train set size
 
 In the code below, we define a K-fold cross-validation experiment,
-with K=2 folds.
+with 
+
+* K=2 `folds`,
+* a `ratio` of 0.9 between the train set sizes,
+* and 19 `sizes` of train sets smaller than the full size.
 
 
 ```r
-reg_size_cv <- mlr3resampling::ResamplingVariableSizeTrainCV$new()
-reg_size_cv$param_set$values$train_sizes <- 20
+reg_size_cv <- mlr3resampling::ResamplingSameOtherSizesCV$new()
 reg_size_cv$param_set$values$folds <- 2
+reg_size_cv$param_set$values$ratio <- 0.9
+reg_size_cv$param_set$values$sizes <- 19
+reg_size_cv$param_set$values$seeds <- 3
+reg_size_cv$instantiate(reg.task)
+reg_size_cv$instance$iteration.dt
+```
+
+```
+##      test.subset train.subsets groups test.fold                  test                 train  seed n.train.groups
+##           <char>        <char>  <int>     <int>                <list>                <list> <int>          <int>
+##   1:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,75,...     1             20
+##   2:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,63,...     1             22
+##   3:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,63,...     1             25
+##   4:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,63,...     1             27
+##   5:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,23,39,58,...     1             30
+##  ---                                                                                                            
+## 116:        full          same    150         2       1,2,3,4,6,7,...  5, 9,12,15,19,26,...     3             98
+## 117:        full          same    150         2       1,2,3,4,6,7,...  5, 8, 9,12,15,19,...     3            109
+## 118:        full          same    150         2       1,2,3,4,6,7,...  5, 8, 9,12,15,19,...     3            121
+## 119:        full          same    150         2       1,2,3,4,6,7,...  5, 8, 9,12,15,19,...     3            135
+## 120:        full          same    150         2       1,2,3,4,6,7,...  5, 8, 9,12,15,17,...     3            150
+##      iteration
+##          <int>
+##   1:         1
+##   2:         2
+##   3:         3
+##   4:         4
+##   5:         5
+##  ---          
+## 116:       116
+## 117:       117
+## 118:       118
+## 119:       119
+## 120:       120
+```
+
+The table above shows that there is a CV iteration/split to compute
+for each train set size (20 to 150), random seeds (1 to 3), and
+cross-validation fold (1 or 2).
+
+
+```r
 (reg.learner.list <- list(
   if(requireNamespace("rpart"))mlr3::LearnerRegrRpart$new(),
   mlr3::LearnerRegrFeatureless$new()))
@@ -123,10 +168,10 @@ reg_size_cv$param_set$values$folds <- 2
 ```
 
 ```
-##      task          learner             resampling
-##    <char>           <char>                 <char>
-## 1:    sin       regr.rpart variable_size_train_cv
-## 2:    sin regr.featureless variable_size_train_cv
+##      task          learner          resampling
+##    <char>           <char>              <char>
+## 1:    sin       regr.rpart same_other_sizes_cv
+## 2:    sin regr.featureless same_other_sizes_cv
 ```
 
 ```r
@@ -138,28 +183,54 @@ lgr::get_logger("mlr3")$set_threshold("warn")
 
 ```
 ## <BenchmarkResult> of 240 rows with 2 resampling runs
-##  nr task_id       learner_id          resampling_id iters warnings errors
-##   1     sin       regr.rpart variable_size_train_cv   120        0      0
-##   2     sin regr.featureless variable_size_train_cv   120        0      0
+##  nr task_id       learner_id       resampling_id iters warnings errors
+##   1     sin       regr.rpart same_other_sizes_cv   120        0      0
+##   2     sin regr.featureless same_other_sizes_cv   120        0      0
 ```
 
 ```r
 reg.bench.score <- mlr3resampling::score(reg.bench.result)
-train_size_vec <- unique(reg.bench.score$train_size)
+reg.bench.score[1]
+```
 
+```
+##    test.subset train.subsets groups test.fold                  test                 train  seed n.train.groups
+##         <char>        <char>  <int>     <int>                <list>                <list> <int>          <int>
+## 1:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,75,...     1             20
+##    iteration                                uhash    nr           task task_id                       learner learner_id
+##        <int>                               <char> <int>         <list>  <char>                        <list>     <char>
+## 1:         1 5bf8e9e1-74ad-48a8-a918-d79a19fb3dd9     1 <TaskRegr:sin>     sin <LearnerRegrRpart:regr.rpart> regr.rpart
+##                      resampling       resampling_id       prediction  regr.mse algorithm
+##                          <list>              <char>           <list>     <num>    <char>
+## 1: <ResamplingSameOtherSizesCV> same_other_sizes_cv <PredictionRegr> 0.7558423     rpart
+```
+
+The output above includes one row of the resulting scores.
+The plot below shows test error for several train sizes.
+
+
+```r
+(train_size_vec <- unique(reg.bench.score$n.train.groups))
+```
+
+```
+##  [1]  20  22  25  27  30  34  38  42  47  52  58  64  71  79  88  98 109 121 135 150
+```
+
+```r
 ggplot()+
   scale_x_log10(
     breaks=train_size_vec)+
   scale_y_log10(
     "Mean squared error on test set")+
   geom_line(aes(
-    train_size, regr.mse,
+    n.train.groups, regr.mse,
     subset=paste(algorithm, seed),
     color=algorithm),
     shape=1,
     data=reg.bench.score)+
   geom_point(aes(
-    train_size, regr.mse, color=algorithm),
+    n.train.groups, regr.mse, color=algorithm),
     shape=1,
     data=reg.bench.score)+
   facet_grid(
@@ -168,14 +239,16 @@ ggplot()+
     scales="free")
 ```
 
-![plot of chunk VariableSizeTrainCV](/assets/img/2024-01-26-when-is-all-better-than-same/VariableSizeTrainCV-1.png)
+![plot of chunk train_size_err](/assets/img/2024-04-15-cv-all-same-new/train_size_err-1.png)
 
 Above we plot the test error for each fold and train set size. We can
-see that the rpart learning algorithm can not learn anything if there
-are less than about 100 samples. So if we have subsets of data that
-really are the same, but each is smaller than this critical threshold
-for this problem, then rpart will not be able to learn anything unless
-we put the subsets together. Let's try it!
+see that if there are less than about 80 samples, the rpart
+learning algorithm has about the same error as featureless
+(representing the error rate of no relationship learned between
+input/output). So if we have subsets of data that really are the same,
+but each is smaller than this critical threshold for this problem,
+then rpart will not be able to learn anything unless we put the
+subsets together. Let's try it!
 
 ## Simulating and combining identical subsets
 
@@ -293,13 +366,13 @@ same.other.score[1]
 ```
 ##    train.subsets test.fold test.subset random_subset iteration                  test                 train
 ##           <char>     <int>       <int>         <int>     <int>                <list>                <list>
-## 1:           all         1           1             1         1 22,25,28,31,40,52,...  1, 4, 7,10,13,16,...
+## 1:           all         1           1             1         1  4, 7,25,34,37,49,...  1,10,13,16,19,22,...
 ##                                   uhash    nr           task task_id                       learner learner_id
 ##                                  <char> <int>         <list>  <char>                        <list>     <char>
-## 1: a583b23a-77f0-468f-92f5-b21286353b12     1 <TaskRegr:sin>     sin <LearnerRegrRpart:regr.rpart> regr.rpart
+## 1: 94cccec6-a98c-4cde-8331-e6c743b9f17e     1 <TaskRegr:sin>     sin <LearnerRegrRpart:regr.rpart> regr.rpart
 ##                 resampling resampling_id       prediction  regr.mse algorithm
 ##                     <list>        <char>           <list>     <num>    <char>
-## 1: <ResamplingSameOtherCV> same_other_cv <PredictionRegr> 0.4780074     rpart
+## 1: <ResamplingSameOtherCV> same_other_cv <PredictionRegr> 0.7350953     rpart
 ```
 
 ```r
@@ -312,7 +385,29 @@ ggplot()+
     "Mean squared prediction error (test set)")
 ```
 
-![plot of chunk SameOtherCV](/assets/img/2024-01-26-when-is-all-better-than-same/SameOtherCV-1.png)
+![plot of chunk SameOtherCV](/assets/img/2024-04-15-cv-all-same-new/SameOtherCV-1.png)
+
+```r
+same.other.wide <- dcast(
+  same.other.score,
+  test.subset + train.subsets + algorithm ~ .,
+  list(mean,sd),
+  value.var="regr.mse")
+ggplot()+
+  geom_segment(aes(
+    regr.mse_mean+regr.mse_sd, train.subsets,
+    xend=regr.mse_mean-regr.mse_sd, yend=train.subsets,
+    color=algorithm),
+    data=same.other.wide)+
+  geom_point(aes(
+    regr.mse_mean, train.subsets, color=algorithm),
+    data=same.other.wide)+
+  facet_grid(. ~ test.subset, labeller=label_both, scales="free")+
+  scale_x_log10(
+    "Mean squared prediction error (test set)")
+```
+
+![plot of chunk SameOtherCV](/assets/img/2024-04-15-cv-all-same-new/SameOtherCV-2.png)
 
 The figure above shows a test subset in each panel, the train subsets on
 the y axis, the test error on the x axis, the two different algorithms
@@ -390,9 +485,9 @@ sessionInfo()
 
 ## UPDATE 15 Apr 2024
 
-Code above updated to use mlr3resampling version 2024.4.15, in which
+Code above uses the new version 2024.4.15 of mlr3resampling, in which
 we now use `subset` instead of `group`, for consistency with the usage
-of `group` in other `mlr3` packages. See [new blog
-post](https://tdhock.github.io/blog/2024/cv-all-same-new) for a
-discussion about how to do the analyses above using the new
-`ResamplingSameOtherSizesCV` class.
+of `group` in other `mlr3` packages. See [old blog
+post](https://tdhock.github.io/blog/2024/when-is-all-better-than-same/)
+for a discussion about how to do the analyses above using the old
+classes (not recommended).
