@@ -1,7 +1,7 @@
 ---
 layout: post
-title: When is it useful to train with combined subsets?
-description: An exploration using cross-validation
+title: New code for various kinds of cross-validation
+description: Cross-validation in R with mlr3
 ---
 
 
@@ -101,32 +101,32 @@ reg_size_cv$instance$iteration.dt
 ```
 
 ```
-##      test.subset train.subsets groups test.fold                  test                 train  seed n.train.groups
-##           <char>        <char>  <int>     <int>                <list>                <list> <int>          <int>
-##   1:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,75,...     1             20
-##   2:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,63,...     1             22
-##   3:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,63,...     1             25
-##   4:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,63,...     1             27
-##   5:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,23,39,58,...     1             30
-##  ---                                                                                                            
-## 116:        full          same    150         2       1,2,3,4,6,7,...  5, 9,12,15,19,26,...     3             98
-## 117:        full          same    150         2       1,2,3,4,6,7,...  5, 8, 9,12,15,19,...     3            109
-## 118:        full          same    150         2       1,2,3,4,6,7,...  5, 8, 9,12,15,19,...     3            121
-## 119:        full          same    150         2       1,2,3,4,6,7,...  5, 8, 9,12,15,19,...     3            135
-## 120:        full          same    150         2       1,2,3,4,6,7,...  5, 8, 9,12,15,17,...     3            150
-##      iteration
-##          <int>
-##   1:         1
-##   2:         2
-##   3:         3
-##   4:         4
-##   5:         5
-##  ---          
-## 116:       116
-## 117:       117
-## 118:       118
-## 119:       119
-## 120:       120
+##      test.subset train.subsets groups test.fold                  test
+##           <char>        <char>  <int>     <int>                <list>
+##   1:        full          same    150         1  5, 8, 9,12,15,17,...
+##   2:        full          same    150         1  5, 8, 9,12,15,17,...
+##   3:        full          same    150         1  5, 8, 9,12,15,17,...
+##   4:        full          same    150         1  5, 8, 9,12,15,17,...
+##   5:        full          same    150         1  5, 8, 9,12,15,17,...
+##  ---                                                                 
+## 116:        full          same    150         2       1,2,3,4,6,7,...
+## 117:        full          same    150         2       1,2,3,4,6,7,...
+## 118:        full          same    150         2       1,2,3,4,6,7,...
+## 119:        full          same    150         2       1,2,3,4,6,7,...
+## 120:        full          same    150         2       1,2,3,4,6,7,...
+##                      train  seed n.train.groups iteration
+##                     <list> <int>          <int>     <int>
+##   1:  6,13,20,39,58,75,...     1             20         1
+##   2:  6,13,20,39,58,63,...     1             22         2
+##   3:  6,13,20,39,58,63,...     1             25         3
+##   4:  6,13,20,39,58,63,...     1             27         4
+##   5:  6,13,20,23,39,58,...     1             30         5
+##  ---                                                     
+## 116:  5, 9,12,15,19,26,...     3             98       116
+## 117:  5, 8, 9,12,15,19,...     3            109       117
+## 118:  5, 8, 9,12,15,19,...     3            121       118
+## 119:  5, 8, 9,12,15,19,...     3            135       119
+## 120:  5, 8, 9,12,15,17,...     3            150       120
 ```
 
 The table above shows that there is a CV iteration/split to compute
@@ -156,7 +156,8 @@ cross-validation fold (1 or 2).
 ## * Parameters: robust=FALSE
 ## * Packages: mlr3, stats
 ## * Predict Types:  [response], se
-## * Feature Types: logical, integer, numeric, character, factor, ordered, POSIXct
+## * Feature Types: logical, integer, numeric, character, factor, ordered,
+##   POSIXct
 ## * Properties: featureless, importance, missings, selected_features
 ```
 
@@ -194,15 +195,21 @@ reg.bench.score[1]
 ```
 
 ```
-##    test.subset train.subsets groups test.fold                  test                 train  seed n.train.groups
-##         <char>        <char>  <int>     <int>                <list>                <list> <int>          <int>
-## 1:        full          same    150         1  5, 8, 9,12,15,17,...  6,13,20,39,58,75,...     1             20
-##    iteration                                uhash    nr           task task_id                       learner learner_id
-##        <int>                               <char> <int>         <list>  <char>                        <list>     <char>
-## 1:         1 5bf8e9e1-74ad-48a8-a918-d79a19fb3dd9     1 <TaskRegr:sin>     sin <LearnerRegrRpart:regr.rpart> regr.rpart
-##                      resampling       resampling_id       prediction  regr.mse algorithm
-##                          <list>              <char>           <list>     <num>    <char>
-## 1: <ResamplingSameOtherSizesCV> same_other_sizes_cv <PredictionRegr> 0.7558423     rpart
+##    test.subset train.subsets groups test.fold                  test
+##         <char>        <char>  <int>     <int>                <list>
+## 1:        full          same    150         1  5, 8, 9,12,15,17,...
+##                    train  seed n.train.groups iteration
+##                   <list> <int>          <int>     <int>
+## 1:  6,13,20,39,58,75,...     1             20         1
+##                                   uhash    nr           task task_id
+##                                  <char> <int>         <list>  <char>
+## 1: 89d1c88d-56c4-4419-a10e-1c7e56c7d259     1 <TaskRegr:sin>     sin
+##                          learner learner_id                   resampling
+##                           <list>     <char>                       <list>
+## 1: <LearnerRegrRpart:regr.rpart> regr.rpart <ResamplingSameOtherSizesCV>
+##          resampling_id       prediction  regr.mse algorithm
+##                 <char>           <list>     <num>    <char>
+## 1: same_other_sizes_cv <PredictionRegr> 0.7558423     rpart
 ```
 
 The output above includes one row of the resulting scores.
@@ -214,7 +221,8 @@ The plot below shows test error for several train sizes.
 ```
 
 ```
-##  [1]  20  22  25  27  30  34  38  42  47  52  58  64  71  79  88  98 109 121 135 150
+##  [1]  20  22  25  27  30  34  38  42  47  52  58  64  71  79  88  98 109 121 135
+## [20] 150
 ```
 
 ```r
@@ -364,15 +372,21 @@ same.other.score[1]
 ```
 
 ```
-##    train.subsets test.fold test.subset random_subset iteration                  test                 train
-##           <char>     <int>       <int>         <int>     <int>                <list>                <list>
-## 1:           all         1           1             1         1  4, 7,25,34,37,49,...  1,10,13,16,19,22,...
-##                                   uhash    nr           task task_id                       learner learner_id
-##                                  <char> <int>         <list>  <char>                        <list>     <char>
-## 1: 94cccec6-a98c-4cde-8331-e6c743b9f17e     1 <TaskRegr:sin>     sin <LearnerRegrRpart:regr.rpart> regr.rpart
-##                 resampling resampling_id       prediction  regr.mse algorithm
-##                     <list>        <char>           <list>     <num>    <char>
-## 1: <ResamplingSameOtherCV> same_other_cv <PredictionRegr> 0.7350953     rpart
+##    train.subsets test.fold test.subset random_subset iteration
+##           <char>     <int>       <int>         <int>     <int>
+## 1:           all         1           1             1         1
+##                     test                 train
+##                   <list>                <list>
+## 1:  4, 7,25,34,37,49,...  1,10,13,16,19,22,...
+##                                   uhash    nr           task task_id
+##                                  <char> <int>         <list>  <char>
+## 1: 820af2cb-cb9a-4645-9ade-ec1c4ccfbebb     1 <TaskRegr:sin>     sin
+##                          learner learner_id              resampling
+##                           <list>     <char>                  <list>
+## 1: <LearnerRegrRpart:regr.rpart> regr.rpart <ResamplingSameOtherCV>
+##    resampling_id       prediction  regr.mse algorithm
+##           <char>           <list>     <num>    <char>
+## 1: same_other_cv <PredictionRegr> 0.7350953     rpart
 ```
 
 ```r
@@ -456,8 +470,11 @@ sessionInfo()
 ## 
 ## 
 ## locale:
-## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
-## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+## [1] LC_COLLATE=English_United States.utf8 
+## [2] LC_CTYPE=English_United States.utf8   
+## [3] LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.utf8    
 ## 
 ## time zone: America/Phoenix
 ## tzcode source: internal
@@ -469,18 +486,22 @@ sessionInfo()
 ## [1] future_1.33.2      animint2_2024.1.24 data.table_1.15.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] gtable_0.3.4             future.apply_1.11.2      highr_0.10               compiler_4.4.0          
-##  [5] BiocManager_1.30.22      crayon_1.5.2             rpart_4.1.23             Rcpp_1.0.12             
-##  [9] stringr_1.5.1            parallel_4.4.0           globals_0.16.3           scales_1.3.0            
-## [13] uuid_1.2-0               RhpcBLASctl_0.23-42      R6_2.5.1                 plyr_1.8.9              
-## [17] labeling_0.4.3           knitr_1.46               palmerpenguins_0.1.1     backports_1.4.1         
-## [21] checkmate_2.3.1          munsell_0.5.1            paradox_0.11.1           mlr3measures_0.5.0      
-## [25] rlang_1.1.3              stringi_1.8.3            lgr_0.4.4                xfun_0.43               
-## [29] mlr3_0.18.0              mlr3misc_0.15.0          RJSONIO_1.3-1.9          cli_3.6.2               
-## [33] magrittr_2.0.3           digest_0.6.34            grid_4.4.0               lifecycle_1.0.4         
-## [37] evaluate_0.23            glue_1.7.0               farver_2.1.1             listenv_0.9.1           
-## [41] codetools_0.2-19         parallelly_1.37.1        colorspace_2.1-0         reshape2_1.4.4          
-## [45] tools_4.4.0              mlr3resampling_2024.4.14
+##  [1] gtable_0.3.4             future.apply_1.11.2      highr_0.10              
+##  [4] compiler_4.4.0           BiocManager_1.30.22      crayon_1.5.2            
+##  [7] rpart_4.1.23             Rcpp_1.0.12              stringr_1.5.1           
+## [10] parallel_4.4.0           globals_0.16.3           scales_1.3.0            
+## [13] uuid_1.2-0               RhpcBLASctl_0.23-42      R6_2.5.1                
+## [16] plyr_1.8.9               labeling_0.4.3           knitr_1.46              
+## [19] palmerpenguins_0.1.1     backports_1.4.1          checkmate_2.3.1         
+## [22] munsell_0.5.1            paradox_0.11.1           mlr3measures_0.5.0      
+## [25] rlang_1.1.3              stringi_1.8.3            lgr_0.4.4               
+## [28] xfun_0.43                mlr3_0.18.0              mlr3misc_0.15.0         
+## [31] RJSONIO_1.3-1.9          cli_3.6.2                magrittr_2.0.3          
+## [34] digest_0.6.34            grid_4.4.0               lifecycle_1.0.4         
+## [37] evaluate_0.23            glue_1.7.0               farver_2.1.1            
+## [40] listenv_0.9.1            codetools_0.2-19         parallelly_1.37.1       
+## [43] colorspace_2.1-0         reshape2_1.4.4           tools_4.4.0             
+## [46] mlr3resampling_2024.4.14
 ```
 
 ## UPDATE 15 Apr 2024

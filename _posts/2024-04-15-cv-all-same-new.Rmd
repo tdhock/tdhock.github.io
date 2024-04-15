@@ -1,7 +1,7 @@
 ---
 layout: post
-title: When is it useful to train with combined subsets?
-description: An exploration using cross-validation
+title: New code for various kinds of cross-validation
+description: Cross-validation in R with mlr3
 ---
 
 ```{r Ropts, echo=FALSE}
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   fig.width=8,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
-options(width=120)
+options(width=80)
 if(FALSE){
   knitr::knit(paste0(post.id, ".Rmd"))
 }
