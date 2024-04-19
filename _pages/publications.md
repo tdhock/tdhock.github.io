@@ -23,6 +23,10 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### In progress
 
+- Bodine CS, Buscombe DD, Hocking TD. Open-source approach for
+  reproducible substrate mapping using semantic segmentation on
+  recreation-grade side scan sonar datasets.
+  [eartharXiv:6448](https://eartharxiv.org/repository/view/6448/)
 - Hocking TD. mlr3resampling: an R implementation of cross-validation
   for comparing models learned using different train sets.
 - Agyapong D, Propster JR, Marks J, Hocking TD. Cross-Validation for
