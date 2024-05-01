@@ -32,14 +32,17 @@ can combine them, and learn a more accurate model, than if we learned
 separate models for each subset. Here we explore what kinds of data
 could result in better learning, when we combine data sets.
 
+This blog post explains how to use the new
+`mlr3resampling::ResamplingSameOtherSizes` code to achieve the same
+results as [a previous
+post](https://tdhock.github.io/blog/2024/when-is-all-better-than-same/)
+which used `mlr3resampling::ResamplingVariableSizeTrain` and
+`mlr3resampling::ResamplingSameOther`.
+
 ## Simulation
 
-In [a previous
-blog](https://tdhock.github.io/blog/2023/variable-size-train/) we
-explained how to use `mlr3resampling::ResamplingVariableSizeTrain`,
-with simulated regression problems. Here we adapt one of those
-simulations, of data with one feature and and output/label with a sin
-pattern.
+Below we simulate data with one feature and output/label with a
+sin pattern.
 
 ```{r simulationScatter}
 N <- 300
@@ -166,7 +169,7 @@ str(subset.task$col_roles)
 Below we define cross-validation using two folds, as above.
 
 ```{r}
-same_other_cv <- mlr3resampling::ResamplingSameOtherCV$new()
+same_other_cv <- mlr3resampling::ResamplingSameOtherSizesCV$new()
 same_other_cv$param_set$values$folds <- 2
 ```
 
@@ -258,7 +261,7 @@ sessionInfo()
 
 Code above uses the new version 2024.4.15 of mlr3resampling, in which
 we now use `subset` instead of `group`, for consistency with the usage
-of `group` in other `mlr3` packages. See [old blog
-post](https://tdhock.github.io/blog/2024/when-is-all-better-than-same/)
-for a discussion about how to do the analyses above using the old
-classes (not recommended).
+of `group` in other `mlr3` packages. See:
+
+* [ResamplingSameOtherSizesCV](https://cloud.r-project.org/web/packages/mlr3resampling/vignettes/ResamplingSameOtherSizesCV.html) vignette for more info.
+* [old blog post](https://tdhock.github.io/blog/2024/when-is-all-better-than-same/) for a discussion about how to do the analyses above using the old classes (not recommended).

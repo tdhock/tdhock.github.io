@@ -38,7 +38,7 @@ In [a previous
 blog](https://tdhock.github.io/blog/2023/variable-size-train/) we
 explained how to use `mlr3resampling::ResamplingVariableSizeTrain`,
 with simulated regression problems. Here we adapt one of those
-simulations, of data with one feature and and output/label with a sin
+simulations, of data with one feature and output/label with a sin
 pattern.
 
 ```{r simulationScatter}

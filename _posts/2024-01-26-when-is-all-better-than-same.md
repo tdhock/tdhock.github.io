@@ -24,7 +24,7 @@ In [a previous
 blog](https://tdhock.github.io/blog/2023/variable-size-train/) we
 explained how to use `mlr3resampling::ResamplingVariableSizeTrain`,
 with simulated regression problems. Here we adapt one of those
-simulations, of data with one feature and and output/label with a sin
+simulations, of data with one feature and output/label with a sin
 pattern.
 
 
@@ -154,7 +154,7 @@ ggplot()+
     "Mean squared error on test set")+
   geom_line(aes(
     train_size, regr.mse,
-    subset=paste(algorithm, seed),
+    group=paste(algorithm, seed),
     color=algorithm),
     shape=1,
     data=reg.bench.score)+
@@ -296,7 +296,7 @@ same.other.score[1]
 ## 1:           all         1           1             1         1 22,25,28,31,40,52,...  1, 4, 7,10,13,16,...
 ##                                   uhash    nr           task task_id                       learner learner_id
 ##                                  <char> <int>         <list>  <char>                        <list>     <char>
-## 1: a583b23a-77f0-468f-92f5-b21286353b12     1 <TaskRegr:sin>     sin <LearnerRegrRpart:regr.rpart> regr.rpart
+## 1: 25f68c66-c77c-4618-9a40-463f5954a2d9     1 <TaskRegr:sin>     sin <LearnerRegrRpart:regr.rpart> regr.rpart
 ##                 resampling resampling_id       prediction  regr.mse algorithm
 ##                     <list>        <char>           <list>     <num>    <char>
 ## 1: <ResamplingSameOtherCV> same_other_cv <PredictionRegr> 0.4780074     rpart
@@ -374,8 +374,8 @@ sessionInfo()
 ## [1] future_1.33.2      animint2_2024.1.24 data.table_1.15.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] gtable_0.3.4             future.apply_1.11.2      highr_0.10               compiler_4.4.0          
-##  [5] BiocManager_1.30.22      crayon_1.5.2             rpart_4.1.23             Rcpp_1.0.12             
+##  [1] gtable_0.3.4             future.apply_1.11.2      compiler_4.4.0           BiocManager_1.30.22     
+##  [5] highr_0.10               crayon_1.5.2             rpart_4.1.23             Rcpp_1.0.12             
 ##  [9] stringr_1.5.1            parallel_4.4.0           globals_0.16.3           scales_1.3.0            
 ## [13] uuid_1.2-0               RhpcBLASctl_0.23-42      R6_2.5.1                 plyr_1.8.9              
 ## [17] labeling_0.4.3           knitr_1.46               palmerpenguins_0.1.1     backports_1.4.1         

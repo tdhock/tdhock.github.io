@@ -18,14 +18,17 @@ can combine them, and learn a more accurate model, than if we learned
 separate models for each subset. Here we explore what kinds of data
 could result in better learning, when we combine data sets.
 
+This blog post explains how to use the new
+`mlr3resampling::ResamplingSameOtherSizes` code to achieve the same
+results as [a previous
+post](https://tdhock.github.io/blog/2024/when-is-all-better-than-same/)
+which used `mlr3resampling::ResamplingVariableSizeTrain` and
+`mlr3resampling::ResamplingSameOther`.
+
 ## Simulation
 
-In [a previous
-blog](https://tdhock.github.io/blog/2023/variable-size-train/) we
-explained how to use `mlr3resampling::ResamplingVariableSizeTrain`,
-with simulated regression problems. Here we adapt one of those
-simulations, of data with one feature and and output/label with a sin
-pattern.
+Below we simulate data with one feature and output/label with a
+sin pattern.
 
 
 ```r
@@ -203,7 +206,7 @@ reg.bench.score[1]
 ## 1:  6,13,20,39,58,75,...     1             20         1
 ##                                   uhash    nr           task task_id
 ##                                  <char> <int>         <list>  <char>
-## 1: 89d1c88d-56c4-4419-a10e-1c7e56c7d259     1 <TaskRegr:sin>     sin
+## 1: d07cff7b-d5f8-4b12-8330-90014f7712de     1 <TaskRegr:sin>     sin
 ##                          learner learner_id                   resampling
 ##                           <list>     <char>                       <list>
 ## 1: <LearnerRegrRpart:regr.rpart> regr.rpart <ResamplingSameOtherSizesCV>
@@ -325,7 +328,7 @@ Below we define cross-validation using two folds, as above.
 
 
 ```r
-same_other_cv <- mlr3resampling::ResamplingSameOtherCV$new()
+same_other_cv <- mlr3resampling::ResamplingSameOtherSizesCV$new()
 same_other_cv$param_set$values$folds <- 2
 ```
 
@@ -348,10 +351,10 @@ We compute and plot the results using the code below,
 ```
 
 ```
-##      task          learner    resampling
-##    <char>           <char>        <char>
-## 1:    sin       regr.rpart same_other_cv
-## 2:    sin regr.featureless same_other_cv
+##      task          learner          resampling
+##    <char>           <char>              <char>
+## 1:    sin       regr.rpart same_other_sizes_cv
+## 2:    sin regr.featureless same_other_sizes_cv
 ```
 
 ```r
@@ -361,9 +364,9 @@ We compute and plot the results using the code below,
 
 ```
 ## <BenchmarkResult> of 36 rows with 2 resampling runs
-##  nr task_id       learner_id resampling_id iters warnings errors
-##   1     sin       regr.rpart same_other_cv    18        0      0
-##   2     sin regr.featureless same_other_cv    18        0      0
+##  nr task_id       learner_id       resampling_id iters warnings errors
+##   1     sin       regr.rpart same_other_sizes_cv    18        0      0
+##   2     sin regr.featureless same_other_sizes_cv    18        0      0
 ```
 
 ```r
@@ -372,21 +375,21 @@ same.other.score[1]
 ```
 
 ```
-##    train.subsets test.fold test.subset random_subset iteration
-##           <char>     <int>       <int>         <int>     <int>
-## 1:           all         1           1             1         1
-##                     test                 train
-##                   <list>                <list>
-## 1:  4, 7,25,34,37,49,...  1,10,13,16,19,22,...
+##    test.subset train.subsets groups test.fold                  test
+##          <int>        <char>  <int>     <int>                <list>
+## 1:           1           all    150         1  4, 7,25,34,37,49,...
+##              train  seed n.train.groups iteration
+##             <list> <int>          <int>     <int>
+## 1: 1,2,5,6,8,9,...     1            150         1
 ##                                   uhash    nr           task task_id
 ##                                  <char> <int>         <list>  <char>
-## 1: 820af2cb-cb9a-4645-9ade-ec1c4ccfbebb     1 <TaskRegr:sin>     sin
-##                          learner learner_id              resampling
-##                           <list>     <char>                  <list>
-## 1: <LearnerRegrRpart:regr.rpart> regr.rpart <ResamplingSameOtherCV>
-##    resampling_id       prediction  regr.mse algorithm
-##           <char>           <list>     <num>    <char>
-## 1: same_other_cv <PredictionRegr> 0.7350953     rpart
+## 1: a3137ab3-93c9-4702-8393-9a714589ad08     1 <TaskRegr:sin>     sin
+##                          learner learner_id                   resampling
+##                           <list>     <char>                       <list>
+## 1: <LearnerRegrRpart:regr.rpart> regr.rpart <ResamplingSameOtherSizesCV>
+##          resampling_id       prediction  regr.mse algorithm
+##                 <char>           <list>     <num>    <char>
+## 1: same_other_sizes_cv <PredictionRegr> 0.7350953     rpart
 ```
 
 ```r
@@ -486,8 +489,8 @@ sessionInfo()
 ## [1] future_1.33.2      animint2_2024.1.24 data.table_1.15.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] gtable_0.3.4             future.apply_1.11.2      highr_0.10              
-##  [4] compiler_4.4.0           BiocManager_1.30.22      crayon_1.5.2            
+##  [1] gtable_0.3.4             future.apply_1.11.2      compiler_4.4.0          
+##  [4] BiocManager_1.30.22      highr_0.10               crayon_1.5.2            
 ##  [7] rpart_4.1.23             Rcpp_1.0.12              stringr_1.5.1           
 ## [10] parallel_4.4.0           globals_0.16.3           scales_1.3.0            
 ## [13] uuid_1.2-0               RhpcBLASctl_0.23-42      R6_2.5.1                
@@ -508,7 +511,7 @@ sessionInfo()
 
 Code above uses the new version 2024.4.15 of mlr3resampling, in which
 we now use `subset` instead of `group`, for consistency with the usage
-of `group` in other `mlr3` packages. See [old blog
-post](https://tdhock.github.io/blog/2024/when-is-all-better-than-same/)
-for a discussion about how to do the analyses above using the old
-classes (not recommended).
+of `group` in other `mlr3` packages. See:
+
+* [ResamplingSameOtherSizesCV](https://cloud.r-project.org/web/packages/mlr3resampling/vignettes/ResamplingSameOtherSizesCV.html) vignette for more info.
+* [old blog post](https://tdhock.github.io/blog/2024/when-is-all-better-than-same/) for a discussion about how to do the analyses above using the old classes (not recommended).
