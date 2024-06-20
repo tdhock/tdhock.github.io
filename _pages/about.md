@@ -9,7 +9,6 @@ profile:
   image: prof_pic.jpg
   address: >
     <p>toby.dylan.hocking@usherbrooke.ca</p>
-	<p>+1(873)821-8000x65565</p>
 
 news: true
 social: true
