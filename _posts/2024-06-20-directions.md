@@ -8,7 +8,7 @@ Monday was my first day as a new Associate Professor in the Computer
 Science department of Université de Sherbrooke. This post explains how
 to find my new office.
 
-![map to toby's office](/assets/img/2024-06-20-directions/iris_altair_scatter_parts.png)
+![map to toby's office](/assets/img/2024-06-20-directions/map-to-tobys-office.png)
 
 ## Parking
 
