@@ -12,9 +12,6 @@ profile:
 	<p>+1(873)821-8000x65565</p>
     <p><a href="https://lassolab.org/">LASSO lab director</a></p>
     <p><a href="https://tdhock.github.io/blog/2024/directions/">Directions to my office, D4-1010-11</a></p>
-	<p>Mailing address:</p>
-	<p>Toby Dylan Hocking</p>
-	<p>Sherbrooke, QC, J1K-2R1, Canada</p>
 
 news: true
 social: true
