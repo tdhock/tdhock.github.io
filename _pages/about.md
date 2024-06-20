@@ -8,14 +8,14 @@ profile:
   align: right
   image: prof_pic.jpg
   address: >
-    <p>toby.hocking@nau.edu</p>
-    <p>(928)523-5209</p> 
-    <p><a href="http://ml.nau.edu/">Machine learning lab director</a>
-    <p>School of Informatics, Computing, and Cyber Systems</p>
-    <p>Northern Arizona University</p>
-    <p><a href="https://nauedu-prod.modolabs.net/campus_map/map/index?state=detail&feed=campus_buildings_2021_v5&id=d2bb1e0a-4b88-5944-9466-68744bdcd981">Building 90</a>, Room 210</p>
-    <p>1295 S. Knoles Dr.</p>
-    <p>Flagstaff, AZ 86011</p>
+    <p>toby.dylan.hocking@usherbrooke.ca</p>
+    <p><a href="https://lassolab.org/">LASSO lab director</a></p>
+    <p><a href="https://www.usherbrooke.ca/informatique/">Département d'informatique</a> / Computer science department, Université de Sherbrooke</p>
+    <p><a href="https://tdhock.github.io/blog/2024/directions/">Directions to my office, D4-1010-11</a></p>
+	<p>Mailing address:</p>
+	<p>Toby Dylan Hocking</p>
+	<p>2500 Boulevard de l'Université</p>
+	<p>Sherbrooke, QC, J1K-2R1, Canada</p>
 
 news: true
 social: true
@@ -33,7 +33,10 @@ instructions](http://ml.nau.edu/application.html).
 
 **Brief CV**
 
-- 2018-present: Assistant Professor,
+- 2024-present: Professeur Agrégé / Tenured Associate Professor, 
+  [Université de Sherbrooke](http://usherbrooke.ca),
+  [Département d'Informatique](http://usherbrooke.ca),
+- 2018-2024: Tenure-Track Assistant Professor,
   [Northern Arizona University](http://nau.edu),
   [School of Informatics, Computing, and Cyber Systems](http://nau.edu/siccs).
 - 2014-2018: Postdoc, McGill University, Human Genetics Department,

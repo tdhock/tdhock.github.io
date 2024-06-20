@@ -23,6 +23,10 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### In progress
 
+- Nguyen T, Hocking TD. Deep Learning Approach for Changepoint
+  Detection: Penalty Parameter Optimization.
+- Truong C, Hocking TD. Fast change-point detection for multivariate
+  circular data.
 - Hocking TD. mlr3resampling: an R implementation of cross-validation
   for comparing models learned using different train sets.
 - Agyapong D, Propster JR, Marks J, Hocking TD. Cross-Validation for
@@ -54,8 +58,10 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Rust K, Hocking TD. A Log-linear Gradient Descent Algorithm for
   Unbalanced Binary Classification using the All Pairs Squared Hinge
   Loss. [Preprint arXiv:2302.11062](https://arxiv.org/abs/2302.11062).
-- Hocking TD. Efficient line search optimization of penalty functions
-  in supervised changepoint detection. [Talk announcement for JSM'23
+- SOAK: Same/Other/All K-fold cross-validation for estimating
+  similarity of patterns in data subsets.
+- Fowler J, Hocking TD. Efficient line search for optimizing Area Under the ROC
+  Curve in gradient descent. [Talk announcement for JSM'23
   Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810),
   [Video of talk at Université Laval July
   2023](https://www.youtube.com/watch?v=22ODpDTZ4VE), [Slides
@@ -70,6 +76,11 @@ description: Peer-reviewed papers and preprints with links to code and data
   satellite image data.
  
 ### Accepted, in press
+
+- Bodine CS, Hocking TD, Buscombe D. Automated river substrate mapping
+  from sonar imagery with machine learning. Accepted for publication
+  in Journal of Geophysical Research - Machine Learning and
+  Computation.
 
 ### 2024
 
