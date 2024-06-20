@@ -10,7 +10,6 @@ profile:
   address: >
     <p>toby.dylan.hocking@usherbrooke.ca</p>
 	<p>+1(873)821-8000x65565</p>
-    <p><a href="https://lassolab.org/">LASSO lab director</a></p>
 
 news: true
 social: true
