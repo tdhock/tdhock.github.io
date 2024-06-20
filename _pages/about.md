@@ -9,6 +9,7 @@ profile:
   image: prof_pic.jpg
   address: >
     <p>toby.dylan.hocking@usherbrooke.ca</p>
+	<p>foo</p>
 
 news: true
 social: true
