@@ -8,9 +8,9 @@ profile:
   align: right
   image: prof_pic.jpg
   address: >
+    <p><a href="https://lassolab.org/">LASSO lab director</a>, Département d'informatique, Université de Sherbrooke</p>
     <p>toby.dylan.hocking@usherbrooke.ca</p>
     <p>+1(819)821-8000x65565</p>
-    <p><a href="https://lassolab.org/">LASSO lab director</a>, <a href="https://www.usherbrooke.ca/informatique/">Département d'informatique</a>, Université de Sherbrooke</p>
     <p><a href="https://tdhock.github.io/blog/2024/directions/">Directions to my office, D4-1010-11</a></p>
     <p>Mailing address:</p>
     <p>Toby Dylan Hocking</p>
@@ -35,7 +35,7 @@ instructions](http://ml.nau.edu/application.html).
 
 - 2024-present: Professeur Agrégé / Tenured Associate Professor, 
   [Université de Sherbrooke](https://www.usherbrooke.ca),
-  [Département d'Informatique](https://www.usherbrooke.ca/informatique/),
+  [Département d'informatique](https://www.usherbrooke.ca/informatique/),
 - 2018-2024: Tenure-Track Assistant Professor,
   [Northern Arizona University](http://nau.edu),
   [School of Informatics, Computing, and Cyber Systems](http://nau.edu/siccs).
