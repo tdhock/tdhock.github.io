@@ -9,9 +9,8 @@ profile:
   image: prof_pic.jpg
   address: >
     <p>toby.dylan.hocking@usherbrooke.ca</p>
-    <p>+1(873)821-8000x65565</p>
-    <p><a href="https://lassolab.org/">LASSO lab director</a></p>
-    <p><a href="https://www.usherbrooke.ca/informatique/">Département d'informatique</a> (Computer science department), Université de Sherbrooke</p>
+    <p>+1(819)821-8000x65565</p>
+    <p><a href="https://lassolab.org/">LASSO lab director</a>, <a href="https://www.usherbrooke.ca/informatique/">Département d'informatique</a>, Université de Sherbrooke</p>
     <p><a href="https://tdhock.github.io/blog/2024/directions/">Directions to my office, D4-1010-11</a></p>
     <p>Mailing address:</p>
     <p>Toby Dylan Hocking</p>
