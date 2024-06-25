@@ -29,7 +29,7 @@ interactive systems, and software for machine learning. If you are
 interested in joining, please first [read my mentorship
 plan](https://tdhock.github.io/blog/2022/research-mentorship-plan/) to
 see what I will expect of you, then [read the application
-instructions](http://ml.nau.edu/application.html).
+instructions](https://tdhock.github.io/blog/2024/application/).
 
 **Brief CV**
 
