@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Directions to my office in Sherbrooke
-description: With a map in English!
+title: Research student application
+description: Please read if you want to do research under my supervision
 ---
 
 ## Mentorship plan reading and writing application
