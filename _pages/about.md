@@ -62,7 +62,7 @@ instructions](https://tdhock.github.io/blog/2024/application/).
 - 2002-2006: undergraduate, UC Berkeley, Double major in Molecular &
   Cell Biology and Statistics, honors thesis with
   [Terry Speed](https://en.wikipedia.org/wiki/Terry_Speed).
-- [Full CV](HOCKING-cv.pdf), [Short Bio](http://ml.nau.edu/members/TDH-short-bio.html).
+- [Full CV](HOCKING-cv.pdf), [Short Bio](https://tdhock.github.io/blog/2024/short-bio/).
 
 Research interests: fast, accurate, and interpretable algorithms for
 learning from large data, using continuous optimization (clustering,

@@ -1,0 +1,204 @@
+---
+layout: post
+title: HTML to Markdown
+description: Regex for porting my lab web site
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-06-24-html-to-markdown"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this blog post is to show a couple of interesting regex
+that I used to port some info from my lab web site to my github blog.
+
+```{r}
+text <- '
+  <li><a href="https://github.com/lamtung16">Tung Lam Nguyen</a>, Inf PHD, Spring 2024 - present.</li>
+  <li><a href="https://github.com/DorisAmoakohene">Doris Amoakohene</a>, Inf master,
+    Fall 2023 - present.</li>
+  <li><a href="https://github.com/bilalaslam45">Bilal Aslam</a>, Inf PHD, Fall 2022 - present.</li>
+  <li><a href="https://github.com/harsheka">Karl Harshe</a>, MechE PHD, Fall 2022 - present.</li>
+  <li><a href="https://github.com/EngineerDanny">Daniel Agyapong</a>,
+  Informatics and Computing PHD, Fall 2022 - present.</li>
+  <li><a href="https://github.com/CameronBodine">Cameron Bodine</a>,
+  Informatics and Computing PHD, Spring 2020 - present.</li>
+  <li><a href="https://github.com/trevb11">Trevor Silverstein</a>, Inf PHD,
+    Fall 2023, then went back to teach school.</li>
+  <li><a href="https://github.com/phase">Jadon Fowler</a>, CS master,
+    Fall 2022 - Spring 2023, working as software developer
+    at <a href="https://www.lunarclient.com/">Lunar Client</a>.</li>
+  <li><a href="https://github.com/austinmalmin">Austin Malmin</a>, CS master, Spring 2023, now Salesforce developer at <a href="https://www.microchip.com">Microchip</a>.</li>
+  <li><a href="https://github.com/rustky">Kyle Rust</a>, CS master,
+  Fall 2021 - Fall 2022, working as data scientist
+  at <a href="https://www.chsinc.com/">CHS</a>.</li>
+  <li><a href="https://github.com/Csaluski">Charlie Saluski</a>,
+    CS undergrad, Spring 2022.</li>
+  <li><a href="https://github.com/balaji-senthil">Balaji Senthilkumar</a>,
+  CS master, Spring 2022.</li>
+  <li><a href="https://github.com/jkaufy">Jacob Kaufman</a>, CS
+  master, Spring 2022, then went
+  to <a href="https://www.gd.com/">General Dynamics</a>.</li>
+  <li><a href="https://github.com/amissafari">Amirhossein Safari</a>,
+  Informatics and Computing PHD, Spring 2022.</li>
+  <li><a href="https://github.com/JWheeler4">Jonathan Wheeler</a>,
+  Math master, Spring 2022.</li>
+  <li><a href="https://github.com/tds325">Tayler Skirvin</a>, CS
+    undergrad, Spring 2022, then went to work as software developer at
+    <a href="https://www.cognizant.com">Cognizant</a>.</li>
+  <li><a href="https://github.com/brookesebranek">Brooke Sebranek</a>,
+    Biomedical Sciences undergrad, Fall 2021 - Spring 2022.</li>
+  <li><a href="https://github.com/Prapti-044">Shadmaan Hye</a>,
+  Informatics and Computing PHD, Fall 2021, then went to University of
+  Arizona CS as PHD student.</li>
+  <li><a href="https://github.com/deltarod">Tristan Miller</a>, BS CS
+  research associate, Fall 2020 - Fall 2021, then went to work at a
+  tech startup.</li>
+  <li><a href="https://github.com/akhikolla">Akhila Chowdary
+  Kolla</a>, CS master, Spring 2020 - Fall 2021, then went to work as
+  software developer at <a href="https://www.amazon.com">Amazon</a>.</li>
+  <li><a href="https://github.com/alyssajs">Alyssa Stenberg</a>, CS
+  master, Spring 2020, then went
+  to <a href="https://www.jbhunt.com/">J.B. Hunt</a> as a software
+  engineer (Machine Learning Operations team).</li>
+  <li><a href="https://github.com/JonathanHillman">Jonathan Hillman</a>,
+  CS undergrad, Summer 2020 - Summer 2021, then did Math master at NAU.</li>
+  <li><a href="https://github.com/frankp4">John Francis "Frank" Burkhart</a>,
+   Math undergrad, Spring 2020 - Spring 2021, then did <a href="https://brc.ncsu.edu/genomics/bioinformatics/phd-program">Bioinformatics PHD program at North Carolina State University</a>.</li>
+  <li><a href="https://github.com/superMicrowave">Weiheng Su</a>, CS
+  undergrad, Summer 2020 - Fall 2020, then worked as Machine Learning
+  Engineer at <a href="http://www.frontopsky.com/">Frontopsky</a>, and
+  then did PHD at Stony Brook University.</li>
+  <li><a href="https://github.com/DovahCraft">Joseph Vargovich</a>, CS
+  undergrad, Fall 2018 - Fall 2020, then did CS master at NAU, then
+  got job offer at <a href="https://www.honeywell.com">Honeywell</a>.</li>
+  <li><a href="https://github.com/aLiehrmann">Arnaud Liehrmann</a>,
+  master intern, Spring-Summer 2020, then did PHD at <a href="https://centreborelli.ens-paris-saclay.fr/en">Centre Borelli, Paris-Saclay
+  University</a>.</li>
+  <li><a href="https://github.com/DarienRT">Darien Reyes-Tadeo</a>, CS undergrad, Spring
+  2020.</li>
+  <li><a href="https://github.com/andruuhurst">Andrew Hurst</a>, CS
+  undergrad, Fall 2019 - Spring 2020, then worked as Software
+  Developer at <a href="https://www.gm.com/">General Motors</a> in Atlanta.</li>
+  <li><a href="https://github.com/LooDaHu">Jinming Yang</a>, CS
+    master, Fall 2019 - Spring 2020, then worked as software
+    development engineer at <a href="https://www.sangfor.com">Sangfor
+    Tech</a> (cybersecurity company in ShenZhen, China specializing in
+    Cloud Computing & Network Security).</li>
+  <li><a href="https://github.com/Zaoyee">Zaoyi Chi</a>, EE master,
+  Fall 2019 - Spring 2020.</li>
+  <li><a href="https://github.com/atiyehftn">Atiyeh Fotoohinasab</a>,
+  Informatics and Computing PHD, Summer 2019 - Spring 2020, then did <a href="https://grad.arizona.edu/catalog/programinfo/BMEGPHD">University of Arizona Biomedical Engineering PHD program</a>.</li>
+  <li><a href="https://github.com/as4378">Anuraag Srivastava</a>, CS
+  master, Fall 2018 - Spring 2020, then went to Chicago to work as a 
+  software engineer for a company.</li>
+  <li><a href="https://github.com/bd288">Brandon Dunn</a>, EE master,
+  Fall 2018 - Spring 2019, then went
+  to <a href="https://www.rtx.com/">Raytheon</a>.</li>'
+no.newlines <- gsub(" +", " ", gsub("\n", "", text))
+'[text](link)'
+no.ahref <- gsub('<a href="(.*?)">(.*?)</a>', '[\\2](\\1)', no.newlines)
+student.dt <- nc::capture_all_str(
+  no.ahref,
+  '<li>',
+  content=".*?",
+  '</li>')
+cat(paste(paste("*", student.dt$content), collapse="\n"))
+
+html <- '
+    <h3>ASU West ML day, Apr 2024</h3>
+    <p>Left to right: Tung, Toby, Doris, Bilal, Danny.<br />
+      <img src="photos/2024-04-26-ASU-West-ML-Day.JPG" alt="ASU West ML day Apr 2024" />
+    </p>
+    <h3>Cross-country ski day, Feb 2024</h3>
+    <p>Left to right: Toby, Tung, Doris, Danny.<br />
+      <img src="photos/2024-02-20-toby-tung-doris-danny-lunch.jpg" alt="Cross-country ski day Feb 2024" />
+    </p>
+    <h3>ML group meeting, Sep 2023</h3>
+    <p>Left to right: Richard, Trevor, Bilal, Danny, Toby, Doris, Karl.<br />
+      <img src="photos/2023-09-13-ml-group-meeting.jpg" alt="ML group meeting Sep 2023" />
+    </p>
+    <h3>SICCS ML lab at ASU West ML Day, April 2023</h3>
+    <p>Left to right: Bilal, Toby, Anirban, Danny, Austin, Jadon.<br />
+      <img src="photos/2023-04-14-ASU-ML-Day.jpg" alt="SICCS at ASU April 2023" />
+    </p>
+    <h3>ML group meeting, Feb 2023</h3>
+    <p>Left to right: Austin, Jadon, Danny, Toby, Bilal, Cam.<br />
+      <img src="photos/2023-02-02-group-meeting.jpg" alt="SICCS group meeting 2023 Feb 2" />
+    </p>
+    <h3>SICCS camping, Oct 2022</h3>
+    <p>Left to right: Kyle, Toby, Danny, Basil.<br />  
+      <img src="photos/2022-10-14_ML_camp_fire.jpg" alt="SICCS camping" />
+    </p>
+    <h3>ML group meeting, Oct 2022</h3>
+    <p>Left to right: Cam, Bilal, Toby, Danny, Kyle, Gabi.<br />  
+      <img src="photos/2022-10-14_ML_group_meeting.jpg" alt="group meeting Oct 2022" />
+    </p>
+    <h3>RcppDeepState project members, Oct 2021</h3>
+    <p>Left to right: Toby, Alex, Akhila.<br />  
+      <img src="photos/2021-10-12-Toby-Alex-Akhila.jpg" alt="Rcpp project members" />
+    </p>
+    <h3>First fall semester group meeting, Aug 2021</h3>
+    <p>Left to right: Tristan, Anirban, Toby, Shadmaan, Akhila, Balaji, Kyle.<br />  
+      <img src="photos/2021-08-16-first-fall-ml-group-meeting.jpg" alt="lab meeting fall 2021" />
+    </p>
+    <h3>Downhill ski day, Mar 2021</h3>
+    <p>Left to right: Toby, Jon, Tristan, Frank, Akhila, Alyssa.<br />  
+      <img src="photos/2021-03-lab-ski-lunch.jpg" alt="ski 2021" />
+    </p>
+    <h3>Summer Pizza Party, July 2020</h3>
+    <p>Foreground: Akhila, left to right in the back: Benoît, Arnaud,
+      Toby, Basil, John.<br />  
+      <img src="photos/2020-07-summer-pizza-ben-baz.jpg" alt="summer
+      pizza" />
+    </p>
+    <h3>Winter Pizza Party, Feb 2020</h3>
+    <p>Left to right: Atiyeh, Darien, Joe, Arnaud, Benoît, Toby.<br />
+      We are showing "six" fingers for SICCS (School of Informatics,
+      Computing and Cyber Systems). <br />
+      <img src="photos/2020-02-ml-lab-pizza-cropped-lores.jpeg"
+      alt="winter pizza" />
+    </p>
+    <h3>Hiking in Sedona, Dec 2019</h3>
+    <p>Left to right: Joe, Toby, Farnoosh, Atiyeh, Anuraag, Zaoyi.<br />
+      <img 
+	  src="photos/2019-12-ml-lab-sedona-cropped-lores.jpeg" 
+	  alt="sedona"
+	  />
+    </p>
+'
+src.pattern <- nc::field('src','="','[^"]+')
+nc::capture_all_str(html, src.pattern)
+img.dt <- nc::capture_all_str(
+  html,
+  '<h3>',
+  h3=".*?",
+  '</h3>.*\n.*?<p>',
+  caption="(?:.*\n)*?.*",
+  "<br /> *\n",
+  ##img="(?:.*\n)*?.*",
+  '[^<]*<img[^s]+',
+  src.pattern,
+  '"[^a]+',
+  nc::field('alt','="','[^"]+'),
+  '"')
+'![Alt](/path/to/img.jpg)'
+
+markdown.vec <- img.dt[, sprintf(
+  '\n### %s\n%s\n![%s](%s)',
+  h3, caption,
+  gsub("[\n ]+", " ", alt),
+  sub("photos", "/assets/img/lab-photos", src))]
+cat(paste(markdown.vec, collapse="\n"))
+```

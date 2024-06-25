@@ -5,7 +5,7 @@ title: Teaching
 description: Course materials and students mentored
 ---
 
-### Course materials
+## Course materials
 
 For current and potential CS master students at NAU, [here is a list
 of progression plans with various specialties including machine
@@ -64,7 +64,7 @@ be useful for planning what classes you take.
   [my course
   materials](https://rcdata.nau.edu/genomic-ml/public_html/mines-course/Mines-ParisTech-machine-learning-projects.html).
   
-### Screencasts
+## Screencasts
 
 Topics without links below are on my TODO list.
 
@@ -82,16 +82,103 @@ Topics without links below are on my TODO list.
 - Interactive data visualization with the grammar of graphics
 - git/github 
   
-### NAU students mentored
-
-See my [Lab Members web page](http://ml.nau.edu/members/).
+## NAU students mentored
 
 "Science is a cooperative enterprise, spanning the generations. It's
 the passing of a torch from teacher to student to teacher. A community
 of minds reaching back to antiquity and forward to the stars." Neil
 DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
 
-### Google Summer of Code students mentored
+* [Tung Lam Nguyen](https://github.com/lamtung16), Inf PHD, Spring 2024 - present.
+* [Doris Amoakohene](https://github.com/DorisAmoakohene), Inf master, Fall 2023 - present.
+* [Bilal Aslam](https://github.com/bilalaslam45), Inf PHD, Fall 2022 - present.
+* [Karl Harshe](https://github.com/harsheka), MechE PHD, Fall 2022 - present.
+* [Daniel Agyapong](https://github.com/EngineerDanny), Informatics and Computing PHD, Fall 2022 - present.
+* [Cameron Bodine](https://github.com/CameronBodine), Informatics and Computing PHD, Spring 2020 - present.
+* [Trevor Silverstein](https://github.com/trevb11), Inf PHD, Fall 2023, then went back to teach school.
+* [Jadon Fowler](https://github.com/phase), CS master, Fall 2022 - Spring 2023, working as software developer at [Lunar Client](https://www.lunarclient.com/).
+* [Austin Malmin](https://github.com/austinmalmin), CS master, Spring 2023, now Salesforce developer at [Microchip](https://www.microchip.com).
+* [Kyle Rust](https://github.com/rustky), CS master, Fall 2021 - Fall 2022, working as data scientist at [CHS](https://www.chsinc.com/).
+* [Charlie Saluski](https://github.com/Csaluski), CS undergrad, Spring 2022.
+* [Balaji Senthilkumar](https://github.com/balaji-senthil), CS master, Spring 2022.
+* [Jacob Kaufman](https://github.com/jkaufy), CS master, Spring 2022, then went to [General Dynamics](https://www.gd.com/).
+* [Amirhossein Safari](https://github.com/amissafari), Informatics and Computing PHD, Spring 2022.
+* [Jonathan Wheeler](https://github.com/JWheeler4), Math master, Spring 2022.
+* [Tayler Skirvin](https://github.com/tds325), CS undergrad, Spring 2022, then went to work as software developer at [Cognizant](https://www.cognizant.com).
+* [Brooke Sebranek](https://github.com/brookesebranek), Biomedical Sciences undergrad, Fall 2021 - Spring 2022.
+* [Shadmaan Hye](https://github.com/Prapti-044), Informatics and Computing PHD, Fall 2021, then went to University of Arizona CS as PHD student.
+* [Tristan Miller](https://github.com/deltarod), BS CS research associate, Fall 2020 - Fall 2021, then went to work at a tech startup.
+* [Akhila Chowdary Kolla](https://github.com/akhikolla), CS master, Spring 2020 - Fall 2021, then went to work as software developer at [Amazon](https://www.amazon.com).
+* [Alyssa Stenberg](https://github.com/alyssajs), CS master, Spring 2020, then went to [J.B. Hunt](https://www.jbhunt.com/) as a software engineer (Machine Learning Operations team).
+* [Jonathan Hillman](https://github.com/JonathanHillman), CS undergrad, Summer 2020 - Summer 2021, then did Math master at NAU.
+* [John Francis "Frank" Burkhart](https://github.com/frankp4), Math undergrad, Spring 2020 - Spring 2021, then did [Bioinformatics PHD program at North Carolina State University](https://brc.ncsu.edu/genomics/bioinformatics/phd-program).
+* [Weiheng Su](https://github.com/superMicrowave), CS undergrad, Summer 2020 - Fall 2020, then worked as Machine Learning Engineer at [Frontopsky](http://www.frontopsky.com/), and then did PHD at Stony Brook University.
+* [Joseph Vargovich](https://github.com/DovahCraft), CS undergrad, Fall 2018 - Fall 2020, then did CS master at NAU, then got job offer at [Honeywell](https://www.honeywell.com).
+* [Arnaud Liehrmann](https://github.com/aLiehrmann), master intern, Spring-Summer 2020, then did PHD at [Centre Borelli, Paris-Saclay University](https://centreborelli.ens-paris-saclay.fr/en).
+* [Darien Reyes-Tadeo](https://github.com/DarienRT), CS undergrad, Spring 2020.
+* [Andrew Hurst](https://github.com/andruuhurst), CS undergrad, Fall 2019 - Spring 2020, then worked as Software Developer at [General Motors](https://www.gm.com/) in Atlanta.
+* [Jinming Yang](https://github.com/LooDaHu), CS master, Fall 2019 - Spring 2020, then worked as software development engineer at [Sangfor Tech](https://www.sangfor.com) (cybersecurity company in ShenZhen, China specializing in Cloud Computing & Network Security).
+* [Zaoyi Chi](https://github.com/Zaoyee), EE master, Fall 2019 - Spring 2020.
+* [Atiyeh Fotoohinasab](https://github.com/atiyehftn), Informatics and Computing PHD, Summer 2019 - Spring 2020, then did [University of Arizona Biomedical Engineering PHD program](https://grad.arizona.edu/catalog/programinfo/BMEGPHD).
+* [Anuraag Srivastava](https://github.com/as4378), CS master, Fall 2018 - Spring 2020, then went to Chicago to work as a software engineer for a company.
+* [Brandon Dunn](https://github.com/bd288), EE master, Fall 2018 - Spring 2019, then went to [Raytheon](https://www.rtx.com/).
+
+### ASU West ML day, Apr 2024
+Left to right: Tung, Toby, Doris, Bilal, Danny.
+![ASU West ML day Apr 2024](/assets/img/lab-photos/2024-04-26-ASU-West-ML-Day.JPG)
+
+### Cross-country ski day, Feb 2024
+Left to right: Toby, Tung, Doris, Danny.
+![Cross-country ski day Feb 2024](/assets/img/lab-photos/2024-02-20-toby-tung-doris-danny-lunch.jpg)
+
+### ML group meeting, Sep 2023
+Left to right: Richard, Trevor, Bilal, Danny, Toby, Doris, Karl.
+![ML group meeting Sep 2023](/assets/img/lab-photos/2023-09-13-ml-group-meeting.jpg)
+
+### SICCS ML lab at ASU West ML Day, April 2023
+Left to right: Bilal, Toby, Anirban, Danny, Austin, Jadon.
+![SICCS at ASU April 2023](/assets/img/lab-photos/2023-04-14-ASU-ML-Day.jpg)
+
+### ML group meeting, Feb 2023
+Left to right: Austin, Jadon, Danny, Toby, Bilal, Cam.
+![SICCS group meeting 2023 Feb 2](/assets/img/lab-photos/2023-02-02-group-meeting.jpg)
+
+### SICCS camping, Oct 2022
+Left to right: Kyle, Toby, Danny, Basil.
+![SICCS camping](/assets/img/lab-photos/2022-10-14_ML_camp_fire.jpg)
+
+### ML group meeting, Oct 2022
+Left to right: Cam, Bilal, Toby, Danny, Kyle, Gabi.
+![group meeting Oct 2022](/assets/img/lab-photos/2022-10-14_ML_group_meeting.jpg)
+
+### RcppDeepState project members, Oct 2021
+Left to right: Toby, Alex, Akhila.
+![Rcpp project members](/assets/img/lab-photos/2021-10-12-Toby-Alex-Akhila.jpg)
+
+### First fall semester group meeting, Aug 2021
+Left to right: Tristan, Anirban, Toby, Shadmaan, Akhila, Balaji, Kyle.
+![lab meeting fall 2021](/assets/img/lab-photos/2021-08-16-first-fall-ml-group-meeting.jpg)
+
+### Downhill ski day, Mar 2021
+Left to right: Toby, Jon, Tristan, Frank, Akhila, Alyssa.
+![ski 2021](/assets/img/lab-photos/2021-03-lab-ski-lunch.jpg)
+
+### Summer Pizza Party, July 2020
+Foreground: Akhila, left to right in the back: Benoît, Arnaud,
+      Toby, Basil, John.
+![summer pizza](/assets/img/lab-photos/2020-07-summer-pizza-ben-baz.jpg)
+
+### Winter Pizza Party, Feb 2020
+Left to right: Atiyeh, Darien, Joe, Arnaud, Benoît, Toby.<br />
+      We are showing "six" fingers for SICCS (School of Informatics,
+      Computing and Cyber Systems). 
+![winter pizza](/assets/img/lab-photos/2020-02-ml-lab-pizza-cropped-lores.jpeg)
+
+### Hiking in Sedona, Dec 2019
+Left to right: Joe, Toby, Farnoosh, Atiyeh, Anuraag, Zaoyi.
+![sedona](/assets/img/lab-photos/2019-12-ml-lab-sedona-cropped-lores.jpeg)
+
+## Google Summer of Code students mentored
 
 I have mentored the
 following students in coding free/open-source software.
