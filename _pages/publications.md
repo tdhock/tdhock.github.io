@@ -35,7 +35,9 @@ description: Peer-reviewed papers and preprints with links to code and data
   for comparing models learned using different train sets.
 - Agyapong D, Propster JR, Marks J, Hocking TD. Cross-Validation for
   Training and Testing Co-occurrence Network Inference
-  Algorithms. [Preprint arXiv:2309.15225](https://arxiv.org/abs/2309.15225).
+  Algorithms. [Preprint
+  arXiv:2309.15225](https://arxiv.org/abs/2309.15225). Under review at
+  BMC Bioinformatics.
 - Why does functional pruning yield such fast algorithms for optimal
   changepoint detection? Invited talk for TRIPODS seminar
   [video](https://arizona.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4e87c8d0-96d2-40d1-808c-ad16014c6962),
