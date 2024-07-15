@@ -13,7 +13,7 @@ to find my new office.
 ## Parking
 
 You can park in any of the parking lots with a yellow sign (the yellow
-sign is often at the entrace to the parking lot, not on the space
+sign is often at the entrance to the parking lot, not on the space
 itself). Closest and easiest to find are D1, D7, and D8 (which can be
 seen on the map above as P pins on the right where red lines
 begin). [Here is a link to the D8 parking pin in google
@@ -23,7 +23,7 @@ need to pay (about 9$CAD) by doing one of the following two things
 
 * find the meter "payez ici" 
 * or on your phone, download the bciti+ app and lookup "Université de
-  Sherbrooke, QC" under city/ville, then ask for a daily permit
+  Sherbrooke, QC" under city/ville (make sure to avoid choosing the other entry "Sherbrooke" which is different), then ask for a daily permit
   "Permis journalier" and enter your license plate.
   
 [More parking info in French](https://www.usherbrooke.ca/smsp/mobilite-durable-et-stationnement/stationnement/campus-principal).
