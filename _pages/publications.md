@@ -25,7 +25,7 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 - Gurney KR, Aslam B, Dass P, Gawuc L, Hocking TD, Barber JJ, Kato
   A. Assessment of the Climate Trace global powerplant CO2
-  emissions. Under review at Nature Communications.
+  emissions. Under review at Environmental Research Letters.
 - Nguyen T, Hocking TD. Deep Learning Approach for Changepoint
   Detection: Penalty Parameter Optimization.
 - Truong C, Hocking TD. Fast change-point detection for multivariate
