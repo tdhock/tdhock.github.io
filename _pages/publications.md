@@ -131,6 +131,12 @@ description: Peer-reviewed papers and preprints with links to code and data
   arXiv:2107.01285](https://arxiv.org/abs/2107.01285),
   [Software](https://github.com/tdhock/aum),
   [Reproducible](https://github.com/tdhock/max-generalized-auc).
+- Sweeney N, Xu C, Shaw JA, Hocking TD, Whitaker BM. Insect
+  Identification in Pulsed Lidar Images Using Changepoint Detection
+  Algorithms. Intermountain Engineering, Technology and Computing
+  (IETC), Provo, UT, USA, 2023, pp. 93-97, DOI:
+  10.1109/IETC57902.2023.10152205. 
+  [IEEE](https://ieeexplore.ieee.org/abstract/document/10152205)
 - Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
   G. gfpop: an R Package for Univariate Graph-Constrained Change-point
   Detection. [Journal of Statistical
