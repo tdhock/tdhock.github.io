@@ -152,6 +152,19 @@ differentiate the two emacs instances:
 * `emacs@ip15.m (on ip15.m)` is on Mammouth.
 * `emacs@maude-MacBookPro` is on my local laptop computer.
 
+## Node types
+
+[MP2 docs](https://docs.alliancecan.ca/wiki/Mp2/en) under
+[Site-specific
+policies](https://docs.alliancecan.ca/wiki/Mp2/en#Site-specific_policies)
+says "Each job must have a duration of at least one hour (at least
+five minutes for test jobs) and a user cannot have more than 1000 jobs
+(running and queued) at any given time. The maximum duration of a job
+is 168 hours (seven days)." and under [Node
+characteristics](https://docs.alliancecan.ca/wiki/Mp2/en#Node_characteristics)
+it says there are three node types.
+
+
 ## srun
 
 TODO Interactive jobs
@@ -160,3 +173,4 @@ TODO Interactive jobs
 [thocking@ip15-mp2 ~]$ srun -t 4:00:00 --mem=31GB --cpus-per-task=1 --pty bash
 srun: error: Unable to allocate resources: Requested time limit is invalid (missing or exceeds some limit)
 ```
+
