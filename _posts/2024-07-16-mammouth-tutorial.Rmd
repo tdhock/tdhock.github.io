@@ -9,7 +9,7 @@ Mammouth, the UdeS super-computer.
 
 ```{r Ropts, echo=FALSE}
 repo.dir <- normalizePath("..")
-post.id <- "2024-07-17-mammouth-tutorial"
+post.id <- "2024-07-16-mammouth-tutorial"
 fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
@@ -359,7 +359,9 @@ Before installing R packages, make sure to declare a CRAN mirror in your `~/.Rpr
 options(repos=c(CRAN="http://cloud.r-project.org"))
 ```
 
-TODO: Another option for adding an R module is 
+# Non-working R versions
+
+Other options for adding R modules: 
 ```
 [thocking@ip15-mp2 ~]$ R --version
 [mii] Please select a module to run R:
@@ -380,7 +382,8 @@ While processing the following module(s):
 
 -bash: R: command not found
 ```
-but why is this environment not available for arch sse3? 
+but we get an error message above "environment is not available for architecture sse3" which refers to [SSE3 (2004)](https://en.wikipedia.org/wiki/SSE3), a specific kind of intel CPU instructions used by the Mammouth computers. According to Éric Giguère, <eric.giguere@calculquebec.ca>
+ `StdEnv/2023` and more recent R versions apparently only work with newer CPUs, AVX2 (2013) and AVX-512 (2015), which are not present on Monsoon, but which are present on [Narval](https://docs.alliancecan.ca/wiki/Narval) and [Beluga](https://docs.alliancecan.ca/wiki/Beluga).
 
 ## shell configuration
 
@@ -418,8 +421,12 @@ node.type.txt <- "Quantity	Cores	Available Memory	CPU Type	Storage	GPU Type
 
 The output above says there are 1,588 nodes with 24 cores per node and
 31 GB of memory, for a total number of 38,112 cores.
-
-Below we count nodes in each state/partition.
+Those are the compute resources which could be made available, but
+since Mammouth is near end of service, there are not many users, and
+so the admins have turned off a large number of nodes, in order to
+conserve electricity.
+To find out the actual number of nodes available,
+below we count nodes in each state/partition.
 
 ```r
 > node.txt <- system("sinfo -N",intern=TRUE)
@@ -475,6 +482,18 @@ From https://slurm.schedmd.com/sinfo.html
 * `CPUS(A/I/O/T)` means "allocated/idle/other/total"
 * "number of sockets, cores, threads (S:C:T)" 
 
+or summarized below,
+
+```
+[thocking@ip15-mp2 ~]$ sinfo -s |grep 'base_i\|NODE'
+PARTITION         AVAIL  TIMELIMIT   NODES(A/I/O/T)  NODELIST
+cpubase_interac      up    3:00:00  55/57/1364/1476  cp[0101-0168,0201-0272,0303-0358,0501-0532,0601-0676,0701-0768,0801-0872,0901-0956,1001-1072,1101-1168,1401-1432,1437-1468,1501-1572,1601-1668,1701-1772,1801-1868,1901-1972,2001-2068,2101-2172,2201-2268,2301-2372,2401-2468,2501-2572]
+```
+
+So the output above indicates there are about 100 nodes available (A=alloc/ated or I=idle).
+There are 1364 O=Other nodes (drain) which are powered off.
+The total 1476 does not add up to the 1588 listed on [Node characteristics](https://docs.alliancecan.ca/wiki/Mp2/en#Node_characteristics), because when nodes break, they are removed.
+
 To find out the number of CPUs available we can use the R code below on Mammouth
 
 ```r
@@ -527,59 +546,47 @@ Key: <PARTITION>
 ```
 
 which indicates there are 856 idle CPUs in the cpubase
-partitions. [Site-specific
+partitions. Admins have told me that if there is a queue, then more
+nodes could be powered back on. However, [Site-specific
 policies](https://docs.alliancecan.ca/wiki/Mp2/en#Site-specific_policies)
 says "a user cannot have more than 1000 jobs (running and queued) at
 any given time."
 
-
 ## srun
 
-TODO Interactive jobs
+Instead of running compute intensive code on the login node, you
+should try running it in an Interactive job, via the code below
 
 ```
 [thocking@ip15-mp2 ~]$ srun -t 4:00:00 --mem=31GB --cpus-per-task=1 --pty bash
 srun: error: Unable to allocate resources: Requested time limit is invalid (missing or exceeds some limit)
+[thocking@ip15-mp2 ~]$ srun -t 2:00:00 --mem=31GB --cpus-per-task=1 --pty bash
+[thocking@cp2554 ~]$ 
 ```
+
+Note the output above indicates that 4h time limit is invalid for the interactive job, but 2h time limit works fine. Admins told me the max time limit for interactive jobs is 3h, but they also said that limits could be changed on Mammouth if necessary.
 
 ## Q&A
 
 ### Which partition to use?
 
-Q: Par contre quel partition est-ce que je devrais utiliser SVP ? Je vois 3 sortes de nodes ici https://docs.alliancecan.ca/wiki/Mp2/en
+The scheduler will choose a partition for you, based on the amount of time and memory you request. 
 
-Et sur "sinfo" je vois cpuSIZE_TYPE where
+It will be one of the following.
+There are 3 types of nodes on the [docs](https://docs.alliancecan.ca/wiki/Mp2/en).
+On "sinfo" I see cpuSIZE_TYPE where
 ```
 SIZE=base, large, xlarge
 TYPE=interac, b1, b2, b3
 ```
-J'ai compris que SIZE détermine la quantité de mémoire etc.
-
-Et je vois que b1,interac sont limités à 3H, alors que b2 est 3 jours, b3 est 7 jours.
-
-Est-ce qu'on devrait utiliser b3 tout le temps ? Sinon, pourquoi on utiliserait les autres ?
-
-Est-ce qu'il y a un page de documentation pour ces partitions là ? Je m'attendais d'en trouver sur https://docs.alliancecan.ca/wiki/Mp2/en
-
-A: Vous n'avez pas à spécifier la partition, slurm va choisir celle
-qui convient selon les ressources demandées.
+SIZE determines memory, type determines type of job and time limit.
 
 ### is conda allowed?
 
-Based on the answer below, I believe conda is allowed.
-
-Q: J'ai l'habitude d'utiliser conda sur la grappes de calcul aux USA
-que j'utilise.  Mais je vois sur
-https://docs.alliancecan.ca/wiki/Anaconda/en que conda est
-découragé. Est-ce que conda est interdit sur mammouth ?
-
-A: conda n'est pas interdit, les modules python fournis par compute canada utilisent les librairies lapack, blas etc. fournie par le vendeurs, donc préférer. Mais mp2 n'étant plus officiellement supporté, je ne suis pas certain que c'est vrai ici. Sur mp2, vous pouvez installer tout logiciel de recherche que vous voulez.
-
-### 
-
-Sinon je vois avec "module load R" la version le plus récent est 4.2.1. Par contre le plus récent sur https://www.r-project.org/ est 4.4.1 – est-ce que je devrais installer moi-même, ou bien est-ce que je pourrai démander à qqn de l'installer SVP ?
-
-mp2 est en fin de vie (depuis 4~5 ans). Les installations de logiciels récents de la stack CC qu'il utilise ne sont plus compatibles. Sur beluga, narval, etc. (ssh thocking@beluga.alliancecan.ca, vous y avez accès automatiquement avec votre compte dans la ccdb), R 4.4.0 est installé, si vous en avez besoin, je vous conseille d'utiliser un de ces serveurs.
+Yes, based on an email from sys admins, who said that Mammouth is no
+longer officially supported, so they do not plan to respond to
+software install requests there, and so we can install any research
+software we want.
 
 ### how does the schedular work?
 
@@ -637,3 +644,11 @@ mp2 est en fin de vie (depuis 4~5 ans). Les installations de logiciels récents 
 
 The output above shows that there are 22 groups who have used any
 compute time at all. I have not yet.
+
+## Conclusions
+
+We have shown how to connect to Mammouth, and to setup some basic software.
+Exercise for the reader: go to my [blog](https://tdhock.github.io/blog/), search for a post about "monsoon" which is the super-computer at Northern Arizona University, and see if you can do the same computations on Mammouth.
+
+* [Cross-validation experiments using R/mlr3batchmark](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/)
+* [Cross-validation experiments using python/slurm command line programs](https://tdhock.github.io/blog/2022/cross-validation-cluster/)
