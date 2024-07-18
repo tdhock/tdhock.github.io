@@ -647,3 +647,9 @@ Exercise for the reader: go to my [blog](https://tdhock.github.io/blog/), search
 
 * [Cross-validation experiments using R/mlr3batchmark](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/)
 * [Cross-validation experiments using python/slurm command line programs](https://tdhock.github.io/blog/2022/cross-validation-cluster/)
+
+Exercise 2: run `sinfo` on
+[Narval](https://docs.alliancecan.ca/wiki/Narval) and
+[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga) to see the
+number of allocated/idle nodes. Which cluster has more total nodes?
+More nodes idle?
