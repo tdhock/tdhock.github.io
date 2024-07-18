@@ -111,8 +111,8 @@ DT[, .(m=mean(i)), by=g]
 ```
 
 The code above computed mean by group for a single data size `N` (number of groups). To convert that to `atime` we just 
-* put the data creation code, which makes `DT`, in the `setup` argument
-* put the code that you want to measure some other named arguments
+* put the data creation code, which makes `DT`, in the `setup` argument,
+* put the code that you want to measure in some other named arguments.
 
 
 ```r
@@ -229,5 +229,5 @@ We have shown how to use `atime` to check if there are any performance differenc
 * different package versions, same R code/data, via `atime_versions()`.
 
 For future work, you may consider changing `setup` and the code to
-measure, if you thin the simple example we considered above is not
+measure, if you think the simple example we considered above is not
 actually representative of real use cases.
