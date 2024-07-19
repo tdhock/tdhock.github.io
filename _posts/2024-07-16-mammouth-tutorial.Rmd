@@ -658,3 +658,192 @@ Exercise 2: run `sinfo` on
 [Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga) to see the
 number of allocated/idle nodes. Which cluster has more total nodes?
 More nodes idle?
+
+Below Mammouth at UdeS
+```
+[thocking@ip15-mp2 ~]$ sinfo -s -o "%P %C"
+PARTITION CPUS(A/I/O/T)
+cpubase_b3 254/2122/33048/35424
+cpubase_b2 254/2122/33048/35424
+cpubase_b1 254/2122/33048/35424
+cpubase_interac 254/2122/33048/35424
+cpularge_b3 64/848/48/960
+cpularge_b2 64/848/48/960
+cpularge_b1 64/944/48/1056
+cpularge_interac 64/944/48/1056
+cpuxlarge_b3 0/96/0/96
+cpuxlarge_b2 0/96/0/96
+cpuxlarge_b1 0/96/0/96
+cpuxlarge_interac 0/96/0/96
+c-fat3072 0/144/0/144
+c-ctabrp 0/0/2592/2592
+c-apc 8/248/0/256
+c-aphex 1/47/0/48
+c-royer 48/80/0/128
+c-blais 0/128/0/128
+c-kerrcat 0/128/0/128
+c-tremblay 128/384/0/512
+c-iq 308/156/0/464
+```
+
+Below Monsoon at NAU
+```
+th798@wind:~$ sinfo -s -o "%P %C"
+PARTITION CPUS(A/I/O/T)
+core* 783/3053/84/3920
+gpu 20/124/28/172
+```
+
+Below Narval at ETS
+```
+[thocking@narval3 ~]$ sinfo -s -o "%P %C"
+PARTITION CPUS(A/I/O/T)
+cpubase_interac 40322/4846/2448/47616
+cpubase_bynode_b1 65215/7897/5416/78528
+cpubase_bynode_b2 63093/6755/5352/75200
+cpubase_bynode_b3 63093/6755/5352/75200
+cpubase_bynode_b4 60117/6275/5224/71616
+cpubase_bynode_b5 57687/5514/4831/68032
+cpubase_bycore_b1 32461/3979/4712/41152
+cpubase_bycore_b2 32461/3979/4712/41152
+cpubase_bycore_b3 32461/3979/4712/41152
+cpubase_bycore_b4 32461/3979/4712/41152
+cpubase_bycore_b5 25693/2083/3136/30912
+cpularge_interac 1386/518/272/2176
+cpularge_bynode_b1 1528/504/272/2304
+cpularge_bynode_b2 1528/504/272/2304
+cpularge_bynode_b3 1492/476/272/2240
+cpularge_bynode_b4 1492/476/272/2240
+cpularge_bynode_b5 1472/432/272/2176
+cpularge_bycore_b1 1144/504/272/1920
+cpularge_bycore_b2 1144/504/272/1920
+cpularge_bycore_b3 1108/476/272/1856
+cpularge_bycore_b4 1088/432/272/1792
+cpularge_bycore_b5 1044/412/272/1728
+gpubase_interac 2679/1604/149/4432
+gpubase_bynode_b1 5358/2266/408/8032
+gpubase_bynode_b2 5358/2266/408/8032
+gpubase_bynode_b3 5280/2248/408/7936
+gpubase_bynode_b4 5212/2220/408/7840
+gpubase_bynode_b5 4092/1802/362/6256
+gpubase_bygpu_b1 4643/2453/408/7504
+gpubase_bygpu_b2 4643/2453/408/7504
+gpubase_bygpu_b3 4565/2435/408/7408
+gpubase_bygpu_b4 4497/2407/408/7312
+gpubase_bygpu_b5 3377/1989/362/5728
+cpubackfill 32158/4276/3758/40192
+gpubackfill 1783/1348/149/3280
+c-frigon 2122/1142/64/3328
+```
+
+Below Beluga at ETS
+```
+[thocking@beluga1 ~]$ sinfo -s -o "%P %C"
+PARTITION CPUS(A/I/O/T)
+cpubase_interac 8114/1046/120/9280
+cpubase_bynode_b1 26710/2850/360/29920
+cpubase_bynode_b2 26486/2674/320/29480
+cpubase_bynode_b3 24846/2594/280/27720
+cpubase_bynode_b4 23166/2554/240/25960
+cpubase_bynode_b5 20330/1870/240/22440
+cpubase_bycore_b1 13658/2222/280/16160
+cpubase_bycore_b2 13434/2046/240/15720
+cpubase_bycore_b3 12246/1474/240/13960
+cpubase_bycore_b4 12246/1474/240/13960
+cpubase_bycore_b5 12133/1427/240/13800
+cpularge_interac 503/297/0/800
+cpularge_bynode_b1 1224/896/0/2120
+cpularge_bynode_b2 1224/856/0/2080
+cpularge_bynode_b3 1184/856/0/2040
+cpularge_bynode_b4 1064/856/0/1920
+cpularge_bynode_b5 984/856/0/1840
+cpularge_bycore_b1 864/856/0/1720
+cpularge_bycore_b2 864/856/0/1720
+cpularge_bycore_b3 824/856/0/1680
+cpularge_bycore_b4 801/839/0/1640
+cpularge_bycore_b5 791/809/0/1600
+gpubase_interac 2389/2903/108/5400
+gpubase_bynode_b1 3005/3767/108/6880
+gpubase_bynode_b2 2968/3444/108/6520
+gpubase_bynode_b3 2968/3444/108/6520
+gpubase_bynode_b4 2968/3444/108/6520
+gpubase_bynode_b5 474/646/0/1120
+gpubase_bygpu_b1 2393/3019/68/5480
+gpubase_bygpu_b2 2356/3016/68/5440
+gpubase_bygpu_b3 2316/3016/68/5400
+gpubase_bygpu_b4 1832/2780/68/4680
+gpubase_bygpu_b5 434/646/0/1080
+cpubackfill 5470/1210/200/6880
+gpubackfill 434/646/0/1080
+```
+
+Below Cedar at SFU
+```
+[thocking@cedar1 ~]$ sinfo -s -o "%P %C"
+PARTITION CPUS(A/I/O/T)
+cpubase_bycore_b6 17251/461/1552/19264
+cpubase_bycore_b5 27723/741/2768/31232
+cpubase_bycore_b4 37601/1711/3776/43088
+cpubase_bycore_b3 43895/3099/4238/51232
+cpubase_bycore_b2 52308/3382/5622/61312
+cpubase_bycore_b1 52308/3382/5622/61312
+cpubase_bynode_b6 17251/461/1552/19264
+cpubase_bynode_b5 27723/741/2768/31232
+cpubase_bynode_b4 37601/1711/3776/43088
+cpubase_bynode_b3 43895/3099/4238/51232
+cpubase_bynode_b2 66344/6674/6726/79744
+cpubase_bynode_b1* 66344/6674/6726/79744
+cpubase_interac 118/282/48/448
+cpularge_bycore_b6 183/17/32/232
+cpularge_bycore_b5 267/29/64/360
+cpularge_bycore_b4 639/73/64/776
+cpularge_bycore_b3 1424/296/248/1968
+cpularge_bycore_b2 1456/296/248/2000
+cpularge_bycore_b1 1456/296/248/2000
+cpularge_bynode_b6 183/17/32/232
+cpularge_bynode_b5 267/29/64/360
+cpularge_bynode_b4 639/73/64/776
+cpularge_bynode_b3 1023/209/128/1360
+cpularge_bynode_b2 1456/296/248/2000
+cpularge_bynode_b1 1456/296/248/2000
+cpularge_interac 0/64/0/64
+gpubase_bygpu_b6 648/664/96/1408
+gpubase_bygpu_b5 1340/1326/150/2816
+gpubase_bygpu_b4 2121/2129/358/4608
+gpubase_bygpu_b3 2792/2690/534/6016
+gpubase_bygpu_b2 3843/2783/726/7352
+gpubase_bygpu_b1 3843/2783/726/7352
+gpubase_bynode_b6 710/938/96/1744
+gpubase_bynode_b5 1504/1834/174/3512
+gpubase_bynode_b4 2450/2960/438/5848
+gpubase_bynode_b3 3265/3665/614/7544
+gpubase_bynode_b2 4438/3876/806/9120
+gpubase_bynode_b1 4462/3876/806/9144
+gpubase_interac 48/0/0/48
+c-alex87 191/1/0/192
+c-stelzer 3/189/0/192
+c-awachs 313/839/144/1296
+c-ccolijn 517/59/0/576
+c-whkchun 0/608/0/608
+c-tim 0/960/0/960
+c-ut-atlas 0/192/0/192
+cpubackfill 39235/2815/3374/45424
+c12hbackfill 62214/7308/6094/75616
+gpubackfill 3217/3089/590/6896
+cpupreempt 62214/7308/6094/75616
+gpupreempt 4342/3300/782/8424
+```
+
+Graham at Waterloo -- no response from graham.calculcanada.ca?
+
+Overall it looks like there are ~1,000s of CPUs idle on the other
+clusters, and ~10,000s of CPUs allocated.
+
+What is the difference between 
+[Narval](https://docs.alliancecan.ca/wiki/Narval) and
+[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga)?
+
+* Narval is newer, since oct 2021, versus mar 2019 for Beluga.
+* Narval has AMD Rome 7532 CPU, Beluga has Intel Gold 6148 Skylake (both at 2.4GHz).
+* Narval has more nodes (1145 with 64 cores and 249GB mem each), Beluga (579 nodes with 40 cores and 186GB mem each).
+
