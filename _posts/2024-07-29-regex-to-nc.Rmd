@@ -1,0 +1,105 @@
+---
+layout: post
+title: Porting base R regex code to nc
+description: Case study in readable code
+---
+
+[nc](https://github.com/tdhock/nc) is an R package that I created for named capture regular expressions (regex).
+The goal of this post is to explain how to port base R regex code to nc, for improved readability.
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-07-29-regex-to-nc"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+# Background
+
+R is a programming language for statistics and graphics, which is implemented in C.
+In R, there is special nomenclature for standard computer science / programming concepts
+
+* A library (piece of code which offers extended functionality) in R is called a package, which can contain R and C code.
+* The "standard library" in R, sometimes called base R, includes the Recommended packages, developed by R core, which is a group 10-20 people, listed in the [AUTHORS](https://github.com/r-devel/r-svn/blob/main/doc/AUTHORS) file.
+* Other packages are distributed on the CRAN, and these other package may include custom C code, which can call some of the C library functions that are provided in the base R packages.
+
+Up until this year, there has been only an informal definition of which base C library functions are public. That is, if the functions were described in Writing R Extensions, then that means they are exported / allowed to be called by other packages. 
+
+Earlier this year, R core has started to formally declare which base C library functions are public.
+So there is now a programmatic method for determining which C library functions are public.
+CRAN checks have started using this, and complaining about packages which call C library functions which are not public.
+There is an interest in programming tools that can be used to determine which C library functions are public, based on the C source code.
+
+Earlier this month, Ivan Krylov posted the following on R-devel,
+
+https://stat.ethz.ch/pipermail/r-devel/2024-July/083542.html
+
+A relatively compact (but still brittle) way to match function
+declarations in C header files is shown at the end of this message. I
+have confirmed that compared to `tools:::getFunsHdr`, the only extraneous
+symbols that it finds in preprocessed headers are `R_SetWin32`,
+`user_unif_rand`, `user_unif_init`, `user_unif_nseed`,
+`user_unif_seedloc`, `user_norm_rand`, which are special-cased in
+`tools:::getFunsHdr`, and the only symbols it doesn't find are `select`
+and `delztg` in `R_ext/Lapack.h`, which we should not be finding.
+
+```{r}
+# "Bird's eye" view, gives unmapped names on non-preprocessed headers
+getdecl <- function(file, lines = readLines(file)) {
+        # have to combine to perform multi-line matches
+        lines <- paste(c(lines, ''), collapse = '\n')
+        # first eat the C comments, dotall but non-greedy match
+        lines <- gsub('(?s)/\\*.*?\\*/', '', lines, perl = TRUE)
+        # C++-style comments too, multiline not dotall
+        lines <- gsub('(?m)//.*$', '', lines, perl = TRUE)
+        # drop all preprocessor directives
+        lines <- gsub('(?m)^\\s*#.*$', '', lines, perl = TRUE)
+        rx <- r"{(?xs)
+                (?!typedef)(?<!\w) # please no typedefs
+                # return type with attributes
+                (
+                        # words followed by whitespace or stars
+                        (?: \w+ (?:\s+ | \*)+)+
+                )
+                # function name, assumes no extra whitespace
+                (
+                        \w+\(\w+\) # macro call
+                        | \(\w+\)  # in parentheses
+                        | \w+      # a plain name
+                )
+                # arguments: non-greedy match inside parentheses
+                \s* \( (.*?) \) \s* # using dotall here
+                # will include R_PRINTF_FORMAT(1,2 but we don't care
+                # finally terminated by semicolon
+                ;
+        }"
+        regmatches(lines, gregexec(rx, lines, perl = TRUE))[[1]][3,]
+}
+# Preprocess then extract remapped function names like getFunsHdr
+getdecl2 <- function(file) {
+  file |>
+    readLines() |>
+    grep('^\\s*#\\s*error', x = _, value = TRUE, invert = TRUE) |>
+    tools:::ccE() |>
+    getdecl(lines = _)
+}
+local.r.svn <- "~/R/r-svn"
+if(!file.exists(local.r.svn)){
+  gert::git_clone("https://github.com/r-devel/r-svn", local.r.svn)
+}
+getdecl("~/R/r-svn/path/to/header.h")
+```
+
+
+# Conclusion
+
+TODO
