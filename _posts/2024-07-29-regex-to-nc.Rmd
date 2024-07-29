@@ -96,7 +96,9 @@ local.r.svn <- "~/R/r-svn"
 if(!file.exists(local.r.svn)){
   gert::git_clone("https://github.com/r-devel/r-svn", local.r.svn)
 }
-getdecl("~/R/r-svn/path/to/header.h")
+getdecl("~/R/r-svn/src/include/R.h")
+getdecl("~/R/r-svn/src/include/Rdefines.h")
+getdecl("~/R/r-svn/src/include/R_ext/Altrep.h")
 ```
 
 
