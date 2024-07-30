@@ -7,21 +7,7 @@ description: Case study with a complex regex
 [nc](https://github.com/tdhock/nc) is an R package that I created for named capture regular expressions (regex).
 The goal of this post is to explain how to port base R regex code to nc, for improved readability.
 
-```{r Ropts, echo=FALSE}
-repo.dir <- normalizePath("..")
-post.id <- "2024-07-29-regex-to-nc"
-fig.path <- file.path(repo.dir, "assets", "img", post.id)
-knitr::opts_chunk$set(
-  dpi=100,
-  fig.path=paste0(fig.path, "/"),
-  fig.width=8,
-  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
-options(width=120)
-if(FALSE){
-  knitr::knit(paste0(post.id, ".Rmd"))
-}
-```
+
 
 ## Background
 
@@ -54,7 +40,8 @@ symbols that it finds in preprocessed headers are `R_SetWin32`,
 `tools:::getFunsHdr`, and the only symbols it doesn't find are `select`
 and `delztg` in `R_ext/Lapack.h`, which we should not be finding.
 
-```{r}
+
+```r
 rx <- r"{
 (?xs)
 (?!typedef)(?<!\w) # please no typedefs
@@ -100,8 +87,21 @@ if(!file.exists(local.r.svn)){
   gert::git_clone("https://github.com/r-devel/r-svn", local.r.svn)
 }
 getdecl("~/R/r-svn/src/include/R.h")
+```
+
+```
+## [1] "R_FlushConsole"  "R_ProcessEvents" "R_WaitEvent"
+```
+
+```r
 ##getdecl("~/R/r-svn/src/include/Rdefines.h")
 getdecl("~/R/r-svn/src/include/R_ext/Altrep.h")
+```
+
+```
+## [1] "R_new_altrep"            "R_make_altstring_class"  "R_make_altinteger_class" "R_make_altreal_class"   
+## [5] "R_make_altlogical_class" "R_make_altraw_class"     "R_make_altcomplex_class" "R_make_altlist_class"   
+## [9] "R_altrep_inherits"
 ```
 
 What is going on in the base R regex code above? The one letter option
@@ -120,18 +120,42 @@ as well as at the start of the subject string. It does not match after
 a newline that ends the string, for compatibility with Perl. However,
 this can be changed by setting the `PCRE2_ALT_CIRCUMFLEX` option."
 
-```{r}
+
+```r
 gsub("^", "_", "foo\nbar", perl=TRUE)
+```
+
+```
+## [1] "_foo\nbar"
+```
+
+```r
 gsub("(?m)^", "_", "foo\nbar", perl=TRUE)
+```
+
+```
+## [1] "_foo\n_bar"
 ```
 
 ### DOTALL
 
 `(?s)` turns on DOTALL matching, which is documented in [FULL STOP (PERIOD, DOT) AND \N](https://www.pcre.org/current/doc/html/pcre2pattern.html#SEC7): "Outside a character class, a dot in the pattern matches any one character in the subject string except (by default) a character that signifies the end of a line... The behaviour of dot with regard to newlines can be changed. If the `PCRE2_DOTALL` option is set, a dot matches any one character, without exception."
 
-```{r}
+
+```r
 sub(    ".*", "", "foo\nbar", perl=TRUE)
+```
+
+```
+## [1] "\nbar"
+```
+
+```r
 sub("(?s).*", "", "foo\nbar", perl=TRUE)
+```
+
+```
+## [1] ""
 ```
 
 ### Extended matching
@@ -159,35 +183,56 @@ sub("(?s).*", "", "foo\nbar", perl=TRUE)
   
 In the code below, `#comment` is a part of the pattern, which does not match, so the output is the same as the input subject.
 
-```{r}
+
+```r
 sub("foo#comment", "", "foo\nbar", perl=TRUE)
+```
+
+```
+## [1] "foo\nbar"
 ```
 
 In the code below, `#comment` is ignored, so the pattern matches, and the output deletes foo:
 
-```{r}
+
+```r
 sub("(?x)foo#comment", "", "foo\nbar", perl=TRUE)
+```
+
+```
+## [1] "\nbar"
 ```
 
 In the pattern below, the newline is a part of the pattern, which does match, so the output deletes the newline.
 
-```{r}
+
+```r
 sub("foo
 ", "", "foo\nbar", perl=TRUE)
 ```
 
+```
+## [1] "bar"
+```
+
 In the pattern below, the newline is excluded from the pattern, which only matches `foo`, so the output includes a newline:
 
-```{r}
+
+```r
 sub("(?x)foo
 ", "", "foo\nbar", perl=TRUE)
+```
+
+```
+## [1] "\nbar"
 ```
 
 ## analysis
 
 A modified version of the base R regex code appears below,
 
-```{r}
+
+```r
 raw.lines <- readLines("~/R/r-svn/src/include/R_ext/Altrep.h")
 one.string <- paste(c(raw.lines, ''), collapse = '\n')
 no.c.comments <- gsub('(?s)/\\*.*?\\*/', '', one.string, perl = TRUE)
@@ -197,7 +242,64 @@ no.pre.processor.directives <- gsub('(?m)^\\s*#.*$', '', no.cpp.comments, perl =
   no.pre.processor.directives, 
   gregexec(rx, no.pre.processor.directives, perl = TRUE)
 )[[1]])
+```
+
+```
+##          [,1]                                                                    
+##          "\nSEXP\nR_new_altrep(R_altrep_class_t aclass, SEXP data1, SEXP data2);"
+## rtype    "SEXP\n"                                                                
+## fun_name "R_new_altrep"                                                          
+## args     "R_altrep_class_t aclass, SEXP data1, SEXP data2"                       
+##          [,2]                                                                                              
+##          "\nR_altrep_class_t\nR_make_altstring_class(const char *cname, const char *pname, DllInfo *info);"
+## rtype    "R_altrep_class_t\n"                                                                              
+## fun_name "R_make_altstring_class"                                                                          
+## args     "const char *cname, const char *pname, DllInfo *info"                                             
+##          [,3]                                                                                               
+##          "\nR_altrep_class_t\nR_make_altinteger_class(const char *cname, const char *pname, DllInfo *info);"
+## rtype    "R_altrep_class_t\n"                                                                               
+## fun_name "R_make_altinteger_class"                                                                          
+## args     "const char *cname, const char *pname, DllInfo *info"                                              
+##          [,4]                                                                                            
+##          "\nR_altrep_class_t\nR_make_altreal_class(const char *cname, const char *pname, DllInfo *info);"
+## rtype    "R_altrep_class_t\n"                                                                            
+## fun_name "R_make_altreal_class"                                                                          
+## args     "const char *cname, const char *pname, DllInfo *info"                                           
+##          [,5]                                                                                               
+##          "\nR_altrep_class_t\nR_make_altlogical_class(const char *cname, const char *pname, DllInfo *info);"
+## rtype    "R_altrep_class_t\n"                                                                               
+## fun_name "R_make_altlogical_class"                                                                          
+## args     "const char *cname, const char *pname, DllInfo *info"                                              
+##          [,6]                                                                                           
+##          "\nR_altrep_class_t\nR_make_altraw_class(const char *cname, const char *pname, DllInfo *info);"
+## rtype    "R_altrep_class_t\n"                                                                           
+## fun_name "R_make_altraw_class"                                                                          
+## args     "const char *cname, const char *pname, DllInfo *info"                                          
+##          [,7]                                                                                               
+##          "\nR_altrep_class_t\nR_make_altcomplex_class(const char *cname, const char *pname, DllInfo *info);"
+## rtype    "R_altrep_class_t\n"                                                                               
+## fun_name "R_make_altcomplex_class"                                                                          
+## args     "const char *cname, const char *pname, DllInfo *info"                                              
+##          [,8]                                                                                            
+##          "\nR_altrep_class_t\nR_make_altlist_class(const char *cname, const char *pname, DllInfo *info);"
+## rtype    "R_altrep_class_t\n"                                                                            
+## fun_name "R_make_altlist_class"                                                                          
+## args     "const char *cname, const char *pname, DllInfo *info"                                           
+##          [,9]                                                     
+##          "\nRboolean R_altrep_inherits(SEXP x, R_altrep_class_t);"
+## rtype    "Rboolean "                                              
+## fun_name "R_altrep_inherits"                                      
+## args     "SEXP x, R_altrep_class_t"
+```
+
+```r
 match.mat["fun_name",]
+```
+
+```
+## [1] "R_new_altrep"            "R_make_altstring_class"  "R_make_altinteger_class" "R_make_altreal_class"   
+## [5] "R_make_altlogical_class" "R_make_altraw_class"     "R_make_altcomplex_class" "R_make_altlist_class"   
+## [9] "R_altrep_inherits"
 ```
 
 The output above includes all of the capture groups.
@@ -206,7 +308,8 @@ The output above includes all of the capture groups.
 
 The code below is a port of the regex code to use my nc package,
 
-```{r}
+
+```r
 pattern.list <- list( 
   "(?xs)",
   "(?!typedef)(?<!\\w)", # please no typedefs
@@ -231,11 +334,33 @@ Capture groups are defined using named arguments in R code, instead of parenthes
 * nc code avoids some parentheses that are present in the base R regex string literal, because each named argument is converted into a capture group.
 * `nc::alternatives` is used instead of string literal alternation via `"|"`.
 
-```{r}
+
+```r
 (match.dt <- nc::capture_all_str(
   no.pre.processor.directives,
   pattern.list))
+```
+
+```
+##                 rtype                fun_name                                                args
+##                <char>                  <char>                                              <char>
+## 1:             SEXP\n            R_new_altrep     R_altrep_class_t aclass, SEXP data1, SEXP data2
+## 2: R_altrep_class_t\n  R_make_altstring_class const char *cname, const char *pname, DllInfo *info
+## 3: R_altrep_class_t\n R_make_altinteger_class const char *cname, const char *pname, DllInfo *info
+## 4: R_altrep_class_t\n    R_make_altreal_class const char *cname, const char *pname, DllInfo *info
+## 5: R_altrep_class_t\n R_make_altlogical_class const char *cname, const char *pname, DllInfo *info
+## 6: R_altrep_class_t\n     R_make_altraw_class const char *cname, const char *pname, DllInfo *info
+## 7: R_altrep_class_t\n R_make_altcomplex_class const char *cname, const char *pname, DllInfo *info
+## 8: R_altrep_class_t\n    R_make_altlist_class const char *cname, const char *pname, DllInfo *info
+## 9:          Rboolean        R_altrep_inherits                            SEXP x, R_altrep_class_t
+```
+
+```r
 identical(match.dt, data.table(t(match.mat[-1,])))
+```
+
+```
+## [1] TRUE
 ```
 
 The output above shows that the output of both methods is identical. 
