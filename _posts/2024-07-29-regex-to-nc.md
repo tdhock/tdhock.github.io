@@ -16,9 +16,9 @@ In R, there is special nomenclature for standard computer science / programming 
 
 * A library (piece of code which offers extended functionality) in R is called a package, which can contain R and C code.
 * The "standard library" in R, sometimes called base R, includes the Recommended packages, developed by R core, which is a group 10-20 people, listed in the [AUTHORS](https://github.com/r-devel/r-svn/blob/main/doc/AUTHORS) file.
-* Other packages are distributed on the CRAN, and these other package may include custom C code, which can call some of the C library functions that are provided in the base R packages.
+* Other packages, developed by other people, are distributed on the CRAN, and these other packages may include custom C code, which can call some of the C library functions that are provided in the base R packages.
 
-Up until this year, there has been only an informal definition of which base C library functions are public. That is, if the functions were described in Writing R Extensions, then that means they are exported / allowed to be called by other packages. 
+Up until this year, there has been only an informal definition of which base C library functions are public. That is, if the functions were described in [Writing R Extensions](https://cloud.r-project.org/doc/manuals/r-release/R-exts.html), then that means they are exported / allowed to be called by other packages. 
 
 Earlier this year, R core has started to formally declare which base C library functions are public.
 So there is now a programmatic method for determining which C library functions are public.
@@ -27,9 +27,8 @@ There is an interest in programming tools that can be used to determine which C 
 
 ## Ivan's code
 
-Earlier this month, Ivan Krylov posted the following on R-devel,
-
-https://stat.ethz.ch/pipermail/r-devel/2024-July/083542.html
+Earlier this month, Ivan Krylov [posted the following on
+R-devel](https://stat.ethz.ch/pipermail/r-devel/2024-July/083542.html).
 
 A relatively compact (but still brittle) way to match function
 declarations in C header files is shown at the end of this message. I
@@ -143,7 +142,7 @@ gsub("(?m)^", "_", "foo\nbar", perl=TRUE)
 
 
 ```r
-sub(    ".*", "", "foo\nbar", perl=TRUE)
+sub(".*", "", "foo\nbar", perl=TRUE)
 ```
 
 ```
@@ -160,10 +159,9 @@ sub("(?s).*", "", "foo\nbar", perl=TRUE)
 
 ### Extended matching
 
-`(?x)` turns on extended matching, which is documented
+`(?x)` turns on extended matching, which is documented in
 
-* in
-  [COMMENTS](https://www.pcre.org/current/doc/html/pcre2pattern.html#SEC24):
+* [COMMENTS](https://www.pcre.org/current/doc/html/pcre2pattern.html#SEC24):
   "The sequence `(?#` marks the start of a comment that continues up
   to the next closing parenthesis. Nested parentheses are not
   permitted. If the `PCRE2_EXTENDED` or `PCRE2_EXTENDED_MORE` option

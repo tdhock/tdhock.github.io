@@ -27,7 +27,7 @@ if(FALSE){
 }
 ```
 
-# Background
+## Background
 
 `data.table` provides a simple syntax for a large number of data manipulation operations: `DT[i,j,by]` where 
 * `i` is used to subset rows,
@@ -46,7 +46,7 @@ working on fixing this in
 [PR#6228](https://github.com/Rdatatable/data.table/pull/6228), and I
 am mentoring him.
 
-# Performance
+## Performance
 
 We would like to evaluate the performance (time and memory usage) of
 `data.table` before and after the changes proposed by Joshua in that
@@ -56,7 +56,7 @@ and after. How can we verify that?
 I have created the [atime](https://github.com/tdhock/atime) R package
 to help answer performance-related questions like this.
 
-# showProgress=TRUE versus FALSE
+## showProgress=TRUE versus FALSE
 
 The PR introduces a new `showProgress` argument, `DT[i,j,by,showProgress]`, which can be either `TRUE` or `FALSE`. We would like to compare the performance of these two options. 
 
@@ -114,7 +114,7 @@ plot(a.result)
 The plot above shows that there is no significant performance
 difference between the three expressions. This is a good thing!
 
-# Comparing versions
+## Comparing versions
 
 We would also like to make sure that the new code is just as fast as
 the old code (before the PR). So how can we find a version of the code before that PR? First go to the [PR commits page](https://github.com/Rdatatable/data.table/pull/6228/commits), then examine the [details of the first commit, 20b213738fdb500369201f6ff584dae3a1bcd44b](https://github.com/Rdatatable/data.table/commit/20b213738fdb500369201f6ff584dae3a1bcd44b). That page shows that its parent is [6df30c39cc5d1e910e6f4ab84ccdcc693c64315c](https://github.com/Rdatatable/data.table/commit/6df30c39cc5d1e910e6f4ab84ccdcc693c64315c), so that is a good candidate.
@@ -179,6 +179,17 @@ The code above contains a few new arguments:
 * `pkg.path` is the file path of a git repository containing an R package, in which we can find the `master` and `showProgress` commits,
 * `pkg.edit.fun` is a function (here specific to `data.table`) which is applied to each git version of the package, in order to make it suitable for installation under the name `PKG.SHA`,
 * `seconds.limit` is the max number of seconds any timing can take (past which we stop trying larger N). Default is 0.01, and we increased it to 0.1 in the code above.
+* `expr` is an expression which we time for each git SHA version of
+  the package specified. Here there are two versions, `master` and
+  `showProgress`. Note that in `atime_versions` we must write
+  ``data.table:::`[.data.table`(DT, , .(m=mean(i)), by=g)`` instead of
+  `DT[, .(m=mean(i)), by=g]`, because timing different versions works
+  by substituting `data.table::` with a version-specific package, such
+  as `data.table.6df30c39cc5d1e910e6f4ab84ccdcc693c64315c::`. If we
+  used `DT[, .(m=mean(i)), by=g]` then it would be using the code in
+  regular `data.table` every time, instead of the code in one of the
+  version-specific packages like
+  `data.table.6df30c39cc5d1e910e6f4ab84ccdcc693c64315c`.
 
 ```{r master-showProgress}
 plot(v.result)
@@ -188,7 +199,54 @@ The plot above shows that there is no significant performance
 difference between the new `showProgress` version of the code, and the
 previous `master` version.
 
-# Conclusion
+## Positive control
+
+Above we saw no performance differences between the different versions of the code. Here we study a historical performance improvement.
+
+```{r positiveControl}
+key.versions <- atime::atime_versions(
+  pkg.path="~/R/data.table",
+  pkg.edit.fun=edit.data.table,
+  N = 10^seq(1, 10, by=0.5),
+  setup = {
+    set.seed(1)
+    L = as.data.table(as.character(rnorm(N, 1, 0.5)))
+    setkey(L, V1)
+  },
+  ## New DT can safely retain key.
+  expr = {
+    data.table:::`[.data.table`(L, , .SD)
+  },
+  Fast = "353dc7a6b66563b61e44b2fa0d7b73a0f97ca461", # Close-to-last merge commit in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+  Slow = "3ca83738d70d5597d9e168077f3768e32569c790", # Circa 2024 master parent of close-to-last merge commit (https://github.com/Rdatatable/data.table/commit/353dc7a6b66563b61e44b2fa0d7b73a0f97ca461) in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+  Slower = "cacdc92df71b777369a217b6c902c687cf35a70d") # Circa 2020 parent of the first commit (https://github.com/Rdatatable/data.table/commit/74636333d7da965a11dad04c322c752a409db098) in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+plot(key.versions)
+```
+
+It is clear that there is a significant difference between the three
+versions (Slower, Slow, Fast).
+
+Note what happens in the code below, when we use `expr=L[,.SD]`:
+
+```{r purl=FALSE}
+atime::atime_versions(
+  pkg.path="~/R/data.table",
+  pkg.edit.fun=edit.data.table,
+  N = 10^seq(1, 10, by=0.5),
+  setup = {
+    set.seed(1)
+    L = as.data.table(as.character(rnorm(N, 1, 0.5)))
+    setkey(L, V1)
+  },
+  expr = L[,.SD],
+  Fast = "353dc7a6b66563b61e44b2fa0d7b73a0f97ca461", # Close-to-last merge commit in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+  Slow = "3ca83738d70d5597d9e168077f3768e32569c790", # Circa 2024 master parent of close-to-last merge commit (https://github.com/Rdatatable/data.table/commit/353dc7a6b66563b61e44b2fa0d7b73a0f97ca461) in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+  Slower = "cacdc92df71b777369a217b6c902c687cf35a70d") # Circa 2020 parent of the first commit (https://github.com/Rdatatable/data.table/commit/74636333d7da965a11dad04c322c752a409db098) in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+```
+
+The error message tells us that `expr` should contain at least one instance of `data.table::` to replace with a version-specific package name, `data.table.353dc7a6b66563b61e44b2fa0d7b73a0f97ca461::`.
+
+## Conclusion
 
 We have shown how to use `atime` to check if there are any performance differences between 
 
