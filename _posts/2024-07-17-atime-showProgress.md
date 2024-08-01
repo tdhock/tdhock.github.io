@@ -204,10 +204,6 @@ v.result <- atime::atime_versions(
   showProgress=pr.sha)
 ```
 
-```
-## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
-```
-
 The code above contains a few new arguments:
 
 * `pkg.path` is the file path of a git repository containing an R package, in which we can find the `master` and `showProgress` commits,
@@ -242,22 +238,24 @@ Above we saw no performance differences between the different versions of the co
 
 
 ```r
-key.versions <- atime::atime_versions(
-  pkg.path="~/R/data.table",
-  pkg.edit.fun=edit.data.table,
-  N = 10^seq(1, 10, by=0.5),
-  setup = {
-    set.seed(1)
-    L = as.data.table(as.character(rnorm(N, 1, 0.5)))
-    setkey(L, V1)
-  },
-  ## New DT can safely retain key.
-  expr = {
-    data.table:::`[.data.table`(L, , .SD)
-  },
-  Fast = "353dc7a6b66563b61e44b2fa0d7b73a0f97ca461", # Close-to-last merge commit in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
-  Slow = "3ca83738d70d5597d9e168077f3768e32569c790", # Circa 2024 master parent of close-to-last merge commit (https://github.com/Rdatatable/data.table/commit/353dc7a6b66563b61e44b2fa0d7b73a0f97ca461) in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
-  Slower = "cacdc92df71b777369a217b6c902c687cf35a70d") # Circa 2020 parent of the first commit (https://github.com/Rdatatable/data.table/commit/74636333d7da965a11dad04c322c752a409db098) in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+overall.time <- system.time({
+  key.versions <- atime::atime_versions(
+    pkg.path="~/R/data.table",
+    pkg.edit.fun=edit.data.table,
+    N = 10^seq(1, 10, by=0.25),
+    setup = {
+      set.seed(1)
+      L = as.data.table(as.character(rnorm(N, 1, 0.5)))
+      setkey(L, V1)
+    },
+    ## New DT can safely retain key.
+    expr = {
+      data.table:::`[.data.table`(L, , .SD)
+    },
+    Fast = "353dc7a6b66563b61e44b2fa0d7b73a0f97ca461", # Close-to-last merge commit in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+    Slow = "3ca83738d70d5597d9e168077f3768e32569c790", # Circa 2024 master parent of close-to-last merge commit (https://github.com/Rdatatable/data.table/commit/353dc7a6b66563b61e44b2fa0d7b73a0f97ca461) in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+    Slower = "cacdc92df71b777369a217b6c902c687cf35a70d") # Circa 2020 parent of the first commit (https://github.com/Rdatatable/data.table/commit/74636333d7da965a11dad04c322c752a409db098) in the PR (https://github.com/Rdatatable/data.table/pull/4501/commits) that fixes the issue 
+})
 plot(key.versions)
 ```
 
@@ -290,6 +288,61 @@ atime::atime_versions(
 ```
 
 The error message tells us that `expr` should contain at least one instance of `data.table::` to replace with a version-specific package name, `data.table.353dc7a6b66563b61e44b2fa0d7b73a0f97ca461::`.
+
+Finally, we may wonder from the plot above, just how much faster is
+the new/Fast version of the code. Looking at the plot above, it is
+clear that it is quantitatively faster, but it is not clear
+quantitatively how much faster (10x or 100x?). To answer that
+question, we can use the predict method as below.
+
+
+```r
+key.refs <- atime::references_best(key.versions)
+key.pred <- predict(key.refs)
+plot(key.pred)
+```
+
+```
+## Warning in ggplot2::scale_x_log10("N", breaks = meas[, 10^seq(ceiling(min(log10(N))), : log-10 transformation
+## introduced infinite values.
+```
+
+![plot of chunk positiveControl-pred](/assets/img/2024-07-17-atime-showProgress/positiveControl-pred-1.png)
+
+The labels in the plot above show the estimated data size N which are possible to process within the 0.01 second time limit. It shows an estimate of the quantitative differences:
+
+* Slow is about 10x faster than Slower, and
+* Fast is about 10x faster than Slow.
+
+## Time required
+
+A final advantage to using `atime` is that it allows us to quickly see asymptotic performance differences between methods which are different by orders of magnitude.
+
+Using the atime approach above, we saw 100x differences (between Slower and Fast methods), but the overall computation time was only a few seconds, as shown below.
+
+
+```r
+overall.time
+```
+
+```
+##    user  system elapsed 
+##  20.838   0.227  24.435
+```
+
+How does that work? The secret is that atime keeps increasing N until
+the time goes over the limit for each method, and then we stop
+increasing N for that method. So the computation time for each method
+(and the overall time) is never significantly larger than the time
+limit.  That is true for at least for one trial/timing, but the
+default is to run 10 timings (user-controllable via the `times`
+argument). With the default time limit of 0.01, that means atime will
+by default take on the order of seconds overall (or less). Most of the time, this default time limit is large enough to see the asymptotic time complexity (not just the constant/overhead time which dominates in the small N regime). For some problems and hardware, this default may need to increase, but so far we have observed that this default is sufficient for seeing significant differences in several different kinds of problems.
+
+In contrast, the traditional method for performance comparison involves comparing the computational requirements for a given data size N (the opposite of the atime approach of comparing the data size N possible for a given time limit). Although that method is simpler to implement (using packages like `microbenchmark`), it is inherently more time intensive. For example, consider the atime default time limit of 0.01, with a time difference of 100x between methods. Using the traditional approach, assuming the fastest approach takes 0.01 seconds, the slowest approach would take 1 second, and so the overall time is controlled by the slowest approach (whereas the overall time is controlled by the time limit in the atime approach). 
+
+And often we have to choose a large N to see the asymptotic regime of
+the fastest method, so the overall time can be very slow. In the example above, N=1e4 is not large enough to escape the constant/overhead regime, so at least 1e5 is necessary, and maybe 1e6, which takes about 0.01 seconds. For the same data size, Slow takes about 0.1 seconds, and Slower takes about 1 second. And doing that 10 times would mean an overall time of 10-100 seconds, which is an order of magnitude slower than the atime approach (1-10 seconds overall).
 
 ## Conclusion
 
