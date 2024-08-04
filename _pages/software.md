@@ -265,10 +265,11 @@ I wrote the `str.extractall` method for regular expressions, which was
 
 ### data.table
 
-To support my NSF project about expanding the open-source community
-around R [data.table](https://github.com/Rdatatable/data.table), I
-provided several important contributions, such as the `measure()`
-function, and was recognized as co-author (committer).
+To support my NSF POSE funded project (2023-2025) about expanding the
+open-source community around R
+[data.table](https://github.com/Rdatatable/data.table), I provided
+several important contributions, such as the `measure()` function, and
+was recognized as co-author (committer).
 
 ### atime: Asymptotic Time and Memory Complexity
 
