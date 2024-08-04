@@ -92,6 +92,11 @@ aum::aum(bin.diffs, c(-10,10))
 ##      [,1] [,2]
 ## [1,]    0    0
 ## [2,]    0    0
+## 
+## $total_error
+##   thresh fp_before fn_before
+## 1     10         0         0
+## 2    -10         0         1
 ```
 
 The R code and output above shows that for one negative label with
@@ -125,6 +130,11 @@ aum::aum(bin.diffs, c(10,-10))
 ##      [,1] [,2]
 ## [1,]    1    1
 ## [2,]   -1   -1
+## 
+## $total_error
+##   thresh fp_before fn_before
+## 1    -10         0         1
+## 2     10         1         1
 ```
 
 The R code and output above shows that we have AUM=20 and derivative 1
@@ -168,6 +178,11 @@ aum::aum(bin.diffs, c(0,0))
 ##      [,1] [,2]
 ## [1,]    0    1
 ## [2,]   -1    0
+## 
+## $total_error
+##   thresh fp_before fn_before
+## 1      0         0         1
+## 2      0         0         1
 ```
 
 The output above indicates AUM=0 with directional derivatives which
@@ -202,3 +217,7 @@ may be points at which there are no subgradients. Some are used as
 [test cases in our R package](https://github.com/tdhock/aum/blob/main/tests/testthat/test-CRAN.R).
 What does auto-grad return in that case? (exercise for the reader)
 
+Update Aug 2024. The `AUM` function above uses the minimum of total FP and FN, whereas there now is a more complete python AUM implementation which can use rates (FPR/FNR) rather than totals.
+
+* [rate only](https://github.com/tdhock/max-generalized-auc/blob/master/data_Classif.py#L41)
+* [count total or rate](https://github.com/tdhock/max-generalized-auc/blob/master/figure-aum-neural-networks-data.py#L83)

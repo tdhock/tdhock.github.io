@@ -197,3 +197,7 @@ may be points at which there are no subgradients. Some are used as
 [test cases in our R package](https://github.com/tdhock/aum/blob/main/tests/testthat/test-CRAN.R).
 What does auto-grad return in that case? (exercise for the reader)
 
+Update Aug 2024. The `AUM` function above uses the minimum of total FP and FN, whereas there now is a more complete python AUM implementation which can use rates (FPR/FNR) rather than totals.
+
+* [rate only](https://github.com/tdhock/max-generalized-auc/blob/master/data_Classif.py#L41)
+* [count total or rate](https://github.com/tdhock/max-generalized-auc/blob/master/figure-aum-neural-networks-data.py#L83)
