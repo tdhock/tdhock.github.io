@@ -28,6 +28,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   emissions. Under review at Environmental Research Letters.
 - Nguyen T, Hocking TD. Deep Learning Approach for Changepoint
   Detection: Penalty Parameter Optimization.
+  [Preprint arXiv:2408.00856](https://arxiv.org/abs/2408.00856)
 - Truong C, Hocking TD. Fast change-point detection for multivariate
   circular data.
 - Bodine CS, Buscombe D, Hocking TD. Open-source approach for
