@@ -1,0 +1,228 @@
+---
+layout: post
+title: Collapse reshape benchmark
+description: Comparison with data.table
+---
+
+[data.table](https://github.com/rdatatable/data.table) is an R package
+for efficient data manipulation.  I have an NSF POSE grant about
+expanding the open-source ecosystem of users and contributors around
+`data.table`.  Part of that project is benchmarking time and memory
+usage, and comparing with similar packages.  Similar to [a previous
+post](https://tdhock.github.io/blog/2024/reshape-performance/), the
+goal of this post is to explain how to use
+[atime](https://github.com/tdhock/atime) to benchmark `data.table`
+reshape with similar packages.
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-08-05-collapse-reshape"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+## Background about data reshaping
+
+Data reshaping means changing the shape of the data, in order to get
+it into a more appropriate format, for learning/plotting/etc. It is
+perhaps best explained using a simple example. Here we consider the
+iris data, which has four numeric columns, and we show the first two rows below:
+
+```{r}
+(two.iris.wide <- iris[c(1,150),])
+```
+
+Note the table above has 8 numbers, arranged into a table of 2 rows
+and 4 columns. What if we wanted to make a facetted histogram of the
+numeric iris data columns, with one panel/facet for each column? With
+ggplots we have to first reshape to "long" (or I like to say "tall")
+format:
+
+```{r}
+cols.to.reshape <- c("Sepal.Length","Sepal.Width","Petal.Length","Petal.Width")
+two.iris.wide.mat <- as.matrix(two.iris.wide[,cols.to.reshape])
+row.i <- as.integer(row(two.iris.wide.mat))
+(two.iris.tall <- data.frame(
+  row.i,
+  Species=two.iris.wide$Species[row.i],
+  row.name=rownames(two.iris.wide)[row.i],
+  col.name=cols.to.reshape[as.integer(col(two.iris.wide.mat))],
+  cm=as.numeric(two.iris.wide.mat)))
+```
+
+Note the table above has the same 8 numbers, but arranged into a table
+of 8 rows and 1 column, which is the desired input for ggplots.
+
+## Making a function
+
+Here is how we would do it using a function:
+
+```{r}
+reshape_taller <- function(DF, col.i){
+  orig.row.i <- 1:nrow(DF)
+  wide.mat <- as.matrix(DF[, col.i])
+  orig.col.i <- as.integer(col(wide.mat))
+  other.values <- DF[, -col.i, drop=FALSE]
+  rownames(other.values) <- NULL
+  data.frame(
+    orig.row.i,
+    orig.row.name=rownames(DF)[orig.row.i],
+    orig.col.i,
+    orig.col.name=names(DF)[orig.col.i],
+    other.values,
+    value=as.numeric(wide.mat))
+}
+reshape_taller(two.iris.wide,1:4)
+```
+
+And below is with the full iris data set:
+
+```{r hist}
+iris.tall <- reshape_taller(iris,1:4)
+library(ggplot2)
+ggplot()+
+  geom_histogram(aes(
+    value),
+    bins=50,
+    data=iris.tall)+
+  facet_wrap("orig.col.name")
+```
+
+## Comparison with other functions
+
+The function defined above works, and there are other functions which
+provide similar functionality. For example,
+
+```{r}
+head(stats::reshape(
+  iris, direction="long", varying=list(cols.to.reshape), v.names="cm"))
+library(data.table)
+iris.dt <- data.table(iris)
+melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
+tidyr::pivot_longer(iris, cols.to.reshape, values_to = "cm")
+head(collapse::pivot(iris, values=cols.to.reshape, names=list("variable", "cm")))
+```
+
+Below we define a larger version of iris data, as a function of number
+of rows `N`:
+
+```{r}
+N <- 250
+(row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
+N.df <- iris[row.id.vec,]
+(N.dt <- data.table(N.df))
+```
+
+Below we use `atime` to compare the performance of the reshape
+functions:
+
+```{r atime-tall}
+a.res <- atime::atime(
+  setup={
+    (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
+    N.df <- iris[row.id.vec,]
+    (N.dt <- data.table(N.df))
+  },
+  seconds.limit=0.1,
+  reshape_taller=reshape_taller(N.df,1:4),
+  "stats::reshape"=stats::reshape(N.df, direction="long", varying=list(cols.to.reshape), v.names="cm"),
+  "data.table::melt"=melt(N.dt, measure.vars=cols.to.reshape, value.name="cm"),
+  "tidyr::pivot_longer"=tidyr::pivot_longer(N.df, cols.to.reshape, values_to = "cm"),
+  "collapse::pivot"=collapse::pivot(N.df, values=cols.to.reshape, names=list("variable", "cm")))
+a.refs <- atime::references_best(a.res)
+a.pred <- predict(a.refs)
+plot(a.pred)+coord_cartesian(xlim=c(1e2,1e7))
+```
+
+## reshape wider
+
+Above we did a wide to tall reshape. The inverse of that operation is
+a tall to wide reshape,
+
+```{r}
+matrix(
+  two.iris.tall$cm, nrow(two.iris.wide), length(cols.to.reshape),
+  dimnames = list(
+    two.iris.tall$row.name[1:nrow(two.iris.wide)],
+    cols.to.reshape))
+```
+
+More generically to do that, we would need to consider missing
+entries, as in the code below.
+
+```{r}
+reshape_wider <- function(DF){
+  dimnames <- list()
+  other.names <- setdiff(
+    names(DF),
+    c("orig.row.i", "orig.row.name", "orig.col.i", "orig.col.name", "value"))
+  for(dim.type in c('row','col')){
+    f <- function(suffix)paste0('orig.',dim.type,'.',suffix)
+    u <- unique(DF[, c(
+      f(c("i","name")),
+      if(dim.type=='row')other.names
+    )])
+    s <- u[order(u[,f("i")]), ]
+    dimnames[[dim.type]] <- s[, f("name")]
+    if(dim.type=='row')other.df <- s[,other.names,drop=FALSE]
+  }
+  mat <- matrix(
+    NA_real_, length(dimnames$row), length(dimnames$col),
+    dimnames = dimnames)
+  mat[cbind(DF$orig.row.i, DF$orig.col.i)] <- DF$value
+  data.frame(mat, other.df)
+}
+(missing.one <- reshape_taller(two.iris.wide,1:4)[-1,])
+reshape_wider(missing.one)
+```
+
+Other functions for doing that below:
+
+```{r}
+library(data.table)
+N.tall.df <- reshape_taller(N.df,1:4)
+str(reshape_wider(N.tall.df))
+N.tall.dt <- data.table(N.tall.df)
+str(dcast(N.tall.dt, orig.row.i ~ orig.col.name, value.var = "value"))
+str(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"), timevar="orig.col.name", v.names="value"))
+str(tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=orig.row.i))
+str(collapse::pivot(N.tall.df, how="w", ids="orig.row.i", values="value", names="orig.col.name"))
+```
+
+Timings below
+
+```{r atime-wide}
+w.res <- atime::atime(
+  setup={
+    (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
+    N.df <- iris[row.id.vec,]
+    N.tall.df <- reshape_taller(N.df,1:4)
+    N.tall.dt <- data.table(N.tall.df)
+  },
+  seconds.limit=0.1,
+  "reshape\nwider"=reshape_wider(N.tall.df),
+  "data.table\ndcast"=dcast(N.tall.dt, orig.row.i ~ orig.col.name, value.var = "value"),
+  "stats\nreshape"=stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"), timevar="orig.col.name", v.names="value"),
+  "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=orig.row.i),
+  "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids="orig.row.i", values="value", names="orig.col.name"))
+w.refs <- atime::references_best(w.res)
+w.pred <- predict(w.refs)
+plot(w.pred)+coord_cartesian(xlim=c(NA,1e8))
+```
+
+The comparison above shows that collapse is actually quite a bit
+faster (50x) for this tall to wide reshape operation which involved
+just copying data (no summarization).
+
+## Conclusion
+
+We have shown how to use `atime` to check if there are any performance differences between data reshaping functions in R.
