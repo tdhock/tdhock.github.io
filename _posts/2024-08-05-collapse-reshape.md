@@ -142,6 +142,16 @@ head(stats::reshape(
 
 ``` r
 library(data.table)
+```
+
+```
+## data.table 1.15.99 IN DEVELOPMENT built 2024-05-02 04:20:26 UTC using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+## **********
+## This development version of data.table was built more than 4 weeks ago. Please update: data.table::update_dev_pkg()
+## **********
+```
+
+``` r
 iris.dt <- data.table(iris)
 melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 ```
@@ -164,6 +174,20 @@ melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 
 ``` r
 tidyr::pivot_longer(iris, cols.to.reshape, values_to = "cm")
+```
+
+```
+## Warning: Using an external vector in selections was deprecated in tidyselect 1.1.0.
+## ℹ Please use `all_of()` or `any_of()` instead.
+##   # Was:
+##   data %>% select(cols.to.reshape)
+## 
+##   # Now:
+##   data %>% select(all_of(cols.to.reshape))
+## 
+## See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 ```
 
 ```
@@ -263,6 +287,10 @@ plot(a.pred)+coord_cartesian(xlim=c(1e2,1e7))
 ```
 
 ```
+## Le chargement a nécessité le package : directlabels
+```
+
+```
 ## Warning in ggplot2::scale_x_log10("N", breaks = meas[, 10^seq(ceiling(min(log10(N))), : log-10 transformation
 ## introduced infinite values.
 ```
@@ -272,7 +300,103 @@ plot(a.pred)+coord_cartesian(xlim=c(1e2,1e7))
 The result above shows that `collapse` is fastest, but `data.table` is
 almost as fast (by small a constant factor).
 
-## reshape wider
+## Regex and multiple column support
+
+In my [paper about the nc
+package](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html),
+I proposed a new syntax for defining wide-to-tall reshape operations,
+using regular expressions (regex). The motivating example in that
+paper was a scatterplot to show that Sepals are larger than
+Petals, as we see in the code/plot below.
+
+
+``` r
+iris.parts <- nc::capture_melt_multiple(iris.dt, column=".*", "[.]", dim=".*")
+ggplot()+
+  geom_point(aes(
+    Petal, Sepal, color=Species),
+    data=iris.parts)+
+  facet_grid(. ~ dim, labeller=label_both)+
+  coord_equal()+
+  theme_bw()+
+  geom_abline(slope=1, intercept=0, color="grey50")
+```
+
+![plot of chunk iris-scatter](/assets/img/2024-08-05-collapse-reshape/iris-scatter-1.png)
+
+Other ways to do that reshape operation are shown in the code below:
+
+
+``` r
+stats::reshape(two.iris.wide, cols.to.reshape, direction="long", timevar="dim", sep=".")
+```
+
+```
+##            Species    dim Sepal Petal id
+## 1.Length    setosa Length   5.1   1.4  1
+## 2.Length virginica Length   5.9   5.1  2
+## 1.Width     setosa  Width   3.5   0.2  1
+## 2.Width  virginica  Width   3.0   1.8  2
+```
+
+``` r
+melt(data.table(two.iris.wide), measure.vars=measure(value.name, part, pattern="(.*)[.](.*)"))
+```
+
+```
+##      Species   part Sepal Petal
+##       <fctr> <char> <num> <num>
+## 1:    setosa Length   5.1   1.4
+## 2: virginica Length   5.9   5.1
+## 3:    setosa  Width   3.5   0.2
+## 4: virginica  Width   3.0   1.8
+```
+
+``` r
+tidyr::pivot_longer(two.iris.wide, cols.to.reshape, names_pattern = "(.*)[.](.*)", names_to = c(".value","part"))
+```
+
+```
+## # A tibble: 4 × 4
+##   Species   part   Sepal Petal
+##   <fct>     <chr>  <dbl> <dbl>
+## 1 setosa    Length   5.1   1.4
+## 2 setosa    Width    3.5   0.2
+## 3 virginica Length   5.9   5.1
+## 4 virginica Width    3     1.8
+```
+
+However `?collapse::pivot` explains that it "currently does not
+support concurrently melting/pivoting longer to multiple columns."
+Below we compare the performance of these methods:
+
+
+``` r
+r.res <- atime::atime(
+  N=2^seq(1,50),
+  setup={
+    (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
+    N.df <- iris[row.id.vec,]
+    (N.dt <- data.table(N.df))
+  },
+  seconds.limit=0.1,
+  "nc::capture\nmelt_multiple"=nc::capture_melt_multiple(N.dt, column=".*", "[.]", dim=".*"),
+  "stats\nreshape"=stats::reshape(N.df, cols.to.reshape, direction="long", timevar="dim", sep="."),
+  "data.table\nmeasure"=melt(N.dt, measure.vars=measure(value.name, part, pattern="(.*)[.](.*)")),
+  "tidyr\nnames_pattern"=tidyr::pivot_longer(N.df, cols.to.reshape, names_pattern = "(.*)[.](.*)", names_to = c(".value","part")))
+r.refs <- atime::references_best(r.res)
+r.pred <- predict(r.refs)
+plot(r.pred)+coord_cartesian(xlim=c(1e2,1e7))
+```
+
+```
+## Warning in ggplot2::scale_x_log10("N", breaks = meas[, 10^seq(ceiling(min(log10(N))), : log-10 transformation
+## introduced infinite values.
+```
+
+![plot of chunk atime-regex](/assets/img/2024-08-05-collapse-reshape/atime-regex-1.png)
+
+## Reshape wider
 
 Above we did a wide to tall reshape. The inverse of that operation is
 a tall to wide reshape,
@@ -428,6 +552,19 @@ str(collapse::pivot(N.tall.df, how="w", ids="orig.row.i", values="value", names=
 ##  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
 ##  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
 ```
+
+In all of the code examples above there are a few common elements
+
+* ID: used to identify unique output rows must be specified, 
+* Name: used for column names of output,
+* Value: used to fill in elements of output.
+
+| function             | ID             | Name           | Value         |
+|----------------------|----------------|----------------|---------------|
+| `data.table::dcast`  | LHS of formula | RHS of formula | `value.var`   |
+| `stats::reshape`     | `idvar`        | `timevar`      | `v.names`     |
+| `tidyr::pivot_wider` | `id_cols`      | `names_from`   | `values_from` |
+| `collapse::pivot`    | `ids`          | `names`        | `values`      |
 
 Timings below
 
@@ -732,6 +869,258 @@ The comparison above shows that collapse is actually quite a bit
 faster (50x) for this tall to wide reshape operation which involved
 just copying data (no summarization).
 
+## Reshape wider with summarization
+
+Sometimes we want to do a reshape wider operation with summarization
+functions. For example, in the code below, we use `mean` for every `orig.col.name` and `Species`:
+
+
+``` r
+dcast(N.tall.dt, orig.col.name + Species ~ ., mean)
+```
+
+```
+## Key: <orig.col.name, Species>
+##     orig.col.name    Species     .
+##            <char>     <fctr> <num>
+##  1:  Petal.Length     setosa 1.462
+##  2:  Petal.Length versicolor 4.260
+##  3:  Petal.Length  virginica 5.552
+##  4:   Petal.Width     setosa 0.246
+##  5:   Petal.Width versicolor 1.326
+##  6:   Petal.Width  virginica 2.026
+##  7:  Sepal.Length     setosa 5.006
+##  8:  Sepal.Length versicolor 5.936
+##  9:  Sepal.Length  virginica 6.588
+## 10:   Sepal.Width     setosa 3.428
+## 11:   Sepal.Width versicolor 2.770
+## 12:   Sepal.Width  virginica 2.974
+```
+
+``` r
+stats::aggregate(N.tall.df[,"value",drop=FALSE], by=with(N.tall.df, list(orig.col.name=orig.col.name,Species=Species)), FUN=mean)
+```
+
+```
+##    orig.col.name    Species value
+## 1   Petal.Length     setosa 1.462
+## 2    Petal.Width     setosa 0.246
+## 3   Sepal.Length     setosa 5.006
+## 4    Sepal.Width     setosa 3.428
+## 5   Petal.Length versicolor 4.260
+## 6    Petal.Width versicolor 1.326
+## 7   Sepal.Length versicolor 5.936
+## 8    Sepal.Width versicolor 2.770
+## 9   Petal.Length  virginica 5.552
+## 10   Petal.Width  virginica 2.026
+## 11  Sepal.Length  virginica 6.588
+## 12   Sepal.Width  virginica 2.974
+```
+
+``` r
+N.tall.df$name <- "foo"
+tidyr::pivot_wider(N.tall.df, names_from=name, values_from=value, id_cols=c(orig.col.name,Species), values_fn=mean)
+```
+
+```
+## # A tibble: 12 × 3
+##    orig.col.name Species      foo
+##    <chr>         <fct>      <dbl>
+##  1 Sepal.Length  setosa     5.01 
+##  2 Sepal.Length  versicolor 5.94 
+##  3 Sepal.Length  virginica  6.59 
+##  4 Sepal.Width   setosa     3.43 
+##  5 Sepal.Width   versicolor 2.77 
+##  6 Sepal.Width   virginica  2.97 
+##  7 Petal.Length  setosa     1.46 
+##  8 Petal.Length  versicolor 4.26 
+##  9 Petal.Length  virginica  5.55 
+## 10 Petal.Width   setosa     0.246
+## 11 Petal.Width   versicolor 1.33 
+## 12 Petal.Width   virginica  2.03
+```
+
+``` r
+collapse::pivot(N.tall.df, how="w", ids=c("orig.col.name","Species"), values="value", names="name", FUN=mean)
+```
+
+```
+##    orig.col.name    Species   foo
+## 1   Sepal.Length     setosa 5.006
+## 2   Sepal.Length versicolor 5.936
+## 3   Sepal.Length  virginica 6.588
+## 4    Sepal.Width     setosa 3.428
+## 5    Sepal.Width versicolor 2.770
+## 6    Sepal.Width  virginica 2.974
+## 7   Petal.Length     setosa 1.462
+## 8   Petal.Length versicolor 4.260
+## 9   Petal.Length  virginica 5.552
+## 10   Petal.Width     setosa 0.246
+## 11   Petal.Width versicolor 1.326
+## 12   Petal.Width  virginica 2.026
+```
+
+Note in the code above that to get the `tidyr` and `collapse` methods
+to work, a "name" column must be created, whereas in `data.table` it
+not necessary (you just specify `.` in right side of formula to
+indicate that only one column should be output). The table below summarizes the differences in syntax between the different R functions:
+
+| function             | ID             | Name             | Value            | Aggregation     |
+|----------------------|----------------|------------------|------------------|-----------------|
+| `data.table::dcast`  | LHS of formula | RHS of formula   | `value.var`      | `fun.aggregate` |
+| `stats::aggregate`   | `by`           | all column names | all input values | `FUN`           |
+| `tidyr::pivot_wider` | `id_cols`      | `names_from`     | `values_from`    | `values_fn`     |
+| `collapse::pivot`    | `ids`          | `names`          | `values`         | `FUN`           |
+
+Below we compare the performance of these different functions.
+
+
+``` r
+m.res <- atime::atime(
+  setup={
+    (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
+    N.df <- iris[row.id.vec,]
+    N.tall.df <- reshape_taller(N.df,1:4)
+    N.tall.df$name <- "foo"
+    N.tall.dt <- data.table(N.tall.df)
+  },
+  seconds.limit=0.1,
+  "stats\naggregate"=stats::aggregate(N.tall.df[,"value",drop=FALSE], by=with(N.tall.df, list(orig.col.name=orig.col.name,Species=Species)), FUN=mean),
+  "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=name, values_from=value, id_cols=c(orig.col.name,Species), values_fn=mean),
+  "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids=c("orig.col.name","Species"), values="value", names="name", FUN=mean),
+  "data.table\ndcast"=dcast(N.tall.dt, orig.col.name + Species ~ ., mean))
+m.refs <- atime::references_best(m.res)
+m.pred <- predict(m.refs)
+plot(m.pred)+coord_cartesian(xlim=c(NA,1e8))
+```
+
+```
+## Warning in ggplot2::scale_x_log10("N", breaks = meas[, 10^seq(ceiling(min(log10(N))), : log-10 transformation
+## introduced infinite values.
+```
+
+![plot of chunk atime-agg](/assets/img/2024-08-05-collapse-reshape/atime-agg-1.png)
+
+The result above shows that `collapse` is about twice as fast as `data.table`.
+
+
+## Multiple aggregation functions
+
+It is often useful to provide a list of aggregation functions, instead of just one. For example, in visualization results of machine learning predictions, we would like to use
+
+* `mean` to compute the mean prediction error over several train/test splits,
+* `sd` to get the standard deviation,
+* `length` to double-check that the number of items to summarize is the same as the number of cross-validation folds.
+
+In `data.table` we can provide a list of functions as in the code below,
+
+
+``` r
+dcast(N.tall.dt, orig.col.name + Species ~ ., list(mean, sd, length))
+```
+
+```
+## Key: <orig.col.name, Species>
+##     orig.col.name    Species value_mean  value_sd value_length
+##            <char>     <fctr>      <num>     <num>        <int>
+##  1:  Petal.Length     setosa      1.462 0.1727847          100
+##  2:  Petal.Length versicolor      4.260 0.4675317          100
+##  3:  Petal.Length  virginica      5.552 0.5518947           50
+##  4:   Petal.Width     setosa      0.246 0.1048520          100
+##  5:   Petal.Width versicolor      1.326 0.1967514          100
+##  6:   Petal.Width  virginica      2.026 0.2746501           50
+##  7:  Sepal.Length     setosa      5.006 0.3507049          100
+##  8:  Sepal.Length versicolor      5.936 0.5135576          100
+##  9:  Sepal.Length  virginica      6.588 0.6358796           50
+## 10:   Sepal.Width     setosa      3.428 0.3771450          100
+## 11:   Sepal.Width versicolor      2.770 0.3122095          100
+## 12:   Sepal.Width  virginica      2.974 0.3224966           50
+```
+
+However this feature is not supported in other packages. 
+
+* `?stats::aggregate` says "FUN: a function to compute the summary
+  statistics which can be applied to all data subsets."
+* `?collapse::pivot` says "FUN: function to aggregate values. At
+  present, only a single function is allowed."
+* `?tidyr::pivot_wider` says `values_fn` argument "can be a named list
+  if you want to apply different aggregations to different
+  `values_from` columns."
+
 ## Conclusion
 
-We have shown how to use `atime` to check if there are any performance differences between data reshaping functions in R.
+We have shown how to use `atime` to check if there are any performance
+differences between data reshaping functions in R. We observed large
+differences between functions when doing a reshape in the wider
+direction, with no aggregation (`collapse` is about 50x faster than
+`data.table` for this case, which involves just copying values to a
+new table). For reshape in the tall/long direction, and for reshape
+wider with aggregation, we observed small constant factor differences
+between methods (`collapse` was still fastest but by only 2x).
+
+In terms of functionality, we observed a few differences. Wide-to-tall
+reshape defined by a `regex` is supported by
+`tidyr::pivot_longer(names_pattern=regex)` and
+`data.table::measure(pattern=regex)`, whereas `stats::reshape` only
+supports multiple outputs via the `sep` argument (separator, not
+regex), and `collapse::pivot` does not support multiple outputs at
+all. Also, we observed that `data.table::dcast` is the only function
+that supports multiple aggregation functions, which can be useful for
+simultaneously computing a variety of summary statistics, such as
+`mean`, `sd`, and `length`. The table below summarizes these
+differences in functionality.
+
+|              | reshape long     | reshape long | reshape wide  | reshape wide |
+| package      | multiple outputs | using regex  | multiple agg. | no agg.      |
+|--------------|------------------|--------------|---------------|--------------|
+| `data.table` | yes              | yes          | yes           | ok           |
+| `tidyr`      | yes              | yes          | no            | ok           |
+| `stats`      | yes              | no           | no            | ok           |
+| `collapse`   | no               | no           | no            | very fast    |
+
+For future work, `data.table`/`tidyr` may consider trying to speed up
+the reshape wide code, and `tidyr`/`collapse` may consider
+implementing the advanced reshaping features that `data.table`
+currently supports.
+
+## Session info
+
+
+``` r
+sessionInfo()
+```
+
+```
+## R version 4.4.1 (2024-06-14)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 22.04.4 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
+## locale:
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: America/New_York
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## 
+## other attached packages:
+## [1] data.table_1.15.99 ggplot2_3.5.1     
+## 
+## loaded via a namespace (and not attached):
+##  [1] gtable_0.3.4           dplyr_1.1.4            compiler_4.4.1         highr_0.11             crayon_1.5.2          
+##  [6] tidyselect_1.2.0       Rcpp_1.0.12            collapse_2.0.15        parallel_4.4.1         tidyr_1.3.1           
+## [11] scales_1.3.0           directlabels_2024.1.21 lattice_0.22-6         R6_2.5.1               labeling_0.4.3        
+## [16] generics_0.1.3         knitr_1.47             tibble_3.2.1           munsell_0.5.0          atime_2024.4.23       
+## [21] pillar_1.9.0           rlang_1.1.3            utf8_1.2.4             xfun_0.45              quadprog_1.5-8        
+## [26] cli_3.6.2              withr_3.0.0            magrittr_2.0.3         grid_4.4.1             nc_2024.2.21          
+## [31] lifecycle_1.0.4        vctrs_0.6.5            bench_1.1.3            evaluate_0.23          glue_1.7.0            
+## [36] farver_2.1.1           profmem_0.6.0          fansi_1.0.6            colorspace_2.1-0       purrr_1.0.2           
+## [41] tools_4.4.1            pkgconfig_2.0.3
+```
