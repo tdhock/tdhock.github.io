@@ -744,9 +744,10 @@ plot(m.refs)
 
 ![plot of chunk atime-agg-refs](/assets/img/2024-08-05-collapse-reshape/atime-agg-refs-1.png)
 
-The plot above indicates that `collapse` is asymptotically log-linear,
+The plot above indicates that all methods use asymptotically linear memory, O(N).
+It also suggests that `collapse` is asymptotically log-linear time,
 `O(N log N)`, in the number of input rows `N`, whereas the others are
-linear, `O(N)`.
+linear time, `O(N)`.
 
 ## Multiple aggregation functions
 
@@ -819,7 +820,7 @@ differences in functionality.
 |--------------|------------------|--------------|---------------|--------------|--------------|
 | `data.table` | yes              | yes          | yes           | O(N)         | O(N)         |
 | `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)   |
-| `stats`      | yes              | no           | no            | O(N)         | O(N log N)   |
+| `stats`      | yes              | no           | no            | O(N log N)   | O(N log N)   |
 | `collapse`   | no               | no           | no            | O(N log N)   | O(N log N)   |
 
 For future work, 

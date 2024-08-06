@@ -24,7 +24,7 @@ fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
   fig.path=paste0(fig.path, "/"),
-  fig.width=8,
+  fig.width=10,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
 options(width=120)
@@ -364,9 +364,10 @@ plot below.
 plot(m.refs)
 ```
 
-The plot above indicates that `collapse` is asymptotically log-linear,
+The plot above indicates that all methods use asymptotically linear memory, O(N).
+It also suggests that `collapse` is asymptotically log-linear time,
 `O(N log N)`, in the number of input rows `N`, whereas the others are
-linear, `O(N)`.
+linear time, `O(N)`.
 
 ## Multiple aggregation functions
 
@@ -420,7 +421,7 @@ differences in functionality.
 |--------------|------------------|--------------|---------------|--------------|--------------|
 | `data.table` | yes              | yes          | yes           | O(N)         | O(N)         |
 | `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)   |
-| `stats`      | yes              | no           | no            | O(N)         | O(N log N)   |
+| `stats`      | yes              | no           | no            | O(N log N)   | O(N log N)   |
 | `collapse`   | no               | no           | no            | O(N log N)   | O(N log N)   |
 
 For future work, 
