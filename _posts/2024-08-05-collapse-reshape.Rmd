@@ -127,21 +127,25 @@ functions:
 
 ```{r atime-tall}
 a.res <- atime::atime(
+  N=2^seq(1,50),
   setup={
     (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
     N.df <- iris[row.id.vec,]
     (N.dt <- data.table(N.df))
   },
   seconds.limit=0.1,
-  reshape_taller=reshape_taller(N.df,1:4),
-  "stats::reshape"=stats::reshape(N.df, direction="long", varying=list(cols.to.reshape), v.names="cm"),
-  "data.table::melt"=melt(N.dt, measure.vars=cols.to.reshape, value.name="cm"),
-  "tidyr::pivot_longer"=tidyr::pivot_longer(N.df, cols.to.reshape, values_to = "cm"),
-  "collapse::pivot"=collapse::pivot(N.df, values=cols.to.reshape, names=list("variable", "cm")))
+  "reshape\ntaller"=reshape_taller(N.df,1:4),
+  "stats\nreshape"=suppressWarnings(stats::reshape(N.df, direction="long", varying=list(cols.to.reshape), v.names="cm")),
+  "data.table\nmelt"=melt(N.dt, measure.vars=cols.to.reshape, value.name="cm"),
+  "tidyr\npivot_longer"=tidyr::pivot_longer(N.df, cols.to.reshape, values_to = "cm"),
+  "collapse\npivot"=collapse::pivot(N.df, values=cols.to.reshape, names=list("variable", "cm")))
 a.refs <- atime::references_best(a.res)
 a.pred <- predict(a.refs)
 plot(a.pred)+coord_cartesian(xlim=c(1e2,1e7))
 ```
+
+The result above shows that `collapse` is fastest, but `data.table` is
+almost as fast (by small a constant factor).
 
 ## reshape wider
 
