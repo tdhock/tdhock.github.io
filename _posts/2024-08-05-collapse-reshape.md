@@ -8,9 +8,12 @@ description: Comparison with data.table
 for efficient data manipulation.  I have an NSF POSE grant about
 expanding the open-source ecosystem of users and contributors around
 `data.table`.  Part of that project is benchmarking time and memory
-usage, and comparing with similar packages.  Similar to [a previous
-post](https://tdhock.github.io/blog/2024/reshape-performance/), the
-goal of this post is to explain how to use
+usage, and comparing with similar packages.  Similar to previous posts
+about
+[reshaping](https://tdhock.github.io/blog/2024/reshape-performance/)
+and
+[reading/writing/summarization](https://tdhock.github.io/blog/2023/dt-atime-figures/),
+the goal of this post is to explain how to use
 [atime](https://github.com/tdhock/atime) to benchmark `data.table`
 reshape with similar packages.
 
@@ -142,16 +145,6 @@ head(stats::reshape(
 
 ``` r
 library(data.table)
-```
-
-```
-## data.table 1.15.99 IN DEVELOPMENT built 2024-05-02 04:20:26 UTC using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
-## **********
-## This development version of data.table was built more than 4 weeks ago. Please update: data.table::update_dev_pkg()
-## **********
-```
-
-``` r
 iris.dt <- data.table(iris)
 melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 ```
@@ -174,20 +167,6 @@ melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 
 ``` r
 tidyr::pivot_longer(iris, cols.to.reshape, values_to = "cm")
-```
-
-```
-## Warning: Using an external vector in selections was deprecated in tidyselect 1.1.0.
-## ℹ Please use `all_of()` or `any_of()` instead.
-##   # Was:
-##   data %>% select(cols.to.reshape)
-## 
-##   # Now:
-##   data %>% select(all_of(cols.to.reshape))
-## 
-## See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 ```
 
 ```
@@ -276,7 +255,6 @@ a.res <- atime::atime(
     (N.dt <- data.table(N.df))
   },
   seconds.limit=0.1,
-  "reshape\ntaller"=reshape_taller(N.df,1:4),
   "stats\nreshape"=suppressWarnings(stats::reshape(N.df, direction="long", varying=list(cols.to.reshape), v.names="cm")),
   "data.table\nmelt"=melt(N.dt, measure.vars=cols.to.reshape, value.name="cm"),
   "tidyr\npivot_longer"=tidyr::pivot_longer(N.df, cols.to.reshape, values_to = "cm"),
@@ -284,10 +262,6 @@ a.res <- atime::atime(
 a.refs <- atime::references_best(a.res)
 a.pred <- predict(a.refs)
 plot(a.pred)+coord_cartesian(xlim=c(1e2,1e7))
-```
-
-```
-## Le chargement a nécessité le package : directlabels
 ```
 
 ```
@@ -505,8 +479,8 @@ str(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"
 ```
 
 ```
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
+## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : some constant variables
+## (orig.col.i) are really varying
 ```
 
 ```
@@ -571,6 +545,7 @@ Timings below
 
 ``` r
 w.res <- atime::atime(
+  N=2^seq(1,50),
   setup={
     (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
     N.df <- iris[row.id.vec,]
@@ -578,284 +553,13 @@ w.res <- atime::atime(
     N.tall.dt <- data.table(N.tall.df)
   },
   seconds.limit=0.1,
-  "reshape\nwider"=reshape_wider(N.tall.df),
   "data.table\ndcast"=dcast(N.tall.dt, orig.row.i ~ orig.col.name, value.var = "value"),
-  "stats\nreshape"=stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"), timevar="orig.col.name", v.names="value"),
+  "stats\nreshape"=suppressWarnings(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"), timevar="orig.col.name", v.names="value")),
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=orig.row.i),
   "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids="orig.row.i", values="value", names="orig.col.name"))
-```
-
-```
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
-## (orig.col.i) varient
-```
-
-``` r
 w.refs <- atime::references_best(w.res)
 w.pred <- predict(w.refs)
-plot(w.pred)+coord_cartesian(xlim=c(NA,1e8))
+plot(w.pred)+coord_cartesian(xlim=c(NA,1e7))
 ```
 
 ```
@@ -865,9 +569,29 @@ plot(w.pred)+coord_cartesian(xlim=c(NA,1e8))
 
 ![plot of chunk atime-wide](/assets/img/2024-08-05-collapse-reshape/atime-wide-1.png)
 
-The comparison above shows that collapse is actually quite a bit
-faster (50x) for this tall to wide reshape operation which involved
-just copying data (no summarization).
+The comparison above shows that `collapse` is actually a bit faster
+than `data.table`, for this tall to wide reshape operation which
+involved just copying data (no summarization). But close inspection of
+the log-log plot above shows different slopes for the different lines,
+which suggests that they have different asymptotic complexity
+classes. To estimate them, we use the code below,
+
+
+``` r
+plot(w.refs)
+```
+
+```
+## Warning in ggplot2::scale_y_log10(""): log-10 transformation introduced infinite values.
+```
+
+![plot of chunk atime-wide-refs](/assets/img/2024-08-05-collapse-reshape/atime-wide-refs-1.png)
+
+The plot above suggests that all methods have the same linear asymptotic memory usage, O(N).
+But `data.table` is the only method which is clearly linear time.
+
+* `collapse::pivot` and `tidyr::pivot_wider` appear to be log-linear, O(N log N).
+* `stats::reshape` appears between linear and log-linear.
 
 ## Reshape wider with summarization
 
@@ -977,6 +701,7 @@ Below we compare the performance of these different functions.
 
 ``` r
 m.res <- atime::atime(
+  N=2^seq(1,50),
   setup={
     (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
     N.df <- iris[row.id.vec,]
@@ -991,7 +716,7 @@ m.res <- atime::atime(
   "data.table\ndcast"=dcast(N.tall.dt, orig.col.name + Species ~ ., mean))
 m.refs <- atime::references_best(m.res)
 m.pred <- predict(m.refs)
-plot(m.pred)+coord_cartesian(xlim=c(NA,1e8))
+plot(m.pred)+coord_cartesian(xlim=c(NA,1e7))
 ```
 
 ```
@@ -1001,8 +726,27 @@ plot(m.pred)+coord_cartesian(xlim=c(NA,1e8))
 
 ![plot of chunk atime-agg](/assets/img/2024-08-05-collapse-reshape/atime-agg-1.png)
 
-The result above shows that `collapse` is about twice as fast as `data.table`.
+The result above shows that `data.table` is a bit faster than
+`collapse`. Upon close inspection of the log-log plot above, we see
+that `data.table` has a smaller slope than `collapse`, which means
+that `data.table has an asymptotically more efficient complexity
+class. To estimate the asymptotic complexity class, we can use the
+plot below.
 
+
+``` r
+plot(m.refs)
+```
+
+```
+## Warning in ggplot2::scale_y_log10(""): log-10 transformation introduced infinite values.
+```
+
+![plot of chunk atime-agg-refs](/assets/img/2024-08-05-collapse-reshape/atime-agg-refs-1.png)
+
+The plot above indicates that `collapse` is asymptotically log-linear,
+`O(N log N)`, in the number of input rows `N`, whereas the others are
+linear, `O(N)`.
 
 ## Multiple aggregation functions
 
@@ -1070,18 +814,19 @@ simultaneously computing a variety of summary statistics, such as
 `mean`, `sd`, and `length`. The table below summarizes these
 differences in functionality.
 
-|              | reshape long     | reshape long | reshape wide  | reshape wide |
-| package      | multiple outputs | using regex  | multiple agg. | no agg.      |
-|--------------|------------------|--------------|---------------|--------------|
-| `data.table` | yes              | yes          | yes           | ok           |
-| `tidyr`      | yes              | yes          | no            | ok           |
-| `stats`      | yes              | no           | no            | ok           |
-| `collapse`   | no               | no           | no            | very fast    |
+|              | reshape long     | reshape long | reshape wide  | reshape wide | reshape wide |
+| package      | multiple outputs | using regex  | multiple agg. | single agg.  | no agg.      |
+|--------------|------------------|--------------|---------------|--------------|--------------|
+| `data.table` | yes              | yes          | yes           | O(N)         | O(N)         |
+| `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)   |
+| `stats`      | yes              | no           | no            | O(N)         | O(N log N)   |
+| `collapse`   | no               | no           | no            | O(N log N)   | O(N log N)   |
 
-For future work, `data.table`/`tidyr` may consider trying to speed up
-the reshape wide code, and `tidyr`/`collapse` may consider
-implementing the advanced reshaping features that `data.table`
-currently supports.
+For future work, 
+
+* `data.table`/`tidyr` may consider trying to speed up the constant factors in the reshape wide code without aggregation.
+* `collapse` reshape wide with aggregation is currently asymptotically log-linear, and so may consider speeding up to be asymptotically linear.
+* `tidyr`/`collapse` may consider implementing the advanced reshaping features that `data.table` currently supports (multiple outputs, regex).
 
 ## Session info
 
@@ -1091,36 +836,34 @@ sessionInfo()
 ```
 
 ```
-## R version 4.4.1 (2024-06-14)
-## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 22.04.4 LTS
+## R version 4.4.1 (2024-06-14 ucrt)
+## Platform: x86_64-w64-mingw32/x64
+## Running under: Windows 11 x64 (build 22631)
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
 ## 
-## time zone: America/New_York
-## tzcode source: system (glibc)
+## time zone: America/Toronto
+## tzcode source: internal
 ## 
 ## attached base packages:
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## other attached packages:
-## [1] data.table_1.15.99 ggplot2_3.5.1     
+## [1] data.table_1.15.4 ggplot2_3.5.1    
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] gtable_0.3.4           dplyr_1.1.4            compiler_4.4.1         highr_0.11             crayon_1.5.2          
-##  [6] tidyselect_1.2.0       Rcpp_1.0.12            collapse_2.0.15        parallel_4.4.1         tidyr_1.3.1           
+##  [1] gtable_0.3.5           dplyr_1.1.4            compiler_4.4.1         highr_0.11             crayon_1.5.3          
+##  [6] tidyselect_1.2.1       Rcpp_1.0.12            collapse_2.0.15        parallel_4.4.1         tidyr_1.3.1           
 ## [11] scales_1.3.0           directlabels_2024.1.21 lattice_0.22-6         R6_2.5.1               labeling_0.4.3        
-## [16] generics_0.1.3         knitr_1.47             tibble_3.2.1           munsell_0.5.0          atime_2024.4.23       
-## [21] pillar_1.9.0           rlang_1.1.3            utf8_1.2.4             xfun_0.45              quadprog_1.5-8        
-## [26] cli_3.6.2              withr_3.0.0            magrittr_2.0.3         grid_4.4.1             nc_2024.2.21          
-## [31] lifecycle_1.0.4        vctrs_0.6.5            bench_1.1.3            evaluate_0.23          glue_1.7.0            
-## [36] farver_2.1.1           profmem_0.6.0          fansi_1.0.6            colorspace_2.1-0       purrr_1.0.2           
+## [16] generics_0.1.3         knitr_1.48             tibble_3.2.1           munsell_0.5.1          atime_2024.4.23       
+## [21] pillar_1.9.0           rlang_1.1.4            utf8_1.2.4             xfun_0.45              quadprog_1.5-8        
+## [26] cli_3.6.3              withr_3.0.0            magrittr_2.0.3         grid_4.4.1             nc_2024.2.21          
+## [31] lifecycle_1.0.4        vctrs_0.6.5            bench_1.1.3            evaluate_0.24.0        glue_1.7.0            
+## [36] farver_2.1.2           profmem_0.6.0          fansi_1.0.6            colorspace_2.1-0       purrr_1.0.2           
 ## [41] tools_4.4.1            pkgconfig_2.0.3
 ```

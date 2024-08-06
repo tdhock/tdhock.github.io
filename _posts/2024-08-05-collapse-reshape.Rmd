@@ -8,9 +8,12 @@ description: Comparison with data.table
 for efficient data manipulation.  I have an NSF POSE grant about
 expanding the open-source ecosystem of users and contributors around
 `data.table`.  Part of that project is benchmarking time and memory
-usage, and comparing with similar packages.  Similar to [a previous
-post](https://tdhock.github.io/blog/2024/reshape-performance/), the
-goal of this post is to explain how to use
+usage, and comparing with similar packages.  Similar to previous posts
+about
+[reshaping](https://tdhock.github.io/blog/2024/reshape-performance/)
+and
+[reading/writing/summarization](https://tdhock.github.io/blog/2023/dt-atime-figures/),
+the goal of this post is to explain how to use
 [atime](https://github.com/tdhock/atime) to benchmark `data.table`
 reshape with similar packages.
 
@@ -134,7 +137,6 @@ a.res <- atime::atime(
     (N.dt <- data.table(N.df))
   },
   seconds.limit=0.1,
-  "reshape\ntaller"=reshape_taller(N.df,1:4),
   "stats\nreshape"=suppressWarnings(stats::reshape(N.df, direction="long", varying=list(cols.to.reshape), v.names="cm")),
   "data.table\nmelt"=melt(N.dt, measure.vars=cols.to.reshape, value.name="cm"),
   "tidyr\npivot_longer"=tidyr::pivot_longer(N.df, cols.to.reshape, values_to = "cm"),
@@ -270,6 +272,7 @@ Timings below
 
 ```{r atime-wide}
 w.res <- atime::atime(
+  N=2^seq(1,50),
   setup={
     (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
     N.df <- iris[row.id.vec,]
@@ -277,19 +280,31 @@ w.res <- atime::atime(
     N.tall.dt <- data.table(N.tall.df)
   },
   seconds.limit=0.1,
-  "reshape\nwider"=reshape_wider(N.tall.df),
   "data.table\ndcast"=dcast(N.tall.dt, orig.row.i ~ orig.col.name, value.var = "value"),
-  "stats\nreshape"=stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"), timevar="orig.col.name", v.names="value"),
+  "stats\nreshape"=suppressWarnings(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"), timevar="orig.col.name", v.names="value")),
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=orig.row.i),
   "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids="orig.row.i", values="value", names="orig.col.name"))
 w.refs <- atime::references_best(w.res)
 w.pred <- predict(w.refs)
-plot(w.pred)+coord_cartesian(xlim=c(NA,1e8))
+plot(w.pred)+coord_cartesian(xlim=c(NA,1e7))
 ```
 
-The comparison above shows that collapse is actually quite a bit
-faster (50x) for this tall to wide reshape operation which involved
-just copying data (no summarization).
+The comparison above shows that `collapse` is actually a bit faster
+than `data.table`, for this tall to wide reshape operation which
+involved just copying data (no summarization). But close inspection of
+the log-log plot above shows different slopes for the different lines,
+which suggests that they have different asymptotic complexity
+classes. To estimate them, we use the code below,
+
+```{r atime-wide-refs}
+plot(w.refs)
+```
+
+The plot above suggests that all methods have the same linear asymptotic memory usage, O(N).
+But `data.table` is the only method which is clearly linear time.
+
+* `collapse::pivot` and `tidyr::pivot_wider` appear to be log-linear, O(N log N).
+* `stats::reshape` appears between linear and log-linear.
 
 ## Reshape wider with summarization
 
@@ -320,6 +335,7 @@ Below we compare the performance of these different functions.
 
 ```{r atime-agg}
 m.res <- atime::atime(
+  N=2^seq(1,50),
   setup={
     (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
     N.df <- iris[row.id.vec,]
@@ -334,11 +350,23 @@ m.res <- atime::atime(
   "data.table\ndcast"=dcast(N.tall.dt, orig.col.name + Species ~ ., mean))
 m.refs <- atime::references_best(m.res)
 m.pred <- predict(m.refs)
-plot(m.pred)+coord_cartesian(xlim=c(NA,1e8))
+plot(m.pred)+coord_cartesian(xlim=c(NA,1e7))
 ```
 
-The result above shows that `collapse` is about twice as fast as `data.table`.
+The result above shows that `data.table` is a bit faster than
+`collapse`. Upon close inspection of the log-log plot above, we see
+that `data.table` has a smaller slope than `collapse`, which means
+that `data.table has an asymptotically more efficient complexity
+class. To estimate the asymptotic complexity class, we can use the
+plot below.
 
+```{r atime-agg-refs}
+plot(m.refs)
+```
+
+The plot above indicates that `collapse` is asymptotically log-linear,
+`O(N log N)`, in the number of input rows `N`, whereas the others are
+linear, `O(N)`.
 
 ## Multiple aggregation functions
 
@@ -387,18 +415,19 @@ simultaneously computing a variety of summary statistics, such as
 `mean`, `sd`, and `length`. The table below summarizes these
 differences in functionality.
 
-|              | reshape long     | reshape long | reshape wide  | reshape wide |
-| package      | multiple outputs | using regex  | multiple agg. | no agg.      |
-|--------------|------------------|--------------|---------------|--------------|
-| `data.table` | yes              | yes          | yes           | ok           |
-| `tidyr`      | yes              | yes          | no            | ok           |
-| `stats`      | yes              | no           | no            | ok           |
-| `collapse`   | no               | no           | no            | very fast    |
+|              | reshape long     | reshape long | reshape wide  | reshape wide | reshape wide |
+| package      | multiple outputs | using regex  | multiple agg. | single agg.  | no agg.      |
+|--------------|------------------|--------------|---------------|--------------|--------------|
+| `data.table` | yes              | yes          | yes           | O(N)         | O(N)         |
+| `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)   |
+| `stats`      | yes              | no           | no            | O(N)         | O(N log N)   |
+| `collapse`   | no               | no           | no            | O(N log N)   | O(N log N)   |
 
-For future work, `data.table`/`tidyr` may consider trying to speed up
-the reshape wide code, and `tidyr`/`collapse` may consider
-implementing the advanced reshaping features that `data.table`
-currently supports.
+For future work, 
+
+* `data.table`/`tidyr` may consider trying to speed up the constant factors in the reshape wide code without aggregation.
+* `collapse` reshape wide with aggregation is currently asymptotically log-linear, and so may consider speeding up to be asymptotically linear.
+* `tidyr`/`collapse` may consider implementing the advanced reshaping features that `data.table` currently supports (multiple outputs, regex).
 
 ## Session info
 
