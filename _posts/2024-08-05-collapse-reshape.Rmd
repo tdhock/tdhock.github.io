@@ -343,14 +343,15 @@ m.res <- atime::atime(
     N.tall.df$name <- "foo"
     N.tall.dt <- data.table(N.tall.df)
   },
-  seconds.limit=0.1,
+  seconds.limit=1,
   "stats\naggregate"=stats::aggregate(N.tall.df[,"value",drop=FALSE], by=with(N.tall.df, list(orig.col.name=orig.col.name,Species=Species)), FUN=mean),
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=name, values_from=value, id_cols=c(orig.col.name,Species), values_fn=mean),
   "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids=c("orig.col.name","Species"), values="value", names="name", FUN=mean),
   "data.table\ndcast"=dcast(N.tall.dt, orig.col.name + Species ~ ., mean))
-m.refs <- atime::references_best(m.res)
+my.refs <- atime:::references_funs[c("N","N \\log N")]
+m.refs <- atime::references_best(m.res, my.refs)
 m.pred <- predict(m.refs)
-plot(m.pred)+coord_cartesian(xlim=c(NA,1e7))
+plot(m.pred)+coord_cartesian(xlim=c(NA,1e8))
 ```
 
 The result above shows that `data.table` is a bit faster than

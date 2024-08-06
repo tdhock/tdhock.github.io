@@ -709,11 +709,19 @@ m.res <- atime::atime(
     N.tall.df$name <- "foo"
     N.tall.dt <- data.table(N.tall.df)
   },
-  seconds.limit=0.1,
+  seconds.limit=1,
   "stats\naggregate"=stats::aggregate(N.tall.df[,"value",drop=FALSE], by=with(N.tall.df, list(orig.col.name=orig.col.name,Species=Species)), FUN=mean),
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=name, values_from=value, id_cols=c(orig.col.name,Species), values_fn=mean),
   "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids=c("orig.col.name","Species"), values="value", names="name", FUN=mean),
   "data.table\ndcast"=dcast(N.tall.dt, orig.col.name + Species ~ ., mean))
+```
+
+```
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+```
+
+``` r
 m.refs <- atime::references_best(m.res)
 m.pred <- predict(m.refs)
 plot(m.pred)+coord_cartesian(xlim=c(NA,1e7))
@@ -744,10 +752,8 @@ plot(m.refs)
 
 ![plot of chunk atime-agg-refs](/assets/img/2024-08-05-collapse-reshape/atime-agg-refs-1.png)
 
-The plot above indicates that all methods use asymptotically linear memory, O(N).
-It also suggests that `collapse` and `stats` are asymptotically log-linear time,
-`O(N log N)`, in the number of input rows `N`, whereas `data.table` and `tidyr` are
-linear time, `O(N)`.
+The plot above suggests that all methods use asymptotically linear time and memory, O(N).
+TODO redo plot above, only showing linear and log-linear references.
 
 ## Multiple aggregation functions
 
@@ -820,8 +826,8 @@ differences in functionality.
 |--------------|------------------|--------------|---------------|--------------|--------------|
 | `data.table` | yes              | yes          | yes           | O(N)         | O(N)         |
 | `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)   |
-| `stats`      | yes              | no           | no            | O(N log N)   | O(N log N)   |
-| `collapse`   | no               | no           | no            | O(N log N)   | O(N log N)   |
+| `stats`      | yes              | no           | no            | O(N)   | O(N log N)   |
+| `collapse`   | no               | no           | no            | O(N)   | O(N log N)   |
 
 For future work, 
 
