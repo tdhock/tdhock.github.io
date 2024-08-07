@@ -15,30 +15,44 @@ different computers.
 
 ## Background about atime
 
-TODO
+atime is an R package for estimating asymptotic computational requirements, for comparative benchmarking, and for performance testing. In this post we are mostly concerned with comparative benchmarking, which means comparing the time it takes to do a given computation, using different methods. Typical comparative benchmarking uses a single data size `N`, whereas with atime we use a range of sizes `N`, until the empirical timing goes over a pre-defined limit. Then we plot the empirical time as a function of `N`, so we can see asymptotic trends:
+
+* is `N` large enough to be in the asymptotic regime? (and not the constant overhead regime)
+* are the slopes of the asymptotic curves similar or different on the log-log plot? (different slope implies different asymptotic complexity class)
+* for which ranges of `N` would each method be preferable? Or is there a single method which is fastest for all `N`?
 
 ## CPUs to compare
 
 On my old MacBook (~2008) running Ubuntu Jammy, `cat /proc/cpuinfo` says: "Intel(R)
 Core(TM)2 Duo CPU P7350 @ 2.00GHz."
 
-TODO windows.
+My windows computer is from ~2000. TODO more details.
 
 ## wide compare
 
 ![plot of chunk atime-wide-win-new](/assets/img/2024-08-06-atime-different-cpu/atime-wide-win-new.png)
 
-![plot of chunk atime-wide-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-wide-linux-old.png)
+* Above new windows, below old linux.
+* We can see, in the direct labels at the top of each plot, that the `N` values computable within the 0.1 second time limit are quite larger above (about 2-20x).
+* Overall the qualitative trends are quite similar, in terms of the ordering of the methods. In particular, `collapse` is fastest, for all `N`.
+* Some trends are not reproducible between CPUs. For example below we see dcast decrease just before the seconds=0.1 limit, whereas we do not see any corresponding decrease above.
 
-TODO
+![plot of chunk atime-wide-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-wide-linux-old.png)
 
 ## agg compare
 
 ![plot of chunk atime-agg-win-new](/assets/img/2024-08-06-atime-different-cpu/atime-agg-win-new.png)
 
+* Above new windows, below old linux.
+* Again the qualitative trends are similar, but there are some subtle differences. For example, in both plots, we see the `stats` curve crossing both `tidyr` and `data.table` curves, but they cross at different `N` values in the two different plots.
+* `data.table` is fastest for large `N` above, whereas `collapse` is fastest for all `N` below. That is because, in the plot below, we did not increase `N` large enough to see `data.table` and `collapse` cross)
+
 ![plot of chunk atime-agg-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-agg-linux-old.png)
 
-TODO
+## Conclusion
+
+We explored the extent to which `atime` benchmarks are reproducible between computers. 
+We observed that qualitative trends hold between computers (ordering of methods, which curves cross), but some details may not be reproducible, just like with traditional benchmarks that use a single `N` value.
 
 ## cpu details
 
