@@ -280,14 +280,6 @@ a.res <- atime::atime(
   "data.table\nmelt"=melt(N.dt, measure.vars=cols.to.reshape, value.name="cm"),
   "tidyr\npivot_longer"=tidyr::pivot_longer(N.df, cols.to.reshape, values_to = "cm"),
   "collapse\npivot"=collapse::pivot(N.df, values=cols.to.reshape, names=list("variable", "cm")))
-```
-
-```
-## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
-## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
-```
-
-``` r
 a.refs <- atime::references_best(a.res)
 a.pred <- predict(a.refs)
 plot(a.pred)+coord_cartesian(xlim=c(1e2,1e7))
@@ -621,11 +613,10 @@ plot(w.refs)
 
 ![plot of chunk atime-wide-refs](/assets/img/2024-08-05-collapse-reshape/atime-wide-refs-1.png)
 
-The plot above suggests that all methods have the same linear asymptotic memory usage, O(N).
-But `data.table` is the only method which is clearly linear time.
+The plot above suggests that all methods have the same linear asymptotic memory usage, `O(N)`, where `N` is the number of input rows.
 
-* `collapse::pivot` and `tidyr::pivot_wider` appear to be log-linear, O(N log N).
-* `stats::reshape` appears between linear and log-linear.
+* `data.table::dcast` and `stats::reshape` appear to be clearly linear time, `O(N)`.
+* `collapse::pivot` and `tidyr::pivot_wider` may be log-linear, `O(N log N)`.
 
 ## Reshape wider with summarization
 
@@ -779,10 +770,11 @@ plot(m.refs)
 
 ![plot of chunk atime-agg-refs](/assets/img/2024-08-05-collapse-reshape/atime-agg-refs-1.png)
 
-The plot above indicates that all methods use asymptotically linear memory, O(N).
-It also suggests that `collapse` and `stats` are asymptotically log-linear time,
-`O(N log N)`, in the number of input rows `N`, whereas `data.table` and `tidyr` are
-linear time, `O(N)`.
+The plot above indicates that all methods use asymptotically linear
+memory, `O(N)`, in the number of input rows `N`.  It also suggests
+that `collapse::pivot` and `stats::aggregate` may be asymptotically log-linear time,
+`O(N log N)`, whereas `data.table::dcast` and `tidyr::pivot_wider` are clearly linear time,
+`O(N)`.
 
 ## Multiple aggregation functions
 
@@ -854,9 +846,9 @@ differences in functionality.
 | package      | multiple outputs | using regex  | multiple agg. | single agg.  | no agg.      |
 |--------------|------------------|--------------|---------------|--------------|--------------|
 | `data.table` | yes              | yes          | yes           | O(N)         | O(N)         |
-| `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)   |
-| `stats`      | yes              | no           | no            | O(N log N)   | O(N log N)   |
-| `collapse`   | no               | no           | no            | O(N log N)   | O(N log N)   |
+| `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)?  |
+| `stats`      | yes              | no           | no            | O(N log N)?  | O(N)         |
+| `collapse`   | no               | no           | no            | O(N log N)?  | O(N log N)?  |
 
 For future work, 
 
