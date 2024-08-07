@@ -26,9 +26,15 @@ atime is an R package for estimating asymptotic computational requirements, for 
 On my old MacBook (~2008) running Ubuntu Jammy, `cat /proc/cpuinfo` says: "Intel(R)
 Core(TM)2 Duo CPU P7350 @ 2.00GHz."
 
-My windows computer is from ~2000. TODO more details.
+My windows computer is from 2018, "Intel(R) Core(TM) i5-9500T CPU @ 2.20GHz."
 
-## wide compare
+## Reshape wide comparison
+
+These comparisons involve tall (sometimes called long) to wide reshape (no aggregation).
+
+### Predict plots
+
+Here we compare the plots which resulted from `atime:::plot.atime_prediction`.
 
 ![plot of chunk atime-wide-win-new](/assets/img/2024-08-06-atime-different-cpu/atime-wide-win-new.png)
 
@@ -39,7 +45,11 @@ My windows computer is from ~2000. TODO more details.
 
 ![plot of chunk atime-wide-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-wide-linux-old.png)
 
-## agg compare
+### References plot
+
+Here we compare the plots which resulted from `atime:::plot.references_best`.
+
+## Aggregation comparison
 
 ![plot of chunk atime-agg-win-new](/assets/img/2024-08-06-atime-different-cpu/atime-agg-win-new.png)
 

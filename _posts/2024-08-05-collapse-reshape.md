@@ -145,6 +145,13 @@ head(stats::reshape(
 
 ``` r
 library(data.table)
+```
+
+```
+## data.table 1.15.99 IN DEVELOPMENT built 2024-08-07 15:42:29 UTC using 3 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+``` r
 iris.dt <- data.table(iris)
 melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 ```
@@ -167,6 +174,20 @@ melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 
 ``` r
 tidyr::pivot_longer(iris, cols.to.reshape, values_to = "cm")
+```
+
+```
+## Warning: Using an external vector in selections was deprecated in tidyselect 1.1.0.
+## ℹ Please use `all_of()` or `any_of()` instead.
+##   # Was:
+##   data %>% select(cols.to.reshape)
+## 
+##   # Now:
+##   data %>% select(all_of(cols.to.reshape))
+## 
+## See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 ```
 
 ```
@@ -259,9 +280,21 @@ a.res <- atime::atime(
   "data.table\nmelt"=melt(N.dt, measure.vars=cols.to.reshape, value.name="cm"),
   "tidyr\npivot_longer"=tidyr::pivot_longer(N.df, cols.to.reshape, values_to = "cm"),
   "collapse\npivot"=collapse::pivot(N.df, values=cols.to.reshape, names=list("variable", "cm")))
+```
+
+```
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+```
+
+``` r
 a.refs <- atime::references_best(a.res)
 a.pred <- predict(a.refs)
 plot(a.pred)+coord_cartesian(xlim=c(1e2,1e7))
+```
+
+```
+## Loading required namespace: directlabels
 ```
 
 ```
@@ -578,6 +611,7 @@ classes. To estimate them, we use the code below,
 
 
 ``` r
+w.refs$plot.references <- w.refs$ref[fun.name %in% c("N","N log N")]
 plot(w.refs)
 ```
 
@@ -709,22 +743,14 @@ m.res <- atime::atime(
     N.tall.df$name <- "foo"
     N.tall.dt <- data.table(N.tall.df)
   },
-  seconds.limit=1,
+  seconds.limit=0.1,
   "stats\naggregate"=stats::aggregate(N.tall.df[,"value",drop=FALSE], by=with(N.tall.df, list(orig.col.name=orig.col.name,Species=Species)), FUN=mean),
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=name, values_from=value, id_cols=c(orig.col.name,Species), values_fn=mean),
   "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids=c("orig.col.name","Species"), values="value", names="name", FUN=mean),
   "data.table\ndcast"=dcast(N.tall.dt, orig.col.name + Species ~ ., mean))
-```
-
-```
-## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
-## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
-```
-
-``` r
 m.refs <- atime::references_best(m.res)
 m.pred <- predict(m.refs)
-plot(m.pred)+coord_cartesian(xlim=c(NA,1e7))
+plot(m.pred)+coord_cartesian(xlim=c(NA,1e8))
 ```
 
 ```
@@ -743,6 +769,7 @@ plot below.
 
 
 ``` r
+m.refs$plot.references <- m.refs$ref[fun.name %in% c("N","N log N")]
 plot(m.refs)
 ```
 
@@ -752,8 +779,10 @@ plot(m.refs)
 
 ![plot of chunk atime-agg-refs](/assets/img/2024-08-05-collapse-reshape/atime-agg-refs-1.png)
 
-The plot above suggests that all methods use asymptotically linear time and memory, O(N).
-TODO redo plot above, only showing linear and log-linear references.
+The plot above indicates that all methods use asymptotically linear memory, O(N).
+It also suggests that `collapse` and `stats` are asymptotically log-linear time,
+`O(N log N)`, in the number of input rows `N`, whereas `data.table` and `tidyr` are
+linear time, `O(N)`.
 
 ## Multiple aggregation functions
 
@@ -826,13 +855,13 @@ differences in functionality.
 |--------------|------------------|--------------|---------------|--------------|--------------|
 | `data.table` | yes              | yes          | yes           | O(N)         | O(N)         |
 | `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)   |
-| `stats`      | yes              | no           | no            | O(N)   | O(N log N)   |
-| `collapse`   | no               | no           | no            | O(N)   | O(N log N)   |
+| `stats`      | yes              | no           | no            | O(N log N)   | O(N log N)   |
+| `collapse`   | no               | no           | no            | O(N log N)   | O(N log N)   |
 
 For future work, 
 
 * `data.table`/`tidyr` may consider trying to speed up the constant factors in the reshape wide code without aggregation.
-* `collapse` reshape wide with aggregation is currently asymptotically log-linear, and so may consider speeding up to be asymptotically linear.
+* `collapse` reshape wide with aggregation seems asymptotically log-linear, and so may consider investigating the possibility of a speedup to asymptotically linear.
 * `tidyr`/`collapse` may consider implementing the advanced reshaping features that `data.table` currently supports (multiple outputs, regex).
 
 ## Session info
@@ -861,16 +890,16 @@ sessionInfo()
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## other attached packages:
-## [1] data.table_1.15.4 ggplot2_3.5.1    
+## [1] data.table_1.15.99 ggplot2_3.5.1     
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] gtable_0.3.5           dplyr_1.1.4            compiler_4.4.1         highr_0.11             crayon_1.5.3          
-##  [6] tidyselect_1.2.1       Rcpp_1.0.12            collapse_2.0.15        parallel_4.4.1         tidyr_1.3.1           
+##  [6] tidyselect_1.2.1       Rcpp_1.0.13            collapse_2.0.15        parallel_4.4.1         tidyr_1.3.1           
 ## [11] scales_1.3.0           directlabels_2024.1.21 lattice_0.22-6         R6_2.5.1               labeling_0.4.3        
-## [16] generics_0.1.3         knitr_1.48             tibble_3.2.1           munsell_0.5.1          atime_2024.4.23       
-## [21] pillar_1.9.0           rlang_1.1.4            utf8_1.2.4             xfun_0.45              quadprog_1.5-8        
-## [26] cli_3.6.3              withr_3.0.0            magrittr_2.0.3         grid_4.4.1             nc_2024.2.21          
+## [16] generics_0.1.3         knitr_1.48             tibble_3.2.1           munsell_0.5.1          atime_2024.8.7        
+## [21] pillar_1.9.0           rlang_1.1.4            utf8_1.2.4             xfun_0.46              quadprog_1.5-8        
+## [26] cli_3.6.3              withr_3.0.1            magrittr_2.0.3         grid_4.4.1             nc_2024.2.21          
 ## [31] lifecycle_1.0.4        vctrs_0.6.5            bench_1.1.3            evaluate_0.24.0        glue_1.7.0            
-## [36] farver_2.1.2           profmem_0.6.0          fansi_1.0.6            colorspace_2.1-0       purrr_1.0.2           
+## [36] farver_2.1.2           profmem_0.6.0          fansi_1.0.6            colorspace_2.1-1       purrr_1.0.2           
 ## [41] tools_4.4.1            pkgconfig_2.0.3
 ```

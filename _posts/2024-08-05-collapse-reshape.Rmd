@@ -297,6 +297,7 @@ which suggests that they have different asymptotic complexity
 classes. To estimate them, we use the code below,
 
 ```{r atime-wide-refs}
+w.refs$plot.references <- w.refs$ref[fun.name %in% c("N","N log N")]
 plot(w.refs)
 ```
 
@@ -348,8 +349,7 @@ m.res <- atime::atime(
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=name, values_from=value, id_cols=c(orig.col.name,Species), values_fn=mean),
   "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids=c("orig.col.name","Species"), values="value", names="name", FUN=mean),
   "data.table\ndcast"=dcast(N.tall.dt, orig.col.name + Species ~ ., mean))
-my.refs <- atime:::references_funs[c("N","N \\log N")]
-m.refs <- atime::references_best(m.res, my.refs)
+m.refs <- atime::references_best(m.res)
 m.pred <- predict(m.refs)
 plot(m.pred)+coord_cartesian(xlim=c(NA,1e8))
 ```
@@ -362,6 +362,7 @@ class. To estimate the asymptotic complexity class, we can use the
 plot below.
 
 ```{r atime-agg-refs}
+m.refs$plot.references <- m.refs$ref[fun.name %in% c("N","N log N")]
 plot(m.refs)
 ```
 
@@ -428,7 +429,7 @@ differences in functionality.
 For future work, 
 
 * `data.table`/`tidyr` may consider trying to speed up the constant factors in the reshape wide code without aggregation.
-* `collapse` reshape wide with aggregation is currently asymptotically log-linear, and so may consider speeding up to be asymptotically linear.
+* `collapse` reshape wide with aggregation seems asymptotically log-linear, and so may consider investigating the possibility of a speedup to asymptotically linear.
 * `tidyr`/`collapse` may consider implementing the advanced reshaping features that `data.table` currently supports (multiple outputs, regex).
 
 ## Session info
