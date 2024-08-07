@@ -55,6 +55,11 @@ previous projects, which answers the following questions.
   figure. If you have not ever used code to make figures, please read
   [Chapter 2 of the Animint2
   Manual](https://rcdata.nau.edu/genomic-ml/animint2-manual/Ch02-ggplot2.html),
-  and use one of the exercises to satisfy this application requirement.
+  and use one of the exercises to satisfy this application requirement. 
+  Best would be to write a whole paragraph about your figure, like we do in research papers:
+  * Setting: start by explaining what your goal is: what are you trying to understand by making a figure?
+  * Hypothesis/expectation: before making the figure based on the real data, what did you expect to see in the figure, and how does that relate to your goal?
+  * Interpretation: what can you actually see in your figure, and how does that relate to your goal? Is the result that you see based on the real data consistent with the hypothesis that you expected?
+  * Conclusion: last sentence of paragraph should summarize what new understanding you have as a result of this figure
 
-Last updated 25 June 2024.
+Last updated 6 Aug 2024.

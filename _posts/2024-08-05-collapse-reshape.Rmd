@@ -343,7 +343,7 @@ m.res <- atime::atime(
     N.tall.df$name <- "foo"
     N.tall.dt <- data.table(N.tall.df)
   },
-  seconds.limit=1,
+  seconds.limit=0.1,
   "stats\naggregate"=stats::aggregate(N.tall.df[,"value",drop=FALSE], by=with(N.tall.df, list(orig.col.name=orig.col.name,Species=Species)), FUN=mean),
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=name, values_from=value, id_cols=c(orig.col.name,Species), values_fn=mean),
   "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids=c("orig.col.name","Species"), values="value", names="name", FUN=mean),
