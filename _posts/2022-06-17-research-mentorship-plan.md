@@ -70,9 +70,9 @@ Students should expect to do the following:
   activities, by keeping copies in 2+ of the following: 
   (1) your personal computer, 
   (2) github, 
-  (3) [cloud storage](https://tdhock.github.io/blog/2022/cloud-storage/), 
-  (4) external hard drive, 
-  (5) [monsoon](https://in.nau.edu/arc/obtaining-an-account/).
+  (3) cloud storage: [my recommendations for researchers at NAU and UdeS](https://tdhock.github.io/blog/2022/cloud-storage/), 
+  (4) external drive (hard disk, USB, etc), 
+  (5) HPC: [NAU monsoon](https://in.nau.edu/arc/obtaining-an-account/), [ UdeS mp2](https://tdhock.github.io/blog/2024/mammouth-tutorial/), [other alliance Canada servers](https://docs.alliancecan.ca/wiki/Storage_and_file_management#Filesystem_quotas_and_policies).
 
 I am aware of differences between research projects and student
 capabilities, and I plan to adapt my approach to the specific needs of
@@ -105,3 +105,5 @@ Updated 22 Dec 2023: added Tyson quote about asking questions.
 Updated 4 Jan 2024: added Druyan quote about scientific method.
 
 Updated 18 Jan 2024: added Sagan quote about scientific method.
+
+Updated 6 Aug 2024: added Sherbrooke storage links.

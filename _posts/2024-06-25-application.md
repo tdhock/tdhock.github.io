@@ -62,4 +62,4 @@ previous projects, which answers the following questions.
   * Interpretation: what can you actually see in your figure, and how does that relate to your goal? Is the result that you see based on the real data consistent with the hypothesis that you expected?
   * Conclusion: last sentence of paragraph should summarize what new understanding you have as a result of this figure
 
-Last updated 6 Aug 2024.
+Updated 6 Aug 2024: added whole paragraph about your figure.

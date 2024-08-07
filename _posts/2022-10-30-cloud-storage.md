@@ -1,11 +1,25 @@
 ---
 layout: post
-title: NAU Cloud Storage
+title: Cloud Storage
 description: Different options for internal and external sharing
 ---
 
+## Sherbrooke
+
+At Sherbrooke we have a couple of options,
+
+- [OneDrive](https://www.usherbrooke.ca/services-informatiques/repertoire/collaboration/microsoft-365/onedrive): 1TB, maybe use [DriveToWeb](https://www.drv.tw/#how) for sharing results on public web pages?
+- [Alliance Canada project
+  space](https://docs.alliancecan.ca/wiki/Storage_and_file_management#Filesystem_quotas_and_policies):
+  1TB, [shareable with collaborators via copy to globus shared
+  endpoint](https://docs.alliancecan.ca/wiki/Sharing_data).
+- Another publishing option is github pages, but there are space
+  limitations: [100MiB per file max in regular repos](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github), and [git large file storage is now an option](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage).
+
+## NAU
+
 Here is a summary of my current understanding of cloud storage options
-available to us at NAU, and to our collaborators. [Link to official
+available to NAU researchers, and to our collaborators. [Link to official
 docs](https://in.nau.edu/its/filesharing-storage/).
 
 - [OneDrive](https://in.nau.edu/its/onedrive-for-business/): 1TB free,
