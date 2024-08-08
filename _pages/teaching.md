@@ -79,7 +79,7 @@ Topics without links below are on my TODO list.
   - [On Monsoon](https://www.youtube.com/watch?v=PByS8QnqDGc&list=PLwc48KSH3D1Onsed66FPLywMSIQmAhUYJ&index=11)
 - [emacs and python](https://www.youtube.com/playlist?list=PLwc48KSH3D1OeAHFQhWpd8Fz8rLhTaD7t)
 - Interpreting machine learning models with feature selection
-- Data manipulation with data.table, [LatinR Oct'23 slides](https://github.com/tdhock/2023-10-LatinR-data.table?tab=readme-ov-file#english).
+- Data manipulation with data.table, [LatinR Oct'23 slide source](https://github.com/tdhock/2023-10-LatinR-data.table?tab=readme-ov-file#english), [updated slides](https://docs.google.com/presentation/d/1mHTFR6Eg7OdKi6yJcAvMk5_B8hjtMmsczs8Ewxt2xT8/edit?usp=sharing).
 - Interactive data visualization with the grammar of graphics
 - git/github 
   
