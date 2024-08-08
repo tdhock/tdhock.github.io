@@ -77,6 +77,7 @@ Here we compare the plots which resulted from `atime:::plot.atime_prediction`.
 ![plot of chunk atime-agg-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-agg-linux-old.png)
 
 * above and below are two different runs on the same/old computer.
+* we see that the two results are qualitatively very similar (both even have the odd dcast decrease just before the time limit), but differ in the `N=` values displayed in the direct labels.
 
 ![plot of chunk atime-agg-linux-old-2](/assets/img/2024-08-06-atime-different-cpu/atime-agg-linux-old-2.png)
 
