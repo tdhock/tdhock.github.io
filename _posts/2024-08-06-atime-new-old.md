@@ -45,11 +45,28 @@ Here we compare the plots which resulted from `atime:::plot.atime_prediction`.
 
 ![plot of chunk atime-wide-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-wide-linux-old.png)
 
+* Above and below are two different runs on the same/old computer.
+
+![plot of chunk atime-wide-linux-old-2](/assets/img/2024-08-06-atime-different-cpu/atime-wide-linux-old-2.png)
+
 ### References plot
 
 Here we compare the plots which resulted from `atime:::plot.references_best`.
 
+![plot of chunk atime-wide-refs-win-new](/assets/img/2024-08-06-atime-different-cpu/atime-wide-refs-win-new.png)
+
+* Above new windows, below old linux.
+* TODO
+
+![plot of chunk atime-wide-refs-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-wide-refs-linux-old.png)
+
 ## Aggregation comparison
+
+These comparisons involve tall (sometimes called long) to wide reshape, with aggregation by taking the mean of several data.
+
+### Predict plots
+
+Here we compare the plots which resulted from `atime:::plot.atime_prediction`.
 
 ![plot of chunk atime-agg-win-new](/assets/img/2024-08-06-atime-different-cpu/atime-agg-win-new.png)
 
@@ -58,6 +75,21 @@ Here we compare the plots which resulted from `atime:::plot.references_best`.
 * `data.table` is fastest for large `N` above, whereas `collapse` is fastest for all `N` below. That is because, in the plot below, we did not increase `N` large enough to see `data.table` and `collapse` cross)
 
 ![plot of chunk atime-agg-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-agg-linux-old.png)
+
+* above and below are two different runs on the same/old computer.
+
+![plot of chunk atime-agg-linux-old-2](/assets/img/2024-08-06-atime-different-cpu/atime-agg-linux-old-2.png)
+
+### References plot
+
+Here we compare the plots which resulted from `atime:::plot.references_best`.
+
+![plot of chunk atime-agg-refs-win-new](/assets/img/2024-08-06-atime-different-cpu/atime-agg-refs-win-new.png)
+
+* Above new windows, below old linux.
+* TODO
+
+![plot of chunk atime-agg-refs-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-agg-refs-linux-old.png)
 
 ## Conclusion
 
