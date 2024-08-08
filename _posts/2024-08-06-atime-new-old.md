@@ -46,6 +46,7 @@ Here we compare the plots which resulted from `atime:::plot.atime_prediction`.
 ![plot of chunk atime-wide-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-wide-linux-old.png)
 
 * Above and below are two different runs on the same/old computer.
+* we see that the two results are qualitatively very similar (both even have the odd dcast decrease just before the time limit), but differ in the `N=` values displayed in the direct labels.
 
 ![plot of chunk atime-wide-linux-old-2](/assets/img/2024-08-06-atime-different-cpu/atime-wide-linux-old-2.png)
 
@@ -55,8 +56,7 @@ Here we compare the plots which resulted from `atime:::plot.references_best`.
 
 ![plot of chunk atime-wide-refs-win-new](/assets/img/2024-08-06-atime-different-cpu/atime-wide-refs-win-new.png)
 
-* Above new windows, below old linux.
-* TODO
+* Above new windows, below old linux, both look qualitatively similar, but below has the odd dcast decrease just before the time limit.
 
 ![plot of chunk atime-wide-refs-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-wide-refs-linux-old.png)
 
@@ -77,7 +77,7 @@ Here we compare the plots which resulted from `atime:::plot.atime_prediction`.
 ![plot of chunk atime-agg-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-agg-linux-old.png)
 
 * above and below are two different runs on the same/old computer.
-* we see that the two results are qualitatively very similar (both even have the odd dcast decrease just before the time limit), but differ in the `N=` values displayed in the direct labels.
+* we see that the two results are qualitatively very similar, but differ in the `N=` values displayed in the direct labels.
 
 ![plot of chunk atime-agg-linux-old-2](/assets/img/2024-08-06-atime-different-cpu/atime-agg-linux-old-2.png)
 
@@ -87,8 +87,7 @@ Here we compare the plots which resulted from `atime:::plot.references_best`.
 
 ![plot of chunk atime-agg-refs-win-new](/assets/img/2024-08-06-atime-different-cpu/atime-agg-refs-win-new.png)
 
-* Above new windows, below old linux.
-* TODO
+* Above new windows, below old linux, a subtle difference is that the curves seem a bit smoother below.
 
 ![plot of chunk atime-agg-refs-linux-old](/assets/img/2024-08-06-atime-different-cpu/atime-agg-refs-linux-old.png)
 
