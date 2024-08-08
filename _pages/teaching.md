@@ -12,40 +12,41 @@ of progression plans with various specialties including machine
 learning](https://github.com/NAU-CS/progression-plans), which should
 be useful for planning what classes you take.
 
+- Fall 2024, UdeS IFT 603/712, Techniques d'Apprentissage, [web site](https://tdhock.github.io/2024-08-ift603-712/) adapted from materials by [Pierre-Marc Jodoin](https://jodoin.github.io/).
 - Spring 2024, NAU SES graduate seminar on R Package development, [my slides](https://docs.google.com/presentation/d/1_ErpxRSYfBhM6Jl2RTprisT2c6iebvzd1cstcwuxUjg/edit?usp=sharing).
-- Fall 2023, CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/2023-08-artificial-intelligence).
-- Fall 2023, CS 599, Deep Learning, [my course materials](https://github.com/tdhock/2023-08-deep-learning).
-- Fall 2023, CS 599, Unsupervised Learning, [my course materials](https://github.com/tdhock/2023-08-unsupervised-learning).
+- Fall 2023, NAU CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/2023-08-artificial-intelligence).
+- Fall 2023, NAU CS 599, Deep Learning, [my course materials](https://github.com/tdhock/2023-08-deep-learning).
+- Fall 2023, NAU CS 599, Unsupervised Learning, [my course materials](https://github.com/tdhock/2023-08-unsupervised-learning).
 - Spring 2023, Introduction to Deep Learning in R, a 2 hour lecture
   for [Research Bazaar
   Arizona](https://researchbazaar.arizona.edu/resbaz/Arizona2023/),
   [my course materials](https://github.com/tdhock/2023-res-baz-az).
-- Spring 2023, CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/cs470-570-spring-2023).
-- Fall 2022, CS 499-002 (5893), Deep Learning, [my course
+- Spring 2023, NAU CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/cs470-570-spring-2023).
+- Fall 2022, NAU CS 499-002 (5893), Deep Learning, [my course
   materials](https://github.com/tdhock/cs499-599-fall-2022).
-- Fall 2022, CS 105/205/305, Computing Tools, [my course materials](https://github.com/tdhock/cs105-205-305-fall-2022).
+- Fall 2022, NAU CS 105/205/305, Computing Tools, [my course materials](https://github.com/tdhock/cs105-205-305-fall-2022).
 - Summer 2022, Introduction to Machine Learning and Neural Networks,
   with an application to earth system modeling. 60 minute lecture for
   summer school on "[New Advances in Land Carbon Cycle
   Modeling](http://www2.nau.edu/luo-lab/?workshop)" (5th
   year), [my course materials](https://github.com/tdhock/2020-yiqi-summer-school#prepared-for-the-summer-school-4th-year-2021).
-- Spring 2022, CS570, Advanced Intelligent Systems (Deep Learning). [my course materials](https://github.com/tdhock/cs570-spring-2022)
-- Fall 2021, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2021)
+- Spring 2022, NAU CS570, Advanced Intelligent Systems (Deep Learning). [my course materials](https://github.com/tdhock/cs570-spring-2022)
+- Fall 2021, NAU CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2021)
 - Summer 2021, Introduction to Machine Learning and Neural Networks,
   with an application to earth system modeling. 60 minute lecture for
   summer school on "[New Advances in Land Carbon Cycle
   Modeling](http://www2.nau.edu/luo-lab/?workshop)" (4th year). [code](https://github.com/tdhock/2020-yiqi-summer-school), [slides](https://github.com/tdhock/2020-yiqi-summer-school/blob/master/raw/master/slides-short.pdf), [video](https://youtu.be/c21etYEb-tE), [quiz](https://forms.office.com/Pages/ResponsePage.aspx?id=n57UJ-GJoEqZo9NbV7K6A4W5m6WiFvFJkzgC_Y4KHq9UQkJTRjBVS1A5TDJBSkc5OUxKSDJEVkM3OC4u)
-- Spring 2021, CS470/570, Artificial Intelligence, [my course materials](https://github.com/tdhock/cs470-570-spring-2021)
-- Fall 2020, CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2020)
+- Spring 2021, NAU CS470/570, Artificial Intelligence, [my course materials](https://github.com/tdhock/cs470-570-spring-2021)
+- Fall 2020, NAU CS499/599, Unsupervised Learning. [my course materials](https://github.com/tdhock/cs499-599-fall-2020)
 - Summer 2020, Introduction to Machine Learning and Neural Networks,
   90 minute lecture for summer school on "[New Advances in Land Carbon
   Cycle Modeling](http://www2.nau.edu/luo-lab/?workshop)" (3rd
   year). [my course
   materials](https://github.com/tdhock/2020-yiqi-summer-school)
-- Spring 2020, CS499-3, Deep Learning. [my course materials](https://github.com/tdhock/cs499-spring2020/)
-- Fall 2019, CS599-6 / EE599-4, Machine learning research. [my course
+- Spring 2020, NAU CS499-3, Deep Learning. [my course materials](https://github.com/tdhock/cs499-spring2020/)
+- Fall 2019, NAU CS599-6 / EE599-4, Machine learning research. [my course
   materials](https://github.com/tdhock/cs599-fall2019/)
-- Spring 2019, CS499-007, Machine learning algorithms. [my course materials](https://github.com/tdhock/cs499-spring2019)
+- Spring 2019, NAU CS499-007, Machine learning algorithms. [my course materials](https://github.com/tdhock/cs499-spring2019)
 - Fall 2018, Open source software engineering class at
   NAU. [my course materials](https://github.com/tdhock/oss-class-ideas)
 - Summer 2017, International useR 2017 conference, Brussels, Belgium,
