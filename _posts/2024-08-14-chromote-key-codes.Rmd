@@ -340,10 +340,17 @@ Below we take the first hex code mentioned:
 (win_first <- win_all[, .SD[1], by=dom_name])
 ```
 
-The table above could be used to expand the keys supported in
-`animint2` tests. To verify that it is compatible with the ones
+The table above could be used to define a new `key2hex_code` variable,
+which would expand the keys supported in `animint2` tests:
+
+```{r}
+key2hex_code <- win_first[, structure(hex, names=dom_name)]
+dput(key2hex_code)
+```
+
+To verify that it is compatible with the ones
 already used in the tests, we can further subset to get the keys we
-use in `animint2` tests:
+use in existing `animint2` tests:
 
 ```{r}
 (win_some <- win_first[c("Backspace","Enter","ArrowDown"),on="dom_name"])
