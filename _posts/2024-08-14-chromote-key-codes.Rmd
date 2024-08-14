@@ -6,8 +6,9 @@ description: Documenting key code magic numbers in animint2 tests
 ---
 
 [animint2](https://github.com/tdhock/animint2) is an R package
-for TODO.
-The goal of this post is to TODO.
+for animated, interactive data visualization.
+It uses R ggplot code, which makes it possible to define a wide range of web-based data visualizations, as can be seen in the [gallery](https://animint.github.io/gallery/).
+The goal of this post is to explain some changes in the framework used for testing `animint2`.
 
 ```{r Ropts, echo=FALSE}
 repo.dir <- normalizePath("..")
@@ -27,6 +28,7 @@ if(FALSE){
 
 ## Background about animint2
 
+Since `animint2` creates web-based data visualizations, we can test the software by using a web browser to render, and examining the output 
 TODO headless browser, RSelenium, chromote.
 
 ### Old test
