@@ -1,9 +1,195 @@
 ---
-layout: page
-permalink: /publications/
-title: Publications
-description: Peer-reviewed papers and preprints with links to code and data
+layout: post
+title: Generate publications page
+description: Parsing bibtex and generating markdown
 ---
+
+I have been updating my
+[publications](https://tdhock.github.io/publications/) page by editing
+markdown for several years. Today I updated my self-citation database,
+[TDH-refs.bib](/assets/TDH-refs.bib), so that is is consistent with
+that publications page. In this post we explore the extent to which it would be possible to generate the publications page, using the bib file as a source.
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-08-15-auto-pubs-page"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=10,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+### Parse bib into R
+
+Parsing bibtex files is easy using regex. In fact, that is one of the
+examples on `?nc::capture_all_str`:
+
+```{r}
+refs.bib <- "~/tdhock.github.io/assets/TDH-refs.bib"
+refs.vec <- readLines(refs.bib)
+at.lines <- grep("^@", refs.vec, value=TRUE)
+str(at.lines)
+```
+
+The output above shows that there are currently 56 lines that start
+with `@` in the bib file. Below we use a regex to convert each item
+into one row of a data table:
+
+```{r}
+refs.dt <- nc::capture_all_str(
+  refs.vec,
+  "@",
+  type="[^{]+", tolower,
+  "[{]",
+  ref="[^,]+",
+  ",\n",
+  fields="(?:.*\n)+?.*",
+  "[}]\\s*(?:$|\n)")
+str(refs.dt)
+```
+
+The output above shows that the bib file was converted to a table with 56 rows.
+
+### Parsing fields 
+
+First we look at the number of lines with an equals sign, each of which is probably a field.
+
+```{r}
+eq.lines <- grep("=", refs.vec, value=TRUE)
+str(eq.lines)
+```
+
+Above we see 390 fields.
+
+Below we parse the `fields` column:
+
+```{r}
+strip <- function(x)gsub("^\\s*|,\\s*$", "", gsub('[{}"]', "", x))
+refs.fields <- refs.dt[, nc::capture_all_str(
+  fields,
+  "\\s*",
+  variable="\\S+", tolower,
+  "\\s*=",
+  value=".*", strip),
+  by=.(type, ref)]
+refs.fields
+```
+
+Above we see 390 fields, consistent with the simpler `grep` parsing above.
+
+### Verify clean
+
+Normally there should not be any quotes or curly braces in fields:
+
+```{r}
+cat(grep('[{}"]', refs.fields$value, value=TRUE), sep="\n\n")
+```
+
+### Formatting the parsed data
+
+The publications page is organized as follows
+
+* chronologically, newest on top.
+* heading `###` for in progress, and each year.
+* bullet `-` for each publication.
+
+Each publication has 
+
+* Names like Last1 F1, Last2 F2.
+* Title then period.
+* Venue/publisher.
+* then links.
+
+The links at the end are not stored in the bib file, so that is not
+possible to output. (exercise for reader!)
+
+But we can get the other info.
+
+### Venues
+
+```{r}
+library(data.table)
+refs.wide <- dcast(refs.fields, type + ref ~ variable)
+refs.wide[, .(
+  type,
+  year,
+  journal=substr(journal,1,10),
+  vol=volume, num=number,
+  booktitle=substr(booktitle,1,10),
+  note=substr(note,1,10),
+  school=substr(school,1,10))]
+```
+
+As can be seen in the table above, we can use various fields to define the venue of publication:
+
+* `article`: most journal articles have a `volume` and `number`. The only exception is a recently published article that has not yet been assigned a volume.
+* `incollection` and `inproceedings`: can use `booktitle`.
+* `unpublished`: can use `note`.
+* `phdthesis`: can use `school`.
+
+These rules are encoded below,
+
+```{r}
+refs.wide[, venue := fcase(
+  type=="article", paste0(
+    journal, ifelse(
+      is.na(volume),
+      paste0(", DOI:", doi),
+      paste0(
+        " ",
+        volume,
+        ifelse(is.na(number), "", sprintf("(%s)", number))
+      )
+    )
+  ),
+  grepl("^in", type), booktitle,
+  type=="phdthesis", school,
+  type=="unpublished", note
+)][, .(type, year, venue=substr(venue, nchar(venue)-30,nchar(venue)))]
+```
+
+### Authors
+
+```{r}
+refs.wide[, author_list := strsplit(author, split=" and ")]
+subject <- c("Toby Dylan Hocking", "Hocking, Toby Dylan")
+family.pattern <- "[A-Z][^ ]+"
+given.pattern <- "[^,]+"
+nc::capture_first_vec(subject, "^", family=family.pattern, ", ", given=given.pattern, "$", nomatch.error=FALSE)
+nc::capture_first_vec(subject, "^", given=given.pattern, " ", family=family.pattern, "$", nomatch.error=FALSE)
+alt.pattern <- nc::alternatives_with_shared_groups(
+  family=family.pattern,
+  given=given.pattern,
+  list("^", given, " ", family, "$"),
+  list("^", family, ", ", given, "$"))
+nc::capture_first_vec(subject, alt.pattern)
+(authors <- refs.wide[, {
+  complete <- author_list[[1]]
+  print(complete)
+  data.table(complete, nc::capture_first_vec(
+    complete,
+    alt.pattern,
+    nomatch.error=FALSE))
+}, by=ref
+][
+, abbrev := gsub("[a-z. ]", "", given)
+][
+, show := ifelse(is.na(family), complete, paste(family, abbrev))
+][])
+authors[is.na(family)]
+```
+
+```{r}
+authors[, .(authors_abbrev=paste(show, collapse=", ")), by=ref]
+```
+
 
 - My pages on
   [Google Scholar](https://scholar.google.ca/citations?user=c83d8tgAAAAJ)
@@ -205,14 +391,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   Presentation at useR 2019:
   [slides](http://www.user2019.fr/static/pres/t257847.pdf),
   [video](https://www.youtube.com/watch?v=XlC4WCqsbuI).
-- Hocking TD, Vargovich J. Linear Time Dynamic Programming for
-  Computing Breakpoints in the Regularization Path of Models Selected
-  From a Finite Set. [Journal of Computational and Graphical
-  Statistics](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2021.2000422)
-  (2021), doi:10.1080/10618600.2021.2000422. [Preprint
-  arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
-  [Software](https://github.com/tdhock/penaltyLearning),
-  [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper).
   
 ### 2021
 
@@ -225,6 +403,14 @@ description: Peer-reviewed papers and preprints with links to code and data
   [video](https://www.youtube.com/watch?v=LXyruwSo2K0&t=245s),
   [blog](https://akhikolla.github.io),
   [results](https://akhikolla.github.io/packages-folders/)
+- Hocking TD, Vargovich J. Linear Time Dynamic Programming for
+  Computing Breakpoints in the Regularization Path of Models Selected
+  From a Finite Set. [Journal of Computational and Graphical
+  Statistics](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2021.2000422)
+  (2021), doi:10.1080/10618600.2021.2000422. [Preprint
+  arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
+  [Software](https://github.com/tdhock/penaltyLearning),
+  [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper).
 - Hocking TD. Wide-to-tall data reshaping using regular expressions
   and the nc package. [R
   Journal](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html)
@@ -340,12 +526,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   tutorial](https://www.user2017.brussels/uploads/TobyHocking.html),
   [video](https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/Introduction-to-optimal-changepoint-detection-algorithms-II),
   [Reproducible](https://github.com/tdhock/change-tutorial).
-- Maidstone R, Hocking TD, Rigaill G, Fearnhead P. On optimal multiple
-  changepoint algorithms for large data. Statistics and Computing, volume 27
-  (2017). doi:10.1007/s11222-016-9636-3
-  [journal](https://link.springer.com/article/10.1007/s11222-016-9636-3),
-  [Software](https://r-forge.r-project.org/R/?group_id%3D1851),
-  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/benchmark/?root%3Dopfp).
 
 ### 2016
 
@@ -364,6 +544,12 @@ description: Peer-reviewed papers and preprints with links to code and data
   profiling using circulating free tumor DNA highlights heterogeneity
   in neuroblastoma. Clinical Cancer
   Research 2016. [journal](http://clincancerres.aacrjournals.org/content/early/2016/11/03/1078-0432.CCR-16-0500).
+- Maidstone R, Hocking TD, Rigaill G, Fearnhead P. On optimal multiple
+  changepoint algorithms for large data. Statistics and Computing
+  (2016). doi:10.1007/s11222-016-9636-3
+  [journal](https://link.springer.com/article/10.1007/s11222-016-9636-3),
+  [Software](https://r-forge.r-project.org/R/?group_id%3D1851),
+  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/benchmark/?root%3Dopfp).
 - The animint2 manual, [online
   "book" with multiple chapters](https://rcdata.nau.edu/genomic-ml/animint2-manual/Ch02-ggplot2.html),
   [Reproducible](https://github.com/tdhock/animint-book).
