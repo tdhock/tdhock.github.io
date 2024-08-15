@@ -48,19 +48,8 @@ description: Peer-reviewed papers and preprints with links to code and data
   [slides](https://github.com/tdhock/functional-pruning-theory#readme),
   [IEEE NJACS](https://events.vtools.ieee.org/m/280515), [ASU West ML
   Day](https://newcollege.asu.edu/machine-learning-day-1).
-- Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
-  comparison machines. [Preprint
-  arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under review at
-  Machine Learning,
-  [Software](https://github.com/tdhock/rankSVMcompare),
-  [Reproducible](https://github.com/tdhock/compare-paper).
 - Hocking TD and Killick R. Changepoint detection algorithms and
   applications in R. Textbook in preparation.
-- Hocking TD. A breakpoint detection error function for segmentation
-  model selection and
-  validation. [Preprint arXiv:1509.00368](https://arxiv.org/abs/1509.00368),
-  [Software](http://r-forge.r-project.org/scm/?group_id=1540),
-  [Reproducible](https://github.com/tdhock/breakpointError-orig).
 - Hocking TD, Khare A. Learning penalty functions for changepoint
   detection using elastic-net regularized accelerated failure time
   models. In preparation, [Software](https://github.com/anujkhare/iregnet),
@@ -84,6 +73,17 @@ description: Peer-reviewed papers and preprints with links to code and data
   Visualization. 
 - Gabi Thibault, TD Hocking, Alexis Achim. Predicting forest burn from
   satellite image data.
+- Hocking TD. A breakpoint detection error function for segmentation
+  model selection and
+  validation. [Preprint arXiv:1509.00368](https://arxiv.org/abs/1509.00368),
+  [Software](http://r-forge.r-project.org/scm/?group_id=1540),
+  [Reproducible](https://github.com/tdhock/breakpointError-orig).
+- Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
+  comparison machines. [Preprint
+  arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under review at
+  Machine Learning,
+  [Software](https://github.com/tdhock/rankSVMcompare),
+  [Reproducible](https://github.com/tdhock/compare-paper).
  
 ### Accepted, in press
 
@@ -210,7 +210,13 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 - Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
   Packages. Published in proceedings of [ISSRE
-  2021](https://ieeexplore.ieee.org/document/9700272).
+  2021](https://ieeexplore.ieee.org/document/9700272). RcppDeepState, a simple way to fuzz
+  test Rcpp Packages. Contributed talk at international useR 2021
+  conference. [Software](https://github.com/akhikolla/RcppDeepState),
+  [abstract](https://www.conftool.org/user2021/index.php?page=browseSessions&form_session=9#paperID123),
+  [video](https://www.youtube.com/watch?v=LXyruwSo2K0&t=245s),
+  [blog](https://akhikolla.github.io),
+  [results](https://akhikolla.github.io/packages-folders/)
 - Hocking TD, Vargovich J. Linear Time Dynamic Programming for
   Computing Breakpoints in the Regularization Path of Models Selected
   From a Finite Set. [Journal of Computational and Graphical
@@ -219,13 +225,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
   [Software](https://github.com/tdhock/penaltyLearning),
   [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper).
-- Kolla A, Hocking TD, Groce A. RcppDeepState, a simple way to fuzz
-  test Rcpp Packages. Contributed talk at international useR 2021
-  conference. [Software](https://github.com/akhikolla/RcppDeepState),
-  [abstract](https://www.conftool.org/user2021/index.php?page=browseSessions&form_session=9#paperID123),
-  [video](https://www.youtube.com/watch?v=LXyruwSo2K0&t=245s),
-  [blog](https://akhikolla.github.io),
-  [results](https://akhikolla.github.io/packages-folders/)
 - Hocking TD. Wide-to-tall data reshaping using regular expressions
   and the nc package. [R
   Journal](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html)
@@ -271,7 +270,9 @@ description: Peer-reviewed papers and preprints with links to code and data
   Supervised Detection of Peaks in Multiple Samples and Cell
   Types. Pacific Symposium on Biocomputing (2020)
   25:367-378, [PDF](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf),
-  [Software](https://github.com/tdhock/PeakSegJoint).
+  [Software](https://github.com/tdhock/PeakSegJoint),
+  [Preprint arXiv:1506.01286](https://arxiv.org/abs/1506.01286),
+  [Reproducible](https://github.com/tdhock/PeakSegJoint-paper).
   
 ### 2019
 
@@ -285,6 +286,13 @@ description: Peer-reviewed papers and preprints with links to code and data
   Deconvolution of Calcium Imaging Data. Biostatistics (2019), doi:
   10.1093/biostatistics/kxy083,
   [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/30753436).
+- Sievert C, Cai J, VanderPlas S, Ferris K, Khan FUF, Hocking
+  TD. Extending ggplot2 for linked and animated web graphics. Journal
+  of Computational and Graphical Statistics, Volume 28, Number 2 (2019).
+  [JCGS](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367),
+  [Software](https://github.com/tdhock/animint),
+  [Reproducible](https://github.com/tdhock/animint-paper),
+  [Interactive Figures](https://rcdata.nau.edu/genomic-ml/public_html/animint-paper-figures/).
   
 ### 2018
 
@@ -299,14 +307,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   [AJHG](https://www.cell.com/action/showPdf?pii=S0002-9297%2818%2930271-4),
   [Software](http://github.com/tdhock/predict-clinically-pathogenic),
   [used in dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP).
-- Sievert C, Cai J, VanderPlas S, Ferris K, Khan FUF, Hocking
-  TD. Extending ggplot2 for linked and animated web graphics. Journal
-  of Computational and Graphical Statistics (2018).
-  doi:10.1080/10618600.2018.1513367.
-  [JCGS](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367),
-  [Software](https://github.com/tdhock/animint),
-  [Reproducible](https://github.com/tdhock/animint-paper),
-  [Interactive Figures](https://rcdata.nau.edu/genomic-ml/public_html/animint-paper-figures/).
 - Depuydt P, Boeva V, Hocking TD, Cannoodt R, Ambros IM, Ambros PF,
   Asgharzadeh S, Attiyeh EF, Combaret V, Defferrari R, Fischer M, Hero
   B, Hogarty MD, Irwin MS, Koster J, Kreissman S, Ladenstein R,
@@ -382,15 +382,6 @@ description: Peer-reviewed papers and preprints with links to code and data
   [video](http://videolectures.net/icml2015_hocking_count_data/?q=hocking),
   [Software](https://github.com/tdhock/PeakSegDP),
   [Reproducible](https://github.com/tdhock/PeakSeg-paper).
-- Hocking TD, Bourque G. PeakSegJoint: fast supervised peak detection
-  via joint segmentation of multiple count data
-  samples. [Preprint arXiv:1506.01286](https://arxiv.org/abs/1506.01286),
-  [Software](https://github.com/tdhock/PeakSegJoint),
-  [Reproducible](https://github.com/tdhock/PeakSegJoint-paper).
-- Animint: Interactive Web-Based Animations Using Ggplot2's Grammar of
-  Graphics. VanderPlas SR and Sievert C and Hocking TD. Presentation
-  at
-  [JSM2015](https://ww2.amstat.org/meetings/jsm/2015/onlineprogram/AbstractDetails.cfm?abstractid=314184%0A).
 
 ### 2014
 
@@ -405,8 +396,11 @@ description: Peer-reviewed papers and preprints with links to code and data
   Bioinformatics (2014) 30 (11):
   1539-1546. DOI:10.1093/bioinformatics/btu072
   [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24493034),
-  [Software](https://github.com/tdhock/SegAnnDB),
+  [SegAnnDB Software](https://github.com/tdhock/SegAnnDB),
   [Reproducible](https://gforge.inria.fr/scm/viewvc.php/breakpoints/webapp/applications-note/).
+  [Preprint hal-00759129](https://hal.inria.fr/hal-00759129),
+  [SegAnnot Software](https://r-forge.r-project.org/scm/?group_id=1541),
+  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/SegAnnot/inst/doc/?root=breakpoints).
 
 ### 2013
 
@@ -433,11 +427,6 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### 2012
 
-- Hocking TD, Rigaill G. SegAnnot: an R package for fast segmentation
-  of annotated piecewise constant signals,
-  [Preprint hal-00759129](https://hal.inria.fr/hal-00759129). 
-  [Software](https://r-forge.r-project.org/scm/?group_id=1541),
-  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/SegAnnot/inst/doc/?root=breakpoints).
 - Hocking TD. Learning algorithms and statistical software, with
   applications to bioinformatics. PhD thesis, Ecole Normale Superieure
   de Cachan,
