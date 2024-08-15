@@ -1,4 +1,3 @@
-s
 ---
 layout: post
 title: Writing comprehensible tests
@@ -26,40 +25,81 @@ if(FALSE){
 }
 ```
 
-## Background about animint2
+### Background about animint2
 
-Since `animint2` creates web-based data visualizations, we can test the software by using a web browser to render, and examining the output 
-TODO headless browser, RSelenium, chromote.
+Since `animint2` creates web-based data visualizations, we can test
+the software by using a web browser to render, and examining the
+output HTML.  This is a concept called [headless
+browser](https://en.wikipedia.org/wiki/Headless_browser) testing (if
+there is no browser window to be seen), and/or remote-controlled
+browser testing (if you control a browser window with the command
+line). 
+
+Since about 2014, the animint project has been using this kind of
+testing, to make sure that the code keeps working, even when making
+changes to the code. Currently, these tests are found in the 59
+`test-renderer*` files in
+[animint2/tests/testthat](https://github.com/animint/animint2/tree/master/tests/testthat),
+which contain 755 `expect_*` test lines.
+
+Originally, these tests were implemented using RSelenium, a package
+that supported firefox as a remote-controlled browser, and PhantomJS
+as a headless browser.  Currently in GSOC'24, Siddhesh Deodhar is
+working in [PR#126](https://github.com/animint/animint2/pull/126) on
+migrating these tests to the chromote package, which is a different
+implementation that requires the Google Chrome browser.
+
+Since `animint2` creates interactive data visualizations, we need to
+test the interactivity, by simulating mouse clicks and keyboard typing
+in various areas of the web page.  The different testing frameworks
+(RSelenium and chromote) use different APIs to simulate these
+interactivity events. The rest of this post will explore some
+challenges we encountered when migrating these interactivity events in
+the tests.
 
 ### Old test
+
+As an example, consider the code below, which tests for the number of
+circles, before and after sending various key interaction events to
+the web browser.
 
 ```r
 test_that("top widget adds/remove points", {
   expect_equal(get_circles(), list(10, 10))
   remDr$sendKeysToActiveElement(list(key="backspace"))
-  sendBackspace()
   expect_equal(get_circles(), list(5, 10))
   remDr$sendKeysToActiveElement(list(key="backspace"))
-  sendBackspace()
   expect_equal(get_circles(), list(0, 10))
   remDr$sendKeysToActiveElement(list("a", key="enter"))
-  send("a")
-tdhock marked this conversation as resolved.
   expect_equal(get_circles(), list(5, 10))
   remDr$sendKeysToActiveElement(list("b", key="enter"))
-  send("b")
   expect_equal(get_circles(), list(10, 10))
 })
 ```
 
+The code above is fairly easy to read/understand:
+* `get_circles()` gets a list of counts of currently displayed circles.
+* `remDr$sendKeysToActiveElement()` simulates a keyboard interaction
+  event, where `enter` and `backspace` are special keywords for the
+  corresponding keys.
+
 ### Siddesh's first proposition
 
-From https://github.com/animint/animint2/blob/d2b5de7cd69bd22e50bbc6da88b528f89828c598/tests/testthat/test-renderer1-knit-print.R
+In chromote, the analog of `sendKeysToActiveElement()` is
+`dispatchKeyEvent()`, which requires specifying a key and
+corresponding code, as in the example below, [from one of Siddhesh's
+commits](https://github.com/animint/animint2/blob/d2b5de7cd69bd22e50bbc6da88b528f89828c598/tests/testthat/test-renderer1-knit-print.R):
 
 ```r
 sendKey <- function(key, code, keyCode) {
-  remDr$Input$dispatchKeyEvent(type = "keyDown", key = key, code = code, windowsVirtualKeyCode = keyCode, nativeVirtualKeyCode = keyCode)
-  remDr$Input$dispatchKeyEvent(type = "keyUp", key = key, code = code, windowsVirtualKeyCode = keyCode, nativeVirtualKeyCode = keyCode)
+  remDr$Input$dispatchKeyEvent(
+    type = "keyDown", key = key, code = code,
+    windowsVirtualKeyCode = keyCode,
+    nativeVirtualKeyCode = keyCode)
+  remDr$Input$dispatchKeyEvent(
+    type = "keyUp", key = key, code = code,
+    windowsVirtualKeyCode = keyCode,
+    nativeVirtualKeyCode = keyCode)
 }
 sendBackspace <- function() {
   if (remDr$browserName == "chromote") {
@@ -86,11 +126,36 @@ sendB <- function() {
     remDr$sendKeysToActiveElement(list("b", key="enter"))
   }
   Sys.sleep(0.5)
-}```
+}
+```
+
+There are several instances of "repeated code blocks" in the code
+above, which is one of the mistakes that I see frequently enough, that
+I have written about it in my [R General Usage
+Rubric](https://docs.google.com/document/d/1W6-HdQLgHayOFXaQtscO5J5yf05G7E6KeXyiBJFcT7A/edit#heading=h.pekgvy78tviz),
+which I use to grade R programming assignments. The repetition issues
+below can be fixed by using loops, functions, or some other
+programming technique:
+
+* In `sendKey()` the two lines are the same except for `type =
+  "keyUp"` or `Down`. 
+* The `sendA` and `sendB` functions are identical except for
+  `text="a"` or `b`.
+* `sendKey(x,y,z)` is always called with `x` same as `y`, such as
+  `sendKey("Enter", "Enter", 13)`.
+  
+Another issue is the `13` which appears in the code, but is not
+explained, so it is a [Magic
+Number](https://en.wikipedia.org/wiki/Magic_number_(programming)#Unnamed_numerical_constants). Any
+reasonable reader of the code may wonder, where does this 13 come
+from, and what number should I use if I wanted to call this function
+to simulate a different key press?
 
 ### Siddesh's proposed fix
 
-From https://github.com/animint/animint2/blob/2a633480122337d98888b8686a6f81b699828ad9/tests/testthat/helper-HTML.R#L83
+I asked Siddhesh to fix these issues, and [he commited a new version](
+https://github.com/animint/animint2/blob/2a633480122337d98888b8686a6f81b699828ad9/tests/testthat/helper-HTML.R#L83)
+with:
 
 ```r
 sendKey <- function(key) {
@@ -110,13 +175,6 @@ sendKey <- function(key) {
 	  nativeVirtualKeyCode = key2code[[key]])
   }
 }
-```
-
-### My proposed new test
-
-From https://github.com/animint/animint2/blob/053dde95b5be7f2fced0741cc71a1ddb8b900d19/tests/testthat/helper-HTML.R
-
-```r
 sendBackspace <- function() {
   sendKey("Backspace")
   Sys.sleep(0.5)
@@ -138,6 +196,19 @@ test_that("top widget adds/remove points", {
   expect_equal(get_circles(), list(10, 10))
 })
 ```
+
+The above code fixes most of the repetition issues, but does not fully fix the magic number issue, because the link in comments, to [Microsoft docs](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes), 
+
+* only has hex codes, not decimal codes (required by chromote in R)
+* only has names like `VK_BACK`, not like `Backspace` (required by chromote in R)
+
+So there is still some mystery. Any reasonable programmer may wonder,
+are these really the decimal versions of the hex codes listed on that
+page? How to find what the keyword should be for a new key?
+
+### My proposed new test
+
+I proposed the following fix [in a recent commit](https://github.com/animint/animint2/blob/053dde95b5be7f2fced0741cc71a1ddb8b900d19/tests/testthat/helper-HTML.R):
 
 ```r 
 ### The hex codes come from
@@ -161,7 +232,30 @@ sendKey <- function(key) {
 }
 ```
 
-## What about the other hex codes?
+The above code provides two links
+
+* [Chrome dev tools docs](https://chromedevtools.github.io/devtools-protocol/tot/Input/) explain that `dispatchKeyEvent()` requires DOM key codes.
+* [Mozilla
+  docs](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values)
+  has a table that lists DOM key names and corresponding codes like
+  `Backspace` (along with the windows virtual key codes like
+  `VK_BACK`).
+  
+So by following those links in the nearby comments, it should be obvious, to find the key codes to use, if we ever wanted to simulate a new/different key entry. And making such a change would be easy, by just adding a new entry to `key2hex_code`, since the repetition has been removed.
+
+### What about the other hex codes?
+
+Another reasonable question we may ask is, can our R code support all
+of the key codes listed on [Mozilla
+docs](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values)?
+
+To do that, we could download the web page, and parse/extract the
+relevant information (names and hex code values). 
+
+### Define expected values
+
+First, we define
+what we expect to extract from that web page:
 
 ```{r}
 library(data.table)
@@ -172,7 +266,18 @@ code <- function(dom_name, key_name, hex){
   code("Backspace", "VK_BACK",   "08"),
   code("Enter",     "VK_RETURN", "0D"),
   code("ArrowDown", "VK_DOWN",   "28")))
-local.html <- "~/keyboard_event_key_values.html"
+```
+
+The table above has three rows, one for each key code that we used in
+the `animint2` test code.
+
+### Create input text for a small, relevant example
+
+When extracting data from loosely structured text in web pages, the
+first thing to do is download a copy of the web page,
+
+```{r}
+local.html <- "~/teaching/regex-tutorial/Keyboard_event_key_values.html"
 if(!file.exists(local.html)){
   remote.url <- "https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values"
   download.file(remote.url, local.html)
@@ -180,10 +285,16 @@ if(!file.exists(local.html)){
 html.lines <- readLines(local.html)
 ```
 
-Contains entries like:
+Then, instead of trying to extract from the whole web page right away,
+first open up the local web page in a text editor like emacs, and copy
+a few relevant parts of the text data to a R string literal. Working
+with this small example will enable easy/fast testing of the
+extraction code, because you should know what the correct extraction
+should look like. For example, below we define a string literal
+containing five examples from that web page:
 
 ```{r}
-some.html <- '
+some.html <- r'{
 	<tr>
       <td><code>"Backspace"</code></td>
       <td>
@@ -231,138 +342,164 @@ some.html <- '
       </td>
       <td><code>KEYCODE_DPAD_DOWN</code> (20)</td>
     </tr>
-'
+    <tr>
+      <td><code>"Alt"</code> [4]</td>
+      <td>The <kbd>Alt</kbd> (Alternative) key.</td>
+      <td>
+        <code>VK_MENU</code> (0x12)<br><code>VK_LMENU</code> (0xA4)<br><code>VK_RMENU</code>
+        (0xA5)
+      </td>
+      <td><code>kVK_Option</code> (0x3A)<br><code>kVK_RightOption</code> (0x3D)</td>
+      <td>
+        <code>GDK_KEY_Alt_L</code> (0xFFE9)<br><code>GDK_KEY_Alt_R</code>
+        (0xFFEA)<br><code>Qt::Key_Alt</code> (0x01000023)
+      </td>
+      <td>
+        <code>KEYCODE_ALT_LEFT</code> (57)<br><code>KEYCODE_ALT_RIGHT</code>
+        (58)
+      </td>
+    </tr>
+    <tr>
+      <td><code>"Dead"</code></td>
+      <td>
+        <p>
+          A dead "combining" key; that is, a key which is used in tandem with
+          other keys to generate accented and other modified characters. If
+          pressed by itself, it doesn't generate a character.
+        </p>
+        <p>
+          If you wish to identify which specific dead key was pressed (in cases
+          where more than one exists), you can do so by examining the
+          <a href="/en-US/docs/Web/API/KeyboardEvent"><code>KeyboardEvent</code></a>'s associated
+          <a href="/en-US/docs/Web/API/Element/compositionupdate_event" title="compositionupdate"><code>compositionupdate</code></a> event's
+          <a href="/en-US/docs/Web/API/CompositionEvent/data" title="data"><code>data</code></a> property.
+        </p>
+      </td>
+      <td></td>
+      <td></td>
+      <td>See <a href="#dead_keycodes_for_linux">Dead keycodes for Linux</a> below</td>
+      <td></td>
+    </tr>
+}'
 ```
+
+The examples above include the three keys used in `animint2` tests
+(Backspace, Enter, ArrowDown), as well as one `Dead` entry that does
+not have any corresponding hex codes ([dead
+keys](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values#dead_keycodes_for_linux
+))., and one `Alt` entry that has more than one hex code.
+
+To extract each DOM name from those text data, we can use my `nc`
+package, as in the code below:
 
 ```{r}
 dom_name_pattern <- list(
   '<td><code>"',
   dom_name='[^"]+')
 nc::capture_all_str(some.html, dom_name_pattern)
-nc::capture_all_str(html.lines, dom_name_pattern)
 ```
 
-The output above suggests there are 319 lines on the web page which have a DOM code.
+The output above is a table with five rows, one for each of the five
+expected entries. Next, we try to match the rest of the entry after
+the DOM name,
 
 ```{r}
-td_key_name_pattern <- list(
-  '      <td><code>',
-  key_name="VK_.*?",
-  '</code>')
-nc::capture_all_str(some.html, td_key_name_pattern)
-nc::capture_all_str(html.lines, td_key_name_pattern)
+dom_name_rest_pattern <- list(
+  dom_name_pattern,
+  rest="(?:.*\n)*?",
+  "    </tr>")
+(dom.rest.dt <- nc::capture_all_str(some.html, dom_name_rest_pattern))
 ```
 
-The output above suggests there are 318 lines with windows key codes.
+The table above contains a lot of text, but since there are only five
+rows, it is actually manageable to look through. Next, we use another
+regex to extract hex codes,
 
 ```{r}
-key_name_pattern <- list(
+key_name_hex_pattern <- list(
   '<code>',
-  key_name="VK_.*?",
-  '</code>')
-nc::capture_all_str(some.html, key_name_pattern)
-nc::capture_all_str(html.lines, key_name_pattern)
-```
-
-The output above is a table with 370 rows, which suggests there may be
-more than one `key_name` per `dom_name`.
-
-To find out, we can first try matching all HTML `<tr>` rows:
-
-```{r}
-tr_pattern <- list(
-  '    <tr>\n      <td><code>',
-  in.tr="(?:.*\n)+?",
-  '    </tr>')
-tr_all <- nc::capture_all_str(
-  html.lines, tr_pattern
-)[
-, first70 := substr(in.tr,1,70)
-][]
-tr_all[, .(first70)]
-```
-
-The output above suggests there are 348 rows which could have a DOM name,
-and could contain key name codes. Below we try extracting a DOM name from
-each:
-
-```{r}
-dom_all <- nc::capture_first_vec(
-  tr_all$in.tr,
-  '^"',
-  dom_name='[^"]+',
-  rest="(?:.*\n)*",
-  nomatch.error=FALSE)
-has.dom <- !is.na(dom_all$dom_name)
-tr_all[has.dom, .(first70)]
-```
-
-The table above represents the 319 HTML `<tr>` elements which did
-contain a DOM which matched our regex. The table below shows the 29
-elements which did not match, which seem to be [dead
-keys](https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values#dead_keycodes_for_linux
-) (probably not interesting for testing).
-
-```{r}
-tr_all[!has.dom, .(first70)]
-```
-
-Below we compute all key codes listed in each HTML row.
-
-```{r}
-(key_all <- dom_all[, nc::capture_all_str(
-  rest,
-  "<code>",
   key_name=".*?",
-  "</code> [(]0x",
-  hex="[^)]+"
+  '</code>',
+  space='\\s+',
+  '[(]0x',
+  hex='.*?',
+  '[)]')
+nc::capture_all_str(some.html, key_name_hex_pattern)
+```
+
+The table above has one row for every occurence of the hex code in the
+original data, but there is no column for DOM code. To get that, we
+can use the code below:
+
+```{r}
+(dom.hex.all <- dom.rest.dt[, nc::capture_all_str(
+  rest, key_name_hex_pattern
 ), by=dom_name])
 ```
 
-The table above has one row for each virtual `key_name` found. Some
-`dom_name` values are missing in the table above, because there were
-no corresponding `key_name` values found, and below we show two which
-do have hex numbers somewhere in the row:
+The output above has the `dom_name` column in addition to the others
+shown previously. To just get the windows virtual key codes, we can do:
 
 ```{r}
-dom_all[!key_all, on="dom_name"][grepl("0x", rest)]
+(dom.hex.windows <- dom.hex.all[grepl("^VK_", key_name)])
 ```
 
-Above we see several hex codes, in two sound-related keys, which we
-can ignore for testing.
-Below we subset by the windows keys with a `VK` prefix:
+In the code below we keep just the first windows key code found:
 
 ```{r}
-(win_all <- key_all[grepl("^VK",key_name)])
+(dom.hex.first <- dom.hex.windows[, .SD[1], by=dom_name])
 ```
 
-Below we take the first hex code mentioned:
+We see that these DOM key names and windows virtual key codes are
+consistent with those in the existing `animint2` tests:
 
 ```{r}
-(win_first <- win_all[, .SD[1], by=dom_name])
+animint2.expected
+```
+
+### Making a function
+
+Next, make a function which runs the whole process from beginning to end.
+
+```{r}
+get_dom_win_hex <- function(in.html){
+  nc::capture_all_str(
+    in.html, dom_name_rest_pattern
+  )[, {
+    nc::capture_all_str(
+      rest, key_name_hex_pattern
+    )[
+      grepl("^VK_", key_name), .SD[1]
+    ]
+  }, by=dom_name]
+}
+get_dom_win_hex(some.html)
+```
+
+The table above additionally contains rows with `NA` for DOM names
+that had no corresponding hex codes.
+
+### Using it on the whole data set
+
+```{r}
+(full_win_codes <- get_dom_win_hex(html.lines))
 ```
 
 The table above could be used to define a new `key2hex_code` variable,
 which would expand the keys supported in `animint2` tests:
 
 ```{r}
-key2hex_code <- win_first[, structure(hex, names=dom_name)]
+key2hex_code <- full_win_codes[, structure(hex, names=dom_name)]
 dput(key2hex_code)
 ```
 
-To verify that it is compatible with the ones
-already used in the tests, we can further subset to get the keys we
-use in existing `animint2` tests:
+### Conclusions
 
-```{r}
-(win_some <- win_first[c("Backspace","Enter","ArrowDown"),on="dom_name"])
-identical(win_some, animint2.expected)
-```
+When refactoring `animint2` tests to use chromote, we saw how to use
+regex to extract a table of hex codes from a web page with DOM key
+names.
 
-Above we see that the data computed using regex are consistent with
-the data which are already being used in the `animint2` tests.
-
-## Session info
+### Session info
 
 ```{r}
 sessionInfo()
