@@ -234,7 +234,7 @@ abbrev.some[
 ]
 ```
 
-## Another output
+## Another output: markdown table with images
 
 One advantage of this is that we can easily modify output formats.
 
@@ -247,9 +247,14 @@ some.out <- abbrev.some[, .(
 knitr::kable(some.out)
 ```
 
+The output above is a table with one row per publication, and an image column that shows a figure from the paper.
+The trick to getting that to display, is putting it in this repo, with a standard name, based on the bib file key.
+
 ## Make sure pdflatex likes it
 
-```{r eval=FALSE}
+This part only works in Rmd, not md/jekyll for some reason.
+
+```{r eval=FALSE, echo=FALSE}
 latex.dir <- tempfile()
 dir.create(latex.dir)
 file.copy(refs.bib, latex.dir)
@@ -267,4 +272,14 @@ paste(refs.wide[order(year), ref], collapse=","),
 sub(".bib$", "", basename(refs.bib)))
 cat(article.code, file=article.tex)
 system(paste("cd",latex.dir,"&& pdflatex article && bibtex article && pdflatex article && pdflatex article && evince article.pdf &"))
+```
+
+## Conclusion
+
+We have seen how a bib file can be used to define a publications web page.
+
+## Session info
+
+```{r}
+sessionInfo()
 ```

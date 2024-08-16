@@ -518,7 +518,7 @@ abbrev.some[
 - Hillman J, Hocking TD (2023). Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection. Journal of Machine Learning Research 24(70).
 NULL
 
-## Another output
+## Another output: markdown table with images
 
 One advantage of this is that we can easily modify output formats.
 
@@ -543,25 +543,56 @@ knitr::kable(some.out)
 |<img src="/assets/img/publications/harshe2023predicting.png" width="150" />  |2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton              |IEEE Robotics and Automation Letters 8(8)                                                   |
 |<img src="/assets/img/publications/Hillman2023.png" width="150" />           |2023        |Hillman J, Hocking TD                        |Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection |Journal of Machine Learning Research 24(70)                                                 |
 
+The output above is a table with one row per publication, and an image column that shows a figure from the paper.
+The trick to getting that to display, is putting it in this repo, with a standard name, based on the bib file key.
+
 ## Make sure pdflatex likes it
+
+This part only works in Rmd, not md/jekyll for some reason.
+
+
+
+## Conclusion
+
+We have seen how a bib file can be used to define a publications web page.
+
+## Session info
 
 
 ``` r
-latex.dir <- tempfile()
-dir.create(latex.dir)
-file.copy(refs.bib, latex.dir)
-article.tex <- file.path(latex.dir, "article.tex")
-article.code <- sprintf(r"{\documentclass{article}
-\usepackage{natbib}
-\usepackage{fullpage}
-\begin{document}
-I have several scientific contributions \citep{%s}.
-\bibliographystyle{abbrvnat}
-\bibliography{%s}
-\end{document}
-}",
-paste(refs.wide[order(year), ref], collapse=","),
-sub(".bib$", "", basename(refs.bib)))
-cat(article.code, file=article.tex)
-system(paste("cd",latex.dir,"&& pdflatex article && bibtex article && pdflatex article && pdflatex article && evince article.pdf &"))
+sessionInfo()
+```
+
+```
+## R version 4.4.1 (2024-06-14)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 22.04.4 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
+## locale:
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: America/New_York
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## 
+## other attached packages:
+## [1] nc_2024.8.15       testthat_3.2.1.1   data.table_1.15.99
+## 
+## loaded via a namespace (and not attached):
+##  [1] miniUI_0.1.1.1    compiler_4.4.1    brio_1.1.4        promises_1.2.1    Rcpp_1.0.12       stringr_1.5.1    
+##  [7] later_1.3.2       fastmap_1.1.1     mime_0.12         R6_2.5.1          knitr_1.47        htmlwidgets_1.6.4
+## [13] desc_1.4.3        profvis_0.3.8     rprojroot_2.0.4   shiny_1.8.0       rlang_1.1.3       cachem_1.0.8     
+## [19] stringi_1.8.3     xfun_0.45         httpuv_1.6.14     fs_1.6.3          pkgload_1.3.4     memoise_2.0.1    
+## [25] cli_3.6.2         withr_3.0.0       magrittr_2.0.3    digest_0.6.34     rstudioapi_0.15.0 xtable_1.8-4     
+## [31] remotes_2.5.0     devtools_2.4.5    lifecycle_1.0.4   vctrs_0.6.5       evaluate_0.23     glue_1.7.0       
+## [37] urlchecker_1.0.1  sessioninfo_1.2.2 pkgbuild_1.4.3    purrr_1.0.2       tools_4.4.1       usethis_2.2.2    
+## [43] ellipsis_0.3.2    htmltools_0.5.7
 ```
