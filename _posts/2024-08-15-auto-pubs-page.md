@@ -21,12 +21,19 @@ examples on `?nc::capture_all_str`:
 ``` r
 refs.bib <- "~/tdhock.github.io/assets/TDH-refs.bib"
 refs.vec <- readLines(refs.bib)
+```
+
+```
+## Warning in readLines(refs.bib): ligne finale incomplète trouvée dans '~/tdhock.github.io/assets/TDH-refs.bib'
+```
+
+``` r
 at.lines <- grep("^@", refs.vec, value=TRUE)
 str(at.lines)
 ```
 
 ```
-##  chr [1:56] "@article{Bodine2024," "@article{tao2024reply," "@article{kaufman2024functional," ...
+##  chr [1:57] "@unpublished{Nguyen2024," "@unpublished{Bodine2023," "@unpublished{Agyapong2023," ...
 ```
 
 The output above shows that there are currently 56 lines that start
@@ -48,10 +55,10 @@ str(refs.dt)
 ```
 
 ```
-## Classes 'data.table' and 'data.frame':	56 obs. of  3 variables:
-##  $ type  : chr  "article" "article" "article" "article" ...
-##  $ ref   : chr  "Bodine2024" "tao2024reply" "kaufman2024functional" "harshe2023predicting" ...
-##  $ fields: chr  "author = {Bodine, C. S. and Buscombe, D. and Hocking, T. D.},\ntitle = {Automated River Substrate Mapping From "| __truncated__ "  title={Reply to: Model uncertainty obscures major driver of soil carbon},\n  author={Tao, Feng and Houlton, B"| __truncated__ "  title={Functional Labeled Optimal Partitioning},\n  author={Kaufman, Jacob M and Stenberg, Alyssa J and Hocki"| __truncated__ "  author={Harshe, Karl and Williams, Jack R. and Hocking, Toby D. and Lerner, Zachary F.},\n  journal={IEEE Rob"| __truncated__ ...
+## Classes 'data.table' and 'data.frame':	57 obs. of  3 variables:
+##  $ type  : chr  "unpublished" "unpublished" "unpublished" "unpublished" ...
+##  $ ref   : chr  "Nguyen2024" "Bodine2023" "Agyapong2023" "Rust2023-all-pairs-squared-hinge" ...
+##  $ fields: chr  "  title={Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization},\n  author={Nguyen, "| __truncated__ "  title={Open-source approach for reproducible substrate mapping using semantic segmentation on recreation-grad"| __truncated__ "  title={Cross-Validation for Training and Testing Co-occurrence Network Inference Algorithms},\n  author={Agya"| __truncated__ "  title={A Log-linear Gradient Descent Algorithm for Unbalanced Binary Classification using the All Pairs Squar"| __truncated__ ...
 ##  - attr(*, ".internal.selfref")=<externalptr>
 ```
 
@@ -68,7 +75,7 @@ str(eq.lines)
 ```
 
 ```
-##  chr [1:415] "author = {Bodine, C. S. and Buscombe, D. and Hocking, T. D.}," ...
+##  chr [1:412] "  title={Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization}," ...
 ```
 
 Above we see 390 fields.
@@ -89,32 +96,32 @@ refs.fields
 ```
 
 ```
-##             type                        ref variable
-##           <char>                     <char>   <char>
-##   1:     article                 Bodine2024   author
-##   2:     article                 Bodine2024    title
-##   3:     article                 Bodine2024  journal
-##   4:     article                 Bodine2024   volume
-##   5:     article                 Bodine2024   number
-##  ---                                                
-## 411: unpublished hocking2015breakpointError     year
-## 412: unpublished          venuto2014support    title
-## 413: unpublished          venuto2014support   author
-## 414: unpublished          venuto2014support     note
-## 415: unpublished          venuto2014support     year
-##                                                                           value
-##                                                                          <char>
-##   1:                          Bodine, C. S. and Buscombe, D. and Hocking, T. D.
-##   2: Automated River Substrate Mapping From Sonar Imagery With Machine Learning
-##   3:          Journal of Geophysical Research: Machine Learning and Computation
-##   4:                                                                          1
-##   5:                                                                          3
-##  ---                                                                           
-## 411:                                                                       2015
-## 412:                                         Support vector comparison machines
-## 413:             Venuto, D and Hocking, TD and Sphanurattana, L and Sugiyama, M
-## 414:                                                   Preprint arXiv:1401.8008
-## 415:                                                                       2014
+##             type                ref  variable
+##           <char>             <char>    <char>
+##   1: unpublished         Nguyen2024     title
+##   2: unpublished         Nguyen2024    author
+##   3: unpublished         Nguyen2024      note
+##   4: unpublished         Nguyen2024      year
+##   5: unpublished         Bodine2023     title
+##  ---                                         
+## 408:     article doyon2008heritable    volume
+## 409:     article doyon2008heritable    number
+## 410:     article doyon2008heritable     pages
+## 411:     article doyon2008heritable      year
+## 412:     article doyon2008heritable publisher
+##                                                                                                                                 value
+##                                                                                                                                <char>
+##   1:                                                 Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization
+##   2:                                                                                                        Nguyen, T and Hocking, TD
+##   3:                                                                                                        Preprint arXiv:2408.00856
+##   4:                                                                                                                             2024
+##   5: Open-source approach for reproducible substrate mapping using semantic segmentation on recreation-grade side scan sonar datasets
+##  ---                                                                                                                                 
+## 408:                                                                                                                               26
+## 409:                                                                                                                                6
+## 410:                                                                                                                         702--708
+## 411:                                                                                                                             2008
+## 412:                                                                                              Nature Publishing Group US New York
 ```
 
 Above we see 390 fields, consistent with the simpler `grep` parsing above.
@@ -194,35 +201,36 @@ refs.wide[, .(
 ## 25:       article   2022 Journal of     31      2       <NA>       <NA>       <NA>
 ## 26:       article   2018 JNCI: Jour    110     10       <NA>       <NA>       <NA>
 ## 27:       article   2018 Scientific      5      1       <NA>       <NA>       <NA>
-## 28:       article   2010   PLoS one      5      8       <NA>       <NA>       <NA>
-## 29:       article   2023 IEEE Robot      8      8       <NA>       <NA>       <NA>
-## 30:       article   2013 Journal of     54   <NA>       <NA>       <NA>       <NA>
-## 31:       article   2024 Journal of   <NA>   <NA>       <NA>       <NA>       <NA>
-## 32:       article   2022 Biology Me      7      1       <NA>       <NA>       <NA>
-## 33:       article   2024     Nature    627   8002       <NA>       <NA>       <NA>
-## 34:  incollection   2017       <NA>   <NA>   <NA> Advances i       <NA>       <NA>
-## 35:  incollection   2022       <NA>   <NA>   <NA> Land Carbo       <NA>       <NA>
-## 36: inproceedings   2020       <NA>   <NA>   <NA> 2020 54th        <NA>       <NA>
-## 37: inproceedings   2020       <NA>   <NA>   <NA> 2020 42nd        <NA>       <NA>
-## 38: inproceedings   2013       <NA>   <NA>   <NA> Proc. 30th       <NA>       <NA>
-## 39: inproceedings   2015       <NA>   <NA>   <NA> Proc. 32nd       <NA>       <NA>
-## 40: inproceedings   2020       <NA>     25   <NA> Proc. Paci       <NA>       <NA>
-## 41: inproceedings   2021       <NA>   <NA>   <NA> 2021 IEEE        <NA>       <NA>
-## 42: inproceedings   2023       <NA>   <NA>   <NA> 2023 Inter       <NA>       <NA>
-## 43: inproceedings   2022       <NA>   <NA>   <NA> 2022 Fourt       <NA>       <NA>
-## 44: inproceedings   2022       <NA>   <NA>   <NA> 2022 fourt       <NA>       <NA>
-## 45: inproceedings   2011       <NA>   <NA>   <NA> 28th inter       <NA>       <NA>
-## 46: inproceedings   2022       <NA>   <NA>   <NA> 2022 Fourt       <NA>       <NA>
-## 47:     phdthesis   2012       <NA>   <NA>   <NA>       <NA>       <NA> Ecole norm
-## 48:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
-## 49:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint e       <NA>
-## 50:   unpublished   2024       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
-## 51:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
-## 52:   unpublished   2016       <NA>   <NA>   <NA>       <NA> Online boo       <NA>
-## 53:   unpublished   2017       <NA>   <NA>   <NA>       <NA> Tutorial a       <NA>
-## 54:   unpublished   2015       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
-## 55:   unpublished   2016       <NA>   <NA>   <NA>       <NA> Tutorial a       <NA>
-## 56:   unpublished   2014       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
+## 28:       article   2008 Nature bio     26      6       <NA>       <NA>       <NA>
+## 29:       article   2010   PLoS one      5      8       <NA>       <NA>       <NA>
+## 30:       article   2023 IEEE Robot      8      8       <NA>       <NA>       <NA>
+## 31:       article   2013 Journal of     54   <NA>       <NA>       <NA>       <NA>
+## 32:       article   2024 Journal of   <NA>   <NA>       <NA>       <NA>       <NA>
+## 33:       article   2022 Biology Me      7      1       <NA>       <NA>       <NA>
+## 34:       article   2024     Nature    627   8002       <NA>       <NA>       <NA>
+## 35:  incollection   2017       <NA>   <NA>   <NA> Advances i       <NA>       <NA>
+## 36:  incollection   2022       <NA>   <NA>   <NA> Land Carbo       <NA>       <NA>
+## 37: inproceedings   2020       <NA>   <NA>   <NA> 2020 54th        <NA>       <NA>
+## 38: inproceedings   2020       <NA>   <NA>   <NA> 2020 42nd        <NA>       <NA>
+## 39: inproceedings   2013       <NA>   <NA>   <NA> Proc. 30th       <NA>       <NA>
+## 40: inproceedings   2015       <NA>   <NA>   <NA> Proc. 32nd       <NA>       <NA>
+## 41: inproceedings   2020       <NA>     25   <NA> Proc. Paci       <NA>       <NA>
+## 42: inproceedings   2021       <NA>   <NA>   <NA> 2021 IEEE        <NA>       <NA>
+## 43: inproceedings   2023       <NA>   <NA>   <NA> 2023 Inter       <NA>       <NA>
+## 44: inproceedings   2022       <NA>   <NA>   <NA> 2022 Fourt       <NA>       <NA>
+## 45: inproceedings   2022       <NA>   <NA>   <NA> 2022 fourt       <NA>       <NA>
+## 46: inproceedings   2011       <NA>   <NA>   <NA> 28th inter       <NA>       <NA>
+## 47: inproceedings   2022       <NA>   <NA>   <NA> 2022 Fourt       <NA>       <NA>
+## 48:     phdthesis   2012       <NA>   <NA>   <NA>       <NA>       <NA> Ecole norm
+## 49:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
+## 50:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint e       <NA>
+## 51:   unpublished   2024       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
+## 52:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
+## 53:   unpublished   2016       <NA>   <NA>   <NA>       <NA> Online boo       <NA>
+## 54:   unpublished   2017       <NA>   <NA>   <NA>       <NA> Tutorial a       <NA>
+## 55:   unpublished   2015       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
+## 56:   unpublished   2016       <NA>   <NA>   <NA>       <NA> Tutorial a       <NA>
+## 57:   unpublished   2014       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
 ##              type   year    journal    vol    num  booktitle       note     school
 ```
 
@@ -285,35 +293,36 @@ refs.wide[, venue := fcase(
 ## 25:       article   2022  and Graphical Statistics 31(2)
 ## 26:       article   2018 tional Cancer Institute 110(10)
 ## 27:       article   2018            Scientific data 5(1)
-## 28:       article   2010                   PLoS one 5(8)
-## 29:       article   2023 ics and Automation Letters 8(8)
-## 30:       article   2013 rnal of Statistical Software 54
-## 31:       article   2024  1080/10618600 . 2023 . 2293216
-## 32:       article   2022 logy Methods and Protocols 7(1)
-## 33:       article   2024                Nature 627(8002)
-## 34:  incollection   2017 formation Processing Systems 30
-## 35:  incollection   2022 ion, and Ecological Forecasting
-## 36: inproceedings   2020 Signals, Systems, and Computers
-## 37: inproceedings   2020 dicine   Biology Society (EMBC)
-## 38: inproceedings   2013                 Proc. 30th ICML
-## 39: inproceedings   2015                 Proc. 32nd ICML
-## 40: inproceedings   2020 cific Symposium on Biocomputing
-## 41: inproceedings   2021 Reliability Engineering (ISSRE)
-## 42: inproceedings   2023 Technology and Computing (IETC)
-## 43: inproceedings   2022  Transdisciplinary AI (TransAI)
-## 44: inproceedings   2022  transdisciplinary AI (TransAI)
-## 45: inproceedings   2011  conference on machine learning
-## 46: inproceedings   2022  Transdisciplinary AI (TransAI)
-## 47:     phdthesis   2012 supérieure de Cachan-ENS Cachan
-## 48:   unpublished   2023       Preprint arXiv:2309.15225
-## 49:   unpublished   2023        Preprint eartharXiv:6448
-## 50:   unpublished   2024       Preprint arXiv:2408.00856
-## 51:   unpublished   2023       Preprint arXiv:2302.11062
-## 52:   unpublished   2016 ine book with multiple chapters
-## 53:   unpublished   2017 ernational useR 2017 conference
-## 54:   unpublished   2015       Preprint arXiv:1509.00368
-## 55:   unpublished   2016 ernational useR 2016 conference
-## 56:   unpublished   2014        Preprint arXiv:1401.8008
+## 28:       article   2008      Nature biotechnology 26(6)
+## 29:       article   2010                   PLoS one 5(8)
+## 30:       article   2023 ics and Automation Letters 8(8)
+## 31:       article   2013 rnal of Statistical Software 54
+## 32:       article   2024  1080/10618600 . 2023 . 2293216
+## 33:       article   2022 logy Methods and Protocols 7(1)
+## 34:       article   2024                Nature 627(8002)
+## 35:  incollection   2017 formation Processing Systems 30
+## 36:  incollection   2022 ion, and Ecological Forecasting
+## 37: inproceedings   2020 Signals, Systems, and Computers
+## 38: inproceedings   2020 dicine   Biology Society (EMBC)
+## 39: inproceedings   2013                 Proc. 30th ICML
+## 40: inproceedings   2015                 Proc. 32nd ICML
+## 41: inproceedings   2020 cific Symposium on Biocomputing
+## 42: inproceedings   2021 Reliability Engineering (ISSRE)
+## 43: inproceedings   2023 Technology and Computing (IETC)
+## 44: inproceedings   2022  Transdisciplinary AI (TransAI)
+## 45: inproceedings   2022  transdisciplinary AI (TransAI)
+## 46: inproceedings   2011  conference on machine learning
+## 47: inproceedings   2022  Transdisciplinary AI (TransAI)
+## 48:     phdthesis   2012 supérieure de Cachan-ENS Cachan
+## 49:   unpublished   2023       Preprint arXiv:2309.15225
+## 50:   unpublished   2023        Preprint eartharXiv:6448
+## 51:   unpublished   2024       Preprint arXiv:2408.00856
+## 52:   unpublished   2023       Preprint arXiv:2302.11062
+## 53:   unpublished   2016 ine book with multiple chapters
+## 54:   unpublished   2017 ernational useR 2017 conference
+## 55:   unpublished   2015       Preprint arXiv:1509.00368
+## 56:   unpublished   2016 ernational useR 2016 conference
+## 57:   unpublished   2014        Preprint arXiv:1401.8008
 ##              type   year                           venue
 ```
 
@@ -370,11 +379,11 @@ Below we use it to match all of the data.
 ##   4:               Abraham2021      Ridenour, Chase       Chase      Ridenour      C      Ridenour C
 ##   5:               Abraham2021   Hempson, Gareth P.   Gareth P.       Hempson     GP      Hempson GP
 ##  ---                                                                                                
-## 299: interactive-tutorial-2016 Ekstrøm, Claus Thorn Claus Thorn       Ekstrøm     CT      Ekstrøm CT
-## 300:         venuto2014support            Venuto, D           D        Venuto      D        Venuto D
-## 301:         venuto2014support          Hocking, TD          TD       Hocking     TD      Hocking TD
-## 302:         venuto2014support     Sphanurattana, L           L Sphanurattana      L Sphanurattana L
-## 303:         venuto2014support          Sugiyama, M           M      Sugiyama      M      Sugiyama M
+## 358: interactive-tutorial-2016 Ekstrøm, Claus Thorn Claus Thorn       Ekstrøm     CT      Ekstrøm CT
+## 359:         venuto2014support            Venuto, D           D        Venuto      D        Venuto D
+## 360:         venuto2014support          Hocking, TD          TD       Hocking     TD      Hocking TD
+## 361:         venuto2014support     Sphanurattana, L           L Sphanurattana      L Sphanurattana L
+## 362:         venuto2014support          Sugiyama, M           M      Sugiyama      M      Sugiyama M
 ```
 
 The table above shows all names standardized to a common format in the `show` column.
@@ -386,19 +395,27 @@ authors[is.na(family)]
 ```
 
 ```
-##                   ref complete  given family abbrev   show
-##                <char>   <char> <char> <char> <char> <char>
-## 1: depuydt2018genomic   others   <NA>   <NA>   <NA> others
-## 2:       tao2024reply   others   <NA>   <NA>   <NA> others
+## Empty data.table (0 rows and 6 cols): ref,complete,given,family,abbrev,show
 ```
 
-The table above shows that the only names that did not match were "others" which is OK.
+The table above shows that there are no entries that did not match the regex, which is OK.
 
 
 ``` r
 abbrev.dt <- authors[, .(
   authors_abbrev=paste(show, collapse=", ")
 ), by=ref]
+abbrev.dt[, length(grep("Hocking",authors_abbrev))]
+```
+
+```
+## [1] 57
+```
+
+The output above shows that there are 57 items for which I am listed as an author.
+
+
+``` r
 abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
 ```
 
@@ -432,35 +449,36 @@ abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
 ## 25:                                 Vargovich2022        Vargovich J, Hocking TD
 ## 26:                            depuydt2018genomic Depuydt P, Boeva V, Hocking TD
 ## 27:                               depuydt2018meta Depuydt P, Koster J, Boeva V, 
-## 28:                           gautier2010bayesian Gautier M, Hocking TD, Foulley
-## 29:                          harshe2023predicting Harshe K, Williams JR, Hocking
-## 30:                        hocking2013sustainable Hocking TD, Wutzler T, Ponting
-## 31:                         kaufman2024functional Kaufman JM, Stenberg AJ, Hocki
-## 32:                      mihaljevic2022sparsemodr Mihaljevic JR, Borkovec S, Rat
-## 33:                                  tao2024reply Tao F, Houlton BZ, Frey SD, Le
-## 34:                                    Drouin2017 Drouin A, Hocking T, Laviolett
-## 35:                                hocking22intro                     Hocking TD
-## 36: Fotoohinasab2020automaticQRSdetectionAsilomar Fotoohinasab A, Hocking T, Afg
-## 37:              Fotoohinasab2020segmentationEMBC Fotoohinasab A, Hocking T, Afg
-## 38:                               Hocking2013icml Rigaill G, Hocking T, Vert J-P
-## 39:                                   Hocking2015 Hocking TD, Rigaill G, Bourque
-## 40:                                Hocking2020psb          Hocking TD, Bourque G
-## 41:                                     Kolla2021  Kolla AC, Groce A, Hocking TD
-## 42:                                   Sweeney2023 Sweeney N, Xu C, Shaw JA, Hock
-## 43:                           barr2022classifying Barr JR, Hocking TD, Morton G,
-## 44:                                 barr2022graph Barr JR, Shaw P, Abu-Khzam FN,
-## 45:                        hocking2011clusterpath Hocking TD, Joulin A, Bach F, 
-## 46:                      hocking2022interpretable Hocking TD, Barr JR, Thatcher 
-## 47:                           hocking2012learning                     Hocking TD
-## 48:                                  Agyapong2023 Agyapong D, Propster JR, Marks
-## 49:                                    Bodine2023 Bodine CS, Buscombe D, Hocking
-## 50:                                    Nguyen2024           Nguyen T, Hocking TD
-## 51:              Rust2023-all-pairs-squared-hinge            Rust KR, Hocking TD
-## 52:                          animint2-manual-2016                     Hocking TD
-## 53:                          change-tutorial-2017          Hocking TD, Killick R
-## 54:                    hocking2015breakpointError                     Hocking TD
-## 55:                     interactive-tutorial-2016         Hocking TD, Ekstrøm CT
-## 56:                             venuto2014support Venuto D, Hocking TD, Sphanura
+## 28:                            doyon2008heritable Doyon Y, McCammon JM, Miller J
+## 29:                           gautier2010bayesian Gautier M, Hocking TD, Foulley
+## 30:                          harshe2023predicting Harshe K, Williams JR, Hocking
+## 31:                        hocking2013sustainable Hocking TD, Wutzler T, Ponting
+## 32:                         kaufman2024functional Kaufman JM, Stenberg AJ, Hocki
+## 33:                      mihaljevic2022sparsemodr Mihaljevic JR, Borkovec S, Rat
+## 34:                                  tao2024reply Tao F, Houlton BZ, Frey SD, Le
+## 35:                                    Drouin2017 Drouin A, Hocking T, Laviolett
+## 36:                                hocking22intro                     Hocking TD
+## 37: Fotoohinasab2020automaticQRSdetectionAsilomar Fotoohinasab A, Hocking T, Afg
+## 38:              Fotoohinasab2020segmentationEMBC Fotoohinasab A, Hocking T, Afg
+## 39:                               Hocking2013icml Rigaill G, Hocking T, Vert J-P
+## 40:                                   Hocking2015 Hocking TD, Rigaill G, Bourque
+## 41:                                Hocking2020psb          Hocking TD, Bourque G
+## 42:                                     Kolla2021  Kolla AC, Groce A, Hocking TD
+## 43:                                   Sweeney2023 Sweeney N, Xu C, Shaw JA, Hock
+## 44:                           barr2022classifying Barr JR, Hocking TD, Morton G,
+## 45:                                 barr2022graph Barr JR, Shaw P, Abu-Khzam FN,
+## 46:                        hocking2011clusterpath Hocking TD, Joulin A, Bach F, 
+## 47:                      hocking2022interpretable Hocking TD, Barr JR, Thatcher 
+## 48:                           hocking2012learning                     Hocking TD
+## 49:                                  Agyapong2023 Agyapong D, Propster JR, Marks
+## 50:                                    Bodine2023 Bodine CS, Buscombe D, Hocking
+## 51:                                    Nguyen2024           Nguyen T, Hocking TD
+## 52:              Rust2023-all-pairs-squared-hinge            Rust KR, Hocking TD
+## 53:                          animint2-manual-2016                     Hocking TD
+## 54:                          change-tutorial-2017          Hocking TD, Killick R
+## 55:                    hocking2015breakpointError                     Hocking TD
+## 56:                     interactive-tutorial-2016         Hocking TD, Ekstrøm CT
+## 57:                             venuto2014support Venuto D, Hocking TD, Sphanura
 ##                                               ref                 authors_abbrev
 ```
 
@@ -524,3 +542,32 @@ knitr::kable(some.out)
 |<img src="/assets/img/publications/kaufman2024functional.png" width="150" /> |2024        |Kaufman JM, Stenberg AJ, Hocking TD          |Functional Labeled Optimal Partitioning                                                                    |Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216 |
 |<img src="/assets/img/publications/harshe2023predicting.png" width="150" />  |2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton              |IEEE Robotics and Automation Letters 8(8)                                                   |
 |<img src="/assets/img/publications/Hillman2023.png" width="150" />           |2023        |Hillman J, Hocking TD                        |Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection |Journal of Machine Learning Research 24(70)                                                 |
+
+## Make sure pdflatex likes it
+
+
+``` r
+latex.dir <- tempfile()
+dir.create(latex.dir)
+file.copy(refs.bib, latex.dir)
+```
+
+```
+## [1] TRUE
+```
+
+``` r
+article.tex <- file.path(latex.dir, "article.tex")
+article.code <- sprintf(r"{\documentclass{article}
+\usepackage{natbib}
+\begin{document}
+I have several scientific contributions \citep{%s}.
+\bibliographystyle{abbrvnat}
+\bibliography{%s}
+\end{document}
+}",
+paste(refs.wide[order(year), ref], collapse=","),
+sub(".bib$", "", basename(refs.bib)))
+cat(article.code, file=article.tex)
+system(paste("cd",latex.dir,"&& pdflatex article && bibtex article && pdflatex article && pdflatex article && evince article.pdf &"))
+```

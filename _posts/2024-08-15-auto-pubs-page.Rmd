@@ -197,12 +197,18 @@ Below we verify that all names matched.
 authors[is.na(family)]
 ```
 
-The table above shows that the only names that did not match were "others" which is OK.
+The table above shows that there are no entries that did not match the regex, which is OK.
 
 ```{r}
 abbrev.dt <- authors[, .(
   authors_abbrev=paste(show, collapse=", ")
 ), by=ref]
+abbrev.dt[, length(grep("Hocking",authors_abbrev))]
+```
+
+The output above shows that there are 57 items for which I am listed as an author.
+
+```{r}
 abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
 ```
 
@@ -239,4 +245,26 @@ some.out <- abbrev.some[, .(
     ref),
   published=heading, authors_abbrev, title, venue)]
 knitr::kable(some.out)
+```
+
+## Make sure pdflatex likes it
+
+```{r}
+latex.dir <- tempfile()
+dir.create(latex.dir)
+file.copy(refs.bib, latex.dir)
+article.tex <- file.path(latex.dir, "article.tex")
+article.code <- sprintf(r"{\documentclass{article}
+\usepackage{natbib}
+\usepackage{fullpage}
+\begin{document}
+I have several scientific contributions \citep{%s}.
+\bibliographystyle{abbrvnat}
+\bibliography{%s}
+\end{document}
+}",
+paste(refs.wide[order(year), ref], collapse=","),
+sub(".bib$", "", basename(refs.bib)))
+cat(article.code, file=article.tex)
+system(paste("cd",latex.dir,"&& pdflatex article && bibtex article && pdflatex article && pdflatex article && evince article.pdf &"))
 ```
