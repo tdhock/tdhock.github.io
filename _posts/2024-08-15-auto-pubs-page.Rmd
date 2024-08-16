@@ -232,11 +232,7 @@ abbrev.some[
 
 One advantage of this is that we can easily modify output formats.
 
-| year | authors | title | venue |
-|------|---------|-------|-------|
-|      |         |       |       |
-
-```{r}
+```{r results='asis'}
 some.out <- abbrev.some[, .(published=heading, authors_abbrev, title, venue)]
 knitr::kable(some.out)
 ```
