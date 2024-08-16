@@ -506,17 +506,21 @@ One advantage of this is that we can easily modify output formats.
 
 
 ``` r
-some.out <- abbrev.some[, .(published=heading, authors_abbrev, title, venue)]
+some.out <- abbrev.some[, .(
+  figure=sprintf(
+    '<img src="/assets/img/publications/%s.png" height="50" />',
+    ref),
+  published=heading, authors_abbrev, title, venue)]
 knitr::kable(some.out)
 ```
 
 
 
-|published   |authors_abbrev                               |title                                                                                                      |venue                                                                                       |
-|:-----------|:--------------------------------------------|:----------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------|
-|In Progress |Nguyen T, Hocking TD                         |Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization                           |Preprint arXiv:2408.00856                                                                   |
-|In Progress |Agyapong D, Propster JR, Marks J, Hocking TD |Cross-Validation for Training and Testing Co-occurrence Network Inference Algorithms                       |Preprint arXiv:2309.15225                                                                   |
-|2024        |Bodine CS, Buscombe D, Hocking TD            |Automated River Substrate Mapping From Sonar Imagery With Machine Learning                                 |Journal of Geophysical Research: Machine Learning and Computation 1(3)                      |
-|2024        |Kaufman JM, Stenberg AJ, Hocking TD          |Functional Labeled Optimal Partitioning                                                                    |Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216 |
-|2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton              |IEEE Robotics and Automation Letters 8(8)                                                   |
-|2023        |Hillman J, Hocking TD                        |Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection |Journal of Machine Learning Research 24(70)                                                 |
+|figure                                                                       |published   |authors_abbrev                               |title                                                                                                      |venue                                                                                       |
+|:----------------------------------------------------------------------------|:-----------|:--------------------------------------------|:----------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------|
+|<img src="/assets/img/publications/Nguyen2024.png" height="50" />            |In Progress |Nguyen T, Hocking TD                         |Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization                           |Preprint arXiv:2408.00856                                                                   |
+|<img src="/assets/img/publications/Agyapong2023.png" height="50" />          |In Progress |Agyapong D, Propster JR, Marks J, Hocking TD |Cross-Validation for Training and Testing Co-occurrence Network Inference Algorithms                       |Preprint arXiv:2309.15225                                                                   |
+|<img src="/assets/img/publications/Bodine2024.png" height="50" />            |2024        |Bodine CS, Buscombe D, Hocking TD            |Automated River Substrate Mapping From Sonar Imagery With Machine Learning                                 |Journal of Geophysical Research: Machine Learning and Computation 1(3)                      |
+|<img src="/assets/img/publications/kaufman2024functional.png" height="50" /> |2024        |Kaufman JM, Stenberg AJ, Hocking TD          |Functional Labeled Optimal Partitioning                                                                    |Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216 |
+|<img src="/assets/img/publications/harshe2023predicting.png" height="50" />  |2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton              |IEEE Robotics and Automation Letters 8(8)                                                   |
+|<img src="/assets/img/publications/Hillman2023.png" height="50" />           |2023        |Hillman J, Hocking TD                        |Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection |Journal of Machine Learning Research 24(70)                                                 |

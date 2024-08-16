@@ -233,6 +233,10 @@ abbrev.some[
 One advantage of this is that we can easily modify output formats.
 
 ```{r}
-some.out <- abbrev.some[, .(published=heading, authors_abbrev, title, venue)]
+some.out <- abbrev.some[, .(
+  figure=sprintf(
+    '<img src="/assets/img/publications/%s.png" height="50" />',
+    ref),
+  published=heading, authors_abbrev, title, venue)]
 knitr::kable(some.out)
 ```
