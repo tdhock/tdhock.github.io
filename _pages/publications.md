@@ -89,7 +89,7 @@ description: Peer-reviewed papers and preprints with links to code and data
 
 ### 2024
 
-- Bodine CS, Buscombe D, Hocking TD. Automated river substrate mapping from sonar imagery with machine learning. Journal of Geophysical Research: Machine Learning and Computation, 1, e2024JH000135. https://doi.org/10.1029/2024JH000135
+- Bodine CS, Buscombe D, Hocking TD. Automated river substrate mapping from sonar imagery with machine learning. Journal of Geophysical Research: Machine Learning and Computation, 1, e2024JH000135. [DOI:10.1029/2024JH000135](https://doi.org/10.1029/2024JH000135).
 - Tao F, Houlton BZ, Frey SD, Lehmann J, Manzoni S, Huang Y, Jiang L,
   Mishra U, Hungate BA, Schmidt MWI, Reichstein M, Carvalhais N, Ciais
   P, Wang Y-P, Ahrens B, Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin

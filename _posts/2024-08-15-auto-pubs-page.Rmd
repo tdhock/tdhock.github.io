@@ -235,7 +235,7 @@ One advantage of this is that we can easily modify output formats.
 ```{r}
 some.out <- abbrev.some[, .(
   figure=sprintf(
-    '<img src="/assets/img/publications/%s.png" height="50" />',
+    '<img src="/assets/img/publications/%s.png" width="150" />',
     ref),
   published=heading, authors_abbrev, title, venue)]
 knitr::kable(some.out)
