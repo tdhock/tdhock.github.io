@@ -241,7 +241,7 @@ refs.wide[, venue := fcase(
   type=="article", paste0(
     journal, ifelse(
       is.na(volume),
-      paste0(", DOI:", doi),
+      paste0(", DOI: ", gsub("[.]", " . ", doi)),
       paste0(
         " ",
         volume,
@@ -288,7 +288,7 @@ refs.wide[, venue := fcase(
 ## 28:       article   2010                   PLoS one 5(8)
 ## 29:       article   2023 ics and Automation Letters 8(8)
 ## 30:       article   2013 rnal of Statistical Software 54
-## 31:       article   2024 I:10.1080/10618600.2023.2293216
+## 31:       article   2024  1080/10618600 . 2023 . 2293216
 ## 32:       article   2022 logy Methods and Protocols 7(1)
 ## 33:       article   2024                Nature 627(8002)
 ## 34:  incollection   2017 formation Processing Systems 30
@@ -493,7 +493,7 @@ abbrev.some[
 
 ### 2024
 - Bodine CS, Buscombe D, Hocking TD (2024). Automated River Substrate Mapping From Sonar Imagery With Machine Learning. Journal of Geophysical Research: Machine Learning and Computation 1(3).
-- Kaufman JM, Stenberg AJ, Hocking TD (2024). Functional Labeled Optimal Partitioning. Journal of Computational and Graphical Statistics, DOI:10.1080/10618600.2023.2293216.
+- Kaufman JM, Stenberg AJ, Hocking TD (2024). Functional Labeled Optimal Partitioning. Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216.
 
 ### 2023
 - Harshe K, Williams JR, Hocking TD, Lerner ZF (2023). Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton. IEEE Robotics and Automation Letters 8(8).
@@ -504,10 +504,6 @@ NULL
 
 One advantage of this is that we can easily modify output formats.
 
-| year | authors | title | venue |
-|------|---------|-------|-------|
-|      |         |       |       |
-
 
 ``` r
 some.out <- abbrev.some[, .(published=heading, authors_abbrev, title, venue)]
@@ -516,11 +512,11 @@ knitr::kable(some.out)
 
 
 
-|published   |authors_abbrev                               |title                                                                                                      |venue                                                                                |
-|:-----------|:--------------------------------------------|:----------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------|
-|In Progress |Nguyen T, Hocking TD                         |Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization                           |Preprint arXiv:2408.00856                                                            |
-|In Progress |Agyapong D, Propster JR, Marks J, Hocking TD |Cross-Validation for Training and Testing Co-occurrence Network Inference Algorithms                       |Preprint arXiv:2309.15225                                                            |
-|2024        |Bodine CS, Buscombe D, Hocking TD            |Automated River Substrate Mapping From Sonar Imagery With Machine Learning                                 |Journal of Geophysical Research: Machine Learning and Computation 1(3)               |
-|2024        |Kaufman JM, Stenberg AJ, Hocking TD          |Functional Labeled Optimal Partitioning                                                                    |Journal of Computational and Graphical Statistics, DOI:10.1080/10618600.2023.2293216 |
-|2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton              |IEEE Robotics and Automation Letters 8(8)                                            |
-|2023        |Hillman J, Hocking TD                        |Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection |Journal of Machine Learning Research 24(70)                                          |
+|published   |authors_abbrev                               |title                                                                                                      |venue                                                                                       |
+|:-----------|:--------------------------------------------|:----------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------|
+|In Progress |Nguyen T, Hocking TD                         |Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization                           |Preprint arXiv:2408.00856                                                                   |
+|In Progress |Agyapong D, Propster JR, Marks J, Hocking TD |Cross-Validation for Training and Testing Co-occurrence Network Inference Algorithms                       |Preprint arXiv:2309.15225                                                                   |
+|2024        |Bodine CS, Buscombe D, Hocking TD            |Automated River Substrate Mapping From Sonar Imagery With Machine Learning                                 |Journal of Geophysical Research: Machine Learning and Computation 1(3)                      |
+|2024        |Kaufman JM, Stenberg AJ, Hocking TD          |Functional Labeled Optimal Partitioning                                                                    |Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216 |
+|2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton              |IEEE Robotics and Automation Letters 8(8)                                                   |
+|2023        |Hillman J, Hocking TD                        |Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection |Journal of Machine Learning Research 24(70)                                                 |

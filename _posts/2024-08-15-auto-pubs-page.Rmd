@@ -141,7 +141,7 @@ refs.wide[, venue := fcase(
   type=="article", paste0(
     journal, ifelse(
       is.na(volume),
-      paste0(", DOI:", doi),
+      paste0(", DOI: ", gsub("[.]", " . ", doi)),
       paste0(
         " ",
         volume,
@@ -232,7 +232,7 @@ abbrev.some[
 
 One advantage of this is that we can easily modify output formats.
 
-```{r results='asis'}
+```{r}
 some.out <- abbrev.some[, .(published=heading, authors_abbrev, title, venue)]
 knitr::kable(some.out)
 ```
