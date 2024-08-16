@@ -550,16 +550,10 @@ knitr::kable(some.out)
 latex.dir <- tempfile()
 dir.create(latex.dir)
 file.copy(refs.bib, latex.dir)
-```
-
-```
-## [1] TRUE
-```
-
-``` r
 article.tex <- file.path(latex.dir, "article.tex")
 article.code <- sprintf(r"{\documentclass{article}
 \usepackage{natbib}
+\usepackage{fullpage}
 \begin{document}
 I have several scientific contributions \citep{%s}.
 \bibliographystyle{abbrvnat}

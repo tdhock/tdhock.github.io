@@ -249,7 +249,7 @@ knitr::kable(some.out)
 
 ## Make sure pdflatex likes it
 
-```{r}
+```{r eval=FALSE}
 latex.dir <- tempfile()
 dir.create(latex.dir)
 file.copy(refs.bib, latex.dir)
