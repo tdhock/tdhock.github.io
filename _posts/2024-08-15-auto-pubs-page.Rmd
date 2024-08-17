@@ -157,7 +157,8 @@ refs.wide[, venue := fcase(
       )
     )
   ),
-  grepl("^in", type), booktitle,
+  type=="inproceedings", booktitle,
+  type=="incollection", sprintf("Chapter in %s, edited by %s, published by %s", booktitle, editor, publisher),
   type=="phdthesis", school,
   type=="unpublished", note
 )][, .(type, year, venue=substr(venue, nchar(venue)-30,nchar(venue)))]
@@ -221,6 +222,18 @@ abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
 ```
 
 The output above shows the abbreviated author list is reasonable.
+
+## Count article types
+
+```{r}
+type2long <- c(
+  article="journal paper",
+  incollection="book chapter",
+  inproceedings="conference paper",
+  phdthesis="PHD thesis",
+  unpublished="in progress")
+refs.wide[, .(count=.N), by=.(Type=type2long[type])][order(-count)]
+```
 
 ## Output markdown
 

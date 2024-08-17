@@ -260,8 +260,8 @@ refs.wide[, .(
 ## 32:       article   2024 Journal of   <NA>   <NA>       <NA>       <NA>       <NA>
 ## 33:       article   2022 Biology Me      7      1       <NA>       <NA>       <NA>
 ## 34:       article   2024     Nature    627   8002       <NA>       <NA>       <NA>
-## 35:  incollection   2017       <NA>   <NA>   <NA> Advances i       <NA>       <NA>
-## 36:  incollection   2022       <NA>   <NA>   <NA> Land Carbo       <NA>       <NA>
+## 35:  incollection   2022       <NA>   <NA>   <NA> Land Carbo       <NA>       <NA>
+## 36: inproceedings   2017       <NA>   <NA>   <NA> Advances i       <NA>       <NA>
 ## 37: inproceedings   2020       <NA>   <NA>   <NA> 2020 54th        <NA>       <NA>
 ## 38: inproceedings   2020       <NA>   <NA>   <NA> 2020 42nd        <NA>       <NA>
 ## 39: inproceedings   2013       <NA>   <NA>   <NA> Proc. 30th       <NA>       <NA>
@@ -318,7 +318,8 @@ refs.wide[, venue := fcase(
       )
     )
   ),
-  grepl("^in", type), booktitle,
+  type=="inproceedings", booktitle,
+  type=="incollection", sprintf("Chapter in %s, edited by %s, published by %s", booktitle, editor, publisher),
   type=="phdthesis", school,
   type=="unpublished", note
 )][, .(type, year, venue=substr(venue, nchar(venue)-30,nchar(venue)))]
@@ -361,8 +362,8 @@ refs.wide[, venue := fcase(
 ## 32:       article   2024  1080/10618600 . 2023 . 2293216
 ## 33:       article   2022 logy Methods and Protocols 7(1)
 ## 34:       article   2024                Nature 627(8002)
-## 35:  incollection   2017 formation Processing Systems 30
-## 36:  incollection   2022 ion, and Ecological Forecasting
+## 35:  incollection   2022 published by Taylor and Francis
+## 36: inproceedings   2017 formation Processing Systems 30
 ## 37: inproceedings   2020 Signals, Systems, and Computers
 ## 38: inproceedings   2020 dicine   Biology Society (EMBC)
 ## 39: inproceedings   2013                 Proc. 30th ICML
@@ -526,8 +527,8 @@ abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
 ## 32:                         kaufman2024functional Kaufman JM, Stenberg AJ, Hocki
 ## 33:                      mihaljevic2022sparsemodr Mihaljevic JR, Borkovec S, Rat
 ## 34:                                  tao2024reply Tao F, Houlton BZ, Frey SD, Le
-## 35:                                    Drouin2017 Drouin A, Hocking T, Laviolett
-## 36:                                hocking22intro                     Hocking TD
+## 35:                                hocking22intro                     Hocking TD
+## 36:                                    Drouin2017 Drouin A, Hocking T, Laviolett
 ## 37: Fotoohinasab2020automaticQRSdetectionAsilomar Fotoohinasab A, Hocking T, Afg
 ## 38:              Fotoohinasab2020segmentationEMBC Fotoohinasab A, Hocking T, Afg
 ## 39:                               Hocking2013icml Rigaill G, Hocking T, Vert J-P
@@ -562,6 +563,29 @@ abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
 ```
 
 The output above shows the abbreviated author list is reasonable.
+
+## Count article types
+
+
+``` r
+type2long <- c(
+  article="journal paper",
+  incollection="book chapter",
+  inproceedings="conference paper",
+  phdthesis="PHD thesis",
+  unpublished="in progress")
+refs.wide[, .(count=.N), by=.(Type=type2long[type])][order(-count)]
+```
+
+```
+##                Type count
+##              <char> <int>
+## 1:    journal paper    34
+## 2:      in progress    18
+## 3: conference paper    12
+## 4:     book chapter     1
+## 5:       PHD thesis     1
+```
 
 ## Output markdown
 
