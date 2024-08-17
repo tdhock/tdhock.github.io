@@ -74,7 +74,7 @@ Below we parse the `fields` column:
 strip <- function(x)gsub("^\\s*|,\\s*$", "", gsub('[{}"]', "", x))
 field.pattern <- list(
   "\\s*",
-  variable="\\S+", tolower,
+  variable="[^= ]+", tolower,
   "\\s*=",
   value=".*", strip)  
 (refs.fields <- refs.dt[, nc::capture_all_str(
