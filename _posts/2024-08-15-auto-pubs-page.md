@@ -33,10 +33,10 @@ str(at.lines)
 ```
 
 ```
-##  chr [1:57] "@unpublished{Nguyen2024," "@unpublished{Bodine2023," "@unpublished{Agyapong2023," ...
+##  chr [1:66] "@unpublished{Gurney2024power," "@unpublished{Nguyen2024," "@unpublished{Truong2024circular," ...
 ```
 
-The output above shows that there are currently 56 lines that start
+The output above shows that there are currently 66 lines that start
 with `@` in the bib file. Below we use a regex to convert each item
 into one row of a data table:
 
@@ -55,14 +55,14 @@ str(refs.dt)
 ```
 
 ```
-## Classes 'data.table' and 'data.frame':	57 obs. of  3 variables:
+## Classes 'data.table' and 'data.frame':	66 obs. of  3 variables:
 ##  $ type  : chr  "unpublished" "unpublished" "unpublished" "unpublished" ...
-##  $ ref   : chr  "Nguyen2024" "Bodine2023" "Agyapong2023" "Rust2023-all-pairs-squared-hinge" ...
-##  $ fields: chr  "  title={Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization},\n  author={Nguyen, "| __truncated__ "  title={Open-source approach for reproducible substrate mapping using semantic segmentation on recreation-grad"| __truncated__ "  title={Cross-Validation for Training and Testing Co-occurrence Network Inference Algorithms},\n  author={Agya"| __truncated__ "  title={A Log-linear Gradient Descent Algorithm for Unbalanced Binary Classification using the All Pairs Squar"| __truncated__ ...
+##  $ ref   : chr  "Gurney2024power" "Nguyen2024" "Truong2024circular" "Hocking2024cv" ...
+##  $ fields: chr  "  title={Assessment of the Climate Trace global powerplant CO2 emissions},\n  author={Kevin Gurney and Bilal As"| __truncated__ "  title={Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization},\n  author={Nguyen, "| __truncated__ "  title={Efficient change-point detection for multivariate circular data},\n  author={Charles Truong and Toby D"| __truncated__ "  title={mlr3resampling: an R implementation of cross-validation for comparing models learned using different t"| __truncated__ ...
 ##  - attr(*, ".internal.selfref")=<externalptr>
 ```
 
-The output above shows that the bib file was converted to a table with 56 rows.
+The output above shows that the bib file was converted to a table with 66 rows.
 
 ## Parsing fields 
 
@@ -75,56 +75,108 @@ str(eq.lines)
 ```
 
 ```
-##  chr [1:412] "  title={Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization}," ...
+##  chr [1:460] "  title={Assessment of the Climate Trace global powerplant CO2 emissions}," ...
 ```
 
-Above we see 390 fields.
+Above we see 460 fields.
 
 Below we parse the `fields` column:
 
 
 ``` r
 strip <- function(x)gsub("^\\s*|,\\s*$", "", gsub('[{}"]', "", x))
-refs.fields <- refs.dt[, nc::capture_all_str(
-  fields,
+field.pattern <- list(
   "\\s*",
   variable="\\S+", tolower,
   "\\s*=",
-  value=".*", strip),
-  by=.(type, ref)]
-refs.fields
+  value=".*", strip)  
+(refs.fields <- refs.dt[, nc::capture_all_str(
+  fields, field.pattern),
+  by=.(type, ref)])
 ```
 
 ```
 ##             type                ref  variable
 ##           <char>             <char>    <char>
-##   1: unpublished         Nguyen2024     title
-##   2: unpublished         Nguyen2024    author
-##   3: unpublished         Nguyen2024      note
-##   4: unpublished         Nguyen2024      year
-##   5: unpublished         Bodine2023     title
+##   1: unpublished    Gurney2024power     title
+##   2: unpublished    Gurney2024power    author
+##   3: unpublished    Gurney2024power      note
+##   4: unpublished    Gurney2024power      year
+##   5: unpublished         Nguyen2024     title
 ##  ---                                         
-## 408:     article doyon2008heritable    volume
-## 409:     article doyon2008heritable    number
-## 410:     article doyon2008heritable     pages
-## 411:     article doyon2008heritable      year
-## 412:     article doyon2008heritable publisher
-##                                                                                                                                 value
-##                                                                                                                                <char>
-##   1:                                                 Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization
-##   2:                                                                                                        Nguyen, T and Hocking, TD
-##   3:                                                                                                        Preprint arXiv:2408.00856
-##   4:                                                                                                                             2024
-##   5: Open-source approach for reproducible substrate mapping using semantic segmentation on recreation-grade side scan sonar datasets
-##  ---                                                                                                                                 
-## 408:                                                                                                                               26
-## 409:                                                                                                                                6
-## 410:                                                                                                                         702--708
-## 411:                                                                                                                             2008
-## 412:                                                                                              Nature Publishing Group US New York
+## 456:     article doyon2008heritable    volume
+## 457:     article doyon2008heritable    number
+## 458:     article doyon2008heritable     pages
+## 459:     article doyon2008heritable      year
+## 460:     article doyon2008heritable publisher
+##                                                                                                                   value
+##                                                                                                                  <char>
+##   1:                                                    Assessment of the Climate Trace global powerplant CO2 emissions
+##   2: Kevin Gurney and Bilal Aslam and Pawlok Dass and L Gawuc and Toby Dylan Hocking and Jarrett J Barber and Anna Kato
+##   3:                                                                     Under review at Environmental Research Letters
+##   4:                                                                                                               2024
+##   5:                                   Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization
+##  ---                                                                                                                   
+## 456:                                                                                                                 26
+## 457:                                                                                                                  6
+## 458:                                                                                                           702--708
+## 459:                                                                                                               2008
+## 460:                                                                                Nature Publishing Group US New York
 ```
 
-Above we see 390 fields, consistent with the simpler `grep` parsing above.
+Above we see 460 fields, consistent with the simpler `grep` parsing above. 
+If it is not consistent, we can use the code below to find out where:
+
+
+``` r
+(eq.dt <- nc::capture_first_vec(eq.lines, field.pattern))
+```
+
+```
+##       variable
+##         <char>
+##   1:     title
+##   2:    author
+##   3:      note
+##   4:      year
+##   5:     title
+##  ---          
+## 456:    volume
+## 457:    number
+## 458:     pages
+## 459:      year
+## 460: publisher
+##                                                                                                                   value
+##                                                                                                                  <char>
+##   1:                                                    Assessment of the Climate Trace global powerplant CO2 emissions
+##   2: Kevin Gurney and Bilal Aslam and Pawlok Dass and L Gawuc and Toby Dylan Hocking and Jarrett J Barber and Anna Kato
+##   3:                                                                     Under review at Environmental Research Letters
+##   4:                                                                                                               2024
+##   5:                                   Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization
+##  ---                                                                                                                   
+## 456:                                                                                                                 26
+## 457:                                                                                                                  6
+## 458:                                                                                                           702--708
+## 459:                                                                                                               2008
+## 460:                                                                                Nature Publishing Group US New York
+```
+
+``` r
+eq.dt[!refs.fields, on=.(variable,value)]
+```
+
+```
+## Empty data.table (0 rows and 2 cols): variable,value
+```
+
+``` r
+eq.counts <- eq.dt[, .(eq.count=.N), by=.(variable,value)]
+refs.fields[, .(ref.count=.N), by=.(variable,value)][eq.counts,on=.(variable,value)][eq.count!=ref.count]
+```
+
+```
+## Empty data.table (0 rows and 4 cols): variable,value,ref.count,eq.count
+```
 
 ## Verify clean
 
@@ -223,14 +275,23 @@ refs.wide[, .(
 ## 47: inproceedings   2022       <NA>   <NA>   <NA> 2022 Fourt       <NA>       <NA>
 ## 48:     phdthesis   2012       <NA>   <NA>   <NA>       <NA>       <NA> Ecole norm
 ## 49:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
-## 50:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint e       <NA>
-## 51:   unpublished   2024       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
-## 52:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
-## 53:   unpublished   2016       <NA>   <NA>   <NA>       <NA> Online boo       <NA>
-## 54:   unpublished   2017       <NA>   <NA>   <NA>       <NA> Tutorial a       <NA>
-## 55:   unpublished   2015       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
-## 56:   unpublished   2016       <NA>   <NA>   <NA>       <NA> Tutorial a       <NA>
-## 57:   unpublished   2014       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
+## 50:   unpublished   2024       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 51:   unpublished   2024       <NA>   <NA>   <NA>       <NA> Under revi       <NA>
+## 52:   unpublished   2023       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 53:   unpublished   2024       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 54:   unpublished   2024       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 55:   unpublished   2024       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 56:   unpublished   2024       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 57:   unpublished   2024       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 58:   unpublished   2024       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 59:   unpublished   2024       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
+## 60:   unpublished   2023       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
+## 61:   unpublished   2024       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 62:   unpublished   2024       <NA>   <NA>   <NA>       <NA> In progres       <NA>
+## 63:   unpublished   2017       <NA>   <NA>   <NA>       <NA> Tutorial a       <NA>
+## 64:   unpublished   2015       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
+## 65:   unpublished   2016       <NA>   <NA>   <NA>       <NA> Tutorial a       <NA>
+## 66:   unpublished   2014       <NA>   <NA>   <NA>       <NA> Preprint a       <NA>
 ##              type   year    journal    vol    num  booktitle       note     school
 ```
 
@@ -314,15 +375,24 @@ refs.wide[, venue := fcase(
 ## 46: inproceedings   2011  conference on machine learning
 ## 47: inproceedings   2022  Transdisciplinary AI (TransAI)
 ## 48:     phdthesis   2012 supérieure de Cachan-ENS Cachan
-## 49:   unpublished   2023       Preprint arXiv:2309.15225
-## 50:   unpublished   2023        Preprint eartharXiv:6448
-## 51:   unpublished   2024       Preprint arXiv:2408.00856
-## 52:   unpublished   2023       Preprint arXiv:2302.11062
-## 53:   unpublished   2016 ine book with multiple chapters
-## 54:   unpublished   2017 ernational useR 2017 conference
-## 55:   unpublished   2015       Preprint arXiv:1509.00368
-## 56:   unpublished   2016 ernational useR 2016 conference
-## 57:   unpublished   2014        Preprint arXiv:1401.8008
+## 49:   unpublished   2023 er review at BMC Bioinformatics
+## 50:   unpublished   2024                     In progress
+## 51:   unpublished   2024  Environmental Research Letters
+## 52:   unpublished   2023                     In progress
+## 53:   unpublished   2024                     In progress
+## 54:   unpublished   2024                     In progress
+## 55:   unpublished   2024                     In progress
+## 56:   unpublished   2024                     In progress
+## 57:   unpublished   2024                     In progress
+## 58:   unpublished   2024                     In progress
+## 59:   unpublished   2024       Preprint arXiv:2408.00856
+## 60:   unpublished   2023       Preprint arXiv:2302.11062
+## 61:   unpublished   2024                     In progress
+## 62:   unpublished   2024                     In progress
+## 63:   unpublished   2017 onference, textbook in progress
+## 64:   unpublished   2015       Preprint arXiv:1509.00368
+## 65:   unpublished   2016 ernational useR 2016 conference
+## 66:   unpublished   2014        Preprint arXiv:1401.8008
 ##              type   year                           venue
 ```
 
@@ -379,11 +449,11 @@ Below we use it to match all of the data.
 ##   4:               Abraham2021      Ridenour, Chase       Chase      Ridenour      C      Ridenour C
 ##   5:               Abraham2021   Hempson, Gareth P.   Gareth P.       Hempson     GP      Hempson GP
 ##  ---                                                                                                
-## 358: interactive-tutorial-2016 Ekstrøm, Claus Thorn Claus Thorn       Ekstrøm     CT      Ekstrøm CT
-## 359:         venuto2014support            Venuto, D           D        Venuto      D        Venuto D
-## 360:         venuto2014support          Hocking, TD          TD       Hocking     TD      Hocking TD
-## 361:         venuto2014support     Sphanurattana, L           L Sphanurattana      L Sphanurattana L
-## 362:         venuto2014support          Sugiyama, M           M      Sugiyama      M      Sugiyama M
+## 382: interactive-tutorial-2016 Ekstrøm, Claus Thorn Claus Thorn       Ekstrøm     CT      Ekstrøm CT
+## 383:         venuto2014support            Venuto, D           D        Venuto      D        Venuto D
+## 384:         venuto2014support          Hocking, TD          TD       Hocking     TD      Hocking TD
+## 385:         venuto2014support     Sphanurattana, L           L Sphanurattana      L Sphanurattana L
+## 386:         venuto2014support          Sugiyama, M           M      Sugiyama      M      Sugiyama M
 ```
 
 The table above shows all names standardized to a common format in the `show` column.
@@ -409,10 +479,10 @@ abbrev.dt[, length(grep("Hocking",authors_abbrev))]
 ```
 
 ```
-## [1] 57
+## [1] 66
 ```
 
-The output above shows that there are 57 items for which I am listed as an author.
+The output above shows that there are 66 items for which I am listed as an author.
 
 
 ``` r
@@ -425,7 +495,7 @@ abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
 ##  1:                                   Abraham2021 Abraham AJ, Prys-Jones TO, De 
 ##  2:                                 Alirezaie2018 Alirezaie N, Kernohan KD, Hart
 ##  3:                               Barnwal2022jcgs    Barnwal A, Cho H, Hocking T
-##  4:                                    Bodine2024 Bodine CS, Buscombe D, Hocking
+##  4:                              Bodine2024JGRMLC Bodine CS, Buscombe D, Hocking
 ##  5:                                    Chaves2022 Chaves AP, Egbert J, Hocking T
 ##  6:                                   Chicard2016 Chicard M, Boyault S, Colmet D
 ##  7:                    FOTOOHINASAB2021CompBioMed Fotoohinasab A, Hocking T, Afg
@@ -471,14 +541,23 @@ abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
 ## 47:                      hocking2022interpretable Hocking TD, Barr JR, Thatcher 
 ## 48:                           hocking2012learning                     Hocking TD
 ## 49:                                  Agyapong2023 Agyapong D, Propster JR, Marks
-## 50:                                    Bodine2023 Bodine CS, Buscombe D, Hocking
-## 51:                                    Nguyen2024           Nguyen T, Hocking TD
-## 52:              Rust2023-all-pairs-squared-hinge            Rust KR, Hocking TD
-## 53:                          animint2-manual-2016                     Hocking TD
-## 54:                          change-tutorial-2017          Hocking TD, Killick R
-## 55:                    hocking2015breakpointError                     Hocking TD
-## 56:                     interactive-tutorial-2016         Hocking TD, Ekstrøm CT
-## 57:                             venuto2014support Venuto D, Hocking TD, Sphanura
+## 50:                                Fowler2024line           Fowler J, Hocking TD
+## 51:                               Gurney2024power Gurney K, Aslam B, Dass P, Gaw
+## 52:                         Hocking2023functional                     Hocking TD
+## 53:                             Hocking2024autism Sutherland V, Hocking TD, Lind
+## 54:                             Hocking2024binary                     Hocking TD
+## 55:                         Hocking2024binsegRcpp                     Hocking TD
+## 56:                                 Hocking2024cv                     Hocking TD
+## 57:                                Hocking2024hmm                     Hocking TD
+## 58:                               Hocking2024soak Bodine CS, Thibault G, Arellan
+## 59:                                    Nguyen2024           Nguyen T, Hocking TD
+## 60:              Rust2023-all-pairs-squared-hinge            Rust KR, Hocking TD
+## 61:                            Thibault2024forest Thibault G, Hocking TD, Achim 
+## 62:                            Truong2024circular           Truong C, Hocking TD
+## 63:                          change-tutorial-2017          Hocking TD, Killick R
+## 64:                    hocking2015breakpointError                     Hocking TD
+## 65:                     interactive-tutorial-2016         Hocking TD, Ekstrøm CT
+## 66:                             venuto2014support Venuto D, Hocking TD, Sphanura
 ##                                               ref                 authors_abbrev
 ```
 
@@ -494,7 +573,7 @@ abbrev.wide <- refs.wide[
   abbrev.dt, on="ref"
 ][, let(
   heading = ifelse(type=="unpublished", "In Progress", year),
-  citation = sprintf("- %s (%s). %s. %s.", authors_abbrev, year, title, venue)
+  citation = sprintf("- %s (%s). %s. %s. %s", authors_abbrev, year, title, venue, links)
 )][order(-heading, -year, authors_abbrev)]
 abbrev.some <- abbrev.wide[unique(heading)[1:3], .SD[1:2], on="heading", by=heading]
 abbrev.some[
@@ -506,16 +585,16 @@ abbrev.some[
 ```
 
 ### In Progress
-- Nguyen T, Hocking TD (2024). Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization. Preprint arXiv:2408.00856.
-- Agyapong D, Propster JR, Marks J, Hocking TD (2023). Cross-Validation for Training and Testing Co-occurrence Network Inference Algorithms. Preprint arXiv:2309.15225.
+- Bodine CS, Thibault G, Arellano PN, Shenkin AF, Lindly O, Hocking TD (2024). SOAK: Same/Other/All K-fold cross-validation for estimating similarity of patterns in data subsets. In progress. [Software](https://github.com/tdhock/mlr3resampling), [Reproducible](https://github.com/tdhock/cv-same-other-paper)
+- Fowler J, Hocking TD (2024). Efficient line search for optimizing Area Under the ROC Curve in gradient descent. In progress. [Talk announcement for JSM'23 Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810), [Video of talk at Université Laval July 2023](https://www.youtube.com/watch?v=22ODpDTZ4VE), [Slides PDF](https://github.com/tdhock/max-generalized-auc/blob/master/HOCKING-slides-toronto.pdf), [source](https://github.com/tdhock/max-generalized-auc/#4-may-2023)
 
 ### 2024
-- Bodine CS, Buscombe D, Hocking TD (2024). Automated River Substrate Mapping From Sonar Imagery With Machine Learning. Journal of Geophysical Research: Machine Learning and Computation 1(3).
-- Kaufman JM, Stenberg AJ, Hocking TD (2024). Functional Labeled Optimal Partitioning. Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216.
+- Bodine CS, Buscombe D, Hocking TD (2024). Automated River Substrate Mapping From Sonar Imagery With Machine Learning. Journal of Geophysical Research: Machine Learning and Computation 1(3). [Preprint eartharXiv:6448](https://eartharxiv.org/repository/view/6448/), [Software](https://github.com/CameronBodine/PINGMapper)
+- Kaufman JM, Stenberg AJ, Hocking TD (2024). Functional Labeled Optimal Partitioning. Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216. NA
 
 ### 2023
-- Harshe K, Williams JR, Hocking TD, Lerner ZF (2023). Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton. IEEE Robotics and Automation Letters 8(8).
-- Hillman J, Hocking TD (2023). Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection. Journal of Machine Learning Research 24(70).
+- Harshe K, Williams JR, Hocking TD, Lerner ZF (2023). Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton. IEEE Robotics and Automation Letters 8(8). NA
+- Hillman J, Hocking TD (2023). Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection. Journal of Machine Learning Research 24(70). NA
 NULL
 
 ## Another output: markdown table with images
@@ -528,20 +607,20 @@ some.out <- abbrev.some[, .(
   figure=sprintf(
     '<img src="/assets/img/publications/%s.png" width="150" />',
     ref),
-  published=heading, authors_abbrev, title, venue)]
+  published=heading, authors_abbrev, title, venue, links)]
 knitr::kable(some.out)
 ```
 
 
 
-|figure                                                                       |published   |authors_abbrev                               |title                                                                                                      |venue                                                                                       |
-|:----------------------------------------------------------------------------|:-----------|:--------------------------------------------|:----------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------|
-|<img src="/assets/img/publications/Nguyen2024.png" width="150" />            |In Progress |Nguyen T, Hocking TD                         |Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization                           |Preprint arXiv:2408.00856                                                                   |
-|<img src="/assets/img/publications/Agyapong2023.png" width="150" />          |In Progress |Agyapong D, Propster JR, Marks J, Hocking TD |Cross-Validation for Training and Testing Co-occurrence Network Inference Algorithms                       |Preprint arXiv:2309.15225                                                                   |
-|<img src="/assets/img/publications/Bodine2024.png" width="150" />            |2024        |Bodine CS, Buscombe D, Hocking TD            |Automated River Substrate Mapping From Sonar Imagery With Machine Learning                                 |Journal of Geophysical Research: Machine Learning and Computation 1(3)                      |
-|<img src="/assets/img/publications/kaufman2024functional.png" width="150" /> |2024        |Kaufman JM, Stenberg AJ, Hocking TD          |Functional Labeled Optimal Partitioning                                                                    |Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216 |
-|<img src="/assets/img/publications/harshe2023predicting.png" width="150" />  |2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton              |IEEE Robotics and Automation Letters 8(8)                                                   |
-|<img src="/assets/img/publications/Hillman2023.png" width="150" />           |2023        |Hillman J, Hocking TD                        |Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection |Journal of Machine Learning Research 24(70)                                                 |
+|figure                                                                       |published   |authors_abbrev                                                       |title                                                                                                      |venue                                                                                       |links                                                                                                 |
+|:----------------------------------------------------------------------------|:-----------|:--------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------|
+|<img src="/assets/img/publications/Hocking2024soak.png" width="150" />       |In Progress |Bodine CS, Thibault G, Arellano PN, Shenkin AF, Lindly O, Hocking TD |SOAK: Same/Other/All K-fold cross-validation for estimating similarity of patterns in data subsets         |In progress                                                                                 |[Software](https://github.com/tdhock/mlr3resampling), [Reproducible](https://github.com/tdhock/cv-same-other-paper)|
+|<img src="/assets/img/publications/Fowler2024line.png" width="150" />        |In Progress |Fowler J, Hocking TD                                                 |Efficient line search for optimizing Area Under the ROC Curve in gradient descent                          |In progress                                                                                 |[Talk announcement for JSM'23 Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810), [Video of talk at Université Laval July 2023](https://www.youtube.com/watch?v=22ODpDTZ4VE), [Slides PDF](https://github.com/tdhock/max-generalized-auc/blob/master/HOCKING-slides-toronto.pdf), [source](https://github.com/tdhock/max-generalized-auc/#4-may-2023)|
+|<img src="/assets/img/publications/Bodine2024JGRMLC.png" width="150" />      |2024        |Bodine CS, Buscombe D, Hocking TD                                    |Automated River Substrate Mapping From Sonar Imagery With Machine Learning                                 |Journal of Geophysical Research: Machine Learning and Computation 1(3)                      |[Preprint eartharXiv:6448](https://eartharxiv.org/repository/view/6448/), [Software](https://github.com/CameronBodine/PINGMapper)|
+|<img src="/assets/img/publications/kaufman2024functional.png" width="150" /> |2024        |Kaufman JM, Stenberg AJ, Hocking TD                                  |Functional Labeled Optimal Partitioning                                                                    |Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216 |NA                                                                                                    |
+|<img src="/assets/img/publications/harshe2023predicting.png" width="150" />  |2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF                         |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton              |IEEE Robotics and Automation Letters 8(8)                                                   |NA                                                                                                    |
+|<img src="/assets/img/publications/Hillman2023.png" width="150" />           |2023        |Hillman J, Hocking TD                                                |Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection |Journal of Machine Learning Research 24(70)                                                 |NA                                                                                                    |
 
 The output above is a table with one row per publication, and an image column that shows a figure from the paper.
 The trick to getting that to display, is putting it in this repo, with a standard name, based on the bib file key.

@@ -38,7 +38,7 @@ at.lines <- grep("^@", refs.vec, value=TRUE)
 str(at.lines)
 ```
 
-The output above shows that there are currently 56 lines that start
+The output above shows that there are currently `r length(at.lines)` lines that start
 with `@` in the bib file. Below we use a regex to convert each item
 into one row of a data table:
 
@@ -55,7 +55,7 @@ refs.dt <- nc::capture_all_str(
 str(refs.dt)
 ```
 
-The output above shows that the bib file was converted to a table with 56 rows.
+The output above shows that the bib file was converted to a table with `r nrow(refs.dt)` rows.
 
 ## Parsing fields 
 
@@ -66,23 +66,31 @@ eq.lines <- grep("=", refs.vec, value=TRUE)
 str(eq.lines)
 ```
 
-Above we see 390 fields.
+Above we see `r length(eq.lines)` fields.
 
 Below we parse the `fields` column:
 
 ```{r}
 strip <- function(x)gsub("^\\s*|,\\s*$", "", gsub('[{}"]', "", x))
-refs.fields <- refs.dt[, nc::capture_all_str(
-  fields,
+field.pattern <- list(
   "\\s*",
   variable="\\S+", tolower,
   "\\s*=",
-  value=".*", strip),
-  by=.(type, ref)]
-refs.fields
+  value=".*", strip)  
+(refs.fields <- refs.dt[, nc::capture_all_str(
+  fields, field.pattern),
+  by=.(type, ref)])
 ```
 
-Above we see 390 fields, consistent with the simpler `grep` parsing above.
+Above we see `r nrow(refs.fields)` fields, consistent with the simpler `grep` parsing above. 
+If it is not consistent, we can use the code below to find out where:
+
+```{r}
+(eq.dt <- nc::capture_first_vec(eq.lines, field.pattern))
+eq.dt[!refs.fields, on=.(variable,value)]
+eq.counts <- eq.dt[, .(eq.count=.N), by=.(variable,value)]
+refs.fields[, .(ref.count=.N), by=.(variable,value)][eq.counts,on=.(variable,value)][eq.count!=ref.count]
+```
 
 ## Verify clean
 
@@ -206,7 +214,7 @@ abbrev.dt <- authors[, .(
 abbrev.dt[, length(grep("Hocking",authors_abbrev))]
 ```
 
-The output above shows that there are 57 items for which I am listed as an author.
+The output above shows that there are `r nrow(abbrev.dt)` items for which I am listed as an author.
 
 ```{r}
 abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
@@ -223,7 +231,7 @@ abbrev.wide <- refs.wide[
   abbrev.dt, on="ref"
 ][, let(
   heading = ifelse(type=="unpublished", "In Progress", year),
-  citation = sprintf("- %s (%s). %s. %s.", authors_abbrev, year, title, venue)
+  citation = sprintf("- %s (%s). %s. %s. %s", authors_abbrev, year, title, venue, links)
 )][order(-heading, -year, authors_abbrev)]
 abbrev.some <- abbrev.wide[unique(heading)[1:3], .SD[1:2], on="heading", by=heading]
 abbrev.some[
@@ -243,7 +251,7 @@ some.out <- abbrev.some[, .(
   figure=sprintf(
     '<img src="/assets/img/publications/%s.png" width="150" />',
     ref),
-  published=heading, authors_abbrev, title, venue)]
+  published=heading, authors_abbrev, title, venue, links)]
 knitr::kable(some.out)
 ```
 
