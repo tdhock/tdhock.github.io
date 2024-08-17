@@ -296,6 +296,14 @@ cat(article.code, file=article.tex)
 system(paste("cd",latex.dir,"&& pdflatex article && bibtex article && pdflatex article && pdflatex article && evince article.pdf &"))
 ```
 
+## Report mis-match between image files and refs
+
+```{r}
+img.dt <- data.table(ref=sub(".png", "", dir("../assets/img/publications/")))
+img.dt[!refs.wide,on="ref"] #images without bib entries
+refs.wide[!img.dt,.(ref),on="ref"] #bib entries without images
+```
+
 ## Conclusion
 
 We have seen how a bib file can be used to define a publications web page.

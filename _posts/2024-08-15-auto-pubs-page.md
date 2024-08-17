@@ -104,11 +104,11 @@ field.pattern <- list(
 ##   4: unpublished    Gurney2024power      year
 ##   5: unpublished         Nguyen2024     title
 ##  ---                                         
-## 506:     article doyon2008heritable    number
-## 507:     article doyon2008heritable     pages
-## 508:     article doyon2008heritable      year
-## 509:     article doyon2008heritable     links
-## 510:     article doyon2008heritable publisher
+## 507:     article doyon2008heritable    number
+## 508:     article doyon2008heritable     pages
+## 509:     article doyon2008heritable      year
+## 510:     article doyon2008heritable     links
+## 511:     article doyon2008heritable publisher
 ##                                                                                                                   value
 ##                                                                                                                  <char>
 ##   1:                                                    Assessment of the Climate Trace global powerplant CO2 emissions
@@ -117,14 +117,14 @@ field.pattern <- list(
 ##   4:                                                                                                               2024
 ##   5:                                   Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization
 ##  ---                                                                                                                   
-## 506:                                                                                                                  6
-## 507:                                                                                                           702--708
-## 508:                                                                                                               2008
-## 509:                                                              [Pubmed](http://www.ncbi.nlm.nih.gov/pubmed/18500334)
-## 510:                                                                                Nature Publishing Group US New York
+## 507:                                                                                                                  6
+## 508:                                                                                                           702--708
+## 509:                                                                                                               2008
+## 510:                                                              [Pubmed](http://www.ncbi.nlm.nih.gov/pubmed/18500334)
+## 511:                                                                                Nature Publishing Group US New York
 ```
 
-Above we see 510 fields, consistent with the simpler `grep` parsing above. 
+Above we see 511 fields, consistent with the simpler `grep` parsing above. 
 If it is not consistent, we can use the code below to find out where:
 
 
@@ -166,10 +166,9 @@ eq.dt[!refs.fields, on=.(variable,value)]
 ```
 
 ```
-##     variable                             value
-##       <char>                            <char>
-## 1: publisher Nature Publishing Group UK London
-## 2:       doi         10.1007/s11222-016-9636-3
+##    variable                     value
+##      <char>                    <char>
+## 1:      doi 10.1007/s11222-016-9636-3
 ```
 
 ``` r
@@ -499,7 +498,7 @@ abbrev.dt[, .(ref, authors_abbrev=substr(authors_abbrev,1,30))]
 ##  1:                                   Abraham2021 Abraham AJ, Prys-Jones TO, De 
 ##  2:                                 Alirezaie2018 Alirezaie N, Kernohan KD, Hart
 ##  3:                               Barnwal2022jcgs    Barnwal A, Cho H, Hocking T
-##  4:                              Bodine2024JGRMLC Bodine CS, Buscombe D, Hocking
+##  4:                                    Bodine2024 Bodine CS, Buscombe D, Hocking
 ##  5:                                    Chaves2022 Chaves AP, Egbert J, Hocking T
 ##  6:                                   Chicard2016 Chicard M, Boyault S, Colmet D
 ##  7:                    FOTOOHINASAB2021CompBioMed Fotoohinasab A, Hocking T, Afg
@@ -749,7 +748,7 @@ knitr::kable(some.out)
 |<img src="/assets/img/publications/interactive-tutorial-2016.png" width="150" />                     |In Progress |Hocking TD, Ekstrøm CT                                                                                                                                                                                                                                                                                                                                                                                                          |Understanding and Creating Interactive Graphics                                                                           |Tutorial at international useR 2016 conference                                                                                                             |[Tutorial](http://user2016.r-project.org/tutorials/13.html), [Reproducible](https://github.com/tdhock/interactive-tutorial)|
 |<img src="/assets/img/publications/hocking2015breakpointError.png" width="150" />                    |In Progress |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |A breakpoint detection error function for segmentation model selection and validation                                     |Preprint arXiv:1509.00368                                                                                                                                  |[Preprint](https://arxiv.org/abs/1509.00368), [Software](http://r-forge.r-project.org/scm/?group_id=1540), [Reproducible](https://github.com/tdhock/breakpointError-orig)|
 |<img src="/assets/img/publications/venuto2014support.png" width="150" />                             |In Progress |Venuto D, Hocking TD, Sphanurattana L, Sugiyama M                                                                                                                                                                                                                                                                                                                                                                               |Support vector comparison machines                                                                                        |Preprint arXiv:1401.8008                                                                                                                                   |[Preprint](https://arxiv.org/abs/1401.8008), [Software](https://github.com/tdhock/rankSVMcompare), [Reproducible](https://github.com/tdhock/compare-paper)|
-|<img src="/assets/img/publications/Bodine2024JGRMLC.png" width="150" />                              |2024        |Bodine CS, Buscombe D, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                               |Automated River Substrate Mapping From Sonar Imagery With Machine Learning                                                |Journal of Geophysical Research: Machine Learning and Computation 1(3)                                                                                     |[DOI](https://doi.org/10.1029/2024JH000135), [Preprint](https://eartharxiv.org/repository/view/6448/), [Software](https://github.com/CameronBodine/PINGMapper)|
+|<img src="/assets/img/publications/Bodine2024.png" width="150" />                                    |2024        |Bodine CS, Buscombe D, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                               |Automated River Substrate Mapping From Sonar Imagery With Machine Learning                                                |Journal of Geophysical Research: Machine Learning and Computation 1(3)                                                                                     |[DOI](https://doi.org/10.1029/2024JH000135), [Preprint](https://eartharxiv.org/repository/view/6448/), [Software](https://github.com/CameronBodine/PINGMapper)|
 |<img src="/assets/img/publications/kaufman2024functional.png" width="150" />                         |2024        |Kaufman JM, Stenberg AJ, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                             |Functional Labeled Optimal Partitioning                                                                                   |Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216                                                                |[DOI](https://doi.org/10.1080/10618600.2023.2293216), [Preprint](https://arxiv.org/abs/2210.02580), [Software](https://github.com/tdhock/FLOPART), [Reproducible](https://github.com/jkaufy/Flopart-Paper), [Preliminary code](https://github.com/tdhock/LabeledFPOP-paper)|
 |<img src="/assets/img/publications/tao2024reply.png" width="150" />                                  |2024        |Tao F, Houlton BZ, Frey SD, Lehmann J, Manzoni S, Huang Y, Jiang L, Mishra U, Hungate BA, Schmidt MWI, Reichstein M, Carvalhais N, Ciais P, Wang Y-P, Ahrens B, Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin K, Vargas R, Yigini Y, Omuto C, Malik AA, Peralta G, Cuevas-Corona R, Paolo LED, Luotto I, Liao C, Liang Y-S, Saynes VS, Huang X, Luo Y                                                                            |Reply to: Model uncertainty obscures major driver of soil carbon                                                          |Nature 627(8002)                                                                                                                                           |[Publisher](https://www.nature.com/articles/s41586-023-07000-9), [Preprint](https://eartharxiv.org/repository/view/6125/)|
 |<img src="/assets/img/publications/harshe2023predicting.png" width="150" />                          |2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF                                                                                                                                                                                                                                                                                                                                                                                    |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton                             |IEEE Robotics and Automation Letters 8(8)                                                                                                                  |[Publisher](https://ieeexplore.ieee.org/document/10172008)                                            |
@@ -806,6 +805,89 @@ The trick to getting that to display, is putting it in this repo, with a standar
 This part only works in Rmd, not md/jekyll for some reason.
 
 
+
+## Report mis-match between image files and refs
+
+
+``` r
+img.dt <- data.table(ref=sub(".png", "", dir("../assets/img/publications/")))
+img.dt[!refs.wide,on="ref"] #images without bib entries
+```
+
+```
+## Empty data.table (0 rows and 1 cols): ref
+```
+
+``` r
+refs.wide[!img.dt,.(ref),on="ref"] #bib entries without images
+```
+
+```
+##                                               ref
+##                                            <char>
+##  1:                                   Abraham2021
+##  2:                                 Alirezaie2018
+##  3:                               Barnwal2022jcgs
+##  4:                                    Chaves2022
+##  5:                                   Chicard2016
+##  6:                    FOTOOHINASAB2021CompBioMed
+##  7:                     Hocking2013bioinformatics
+##  8:                                   Hocking2014
+##  9:                            Hocking2017bioinfo
+## 10:                               Hocking2020jmlr
+## 11:                           Hocking2021RJournal
+## 12:                                Hocking2022jss
+## 13:                            Hocking2023-LOPART
+## 14:                                    Jewell2019
+## 15:                          Liehrmann2021chipseq
+## 16:                                 Maidstone2017
+## 17:                                   RJ-2019-050
+## 18:                                     Runge2023
+## 19:                                   Shimada2016
+## 20:                                   Sievert2019
+## 21:                                    Suguro2014
+## 22:                                       Tao2023
+## 23:                                 Vargovich2022
+## 24:                            depuydt2018genomic
+## 25:                               depuydt2018meta
+## 26:                            doyon2008heritable
+## 27:                           gautier2010bayesian
+## 28:                          harshe2023predicting
+## 29:                        hocking2013sustainable
+## 30:                      mihaljevic2022sparsemodr
+## 31:                                  tao2024reply
+## 32:                                hocking22intro
+## 33:                                    Drouin2017
+## 34: Fotoohinasab2020automaticQRSdetectionAsilomar
+## 35:              Fotoohinasab2020segmentationEMBC
+## 36:                               Hocking2013icml
+## 37:                                   Hocking2015
+## 38:                                Hocking2020psb
+## 39:                                     Kolla2021
+## 40:                                   Sweeney2023
+## 41:                           barr2022classifying
+## 42:                                 barr2022graph
+## 43:                        hocking2011clusterpath
+## 44:                      hocking2022interpretable
+## 45:                           hocking2012learning
+## 46:                                Fowler2024line
+## 47:                               Gurney2024power
+## 48:                         Hocking2023functional
+## 49:                             Hocking2024autism
+## 50:                             Hocking2024binary
+## 51:                         Hocking2024binsegRcpp
+## 52:                                 Hocking2024cv
+## 53:                                Hocking2024hmm
+## 54:                               Hocking2024soak
+## 55:              Rust2023-all-pairs-squared-hinge
+## 56:                            Thibault2024forest
+## 57:                            Truong2024circular
+## 58:                          change-tutorial-2017
+## 59:                    hocking2015breakpointError
+## 60:                     interactive-tutorial-2016
+## 61:                             venuto2014support
+##                                               ref
+```
 
 ## Conclusion
 
