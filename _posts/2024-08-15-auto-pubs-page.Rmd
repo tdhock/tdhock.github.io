@@ -247,6 +247,7 @@ abbrev.wide <- refs.wide[
   citation = sprintf("- %s (%s). %s. %s. %s", authors_abbrev, year, title, venue, links)
 )][order(-heading, -year, authors_abbrev)]
 abbrev.some <- abbrev.wide[unique(heading)[1:3], .SD[1:2], on="heading", by=heading]
+abbrev.some <- abbrev.wide
 abbrev.some[
 , .(markdown=sprintf("### %s\n%s\n", heading, paste(citation, collapse="\n")))
 , by=heading
