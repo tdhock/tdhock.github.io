@@ -20,8 +20,8 @@ scholar_authorid: c83d8tgAAAAJ
 # -----------------------------------------------------------------------------
 # Blog
 # -----------------------------------------------------------------------------
-blog_name: Toby Dylan Hocking's Blog
-blog_description: Statistical machine learning, data visualization, genomics, R
+blog_name: Toby Dylan Hocking's LASSO Blog
+blog_description: Learning Algorithms, Statistical Software, Optimization
 
 # Pagination
 #paginate: 4
@@ -29,8 +29,8 @@ permalink: /blog/:year/:title/
 #paginate_path: /blog/page:num/
 
 exclude:
-  _posts/*.Rmd
-  _pages/*.Rmd
+  - _posts/*.Rmd
+  - _pages/*.Rmd
 
 text:
   pagination:
