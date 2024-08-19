@@ -10,7 +10,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   and
   [Mathematics Genealogy Project](https://www.genealogy.math.ndsu.nodak.edu/id.php?id=224469).
 - Peer review notice: in addition to peer-reviewed journals, I publish
-  papers at machine learning conferences such as ICML and NIPS, which
+  papers at machine learning conferences such as ICML and NeurIPS, which
   have double-blind peer reviews, and only accept about 20% of
   submitted papers.
 - Reproducible Research notice: a "Reproducible" link for each paper below
@@ -18,19 +18,43 @@ description: Peer-reviewed papers and preprints with links to code and data
   the figures/tables.
 - Software notice: a "Software" link for each paper below provides a software
   package with a reference implementation of the algorithms described
-  in our paper.
+  in our paper. See also my [Software](https://tdhock.github.io/software/) page.
 - Please download my [TDH-refs.bib](/assets/TDH-refs.bib) BibTeX
   citation database, and use it to cite my papers. This is the file
-  that was used to generate the list of publications below.
+  that was used to
+  [generate](https://tdhock.github.io/blog/2024/auto-pubs-page/) the
+  list of publications below.
 
-
-|Type             | count|
-|:----------------|-----:|
-|journal paper    |    34|
-|in progress      |    18|
-|conference paper |    12|
-|book chapter     |     1|
-|PHD thesis       |     1|
+<table style='width:30%;'>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Type </th>
+   <th style="text-align:right;"> count </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> journal paper </td>
+   <td style="text-align:right;"> 34 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> in progress </td>
+   <td style="text-align:right;"> 18 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> conference paper </td>
+   <td style="text-align:right;"> 12 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> book chapter </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> PHD thesis </td>
+   <td style="text-align:right;"> 1 </td>
+  </tr>
+</tbody>
+</table>
 
 
 
