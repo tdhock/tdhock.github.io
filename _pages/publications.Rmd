@@ -21,7 +21,9 @@ description: Peer-reviewed papers and preprints with links to code and data
   in our paper. See also my [Software](https://tdhock.github.io/software/) page.
 - Please download my [TDH-refs.bib](/assets/TDH-refs.bib) BibTeX
   citation database, and use it to cite my papers. This is the file
-  that was used to generate the list of publications below.
+  that was used to
+  [generate](https://tdhock.github.io/blog/2024/auto-pubs-page/) the
+  list of publications below.
 
 ```{r Ropts, echo=FALSE}
 if(FALSE){
@@ -140,7 +142,7 @@ knitr::kable(refs.wide[
 
 ```{r eval=TRUE, echo=FALSE, results='hide'}
 cat(sprintf(
-  "I have several scientific contributions \\citep{%s}.",
+  "I have several scientific contributions \\citep{ %s }.",
   paste(refs.wide[order(year), ref], collapse=",")),
   file="../assets/citep.tex")
 system(paste("cd ../assets && rm -f TDH-refs.pdf && pdflatex TDH-refs && bibtex TDH-refs && pdflatex TDH-refs && pdflatex TDH-refs && evince TDH-refs.pdf &"))
