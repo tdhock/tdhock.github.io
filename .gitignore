@@ -10,3 +10,7 @@ auto
 Gemfile.lock
 .Rhistory
 *.log
+*blg
+*bbl
+*aux
+citep.tex

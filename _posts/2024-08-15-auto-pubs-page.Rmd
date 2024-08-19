@@ -295,7 +295,7 @@ The trick to getting that to display, is putting it in this repo, with a standar
 The code below checks for missing figures.
 
 ```{r}
-some.out[figure=='', title]
+some.out[Figure=='', Title]
 ```
 
 ## Make sure pdflatex likes it
@@ -333,6 +333,22 @@ refs.wide[!img.dt,.(ref),on="ref"] #bib entries without images
 ## Conclusion
 
 We have seen how a bib file can be used to define a publications web page.
+
+* bib file contains peer-reviewed, published papers as `article` (for
+  journals) and `inproceedings` (for conferences),
+* `incollection` is used for book chapters,
+* `phdthesis` is used for PHD thesis,
+
+`unpublished` is used for papers in progress (not yet published), meaning one or more of below:
+
+* conference tutorial, note should include which conference; links should include conference page, book/manual page, and github source.
+* paper not yet submitted for review (note=In progress), 
+* Pre-print available, put in note and links.
+* If under review or accepted, put venue in note.
+
+Because bibtex ignores fields like `links` which are not part of
+standard bibliography types, we can put markdown code in there, and
+then put it into our markdown pubs page.
 
 ## Session info
 

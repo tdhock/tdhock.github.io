@@ -19,446 +19,88 @@ description: Peer-reviewed papers and preprints with links to code and data
 - Software notice: a "Software" link for each paper below provides a software
   package with a reference implementation of the algorithms described
   in our paper.
-- Selected publications in [bib](/assets/TDH-refs.bib) format.
+- Please download my [TDH-refs.bib](/assets/TDH-refs.bib) BibTeX
+  citation database, and use it to cite my papers. This is the file
+  that was used to generate the list of publications below.
 
-### In progress
 
-- Gurney KR, Aslam B, Dass P, Gawuc L, Hocking TD, Barber JJ, Kato
-  A. Assessment of the Climate Trace global powerplant CO2
-  emissions. Under review at Environmental Research Letters.
-- Nguyen T, Hocking TD. Deep Learning Approach for Changepoint
-  Detection: Penalty Parameter Optimization.
-  [Preprint arXiv:2408.00856](https://arxiv.org/abs/2408.00856)
-- Truong C, Hocking TD. Fast change-point detection for multivariate
-  circular data.
-- Bodine CS, Buscombe D, Hocking TD. Open-source approach for
-  reproducible substrate mapping using semantic segmentation on
-  recreation-grade side scan sonar datasets.
-  [Preprint eartharXiv:6448](https://eartharxiv.org/repository/view/6448/)
-- Hocking TD. mlr3resampling: an R implementation of cross-validation
-  for comparing models learned using different train sets.
-- Agyapong D, Propster JR, Marks J, Hocking TD. Cross-Validation for
-  Training and Testing Co-occurrence Network Inference
-  Algorithms. [Preprint
-  arXiv:2309.15225](https://arxiv.org/abs/2309.15225). Under review at
-  BMC Bioinformatics.
-- Why does functional pruning yield such fast algorithms for optimal
-  changepoint detection? Invited talk for TRIPODS seminar
-  [video](https://arizona.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4e87c8d0-96d2-40d1-808c-ad16014c6962),
-  [slides](https://github.com/tdhock/functional-pruning-theory#readme),
-  [IEEE NJACS](https://events.vtools.ieee.org/m/280515), [ASU West ML
-  Day](https://newcollege.asu.edu/machine-learning-day-1).
-- Hocking TD and Killick R. Changepoint detection algorithms and
-  applications in R. Textbook in preparation.
-- Hocking TD, Khare A. Learning penalty functions for changepoint
-  detection using elastic-net regularized accelerated failure time
-  models. In preparation, [Software](https://github.com/anujkhare/iregnet),
-  [Reproducible](https://github.com/tdhock/iregnet-paper).
-- Rust K, Hocking TD. A Log-linear Gradient Descent Algorithm for
-  Unbalanced Binary Classification using the All Pairs Squared Hinge
-  Loss. [Preprint arXiv:2302.11062](https://arxiv.org/abs/2302.11062).
-- SOAK: Same/Other/All K-fold cross-validation for estimating
-  similarity of patterns in data subsets.
-- Fowler J, Hocking TD. Efficient line search for optimizing Area Under the ROC
-  Curve in gradient descent. [Talk announcement for JSM'23
-  Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810),
-  [Video of talk at Université Laval July
-  2023](https://www.youtube.com/watch?v=22ODpDTZ4VE), [Slides
-  PDF](https://github.com/tdhock/max-generalized-auc/blob/master/HOCKING-slides-toronto.pdf),
-  [source](https://github.com/tdhock/max-generalized-auc/#4-may-2023).
-- Hocking TD. Finite Sample Complexity Analysis of Binary Segmentation.
-- Hocking TD. Comparing binsegRcpp with other implementations of
-  binary segmentation for changepoint detection.
-- Hocking TD. Teaching Hidden Markov Models Using Interactive Data
-  Visualization. 
-- Gabi Thibault, TD Hocking, Alexis Achim. Predicting forest burn from
-  satellite image data.
-- Hocking TD. A breakpoint detection error function for segmentation
-  model selection and
-  validation. [Preprint arXiv:1509.00368](https://arxiv.org/abs/1509.00368),
-  [Software](http://r-forge.r-project.org/scm/?group_id=1540),
-  [Reproducible](https://github.com/tdhock/breakpointError-orig).
-- Venuto D, Hocking TD, Spanurattana S, Sugiyama M. Support vector
-  comparison machines. [Preprint
-  arXiv:1401.8008](https://arxiv.org/abs/1401.8008). Under review at
-  Machine Learning,
-  [Software](https://github.com/tdhock/rankSVMcompare),
-  [Reproducible](https://github.com/tdhock/compare-paper).
- 
-### Accepted, in press
+|Type             | count|
+|:----------------|-----:|
+|journal paper    |    34|
+|in progress      |    18|
+|conference paper |    12|
+|book chapter     |     1|
+|PHD thesis       |     1|
 
-### 2024
 
-- Bodine CS, Buscombe D, Hocking TD. Automated river substrate mapping from sonar imagery with machine learning. Journal of Geophysical Research: Machine Learning and Computation, 1, e2024JH000135. [DOI:10.1029/2024JH000135](https://doi.org/10.1029/2024JH000135).
-- Tao F, Houlton BZ, Frey SD, Lehmann J, Manzoni S, Huang Y, Jiang L,
-  Mishra U, Hungate BA, Schmidt MWI, Reichstein M, Carvalhais N, Ciais
-  P, Wang Y-P, Ahrens B, Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin
-  K, Vargas R, Yigini Y, Omuto C, Malik AA, Peralta G, Cuevas-Corona
-  R, Di Paolo LE, Luotto I, Liao C, Liang Y-S, Saynes VS, Huang X, Luo
-  Y. Reply to: Model uncertainty obscures major driver of soil
-  carbon. [Nature](https://www.nature.com/articles/s41586-023-07000-9)
-  volume 627, pages E4-E6 (2024). Preprint
-  [EarthArXiv:6125](https://eartharxiv.org/repository/view/6125/).
-- Kaufman J, Stenberg A, Hocking TD. Functional Labeled Optimal
-  Partitioning. Published online 05 Jan 2024 by Journal of
-  Computational and Graphical Statistics,
-  [DOI:10.1080/10618600.2023.2293216](https://doi.org/10.1080/10618600.2023.2293216). [Preprint
-  arXiv:2210.02580](https://arxiv.org/abs/2210.02580).
-  [Software](https://github.com/tdhock/FLOPART),
-  [Reproducible](https://github.com/jkaufy/Flopart-Paper),
-  [Preliminary code](https://github.com/tdhock/LabeledFPOP-paper).
-  
-### 2023
 
-- Harshe K, Williams J, Hocking TD, Lerner Z. Predicting Neuromuscular
-  Engagement to Improve Gait Training with a Robotic Ankle
-  Exoskeleton. [IEEE Robotics and Automation
-  Letters](https://ieeexplore.ieee.org/document/10172008), vol. 8,
-  no. 8, pp. 5055-5060, Aug. 2023, doi: 10.1109/LRA.2023.3291919.
-- Tao F, Huang Y, Hungate BA, Manzoni S, Frey SD, Schmidt MWI,
-  Reichstein M, Carvalhais N, Ciais P, Jiang L, Lehmann J, Mishra U,
-  Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin K, Vargas R, Yigini Y,
-  Omuto C, Malik AA, Peralta G, Cuevas-Corona R, Di Paolo LE, Luotto
-  I, Liao C, Liang YS, Saynes VS, Huang X, Luo Y. Microbial carbon use
-  efficiency promotes global soil carbon
-  storage. [Nature](https://www.nature.com/articles/s41586-023-06042-3)
-  (2023),
-  [DOI:10.1038/s41586-023-06042-3](https://doi.org/10.1038/s41586-023-06042-3).
-- Hillman J, Hocking TD. Optimizing ROC Curves with a Sort-Based
-  Surrogate Loss Function for Binary Classification and Changepoint
-  Detection. [Journal of Machine Learning
-  Research](https://jmlr.org/papers/v24/21-0751.html)
-  24(70):1-24, 2023.  [Preprint
-  arXiv:2107.01285](https://arxiv.org/abs/2107.01285),
-  [Software](https://github.com/tdhock/aum),
-  [Reproducible](https://github.com/tdhock/max-generalized-auc).
-- Sweeney N, Xu C, Shaw JA, Hocking TD, Whitaker BM. Insect
-  Identification in Pulsed Lidar Images Using Changepoint Detection
-  Algorithms. Intermountain Engineering, Technology and Computing
-  (IETC), Provo, UT, USA, 2023, pp. 93-97, DOI:
-  10.1109/IETC57902.2023.10152205. 
-  [IEEE](https://ieeexplore.ieee.org/abstract/document/10152205)
-- Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill
-  G. gfpop: an R Package for Univariate Graph-Constrained Change-point
-  Detection. [Journal of Statistical
-  Software](https://www.jstatsoft.org/article/view/v106i06), Volume
-  106, Issue 6. [Preprint
-  arXiv:2002.03646](https://arxiv.org/abs/2002.03646), [Software
-  (gfpop)](https://github.com/vrunge/gfpop), [Software
-  (gfpopgui)](https://github.com/julianstanley/gfpopgui),
-  [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd).
-- Hocking TD, Srivastava A. Labeled Optimal Partitioning. Published in
-  [Computational Statistics](https://rdcu.be/cQ8qM), (2023) 38:461-480.
-  DOI:10.1007/s00180-022-01238-z, [Preprint
-  arXiv:2006.13967](https://arxiv.org/abs/2006.13967),
-  [Video](https://www.youtube.com/watch?v=lm_6_33zOWc),
-  [Software](https://github.com/tdhock/LOPART),
-  [Reproducible](https://github.com/tdhock/LOPART-paper).
-
-### 2022
-
-- Barr J, Hocking TD, Morton G, Thatcher T, Shaw P. Classifying
-  Imbalanced Data with AUM Loss. 2022 Fourth International Conference
-  on Transdisciplinary AI
-  (TransAI). [IEEE](https://ieeexplore.ieee.org/document/9951523).
-- Hocking TD, Barr J, Thatcher T. Interpretable linear models for
-  predicting security vulnerabilities in source code. 2022 Fourth International Conference
-  on Transdisciplinary AI
-  (TransAI). [IEEE](https://ieeexplore.ieee.org/document/9951610/)
-- Barr J, Shaw P, Abu-Khzam FN, Thatcher T, Hocking TD. Graph
-  Embedding: A Methodological Survey. 2022 Fourth International Conference
-  on Transdisciplinary AI
-  (TransAI). [IEEE](https://ieeexplore.ieee.org/document/9951469/)
-- Mihaljevic JR, Borkovec S, Ratnavale S, Hocking TD, Banister KE,
-  Eppinger JE, Hepp CM, Doerry E. Rapid simulations of spatially
-  explicit and stochastic models of infectious disease. [Preprint
-  medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1). [Biology
-  Methods &
-  Protocols](https://academic.oup.com/biomethods/advance-article/doi/10.1093/biomethods/bpac022/6680179)
-  2022, [Software](https://github.com/NAU-CCL/SPARSEMODr).
-- Hocking TD. Chapter "Introduction to machine learning and neural
-  networks" for book "Land Carbon Cycle Modeling: Matrix Approach,
-  Data Assimilation, and Ecological Forecasting" edited by Luo Y,
-  published by Taylor and Francis, [download whole book](https://www.taylorfrancis.com/books/oa-edit/10.1201/9780429155659/land-carbon-cycle-modeling-yiqi-luo-benjamin-smith),
-  [download my chapter](https://raw.githubusercontent.com/tdhock/2020-yiqi-summer-school/master/HOCKING-chapter.pdf),
-  [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school#prepared-for-the-summer-school-4th-year-2021).
-- Barnwal A, Cho H, Hocking TD. Survival regression with accelerated
-  failure time model in XGBoost. [Journal of Computational and
-  Graphical Statistics](https://www.tandfonline.com/doi/full/10.1080/10618600.2022.2067548) (doi:10.1080/10618600.2022.2067548). [Preprint
-  arXiv:2006.04920](https://arxiv.org/abs/2006.04920),
-  [Software](https://github.com/dmlc/xgboost),
-  [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
-  [Video](https://www.youtube.com/watch?v=HuWRnzgGuIo),
-  [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/).
-- Chaves AP, Egbert J, Hocking TD, Doerry E, Gerosa MA. Chatbots
-  language design: the influence of language use on user
-  experience. [ACM Transactions on Computer-Human
-  Interaction](https://dl.acm.org/doi/10.1145/3487193) 29, 2, Article
-  13 (2022). [Preprint
-  arXiv:2101.11089](https://arxiv.org/abs/2101.11089).
-- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Generalized
-  Functional Pruning Optimal Partitioning (GFPOP) for Constrained
-  Changepoint Detection in Genomic Data.  [Journal of Statistical
-  Software Vol. 101, Issue
-  10](https://www.jstatsoft.org/article/view/v101i10). [Software](https://github.com/tdhock/PeakSegDisk),
-  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
-  Presentation at useR 2019:
-  [slides](http://www.user2019.fr/static/pres/t257847.pdf),
-  [video](https://www.youtube.com/watch?v=XlC4WCqsbuI).
-- Hocking TD, Vargovich J. Linear Time Dynamic Programming for
-  Computing Breakpoints in the Regularization Path of Models Selected
-  From a Finite Set. [Journal of Computational and Graphical
-  Statistics](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2021.2000422)
-  (2021), doi:10.1080/10618600.2021.2000422. [Preprint
-  arXiv:2003.02808](https://arxiv.org/abs/2003.02808),
-  [Software](https://github.com/tdhock/penaltyLearning),
-  [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper).
-  
-### 2021
-
-- Kolla A, Hocking TD, Groce A. Fuzz Testing the Compiled Code in R
-  Packages. Published in proceedings of [ISSRE
-  2021](https://ieeexplore.ieee.org/document/9700272). RcppDeepState, a simple way to fuzz
-  test Rcpp Packages. Contributed talk at international useR 2021
-  conference. [Software](https://github.com/akhikolla/RcppDeepState),
-  [abstract](https://www.conftool.org/user2021/index.php?page=browseSessions&form_session=9#paperID123),
-  [video](https://www.youtube.com/watch?v=LXyruwSo2K0&t=245s),
-  [blog](https://akhikolla.github.io),
-  [results](https://akhikolla.github.io/packages-folders/)
-- Hocking TD. Wide-to-tall data reshaping using regular expressions
-  and the nc package. [R
-  Journal](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html)
-  (2021), doi:10.32614/RJ-2021-029, [Software](https://github.com/tdhock/nc),
-  [Reproducible](https://github.com/tdhock/nc-article).
-- Liehrmann A, Rigaill G, Hocking TD. Increased peak detection
-  accuracy in over-dispersed ChIP-seq data with supervised
-  segmentation models. [BMC Bioinformatics 22, Article number: 323
-  (2021)](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-04221-5),
-  [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper),
-  [Software](https://github.com/aliehrmann/crocs).
-- Fotoohinasab A, Hocking TD, Afghah F. A Greedy Graph Search
-  Algorithm Based on Changepoint Analysis for Automatic QRS-Complex
-  Detection. [Computers in Biology and Medicine 130 (2021)](https://www.sciencedirect.com/science/article/pii/S0010482521000020), [Preprint
-  arXiv:2004.13558](https://arxiv.org/abs/2004.13558).
-- Abraham A, Prys-Jones T, De Cuyper A, Ridenour C, Hempson G, Hocking
-  TD, Clauss M, Doughty C. Improved estimation of gut passage time
-  considerably affects trait-based dispersal models. 
-  [Functional Ecology](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2435.13726) 2021; 35: 860-869.
-  
-### 2020
-
-- Fotoohinasab A, Hocking TD, Afghah F. A Graph-Constrained
-  Changepoint Learning Approach for Automatic QRS-Complex
-  Detection. [Paper](https://ieeexplore.ieee.org/document/9443307) in
-  proceedings of [Asilomar Conference on Signals, Systems, and
-  Computers](https://www2.securecms.com/Asilomar2020/Papers/ViewPapers.asp?PaperNum=1323)
-  (2020), [Preprint
-  arXiv:2004.13558](https://arxiv.org/abs/2004.13558).
-- Fotoohinasab A, Hocking TD, Afghah F. A Graph-constrained
-  Changepoint Detection Approach for ECG Segmentation. In proceedings
-  of 42th Annual International Conference of the IEEE Engineering in
-  Medicine and Biology Society (EMBC 2020), [IEEE
-	  Xplore](https://ieeexplore.ieee.org/document/9175333).
-- Hocking TD, Rigaill G, Fearnhead P, Bourque G. Constrained Dynamic
-  Programming and Supervised Penalty Learning Algorithms for Peak
-  Detection in Genomic Data. Journal of Machine Learning Research
-  21(87):1-40, 2020. [JMLR](http://jmlr.org/papers/v21/18-843.html),
-  [Preprint arXiv:1703.03352](https://arxiv.org/abs/1703.03352),
-  [Software](https://github.com/tdhock/PeakSegOptimal),
-  [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper).
-- Hocking TD, Bourque G. Machine Learning Algorithms for Simultaneous
-  Supervised Detection of Peaks in Multiple Samples and Cell
-  Types. Pacific Symposium on Biocomputing (2020)
-  25:367-378, [PDF](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf),
-  [Software](https://github.com/tdhock/PeakSegJoint),
-  [Preprint arXiv:1506.01286](https://arxiv.org/abs/1506.01286),
-  [Reproducible](https://github.com/tdhock/PeakSegJoint-paper).
-  
-### 2019
-
-- Hocking TD. Comparing namedCapture with other R packages for regular
-  expressions. 
-  [R Journal](https://journal.r-project.org/archive/2019/RJ-2019-050/index.html) 
-  (2019), doi:10.32614/RJ-2019-050 
-  [Software](https://github.com/tdhock/namedCapture), 
-  [Reproducible](https://github.com/tdhock/namedCapture-article).
-- Jewell S, Hocking TD, Fearnhead P, Witten D. Fast Nonconvex
-  Deconvolution of Calcium Imaging Data. Biostatistics (2019), doi:
-  10.1093/biostatistics/kxy083,
-  [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/30753436).
-- Sievert C, Cai J, VanderPlas S, Ferris K, Khan FUF, Hocking
-  TD. Extending ggplot2 for linked and animated web graphics. Journal
-  of Computational and Graphical Statistics, Volume 28, Number 2 (2019).
-  [JCGS](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367),
-  [Software](https://github.com/tdhock/animint),
-  [Reproducible](https://github.com/tdhock/animint-paper),
-  [Interactive Figures](https://rcdata.nau.edu/genomic-ml/public_html/animint-paper-figures/).
-  
-### 2018
-
-- Depuydt P, Koster J, Boeva V, Hocking TD, Speleman F, Schleiermacher
-  G, De Preter K. Meta-mining of copy number profiles of high-risk
-  neuroblastoma tumors. [Scientific Data](https://www.nature.com/articles/sdata2018240) (2018).
-- Alirezaie N, Kernohan KD, Hartley T, Majewski J, Hocking
-  TD. ClinPred: Prediction Tool to Identify Disease-Relevant
-  Nonsynonymous Single-Nucleotide Variants. American
-  Journal of Human Genetics
-  (2018). [doi:10.1016/j.ajhg.2018.08.005](https://doi.org/10.1016/j.ajhg.2018.08.005)
-  [AJHG](https://www.cell.com/action/showPdf?pii=S0002-9297%2818%2930271-4),
-  [Software](http://github.com/tdhock/predict-clinically-pathogenic),
-  [used in dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP).
-- Depuydt P, Boeva V, Hocking TD, Cannoodt R, Ambros IM, Ambros PF,
-  Asgharzadeh S, Attiyeh EF, Combaret V, Defferrari R, Fischer M, Hero
-  B, Hogarty MD, Irwin MS, Koster J, Kreissman S, Ladenstein R,
-  Lapouble E, Laureys G, London WB, Mazzocco K, Nakagawara A, Noguera
-  R, Ohira M, Park JR, Pötschger U, Theissen J, Tonini GP,
-  Valteau-Couanet D, Varesio L, Versteeg R, Speleman F, Maris JM,
-  Schleiermacher G, De Preter K. Genomic Amplifications and Distal 6q
-  Loss: Novel Markers for Poor Survival in High-risk Neuroblastoma
-  Patients. Journal of the National Cancer
-  Institute (2018), DOI:10.1093/jnci/djy022,
-  [JNCI](https://academic.oup.com/jnci/advance-article/doi/10.1093/jnci/djy022/4921185).
-
-### 2017
-
-- Drouin A, Hocking TD, Laviolette F. Maximum margin interval
-  trees. Neural Information Processing Systems
-  (NeurIPS) 2017. [Software](https://github.com/aldro61/mmit),
-  [Reproducible](https://github.com/tdhock/mmit-paper),
-  [Preprint arXiv](https://arxiv.org/abs/1710.04234),
-  [NeurIPS](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees),
-  [video](https://www.youtube.com/watch?v=sNrMH9z1rb4).
-- Hocking TD, Goerner-Potvin P, Morin A, Shao X, Pastinen T, Bourque
-  G. Optimizing ChIP-seq peak detectors using visual labels and
-  supervised machine learning.  Bioinformatics (2017) 33 (4):
-  491-499. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27797775),
-  [Software](https://github.com/tdhock/PeakError),
-  [Reproducible](https://bitbucket.org/mugqic/chip-seq-paper),
-  [Data](https://rcdata.nau.edu/genomic-ml/chip-seq-chunk-db/).
-- Hocking TD and Killick R. Introduction to optimal changepoint
-  detection algorithms. [useR2017 conference
-  tutorial](https://www.user2017.brussels/uploads/TobyHocking.html),
-  [video](https://channel9.msdn.com/Events/useR-international-R-User-conferences/useR-International-R-User-2017-Conference/Introduction-to-optimal-changepoint-detection-algorithms-II),
-  [Reproducible](https://github.com/tdhock/change-tutorial).
-- Maidstone R, Hocking TD, Rigaill G, Fearnhead P. On optimal multiple
-  changepoint algorithms for large data. Statistics and Computing, volume 27
-  (2017). doi:10.1007/s11222-016-9636-3
-  [journal](https://link.springer.com/article/10.1007/s11222-016-9636-3),
-  [Software](https://r-forge.r-project.org/R/?group_id%3D1851),
-  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/benchmark/?root%3Dopfp).
-
-### 2016
-
-- Shimada K, Shimada S, Sugimoto K, Nakatochi M, Suguro M, Hirakawa A,
-  Hocking TD, Takeuchi I, Tokunaga T, Takagi Y, Sakamoto A, Aoki T,
-  Naoe T, Nakamura S, Hayakawa F, Seto M, Tomita A, Kiyoi
-  H. Development and analysis of patient-derived xenograft mouse
-  models in intravascular large B-cell lymphoma.
-  Leukemia 2016. [pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27001523).
-- Chicard M, Boyault S, Colmet-Daage L, Richer W, Gentien D, Pierron
-  G, Lapouble E, Bellini A, Clement N, Iacono I, Bréjon S, Carrere M,
-  Reyes C, Hocking TD, Bernard V, Peuchmaur M, Corradini N,
-  Faure-Conter C, Coze C, Plantaz D, Defachelles A-S, Thebaud E,
-  Gambart M, Millot F, Valteau-Couanet D, Michon J, Puisieux A,
-  Delattre O, Combaret V, Schleiermacher G. Genomic copy number
-  profiling using circulating free tumor DNA highlights heterogeneity
-  in neuroblastoma. Clinical Cancer
-  Research 2016. [journal](http://clincancerres.aacrjournals.org/content/early/2016/11/03/1078-0432.CCR-16-0500).
-- The animint2 manual, [online
-  "book" with multiple chapters](https://rcdata.nau.edu/genomic-ml/animint2-manual/Ch02-ggplot2.html),
-  [Reproducible](https://github.com/tdhock/animint-book).
-- Understanding and Creating Interactive Graphics. Hocking TD, Ekstrøm
-  CT. [useR2016 conference
-  tutorial](http://user2016.r-project.org/tutorials/13.html),
-  [Reproducible](https://github.com/tdhock/interactive-tutorial).
-
-### 2015
-
-- Hocking TD, Rigaill G, Bourque G. PeakSeg: constrained optimal
-  segmentation and supervised penalty learning for peak detection in
-  count data.
-  International Conference on Machine Learning (ICML), 2015. 
-  [PMLR](http://proceedings.mlr.press/v37/hocking15.html), 
-  [video](http://videolectures.net/icml2015_hocking_count_data/?q=hocking),
-  [Software](https://github.com/tdhock/PeakSegDP),
-  [Reproducible](https://github.com/tdhock/PeakSeg-paper).
-
-### 2014
-
-- Suguro M, Yoshida N, Umino A, Kato H, Tagawa H, Nakagawa M, Fukuhara
-  N, Karnan S, Takeuchi I, Hocking TD, Arita K, Karube K, Tsuzuki S,
-  Nakamura S, Kinoshita T, Seto M. Clonal heterogeneity of lymphoid
-  malignancies correlates with poor prognosis.  Cancer Sci. 2014
-  Jul;105(7):897-904. [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24815991).
-- Hocking TD, Boeva V, Rigaill G, Schleiermacher G, Janoueix-Lerosey
-  I, Delattre O, Richer W, Bourdeaut F, Suguro M, Seto M, Bach F, Vert
-  J-P. SegAnnDB: interactive Web-based genomic segmentation.
-  Bioinformatics (2014) 30 (11):
-  1539-1546. DOI:10.1093/bioinformatics/btu072
-  [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24493034),
-  [SegAnnDB Software](https://github.com/tdhock/SegAnnDB),
-  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/breakpoints/webapp/applications-note/).
-  [Preprint hal-00759129](https://hal.inria.fr/hal-00759129),
-  [SegAnnot Software](https://r-forge.r-project.org/scm/?group_id=1541),
-  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/SegAnnot/inst/doc/?root=breakpoints).
-
-### 2013
-
-- Hocking TD, Wutzler T, Ponting K and Grosjean P. Sustainable,
-  extensible documentation generation using inlinedocs.  Journal of
-  Statistical Software (2013), 54(6), 1-20. DOI:10.18637/jss.v054.i06
-  [journal](https://www.jstatsoft.org/article/view/v054i06),
-  [Software](https://cran.r-project.org/package=inlinedocs),
-  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/jss762/?root=inlinedocs).
-- Hocking TD, Schleiermacher G, Janoueix-Lerosey I, Boeva V, Cappo J,
-  Delattre O, Bach F, Vert J-P. Learning smoothing models of copy
-  number profiles using breakpoint annotations.  BMC Bioinfo. 2013,
-  14:164. DOI:10.1186/1471-2105-14-164
-  [journal](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-164),
-  [Software](https://cran.r-project.org/src/contrib/Archive/bams/),
-  [Reproducible](https://rcdata.nau.edu/genomic-ml/public_html/papers/2012-01-27-Breakpoint-annotation-model-smoothing/HOCKING-breakpoint-annotation-model-smoothing.tgz).
-- Hocking TD, Rigaill G, Bach F, Vert J-P. Learning sparse penalties
-  for change-point detection using max-margin interval regression.
-  International Conference on Machine Learning
-  (ICML), 2013. [PMLR](http://proceedings.mlr.press/v28/hocking13.html),
-  [video](http://techtalks.tv/talks/learning-sparse-penalties-for-change-point-detection-using-max-margin-interval-regression/58208/),
-  [Software](https://github.com/tdhock/penaltyLearning),
-  [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/?root=breakpoints).
-
-### 2012
-
-- Hocking TD. Learning algorithms and statistical software, with
-  applications to bioinformatics. PhD thesis, Ecole Normale Superieure
-  de Cachan,
-  France. [tel-00906029](https://tel.archives-ouvertes.fr/tel-00906029/), 
-  [Reproducible](https://rcdata.nau.edu/genomic-ml/public_html/papers/2012-11-20-PhD-thesis/HOCKING-phd-thesis.tgz).
-
-### 2011
-
-- Hocking TD, Joulin A, Bach F, Vert J-P. Clusterpath: an Algorithm
-  for Clustering using Convex Fusion Penalties.  International
-  Conference on Machine Learning
-  (ICML), 2011. [pdf](http://www.icml-2011.org/papers/419_icmlpaper.pdf),
-  [video](http://techtalks.tv/talks/clusterpath-an-algorithm-for-clustering-using-convex-fusion-penalties/54405/).
-  [Software](https://r-forge.r-project.org/scm/?group_id=1090),
-  [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/?root=clusterpath). Cited
-  by Genevera Allen who showed interactive visualizations in her
-  [Ihaka lecture](https://www.youtube.com/watch?v=2g-akN6q8aI).
-
-### 2010
-
-- Gautier M, Hocking TD, Foulley JL. A Bayesian outlier criterion to
-  detect SNPs under selection in large data sets.  PloS ONE 5 (8),
-  e11913
-  (2010). [journal](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0011913).
-
-### 2008
-
-- Doyon Y, McCammon JM, Miller JC, Faraji F, Ngo C, Katibah GE, Amora
-  R, Hocking TD, Zhang L, Rebar EJ, Gregory PD, Urnov FD, Amacher
-  SL. Heritable targeted gene disruption in zebrafish using designed
-  zinc-finger nucleases.  Nature biotechnology 26 (6), 702-70
-  (2008). [pubmed](http://www.ncbi.nlm.nih.gov/pubmed/18500334).
-
+|Figure                                                                                  |Published   |Authors                                                                                                                                                                                                                                                                                                                                                                                                                         |Title                                                                                                                     |Venue                                                                                                                                                      |Links                                                                                                 |
+|:---------------------------------------------------------------------------------------|:-----------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------|
+|<img src="/assets/img/publications/thumb/Hocking2024soak.png" width="150" />            |In progress |Bodine CS, Thibault G, Arellano PN, Shenkin AF, Lindly O, Hocking TD                                                                                                                                                                                                                                                                                                                                                            |SOAK: Same/Other/All K-fold cross-validation for estimating similarity of patterns in data subsets                        |In progress                                                                                                                                                |[Software](https://github.com/tdhock/mlr3resampling), [Reproducible](https://github.com/tdhock/cv-same-other-paper)|
+|<img src="/assets/img/publications/thumb/Fowler2024line.png" width="150" />             |In progress |Fowler J, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                            |Efficient line search for optimizing Area Under the ROC Curve in gradient descent                                         |In progress                                                                                                                                                |[Talk announcement for JSM'23 Toronto](https://ww2.aievolution.com/JSMAnnual/index.cfm?do=ev.viewEv&ev=2810), [Video of talk at Université Laval July 2023](https://www.youtube.com/watch?v=22ODpDTZ4VE), [Slides PDF](https://github.com/tdhock/max-generalized-auc/blob/master/HOCKING-slides-toronto.pdf), [source](https://github.com/tdhock/max-generalized-auc/#4-may-2023)|
+|<img src="/assets/img/publications/thumb/Hocking2024binsegRcpp.png" width="150" />      |In progress |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |Comparing binsegRcpp with other implementations of binary segmentation for changepoint detection                          |In progress                                                                                                                                                |[Reproducible](https://github.com/tdhock/binseg-model-selection), [Software](https://github.com/tdhock/binsegRcpp)|
+|<img src="/assets/img/publications/thumb/Hocking2024finite.png" width="150" />          |In progress |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |Finite Sample Complexity Analysis of Binary Segmentation                                                                  |In progress                                                                                                                                                |[Reproducible](https://github.com/tdhock/binseg-model-selection), [Software](https://github.com/tdhock/binsegRcpp)|
+|<img src="/assets/img/publications/thumb/Hocking2024hmm.png" width="150" />             |In progress |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |Teaching Hidden Markov Models Using Interactive Data Visualization                                                        |In progress                                                                                                                                                |[Reproducible](https://github.com/tdhock/2023-08-unsupervised-learning/blob/main/slides/07-hidden-markov-models.Rmd), [Slides](https://github.com/tdhock/2023-08-unsupervised-learning/blob/main/slides/07-hidden-markov-models.pdf)|
+|<img src="/assets/img/publications/thumb/Hocking2024mlr3resampling.png" width="150" />  |In progress |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |mlr3resampling: an R implementation of cross-validation for comparing models learned using different train subsets        |In progress                                                                                                                                                |[Software](https://github.com/tdhock/mlr3resampling)                                                  |
+|<img src="/assets/img/publications/thumb/Hocking2024autism.png" width="150" />          |In progress |Sutherland V, Hocking TD, Lindly O                                                                                                                                                                                                                                                                                                                                                                                              |Interpretable machine learning algorithms for understanding factors related to childhood autism                           |In progress                                                                                                                                                |[Reproducible](https://github.com/tdhock/2024-01-ml-for-autism)                                       |
+|                                                                                        |In progress |Thibault G, Hocking TD, Achim A                                                                                                                                                                                                                                                                                                                                                                                                 |Predicting forest burn from satellite image data                                                                          |In progress                                                                                                                                                |                                                                                                      |
+|<img src="/assets/img/publications/thumb/Truong2024circular.png" width="150" />         |In progress |Truong C, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                            |Efficient change-point detection for multivariate circular data                                                           |In progress                                                                                                                                                |[Reproducible](https://github.com/tdhock/angular-change-paper), [Software](https://github.com/tdhock/geodesichange)|
+|<img src="/assets/img/publications/thumb/Nguyen2024penalty.png" width="150" />          |In progress |Nguyen T, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                            |Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization                                          |Preprint arXiv:2408.00856                                                                                                                                  |[Preprint](https://arxiv.org/abs/2408.00856)                                                          |
+|                                                                                        |In progress |Gurney K, Aslam B, Dass P, Gawuc L, Hocking TD, Barber JJ, Kato A                                                                                                                                                                                                                                                                                                                                                               |Assessment of the Climate Trace global powerplant CO2 emissions                                                           |Under review at Environmental Research Letters                                                                                                             |                                                                                                      |
+|<img src="/assets/img/publications/thumb/Hocking2023functional.png" width="150" />      |In progress |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |Why does functional pruning yield such fast algorithms for optimal changepoint detection?                                 |In progress                                                                                                                                                |Invited talk for TRIPODS seminar [video](https://arizona.hosted.panopto.com/Panopto/Pages/Viewer.aspx?id=4e87c8d0-96d2-40d1-808c-ad16014c6962), [slides](https://github.com/tdhock/functional-pruning-theory#readme), [IEEE NJACS](https://events.vtools.ieee.org/m/280515), [ASU West ML Day](https://newcollege.asu.edu/machine-learning-day-1)|
+|<img src="/assets/img/publications/thumb/Rust2023pairs.png" width="150" />              |In progress |Rust KR, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                             |A Log-linear Gradient Descent Algorithm for Unbalanced Binary Classification using the All Pairs Squared Hinge Loss       |Preprint arXiv:2302.11062                                                                                                                                  |[Preprint](https://arxiv.org/abs/2302.11062)                                                          |
+|<img src="/assets/img/publications/thumb/Agyapong2023cv.png" width="150" />             |In progress |Agyapong D, Propster JR, Marks J, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                    |Cross-Validation for Training and Testing Co-occurrence Network Inference Algorithms                                      |Preprint arXiv:2309.15225, under review at BMC Bioinformatics                                                                                              |[Preprint](https://arxiv.org/abs/2309.15225)                                                          |
+|<img src="/assets/img/publications/thumb/Hocking2017changepoint.png" width="150" />     |In progress |Hocking TD, Killick R                                                                                                                                                                                                                                                                                                                                                                                                           |Introduction to optimal changepoint detection algorithms                                                                  |Tutorial at international useR 2017 conference, textbook in progress                                                                                       |[Conference](https://www.user2017.brussels/uploads/TobyHocking.html), [Book](https://github.com/tdhock/changepoint-book), [Reproducible](https://github.com/tdhock/change-tutorial)|
+|<img src="/assets/img/publications/thumb/Hocking2016interactive.png" width="150" />     |In progress |Hocking TD, Ekstrøm CT                                                                                                                                                                                                                                                                                                                                                                                                          |Understanding and Creating Interactive Graphics                                                                           |Tutorial at international useR 2016 conference, textbook in progress                                                                                       |[Conference](http://user2016.r-project.org/tutorials/13.html), [Manual](https://rcdata.nau.edu/genomic-ml/animint2-manual/Ch02-ggplot2.html), [Reproducible](https://github.com/tdhock/interactive-tutorial)|
+|<img src="/assets/img/publications/thumb/Hocking2015breakpointError.png" width="150" /> |In progress |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |A breakpoint detection error function for segmentation model selection and validation                                     |Preprint arXiv:1509.00368                                                                                                                                  |[Preprint](https://arxiv.org/abs/1509.00368), [Software](http://r-forge.r-project.org/scm/?group_id=1540), [Reproducible](https://github.com/tdhock/breakpointError-orig)|
+|<img src="/assets/img/publications/thumb/Venuto2014support.png" width="150" />          |In progress |Venuto D, Hocking TD, Sphanurattana L, Sugiyama M                                                                                                                                                                                                                                                                                                                                                                               |Support vector comparison machines                                                                                        |Preprint arXiv:1401.8008                                                                                                                                   |[Preprint](https://arxiv.org/abs/1401.8008), [Software](https://github.com/tdhock/rankSVMcompare), [Reproducible](https://github.com/tdhock/compare-paper)|
+|<img src="/assets/img/publications/thumb/Kaufman2024functional.png" width="150" />      |2024        |Kaufman JM, Stenberg AJ, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                             |Functional Labeled Optimal Partitioning                                                                                   |Journal of Computational and Graphical Statistics, DOI: 10 . 1080/10618600 . 2023 . 2293216                                                                |[DOI](https://doi.org/10.1080/10618600.2023.2293216), [Preprint](https://arxiv.org/abs/2210.02580), [Software](https://github.com/tdhock/FLOPART), [Reproducible](https://github.com/jkaufy/Flopart-Paper), [Preliminary code](https://github.com/tdhock/LabeledFPOP-paper)|
+|<img src="/assets/img/publications/thumb/Bodine2024mapping.png" width="150" />          |2024        |Bodine CS, Buscombe D, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                               |Automated River Substrate Mapping From Sonar Imagery With Machine Learning                                                |Journal of Geophysical Research: Machine Learning and Computation 1(3)                                                                                     |[DOI](https://doi.org/10.1029/2024JH000135), [Preprint](https://eartharxiv.org/repository/view/6448/), [Software](https://github.com/CameronBodine/PINGMapper)|
+|<img src="/assets/img/publications/thumb/Tao2024reply.png" width="150" />               |2024        |Tao F, Houlton BZ, Frey SD, Lehmann J, Manzoni S, Huang Y, Jiang L, Mishra U, Hungate BA, Schmidt MWI, Reichstein M, Carvalhais N, Ciais P, Wang Y-P, Ahrens B, Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin K, Vargas R, Yigini Y, Omuto C, Malik AA, Peralta G, Cuevas-Corona R, Paolo LED, Luotto I, Liao C, Liang Y-S, Saynes VS, Huang X, Luo Y                                                                            |Reply to: Model uncertainty obscures major driver of soil carbon                                                          |Nature 627(8002)                                                                                                                                           |[Publisher](https://www.nature.com/articles/s41586-023-07000-9), [Preprint](https://eartharxiv.org/repository/view/6125/)|
+|                                                                                        |2023        |Sweeney N, Xu C, Shaw JA, Hocking TD, Whitaker BM                                                                                                                                                                                                                                                                                                                                                                               |Insect Identification in Pulsed Lidar Images Using Changepoint Detection Algorithms                                       |2023 Intermountain Engineering, Technology and Computing (IETC)                                                                                            |[Publisher](https://ieeexplore.ieee.org/abstract/document/10152205)                                   |
+|<img src="/assets/img/publications/thumb/Hocking2023lopart.png" width="150" />          |2023        |Hocking TD, Srivastava A                                                                                                                                                                                                                                                                                                                                                                                                        |Labeled optimal partitioning                                                                                              |Computational Statistics 38                                                                                                                                |[Publisher](https://rdcu.be/cQ8qM), [Preprint](https://arxiv.org/abs/2006.13967), [Video](https://www.youtube.com/watch?v=lm_6_33zOWc), [Software](https://github.com/tdhock/LOPART), [Reproducible](https://github.com/tdhock/LOPART-paper)|
+|                                                                                        |2023        |Harshe K, Williams JR, Hocking TD, Lerner ZF                                                                                                                                                                                                                                                                                                                                                                                    |Predicting Neuromuscular Engagement to Improve Gait Training With a Robotic Ankle Exoskeleton                             |IEEE Robotics and Automation Letters 8(8)                                                                                                                  |[Publisher](https://ieeexplore.ieee.org/document/10172008)                                            |
+|<img src="/assets/img/publications/thumb/Hillman2023jmlr.png" width="150" />            |2023        |Hillman J, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                           |Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection                |Journal of Machine Learning Research 24(70)                                                                                                                |[Publisher](https://jmlr.org/papers/v24/21-0751.html), [Preprint](https://arxiv.org/abs/2107.01285), [Software](https://github.com/tdhock/aum), [Reproducible](https://github.com/tdhock/max-generalized-auc)|
+|<img src="/assets/img/publications/thumb/Runge2023jss.png" width="150" />               |2023        |Runge V, Hocking TD, Romano G, Afghah F, Fearnhead P, Rigaill G                                                                                                                                                                                                                                                                                                                                                                 |gfpop: An R Package for Univariate Graph-Constrained Change-Point Detection                                               |Journal of Statistical Software 106(6)                                                                                                                     |[Publisher](https://www.jstatsoft.org/article/view/v106i06), [Preprint](https://arxiv.org/abs/2002.03646), [Software](https://github.com/vrunge/gfpop), [GUI](https://github.com/julianstanley/gfpopgui), [Reproducible](https://github.com/vrunge/gfpop/blob/master/vignettes/applications.Rmd)|
+|<img src="/assets/img/publications/thumb/Tao2023nature.png" width="150" />              |2023        |Tao F, Huang Y, Hungate BA, Manzoni S, Frey SD, Schmidt MWI, Reichstein M, Carvalhais N, Ciais P, Jiang L, Lehmann J, Mishra U, Hugelius G, Hocking TD, Lu X, Shi Z, Viatkin K, Vargas R, Yigini Y, Omuto C, Malik AA, Perualta G, Cuevas-Corona R, Paolo LED, Luotto I, Liao C, Liang Y-S, Saynes VS, Huang X, Luo Y                                                                                                           |Microbial carbon use efficiency promotes global soil carbon storage                                                       |Nature 618                                                                                                                                                 |[Publisher](https://www.nature.com/articles/s41586-023-06042-3)                                       |
+|                                                                                        |2022        |Barr JR, Hocking TD, Morton G, Thatcher T, Shaw P                                                                                                                                                                                                                                                                                                                                                                               |Classifying Imbalanced Data with AUM Loss                                                                                 |2022 Fourth International Conference on Transdisciplinary AI (TransAI)                                                                                     |[Publisher](https://ieeexplore.ieee.org/document/9951523)                                             |
+|                                                                                        |2022        |Hocking TD, Barr JR, Thatcher T                                                                                                                                                                                                                                                                                                                                                                                                 |Interpretable linear models for predicting security vulnerabilities in source code                                        |2022 Fourth International Conference on Transdisciplinary AI (TransAI)                                                                                     |[Publisher](https://ieeexplore.ieee.org/document/9951610/)                                            |
+|                                                                                        |2022        |Barr JR, Shaw P, Abu-Khzam FN, Thatcher T, Hocking TD                                                                                                                                                                                                                                                                                                                                                                           |Graph embedding: A methodological survey                                                                                  |2022 fourth international conference on transdisciplinary AI (TransAI)                                                                                     |[Publisher](https://ieeexplore.ieee.org/document/9951469/)                                            |
+|                                                                                        |2022        |Chaves AP, Egbert J, Hocking T, Doerry E, Gerosa MA                                                                                                                                                                                                                                                                                                                                                                             |Chatbots Language Design: The Influence of Language Variation on User Experience with Tourist Assistant Chatbots          |ACM Trans. Comput.-Hum. Interact. 29(2)                                                                                                                    |[Publisher](https://dl.acm.org/doi/10.1145/3487193), [Preprint](https://arxiv.org/abs/2101.11089)     |
+|<img src="/assets/img/publications/thumb/Mihaljevic2022sparsemodr.png" width="150" />   |2022        |Mihaljevic JR, Borkovec S, Ratnavale S, Hocking TD, Banister KE, Eppinger JE, Hepp C, Doerry E                                                                                                                                                                                                                                                                                                                                  |SPARSEMODr: Rapidly simulate spatially explicit and stochastic models of COVID-19 and other infectious diseases           |Biology Methods and Protocols 7(1)                                                                                                                         |[Publisher](https://academic.oup.com/biomethods/advance-article/doi/10.1093/biomethods/bpac022/6680179), [Preprint](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1), [Software](https://github.com/NAU-CCL/SPARSEMODr)|
+|<img src="/assets/img/publications/thumb/Hocking22intro.png" width="150" />             |2022        |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |Introduction to machine learning and neural networks                                                                      |Chapter in Land Carbon Cycle Modeling: Matrix Approach, Data Assimilation, and Ecological Forecasting, edited by Yiqi Luo, published by Taylor and Francis |[Publisher](https://www.taylorfrancis.com/books/oa-edit/10.1201/9780429155659/land-carbon-cycle-modeling-yiqi-luo-benjamin-smith), [My chapter](https://raw.githubusercontent.com/tdhock/2020-yiqi-summer-school/master/HOCKING-chapter.pdf), [Reproducible](https://github.com/tdhock/2020-yiqi-summer-school#prepared-for-the-summer-school-4th-year-2021)|
+|                                                                                        |2022        |Vargovich J, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                         |Linear time dynamic programming for computing breakpoints in the regularization path of models selected from a finite set |Journal of Computational and Graphical Statistics 31(2)                                                                                                    |[Publisher](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2021.2000422), [Preprint](https://arxiv.org/abs/2003.02808), [Software](https://github.com/tdhock/penaltyLearning), [Reproducible](https://github.com/tdhock/changepoint-data-structure#source-code-for-figures-in-paper)|
+|                                                                                        |2022        |Barnwal A, Cho H, Hocking T                                                                                                                                                                                                                                                                                                                                                                                                     |Survival Regression with Accelerated Failure Time Model in XGBoost                                                        |Journal of Computational and Graphical Statistics 31(4)                                                                                                    |[Publisher](https://www.tandfonline.com/doi/full/10.1080/10618600.2022.2067548), [Preprint](https://arxiv.org/abs/2006.04920), [Software](https://github.com/dmlc/xgboost), [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html), [Video](https://www.youtube.com/watch?v=HuWRnzgGuIo), [Reproducible](https://github.com/avinashbarnwal/aftXgboostPaper/)|
+|<img src="/assets/img/publications/thumb/Hocking2022jss.png" width="150" />             |2022        |Hocking TD, Rigaill G, Fearnhead P, Bourque G                                                                                                                                                                                                                                                                                                                                                                                   |Generalized Functional Pruning Optimal Partitioning (GFPOP) for Constrained Changepoint Detection in Genomic Data         |Journal of Statistical Software 101(10)                                                                                                                    |[Publisher](https://www.jstatsoft.org/article/view/v101i10), [Software](https://github.com/tdhock/PeakSegDisk), [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper), [Slides](http://www.user2019.fr/static/pres/t257847.pdf), [Video](https://www.youtube.com/watch?v=XlC4WCqsbuI)|
+|                                                                                        |2021        |Kolla AC, Groce A, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                   |Fuzz Testing the Compiled Code in R Packages                                                                              |2021 IEEE 32nd International Symposium on Software Reliability Engineering (ISSRE)                                                                         |[Publisher](https://ieeexplore.ieee.org/document/9700272), [Software](https://github.com/akhikolla/RcppDeepState), [GitHub Action](https://github.com/FabrizioSandri/RcppDeepState-action), [Abstract](https://www.conftool.org/user2021/index.php?page=browseSessions&form_session=9#paperID123), [Video](https://www.youtube.com/watch?v=LXyruwSo2K0&t=245s), [Blog](https://akhikolla.github.io), [Results](https://akhikolla.github.io/packages-folders/)|
+|<img src="/assets/img/publications/thumb/Liehrmann2021chipseq.png" width="150" />       |2021        |Liehrmann A, Rigaill G, Hocking TD                                                                                                                                                                                                                                                                                                                                                                                              |Increased peak detection accuracy in over-dispersed ChIP-seq data with supervised segmentation models                     |BMC Bioinformatics 22(323)                                                                                                                                 |[Publisher](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-04221-5), [Reproducible](https://github.com/aLiehrmann/ChIP_SEQ_segmentation_paper), [Software](https://github.com/aliehrmann/crocs)|
+|<img src="/assets/img/publications/thumb/Fotoohinasab2021greedy.png" width="150" />     |2021        |Fotoohinasab A, Hocking T, Afghah F                                                                                                                                                                                                                                                                                                                                                                                             |A greedy graph search algorithm based on changepoint analysis for automatic QRS complex detection                         |Computers in Biology and Medicine 130                                                                                                                      |[Publisher](https://www.sciencedirect.com/science/article/pii/S0010482521000020), [Preprint](https://arxiv.org/abs/2004.13558)|
+|<img src="/assets/img/publications/thumb/Abraham2021gut.png" width="150" />             |2021        |Abraham AJ, Prys-Jones TO, De Cuyper A, Ridenour C, Hempson GP, Hocking T, Clauss M, Doughty CE                                                                                                                                                                                                                                                                                                                                 |Improved estimation of gut passage time considerably affects trait-based dispersal models                                 |Functional Ecology 35(4)                                                                                                                                   |[Publisher](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/1365-2435.13726)                  |
+|<img src="/assets/img/publications/thumb/Hocking2021reshaping.png" width="150" />       |2021        |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |Wide-to-tall Data Reshaping Using Regular Expressions and the nc Package                                                  |The R Journal 13(1)                                                                                                                                        |[Publisher](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html), [Software](https://github.com/tdhock/nc), [Reproducible](https://github.com/tdhock/nc-article)|
+|                                                                                        |2020        |Fotoohinasab A, Hocking T, Afghah F                                                                                                                                                                                                                                                                                                                                                                                             |A Graph-constrained Changepoint Detection Approach for ECG Segmentation                                                   |2020 42nd Annual International Conference of the IEEE Engineering in Medicine Biology Society (EMBC)                                                       |[Publisher](https://ieeexplore.ieee.org/document/9175333)                                             |
+|                                                                                        |2020        |Fotoohinasab A, Hocking T, Afghah F                                                                                                                                                                                                                                                                                                                                                                                             |A Graph-Constrained Changepoint Learning Approach for Automatic QRS-Complex Detection                                     |2020 54th Asilomar Conference on Signals, Systems, and Computers                                                                                           |[Publisher](https://ieeexplore.ieee.org/document/9443307), [Abstract](https://www2.securecms.com/Asilomar2020/Papers/ViewPapers.asp?PaperNum=1323),  [Preprint](https://arxiv.org/abs/2004.13558)|
+|<img src="/assets/img/publications/thumb/Hocking2020jmlr.png" width="150" />            |2020        |Hocking TD, Rigaill G, Fearnhead P, Bourque G                                                                                                                                                                                                                                                                                                                                                                                   |Constrained Dynamic Programming and Supervised Penalty Learning Algorithms for Peak Detection in Genomic Data             |Journal of Machine Learning Research 21(87)                                                                                                                |[Publisher](http://jmlr.org/papers/v21/18-843.html), [Preprint](https://arxiv.org/abs/1703.03352), [Software](https://github.com/tdhock/PeakSegOptimal), [Reproducible](https://github.com/tdhock/PeakSegFPOP-paper)|
+|<img src="/assets/img/publications/thumb/Hocking2020psb.png" width="150" />             |2020        |Hocking TD, Bourque G                                                                                                                                                                                                                                                                                                                                                                                                           |Machine Learning Algorithms for Simultaneous Supervised Detection of Peaks in Multiple Samples and Cell Types             |Proc. Pacific Symposium on Biocomputing                                                                                                                    |[Publisher](http://psb.stanford.edu/psb-online/proceedings/psb20/Hocking.pdf), [Software](https://github.com/tdhock/PeakSegJoint), [Preprint](https://arxiv.org/abs/1506.01286), [Reproducible](https://github.com/tdhock/PeakSegJoint-paper)|
+|<img src="/assets/img/publications/thumb/Jewell2019biostatistics.png" width="150" />    |2019        |Jewell SW, Hocking TD, Fearnhead P, Witten DM                                                                                                                                                                                                                                                                                                                                                                                   |Fast nonconvex deconvolution of calcium imaging data                                                                      |Biostatistics 21(4)                                                                                                                                        |[Pubmed](https://www.ncbi.nlm.nih.gov/pubmed/30753436)                                                |
+|                                                                                        |2019        |Sievert C, VanderPlas S, Cai J, Ferris K, Khan FUF, Hocking TD                                                                                                                                                                                                                                                                                                                                                                  |Extending ggplot2 for Linked and Animated Web Graphics                                                                    |Journal of Computational and Graphical Statistics 28(2)                                                                                                    |[Publisher](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367), [Software](https://github.com/tdhock/animint), [Reproducible](https://github.com/tdhock/animint-paper), [Interactive Figures](https://rcdata.nau.edu/genomic-ml/public_html/animint-paper-figures/)|
+|<img src="/assets/img/publications/thumb/Hocking2019regex.png" width="150" />           |2019        |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |Comparing namedCapture with other R packages for regular expressions                                                      |The R Journal 11(2)                                                                                                                                        |[Publisher](https://journal.r-project.org/archive/2019/RJ-2019-050/index.html), [Software](https://github.com/tdhock/namedCapture), [Reproducible](https://github.com/tdhock/namedCapture-article)|
+|<img src="/assets/img/publications/thumb/Depuydt2018genomic.png" width="150" />         |2018        |Depuydt P, Boeva V, Hocking TD, Cannoodt R, Ambros IM, Ambros PF, Asgharzadeh S, Attiyeh EF, Combaret Vé, Defferrari R, Fischer M, Hero B, Hogarty MD, Irwin MS, Koster J, Kreissman S, Ladenstein R, Lapouble E, Laureys Gè, London WB, Mazzocco K, Nakagawara A, Noguera R, Ohira M, Park JR, Pötschger U, Theissen J, Tonini GP, Valteau-Couanet D, Varesio L, Versteeg R, Speleman F, Maris JM, Schleiermacher G, Preter KD |Genomic amplifications and distal 6q loss: novel markers for poor survival in high-risk neuroblastoma patients            |JNCI: Journal of the National Cancer Institute 110(10)                                                                                                     |[Publisher](https://academic.oup.com/jnci/advance-article/doi/10.1093/jnci/djy022/4921185)            |
+|<img src="/assets/img/publications/thumb/Depuydt2018meta.png" width="150" />            |2018        |Depuydt P, Koster J, Boeva V, Hocking TD, Speleman F, Schleiermacher G, De Preter K                                                                                                                                                                                                                                                                                                                                             |Meta-mining of copy number profiles of high-risk neuroblastoma tumors                                                     |Scientific data 5(1)                                                                                                                                       |[Publisher](https://www.nature.com/articles/sdata2018240)                                             |
+|<img src="/assets/img/publications/thumb/Alirezaie2018clinpred.png" width="150" />      |2018        |Alirezaie N, Kernohan KD, Hartley T, Majewski J, Hocking TD                                                                                                                                                                                                                                                                                                                                                                     |ClinPred: Prediction Tool to Identify Disease-Relevant Nonsynonymous Single-Nucleotide Variants                           |The American Journal of Human Genetics 103(4)                                                                                                              |[DOI](https://doi.org/10.1016/j.ajhg.2018.08.005), [Software](http://github.com/tdhock/predict-clinically-pathogenic), [used in dbNSFP](https://sites.google.com/site/jpopgen/dbNSFP)|
+|<img src="/assets/img/publications/thumb/Drouin2017mmit.png" width="150" />             |2017        |Drouin A, Hocking T, Laviolette F                                                                                                                                                                                                                                                                                                                                                                                               |Maximum Margin Interval Trees                                                                                             |Advances in Neural Information Processing Systems 30                                                                                                       |[Publisher](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees), [Software](https://github.com/aldro61/mmit), [Reproducible](https://github.com/tdhock/mmit-paper), [Preprint](https://arxiv.org/abs/1710.04234), [Video](https://www.youtube.com/watch?v=sNrMH9z1rb4)|
+|<img src="/assets/img/publications/thumb/Hocking2017bioinfo.png" width="150" />         |2017        |Hocking TD, Goerner-Potvin P, Morin A, Shao X, Pastinen T, Bourque G                                                                                                                                                                                                                                                                                                                                                            |Optimizing ChIP-seq peak detectors using visual labels and supervised machine learning                                    |Bioinformatics 33(4)                                                                                                                                       |[Pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27797775), [Software](https://github.com/tdhock/PeakError), [Reproducible](https://bitbucket.org/mugqic/chip-seq-paper), [Data](https://rcdata.nau.edu/genomic-ml/chip-seq-chunk-db/)|
+|<img src="/assets/img/publications/thumb/Maidstone2017optimal.png" width="150" />       |2017        |Maidstone R, Hocking T, Rigaill G, Fearnhead P                                                                                                                                                                                                                                                                                                                                                                                  |On optimal multiple changepoint algorithms for large data                                                                 |Statistics and Computing 27                                                                                                                                |[Publisher](https://link.springer.com/article/10.1007/s11222-016-9636-3), [Software](https://r-forge.r-project.org/R/?group_id=1851), [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/benchmark/?root=opfp)|
+|<img src="/assets/img/publications/thumb/Chicard2016cancer.png" width="150" />          |2016        |Chicard M, Boyault S, Colmet Daage L, Richer W, Gentien D, Pierron G, Lapouble E, Bellini A, Clement N, Iacono I, Bréjon Sé, Carrere M, Reyes Cé, Hocking T, Bernard V, Peuchmaur M, Corradini Nè, Faure-Conter Cé, Coze C, Plantaz D, Defachelles AS, Thebaud E, Gambart M, Millot Féé, Valteau-Couanet D, Michon J, Puisieux A, Delattre O, Combaret Vé, Schleiermacher G                                                     |Genomic Copy Number Profiling Using Circulating Free Tumor DNA Highlights Heterogeneity in Neuroblastoma                  |Clinical Cancer Research 22(22)                                                                                                                            |[Publisher](http://clincancerres.aacrjournals.org/content/early/2016/11/03/1078-0432.CCR-16-0500)     |
+|                                                                                        |2016        |Shimada K, Shimada S, Sugimoto K, Nakatochi M, Suguro M, Hirakawa A, Hocking TD, Takeuchi I, Tokunaga T, Takagi Y, Sakamoto A, Aoki T, Naoe T, Nakamura S, Hayakawa F, Seto M, Tomita A, Kiyoi H                                                                                                                                                                                                                                |Development and analysis of patient-derived xenograft mouse models in intravascular large B-cell lymphoma                 |Leukemia 30(7)                                                                                                                                             |[Pubmed](https://www.ncbi.nlm.nih.gov/pubmed/27001523)                                                |
+|<img src="/assets/img/publications/thumb/Hocking2015icml.png" width="150" />            |2015        |Hocking TD, Rigaill G, Bourque G                                                                                                                                                                                                                                                                                                                                                                                                |PeakSeg: constrained optimal segmentation and supervised penalty learning for peak detection in count data                |Proc. 32nd ICML                                                                                                                                            |[Publisher](http://proceedings.mlr.press/v37/hocking15.html), [Video](http://videolectures.net/icml2015_hocking_count_data/?q=hocking), [Software](https://github.com/tdhock/PeakSegDP), [Reproducible](https://github.com/tdhock/PeakSeg-paper)|
+|<img src="/assets/img/publications/thumb/Hocking2014bioinformatics.png" width="150" />  |2014        |Hocking TD, Boeva V, Rigaill G, Schleiermacher G, Janoueix-Lerosey I, Delattre O, Richer W, Bourdeaut F, Suguro M, Seto M, Bach F, Vert JP                                                                                                                                                                                                                                                                                      |SegAnnDB: interactive Web-based genomic segmentation                                                                      |Bioinformatics 30(11)                                                                                                                                      |[Pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24493034), [Software](https://github.com/tdhock/SegAnnDB), [Reproducible](https://gforge.inria.fr/scm/viewvc.php/breakpoints/webapp/applications-note/), [Preprint](https://hal.inria.fr/hal-00759129), [Package](https://r-forge.r-project.org/scm/?group_id=1541), [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/SegAnnot/inst/doc/?root=breakpoints)|
+|<img src="/assets/img/publications/thumb/Suguro2014cancer.png" width="150" />           |2014        |Suguro M, Yoshida N, Umino A, Kato H, Tagawa H, Nakagawa M, Fukuhara N, Karnan S, Takeuchi I, Hocking TD, Arita K, Karube K, Tsuzuki S, Nakamura S, Kinoshita T, Seto M                                                                                                                                                                                                                                                         |Clonal heterogeneity of lymphoid malignancies correlates with poor prognosis                                              |Cancer Sci 105(7)                                                                                                                                          |[Pubmed](http://www.ncbi.nlm.nih.gov/pubmed/24815991)                                                 |
+|<img src="/assets/img/publications/thumb/Hocking2013bioinformatics.png" width="150" />  |2013        |Hocking TD, Schleiermacher G, Janoueix-Lerosey I, Boeva V, Cappo J, Delattre O, Bach F, Vert J-P                                                                                                                                                                                                                                                                                                                                |Learning smoothing models of copy number profiles using breakpoint annotations                                            |BMC Bioinformatics 14(164)                                                                                                                                 |[Publisher](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-164), [Software](https://cran.r-project.org/src/contrib/Archive/bams/), [Reproducible](https://rcdata.nau.edu/genomic-ml/public_html/papers/2012-01-27-Breakpoint-annotation-model-smoothing/HOCKING-breakpoint-annotation-model-smoothing.tgz)|
+|<img src="/assets/img/publications/thumb/Hocking2013sustainable.png" width="150" />     |2013        |Hocking TD, Wutzler T, Ponting K, Grosjean P                                                                                                                                                                                                                                                                                                                                                                                    |Sustainable, Extensible Documentation Generation using inlinedocs                                                         |Journal of Statistical Software 54                                                                                                                         |[Publisher](https://www.jstatsoft.org/article/view/v054i06), [Software](https://cran.r-project.org/package=inlinedocs), [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/jss762/?root=inlinedocs)|
+|<img src="/assets/img/publications/thumb/Hocking2013icml.png" width="150" />            |2013        |Rigaill G, Hocking T, Vert J-P, Bach F                                                                                                                                                                                                                                                                                                                                                                                          |Learning sparse penalties for change-point detection using max margin interval regression                                 |Proc. 30th ICML                                                                                                                                            |[Publisher](http://proceedings.mlr.press/v28/hocking13.html), [Video](http://techtalks.tv/talks/learning-sparse-penalties-for-change-point-detection-using-max-margin-interval-regression/58208/), [Software](https://github.com/tdhock/penaltyLearning), [Reproducible](https://gforge.inria.fr/scm/viewvc.php/pruned-dp/?root=breakpoints)|
+|<img src="/assets/img/publications/thumb/Hocking2012phd.png" width="150" />             |2012        |Hocking TD                                                                                                                                                                                                                                                                                                                                                                                                                      |Learning algorithms and statistical software, with applications to bioinformatics                                         |PHD thesis, Ecole normale supérieure de Cachan                                                                                                             |[Publisher](https://tel.archives-ouvertes.fr/tel-00906029/), [Reproducible](https://rcdata.nau.edu/genomic-ml/public_html/papers/2012-11-20-PhD-thesis/HOCKING-phd-thesis.tgz)|
+|<img src="/assets/img/publications/thumb/Hocking2011clusterpath.png" width="150" />     |2011        |Hocking TD, Joulin A, Bach F, Vert J-P                                                                                                                                                                                                                                                                                                                                                                                          |Clusterpath an algorithm for clustering using convex fusion penalties                                                     |28th international conference on machine learning                                                                                                          |[Publisher](http://www.icml-2011.org/papers/419_icmlpaper.pdf), [Video](http://techtalks.tv/talks/clusterpath-an-algorithm-for-clustering-using-convex-fusion-penalties/54405/), [Software](https://r-forge.r-project.org/scm/?group_id=1090), [Reproducible](https://r-forge.r-project.org/scm/viewvc.php/tex/?root=clusterpath), [Cited in Ihaka lecture](https://www.youtube.com/watch?v=2g-akN6q8aI)|
+|<img src="/assets/img/publications/thumb/Gautier2010bayesian.png" width="150" />        |2010        |Gautier M, Hocking TD, Foulley J-L                                                                                                                                                                                                                                                                                                                                                                                              |A Bayesian outlier criterion to detect SNPs under selection in large data sets                                            |PLoS one 5(8)                                                                                                                                              |[Publisher](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0011913)                 |
+|<img src="/assets/img/publications/thumb/Doyon2008heritable.png" width="150" />         |2008        |Doyon Y, McCammon JM, Miller JC, Faraji F, Ngo C, Katibah GE, Amora R, Hocking TD, Zhang L, Rebar EJ, Gregory PD, Urnov FD, Amacher SL                                                                                                                                                                                                                                                                                          |Heritable targeted gene disruption in zebrafish using designed zinc-finger nucleases                                      |Nature biotechnology 26(6)                                                                                                                                 |[Pubmed](http://www.ncbi.nlm.nih.gov/pubmed/18500334)                                                 |
 
 

@@ -1,0 +1,147 @@
+---
+layout: page
+permalink: /publications/
+title: Publications
+description: Peer-reviewed papers and preprints with links to code and data
+---
+
+- My pages on
+  [Google Scholar](https://scholar.google.ca/citations?user=c83d8tgAAAAJ)
+  and
+  [Mathematics Genealogy Project](https://www.genealogy.math.ndsu.nodak.edu/id.php?id=224469).
+- Peer review notice: in addition to peer-reviewed journals, I publish
+  papers at machine learning conferences such as ICML and NeurIPS, which
+  have double-blind peer reviews, and only accept about 20% of
+  submitted papers.
+- Reproducible Research notice: a "Reproducible" link for each paper below
+  provides source code and data that I used to perform the analysis and make
+  the figures/tables.
+- Software notice: a "Software" link for each paper below provides a software
+  package with a reference implementation of the algorithms described
+  in our paper. See also my [Software](https://tdhock.github.io/software/) page.
+- Please download my [TDH-refs.bib](/assets/TDH-refs.bib) BibTeX
+  citation database, and use it to cite my papers. This is the file
+  that was used to generate the list of publications below.
+
+```{r Ropts, echo=FALSE}
+if(FALSE){
+  knitr::knit("publications.Rmd")
+}
+refs.bib <- "../assets/TDH-refs.bib"
+refs.vec <- readLines(refs.bib)
+at.lines <- grep("^@", refs.vec, value=TRUE)
+refs.dt <- nc::capture_all_str(
+  refs.vec,
+  "@",
+  type="[^{]+", tolower,
+  "[{]",
+  ref="[^,]+",
+  ",\n",
+  fields="(?:.*\n)+?.*",
+  "[}]\\s*(?:$|\n)")
+eq.lines <- grep("=", refs.vec, value=TRUE)
+strip <- function(x)gsub("^\\s*|,\\s*$", "", gsub('[{}"]', "", x))
+field.pattern <- list(
+  "\\s*",
+  variable="[^= ]+", tolower,
+  "\\s*=",
+  value=".*", strip)  
+refs.fields <- refs.dt[, nc::capture_all_str(
+  fields, field.pattern),
+  by=.(type, ref)]
+suppressPackageStartupMessages(library(data.table))#for dcast
+refs.wide <- dcast(
+  refs.fields, type + ref ~ variable
+)[
+, venue := fcase(
+  type=="article", paste0(
+    journal, ifelse(
+      is.na(volume),
+      paste0(", DOI: ", gsub("[.]", " . ", doi)),
+      paste0(
+        " ",
+        volume,
+        ifelse(is.na(number), "", sprintf("(%s)", number))
+      )
+    )
+  ),
+  type=="inproceedings", booktitle,
+  type=="incollection", sprintf("Chapter in %s, edited by %s, published by %s", booktitle, editor, publisher),
+  type=="phdthesis", paste("PHD thesis,", school),
+  type=="unpublished", note
+)]
+alt.pattern <- nc::alternatives_with_shared_groups(
+  family="[A-Z][^,]+",
+  given="[^,]+",
+  list("^", given, " ", family, "$"),
+  list("^", family, ", ", given, "$"))
+authors <- refs.wide[, {
+  complete <- strsplit(author, split=" and ")[[1]]
+  data.table(complete, nc::capture_first_vec(
+    complete,
+    alt.pattern,
+    nomatch.error=FALSE))
+}, by=ref
+][
+, abbrev := gsub("[a-z. ]", "", given)
+][
+, show := ifelse(is.na(family), complete, paste(family, abbrev))
+][]
+no.family <- authors[is.na(family)]
+if(nrow(no.family)){
+  print(no.family)
+  stop("some names not parsed")
+}
+abbrev.dt <- authors[, .(
+  authors_abbrev=paste(show, collapse=", ")
+), by=ref]
+not.mine <- abbrev.dt[!grepl("Hocking",authors_abbrev)]
+if(nrow(not.mine)){
+  print(not.mine)
+  stop("I am not author")
+}
+type2long <- c(
+  unpublished="in progress",
+  article="journal paper",
+  incollection="book chapter",
+  inproceedings="conference paper",
+  phdthesis="PHD thesis")
+knitr::kable(refs.wide[, .(count=.N), by=.(Type=type2long[type])][order(-count)])
+for(large.png in Sys.glob("../assets/img/publications/*.png")){
+  thumb.png <- file.path(
+    dirname(large.png),
+    "thumb",
+    basename(large.png))
+  if(!file.exists(thumb.png)){
+    dir.create(dirname(thumb.png))
+    convert.cmd <- paste("convert", large.png, "-scale 150", thumb.png)
+    print(convert.cmd)
+    system(convert.cmd)
+  }
+}
+knitr::kable(refs.wide[
+  abbrev.dt, on="ref"
+][, let(
+  heading = ifelse(type=="unpublished", "In progress", year),
+  citation = sprintf("- %s (%s). %s. %s. %s", authors_abbrev, year, title, venue, links),
+  figure.png = sprintf("/assets/img/publications/thumb/%s.png", ref)
+)][order(-heading, -year, venue, authors_abbrev), .(
+  Figure=ifelse(
+    file.exists(file.path("..", figure.png)),
+    sprintf('<img src="%s" width="150" />', figure.png),
+    ""),
+  Published=heading,
+  Authors=authors_abbrev,
+  Title=title,
+  Venue=venue,
+  Links=ifelse(is.na(links), "", links)
+)])
+```
+
+```{r eval=TRUE, echo=FALSE, results='hide'}
+cat(sprintf(
+  "I have several scientific contributions \\citep{%s}.",
+  paste(refs.wide[order(year), ref], collapse=",")),
+  file="../assets/citep.tex")
+system(paste("cd ../assets && rm -f TDH-refs.pdf && pdflatex TDH-refs && bibtex TDH-refs && pdflatex TDH-refs && pdflatex TDH-refs && evince TDH-refs.pdf &"))
+```
