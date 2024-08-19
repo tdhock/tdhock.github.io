@@ -29,7 +29,7 @@ permalink: /blog/:year/:title/
 #paginate_path: /blog/page:num/
 
 exclude:
-  _posts/*.Rmd
+  */*.Rmd
 
 text:
   pagination:
