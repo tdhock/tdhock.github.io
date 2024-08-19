@@ -261,16 +261,39 @@ abbrev.some[
 One advantage of this is that we can easily modify output formats.
 
 ```{r}
-some.out <- abbrev.some[, .(
-  figure=sprintf(
-    '<img src="/assets/img/publications/%s.png" width="150" />',
-    ref),
-  published=heading, authors_abbrev, title, venue, links)]
+for(large.png in Sys.glob("../assets/img/publications/*.png")){
+  thumb.png <- file.path(
+    dirname(large.png),
+    "thumb",
+    basename(large.png))
+  if(!file.exists(thumb.png)){
+    dir.create(dirname(thumb.png))
+    convert.cmd <- paste("convert", large.png, "-scale 150", thumb.png)
+    print(convert.cmd)
+    system(convert.cmd)
+  }
+}
+some.out <- abbrev.some[
+, figure.png := sprintf("/assets/img/publications/thumb/%s.png", ref)
+][, .(
+  figure=ifelse(
+    file.exists(file.path("..", figure.png)),
+    sprintf('<img src="%s" width="150" />', figure.png),
+    ""),
+  published=heading, authors_abbrev, title, venue,
+  links=ifelse(is.na(links), "", links)
+)]
 knitr::kable(some.out)
 ```
 
 The output above is a table with one row per publication, and an image column that shows a figure from the paper.
 The trick to getting that to display, is putting it in this repo, with a standard name, based on the bib file key.
+
+The code below checks for missing figures.
+
+```{r}
+some.out[figure=='', title]
+```
 
 ## Make sure pdflatex likes it
 
