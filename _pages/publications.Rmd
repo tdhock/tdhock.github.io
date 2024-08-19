@@ -144,7 +144,7 @@ knitr::kable(refs.wide[
 
 ```{r eval=TRUE, echo=FALSE, results='hide'}
 cat(paste0(
-  ##{%s} causes jekyll Liquid syntax error (line 136): Tag '{%' was not properly terminated with regexp: /\%\}/ in _pages/publications.Rmd
+  ##{ %s } without spaces causes jekyll Liquid syntax error (line 136): Tag '{ %' was not properly terminated with regexp: /\%\}/ in _pages/publications.Rmd and with spaces causes latex/bibtex to error, so we use paste0 instead of sprintf.
   "I have several scientific contributions \\citep{",
   paste(refs.wide[order(year), ref], collapse=","),
   "}."),
