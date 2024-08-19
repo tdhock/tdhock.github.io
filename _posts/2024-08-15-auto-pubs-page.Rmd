@@ -159,7 +159,7 @@ refs.wide[, venue := fcase(
   ),
   type=="inproceedings", booktitle,
   type=="incollection", sprintf("Chapter in %s, edited by %s, published by %s", booktitle, editor, publisher),
-  type=="phdthesis", school,
+  type=="phdthesis", paste("PHD thesis,", school),
   type=="unpublished", note
 )][, .(type, year, venue=substr(venue, nchar(venue)-30,nchar(venue)))]
 ```
@@ -243,7 +243,7 @@ The code below joins the authors back to the original table, then outputs markdo
 abbrev.wide <- refs.wide[
   abbrev.dt, on="ref"
 ][, let(
-  heading = ifelse(type=="unpublished", "In Progress", year),
+  heading = ifelse(type=="unpublished", "In progress", year),
   citation = sprintf("- %s (%s). %s. %s. %s", authors_abbrev, year, title, venue, links)
 )][order(-heading, -year, authors_abbrev)]
 abbrev.some <- abbrev.wide[unique(heading)[1:3], .SD[1:2], on="heading", by=heading]
@@ -276,12 +276,15 @@ for(large.png in Sys.glob("../assets/img/publications/*.png")){
 some.out <- abbrev.some[
 , figure.png := sprintf("/assets/img/publications/thumb/%s.png", ref)
 ][, .(
-  figure=ifelse(
+  Figure=ifelse(
     file.exists(file.path("..", figure.png)),
     sprintf('<img src="%s" width="150" />', figure.png),
     ""),
-  published=heading, authors_abbrev, title, venue,
-  links=ifelse(is.na(links), "", links)
+  Published=heading,
+  Authors=authors_abbrev,
+  Title=title,
+  Venue=venue,
+  Links=ifelse(is.na(links), "", links)
 )]
 knitr::kable(some.out)
 ```
