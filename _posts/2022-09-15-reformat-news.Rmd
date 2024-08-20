@@ -55,22 +55,30 @@ parse the news items into a data table...
 change.dt <- nc::capture_all_str(
   NEWS.lines,
   version="[0-9]+[.][0-9]+(?:[.][0-9]+)?",
-  "\\s*\n",
+  author=".*",
+  "\n\n",
   changes="(?:[^0-9].*\n*)*")
-change.dt[, .(version, changes=substr(changes,1,50))]
+change.dt[, .(version, author, changes=substr(changes,1,50))]
 ```
 
 ...then convert them into the correct format,
 
 ```{r}
-change.dt[, change.list := strsplit(changes, "\n\n")]
-change.dt[, new.str := sapply(change.list, function(change.vec){
+change.dt[
+, change.list := strsplit(
+  paste0(
+    ifelse(author=="", "", sprintf("Author:%s\n\n", author)),
+    changes),
+  "\n\n")
+][
+, new.str := sapply(change.list, function(change.vec){
   no.newline <- gsub("\n", " ", change.vec)
   with.dash <- paste0("- ", no.newline)
   paste(with.dash, collapse="\n")
-})]
-change.dt[, new.block := sprintf(
-  "Changes in version %s\n\n%s", version, new.str)]
+})][
+, new.block := sprintf(
+  "Changes in version %s\n\n%s", version, new.str
+)]
 out.str <- paste(change.dt$new.block, collapse="\n\n")
 cat(out.str)
 ```
