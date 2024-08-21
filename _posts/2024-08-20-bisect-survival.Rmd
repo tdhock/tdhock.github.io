@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   fig.path=paste0(fig.path, "/"),
   fig.width=10,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
+  fig.height=5)
 options(width=120)
 if(FALSE){
   knitr::knit(paste0(post.id, ".Rmd"))
@@ -33,7 +33,7 @@ doctors who were interested in classifying tumors based on their DNA
 copy number profiles. These data sets are like time series, but
 measured along space (positions on a chromosome), rather than time. If
 there are abrupt changes within a sequence, then the tumor is said to
-have ``segmental copy number alternations,'' and is likely to require
+have "segmental copy number alternations," and is likely to require
 more aggressive treatment (compared to a more benign sub-type in which
 these abrupt changes are not present).
 
@@ -108,35 +108,43 @@ linear models, as described in the recent [JSS
 paper](https://www.jstatsoft.org/article/view/v106i01).
 
 Another supervised change-point detection algorithm, similar to our
-ICML'13 paper, was proposed by Charles Truong in EUSIPCO'17, but there
-is no R package that implements this method.
+ICML'13 paper, was proposed by Truong et al in
+[EUSIPCO'17](http://laurentoudre.fr/publis/TOV-EUSIPCO-17.pdf), but
+there is no R package that implements this method.
 
 ## Issue
 
-Back in 2017 when I was preparing the tutorial for useR, I ran into an
-[issue](https://github.com/therneau/survival/issues/8) about `survreg`
-not converging when all train labels are censored. After that fix,
+Back in 2017 when I was preparing the tutorial for useR, I ran into an issue, which I posted as
+[survival/issue#8](https://github.com/therneau/survival/issues/8) about `survreg`
+not converging when all train labels are censored. In the case of my data, all outputs
+are censored, which is normal for supervised change-point problems,
+but rather unusual for survival analysis (where there is typically at
+least one observation that is not censored). Because the "all
+censored" train data is a rather niche use case for the survival AFT
+model, I suppose it is not very well tested, so it is normal to expect
+issues with such code. 
+
+After that issue was eventually fixed, 
 survreg worked well enough so that I could use it to prepare [my
 useR'17 tutorial on supervised change-point
 detection](https://tdhock.github.io/change-tutorial/Supervised.html). 
-
 Recently, a GSOC student tried reproducing some code from that time. 
 
-* The related [issue#1](https://github.com/tdhock/change-tutorial/issues/1) begin with Nhi observing the error "Supplied 2 items to be assigned to 1 items."
+* The related issue, [change-tutorial/issue#1](https://github.com/tdhock/change-tutorial/issues/1) begins with Nhi observing the error "Supplied 2 items to be assigned to 1 items."
 * Using current R-4.4.1, I re-ran [my old R
   code from 2017](https://github.com/tdhock/change-tutorial/blob/efbec88d4d7e77f16f0cdc8a56ea17709b576852/figure-regression-interactive-some.R),
   which gave me warning "Ran out of iterations and did not converge" and
   error "pred must be a numeric vector or matrix with neither missing
   nor infinite entries" and saw that the problem was that survreg is
-  returning missing values for the learned coefficients.
+  returning missing values for the learned coefficients (where finite values were expected in the previous code).
 * I made a copy of the R code, and edited it to make [a minimal
   reproducible example which demonstrates the bug](
   https://github.com/tdhock/change-tutorial/blob/master/figure-regression-interactive-some-bug.R).
-  That code runs survreg with three small data sets (few dozen data each).
-  Running that code with `survival_3.6-4` I get
-  * extra.id=0 NA coefs, convergence failed. Here I expected finite coefs, as I observed in 2017.
-  * extra.id=13 finite coefs, converged.
-  * extra.id=120 finite coefs, convergence failed.
+  That code runs survreg with three small data sets, each identified with a different value of `extra.id`, and each with a few dozen data/rows.
+  Running that code with `survival_3.6-4` I get the following results, for the data with:
+  * `extra.id=0`: NA coefs, convergence failed. Here I expected finite coefs, as I observed in 2017, after Terry fixed [survival/issue#8](https://github.com/therneau/survival/issues/8).
+  * `extra.id=13`: finite coefs, converged. This was an expected result.
+  * `extra.id=120`: finite coefs, convergence failed. This was also unexpected, because it is inconsistent with the other two data sets above.
 * I filed
   [survival/issue#270](https://github.com/therneau/survival/issues/270),
   which includes a figure that illustrates the issue, along with the
@@ -163,19 +171,12 @@ Another work-around involves understanding how the survreg
 optimization algorithm works. The survreg algorithm uses gradient
 descent, which optimizes the coefficients to fit the train data
 (maximize AFT log likelihood). Using the default `scale=0` means to
-also optimize the scale parameter. In the case of my data, all outputs
-are censored, which is normal for supervised change-point problems,
-but rather unusual for survival analysis (where there is typically at
-least one observation that is not censored). Because the "all
-censored" train data is a rather niche use case for the survival AFT
-model, I suppose it is not very well tested, so it is normal to expect
-issues with such code. With the case of small data which are all
-censored, there is another issue: the data may be separable, which
+also optimize the scale parameter. With the case of small data which are all
+censored, there is an issue with optimizing the scale: the data may be separable, which
 means there is a regression line that correctly predicts inside of
 every interval label in the train set. In that case, decreasing the
 scale parameter (subject to the constraint that it must stay positive)
-will always increase the log likelihood, resulting in an optimization
-problem that is singular (undefined solution). To work-around that
+will always increase the log likelihood. To work-around that
 issue, you could use `survreg(scale=1)` which means to fix the scale
 parameter to the (relatively large) value of 1, instead of optimizing
 it in gradient descent. 
@@ -434,12 +435,18 @@ model.df <- rbind(
   data.frame(pkg="penaltyLearning", scale=1),
   data.frame(pkg="survreg", scale=0),
   data.frame(pkg="survreg", scale=1))
+common.ids <- c(1, 4, 6, 8, 10, 11)
 dot.df.list <- list()
 coef.df.list <- list()
 for(extra.id in c(0,13,120)){
-  sub.df <- subset(full.df, id %in% c(1, 4, 6, 8, 10, 11, extra.id))
+  sub.df <- transform(
+    subset(full.df, id %in% c(common.ids, extra.id)),
+    type=ifelse(id %in% common.ids, "common", "extra"))
+  X <- with(sub.df, cbind(1, feature))
+  print(chol(t(X) %*% X))
   for(model.i in 1:nrow(model.df)){
     model.row <- model.df[model.i,]
+    rownames(model.row) <- NULL
     model.fun <- model.fun.list[[model.row$pkg]]
     this.df <- data.frame(extra.id, model.row, warn.text="")
     set.warn <- function(w)this.df$warn.text <<- w$message
@@ -450,11 +457,12 @@ for(extra.id in c(0,13,120)){
     }
     withCallingHandlers(set.coefs(), warning=set.warn)
     coef.df.list[[paste(extra.id, model.i)]] <- this.df
-    dot.df.list[[paste(extra.id, model.i)]] <- with(sub.df, data.frame(
+    dot.df.list[[paste(extra.id, model.i)]] <- data.frame(
       extra.id, model.row,
-      rbind(
-        data.frame(limit="lo", output=lo, feature),
-        data.frame(limit="hi", output=hi, feature))))
+      with(sub.df, data.frame(feature, type, rbind(
+        data.frame(limit="lo", output=lo),
+        data.frame(limit="hi", output=hi))))
+    )
   }
 }
 dot.df <- subset(do.call(rbind, dot.df.list), is.finite(output))
@@ -482,14 +490,18 @@ ggplot()+
     data=coef.df)+
   facet_grid(pkg + scale ~ extra.id, labeller=label_both)+
   geom_point(aes(
-    feature, output, fill=limit),
+    feature, output, fill=limit, color=type),
     shape=21,
     data=dot.df)+
+  scale_color_manual(values=c(
+    common="white",
+    extra="black"))+
   geom_text(aes(
-    -3.2, 3, label=sprintf(
-      "slope=%.2f\nintercept=%.2f\n%s", slope, intercept, warn.text)),
+    -3.2, 5.5, label=sprintf(
+      "slope=%.2f intercept=%.2f\n%s", slope, intercept, warn.text)),
     vjust=1,
     hjust=0,
+    size=3,
     data=coef.df)
 ```
 
@@ -528,7 +540,7 @@ out.csv <- gsub("[ ()]", "_", paste0(
   "survival",
   packageVersion("survival"),
   ".csv"))
-dir.create(dirname(out.csv))
+dir.create(dirname(out.csv), showWarnings = FALSE)
 write.csv(coef.df, out.csv, row.names=FALSE)
 ```
 
@@ -635,8 +647,9 @@ continuity between versions -- there is one change that introduced the
 bug). In our case there were 20 versions, so we test the one in the
 middle, now there are only 10, next step there are only 5, then 3 (or
 2), then 2 (or 1), then finally only one left to test. So we test 7
-versions using this algorithm, which is much faster than 20 which we
-would need for linear search.
+versions using this algorithm (asymptotically log2 of the number of
+versions in between known good/old and bad/new versions), which is much
+faster than 20 versions which we would need to test using linear search.
 
 Now that we have found the CRAN release version, we may ask, what git
 commit is responsible? We can use the `git bisect` command, as I did
@@ -672,7 +685,7 @@ HEAD est maintenant sur 3f8f3e9 Add trust regions to coxph.
 ```
 
 The output above shows the commits we can use, old=dbf56fa,
-new=3f8f3e9. The code below compute the bisect.
+new=3f8f3e9. The code below computes the bisect.
 
 ```
 (base) tdhock@tdhock-MacBook:~/R/survival$ git bisect start
@@ -744,9 +757,9 @@ index d4da378..edc9ad5 100644
 
 The code above shows that a typo `coeffients` was changed to
 `coefficients`, in a line that assigns `NA`, which explains why we see
-missing values in survreg output (when singular). This may actually be
-interpreted as a feature/fix, rather than a bug, because there is
-technically no solution when data are separable/problem is singular.
+missing values in survreg output (when singular). Does singular mean the same as separable? This may actually be
+interpreted as a feature/fix, rather than a bug, because the scale of the solution
+is undefined when the data are separable (several different scale parameters have the same max likelihood).
 
 ## Conclusion
 
@@ -760,8 +773,8 @@ coefficients, and the scatterplot appears to be separable. It seems to
 me that this is inconsistent with the results we observe for
 `extra.id=0` (no convergence, missing coefficients). I would suggest
 that `survreg` should return missing values for both cases, or finite
-values for both cases. More generally, if the data are separable, and
-the problem is singular, then it is reasonable for `survreg` to return
-missing coefficients. On the other hand, a warning is sufficient to
-alert the user, and returning finite coefficients (last iteration of
-gradient descent before giving up) still may be useful to the user.
+values for both cases. More generally, if the data are separable, then
+it is reasonable for `survreg` to return missing coefficients. On the
+other hand, a warning is sufficient to alert the user, and returning
+finite coefficients (last iteration of gradient descent before giving
+up) still may be useful to the user.
