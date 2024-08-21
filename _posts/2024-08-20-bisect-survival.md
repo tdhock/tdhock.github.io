@@ -458,12 +458,16 @@ model.fun.list <- list(
       Surv(lo, hi, type="interval2") ~ feature,
       scale=sc,
       dist="gaussian"))
-    coef(fit)
+    w <- coef(fit)
+    w["scale.out"] <- fit$scale
+    w
   },
   penaltyLearning=function(train.df, sc){
     fit <- with(train.df, penaltyLearning::IntervalRegressionUnregularized(
       cbind(feature), cbind(lo,hi), margin=sc))
-    coef(fit)[,"0"]
+    w <- coef(fit)[,"0"]
+    w["scale.out"] <- sc
+    w
   })
 ```
 
@@ -498,6 +502,7 @@ for(extra.id in c(0,13,120)){
       weight.vec <- model.fun(sub.df, model.row$scale)
       this.df$intercept <<- weight.vec[["(Intercept)"]]
       this.df$slope <<- weight.vec[["feature"]]
+      this.df$scale.out <<- weight.vec[["scale.out"]]
     }
     withCallingHandlers(set.coefs(), warning=set.warn)
     coef.df.list[[paste(extra.id, model.i)]] <- this.df
@@ -542,16 +547,16 @@ dot.df <- subset(do.call(rbind, dot.df.list), is.finite(output))
 ```
 
 ```
-##       extra.id             pkg scale                                  warn.text intercept     slope
-## 0 1          0 penaltyLearning     1                                             4.509705 1.5654255
-## 0 2          0         survreg     0 Ran out of iterations and did not converge        NA        NA
-## 0 3          0         survreg     1                                             4.163601 1.3984400
-## 13 1        13 penaltyLearning     1                                             3.287217 1.0413089
-## 13 2        13         survreg     0                                             2.580365 0.7560768
-## 13 3        13         survreg     1                                             2.908041 0.8542918
-## 120 1      120 penaltyLearning     1                                             3.914680 1.3137750
-## 120 2      120         survreg     0 Ran out of iterations and did not converge  5.990912 2.1580340
-## 120 3      120         survreg     1                                             3.583528 1.1475425
+##       extra.id             pkg scale                                  warn.text intercept     slope   scale.out
+## 0 1          0 penaltyLearning     1                                             4.509705 1.5654255 1.000000000
+## 0 2          0         survreg     0 Ran out of iterations and did not converge        NA        NA 0.002830596
+## 0 3          0         survreg     1                                             4.163601 1.3984400 1.000000000
+## 13 1        13 penaltyLearning     1                                             3.287217 1.0413089 1.000000000
+## 13 2        13         survreg     0                                             2.580365 0.7560768 0.227619730
+## 13 3        13         survreg     1                                             2.908041 0.8542918 1.000000000
+## 120 1      120 penaltyLearning     1                                             3.914680 1.3137750 1.000000000
+## 120 2      120         survreg     0 Ran out of iterations and did not converge  5.990912 2.1580340 0.041260001
+## 120 3      120         survreg     1                                             3.583528 1.1475425 1.000000000
 ```
 
 The result above is a table with one row per model and data set, with columns
@@ -584,7 +589,7 @@ ggplot()+
     extra="black"))+
   geom_text(aes(
     -3.2, 5.5, label=sprintf(
-      "slope=%.2f intercept=%.2f\n%s", slope, intercept, warn.text)),
+      "slope=%.2f intercept=%.2f scale=%.4f\n%s", slope, intercept, scale.out, warn.text)),
     vjust=1,
     hjust=0,
     size=3,

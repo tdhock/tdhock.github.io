@@ -415,12 +415,16 @@ model.fun.list <- list(
       Surv(lo, hi, type="interval2") ~ feature,
       scale=sc,
       dist="gaussian"))
-    coef(fit)
+    w <- coef(fit)
+    w["scale.out"] <- fit$scale
+    w
   },
   penaltyLearning=function(train.df, sc){
     fit <- with(train.df, penaltyLearning::IntervalRegressionUnregularized(
       cbind(feature), cbind(lo,hi), margin=sc))
-    coef(fit)[,"0"]
+    w <- coef(fit)[,"0"]
+    w["scale.out"] <- sc
+    w
   })
 ```
 
@@ -454,6 +458,7 @@ for(extra.id in c(0,13,120)){
       weight.vec <- model.fun(sub.df, model.row$scale)
       this.df$intercept <<- weight.vec[["(Intercept)"]]
       this.df$slope <<- weight.vec[["feature"]]
+      this.df$scale.out <<- weight.vec[["scale.out"]]
     }
     withCallingHandlers(set.coefs(), warning=set.warn)
     coef.df.list[[paste(extra.id, model.i)]] <- this.df
@@ -498,7 +503,7 @@ ggplot()+
     extra="black"))+
   geom_text(aes(
     -3.2, 5.5, label=sprintf(
-      "slope=%.2f intercept=%.2f\n%s", slope, intercept, warn.text)),
+      "slope=%.2f intercept=%.2f scale=%.4f\n%s", slope, intercept, scale.out, warn.text)),
     vjust=1,
     hjust=0,
     size=3,
