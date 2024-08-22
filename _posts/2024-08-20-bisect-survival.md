@@ -48,8 +48,11 @@ accurate, such as:
 To use these algorithms in practice for accurate detection, a model
 complexity parameter needs to be carefully chosen. That is either the
 number of segments (in the segment neighborhood method), or the
-penalty for each change (in the optimal partitioning method).  There
-are theoretical arguments that can be used to choose the model
+penalty for each change (in the optimal partitioning method).  
+
+![changing penalty OPART](https://arxiv.org/html/2408.00856v2/x1.png)
+
+There are theoretical arguments that can be used to choose the model
 complexity parameter (AIC or BIC for example), in the unsupervised
 setting (no labels which indicate presence/absence of change-points in
 particular regions of data sequences). However, when there are labels
@@ -59,8 +62,12 @@ it is much more accurate to use a supervised learning approach. The
 learning algorithm we proposed in that paper was called "max margin
 interval regression," which uses gradient descent with a linear model
 and a squared hinge loss, where the label/output used in training is
-an interval of good penalty values for each labeled data sequence. Our
-algorithm is implemented in the penaltyLearning R package:
+an interval of good penalty values for each labeled data sequence. 
+
+![interval regression](https://arxiv.org/html/2408.00856v2/x2.png)
+![squared hinge loss](https://arxiv.org/html/2408.00856v2/x3.png)
+
+Our algorithm is implemented in the penaltyLearning R package:
 `penaltyLearning::IntervalRegressionUnregularized` (un-regularized)
 and `penaltyLearning::IntervalRegressionCV` (degree of L1
 regularization chosen using cross-validation).
@@ -97,6 +104,10 @@ Another supervised change-point detection algorithm, similar to our
 ICML'13 paper, was proposed by Truong et al in
 [EUSIPCO'17](http://laurentoudre.fr/publis/TOV-EUSIPCO-17.pdf), but
 there is no R package that implements this method.
+
+Another study that my student, [Tung Nguyen](https://github.com/lamtung16), and I have been developing involves using a multi-layer perceptron model to predict the penalty value for the "optimal partitioning" algorithm: [Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization](https://arxiv.org/abs/2408.00856).
+
+![diagram](https://arxiv.org/html/2408.00856v2/x4.png)
 
 ## Issue
 
