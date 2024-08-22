@@ -48,18 +48,29 @@ accurate, such as:
 To use these algorithms in practice for accurate detection, a model
 complexity parameter needs to be carefully chosen. That is either the
 number of segments (in the segment neighborhood method), or the
-penalty for each change (in the optimal partitioning method).  There
+penalty for each change (in the optimal partitioning method). 
+The figure below, from [my recent arXiv paper with my PHD student Tung Nguyen](https://arxiv.org/abs/2408.00856), is a very nice demonstration about how the penalty parameter affects the number of segments.
+
+![changing penalty OPART](https://arxiv.org/html/2408.00856v2/x1.png)
+
+There
 are theoretical arguments that can be used to choose the model
 complexity parameter (AIC or BIC for example), in the unsupervised
 setting (no labels which indicate presence/absence of change-points in
 particular regions of data sequences). However, when there are labels
 available, our [ICML'13
 paper](https://proceedings.mlr.press/v28/hocking13.html) showed that
-it is much more accurate to use a supervised learning approach. The
+it is much more accurate to use a supervised learning approach (where accuracy is measured with respect to labels drawn as colored rectangles in the figure above). The
 learning algorithm we proposed in that paper was called "max margin
 interval regression," which uses gradient descent with a linear model
 and a squared hinge loss, where the label/output used in training is
-an interval of good penalty values for each labeled data sequence. Our
+an interval of good penalty values for each labeled data sequence (right figures below).
+This is similar to usual regression which uses the square loss (left figures below, again from [arXiv:2408.00856](https://arxiv.org/abs/2408.00856)).
+
+![interval regression](https://arxiv.org/html/2408.00856v2/x2.png)
+![squared hinge loss](https://arxiv.org/html/2408.00856v2/x3.png)
+
+Our
 algorithm is implemented in the penaltyLearning R package:
 `penaltyLearning::IntervalRegressionUnregularized` (un-regularized)
 and `penaltyLearning::IntervalRegressionCV` (degree of L1
@@ -93,10 +104,16 @@ new version of glmnet, which apparently can support all generalized
 linear models, as described in the recent [JSS
 paper](https://www.jstatsoft.org/article/view/v106i01).
 
-Another supervised change-point detection algorithm, similar to our
-ICML'13 paper, was proposed by Truong et al in
-[EUSIPCO'17](http://laurentoudre.fr/publis/TOV-EUSIPCO-17.pdf), but
-there is no R package that implements this method.
+Other supervised change-point algorithms similar to our
+ICML'13 paper, which are worth mentioning here:
+
+- Truong et al proposed an algorithm which learns based on labels that give the desired number of changes per sequence (rather than incomplete labels in regions), in
+  [EUSIPCO'17](http://laurentoudre.fr/publis/TOV-EUSIPCO-17.pdf), but
+  there is no R package that implements this method.
+- At [NeurIPS'17](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees) we proposed Max Margin Interval Trees, which generalizes the classic greedy CART algorithm of Breiman, to the case of interval censored outputs. [Code for R and Python on Github](https://github.com/aldro61/mmit).
+- Another supervised change-point algorithm that my student, [Tung Nguyen](https://github.com/lamtung16), and I have been developing involves using a multi-layer perceptron model to predict the penalty value for the "optimal partitioning" algorithm: [Deep Learning Approach for Changepoint Detection: Penalty Parameter Optimization](https://arxiv.org/abs/2408.00856). The figure below shows the proposed new idea relative to previous work, and [the code is available on GitHub](https://github.com/lamtung16/ML_ChangepointDetection).
+
+![diagram](https://arxiv.org/html/2408.00856v2/x4.png)
 
 ## Issue
 
