@@ -77,6 +77,9 @@ alt.pattern <- nc::alternatives_with_shared_groups(
   given="[^,]+",
   list("^", given, " ", family, "$"),
   list("^", family, ", ", given, "$"))
+if(packageVersion("nc")<"2024.8.15"){
+  stop("please install library(nc) >= 2024.8.15")
+}
 authors <- refs.wide[, {
   complete <- strsplit(author, split=" and ")[[1]]
   data.table(complete, nc::capture_first_vec(
