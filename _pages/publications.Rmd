@@ -117,9 +117,8 @@ for(large.png in Sys.glob("../assets/img/publications/*.png")){
     "thumb",
     basename(large.png))
   if(!file.exists(thumb.png)){
-    dir.create(dirname(thumb.png))
+    dir.create(dirname(thumb.png),showWarnings=FALSE)
     convert.cmd <- paste("convert", large.png, "-scale 150", thumb.png)
-    print(convert.cmd)
     system(convert.cmd)
   }
 }
