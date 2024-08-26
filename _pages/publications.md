@@ -56,6 +56,546 @@ description: Peer-reviewed papers and preprints with links to code and data
 </tbody>
 </table>
 
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Abraham2021gut.png -scale 150 ../assets/img/publications/thumb/Abraham2021gut.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Agyapong2023cv.png -scale 150 ../assets/img/publications/thumb/Agyapong2023cv.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Alirezaie2018clinpred.png -scale 150 ../assets/img/publications/thumb/Alirezaie2018clinpred.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Barr2022classifying.png -scale 150 ../assets/img/publications/thumb/Barr2022classifying.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Barr2022graph.png -scale 150 ../assets/img/publications/thumb/Barr2022graph.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Bodine2024mapping.png -scale 150 ../assets/img/publications/thumb/Bodine2024mapping.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Chicard2016cancer.png -scale 150 ../assets/img/publications/thumb/Chicard2016cancer.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Depuydt2018genomic.png -scale 150 ../assets/img/publications/thumb/Depuydt2018genomic.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Depuydt2018meta.png -scale 150 ../assets/img/publications/thumb/Depuydt2018meta.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Doyon2008heritable.png -scale 150 ../assets/img/publications/thumb/Doyon2008heritable.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Drouin2017mmit.png -scale 150 ../assets/img/publications/thumb/Drouin2017mmit.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Fotoohinasab2020automaticQRSdetectionAsilomar.png -scale 150 ../assets/img/publications/thumb/Fotoohinasab2020automaticQRSdetectionAsilomar.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Fotoohinasab2020segmentationEMBC.png -scale 150 ../assets/img/publications/thumb/Fotoohinasab2020segmentationEMBC.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Fotoohinasab2021greedy.png -scale 150 ../assets/img/publications/thumb/Fotoohinasab2021greedy.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Fowler2024line.png -scale 150 ../assets/img/publications/thumb/Fowler2024line.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Gautier2010bayesian.png -scale 150 ../assets/img/publications/thumb/Gautier2010bayesian.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Harshe2023exoskeleton.png -scale 150 ../assets/img/publications/thumb/Harshe2023exoskeleton.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hillman2023jmlr.png -scale 150 ../assets/img/publications/thumb/Hillman2023jmlr.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2011clusterpath.png -scale 150 ../assets/img/publications/thumb/Hocking2011clusterpath.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2012phd.png -scale 150 ../assets/img/publications/thumb/Hocking2012phd.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2013bioinformatics.png -scale 150 ../assets/img/publications/thumb/Hocking2013bioinformatics.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2013icml.png -scale 150 ../assets/img/publications/thumb/Hocking2013icml.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2013sustainable.png -scale 150 ../assets/img/publications/thumb/Hocking2013sustainable.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2014bioinformatics.png -scale 150 ../assets/img/publications/thumb/Hocking2014bioinformatics.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2015breakpointError.png -scale 150 ../assets/img/publications/thumb/Hocking2015breakpointError.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2015icml.png -scale 150 ../assets/img/publications/thumb/Hocking2015icml.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2016interactive.png -scale 150 ../assets/img/publications/thumb/Hocking2016interactive.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2017bioinfo.png -scale 150 ../assets/img/publications/thumb/Hocking2017bioinfo.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2017changepoint.png -scale 150 ../assets/img/publications/thumb/Hocking2017changepoint.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2019regex.png -scale 150 ../assets/img/publications/thumb/Hocking2019regex.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2020jmlr.png -scale 150 ../assets/img/publications/thumb/Hocking2020jmlr.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2020psb.png -scale 150 ../assets/img/publications/thumb/Hocking2020psb.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2021reshaping.png -scale 150 ../assets/img/publications/thumb/Hocking2021reshaping.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2022interpretable.png -scale 150 ../assets/img/publications/thumb/Hocking2022interpretable.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2022jss.png -scale 150 ../assets/img/publications/thumb/Hocking2022jss.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2023functional.png -scale 150 ../assets/img/publications/thumb/Hocking2023functional.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2023lopart.png -scale 150 ../assets/img/publications/thumb/Hocking2023lopart.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2024autism.png -scale 150 ../assets/img/publications/thumb/Hocking2024autism.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2024binsegRcpp.png -scale 150 ../assets/img/publications/thumb/Hocking2024binsegRcpp.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2024finite.png -scale 150 ../assets/img/publications/thumb/Hocking2024finite.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2024hmm.png -scale 150 ../assets/img/publications/thumb/Hocking2024hmm.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2024mlr3resampling.png -scale 150 ../assets/img/publications/thumb/Hocking2024mlr3resampling.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking2024soak.png -scale 150 ../assets/img/publications/thumb/Hocking2024soak.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Hocking22intro.png -scale 150 ../assets/img/publications/thumb/Hocking22intro.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Jewell2019biostatistics.png -scale 150 ../assets/img/publications/thumb/Jewell2019biostatistics.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Kaufman2024functional.png -scale 150 ../assets/img/publications/thumb/Kaufman2024functional.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Kolla2021fuzz.png -scale 150 ../assets/img/publications/thumb/Kolla2021fuzz.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Liehrmann2021chipseq.png -scale 150 ../assets/img/publications/thumb/Liehrmann2021chipseq.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Maidstone2017optimal.png -scale 150 ../assets/img/publications/thumb/Maidstone2017optimal.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Mihaljevic2022sparsemodr.png -scale 150 ../assets/img/publications/thumb/Mihaljevic2022sparsemodr.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Nguyen2024penalty.png -scale 150 ../assets/img/publications/thumb/Nguyen2024penalty.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Runge2023jss.png -scale 150 ../assets/img/publications/thumb/Runge2023jss.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Rust2023pairs.png -scale 150 ../assets/img/publications/thumb/Rust2023pairs.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Suguro2014cancer.png -scale 150 ../assets/img/publications/thumb/Suguro2014cancer.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Sweeney2023insect.png -scale 150 ../assets/img/publications/thumb/Sweeney2023insect.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Tao2023nature.png -scale 150 ../assets/img/publications/thumb/Tao2023nature.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Tao2024reply.png -scale 150 ../assets/img/publications/thumb/Tao2024reply.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Truong2024circular.png -scale 150 ../assets/img/publications/thumb/Truong2024circular.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Vargovich2021breakpoints.png -scale 150 ../assets/img/publications/thumb/Vargovich2021breakpoints.png"
+```
+
+```
+## Warning in dir.create(dirname(thumb.png)): '../assets/img/publications/thumb'
+## existe déjà
+```
+
+```
+## [1] "convert ../assets/img/publications/Venuto2014support.png -scale 150 ../assets/img/publications/thumb/Venuto2014support.png"
+```
+
 
 
 |Figure                                                                                                     |Published   |Authors                                                                                                                                                                                                                                                                                                                                                                                                                         |Title                                                                                                                     |Venue                                                                                                                                                      |Links                                                                                                 |
