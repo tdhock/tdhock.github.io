@@ -138,8 +138,21 @@ knitr::kable(refs.wide[
   Authors=authors_abbrev,
   Title=title,
   Venue=venue,
-  Links=ifelse(is.na(links), "", links)
+  Links=paste0(
+    ifelse(is.na(links), "", links),
+    ifelse(
+      file.exists(sprintf("../assets/papers/%s.pdf", ref)),
+      sprintf(", [Local PDF](/assets/papers/%s.pdf)", ref),
+      "")
+  )
 )])
+pdfs.without.refs <- data.table(
+  ref=gsub(".*/|[.]pdf$", "", Sys.glob("../assets/papers/*.pdf"))
+)[!refs.wide,on="ref"]
+if(nrow(pdfs.without.refs)){
+  print(pdfs.without.refs)
+  stop("found pdfs without refs")
+}
 ```
 
 ```{r eval=TRUE, echo=FALSE, results='hide'}
