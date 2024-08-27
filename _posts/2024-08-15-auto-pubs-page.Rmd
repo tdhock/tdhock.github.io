@@ -125,6 +125,7 @@ But we can get the other info.
 ```{r}
 library(data.table)
 refs.wide <- dcast(refs.fields, type + ref ~ variable)
+fwrite(refs.wide,"../assets/TDH-refs.csv")
 refs.wide[, .(
   type,
   year,

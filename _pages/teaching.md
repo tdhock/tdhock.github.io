@@ -186,7 +186,7 @@ Left to right: Joe, Toby, Farnoosh, Atiyeh, Anuraag, Zaoyi.
 
 I have mentored the
 following students in coding free/open-source software.
-- [Siddesh Deodhar](https://github.com/siddhesh195), 2024, [chromote for animint2](https://github.com/animint/animint2/pull/126).
+- [Siddesh Deodhar](https://github.com/siddhesh195), 2024, [chromote and plot layout for animint2](https://siddhesh195.github.io/gsoc2024/).
 - [Josh Wu](https://github.com/joshhwuu), 2024, [new features for data.table](https://joshhwuu.github.io/gsoc/).
 - [Nitish Jha](https://github.com/Nj221102), 2024, [closing data.table issues](https://nj221102.github.io/Nitish-gSoc-24/2024-08-24-gsoc'24-summary/).
 - [Arthur Pan](https://github.com/ampurrr), 2023, [polars in
