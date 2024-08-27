@@ -12,6 +12,7 @@ of progression plans with various specialties including machine
 learning](https://github.com/NAU-CS/progression-plans), which should
 be useful for planning what classes you take.
 
+- Fall 2024, UdeS IFT 187, Éléments de bases de données, [supplementary course materials](https://github.com/tdhock/2024-08-data-bases).
 - Fall 2024, UdeS IFT 603/712, Techniques d'Apprentissage, [web site](https://tdhock.github.io/2024-08-ift603-712/) adapted from materials by [Pierre-Marc Jodoin](https://jodoin.github.io/).
 - Spring 2024, NAU SES graduate seminar on R Package development, [my slides](https://docs.google.com/presentation/d/1_ErpxRSYfBhM6Jl2RTprisT2c6iebvzd1cstcwuxUjg/edit?usp=sharing).
 - Fall 2023, NAU CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/2023-08-artificial-intelligence).
