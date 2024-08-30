@@ -323,11 +323,11 @@ First we compute the best two loss functions for each dataset, as below.
 
 ```{r}
 (best.two <- best.wide[
-  order(-auc_mean)
+  order(N,-auc_mean)
 ][
 , rank := rank(-auc_mean)
 , by=.(N,Data)
-][rank <= 2])
+][rank <= 2, .(N,Data,Loss,auc_mean,rank)])
 ```
 
 Below we join with the original data.
@@ -336,14 +336,14 @@ Below we join with the original data.
 (best.two.join <- best.dt[best.two, .(N,Data,Loss,rank,seed,auc), on=.(N,Data,Loss)])
 ```
 
-Below we reshape.
+Below we reshape, which is required before doing the T-test in R.
 
 ```{r}
 (best.two.wide <- dcast(best.two.join, N+Data+seed~rank, value.var="auc"))
 ```
 
 Below we run T-tests to see if the top ranked AUC is significantly
-greater than the next ranked AUC.
+greater than the next ranked AUC, for each data set.
 
 ```{r}
 (test.dt <- best.two.wide[, {
@@ -407,12 +407,14 @@ ggplot()+
     vjust=1.5,
     data=best.wide)+
   facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
+  scale_y_discrete(
+    "Loss")+
   scale_x_continuous(
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
 
-In the plot above that we show the p-value, so we can see that 
-* the difference in MNIST is not statistically significant (p much larger than 0.05), 
+In the plot above, we show the p-value, which is typically intepreted by comparing with the traditional significance threshold of 0.05, which corresponds to a 5% false positive rate. Seeing a p-value of 0.05 means that you have observed a difference that you would see about 5% of the time (simply due to random variation/noise), if there is really no difference between methods. So if we are trying to argue that one algorithm is better, then we want to see small p-values, which mean that we have observed differences that are so large, that it would be extremely unlikely to see such a difference by random chance.
+* the difference in MNIST is not statistically significant (p=0.17 much larger than 0.05), 
 * in FashionMNIST there is a slight difference (but we do not say significant because p=0.07 is still larger than 0.05),
 * in CIFAR10 there is a significant difference (p=0.02 is less than 0.05),
 * in STL10 there is a highly significant difference (p=0.002, order of magnitude less than 0.05).
@@ -511,10 +513,11 @@ dput(RColorBrewer::brewer.pal(3,"Dark2"))
 loss.colors <- c("black", "#D95F02", "#7570B3")
 names(loss.colors) <- loss2show
 p <- function(Data,x,y)data.table(Data,x,y)
-blank.dt <- rbind(
+(blank.Data <- rbind(
   p("CIFAR10",0.8,100),
   p("MNIST",0.99,c(10,100000)),
-  p("STL10",0.8,30))
+  p("STL10",0.8,30)))
+(blank.Data.N <- best.wide[, .(N,Data)][blank.Data, on=.(Data), mult="first"])
 ggplot()+
   theme_bw()+
   theme(
@@ -522,7 +525,7 @@ ggplot()+
     legend.key.spacing.y=grid::unit(1, "lines"),
     axis.text.x=element_text(angle=30, hjust=1),
     panel.spacing=grid::unit(1.5, "lines"))+
-  geom_blank(aes(x, y), data=blank.dt)+
+  geom_blank(aes(x, y), data=blank.Data.N)+
   geom_point(aes(
     auc_mean, step_number_mean,
     color=Loss),

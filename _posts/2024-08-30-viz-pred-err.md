@@ -375,44 +375,24 @@ First we compute the best two loss functions for each dataset, as below.
 
 ``` r
 (best.two <- best.wide[
-  order(-auc_mean)
+  order(N,-auc_mean)
 ][
 , rank := rank(-auc_mean)
 , by=.(N,Data)
-][rank <= 2])
+][rank <= 2, .(N,Data,Loss,auc_mean,rank)])
 ```
 
 ```
-##        N         Data                                               Loss  auc_mean step_number_mean       auc_sd
-##    <int>       <char>                                             <fctr>     <num>            <num>        <num>
-## 1: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.9968667            31.75 0.0001704442
-## 2: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative) 0.9967723           194.00 0.0002446508
-## 3: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.9817996            68.25 0.0001768922
-## 4: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative) 0.9750111            58.75 0.0069031630
-## 5:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.8459024            19.75 0.0021060041
-## 6:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.8205572            42.25 0.0012836241
-## 7:  1778        STL10         Logistic/Cross-entropy\n(classic baseline) 0.8118469             9.50 0.0086704638
-## 8:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline) 0.8107824            23.75 0.0047546328
-##    step_number_sd auc_length step_number_length   auc_min step_number_min   auc_max step_number_max        lo        hi
-##             <num>      <int>              <int>     <num>           <int>     <num>           <int>     <num>     <num>
-## 1:       3.862210          4                  4 0.9967078              28 0.9970675              36 0.9966963 0.9970371
-## 2:      31.379399          4                  4 0.9964240             158 0.9969883             225 0.9965277 0.9970170
-## 3:       5.852350          4                  4 0.9816031              61 0.9820311              75 0.9816227 0.9819764
-## 4:      30.598203          4                  4 0.9650889              23 0.9808044              94 0.9681079 0.9819143
-## 5:       4.573474          4                  4 0.8432584              13 0.8483989              23 0.8437964 0.8480084
-## 6:      10.812801          4                  4 0.8192649              29 0.8220866              55 0.8192736 0.8218409
-## 7:       7.141428          4                  4 0.8046910               2 0.8243258              17 0.8031764 0.8205174
-## 8:      26.297972          4                  4 0.8072651               7 0.8177584              63 0.8060277 0.8155370
-##          mid  rank
-##        <num> <num>
-## 1: 0.9934427     1
-## 2: 0.9934427     2
-## 3: 0.9612576     1
-## 4: 0.9612576     2
-## 5: 0.7947207     1
-## 6: 0.7759173     1
-## 7: 0.7947207     2
-## 8: 0.7759173     2
+##        N         Data                                               Loss  auc_mean  rank
+##    <int>       <char>                                             <fctr>     <num> <num>
+## 1:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.8459024     1
+## 2:  1778        STL10         Logistic/Cross-entropy\n(classic baseline) 0.8118469     2
+## 3:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.8205572     1
+## 4:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline) 0.8107824     2
+## 5: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.9817996     1
+## 6: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative) 0.9750111     2
+## 7: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.9968667     1
+## 8: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative) 0.9967723     2
 ```
 
 Below we join with the original data.
@@ -425,42 +405,42 @@ Below we join with the original data.
 ```
 ##         N         Data                                               Loss  rank  seed       auc
 ##     <int>       <char>                                             <fctr> <num> <int>     <num>
-##  1: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.9967078
-##  2: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.9967440
-##  3: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.9969475
-##  4: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.9970675
-##  5: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     1 0.9964240
-##  6: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     2 0.9968762
-##  7: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     3 0.9968006
-##  8: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     4 0.9969883
-##  9: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.9817591
-## 10: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.9816031
-## 11: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.9818049
-## 12: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.9820311
-## 13: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     1 0.9781764
-## 14: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     2 0.9808044
-## 15: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     3 0.9759747
-## 16: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     4 0.9650889
-## 17:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.8432584
-## 18:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.8457865
-## 19:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.8483989
-## 20:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.8461657
-## 21:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.8220866
-## 22:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.8192649
-## 23:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.8197657
-## 24:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.8211118
-## 25:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     1 0.8076966
-## 26:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     2 0.8243258
-## 27:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     3 0.8046910
-## 28:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     4 0.8106742
-## 29:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     1 0.8084200
-## 30:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     2 0.8177584
-## 31:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     3 0.8096859
-## 32:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     4 0.8072651
+##  1:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.8432584
+##  2:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.8457865
+##  3:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.8483989
+##  4:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.8461657
+##  5:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     1 0.8076966
+##  6:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     2 0.8243258
+##  7:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     3 0.8046910
+##  8:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     4 0.8106742
+##  9:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.8220866
+## 10:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.8192649
+## 11:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.8197657
+## 12:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.8211118
+## 13:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     1 0.8084200
+## 14:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     2 0.8177584
+## 15:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     3 0.8096859
+## 16:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     4 0.8072651
+## 17: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.9817591
+## 18: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.9816031
+## 19: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.9818049
+## 20: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.9820311
+## 21: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     1 0.9781764
+## 22: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     2 0.9808044
+## 23: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     3 0.9759747
+## 24: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     4 0.9650889
+## 25: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.9967078
+## 26: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.9967440
+## 27: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.9969475
+## 28: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.9970675
+## 29: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     1 0.9964240
+## 30: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     2 0.9968762
+## 31: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     3 0.9968006
+## 32: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     4 0.9969883
 ##         N         Data                                               Loss  rank  seed       auc
 ```
 
-Below we reshape.
+Below we reshape, which is required before doing the T-test in R.
 
 
 ``` r
@@ -490,7 +470,7 @@ Below we reshape.
 ```
 
 Below we run T-tests to see if the top ranked AUC is significantly
-greater than the next ranked AUC.
+greater than the next ranked AUC, for each data set.
 
 
 ``` r
@@ -566,14 +546,16 @@ ggplot()+
     vjust=1.5,
     data=best.wide)+
   facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
+  scale_y_discrete(
+    "Loss")+
   scale_x_continuous(
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
 
 ![plot of chunk p-value](/assets/img/2024-08-30-viz-pred-err/p-value-1.png)
 
-In the plot above that we show the p-value, so we can see that 
-* the difference in MNIST is not statistically significant (p much larger than 0.05), 
+In the plot above, we show the p-value, which is typically intepreted by comparing with the traditional significance threshold of 0.05, which corresponds to a 5% false positive rate. Seeing a p-value of 0.05 means that you have observed a difference that you would see about 5% of the time (simply due to random variation/noise), if there is really no difference between methods. So if we are trying to argue that one algorithm is better, then we want to see small p-values, which mean that we have observed differences that are so large, that it would be extremely unlikely to see such a difference by random chance.
+* the difference in MNIST is not statistically significant (p=0.17 much larger than 0.05), 
 * in FashionMNIST there is a slight difference (but we do not say significant because p=0.07 is still larger than 0.05),
 * in CIFAR10 there is a significant difference (p=0.02 is less than 0.05),
 * in STL10 there is a highly significant difference (p=0.002, order of magnitude less than 0.05).
@@ -686,10 +668,35 @@ dput(RColorBrewer::brewer.pal(3,"Dark2"))
 loss.colors <- c("black", "#D95F02", "#7570B3")
 names(loss.colors) <- loss2show
 p <- function(Data,x,y)data.table(Data,x,y)
-blank.dt <- rbind(
+(blank.Data <- rbind(
   p("CIFAR10",0.8,100),
   p("MNIST",0.99,c(10,100000)),
-  p("STL10",0.8,30))
+  p("STL10",0.8,30)))
+```
+
+```
+##       Data     x     y
+##     <char> <num> <num>
+## 1: CIFAR10  0.80 1e+02
+## 2:   MNIST  0.99 1e+01
+## 3:   MNIST  0.99 1e+05
+## 4:   STL10  0.80 3e+01
+```
+
+``` r
+(blank.Data.N <- best.wide[, .(N,Data)][blank.Data, on=.(Data), mult="first"])
+```
+
+```
+##        N    Data     x     y
+##    <int>  <char> <num> <num>
+## 1:  5623 CIFAR10  0.80 1e+02
+## 2: 18032   MNIST  0.99 1e+01
+## 3: 18032   MNIST  0.99 1e+05
+## 4:  1778   STL10  0.80 3e+01
+```
+
+``` r
 ggplot()+
   theme_bw()+
   theme(
@@ -697,7 +704,7 @@ ggplot()+
     legend.key.spacing.y=grid::unit(1, "lines"),
     axis.text.x=element_text(angle=30, hjust=1),
     panel.spacing=grid::unit(1.5, "lines"))+
-  geom_blank(aes(x, y), data=blank.dt)+
+  geom_blank(aes(x, y), data=blank.Data.N)+
   geom_point(aes(
     auc_mean, step_number_mean,
     color=Loss),
