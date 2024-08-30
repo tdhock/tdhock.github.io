@@ -175,11 +175,19 @@ their display in the plot above: the `Loss` column factor levels come
 from `loss2show`, and are used to determine the order of display of
 the tick marks in the Y axis.
 
+Similarly, the facets/panels are ordered by the first facet variable,
+`N` (smallest N for STL10 on the left, largest N for MNIST on the
+right). This order is different than previous plots, which had facets
+in alphabetical order (CIFAR10 left, STL10 right). To display an
+alternative facet/panel order, you would have to create a factor
+variable with the levels in the desired order, similar to what we did
+with `Loss` values for the Y axis above. (exercise for the reader)
+
 ## Display mean and standard deviation
 
 Whereas in the previous section we displayed each random seed as a
 different dot, below we compute and plot the mean and SD over random seeds.
-And while we are at it, we can also compute the range (min and max), for the AUC as well as for the number of gradient descent epochs.
+And while we are at it, we can also compute the range (min and max), for the AUC as well as for the number of gradient descent epochs (which is the same as the number of steps here, since we used full gradient method, batch size = N).
 
 
 ``` r
@@ -245,8 +253,10 @@ ggplot()+
 
 The plot above is not very useful for comparing the different Loss
 functions, because it only shows the mean, without showing any measure
-of the variance. We fix that in the code/plot below, by computing `lo`
-and `hi` limits to display based on the SD.
+of the variance. So we can not say if any Loss is significantly more
+or less accurate than any other (we would need error bars or
+confidence intervals to do that). We fix that in the code/plot below,
+by computing `lo` and `hi` limits to display based on the SD.
 
 
 ``` r
@@ -274,6 +284,7 @@ ggplot()+
 ![plot of chunk mean-sd](/assets/img/2024-08-30-viz-pred-err/mean-sd-1.png)
 
 The plot above is much better, because it shows the SD as well as the mean.
+We can see that AUM is significantly more accurate than the others in all of the data sets, except perhaps MNIST, in which the All Pairs Squared Hinge looks only slightly worse.
 We could additionally write the values of mean and SD, as below.
 
 
@@ -353,6 +364,219 @@ ggplot()+
 ![plot of chunk mean-sd-aes-hjust](/assets/img/2024-08-30-viz-pred-err/mean-sd-aes-hjust-1.png)
 
 The plot above has text that can be read to determine the mean and SD values of each loss, in each data set.
+
+## P-value plot
+
+To conclusively answer the question about whether AUM results in
+larger Max validation AUC than the next best loss, we would need to
+use a statistical significance test.
+First we compute the best two loss functions for each dataset, as below.
+
+
+``` r
+(best.two <- best.wide[
+  order(-auc_mean)
+][
+, rank := rank(-auc_mean)
+, by=.(N,Data)
+][rank <= 2])
+```
+
+```
+##        N         Data                                               Loss  auc_mean step_number_mean       auc_sd
+##    <int>       <char>                                             <fctr>     <num>            <num>        <num>
+## 1: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.9968667            31.75 0.0001704442
+## 2: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative) 0.9967723           194.00 0.0002446508
+## 3: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.9817996            68.25 0.0001768922
+## 4: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative) 0.9750111            58.75 0.0069031630
+## 5:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.8459024            19.75 0.0021060041
+## 6:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss) 0.8205572            42.25 0.0012836241
+## 7:  1778        STL10         Logistic/Cross-entropy\n(classic baseline) 0.8118469             9.50 0.0086704638
+## 8:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline) 0.8107824            23.75 0.0047546328
+##    step_number_sd auc_length step_number_length   auc_min step_number_min   auc_max step_number_max        lo        hi
+##             <num>      <int>              <int>     <num>           <int>     <num>           <int>     <num>     <num>
+## 1:       3.862210          4                  4 0.9967078              28 0.9970675              36 0.9966963 0.9970371
+## 2:      31.379399          4                  4 0.9964240             158 0.9969883             225 0.9965277 0.9970170
+## 3:       5.852350          4                  4 0.9816031              61 0.9820311              75 0.9816227 0.9819764
+## 4:      30.598203          4                  4 0.9650889              23 0.9808044              94 0.9681079 0.9819143
+## 5:       4.573474          4                  4 0.8432584              13 0.8483989              23 0.8437964 0.8480084
+## 6:      10.812801          4                  4 0.8192649              29 0.8220866              55 0.8192736 0.8218409
+## 7:       7.141428          4                  4 0.8046910               2 0.8243258              17 0.8031764 0.8205174
+## 8:      26.297972          4                  4 0.8072651               7 0.8177584              63 0.8060277 0.8155370
+##          mid  rank
+##        <num> <num>
+## 1: 0.9934427     1
+## 2: 0.9934427     2
+## 3: 0.9612576     1
+## 4: 0.9612576     2
+## 5: 0.7947207     1
+## 6: 0.7759173     1
+## 7: 0.7947207     2
+## 8: 0.7759173     2
+```
+
+Below we join with the original data.
+
+
+``` r
+(best.two.join <- best.dt[best.two, .(N,Data,Loss,rank,seed,auc), on=.(N,Data,Loss)])
+```
+
+```
+##         N         Data                                               Loss  rank  seed       auc
+##     <int>       <char>                                             <fctr> <num> <int>     <num>
+##  1: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.9967078
+##  2: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.9967440
+##  3: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.9969475
+##  4: 18032        MNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.9970675
+##  5: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     1 0.9964240
+##  6: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     2 0.9968762
+##  7: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     3 0.9968006
+##  8: 18032        MNIST      All Pairs Squared Hinge\n(recent alternative)     2     4 0.9969883
+##  9: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.9817591
+## 10: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.9816031
+## 11: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.9818049
+## 12: 10000 FashionMNIST AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.9820311
+## 13: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     1 0.9781764
+## 14: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     2 0.9808044
+## 15: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     3 0.9759747
+## 16: 10000 FashionMNIST      All Pairs Squared Hinge\n(recent alternative)     2     4 0.9650889
+## 17:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.8432584
+## 18:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.8457865
+## 19:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.8483989
+## 20:  1778        STL10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.8461657
+## 21:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     1 0.8220866
+## 22:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     2 0.8192649
+## 23:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     3 0.8197657
+## 24:  5623      CIFAR10 AUM=Area Under Min(FP,FN)\n(proposed complex loss)     1     4 0.8211118
+## 25:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     1 0.8076966
+## 26:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     2 0.8243258
+## 27:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     3 0.8046910
+## 28:  1778        STL10         Logistic/Cross-entropy\n(classic baseline)     2     4 0.8106742
+## 29:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     1 0.8084200
+## 30:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     2 0.8177584
+## 31:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     3 0.8096859
+## 32:  5623      CIFAR10         Logistic/Cross-entropy\n(classic baseline)     2     4 0.8072651
+##         N         Data                                               Loss  rank  seed       auc
+```
+
+Below we reshape.
+
+
+``` r
+(best.two.wide <- dcast(best.two.join, N+Data+seed~rank, value.var="auc"))
+```
+
+```
+## Key: <N, Data, seed>
+##         N         Data  seed         1         2
+##     <int>       <char> <int>     <num>     <num>
+##  1:  1778        STL10     1 0.8432584 0.8076966
+##  2:  1778        STL10     2 0.8457865 0.8243258
+##  3:  1778        STL10     3 0.8483989 0.8046910
+##  4:  1778        STL10     4 0.8461657 0.8106742
+##  5:  5623      CIFAR10     1 0.8220866 0.8084200
+##  6:  5623      CIFAR10     2 0.8192649 0.8177584
+##  7:  5623      CIFAR10     3 0.8197657 0.8096859
+##  8:  5623      CIFAR10     4 0.8211118 0.8072651
+##  9: 10000 FashionMNIST     1 0.9817591 0.9781764
+## 10: 10000 FashionMNIST     2 0.9816031 0.9808044
+## 11: 10000 FashionMNIST     3 0.9818049 0.9759747
+## 12: 10000 FashionMNIST     4 0.9820311 0.9650889
+## 13: 18032        MNIST     1 0.9967078 0.9964240
+## 14: 18032        MNIST     2 0.9967440 0.9968762
+## 15: 18032        MNIST     3 0.9969475 0.9968006
+## 16: 18032        MNIST     4 0.9970675 0.9969883
+```
+
+Below we run T-tests to see if the top ranked AUC is significantly
+greater than the next ranked AUC.
+
+
+``` r
+(test.dt <- best.two.wide[, {
+  paired <- t.test(`1`, `2`, alternative="greater", paired=TRUE)
+  unpaired <- t.test(`1`, `2`, alternative="greater", paired=FALSE)
+  data.table(
+    mean.of.diff=paired$estimate, p.paired=paired$p.value,
+    m1=unpaired$estimate[1], m2=unpaired$estimate[2], p.unpaired=unpaired$p.value)
+}, by=.(N,Data)])
+```
+
+```
+## Key: <N, Data>
+##        N         Data mean.of.diff   p.paired        m1        m2  p.unpaired
+##    <int>       <char>        <num>      <num>     <num>     <num>       <num>
+## 1:  1778        STL10 3.405548e-02 0.00258075 0.8459024 0.8118469 0.001564229
+## 2:  5623      CIFAR10 9.774872e-03 0.02149806 0.8205572 0.8107824 0.011088867
+## 3: 10000 FashionMNIST 6.788444e-03 0.07539559 0.9817996 0.9750111 0.071935081
+## 4: 18032        MNIST 9.439573e-05 0.17791682 0.9968667 0.9967723 0.276335600
+```
+
+The table above summarizes the results of the T-tests.
+
+* The paired T-test is more powerful (gives you smaller P-values), but
+  only works when you actually have paired observations, as we do here
+  (AUC was computed for each loss and each random seed). Its
+  `estimate` is the mean of the differences between each pair of AUC
+  values.
+* The unpaired T-test can be seen to have larger (less significant)
+  P-values, but it may be useful to run as well, because `estimate`
+  contains mean values for each of the two samples (here the two
+  different loss functions).
+
+To display the test result below we use a rectangle.
+
+
+``` r
+p.color <- "red"
+text.size <- 3
+ggplot()+
+  theme_bw()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_text(aes(
+    m2, Inf, label=sprintf("p=%.4f ", p.paired)),
+    color=p.color,
+    data=test.dt,
+    size=text.size,
+    vjust=1.2,
+    hjust=1)+
+  geom_rect(aes(
+    xmin=m2, xmax=m1,
+    ymin=-Inf, ymax=Inf),
+    fill=p.color,
+    alpha=0.5,
+    data=test.dt)+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    lo, Loss,
+    xend=hi, yend=Loss),
+    data=best.wide)+
+  geom_text(aes(
+    auc_mean, Loss,
+    hjust=ifelse(auc_mean<mid, 0, 1),
+    label=sprintf(
+      "%.4f±%.4f", auc_mean, auc_sd)),
+    size=text.size,
+    vjust=1.5,
+    data=best.wide)+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
+  scale_x_continuous(
+    "Max validation AUC (Mean ± SD over 4 random initializations)")
+```
+
+![plot of chunk p-value](/assets/img/2024-08-30-viz-pred-err/p-value-1.png)
+
+In the plot above that we show the p-value, so we can see that 
+* the difference in MNIST is not statistically significant (p much larger than 0.05), 
+* in FashionMNIST there is a slight difference (but we do not say significant because p=0.07 is still larger than 0.05),
+* in CIFAR10 there is a significant difference (p=0.02 is less than 0.05),
+* in STL10 there is a highly significant difference (p=0.002, order of magnitude less than 0.05).
 
 ## Display accuracy and computation time in scatter plot
 

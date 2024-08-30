@@ -169,11 +169,19 @@ their display in the plot above: the `Loss` column factor levels come
 from `loss2show`, and are used to determine the order of display of
 the tick marks in the Y axis.
 
+Similarly, the facets/panels are ordered by the first facet variable,
+`N` (smallest N for STL10 on the left, largest N for MNIST on the
+right). This order is different than previous plots, which had facets
+in alphabetical order (CIFAR10 left, STL10 right). To display an
+alternative facet/panel order, you would have to create a factor
+variable with the levels in the desired order, similar to what we did
+with `Loss` values for the Y axis above. (exercise for the reader)
+
 ## Display mean and standard deviation
 
 Whereas in the previous section we displayed each random seed as a
 different dot, below we compute and plot the mean and SD over random seeds.
-And while we are at it, we can also compute the range (min and max), for the AUC as well as for the number of gradient descent epochs.
+And while we are at it, we can also compute the range (min and max), for the AUC as well as for the number of gradient descent epochs (which is the same as the number of steps here, since we used full gradient method, batch size = N).
 
 ```{r}
 (best.wide <- dcast(
@@ -203,8 +211,10 @@ ggplot()+
 
 The plot above is not very useful for comparing the different Loss
 functions, because it only shows the mean, without showing any measure
-of the variance. We fix that in the code/plot below, by computing `lo`
-and `hi` limits to display based on the SD.
+of the variance. So we can not say if any Loss is significantly more
+or less accurate than any other (we would need error bars or
+confidence intervals to do that). We fix that in the code/plot below,
+by computing `lo` and `hi` limits to display based on the SD.
 
 ```{r mean-sd}
 best.wide[, `:=`(
@@ -229,6 +239,7 @@ ggplot()+
 ```
 
 The plot above is much better, because it shows the SD as well as the mean.
+We can see that AUM is significantly more accurate than the others in all of the data sets, except perhaps MNIST, in which the All Pairs Squared Hinge looks only slightly worse.
 We could additionally write the values of mean and SD, as below.
 
 ```{r mean-sd-text-mid}
@@ -302,6 +313,109 @@ ggplot()+
 ```
 
 The plot above has text that can be read to determine the mean and SD values of each loss, in each data set.
+
+## P-value plot
+
+To conclusively answer the question about whether AUM results in
+larger Max validation AUC than the next best loss, we would need to
+use a statistical significance test.
+First we compute the best two loss functions for each dataset, as below.
+
+```{r}
+(best.two <- best.wide[
+  order(-auc_mean)
+][
+, rank := rank(-auc_mean)
+, by=.(N,Data)
+][rank <= 2])
+```
+
+Below we join with the original data.
+
+```{r}
+(best.two.join <- best.dt[best.two, .(N,Data,Loss,rank,seed,auc), on=.(N,Data,Loss)])
+```
+
+Below we reshape.
+
+```{r}
+(best.two.wide <- dcast(best.two.join, N+Data+seed~rank, value.var="auc"))
+```
+
+Below we run T-tests to see if the top ranked AUC is significantly
+greater than the next ranked AUC.
+
+```{r}
+(test.dt <- best.two.wide[, {
+  paired <- t.test(`1`, `2`, alternative="greater", paired=TRUE)
+  unpaired <- t.test(`1`, `2`, alternative="greater", paired=FALSE)
+  data.table(
+    mean.of.diff=paired$estimate, p.paired=paired$p.value,
+    m1=unpaired$estimate[1], m2=unpaired$estimate[2], p.unpaired=unpaired$p.value)
+}, by=.(N,Data)])
+```
+
+The table above summarizes the results of the T-tests.
+
+* The paired T-test is more powerful (gives you smaller P-values), but
+  only works when you actually have paired observations, as we do here
+  (AUC was computed for each loss and each random seed). Its
+  `estimate` is the mean of the differences between each pair of AUC
+  values.
+* The unpaired T-test can be seen to have larger (less significant)
+  P-values, but it may be useful to run as well, because `estimate`
+  contains mean values for each of the two samples (here the two
+  different loss functions).
+
+To display the test result below we use a rectangle.
+
+```{r p-value}
+p.color <- "red"
+text.size <- 3
+ggplot()+
+  theme_bw()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_text(aes(
+    m2, Inf, label=sprintf("p=%.4f ", p.paired)),
+    color=p.color,
+    data=test.dt,
+    size=text.size,
+    vjust=1.2,
+    hjust=1)+
+  geom_rect(aes(
+    xmin=m2, xmax=m1,
+    ymin=-Inf, ymax=Inf),
+    fill=p.color,
+    alpha=0.5,
+    data=test.dt)+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    lo, Loss,
+    xend=hi, yend=Loss),
+    data=best.wide)+
+  geom_text(aes(
+    auc_mean, Loss,
+    hjust=ifelse(auc_mean<mid, 0, 1),
+    label=sprintf(
+      "%.4f±%.4f", auc_mean, auc_sd)),
+    size=text.size,
+    vjust=1.5,
+    data=best.wide)+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
+  scale_x_continuous(
+    "Max validation AUC (Mean ± SD over 4 random initializations)")
+```
+
+In the plot above that we show the p-value, so we can see that 
+* the difference in MNIST is not statistically significant (p much larger than 0.05), 
+* in FashionMNIST there is a slight difference (but we do not say significant because p=0.07 is still larger than 0.05),
+* in CIFAR10 there is a significant difference (p=0.02 is less than 0.05),
+* in STL10 there is a highly significant difference (p=0.002, order of magnitude less than 0.05).
 
 ## Display accuracy and computation time in scatter plot
 
