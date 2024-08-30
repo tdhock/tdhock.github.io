@@ -148,8 +148,11 @@ loss2show <- rev(c(
   SquaredHinge="All Pairs Squared Hinge\n(recent alternative)",
   AUM="AUM=Area Under Min(FP,FN)\n(proposed complex loss)",
   NULL))
+Loss_factor <- function(L){
+  factor(L, names(loss2show), loss2show)
+}
 best.dt[, `:=`(
-  Loss = factor(loss2show[loss], loss2show),
+  Loss = Loss_factor(loss),
   Data = data.name
 )]
 ggplot()+
@@ -418,6 +421,140 @@ In the plot above, we show the p-value, which is typically intepreted by compari
 * in FashionMNIST there is a slight difference (but we do not say significant because p=0.07 is still larger than 0.05),
 * in CIFAR10 there is a significant difference (p=0.02 is less than 0.05),
 * in STL10 there is a highly significant difference (p=0.002, order of magnitude less than 0.05).
+
+Above we compared the best to the next best. An alternative is to compare the proposed to others, which we code below.
+First we reshape wider, as below.
+
+```{r}
+(best.loss.wide <- dcast(best.dt, N + Data + seed ~ loss, value.var="auc"))
+```
+
+The table above has one column for each method/loss.
+Then we define the proposed method column, and reshape the other columns taller, as below.
+
+```{r}
+proposed.loss <- "AUM"
+(other.loss.vec <- best.dt[loss!=proposed, unique(loss)])
+(best.loss.tall <- melt(
+  best.loss.wide,
+  measure.vars=other.loss.vec,
+  variable.name="other.loss",
+  value.name="other.auc"))
+```
+
+The table above has a column for the Max Validation AUC of the proposed method (AUM), and has the Max Validation AUC of the other methods in the `other.auc` column. We can then run the T-test for each value of `other.loss`, using the code below.
+
+```{r}
+(test.proposed <- best.loss.tall[, {
+  paired <- t.test(AUM, other.auc, alternative="greater", paired=TRUE)
+  unpaired <- t.test(AUM, other.auc, alternative="greater", paired=FALSE)
+  data.table(
+    mean.of.diff=paired$estimate, p.paired=paired$p.value,
+    mean.proposed=unpaired$estimate[1], mean.other=unpaired$estimate[2], p.unpaired=unpaired$p.value)
+}, by=.(N,Data,other.loss)])
+```
+
+The table above has a row for each T-test, one for each data set and other loss function (other than the proposed AUM).
+The final step is to visualize these data on the plot, as in the code below.
+
+```{r p-others}
+test.proposed[
+, other.Loss := Loss_factor(other.loss)
+]
+ggplot()+
+  theme_bw()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_segment(aes(
+    mean.proposed, other.Loss,
+    xend=mean.other, yend=other.Loss),
+    color=p.color,
+    alpha=0.5,
+    linewidth=3,
+    data=test.proposed)+
+  geom_text(aes(
+    mean.proposed, other.Loss,
+    label=sprintf("P=%.4f", p.paired)),
+    color=p.color,
+    size=text.size,
+    vjust=-0.5,
+    hjust=1,
+    data=test.proposed)+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    lo, Loss,
+    xend=hi, yend=Loss),
+    data=best.wide)+
+  geom_text(aes(
+    auc_mean, Loss,
+    hjust=ifelse(auc_mean<mid, 0, 1),
+    label=sprintf(
+      "%.4f±%.4f", auc_mean, auc_sd)),
+    size=text.size,
+    vjust=1.5,
+    data=best.wide)+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
+  scale_y_discrete(
+    "Loss")+
+  scale_x_continuous(
+    "Max validation AUC (Mean ± SD over 4 random initializations)")
+```
+
+We can see in the plot above that there is red text and segments drawn to emphasize the p-value, and how it was computed, for each method other than the proposed AUM. There are a couple of issues though
+
+* The Y axis tick mark ordering is no longer as expected, because ggplot2 drops factor levels by default, if some are not present in a given data layer. To avoid that we can use `scale_y_discrete(drop=FALSE)`.
+* Some p-values are smaller than the limit of 4 decimal places, so we need a different method to display them, for example writing `P<0.0001` when that is true.
+
+```{r p-others-no-drop}
+ggplot()+
+  theme_bw()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_segment(aes(
+    mean.proposed, other.Loss,
+    xend=mean.other, yend=other.Loss),
+    color=p.color,
+    alpha=0.5,
+    linewidth=3,
+    data=test.proposed)+
+  geom_text(aes(
+    mean.proposed, other.Loss,
+    label=ifelse(
+      p.paired<0.0001, "P<0.0001",
+      sprintf("P=%.4f", p.paired))),
+    color=p.color,
+    size=text.size,
+    vjust=-0.5,
+    hjust=1,
+    data=test.proposed)+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    lo, Loss,
+    xend=hi, yend=Loss),
+    data=best.wide)+
+  geom_text(aes(
+    auc_mean, Loss,
+    hjust=ifelse(auc_mean<mid, 0, 1),
+    label=sprintf(
+      "%.4f±%.4f", auc_mean, auc_sd)),
+    size=text.size,
+    vjust=1.5,
+    data=best.wide)+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
+  scale_y_discrete(
+    "Loss",
+    drop=FALSE)+
+  scale_x_continuous(
+    "Max validation AUC (Mean ± SD over 4 random initializations)")
+```
 
 ## Display accuracy and computation time in scatter plot
 

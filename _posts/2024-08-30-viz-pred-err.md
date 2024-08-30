@@ -152,8 +152,11 @@ loss2show <- rev(c(
   SquaredHinge="All Pairs Squared Hinge\n(recent alternative)",
   AUM="AUM=Area Under Min(FP,FN)\n(proposed complex loss)",
   NULL))
+Loss_factor <- function(L){
+  factor(L, names(loss2show), loss2show)
+}
 best.dt[, `:=`(
-  Loss = factor(loss2show[loss], loss2show),
+  Loss = Loss_factor(loss),
   Data = data.name
 )]
 ggplot()+
@@ -560,6 +563,229 @@ In the plot above, we show the p-value, which is typically intepreted by compari
 * in CIFAR10 there is a significant difference (p=0.02 is less than 0.05),
 * in STL10 there is a highly significant difference (p=0.002, order of magnitude less than 0.05).
 
+Above we compared the best to the next best. An alternative is to compare the proposed to others, which we code below.
+First we reshape wider, as below.
+
+
+``` r
+(best.loss.wide <- dcast(best.dt, N + Data + seed ~ loss, value.var="auc"))
+```
+
+```
+## Key: <N, Data, seed>
+##         N         Data  seed       AUM  Logistic SquaredHinge
+##     <int>       <char> <int>     <num>     <num>        <num>
+##  1:  1778        STL10     1 0.8432584 0.8076966    0.7627528
+##  2:  1778        STL10     2 0.8457865 0.8243258    0.7589888
+##  3:  1778        STL10     3 0.8483989 0.8046910    0.7541152
+##  4:  1778        STL10     4 0.8461657 0.8106742    0.8266292
+##  5:  5623      CIFAR10     1 0.8220866 0.8084200    0.7710211
+##  6:  5623      CIFAR10     2 0.8192649 0.8177584    0.7354803
+##  7:  5623      CIFAR10     3 0.8197657 0.8096859    0.7309735
+##  8:  5623      CIFAR10     4 0.8211118 0.8072651    0.7753759
+##  9: 10000 FashionMNIST     1 0.9817591 0.9408162    0.9781764
+## 10: 10000 FashionMNIST     2 0.9816031 0.9405631    0.9808044
+## 11: 10000 FashionMNIST     3 0.9818049 0.9414778    0.9759747
+## 12: 10000 FashionMNIST     4 0.9820311 0.9408533    0.9650889
+## 13: 18032        MNIST     1 0.9967078 0.9899026    0.9964240
+## 14: 18032        MNIST     2 0.9967440 0.9898945    0.9968762
+## 15: 18032        MNIST     3 0.9969475 0.9899023    0.9968006
+## 16: 18032        MNIST     4 0.9970675 0.9901057    0.9969883
+```
+
+The table above has one column for each method/loss.
+Then we define the proposed method column, and reshape the other columns taller, as below.
+
+
+``` r
+proposed.loss <- "AUM"
+(other.loss.vec <- best.dt[loss!=proposed, unique(loss)])
+```
+
+```
+## [1] "Logistic"     "SquaredHinge"
+```
+
+``` r
+(best.loss.tall <- melt(
+  best.loss.wide,
+  measure.vars=other.loss.vec,
+  variable.name="other.loss",
+  value.name="other.auc"))
+```
+
+```
+##         N         Data  seed       AUM   other.loss other.auc
+##     <int>       <char> <int>     <num>       <fctr>     <num>
+##  1:  1778        STL10     1 0.8432584     Logistic 0.8076966
+##  2:  1778        STL10     2 0.8457865     Logistic 0.8243258
+##  3:  1778        STL10     3 0.8483989     Logistic 0.8046910
+##  4:  1778        STL10     4 0.8461657     Logistic 0.8106742
+##  5:  5623      CIFAR10     1 0.8220866     Logistic 0.8084200
+##  6:  5623      CIFAR10     2 0.8192649     Logistic 0.8177584
+##  7:  5623      CIFAR10     3 0.8197657     Logistic 0.8096859
+##  8:  5623      CIFAR10     4 0.8211118     Logistic 0.8072651
+##  9: 10000 FashionMNIST     1 0.9817591     Logistic 0.9408162
+## 10: 10000 FashionMNIST     2 0.9816031     Logistic 0.9405631
+## 11: 10000 FashionMNIST     3 0.9818049     Logistic 0.9414778
+## 12: 10000 FashionMNIST     4 0.9820311     Logistic 0.9408533
+## 13: 18032        MNIST     1 0.9967078     Logistic 0.9899026
+## 14: 18032        MNIST     2 0.9967440     Logistic 0.9898945
+## 15: 18032        MNIST     3 0.9969475     Logistic 0.9899023
+## 16: 18032        MNIST     4 0.9970675     Logistic 0.9901057
+## 17:  1778        STL10     1 0.8432584 SquaredHinge 0.7627528
+## 18:  1778        STL10     2 0.8457865 SquaredHinge 0.7589888
+## 19:  1778        STL10     3 0.8483989 SquaredHinge 0.7541152
+## 20:  1778        STL10     4 0.8461657 SquaredHinge 0.8266292
+## 21:  5623      CIFAR10     1 0.8220866 SquaredHinge 0.7710211
+## 22:  5623      CIFAR10     2 0.8192649 SquaredHinge 0.7354803
+## 23:  5623      CIFAR10     3 0.8197657 SquaredHinge 0.7309735
+## 24:  5623      CIFAR10     4 0.8211118 SquaredHinge 0.7753759
+## 25: 10000 FashionMNIST     1 0.9817591 SquaredHinge 0.9781764
+## 26: 10000 FashionMNIST     2 0.9816031 SquaredHinge 0.9808044
+## 27: 10000 FashionMNIST     3 0.9818049 SquaredHinge 0.9759747
+## 28: 10000 FashionMNIST     4 0.9820311 SquaredHinge 0.9650889
+## 29: 18032        MNIST     1 0.9967078 SquaredHinge 0.9964240
+## 30: 18032        MNIST     2 0.9967440 SquaredHinge 0.9968762
+## 31: 18032        MNIST     3 0.9969475 SquaredHinge 0.9968006
+## 32: 18032        MNIST     4 0.9970675 SquaredHinge 0.9969883
+##         N         Data  seed       AUM   other.loss other.auc
+```
+
+The table above has a column for the Max Validation AUC of the proposed method (AUM), and has the Max Validation AUC of the other methods in the `other.auc` column. We can then run the T-test for each value of `other.loss`, using the code below.
+
+
+``` r
+(test.proposed <- best.loss.tall[, {
+  paired <- t.test(AUM, other.auc, alternative="greater", paired=TRUE)
+  unpaired <- t.test(AUM, other.auc, alternative="greater", paired=FALSE)
+  data.table(
+    mean.of.diff=paired$estimate, p.paired=paired$p.value,
+    mean.proposed=unpaired$estimate[1], mean.other=unpaired$estimate[2], p.unpaired=unpaired$p.value)
+}, by=.(N,Data,other.loss)])
+```
+
+```
+##        N         Data   other.loss mean.of.diff     p.paired mean.proposed mean.other   p.unpaired
+##    <int>       <char>       <fctr>        <num>        <num>         <num>      <num>        <num>
+## 1:  1778        STL10     Logistic 3.405548e-02 2.580750e-03     0.8459024  0.8118469 1.564229e-03
+## 2:  5623      CIFAR10     Logistic 9.774872e-03 2.149806e-02     0.8205572  0.8107824 1.108887e-02
+## 3: 10000 FashionMNIST     Logistic 4.087194e-02 1.071213e-07     0.9817996  0.9409276 1.010710e-09
+## 4: 18032        MNIST     Logistic 6.915422e-03 5.360106e-07     0.9968667  0.9899513 7.150765e-09
+## 5:  1778        STL10 SquaredHinge 7.028090e-02 1.313712e-02     0.8459024  0.7756215 1.290625e-02
+## 6:  5623      CIFAR10 SquaredHinge 6.734453e-02 4.423756e-03     0.8205572  0.7532127 5.033883e-03
+## 7: 10000 FashionMNIST SquaredHinge 6.788444e-03 7.539559e-02     0.9817996  0.9750111 7.193508e-02
+## 8: 18032        MNIST SquaredHinge 9.439573e-05 1.779168e-01     0.9968667  0.9967723 2.763356e-01
+```
+
+The table above has a row for each T-test, one for each data set and other loss function (other than the proposed AUM).
+The final step is to visualize these data on the plot, as in the code below.
+
+
+``` r
+test.proposed[
+, other.Loss := Loss_factor(other.loss)
+]
+ggplot()+
+  theme_bw()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_segment(aes(
+    mean.proposed, other.Loss,
+    xend=mean.other, yend=other.Loss),
+    color=p.color,
+    alpha=0.5,
+    linewidth=3,
+    data=test.proposed)+
+  geom_text(aes(
+    mean.proposed, other.Loss,
+    label=sprintf("P=%.4f", p.paired)),
+    color=p.color,
+    size=text.size,
+    vjust=-0.5,
+    hjust=1,
+    data=test.proposed)+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    lo, Loss,
+    xend=hi, yend=Loss),
+    data=best.wide)+
+  geom_text(aes(
+    auc_mean, Loss,
+    hjust=ifelse(auc_mean<mid, 0, 1),
+    label=sprintf(
+      "%.4f±%.4f", auc_mean, auc_sd)),
+    size=text.size,
+    vjust=1.5,
+    data=best.wide)+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
+  scale_y_discrete(
+    "Loss")+
+  scale_x_continuous(
+    "Max validation AUC (Mean ± SD over 4 random initializations)")
+```
+
+![plot of chunk p-others](/assets/img/2024-08-30-viz-pred-err/p-others-1.png)
+
+We can see in the plot above that there is red text and segments drawn to emphasize the p-value, and how it was computed, for each method other than the proposed AUM. There are a couple of issues though
+
+* The Y axis tick mark ordering is no longer as expected, because ggplot2 drops factor levels by default, if some are not present in a given data layer. To avoid that we can use `scale_y_discrete(drop=FALSE)`.
+* Some p-values are smaller than the limit of 4 decimal places, so we need a different method to display them, for example writing `P<0.0001` when that is true.
+
+
+``` r
+ggplot()+
+  theme_bw()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_segment(aes(
+    mean.proposed, other.Loss,
+    xend=mean.other, yend=other.Loss),
+    color=p.color,
+    alpha=0.5,
+    linewidth=3,
+    data=test.proposed)+
+  geom_text(aes(
+    mean.proposed, other.Loss,
+    label=ifelse(
+      p.paired<0.0001, "P<0.0001",
+      sprintf("P=%.4f", p.paired))),
+    color=p.color,
+    size=text.size,
+    vjust=-0.5,
+    hjust=1,
+    data=test.proposed)+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    lo, Loss,
+    xend=hi, yend=Loss),
+    data=best.wide)+
+  geom_text(aes(
+    auc_mean, Loss,
+    hjust=ifelse(auc_mean<mid, 0, 1),
+    label=sprintf(
+      "%.4f±%.4f", auc_mean, auc_sd)),
+    size=text.size,
+    vjust=1.5,
+    data=best.wide)+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
+  scale_y_discrete(
+    "Loss",
+    drop=FALSE)+
+  scale_x_continuous(
+    "Max validation AUC (Mean ± SD over 4 random initializations)")
+```
+
+![plot of chunk p-others-no-drop](/assets/img/2024-08-30-viz-pred-err/p-others-no-drop-1.png)
+
 ## Display accuracy and computation time in scatter plot
 
 In the plots above, we only examined prediction accuracy. Below we
@@ -772,9 +998,10 @@ sessionInfo()
 ## [1] ggplot2_3.5.1     data.table_1.16.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] vctrs_0.6.5        cli_3.6.2          knitr_1.47         rlang_1.1.3        xfun_0.45          highr_0.11        
-##  [7] generics_0.1.3     glue_1.7.0         labeling_0.4.3     colorspace_2.1-0   scales_1.3.0       fansi_1.0.6       
-## [13] grid_4.4.1         munsell_0.5.0      evaluate_0.23      tibble_3.2.1       lifecycle_1.0.4    compiler_4.4.1    
-## [19] dplyr_1.1.4        RColorBrewer_1.1-3 pkgconfig_2.0.3    farver_2.1.1       R6_2.5.1           tidyselect_1.2.1  
-## [25] utf8_1.2.4         pillar_1.9.0       magrittr_2.0.3     tools_4.4.1        withr_3.0.0        gtable_0.3.4
+##  [1] crayon_1.5.2       vctrs_0.6.5        cli_3.6.2          knitr_1.47         rlang_1.1.3        xfun_0.45         
+##  [7] highr_0.11         generics_0.1.3     glue_1.7.0         labeling_0.4.3     colorspace_2.1-0   scales_1.3.0      
+## [13] fansi_1.0.6        grid_4.4.1         munsell_0.5.0      evaluate_0.23      tibble_3.2.1       lifecycle_1.0.4   
+## [19] compiler_4.4.1     dplyr_1.1.4        RColorBrewer_1.1-3 pkgconfig_2.0.3    farver_2.1.1       R6_2.5.1          
+## [25] tidyselect_1.2.1   utf8_1.2.4         pillar_1.9.0       magrittr_2.0.3     tools_4.4.1        withr_3.0.0       
+## [31] gtable_0.3.4
 ```
