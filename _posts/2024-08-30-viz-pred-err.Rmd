@@ -77,7 +77,7 @@ as shown in the code below:
 
 ```{r}
 library(data.table)
-(best.dt <- fread("../assets/data_Classif_batchtools_best_valid.csv"))
+(best.dt <- fread("/assets/data_Classif_batchtools_best_valid.csv"))
 ```
 
 ## Easy dot plot visualization
@@ -139,7 +139,7 @@ ggplot()+
 The plot above looks like a reasonable summary of the results, but the labels could be improved.
 
 * We could explain more details about each algorithm in the Y axis labels.
-* We could simplify the panel/facet variable names, `data.name` above, to simply `Data`, as below.
+* We could simplify the panel/facet variable names, `data.name` above, to simply `Data`, and add `N` for each.
 * We could use the more common capital `AUC` rather than lower `auc`, and explain that it is the max on the validation set.
 
 ```{r dot-labels}
@@ -156,7 +156,7 @@ ggplot()+
   geom_point(aes(
     auc, Loss),
     data=best.dt)+
-  facet_grid(. ~ Data, scales="free", labeller=label_both)+
+  facet_grid(. ~ N + Data, scales="free", labeller=label_both)+
   scale_x_continuous(
     "Max validation AUC (4 random initializations)")+
   theme(
@@ -178,7 +178,7 @@ And while we are at it, we can also compute the range (min and max), for the AUC
 ```{r}
 (best.wide <- dcast(
   best.dt,
-  Data + Loss ~ .,
+  N + Data + Loss ~ .,
   list(mean, sd, length, min, max),
   value.var=c("auc","step_number")))
 ```
@@ -196,7 +196,7 @@ ggplot()+
     auc_mean, Loss),
     shape=1,
     data=best.wide)+
-  facet_grid(. ~ Data, labeller=label_both, scales="free")+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
   scale_x_continuous(
     "Max validation AUC (Mean over 4 random initializations)")
 ```
@@ -223,7 +223,7 @@ ggplot()+
     lo, Loss,
     xend=hi, yend=Loss),
     data=best.wide)+
-  facet_grid(. ~ Data, labeller=label_both, scales="free")+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
   scale_x_continuous(
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
@@ -251,7 +251,7 @@ ggplot()+
     size=3,
     vjust=1.5,
     data=best.wide)+
-  facet_grid(. ~ Data, labeller=label_both, scales="free")+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
   scale_x_continuous(
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
@@ -296,7 +296,7 @@ ggplot()+
     size=3,
     vjust=1.5,
     data=best.wide)+
-  facet_grid(. ~ Data, labeller=label_both, scales="free")+
+  facet_grid(. ~ N + Data, labeller=label_both, scales="free")+
   scale_x_continuous(
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
@@ -308,6 +308,47 @@ The plot above has text that can be read to determine the mean and SD values of 
 In the plots above, we only examined prediction accuracy. Below we
 additionally examine the number of iterations/epochs of gradient
 descent, in order to determine which loss function results in fastest learning.
+
+```{r scatter-grid}
+ggplot()+
+  theme_bw()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    legend.key.spacing.y=grid::unit(1, "lines"),
+    axis.text.x=element_text(angle=30, hjust=1),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_point(aes(
+    auc_mean, step_number_mean,
+    color=Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    auc_min, step_number_mean,
+    color=Loss,
+    xend=auc_max, yend=step_number_mean),
+    data=best.wide)+
+  geom_segment(aes(
+    auc_mean, step_number_min,
+    color=Loss,
+    xend=auc_mean, yend=step_number_max),
+    data=best.wide)+
+  facet_grid(~N+Data, labeller=label_both, scales="free")+
+  scale_y_log10(
+    "Gradient descent epochs\n(using best learning rate)")+
+  scale_x_continuous(
+    "Best validation AUC (dot=mean, segments=range over 4 random initializations)")
+```
+
+In the plot above, we again see Best validation AUC on the X axis, and
+we see number of epochs on the Y axis. So we can see that the AUM loss
+has largest Best validation AUC (so AUM can be more accurate), as well
+as comparable/smaller number of epochs (so AUM can be faster). 
+
+The plot above uses `facet_grid` which forces the Y axis to be the
+same in each plot, even though we specified `scales="free"` (which
+actually only affects the X axis in this case). Below we use
+`facet_wrap` instead, in order to zoom in on the details of each
+panel:
 
 ```{r scatter}
 ggplot()+
@@ -332,18 +373,16 @@ ggplot()+
     color=Loss,
     xend=auc_mean, yend=step_number_max),
     data=best.wide)+
-  facet_wrap("Data", nrow=1, labeller=label_both, scales="free")+
+  facet_wrap(~N+Data, nrow=1, labeller=label_both, scales="free")+
   scale_y_log10(
     "Gradient descent epochs\n(using best learning rate)")+
   scale_x_continuous(
     "Best validation AUC (dot=mean, segments=range over 4 random initializations)")
 ```
 
-In the plot above, we again see Best validation AUC on the X axis, and
-we see number of epochs on the Y axis. So we can see that the AUM loss
-has largest Best validation AUC (so AUM can be more accurate), as well
-as comparable/smaller number of epochs (so AUM can be faster). However
-there are a couple of details worth fixing, for improved clarity:
+The plot above has a different Y axis for each panel/facet, due to `facet_wrap(scales="free")`.
+This allows us to zoom in to see more detailed comparisons in each panel/facet.
+However there are a couple of details worth fixing, for improved clarity:
 
 * The default color scale in ggplot2 results in a blue and green which
   can be difficult to distinguish, so I recommend using Cynthia
@@ -385,7 +424,7 @@ ggplot()+
     color=Loss,
     xend=auc_mean, yend=step_number_max),
     data=best.wide)+
-  facet_wrap("Data", nrow=1, labeller=label_both, scales="free")+
+  facet_wrap(~N+Data, nrow=1, labeller=label_both, scales="free")+
   scale_color_manual(
     values=loss.colors)+
   scale_y_log10(
