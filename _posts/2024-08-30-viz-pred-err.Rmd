@@ -1,0 +1,411 @@
+---
+layout: post
+title: Visualizing prediction error
+description: And clearly showing differences between algorithms
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-08-30-viz-pred-err"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=10,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=2)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+In machine learning papers, we often need to compare the prediction
+error/accuracy of different algorithms. This post explains how to do
+that using data visualizations that are easy to read/interpret.
+
+## Example: gradient descent learning of binary classification models
+
+Classification is a machine learning problem that has been widely
+studied for the last few decades. Binary classification is the special
+case when there are two possible classes to predict (spam vs normal
+email, cat vs dog in images, etc). To evaluate the prediction accuracy
+of learned binary classification models, we often use the Area Under
+the ROC Curve, because it allows fair comparison, even when the
+distribution of labels is unbalanced (for example, 1% positive/spam
+and 99% negative/normal email).
+
+In our recent [JMLR'23](https://jmlr.org/papers/v24/21-0751.html)
+paper, we proposed the AUM loss function, which can be used in
+gradient descent learning algorithms, to optimize ROC curves.
+Recently I did a computational experiment to compare this loss
+function to others, via the following setup.
+
+* We were motivated by the following question: Can gradient descent
+  using the AUM loss result in faster computation of a model with good
+  generalization properties? (large AUC on held-out data)
+* We wanted to compare the AUM loss to the standard
+  Logistic/Cross-Entropy loss used in classification, as well as the
+  all pairs squared hinge loss which is a popular relaxation of the
+  Mann-Whitney U statistic (and therefore a surrogate for ROC-AUC, for
+  more info see [my paper with Kyle
+  Rust](https://arxiv.org/abs/2302.11062)).
+* We analyzed four different image classification data sets, in which
+  each had 10 classes. So in each data set we converted to a binary
+  problem, by using the first class (0) as the negative/0 class, and
+  using all of the other classes as the positive/1 class. So each data
+  set had about 10% negative and 90% positive labels.
+* Data sets had different numbers of features, so were down-sampled to
+  different sizes, in order to get train times which were similar
+  between data sets. For example STL10 had the largest number of
+  features (27648), so had the smallest train set; MNIST with only 784
+  features had the largest train set.
+* Source code used to compute the result, for a given loss function
+  and learning rate, is in
+  [data_Classif.py](https://github.com/tdhock/max-generalized-auc/blob/master/data_Classif.py)
+* We tried a range of learning rates, `10^seq(-4,5)`, and three different loss functions, as can be seen in [data_Classif_batchtools.R](https://github.com/tdhock/max-generalized-auc/blob/master/data_Classif_batchtools.R).
+* For each algorithm, data set, random seed, and learning rate, we
+  used torch to initialize a random linear model, and then did 100000
+  epochs of gradient descent learning with constant step size (learning rate).
+* Then for each algorithm, data set, and random seed, we select only
+  the epoch/iteration and step size that achieved the max AUC on the
+  validation set.
+
+The results can be read from
+[data_Classif_batchtools_best_valid.csv](../assets/data_Classif_batchtools_best_valid.csv),
+as shown in the code below:
+
+```{r}
+library(data.table)
+(best.dt <- fread("../assets/data_Classif_batchtools_best_valid.csv"))
+```
+
+## Easy dot plot visualization
+
+A visualization method which is simple to code is shown below:
+
+```{r dot}
+library(ggplot2)
+ggplot()+
+  geom_point(aes(
+    auc, loss),
+    data=best.dt)+
+  facet_grid(. ~ data.name)
+```
+
+The plot above shows four dots for each loss and data set. Already we
+can see that loss=AUM tends to have the largest `auc` values, in each
+data set. Rather than showing the four data sets using the same X axis
+scale, we can show more subtle differences, by allowing each data set
+to have its own X axis scale, as below.
+
+```{r dot-scale-free}
+ggplot()+
+  geom_point(aes(
+    auc, loss),
+    data=best.dt)+
+  facet_grid(. ~ data.name, scales="free", labeller=label_both)
+```
+
+Above we see each data set has its own scale, but some of the tick
+marks are not readable. This can be fixed by specifying non-default
+panel spacing values in the theme, as below.
+
+```{r dot-panel-space}
+ggplot()+
+  geom_point(aes(
+    auc, loss),
+    data=best.dt)+
+  facet_grid(. ~ data.name, scales="free", labeller=label_both)+
+  theme(
+    panel.spacing=grid::unit(1.5, "lines"))
+```
+
+In the plot above there is now another issue: the last X tick mark
+goes off the right edge of the plot. To fix that we need to adjust the
+plot margin, as below.
+
+```{r dot-plot-margin}
+ggplot()+
+  geom_point(aes(
+    auc, loss),
+    data=best.dt)+
+  facet_grid(. ~ data.name, scales="free", labeller=label_both)+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))
+```
+
+The plot above looks like a reasonable summary of the results, but the labels could be improved.
+
+* We could explain more details about each algorithm in the Y axis labels.
+* We could simplify the panel/facet variable names, `data.name` above, to simply `Data`, as below.
+* We could use the more common capital `AUC` rather than lower `auc`, and explain that it is the max on the validation set.
+
+```{r dot-labels}
+loss2show <- rev(c(
+  Logistic="Logistic/Cross-entropy\n(classic baseline)",
+  SquaredHinge="All Pairs Squared Hinge\n(recent alternative)",
+  AUM="AUM=Area Under Min(FP,FN)\n(proposed complex loss)",
+  NULL))
+best.dt[, `:=`(
+  Loss = factor(loss2show[loss], loss2show),
+  Data = data.name
+)]
+ggplot()+
+  geom_point(aes(
+    auc, Loss),
+    data=best.dt)+
+  facet_grid(. ~ Data, scales="free", labeller=label_both)+
+  scale_x_continuous(
+    "Max validation AUC (4 random initializations)")+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))
+```
+
+Note the `Loss` names in code above is arranged to be consistent with
+their display in the plot above: the `Loss` column factor levels come
+from `loss2show`, and are used to determine the order of display of
+the tick marks in the Y axis.
+
+## Display mean and standard deviation
+
+Whereas in the previous section we displayed each random seed as a
+different dot, below we compute and plot the mean and SD over random seeds.
+And while we are at it, we can also compute the range (min and max), for the AUC as well as for the number of gradient descent epochs.
+
+```{r}
+(best.wide <- dcast(
+  best.dt,
+  Data + Loss ~ .,
+  list(mean, sd, length, min, max),
+  value.var=c("auc","step_number")))
+```
+
+In the result table above, we also compute the `length` to double
+check that the mean/etc was indeed taken over the four random seeds.
+The code/plot below only uses the mean.
+
+```{r mean-only}
+ggplot()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  facet_grid(. ~ Data, labeller=label_both, scales="free")+
+  scale_x_continuous(
+    "Max validation AUC (Mean over 4 random initializations)")
+```
+
+The plot above is not very useful for comparing the different Loss
+functions, because it only shows the mean, without showing any measure
+of the variance. We fix that in the code/plot below, by computing `lo`
+and `hi` limits to display based on the SD.
+
+```{r mean-sd}
+best.wide[, `:=`(
+  lo = auc_mean-auc_sd,
+  hi = auc_mean+auc_sd
+)]
+ggplot()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    lo, Loss,
+    xend=hi, yend=Loss),
+    data=best.wide)+
+  facet_grid(. ~ Data, labeller=label_both, scales="free")+
+  scale_x_continuous(
+    "Max validation AUC (Mean ± SD over 4 random initializations)")
+```
+
+The plot above is much better, because it shows the SD as well as the mean.
+We could additionally write the values of mean and SD, as below.
+
+```{r mean-sd-text-mid}
+ggplot()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    lo, Loss,
+    xend=hi, yend=Loss),
+    data=best.wide)+
+  geom_text(aes(
+    auc_mean, Loss,
+    label=sprintf(
+      "%.4f±%.4f", auc_mean, auc_sd)),
+    size=3,
+    vjust=1.5,
+    data=best.wide)+
+  facet_grid(. ~ Data, labeller=label_both, scales="free")+
+  scale_x_continuous(
+    "Max validation AUC (Mean ± SD over 4 random initializations)")
+```
+
+Above, only some of the text is readable, and others go outside of the panels.
+To fix this, we can use `aes(hjust)`:
+
+* The default `hjust=0.5`, used in the plot above, draws the text centered around the mean value.
+* if the mean is less than the mid point of the panel X axis, then we
+  can use `hjust=0` which means text will be left justified with the
+  mean value as the limit. In other words, the text will start writing
+  from the mean value, and go to the right of the mean value, but is
+  guaranteed to not go left of the mean value, so it will not go off
+  the panel to the left.
+* otherwise, we can use `hjust=1` which means text will be right
+  justified to the mean value.
+  
+To get this scheme to work, we need to compute the mid-point on the X
+axis (auc) of each panel, which we do in the code below.
+
+```{r mean-sd-aes-hjust}
+best.wide[
+, mid := (min(lo)+max(hi))/2
+, by=Data]
+ggplot()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_point(aes(
+    auc_mean, Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    lo, Loss,
+    xend=hi, yend=Loss),
+    data=best.wide)+
+  geom_text(aes(
+    auc_mean, Loss,
+    hjust=ifelse(auc_mean<mid, 0, 1),
+    label=sprintf(
+      "%.4f±%.4f", auc_mean, auc_sd)),
+    size=3,
+    vjust=1.5,
+    data=best.wide)+
+  facet_grid(. ~ Data, labeller=label_both, scales="free")+
+  scale_x_continuous(
+    "Max validation AUC (Mean ± SD over 4 random initializations)")
+```
+
+The plot above has text that can be read to determine the mean and SD values of each loss, in each data set.
+
+## Display accuracy and computation time in scatter plot
+
+In the plots above, we only examined prediction accuracy. Below we
+additionally examine the number of iterations/epochs of gradient
+descent, in order to determine which loss function results in fastest learning.
+
+```{r scatter}
+ggplot()+
+  theme_bw()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    legend.key.spacing.y=grid::unit(1, "lines"),
+    axis.text.x=element_text(angle=30, hjust=1),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_point(aes(
+    auc_mean, step_number_mean,
+    color=Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    auc_min, step_number_mean,
+    color=Loss,
+    xend=auc_max, yend=step_number_mean),
+    data=best.wide)+
+  geom_segment(aes(
+    auc_mean, step_number_min,
+    color=Loss,
+    xend=auc_mean, yend=step_number_max),
+    data=best.wide)+
+  facet_wrap("Data", nrow=1, labeller=label_both, scales="free")+
+  scale_y_log10(
+    "Gradient descent epochs\n(using best learning rate)")+
+  scale_x_continuous(
+    "Best validation AUC (dot=mean, segments=range over 4 random initializations)")
+```
+
+In the plot above, we again see Best validation AUC on the X axis, and
+we see number of epochs on the Y axis. So we can see that the AUM loss
+has largest Best validation AUC (so AUM can be more accurate), as well
+as comparable/smaller number of epochs (so AUM can be faster). However
+there are a couple of details worth fixing, for improved clarity:
+
+* The default color scale in ggplot2 results in a blue and green which
+  can be difficult to distinguish, so I recommend using Cynthia
+  Brewer's color palettes, such as
+  [Dark2](https://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=3).
+* Some data/segments go outside the range of the Y axis ticks, which
+  can make the Y axis difficult to read, so we can use `geom_blank` to
+  increase the Y axis range.
+
+```{r scatter-improved}
+dput(RColorBrewer::brewer.pal(3,"Dark2"))
+loss.colors <- c("black", "#D95F02", "#7570B3")
+names(loss.colors) <- loss2show
+p <- function(Data,x,y)data.table(Data,x,y)
+blank.dt <- rbind(
+  p("CIFAR10",0.8,100),
+  p("MNIST",0.99,c(10,100000)),
+  p("STL10",0.8,30))
+ggplot()+
+  theme_bw()+
+  theme(
+    plot.margin=grid::unit(c(0,1,0,0), "lines"),
+    legend.key.spacing.y=grid::unit(1, "lines"),
+    axis.text.x=element_text(angle=30, hjust=1),
+    panel.spacing=grid::unit(1.5, "lines"))+
+  geom_blank(aes(x, y), data=blank.dt)+
+  geom_point(aes(
+    auc_mean, step_number_mean,
+    color=Loss),
+    shape=1,
+    data=best.wide)+
+  geom_segment(aes(
+    auc_min, step_number_mean,
+    color=Loss,
+    xend=auc_max, yend=step_number_mean),
+    data=best.wide)+
+  geom_segment(aes(
+    auc_mean, step_number_min,
+    color=Loss,
+    xend=auc_mean, yend=step_number_max),
+    data=best.wide)+
+  facet_wrap("Data", nrow=1, labeller=label_both, scales="free")+
+  scale_color_manual(
+    values=loss.colors)+
+  scale_y_log10(
+    "Gradient descent epochs\n(using best learning rate)")+
+  scale_x_continuous(
+    "Best validation AUC (dot=mean, segments=range over 4 random initializations)")
+```
+
+Note above how the Y axes have expanded, and now there are tick marks
+above the range of the data/segments, which makes the Y axis easier to
+read. Also the color legend has changed: I use black for the proposed
+method, and two other colors from Cynthia Brewer's Dark2 palette.
+
+## Conclusions
+
+Our goal was to explore how machine learning error/accuracy rates can be visualized, in order to compare different algorithms. 
+We discussed various techniques for creating visualizations that make it easy for the reader to compare different algorithms.
+
+## Session info
+
+```{r}
+sessionInfo()
+```
