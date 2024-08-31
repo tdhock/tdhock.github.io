@@ -72,12 +72,12 @@ function to others, via the following setup.
   validation set.
 
 The results can be read from
-[data_Classif_batchtools_best_valid.csv](../assets/data_Classif_batchtools_best_valid.csv),
+[data_Classif_batchtools_best_valid.csv](/assets/data_Classif_batchtools_best_valid.csv),
 as shown in the code below:
 
 ```{r}
 library(data.table)
-(best.dt <- fread("/assets/data_Classif_batchtools_best_valid.csv"))
+(best.dt <- fread("../assets/data_Classif_batchtools_best_valid.csv"))
 ```
 
 ## Easy dot plot visualization

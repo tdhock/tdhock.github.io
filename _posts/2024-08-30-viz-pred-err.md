@@ -58,17 +58,74 @@ function to others, via the following setup.
   validation set.
 
 The results can be read from
-[data_Classif_batchtools_best_valid.csv](../assets/data_Classif_batchtools_best_valid.csv),
+[data_Classif_batchtools_best_valid.csv](/assets/data_Classif_batchtools_best_valid.csv),
 as shown in the code below:
 
 
 ``` r
 library(data.table)
-(best.dt <- fread("/assets/data_Classif_batchtools_best_valid.csv"))
 ```
 
 ```
-## Error in fread("/assets/data_Classif_batchtools_best_valid.csv"): File '/assets/data_Classif_batchtools_best_valid.csv' does not exist or is non-readable. getwd()=='/home/tdhock/tdhock.github.io/_posts'
+## data.table 1.16.0 using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+``` r
+(best.dt <- fread("../assets/data_Classif_batchtools_best_valid.csv"))
+```
+
+```
+##        data.name     N         loss  seed    lr step_number   loss_value       auc
+##           <char> <int>       <char> <int> <num>       <int>        <num>     <num>
+##  1:      CIFAR10  5623          AUM     1 1e+00          45 5.196870e+01 0.8220866
+##  2:      CIFAR10  5623          AUM     2 1e+04          40 5.412949e+05 0.8192649
+##  3:      CIFAR10  5623          AUM     3 1e+05          55 4.929346e+06 0.8197657
+##  4:      CIFAR10  5623          AUM     4 1e+03          29 4.944706e+04 0.8211118
+##  5:      CIFAR10  5623     Logistic     1 1e+01          63 1.137827e+02 0.8084200
+##  6:      CIFAR10  5623     Logistic     2 1e+05           7 6.490934e+05 0.8177584
+##  7:      CIFAR10  5623     Logistic     3 1e+01          12 1.027919e+02 0.8096859
+##  8:      CIFAR10  5623     Logistic     4 1e+04          13 1.202190e+05 0.8072651
+##  9:      CIFAR10  5623 SquaredHinge     1 1e+03           1 1.744445e+07 0.7710211
+## 10:      CIFAR10  5623 SquaredHinge     2 1e+00           1 1.163525e+03 0.7354803
+## 11:      CIFAR10  5623 SquaredHinge     3 1e+00           8 2.199932e+09 0.7309735
+## 12:      CIFAR10  5623 SquaredHinge     4 1e+05           1 1.974501e+11 0.7753759
+## 13: FashionMNIST 10000          AUM     1 1e+02          61 1.475747e+02 0.9817591
+## 14: FashionMNIST 10000          AUM     2 1e+01          70 1.553757e+01 0.9816031
+## 15: FashionMNIST 10000          AUM     3 1e+05          75 1.575107e+05 0.9818049
+## 16: FashionMNIST 10000          AUM     4 1e+02          67 1.507560e+02 0.9820311
+## 17: FashionMNIST 10000     Logistic     1 1e+00         397 8.089332e+00 0.9408162
+## 18: FashionMNIST 10000     Logistic     2 1e+02        1125 6.918590e+02 0.9405631
+## 19: FashionMNIST 10000     Logistic     3 1e+02        1213 6.432875e+02 0.9414778
+## 20: FashionMNIST 10000     Logistic     4 1e+03         931 7.283925e+03 0.9408533
+## 21: FashionMNIST 10000 SquaredHinge     1 1e+01          71 4.527093e-02 0.9781764
+## 22: FashionMNIST 10000 SquaredHinge     2 1e+01          94 1.379243e-01 0.9808044
+## 23: FashionMNIST 10000 SquaredHinge     3 1e+01          47 5.958961e-02 0.9759747
+## 24: FashionMNIST 10000 SquaredHinge     4 1e+01          23 4.981834e-02 0.9650889
+## 25:        MNIST 18032          AUM     1 1e+01          28 3.038475e+00 0.9967078
+## 26:        MNIST 18032          AUM     2 1e+03          36 3.333767e+02 0.9967440
+## 27:        MNIST 18032          AUM     3 1e+03          29 2.631508e+02 0.9969475
+## 28:        MNIST 18032          AUM     4 1e+02          34 2.607299e+01 0.9970675
+## 29:        MNIST 18032     Logistic     1 1e+00       45322 7.714394e+00 0.9899026
+## 30:        MNIST 18032     Logistic     2 1e+00       44783 7.678055e+00 0.9898945
+## 31:        MNIST 18032     Logistic     3 1e+00       44620 7.705319e+00 0.9899023
+## 32:        MNIST 18032     Logistic     4 1e+00       44829 7.701845e+00 0.9901057
+## 33:        MNIST 18032 SquaredHinge     1 1e+02         215 1.577004e-02 0.9964240
+## 34:        MNIST 18032 SquaredHinge     2 1e+02         178 1.847402e-02 0.9968762
+## 35:        MNIST 18032 SquaredHinge     3 1e+02         158 1.802334e-02 0.9968006
+## 36:        MNIST 18032 SquaredHinge     4 1e+02         225 1.207210e-02 0.9969883
+## 37:        STL10  1778          AUM     1 1e+01          22 2.455220e+03 0.8432584
+## 38:        STL10  1778          AUM     2 1e+00          21 2.232408e+02 0.8457865
+## 39:        STL10  1778          AUM     3 1e+05          23 2.420980e+07 0.8483989
+## 40:        STL10  1778          AUM     4 1e+00          13 2.384768e+02 0.8461657
+## 41:        STL10  1778     Logistic     1 1e+03          17 1.080996e+05 0.8076966
+## 42:        STL10  1778     Logistic     2 1e+02           2 6.999322e+03 0.8243258
+## 43:        STL10  1778     Logistic     3 1e+03           5 1.096540e+05 0.8046910
+## 44:        STL10  1778     Logistic     4 1e+01          14 1.213560e+03 0.8106742
+## 45:        STL10  1778 SquaredHinge     1 1e-01           1 5.429723e+03 0.7627528
+## 46:        STL10  1778 SquaredHinge     2 1e+05           1 2.601109e+16 0.7589888
+## 47:        STL10  1778 SquaredHinge     3 1e+01           6 4.489175e+34 0.7541152
+## 48:        STL10  1778 SquaredHinge     4 1e-01           1 2.382808e+02 0.8266292
+##        data.name     N         loss  seed    lr step_number   loss_value       auc
 ```
 
 ## Easy dot plot visualization
@@ -602,7 +659,7 @@ proposed.loss <- "AUM"
 ```
 
 ```
-## [1] "Logistic"     "SquaredHinge"
+## Error in .checkTypos(e, names_x): Object 'proposed' not found amongst [data.name, N, loss, seed, lr, step_number, loss_value, auc, Loss, Data]
 ```
 
 ``` r
@@ -614,41 +671,7 @@ proposed.loss <- "AUM"
 ```
 
 ```
-##         N         Data  seed       AUM   other.loss other.auc
-##     <int>       <char> <int>     <num>       <fctr>     <num>
-##  1:  1778        STL10     1 0.8432584     Logistic 0.8076966
-##  2:  1778        STL10     2 0.8457865     Logistic 0.8243258
-##  3:  1778        STL10     3 0.8483989     Logistic 0.8046910
-##  4:  1778        STL10     4 0.8461657     Logistic 0.8106742
-##  5:  5623      CIFAR10     1 0.8220866     Logistic 0.8084200
-##  6:  5623      CIFAR10     2 0.8192649     Logistic 0.8177584
-##  7:  5623      CIFAR10     3 0.8197657     Logistic 0.8096859
-##  8:  5623      CIFAR10     4 0.8211118     Logistic 0.8072651
-##  9: 10000 FashionMNIST     1 0.9817591     Logistic 0.9408162
-## 10: 10000 FashionMNIST     2 0.9816031     Logistic 0.9405631
-## 11: 10000 FashionMNIST     3 0.9818049     Logistic 0.9414778
-## 12: 10000 FashionMNIST     4 0.9820311     Logistic 0.9408533
-## 13: 18032        MNIST     1 0.9967078     Logistic 0.9899026
-## 14: 18032        MNIST     2 0.9967440     Logistic 0.9898945
-## 15: 18032        MNIST     3 0.9969475     Logistic 0.9899023
-## 16: 18032        MNIST     4 0.9970675     Logistic 0.9901057
-## 17:  1778        STL10     1 0.8432584 SquaredHinge 0.7627528
-## 18:  1778        STL10     2 0.8457865 SquaredHinge 0.7589888
-## 19:  1778        STL10     3 0.8483989 SquaredHinge 0.7541152
-## 20:  1778        STL10     4 0.8461657 SquaredHinge 0.8266292
-## 21:  5623      CIFAR10     1 0.8220866 SquaredHinge 0.7710211
-## 22:  5623      CIFAR10     2 0.8192649 SquaredHinge 0.7354803
-## 23:  5623      CIFAR10     3 0.8197657 SquaredHinge 0.7309735
-## 24:  5623      CIFAR10     4 0.8211118 SquaredHinge 0.7753759
-## 25: 10000 FashionMNIST     1 0.9817591 SquaredHinge 0.9781764
-## 26: 10000 FashionMNIST     2 0.9816031 SquaredHinge 0.9808044
-## 27: 10000 FashionMNIST     3 0.9818049 SquaredHinge 0.9759747
-## 28: 10000 FashionMNIST     4 0.9820311 SquaredHinge 0.9650889
-## 29: 18032        MNIST     1 0.9967078 SquaredHinge 0.9964240
-## 30: 18032        MNIST     2 0.9967440 SquaredHinge 0.9968762
-## 31: 18032        MNIST     3 0.9969475 SquaredHinge 0.9968006
-## 32: 18032        MNIST     4 0.9970675 SquaredHinge 0.9969883
-##         N         Data  seed       AUM   other.loss other.auc
+## Error in eval(expr, envir, enclos): objet 'other.loss.vec' introuvable
 ```
 
 The table above has a column for the Max Validation AUC of the proposed method (AUM), and has the Max Validation AUC of the other methods in the `other.auc` column. We can then run the T-test for each value of `other.loss`, using the code below.
@@ -665,16 +688,7 @@ The table above has a column for the Max Validation AUC of the proposed method (
 ```
 
 ```
-##        N         Data   other.loss mean.of.diff     p.paired mean.proposed mean.other   p.unpaired
-##    <int>       <char>       <fctr>        <num>        <num>         <num>      <num>        <num>
-## 1:  1778        STL10     Logistic 3.405548e-02 2.580750e-03     0.8459024  0.8118469 1.564229e-03
-## 2:  5623      CIFAR10     Logistic 9.774872e-03 2.149806e-02     0.8205572  0.8107824 1.108887e-02
-## 3: 10000 FashionMNIST     Logistic 4.087194e-02 1.071213e-07     0.9817996  0.9409276 1.010710e-09
-## 4: 18032        MNIST     Logistic 6.915422e-03 5.360106e-07     0.9968667  0.9899513 7.150765e-09
-## 5:  1778        STL10 SquaredHinge 7.028090e-02 1.313712e-02     0.8459024  0.7756215 1.290625e-02
-## 6:  5623      CIFAR10 SquaredHinge 6.734453e-02 4.423756e-03     0.8205572  0.7532127 5.033883e-03
-## 7: 10000 FashionMNIST SquaredHinge 6.788444e-03 7.539559e-02     0.9817996  0.9750111 7.193508e-02
-## 8: 18032        MNIST SquaredHinge 9.439573e-05 1.779168e-01     0.9968667  0.9967723 2.763356e-01
+## Error in eval(expr, envir, enclos): objet 'best.loss.tall' introuvable
 ```
 
 The table above has a row for each T-test, one for each data set and other loss function (other than the proposed AUM).
@@ -685,6 +699,13 @@ The final step is to visualize these data on the plot, as in the code below.
 test.proposed[
 , other.Loss := Loss_factor(other.loss)
 ]
+```
+
+```
+## Error in eval(expr, envir, enclos): objet 'test.proposed' introuvable
+```
+
+``` r
 ggplot()+
   theme_bw()+
   theme(
@@ -728,7 +749,9 @@ ggplot()+
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
 
-![plot of chunk p-others](/assets/img/2024-08-30-viz-pred-err/p-others-1.png)
+```
+## Error in eval(expr, envir, enclos): objet 'test.proposed' introuvable
+```
 
 We can see in the plot above that there is red text and segments drawn to emphasize the p-value, and how it was computed, for each method other than the proposed AUM. There are a couple of issues though
 
@@ -785,7 +808,9 @@ ggplot()+
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
 
-![plot of chunk p-others-no-drop](/assets/img/2024-08-30-viz-pred-err/p-others-no-drop-1.png)
+```
+## Error in eval(expr, envir, enclos): objet 'test.proposed' introuvable
+```
 
 ## Display accuracy and computation time in scatter plot
 
@@ -999,10 +1024,9 @@ sessionInfo()
 ## [1] ggplot2_3.5.1     data.table_1.16.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] crayon_1.5.2       vctrs_0.6.5        cli_3.6.2          knitr_1.47         rlang_1.1.3        xfun_0.45         
-##  [7] highr_0.11         generics_0.1.3     glue_1.7.0         labeling_0.4.3     colorspace_2.1-0   scales_1.3.0      
-## [13] fansi_1.0.6        grid_4.4.1         munsell_0.5.0      evaluate_0.23      tibble_3.2.1       lifecycle_1.0.4   
-## [19] compiler_4.4.1     dplyr_1.1.4        RColorBrewer_1.1-3 pkgconfig_2.0.3    farver_2.1.1       R6_2.5.1          
-## [25] tidyselect_1.2.1   utf8_1.2.4         pillar_1.9.0       magrittr_2.0.3     tools_4.4.1        withr_3.0.0       
-## [31] gtable_0.3.4
+##  [1] vctrs_0.6.5        cli_3.6.2          knitr_1.47         rlang_1.1.3        xfun_0.45          highr_0.11        
+##  [7] generics_0.1.3     glue_1.7.0         labeling_0.4.3     colorspace_2.1-0   scales_1.3.0       fansi_1.0.6       
+## [13] grid_4.4.1         munsell_0.5.0      evaluate_0.23      tibble_3.2.1       lifecycle_1.0.4    compiler_4.4.1    
+## [19] dplyr_1.1.4        RColorBrewer_1.1-3 pkgconfig_2.0.3    farver_2.1.1       R6_2.5.1           tidyselect_1.2.1  
+## [25] utf8_1.2.4         pillar_1.9.0       magrittr_2.0.3     tools_4.4.1        withr_3.0.0        gtable_0.3.4
 ```
