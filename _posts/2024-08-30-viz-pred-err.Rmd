@@ -416,10 +416,10 @@ ggplot()+
 ```
 
 In the plot above, we show the p-value, which is typically intepreted by comparing with the traditional significance threshold of 0.05, which corresponds to a 5% false positive rate. Seeing a p-value of 0.05 means that you have observed a difference that you would see about 5% of the time (simply due to random variation/noise), if there is really no difference between methods. So if we are trying to argue that one algorithm is better, then we want to see small p-values, which mean that we have observed differences that are so large, that it would be extremely unlikely to see such a difference by random chance.
-* the difference in MNIST is not statistically significant (p=0.17 much larger than 0.05), 
-* in FashionMNIST there is a slight difference (but we do not say significant because p=0.07 is still larger than 0.05),
-* in CIFAR10 there is a significant difference (p=0.02 is less than 0.05),
 * in STL10 there is a highly significant difference (p=0.002, order of magnitude less than 0.05).
+* in CIFAR10 there is a significant difference (p=0.02 is less than 0.05),
+* in FashionMNIST there is a slight difference (but we do not say significant because p=0.07 is still larger than 0.05),
+* the difference in MNIST is not statistically significant (p=0.17 much larger than 0.05), 
 
 Above we compared the best to the next best. An alternative is to compare the proposed to others, which we code below.
 First we reshape wider, as below.
