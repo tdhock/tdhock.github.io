@@ -519,18 +519,18 @@ ggplot()+
   theme(
     plot.margin=grid::unit(c(0,1,0,0), "lines"),
     panel.spacing=grid::unit(1.5, "lines"))+
-  geom_text(aes(
-    m1, Inf, label=sprintf("Diff=%.4f P=%.4f ", mean.of.diff, p.paired)),
-    data=test.dt,
-    size=text.size,
-    vjust=1.2,
-    hjust=1)+
   geom_rect(aes(
     xmin=m2, xmax=m1,
     ymin=-Inf, ymax=Inf),
     fill=p.color,
     alpha=0.5,
     data=test.dt)+
+  geom_text(aes(
+    m1, Inf, label=sprintf("Diff=%.4f P=%.4f ", mean.of.diff, p.paired)),
+    data=test.dt,
+    size=text.size,
+    vjust=1.2,
+    hjust=1)+
   geom_point(aes(
     auc_mean, Loss),
     shape=1,
