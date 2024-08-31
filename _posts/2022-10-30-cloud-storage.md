@@ -13,8 +13,7 @@ At Sherbrooke we have a couple of options,
   space](https://docs.alliancecan.ca/wiki/Storage_and_file_management#Filesystem_quotas_and_policies):
   1TB, [shareable with collaborators via copy to globus shared
   endpoint](https://docs.alliancecan.ca/wiki/Sharing_data).
-- Another publishing option is github pages, but there are space
-  limitations: [100MiB per file max in regular repos](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github), and [git large file storage is now an option](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage).
+- [EspaceWeb](https://www.usherbrooke.ca/services-informatiques/repertoire/applications/espace-web#acc-4085-1131): 1GB, web access.
 
 ## NAU
 
@@ -49,3 +48,9 @@ and those files can be shared via:
   sharing. You run publish_data on monsoon, then others can access
   here,
   https://rcdata.nau.edu/genomic-ml/animint2-manual/Ch02-ggplot2.html
+
+## Anybody
+
+- Another publishing option is github pages, but there are space
+  limitations: [100MiB per file max in regular repos](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github), and [git large file storage is now an option](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage).
+- Google Drive: 10GB.
