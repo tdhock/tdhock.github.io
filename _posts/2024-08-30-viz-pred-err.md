@@ -64,13 +64,6 @@ as shown in the code below:
 
 ``` r
 library(data.table)
-```
-
-```
-## data.table 1.16.0 using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
-```
-
-``` r
 (best.dt <- fread("../assets/data_Classif_batchtools_best_valid.csv"))
 ```
 
@@ -655,11 +648,11 @@ Then we define the proposed method column, and reshape the other columns taller,
 
 ``` r
 proposed.loss <- "AUM"
-(other.loss.vec <- best.dt[loss!=proposed, unique(loss)])
+(other.loss.vec <- best.dt[loss!=proposed.loss, unique(loss)])
 ```
 
 ```
-## Error in .checkTypos(e, names_x): Object 'proposed' not found amongst [data.name, N, loss, seed, lr, step_number, loss_value, auc, Loss, Data]
+## [1] "Logistic"     "SquaredHinge"
 ```
 
 ``` r
@@ -671,7 +664,41 @@ proposed.loss <- "AUM"
 ```
 
 ```
-## Error in eval(expr, envir, enclos): objet 'other.loss.vec' introuvable
+##         N         Data  seed       AUM   other.loss other.auc
+##     <int>       <char> <int>     <num>       <fctr>     <num>
+##  1:  1778        STL10     1 0.8432584     Logistic 0.8076966
+##  2:  1778        STL10     2 0.8457865     Logistic 0.8243258
+##  3:  1778        STL10     3 0.8483989     Logistic 0.8046910
+##  4:  1778        STL10     4 0.8461657     Logistic 0.8106742
+##  5:  5623      CIFAR10     1 0.8220866     Logistic 0.8084200
+##  6:  5623      CIFAR10     2 0.8192649     Logistic 0.8177584
+##  7:  5623      CIFAR10     3 0.8197657     Logistic 0.8096859
+##  8:  5623      CIFAR10     4 0.8211118     Logistic 0.8072651
+##  9: 10000 FashionMNIST     1 0.9817591     Logistic 0.9408162
+## 10: 10000 FashionMNIST     2 0.9816031     Logistic 0.9405631
+## 11: 10000 FashionMNIST     3 0.9818049     Logistic 0.9414778
+## 12: 10000 FashionMNIST     4 0.9820311     Logistic 0.9408533
+## 13: 18032        MNIST     1 0.9967078     Logistic 0.9899026
+## 14: 18032        MNIST     2 0.9967440     Logistic 0.9898945
+## 15: 18032        MNIST     3 0.9969475     Logistic 0.9899023
+## 16: 18032        MNIST     4 0.9970675     Logistic 0.9901057
+## 17:  1778        STL10     1 0.8432584 SquaredHinge 0.7627528
+## 18:  1778        STL10     2 0.8457865 SquaredHinge 0.7589888
+## 19:  1778        STL10     3 0.8483989 SquaredHinge 0.7541152
+## 20:  1778        STL10     4 0.8461657 SquaredHinge 0.8266292
+## 21:  5623      CIFAR10     1 0.8220866 SquaredHinge 0.7710211
+## 22:  5623      CIFAR10     2 0.8192649 SquaredHinge 0.7354803
+## 23:  5623      CIFAR10     3 0.8197657 SquaredHinge 0.7309735
+## 24:  5623      CIFAR10     4 0.8211118 SquaredHinge 0.7753759
+## 25: 10000 FashionMNIST     1 0.9817591 SquaredHinge 0.9781764
+## 26: 10000 FashionMNIST     2 0.9816031 SquaredHinge 0.9808044
+## 27: 10000 FashionMNIST     3 0.9818049 SquaredHinge 0.9759747
+## 28: 10000 FashionMNIST     4 0.9820311 SquaredHinge 0.9650889
+## 29: 18032        MNIST     1 0.9967078 SquaredHinge 0.9964240
+## 30: 18032        MNIST     2 0.9967440 SquaredHinge 0.9968762
+## 31: 18032        MNIST     3 0.9969475 SquaredHinge 0.9968006
+## 32: 18032        MNIST     4 0.9970675 SquaredHinge 0.9969883
+##         N         Data  seed       AUM   other.loss other.auc
 ```
 
 The table above has a column for the Max Validation AUC of the proposed method (AUM), and has the Max Validation AUC of the other methods in the `other.auc` column. We can then run the T-test for each value of `other.loss`, using the code below.
@@ -688,7 +715,16 @@ The table above has a column for the Max Validation AUC of the proposed method (
 ```
 
 ```
-## Error in eval(expr, envir, enclos): objet 'best.loss.tall' introuvable
+##        N         Data   other.loss mean.of.diff     p.paired mean.proposed mean.other   p.unpaired
+##    <int>       <char>       <fctr>        <num>        <num>         <num>      <num>        <num>
+## 1:  1778        STL10     Logistic 3.405548e-02 2.580750e-03     0.8459024  0.8118469 1.564229e-03
+## 2:  5623      CIFAR10     Logistic 9.774872e-03 2.149806e-02     0.8205572  0.8107824 1.108887e-02
+## 3: 10000 FashionMNIST     Logistic 4.087194e-02 1.071213e-07     0.9817996  0.9409276 1.010710e-09
+## 4: 18032        MNIST     Logistic 6.915422e-03 5.360106e-07     0.9968667  0.9899513 7.150765e-09
+## 5:  1778        STL10 SquaredHinge 7.028090e-02 1.313712e-02     0.8459024  0.7756215 1.290625e-02
+## 6:  5623      CIFAR10 SquaredHinge 6.734453e-02 4.423756e-03     0.8205572  0.7532127 5.033883e-03
+## 7: 10000 FashionMNIST SquaredHinge 6.788444e-03 7.539559e-02     0.9817996  0.9750111 7.193508e-02
+## 8: 18032        MNIST SquaredHinge 9.439573e-05 1.779168e-01     0.9968667  0.9967723 2.763356e-01
 ```
 
 The table above has a row for each T-test, one for each data set and other loss function (other than the proposed AUM).
@@ -699,13 +735,6 @@ The final step is to visualize these data on the plot, as in the code below.
 test.proposed[
 , other.Loss := Loss_factor(other.loss)
 ]
-```
-
-```
-## Error in eval(expr, envir, enclos): objet 'test.proposed' introuvable
-```
-
-``` r
 ggplot()+
   theme_bw()+
   theme(
@@ -749,9 +778,7 @@ ggplot()+
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
 
-```
-## Error in eval(expr, envir, enclos): objet 'test.proposed' introuvable
-```
+![plot of chunk p-others](/assets/img/2024-08-30-viz-pred-err/p-others-1.png)
 
 We can see in the plot above that there is red text and segments drawn to emphasize the p-value, and how it was computed, for each method other than the proposed AUM. There are a couple of issues though
 
@@ -808,9 +835,7 @@ ggplot()+
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
 
-```
-## Error in eval(expr, envir, enclos): objet 'test.proposed' introuvable
-```
+![plot of chunk p-others-no-drop](/assets/img/2024-08-30-viz-pred-err/p-others-no-drop-1.png)
 
 ## Display accuracy and computation time in scatter plot
 

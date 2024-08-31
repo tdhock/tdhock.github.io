@@ -433,7 +433,7 @@ Then we define the proposed method column, and reshape the other columns taller,
 
 ```{r}
 proposed.loss <- "AUM"
-(other.loss.vec <- best.dt[loss!=proposed, unique(loss)])
+(other.loss.vec <- best.dt[loss!=proposed.loss, unique(loss)])
 (best.loss.tall <- melt(
   best.loss.wide,
   measure.vars=other.loss.vec,
