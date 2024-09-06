@@ -4,9 +4,14 @@ title: Research student application
 description: Please read if you want to do research under my supervision
 ---
 
+To work in the LASSO lab, please write an application, with section
+headings corresponding to the sections below. Ideally, please typeset
+your response using LaTeX and/or Overleaf, and include a bibliography
+with at least one citation to the paper you read.
+
 ## Mentorship plan reading and writing application
 
-Before doing this application, please first read [my mentorship
+Please read [my mentorship
 plan](https://tdhock.github.io/blog/2022/research-mentorship-plan/),
 which will help you understand what I expect of my research students.
 In the first section of your application, please write a summary of
@@ -15,9 +20,17 @@ copy word for word from my mentorship plan). Also write about what
 kind of work/study style you have, and what frequency/kind of
 interactions with me you expect to have.
 
+## Code of conduct reading and writing application
+
+Please read the LASSO lab [Code of
+Conduct](https://tdhock.github.io/blog/2024/code-of-conduct/), which
+is a set of rules designed to encourage diversity, equity, and
+inclusion. In your application, please write a brief summary of your
+understanding of the Code of Conduct.
+
 ## Technical reading and writing application
 
-To work in the machine learning research lab, it is important to be
+To work in the LASSO lab, it is important to be
 able to read and understand machine learning research papers. It is
 also important to have excellent written communication
 skills. Therefore I need to judge your reading/writing skills and the
@@ -25,8 +38,8 @@ quality of your scientific comprehension/ideas. Please take some time
 to choose [one of my
 publications](https://tdhock.github.io/publications/) that is
 interesting to you, and for which you think there would be an
-interesting future research project/publication. Then write me an
-email, in your own words (not copying from the publication), with
+interesting future research project/publication. Then write a summary,
+in your own words (not copying from the publication), that contains
 
 * Background: what is the problem setting and data? For example, in regression the data is a n x p input/feature matrix, an n-vector of outputs/labels, problem is learning a function which takes a p-dimensional input/feature vector and returns a real-valued output/prediction.
 * Previous work: what are the existing approaches for that problem, and what are their drawbacks that motivate a new algorithm? For example, in regression there are linear models, neural networks, boosting, etc.
@@ -34,7 +47,7 @@ email, in your own words (not copying from the publication), with
 * Results: what comparisons were done to show that the new idea is interesting/useful in theory and/or in practice? For example, you could compare the test accuracy and computation time for different regression algorithms on various data sets.
 * Future work: what are some of your ideas for new research papers that could be written as a follow up to this one? Justify why these ideas are sufficiently novel that they warrant a new paper describing them. Also describe what kinds of theoretical and empirical arguments you would need in that future paper. Please answer this point very specifically, because it will be helpful to define your first research project with me.
 
-Make sure to use full sentences and paragraphs, and follow [Mark Schmidt's writing guidelines](https://www.cs.ubc.ca/~schmidtm/Courses/Notes/writing.pdf), so I can evaluate the quality of your English writing skills. Ideally, please typeset your response using LaTeX and/or Overleaf, and include section headings and a bibliography with at least one citation to the paper you read.
+Make sure to use full sentences and paragraphs, and follow [Mark Schmidt's writing guidelines](https://www.cs.ubc.ca/~schmidtm/Courses/Notes/writing.pdf), so I can evaluate the quality of your English writing skills. 
 
 ## Coding application
 
@@ -63,3 +76,5 @@ previous projects, which answers the following questions.
   * Conclusion: last sentence of paragraph should summarize what new understanding you have as a result of this figure
 
 Updated 6 Aug 2024: added whole paragraph about your figure.
+
+Updated 6 Sep 2024: added code of conduct.
