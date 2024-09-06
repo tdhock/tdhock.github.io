@@ -1,0 +1,138 @@
+---
+layout: post
+title: Visualizing prediction error
+description: And clearly showing differences between algorithms
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-08-30-viz-pred-err"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=10,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=2)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+In R the main data structure is `data.frame`, which is a 2d object,
+like a matrix, but the columns may have different types.
+Handling 
+
+```{r}
+Rdatatable.members <- gh::gh("/orgs/Rdatatable/members")
+Rdatatable.roles <- gh::gh("/orgs/Rdatatable/organization-roles")
+str(Rdatatable.members[1:2])
+library(data.table)
+do.call(rbind, lapply(Rdatatable.members, as.data.table))
+dt.list.col <- data.table(L=Rdatatable.members)
+tidyr::unnest_wider(dt.list.col, L)
+dt.list.col[, L[[1]], by=.I]
+hoist.result <- tidyr::hoist(dt.list.col, L, "login", "type")
+dt.list.col
+
+data("gh_repos",package="repurrrsive")
+length(gh_repos)
+repos_tib <- tibble::tibble(repo = gh_repos)
+repos_tib_longer <- tidyr::unnest_longer(repos_tib, repo)
+hoist.result <- tidyr::hoist(
+  repos_tib_longer, repo,
+  login = c("owner", "login"),
+  name = "name",
+  homepage = "homepage",
+  watchers = "watchers_count") |>
+  dplyr::select(-repo)
+spec <- unnest::s(
+  stack = TRUE,
+  unnest::s(
+    stack = TRUE,
+    unnest::s("name"),
+    unnest::s("homepage"),
+    unnest::s("watchers_count", as = "watchers"),
+    unnest::s(
+      "owner",
+      unnest::s("login"))))
+unnest.result <- unnest::unnest(gh_repos, spec)
+
+get_repo_row <- function(repo){
+  one.row <- with(repo, data.table(name, watchers=watchers_count))
+  one.row$login <- repo$owner$login
+  one.row$homepage <- if(is.null(repo$homepage))NA_character_ else repo$homepage
+  one.row
+}
+data.table(L=gh_repos)[, {
+  data.table(repos.list=L[[1]])[, {
+    get_repo_row(repos.list[[1]])
+  }, by=.(repo=.I)] ## we still get column named I?
+}, by=.(user=.I)]
+
+repo_dt <- data.table(L=gh_repos)[, {
+  data.table(Rlist=L[[1]])
+}, by=.I]
+repo_dt[, {
+  get_repo_row(Rlist[[1]])
+}, by=.I]
+repo_dt
+
+## TODO run on faster computer.
+atime.res <- atime::atime(
+  setup={
+    N_repos <- rep(gh_repos, l=N)
+  },
+  dt_nested={
+    data.table(L=N_repos)[, {
+      data.table(repos.list=L[[1]])[, {
+        get_repo_row(repos.list[[1]])
+      }, by=.(repo=.I)] ## we still get column named I?
+    }, by=.(user=.I)]
+  }, 
+  dt_sequential={
+    repo_dt <- data.table(L=N_repos)[, {
+      data.table(Rlist=L[[1]])
+    }, by=.I]
+    repo_dt[, {
+      get_repo_row(Rlist[[1]])
+    }, by=.I]
+  },
+  hoist={
+    repos_tib <- tibble::tibble(repo = N_repos)
+    repos_tib_longer <- tidyr::unnest_longer(repos_tib, repo)
+    tidyr::hoist(
+      repos_tib_longer, repo,
+      login = c("owner", "login"),
+      name = "name",
+      homepage = "homepage",
+      watchers = "watchers_count") |>
+      dplyr::select(-repo)
+  }, 
+  unnest={
+    spec <- unnest::s(
+      stack = TRUE,
+      unnest::s(
+        stack = TRUE,
+        unnest::s("name"),
+        unnest::s("homepage"),
+        unnest::s("watchers_count", as = "watchers"),
+        unnest::s(
+          "owner",
+          unnest::s("login"))))
+    unnest::unnest(N_repos, spec)
+  }
+)  
+plot(atime.res)  
+```
+
+## Conclusions
+
+TODO
+
+## Session info
+
+```{r}
+sessionInfo()
+```
