@@ -31,9 +31,10 @@ trolling, public or private harassment, insults, inappropriate
 touching, or other unprofessional conduct.
 
 For similar codes of conduct that apply to members of the Université de Sherbrooke community more generally, please read 
-* https://www.usherbrooke.ca/respect/harcelement-et-discrimination/politique-et-procedure
-* https://www.usherbrooke.ca/respect/violences-a-caractere-sexuel/politiques-et-procedures/le-code-de-conduite
-* https://www.usherbrooke.ca/medecine/fileadmin/sites/medecine/documents_officiels/secteurs/fmss/fmss_code_conduite_v_finale_2018.pdf
+* [Harcèlement et discrimination](https://www.usherbrooke.ca/respect/harcelement-et-discrimination)
+* [Violences à caractère sexuel](https://www.usherbrooke.ca/respect/violences-a-caractere-sexuel)
+* [CODE DE CONDUITE À L’ATTENTION DU PERSONNEL, DU CORPS ENSEIGNANT ET DE LA
+COMMUNAUTÉ ÉTUDIANTE DE LA FACULTÉ DE MÉDECINE ET DES SCIENCES DE LA SANTÉ](https://www.usherbrooke.ca/medecine/fileadmin/sites/medecine/documents_officiels/secteurs/fmss/fmss_code_conduite_v_finale_2018.pdf)
 
 ### Reporting and consequences 
 
