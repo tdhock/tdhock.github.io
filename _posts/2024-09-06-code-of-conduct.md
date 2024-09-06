@@ -30,13 +30,18 @@ sexual language or imagery, derogatory comments or personal attacks,
 trolling, public or private harassment, insults, inappropriate
 touching, or other unprofessional conduct.
 
+For similar codes of conduct that apply to members of the Université de Sherbrooke community more generally, please read 
+* https://www.usherbrooke.ca/respect/harcelement-et-discrimination/politique-et-procedure
+* https://www.usherbrooke.ca/respect/violences-a-caractere-sexuel/politiques-et-procedures/le-code-de-conduite
+* https://www.usherbrooke.ca/medecine/fileadmin/sites/medecine/documents_officiels/secteurs/fmss/fmss_code_conduite_v_finale_2018.pdf
+
 ### Reporting and consequences 
 
 Members have the right and responsibility to report written/oral
 communications, and other behaviors, that are not aligned to this Code
 of Conduct, by emailing `Toby.Dylan.Hocking@usherbrooke.ca`,
 and/or the Director(s) du Département d’informatique,
-`direction-informatique@usherbrooke.ca`.
+`direction-informatique@usherbrooke.ca`. For reporting incidents more generally to the Université de Sherbrooke, please read [Procédure de signalement et de plainte en lien avec la Politique visant à prévenir et à faire cesser le harcèlement et la discrimination](https://www.usherbrooke.ca/decouvrir/fileadmin/sites/decouvrir/documents/direction/directives/2600-083.pdf).
 
 A person who has been awarded special leadership roles, or
 grant/scholarship/salary funds, and who does not follow the Code of
