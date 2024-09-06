@@ -26,7 +26,9 @@ Please read the LASSO lab [Code of
 Conduct](https://tdhock.github.io/blog/2024/code-of-conduct/), which
 is a set of rules designed to encourage diversity, equity, and
 inclusion. In your application, please write a brief summary of your
-understanding of the Code of Conduct.
+understanding of the Code of Conduct. Do you agree to comply with the
+Code of Conduct? Do you have any ideas for improving the Code of
+Conduct?
 
 ## Technical reading and writing application
 
