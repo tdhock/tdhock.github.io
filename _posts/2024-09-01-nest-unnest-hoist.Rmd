@@ -1,12 +1,12 @@
 ---
 layout: post
-title: Visualizing prediction error
-description: And clearly showing differences between algorithms
+title: Nest and un-nest operations
+description: Making and expanding list columns
 ---
 
 ```{r Ropts, echo=FALSE}
 repo.dir <- normalizePath("..")
-post.id <- "2024-08-30-viz-pred-err"
+post.id <- "2024-09-01-nest-unnest-hoist"
 fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
@@ -20,9 +20,86 @@ if(FALSE){
 }
 ```
 
+The goal of this post is to explain how `data.table` can be used to
+reshape data with list columns.
+
+## Introduction to list columns
+
 In R the main data structure is `data.frame`, which is a 2d object,
-like a matrix, but the columns may have different types.
-Handling 
+like a matrix, but the columns may have different types. Each column
+is often an atomic type, which means one of integer, double/numeric,
+character, or logical. For example, if you have an integer column,
+then each entry in that column is an integer (C int).
+
+```{r}
+library(data.table)
+(two.rows <- data.table(
+  INT=c(1L,NA_integer_),
+  NUM=c(Inf,NA_real_),
+  CHR=c("foo",NA_character_),
+  LOG=c(TRUE,NA)))
+```
+
+The above is a data table with two rows.
+List columns are useful when you have data which is more complex than a simple atomic type.
+To add a list column to the table above (which has two rows), 
+we need to make sure it has two entries.
+
+```{r}
+two.rows[, `:=`(
+  L_INT_LOG=list(1:5, NA),
+  L_NUM_LIST=list(c(3.14,NaN,-Inf), list("foo", function(x)x^2, quote(bar)))
+)][]
+```
+
+The table above has two additional list columns. Each list has two
+elements (because the table has two rows). Each element can be an R
+object of any type, which we can see using the code below:
+
+```{r}
+str(two.rows)
+```
+
+The output above shows that
+* `L_INT_LOG` is a list of two items, of types integer and logical.
+* `L_NUM_CHR` is a list of two items, of types numeric and list. This
+  internal/nested list has 3 items, of types character, function, and symbol.
+  
+## animint JSON example
+
+List columns can be useful when parsing JSON data.
+
+For example, consider data from the animint gallery.
+
+```{r}
+meta.csv <- "~/R/gallery/meta.csv"
+if(!file.exists(meta.csv)){
+  download.file("https://github.com/animint/gallery/raw/gh-pages/meta.csv", meta.csv)
+}
+meta.dt <- fread(meta.csv)
+str(meta.dt)
+```
+
+The `meta.dt` above has one row per visualization published in the
+[animint gallery](https://animint.github.io/gallery/). Each has a
+corresponding JSON plot data file, which we can download using the
+code below:
+
+```{r}
+meta.dt[, json.list := {
+  plot.json <- file.path("~/viz-json", viz_owner_repo, "plot.json")
+  if(!file.exists(plot.json)){
+    u <- sprintf("https://github.com/%s/raw/gh-pages/plot.json", viz_owner_repo)
+    dir.create(dirname(plot.json), showWarnings=FALSE, recursive = TRUE)
+    download.file(u, plot.json)
+  }
+  list(list(RJSONIO::fromJSON(plot.json)))
+}, by=.I]
+```
+
+```{r}
+names(meta.dt$json.list[[1]])
+```
 
 ```{r}
 Rdatatable.members <- gh::gh("/orgs/Rdatatable/members")
@@ -123,8 +200,8 @@ atime.res <- atime::atime(
           unnest::s("login"))))
     unnest::unnest(N_repos, spec)
   }
-)  
-plot(atime.res)  
+)
+plot(atime.res)
 ```
 
 ## Conclusions
