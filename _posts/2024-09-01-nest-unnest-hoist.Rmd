@@ -98,7 +98,33 @@ meta.dt[, json.list := {
 ```
 
 ```{r}
-names(meta.dt$json.list[[1]])
+lapply(meta.dt$json.list, names)
+```
+
+```{r}
+tidyr::unnest_wider(meta.dt, json.list)
+```
+
+```{r}
+tidyr::unnest_longer(meta.dt, json.list)
+```
+
+```{r}
+hoist.result <- tidyr::hoist(meta.dt, json.list, "geoms", "plots", "selectors")
+```
+
+```{r}
+meta.dt[, geoms := list(json.list[[1]]$geoms), by=.I]
+```
+
+```{r}
+spec <- unnest::s(
+  stack = TRUE,
+  unnest::s("geoms"),
+  unnest::s("plots"),
+      "owner",
+      unnest::s("login"))))
+unnest.result <- unnest::unnest(gh_repos, spec)
 ```
 
 ```{r}
