@@ -25,8 +25,25 @@ The goal of this post is to explore what countries and institutions are not allo
 ## Introduction 
 
 ```{r}
-"https://science.gc.ca/site/science/en/safeguarding-your-research/guidelines-and-tools-implement-research-security/sensitive-technology-research-and-affiliations-concern/named-research-organizations"
+orgs.html <- "~/canada-list-of-risky-research-orgs.html"
+if(!file.exists(orgs.html)){
+  u <- "https://science.gc.ca/site/science/en/safeguarding-your-research/guidelines-and-tools-implement-research-security/sensitive-technology-research-and-affiliations-concern/named-research-organizations"
+  download.file(u, orgs.html)
+}
 library(data.table)
+```
+
+```html
+<li><strong>A.A. Kharkevich Institute for Information Transmission Problems, IITP, Russian Academy of Sciences</strong> (Russia)</li>
+<li><strong>Academy of Military Medical Sciences</strong> (People’s Republic of China)
+<p>Known alias(es): AMMS</p>
+</li>
+<li><strong>Academy of Military Science</strong> (People’s Republic of China)
+<p>Known alias(es): AMS</p>
+</li>
+<li><strong>Aerospace Research Institute</strong> (Iran)
+<p>Known alias(es): ARI</p>
+</li>
 ```
 
 ## Conclusions
