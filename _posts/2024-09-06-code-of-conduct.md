@@ -19,6 +19,9 @@ Nous nous engageons à faire de la participation au laboratoire LASSO une expér
 Les exemples de comportements inacceptables de la part des participants comprennent l'utilisation de langage ou d'images à caractère sexuel, les commentaires désobligeants ou les attaques personnelles, le trolling, le harcèlement public ou privé, les insultes, les attouchements inappropriés ou toute autre conduite non professionnelle.
 
 Pour des codes de conduite similaires qui s'appliquent plus généralement aux membres de la communauté de l'Université de Sherbrooke, veuillez lire
+* [Savoir-être à l'UdeS](https://www.usherbrooke.ca/etudiants/sante-et-aide-a-la-personne/savoir-etre-a-udes)
+* [Parler à quelqu'un](https://www.usherbrooke.ca/savoir-etre/parler-a-quelquun)
+* [Aide à la vie étudiante](https://www.usherbrooke.ca/etudiants/sante-et-aide-a-la-personne/aide-a-la-vie-etudiante)
 * [Harcèlement et discrimination](https://www.usherbrooke.ca/respect/harcelement-et-discrimination)
 * [Violences à caractère sexuel](https://www.usherbrooke.ca/respect/violences-a-caractere-sexuel)
 * [CODE DE CONDUITE À L’ATTENTION DU PERSONNEL, DU CORPS ENSEIGNANT ET DE LA
@@ -74,6 +77,9 @@ trolling, public or private harassment, insults, inappropriate
 touching, or other unprofessional conduct.
 
 For similar codes of conduct that apply to members of the Université de Sherbrooke community more generally, please read 
+* [Savoir-être à l'UdeS](https://www.usherbrooke.ca/etudiants/sante-et-aide-a-la-personne/savoir-etre-a-udes)
+* [Parler à quelqu'un](https://www.usherbrooke.ca/savoir-etre/parler-a-quelquun)
+* [Aide à la vie étudiante](https://www.usherbrooke.ca/etudiants/sante-et-aide-a-la-personne/aide-a-la-vie-etudiante)
 * [Harcèlement et discrimination](https://www.usherbrooke.ca/respect/harcelement-et-discrimination)
 * [Violences à caractère sexuel](https://www.usherbrooke.ca/respect/violences-a-caractere-sexuel)
 * [CODE DE CONDUITE À L’ATTENTION DU PERSONNEL, DU CORPS ENSEIGNANT ET DE LA
