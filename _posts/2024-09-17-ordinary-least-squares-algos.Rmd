@@ -1,0 +1,151 @@
+---
+layout: post
+title: Ordinary least squares algorithms
+description: Comparing computation time in R
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-09-17-ordinary-least-squares-algos"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=8,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to explore time complexity of various methods
+for computing least squares regression models.
+
+## Introduction 
+
+Least squares regression is a fundamental and classic model in
+statistics and in machine learning. When you learn about it in a
+stats class, you usually see its computation via the matrix inverse,
+but when you look at `?lm` in R you see
+
+```
+  method: the method to be used; for fitting, currently only ‘method =
+          "qr"’ is supported...
+```
+
+- [Arbenz
+  notes](https://people.inf.ethz.ch/arbenz/ewp/Lnotes/chapter4.pdf)
+  say that QR time complexity is `O(N^3)`
+- R `?solve` says LAPACK [dgesv](https://netlib.org/lapack/explore-html-3.6.1/d7/d3b/group__double_g_esolve_ga5ee879032a8365897c3ba91e3dc8d512.html) is used, which says [LU decomposition](https://en.wikipedia.org/wiki/LU_decomposition) is used, which is same complexity as matrix multiplication, typically `O(N^3)` as well.
+
+So the asymptotic time complexity is the same. Why is QR preferred?
+For numerical stability, which means that it is more likely to compute
+a valid result, for numerically unusual inputs.
+
+## R implementations
+
+```{r}
+Nrow <- 5
+Ncol <- 2
+set.seed(1)
+X <- matrix(runif(Nrow*Ncol), Nrow, Ncol)
+y <- runif(Nrow)
+Xt <- t(X)
+qres <- qr(X)
+rbind(
+  LU=as.numeric(solve(Xt %*% X) %*% (Xt %*% y)),
+  QR=solve(qres, y),
+  lm=as.numeric(coef(lm(y ~ X + 0))))
+```
+
+Above we see the three methods compute the same result.
+
+### Number of rows increases with N
+
+Converting the examples above to atime code below, (with a constant number of columns=2)
+
+```{r atime-vary-rows}
+atime.vary.rows <- atime::atime(
+  setup={
+    Ncol <- 2
+    set.seed(1)
+    X <- matrix(runif(N*Ncol), N, Ncol)
+    y <- runif(N)
+  },
+  seconds.limit=0.1,
+  LU={
+    Xt <- t(X)
+    as.numeric(solve(Xt %*% X) %*% (Xt %*% y))
+  },
+  QR={
+    qres <- qr(X)
+    solve(qres, y)
+  },
+  lm=as.numeric(coef(lm(y ~ X + 0))))
+plot(atime.vary.rows)
+```
+
+The plot above shows that `solve` in R (LU decomposition, LAPACK
+dgesv) is fastest, looks like by constant factors. The code below
+estimates asymptotic time complexity.
+
+```{r refs-vary-rows}
+refs.vary.rows <- atime::references_best(atime.vary.rows)
+plot(refs.vary.rows)
+```
+
+The plot above shows almost linear trends for all methods, contrary to
+the expectation of cubic.
+
+### Rows and columns increase with N
+
+The code below additionally increases the number of columns.
+
+```{r atime-vary-rows-cols}
+atime.vary.rows.cols <- atime::atime(
+  setup={
+    Ncol <- N-1
+    set.seed(1)
+    X <- matrix(runif(N*Ncol), N, Ncol)
+    y <- runif(N)
+  },
+  seconds.limit=0.1,
+  LU={
+    Xt <- t(X)
+    as.numeric(solve(Xt %*% X) %*% (Xt %*% y))
+  },
+  QR={
+    qres <- qr(X)
+    solve(qres, y)
+  },
+  lm=as.numeric(coef(lm(y ~ X + 0))))
+plot(atime.vary.rows.cols)
+```
+
+The plot above shows that `QR` and `lm` are about the same, which
+makes sense, because `lm` uses QR decomposition method. The difference
+between them for small `N` can be attributed to the overhead of the
+`lm` formula parsing, etc. Both are slightly faster than `LU` in this case.
+Below we estimate asymptotic complexity classes.
+
+```{r refs-vary-rows-cols}
+refs.vary.rows.cols <- atime::references_best(atime.vary.rows.cols)
+plot(refs.vary.rows.cols)
+```
+
+The plot above suggests cubic `N^3` asymptotic time for all methods, and
+quadratic `N^2` asymptotic memory.
+
+## Conclusions
+
+We have shown that there is no large asymptotic time/memory
+differences between the different methods of estimating least squares
+regression coefficients.
+
+## Session info
+
+```{r}
+sessionInfo()
+```
