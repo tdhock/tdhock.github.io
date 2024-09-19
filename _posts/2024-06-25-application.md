@@ -49,7 +49,18 @@ in your own words (not copying from the publication), that contains
 * Results: what comparisons were done to show that the new idea is interesting/useful in theory and/or in practice? For example, you could compare the test accuracy and computation time for different regression algorithms on various data sets.
 * Future work: what are some of your ideas for new research papers that could be written as a follow up to this one? Justify why these ideas are sufficiently novel that they warrant a new paper describing them. Also describe what kinds of theoretical and empirical arguments you would need in that future paper. Please answer this point very specifically, because it will be helpful to define your first research project with me.
 
-Make sure to use full sentences and paragraphs, and follow [Mark Schmidt's writing guidelines](https://www.cs.ubc.ca/~schmidtm/Courses/Notes/writing.pdf), so I can evaluate the quality of your English writing skills. 
+Make sure to use full sentences and paragraphs, and follow [Mark Schmidt's writing guidelines](https://www.cs.ubc.ca/~schmidtm/Courses/Notes/writing.pdf), so I can evaluate the quality of your English writing skills. For the bibliography:
+
+* Avoid using `\cite{Bruynooghe2024}`
+* Use `\usepackage{natbib}` in your LaTeX header, which defines the
+  following commands.
+* Use `\citet{Bruynooghe2024}` for "Author (year) proposed ..."
+* Use `\citep{Bruynooghe2024}` for "The XYZ package does something
+  (Author, year)."
+* When you cite something, you should write one sentence that
+  summarizes what it was about. For example this is pretty good:
+  "Bruynooghe (2024) developed pytest-benchmark which integrates
+  airspeed velocity benchmarking into pytest..." 
 
 ## Coding application
 
@@ -80,3 +91,5 @@ previous projects, which answers the following questions.
 Updated 6 Aug 2024: added whole paragraph about your figure.
 
 Updated 6 Sep 2024: added code of conduct.
+
+Updated 19 Sept 2024: added natbib guidelines.
