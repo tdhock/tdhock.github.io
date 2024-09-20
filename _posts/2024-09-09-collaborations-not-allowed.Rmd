@@ -182,9 +182,16 @@ The output above indicates there are just three countries with organizations to 
 How many aliases per organization?
 
 ```{r}
-(a.dt <- plus.dt[, .(alias=strsplit(aliases,split="; ")[[1]]), by=name])
-a.dt[plus.dt, .(n.aliases=.N), on='name', by=.EACHI]
-tibble::tibble(plus.dt[, n.aliases := sapply(strsplit(aliases,split=": "), length)]) # for nice print.
+(a.dt <- plus.dt[
+, alias.list := strsplit(aliases,split="; ")
+][
+, .(alias=alias.list[[1]]), by=name
+])
+tibble::tibble(plus.dt[
+, n.alias := sapply(alias.list, length)
+]) # for nice print.
+## another way to get the count is via .N in join:
+a.dt[plus.dt, .(.N=.N, n.alias), on='name', by=.EACHI]
 ```
 
 ## Conclusions

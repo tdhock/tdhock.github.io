@@ -330,7 +330,11 @@ How many aliases per organization?
 
 
 ``` r
-(a.dt <- plus.dt[, .(alias=strsplit(aliases,split="; ")[[1]]), by=name])
+(a.dt <- plus.dt[
+, alias.list := strsplit(aliases,split="; ")
+][
+, .(alias=alias.list[[1]]), by=name
+])
 ```
 
 ```
@@ -350,44 +354,47 @@ How many aliases per organization?
 ```
 
 ``` r
-a.dt[plus.dt, .(n.aliases=.N), on='name', by=.EACHI]
+tibble::tibble(plus.dt[
+, n.alias := sapply(alias.list, length)
+]) # for nice print.
 ```
 
 ```
-##                                                                                                    name n.aliases
-##                                                                                                  <char>     <int>
-##   1: A.A. Kharkevich Institute for Information Transmission Problems, IITP, Russian Academy of Sciences         0
-##   2:                                                               Academy of Military Medical Sciences         1
-##   3:                                                                        Academy of Military Science         1
-##   4:                                                                       Aerospace Research Institute         1
-##   5:                                                                       Air Force Medical University         4
-##  ---                                                                                                             
-##  99:                                                                     Xi'an Technological University         1
-## 100:                                          27th Scientific Center of the Russian Ministry of Defense         1
-## 101:                                                     33rd Scientific Research and Testing Institute         1
-## 102:                                                   46th TSNII Central Scientific Research Institute         2
-## 103:                                                         48th Central Scientific Research Institute        10
+## # A tibble: 103 × 5
+##    name                                                                               country aliases alias.list n.alias
+##    <chr>                                                                              <chr>   <chr>   <list>       <int>
+##  1 A.A. Kharkevich Institute for Information Transmission Problems, IITP, Russian Ac… Russia  ""      <chr [0]>        0
+##  2 Academy of Military Medical Sciences                                               People… "AMMS"  <chr [1]>        1
+##  3 Academy of Military Science                                                        People… "AMS"   <chr [1]>        1
+##  4 Aerospace Research Institute                                                       Iran    "ARI"   <chr [1]>        1
+##  5 Air Force Medical University                                                       People… "Air F… <chr [4]>        4
+##  6 Air Force Research Institute                                                       People… "Air F… <chr [2]>        2
+##  7 Air Force Xi’an Flight Academy                                                     People… "PLA A… <chr [3]>        3
+##  8 Airforce Command College                                                           People… "PLA A… <chr [4]>        4
+##  9 Airforce Communication NCO Academy                                                 People… "Dalia… <chr [1]>        1
+## 10 Airforce Early Warning Academy                                                     People… "Wuhan… <chr [1]>        1
+## # ℹ 93 more rows
 ```
 
 ``` r
-tibble::tibble(plus.dt[, n.aliases := sapply(strsplit(aliases,split=": "), length)]) # for nice print.
+## another way to get the count is via .N in join:
+a.dt[plus.dt, .(.N=.N, n.alias), on='name', by=.EACHI]
 ```
 
 ```
-## # A tibble: 103 × 4
-##    name                                                                                        country aliases n.aliases
-##    <chr>                                                                                       <chr>   <chr>       <int>
-##  1 A.A. Kharkevich Institute for Information Transmission Problems, IITP, Russian Academy of … Russia  ""              0
-##  2 Academy of Military Medical Sciences                                                        People… "AMMS"          1
-##  3 Academy of Military Science                                                                 People… "AMS"           1
-##  4 Aerospace Research Institute                                                                Iran    "ARI"           1
-##  5 Air Force Medical University                                                                People… "Air F…         1
-##  6 Air Force Research Institute                                                                People… "Air F…         1
-##  7 Air Force Xi’an Flight Academy                                                              People… "PLA A…         1
-##  8 Airforce Command College                                                                    People… "PLA A…         1
-##  9 Airforce Communication NCO Academy                                                          People… "Dalia…         1
-## 10 Airforce Early Warning Academy                                                              People… "Wuhan…         1
-## # ℹ 93 more rows
+##                                                                                                    name    .N n.alias
+##                                                                                                  <char> <int>   <int>
+##   1: A.A. Kharkevich Institute for Information Transmission Problems, IITP, Russian Academy of Sciences     0       0
+##   2:                                                               Academy of Military Medical Sciences     1       1
+##   3:                                                                        Academy of Military Science     1       1
+##   4:                                                                       Aerospace Research Institute     1       1
+##   5:                                                                       Air Force Medical University     4       4
+##  ---                                                                                                                 
+##  99:                                                                     Xi'an Technological University     1       1
+## 100:                                          27th Scientific Center of the Russian Ministry of Defense     1       1
+## 101:                                                     33rd Scientific Research and Testing Institute     1       1
+## 102:                                                   46th TSNII Central Scientific Research Institute     2       2
+## 103:                                                         48th Central Scientific Research Institute    10      10
 ```
 
 ## Conclusions
@@ -404,36 +411,25 @@ sessionInfo()
 ```
 
 ```
-## R version 4.4.1 (2024-06-14)
-## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 22.04.5 LTS
+## R version 4.4.1 (2024-06-14 ucrt)
+## Platform: x86_64-w64-mingw32/x64
+## Running under: Windows 11 x64 (build 22631)
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
 ## 
-## time zone: America/New_York
-## tzcode source: system (glibc)
+## time zone: America/Toronto
+## tzcode source: internal
 ## 
 ## attached base packages:
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
-## other attached packages:
-## [1] nc_2024.9.19      testthat_3.2.1.1  data.table_1.16.0
-## 
 ## loaded via a namespace (and not attached):
-##  [1] utf8_1.2.4        stringi_1.8.3     digest_0.6.34     magrittr_2.0.3    evaluate_0.23     pkgload_1.3.4    
-##  [7] fastmap_1.1.1     rprojroot_2.0.4   pkgbuild_1.4.3    sessioninfo_1.2.2 brio_1.1.4        urlchecker_1.0.1 
-## [13] promises_1.2.1    purrr_1.0.2       fansi_1.0.6       cli_3.6.2         shiny_1.8.0       rlang_1.1.3      
-## [19] ellipsis_0.3.2    remotes_2.5.0     withr_3.0.0       cachem_1.0.8      devtools_2.4.5    tools_4.4.1      
-## [25] memoise_2.0.1     httpuv_1.6.14     vctrs_0.6.5       R6_2.5.1          re2_0.1.3         mime_0.12        
-## [31] lifecycle_1.0.4   stringr_1.5.1     fs_1.6.3          htmlwidgets_1.6.4 usethis_2.2.2     miniUI_0.1.1.1   
-## [37] pkgconfig_2.0.3   waldo_0.5.2       desc_1.4.3        pillar_1.9.0      later_1.3.2       glue_1.7.0       
-## [43] profvis_0.3.8     Rcpp_1.0.12       xfun_0.45         tibble_3.2.1      knitr_1.47        rstudioapi_0.15.0
-## [49] xtable_1.8-4      htmltools_0.5.7   compiler_4.4.1
+##  [1] utf8_1.2.4         xfun_0.47          nc_2024.9.20       magrittr_2.0.3     glue_1.7.0         tibble_3.2.1      
+##  [7] knitr_1.48         pkgconfig_2.0.3    lifecycle_1.0.4    cli_3.6.3          fansi_1.0.6        vctrs_0.6.5       
+## [13] data.table_1.16.99 compiler_4.4.1     tools_4.4.1        evaluate_0.24.0    pillar_1.9.0       rlang_1.1.4
 ```
