@@ -294,7 +294,7 @@ for `nrow(X)=N`, `ncol(X)=P`, and `M=min(N,P)` (rank of X).
 Is any method clearly faster? 
 * with lots of data and few features (N>P), all methods are fast/linear (P constant column).
 * with lots of features and few data (N<P), lm/QR decomposition is
-  asymptotically faster than matrix multiply and solve/invert/LU.
+  asymptotically faster than matrix multiply and solve/invert/LU (N constant column).
 
 ## Conclusions
 

@@ -90,14 +90,28 @@ atime.vary.rows <- atime::atime(
     solve(qres, y)
   },
   lm=as.numeric(coef(lm(y ~ X + 0))))
+```
+
+```
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+```
+
+``` r
 tit.vary.rows <- ggplot2::ggtitle(paste0(
   "Variable number of rows, N = nrow(X), ncol(X)=",Ncol))
 plot(atime.vary.rows)+tit.vary.rows
 ```
 
 ```
+## Loading required namespace: directlabels
+```
+
+```
 ## Warning in ggplot2::scale_y_log10("median line, min/max band"): log-10 transformation introduced infinite values.
-## log-10 transformation introduced infinite values.
+```
+
+```
+## Warning in ggplot2::scale_y_log10("median line, min/max band"): log-10 transformation introduced infinite values.
 ## log-10 transformation introduced infinite values.
 ```
 
@@ -115,6 +129,10 @@ plot(refs.vary.rows)+tit.vary.rows
 
 ```
 ## Warning in ggplot2::scale_y_log10(""): log-10 transformation introduced infinite values.
+```
+
+```
+## Warning in (function (..., deparse.level = 1) : number of rows of result is not a multiple of vector length (arg 2)
 ```
 
 ![plot of chunk refs-vary-rows](/assets/img/2024-09-17-ordinary-least-squares-algos/refs-vary-rows-1.png)
@@ -342,7 +360,7 @@ for `nrow(X)=N`, `ncol(X)=P`, and `M=min(N,P)` (rank of X).
 Is any method clearly faster? 
 * with lots of data and few features (N>P), all methods are fast/linear (P constant column).
 * with lots of features and few data (N<P), lm/QR decomposition is
-  asymptotically faster than matrix multiply and solve/invert/LU.
+  asymptotically faster than matrix multiply and solve/invert/LU (N constant column).
 
 ## Conclusions
 
@@ -358,32 +376,30 @@ sessionInfo()
 ```
 
 ```
-## R version 4.4.1 (2024-06-14)
-## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 22.04.5 LTS
+## R version 4.4.1 (2024-06-14 ucrt)
+## Platform: x86_64-w64-mingw32/x64
+## Running under: Windows 11 x64 (build 22631)
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
 ## 
-## time zone: America/New_York
-## tzcode source: system (glibc)
+## time zone: America/Toronto
+## tzcode source: internal
 ## 
 ## attached base packages:
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] directlabels_2024.1.21 vctrs_0.6.5            cli_3.6.2              knitr_1.47             rlang_1.1.3           
-##  [6] xfun_0.45              highr_0.11             bench_1.1.3            generics_0.1.3         data.table_1.16.0     
-## [11] glue_1.7.0             colorspace_2.1-0       scales_1.3.0           fansi_1.0.6            quadprog_1.5-8        
-## [16] grid_4.4.1             evaluate_0.23          munsell_0.5.0          tibble_3.2.1           MASS_7.3-60.2         
-## [21] profmem_0.6.0          lifecycle_1.0.4        compiler_4.4.1         dplyr_1.1.4            pkgconfig_2.0.3       
-## [26] atime_2024.4.23        farver_2.1.1           lattice_0.22-6         R6_2.5.1               tidyselect_1.2.1      
-## [31] utf8_1.2.4             pillar_1.9.0           magrittr_2.0.3         withr_3.0.0            tools_4.4.1           
-## [36] gtable_0.3.4           ggplot2_3.5.1
+##  [1] directlabels_2024.1.21 vctrs_0.6.5            cli_3.6.3              knitr_1.48             rlang_1.1.4           
+##  [6] xfun_0.47              highr_0.11             bench_1.1.3            generics_0.1.3         data.table_1.16.99    
+## [11] glue_1.7.0             nc_2024.9.20           colorspace_2.1-1       scales_1.3.0           fansi_1.0.6           
+## [16] quadprog_1.5-8         grid_4.4.1             evaluate_0.24.0        munsell_0.5.1          tibble_3.2.1          
+## [21] MASS_7.3-60.2          profmem_0.6.0          lifecycle_1.0.4        compiler_4.4.1         dplyr_1.1.4           
+## [26] pkgconfig_2.0.3        atime_2024.8.8         farver_2.1.2           lattice_0.22-6         R6_2.5.1              
+## [31] tidyselect_1.2.1       utf8_1.2.4             pillar_1.9.0           magrittr_2.0.3         withr_3.0.1           
+## [36] tools_4.4.1            gtable_0.3.5           ggplot2_3.5.1
 ```
