@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Collaborations not allowed
-description: Parsing 
+description: Parsing a web page with regex
 ---
 
 ```{r Ropts, echo=FALSE}
@@ -24,31 +24,174 @@ The goal of this post is to explore what countries and institutions are not allo
 
 ## Introduction 
 
+When applying for grants at my new job at Université de Sherbrooke in
+Canada, I was asked to agree to not share research "secrets" with a
+certain list of organizations, on a web page.  This is silly to ask of
+most researchers, who publish in peer-reviewed journals/conferences
+that are more or less publicly accessible for anyone. If anyone can
+access my research, how can I prevent sharing with these
+organizations? This makes me think of the McCarthy-era communist witch
+hunt in the USA in the 1950s. Are we going to soon have to swear
+loyalty, or renounce a certain idealogy, to continue our jobs at the
+university? I find this dubious.
+
+## Simple example
+
+A good example of what the data look like is below:
+
 ```{r}
-orgs.html <- "~/canada-list-of-risky-research-orgs.html"
+some.html <- '
+	<li><strong>A.A. Kharkevich Institute for Information Transmission Problems, IITP, Russian Academy of Sciences</strong> (Russia)</li>
+	<li><strong>Academy of Military Medical Sciences</strong> (People’s Republic of China)
+	<p>Known alias(es): AMMS</p>
+	</li>
+	<li><strong>Academy of Military Science</strong> (People’s Republic of China)
+	<p>Known alias(es): AMS</p>
+	</li>
+	<li><strong>Aerospace Research Institute</strong> (Iran)
+	<p>Known alias(es): ARI</p>
+	</li>
+'
+```
+
+We parse name in each block using the regex below,
+
+```{r}
+name.pattern <- list(
+  "\n\t<li><strong>",
+  name=".*?",
+  "</strong>")
+nc::capture_all_str(
+  some.html,
+  name.pattern)
+```
+
+The table above has four rows and one column.
+We can add another column for country via the code below.
+
+```{r}
+country.pattern <- list(
+  " [(]",
+  country=".*?",
+  " *[)]")
+nc::capture_all_str(
+  some.html,
+  name.pattern,
+  country.pattern)
+```
+
+The table above has two columns.
+To add a final column for aliases, we use the code below.
+
+```{r}
+aliases.pattern <- list(
+  "\n\t<p>Known alias[(]es[)]: ",
+  aliases=".*?",
+  "</p>")
+nca.pattern <- list(
+  name.pattern,
+  country.pattern,
+  nc::quantifier(aliases.pattern, "?"))
+nc::capture_all_str(some.html, nca.pattern)
+```
+
+## Download and parse
+
+```{r}
+orgs.html <- "../assets/2024-09-09-canada-list-of-risky-research-orgs.html"
 if(!file.exists(orgs.html)){
   u <- "https://science.gc.ca/site/science/en/safeguarding-your-research/guidelines-and-tools-implement-research-security/sensitive-technology-research-and-affiliations-concern/named-research-organizations"
   download.file(u, orgs.html)
 }
-library(data.table)
+orgs.lines <- readLines(orgs.html)
+(n.strong <- length(grep("<strong>",orgs.lines)))
+orgs.dt <- nc::capture_all_str(orgs.lines, nca.pattern)
+nrow(orgs.dt)
 ```
 
-```html
-<li><strong>A.A. Kharkevich Institute for Information Transmission Problems, IITP, Russian Academy of Sciences</strong> (Russia)</li>
-<li><strong>Academy of Military Medical Sciences</strong> (People’s Republic of China)
-<p>Known alias(es): AMMS</p>
-</li>
-<li><strong>Academy of Military Science</strong> (People’s Republic of China)
-<p>Known alias(es): AMS</p>
-</li>
-<li><strong>Aerospace Research Institute</strong> (Iran)
-<p>Known alias(es): ARI</p>
-</li>
+The number of rows above seems to agree with the number of `<strong>` tags (simpler pattern).
+Below we check the number of aliases.
+
+```{r}
+sum(orgs.dt$aliases!="")
+aliases.lines <- grep("alias(es)", orgs.lines, fixed=TRUE, value=TRUE)
+length(aliases.lines)
+```
+
+Above it looks like there were some aliases not parsed. Which ones?
+
+```{r}
+alias.dt <- nc::capture_first_vec(paste0("\n",aliases.lines), aliases.pattern)
+alias.dt[!orgs.dt,.(aliases40=substr(aliases,1,40)),on="aliases"]
+```
+
+### Trying again
+
+Looking at the ones that did not match, it seems that there are some empty lines which are optional.
+
+```{r}
+odd.html <- '
+	<li><strong>Center for High Pressure Science and Technology Advanced Research</strong> (People’s Republic of China)
+
+	<p>Known alias(es): HPSTAR; Beijing High Voltage Science Research Center</p>
+	</li>
+	<li><strong>Engineering University of the CAPF</strong> (People’s Republic of China)
+
+	<p>Known alias(es): PAP Engineering University</p>
+	</li>
+	<li><strong>Explosion and Impact Technology Research Centre</strong> (Iran)
+	<p>Known alias(es): Research Centre for Explosion and Impact; METFAZ</p>
+	</li>
+	<li><strong>Institute of NBC Defense</strong> (People’s Republic of China)</li>
+'
+aliases.plus.pattern <- list(
+  "\n+\t<p>Known alias[(]es[)]: ", #added a +
+  aliases=".*?",
+  "</p>")
+nca.plus.pattern <- list(
+  name.pattern,
+  country.pattern,
+  nc::quantifier(aliases.plus.pattern, "?"))
+nc::capture_all_str(some.html, nca.plus.pattern)
+nc::capture_all_str(odd.html, nca.plus.pattern)
+```
+
+Results above look great! Let's try it again below.
+
+
+```{r}
+plus.dt <- nc::capture_all_str(orgs.lines, nca.plus.pattern)
+nrow(plus.dt)
+n.strong
+sum(plus.dt$aliases!="")
+length(aliases.lines)
+```
+
+Numbers agreeing in the output above indicate that the data were parsed correctly.
+
+## Country analysis
+
+```{r}
+plus.dt[, .(organizations=.N), by=country]
+```
+
+The output above indicates there are just three countries with organizations to avoid.
+
+## Aliases
+
+How many aliases per organization?
+
+```{r}
+(a.dt <- plus.dt[, .(alias=strsplit(aliases,split="; ")[[1]]), by=name])
+a.dt[plus.dt, .(n.aliases=.N), on='name', by=.EACHI]
+tibble::tibble(plus.dt[, n.aliases := sapply(strsplit(aliases,split=": "), length)]) # for nice print.
 ```
 
 ## Conclusions
 
-TODO
+We used regular expressions to help us understand that Canada does not
+want researchers collaborating with certain organizations in three
+countries: Russia, Iran, China.
 
 ## Session info
 
