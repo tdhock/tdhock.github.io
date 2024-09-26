@@ -1,0 +1,521 @@
+---
+layout: post
+title: Polars regex
+description: Translating nc to python/rust
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2024-09-25-polars-regex"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=10,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+conda.env <- "2023-08-deep-learning"
+Sys.setenv(RETICULATE_PYTHON=sprintf(if(.Platform$OS.type=="unix")
+  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
+  "/home/tdhock/miniconda3/envs/%s/bin/python"
+  else "~/Miniconda3/envs/%s/python.exe", conda.env))
+reticulate::use_condaenv(conda.env, required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to explore the extent to which it is possible
+to implement an analog of my R `nc` package in Rust/Polars.
+
+## Introduction
+
+I have long been a fan of named capture regex, because it is so useful
+for transforming non-tabular text data into data tables.  I
+implemented named capture support for R, and presented a lightning
+talk about that at useR 2011.  That talk described a function
+`str_match_perl` which I had in my `.Rprofile` for several years.
+Eventually I converted it to `namedCapture::str_match_named` which was
+on CRAN for a few years.  Most recently I have created
+[`nc::capture_first_vec`](https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html)
+which allows defining the regex using a variable number of named and un-named arguments.
+I also wrote the first implementation of the str.extractall method in pandas, which is the analog of `nc::capture_all_str`, super useful for converting web pages and other text data to tables.
+
+## Python
+
+In 2021 I wrote [a
+blog](https://tdhock.github.io/blog/2021/row-vs-col/) that explains
+how we can implement an analog of the nc regex syntax, using a list of
+tuples in python. This is somewhat less magical, and less convenient,
+than R, in which we can use a variable number of named and un-named
+arguments, in any order. 
+
+```{r}
+nc::capture_first_vec("chrX:200", "chr", chrom=".*?", ":", start=".*")
+```
+
+In contrast, python un-named arguments can
+not appear after named arguments, so when we do that, we get a SyntaxError
+
+```{python err, error=TRUE, purl=TRUE}
+def capture_first_vec(*args, **kwargs):
+    print(args)
+    print(kwargs)
+f("chrX:200", "chr", chrom=".*?", ":", start=".*")
+```
+
+To get around that, we can use tuples as in the code below.
+
+```{python}
+def pattern_funs(*pattern_list):
+    pattern = ""
+    name_fun_list = []
+    for pat_or_tup in pattern_list:
+        if type(pat_or_tup) == type(""):
+            pat = pat_or_tup
+            name = None
+        else:
+            if len(pat_or_tup) == 2:
+                pat, name = pat_or_tup
+                fun = None
+            else:
+                pat, name, fun = pat_or_tup
+            name_fun_list.append( (name,fun) )
+            pat = "("+pat+")"
+        pattern += pat
+    return pattern, name_fun_list
+pattern_funs(
+    "chr",
+    (".*?", "chrom"),
+    ":",
+    (".*", "start", int))
+```
+
+The code above has additioanl parentheses which are not necessary in R, but overall the content is the same.
+* first match `chr`
+* then match `.*?` meaning zero or more non-newline, not greedy, and put the result in `chrom` group/column.
+* then match `:`
+* finally match `.*` meaning zero or more non-newline, greedy, and convert the string to int, then put the result in the `start` group/column.
+
+Below we use that to construct a data frame:
+
+```{python}
+def capture_first_vec(subject_series, *args):
+    pattern, name_fun_list = pattern_funs(*args)
+    match_df = pd.Series(subject_series).str.extract(pattern)
+    match_df.columns = [name for name,fun in name_fun_list]
+    for col_name, fun in name_fun_list:
+        if fun is not None:
+            match_df[col_name] = match_df[col_name].transform(fun)
+    return match_df
+capture_first_vec(["chrX:200"], "chr", (".*?", "chrom"), ":", (".*", "start", int))
+```
+
+## py-polars
+
+Can we do the same in polars?
+
+First I tried to install polars in a conda env.
+
+```shell
+(base) tdhock@tdhock-MacBook:~/R/atime[main]$ conda create -n 2024-09-polars
+(base) tdhock@tdhock-MacBook:~/R/atime[main]$ conda activate 2024-09-polars
+(2024-09-polars) tdhock@tdhock-MacBook:~/R/atime[main]$ conda install python3
+Collecting package metadata (current_repodata.json): done
+...
+Proceed ([y]/n)? 
+...
+Executing transaction: done
+(2024-09-polars) tdhock@tdhock-MacBook:~/R/atime[main]$ python 
+Python 3.10.14 (main, May  6 2024, 19:42:50) [GCC 11.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import polars
+/home/tdhock/miniconda3/envs/2024-09-polars/lib/python3.10/site-packages/polars/_cpu_check.py:259: RuntimeWarning: Missing required CPU features.
+
+The following required CPU features were not detected:
+    sse4.2, popcnt, avx, avx2, fma, bmi1, bmi2, lzcnt, pclmulqdq, movbe
+Continuing to use this version of Polars on this processor will likely result in a crash.
+Install the `polars-lts-cpu` package instead of `polars` to run Polars with better compatibility.
+
+Hint: If you are on an Apple ARM machine (e.g. M1) this is likely due to running Python under Rosetta.
+It is recommended to install a native version of Python that does not run under Rosetta x86-64 emulation.
+
+If you believe this warning to be a false positive, you can set the `POLARS_SKIP_CPU_CHECK` environment variable to bypass this check.
+
+  warnings.warn(
+Instruction non permise (core dumped)
+```
+
+The output above indicates that the polars binary from PyPI is not compatible with my old mac laptop CPU from ~2010.
+I tried installing the other package below,
+
+```shell
+(2024-09-polars) tdhock@tdhock-MacBook:~/R/atime[main]$ pip uninstall polars
+Found existing installation: polars 1.8.2
+Uninstalling polars-1.8.2:
+  Would remove:
+    /home/tdhock/miniconda3/envs/2024-09-polars/lib/python3.10/site-packages/polars-1.8.2.dist-info/*
+    /home/tdhock/miniconda3/envs/2024-09-polars/lib/python3.10/site-packages/polars/*
+Proceed (Y/n)? 
+  Successfully uninstalled polars-1.8.2
+(2024-09-polars) tdhock@tdhock-MacBook:~/R/atime[main]$ pip install polars-lts-cpu
+Collecting polars-lts-cpu
+  Downloading polars_lts_cpu-1.8.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (14 kB)
+Downloading polars_lts_cpu-1.8.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (32.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 32.1/32.1 MB 10.3 MB/s eta 0:00:00
+
+Installing collected packages: polars-lts-cpu
+Successfully installed polars-lts-cpu-1.8.2
+(2024-09-polars) tdhock@tdhock-MacBook:~/R/atime[main]$ python
+Python 3.10.14 (main, May  6 2024, 19:42:50) [GCC 11.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import polars
+/home/tdhock/miniconda3/envs/2024-09-polars/lib/python3.10/site-packages/polars/_cpu_check.py:259: RuntimeWarning: Missing required CPU features.
+
+The following required CPU features were not detected:
+    sse4.2, popcnt
+Continuing to use this version of Polars on this processor will likely result in a crash.
+Install the `polars-lts-cpu` package instead of `polars` to run Polars with better compatibility.
+
+Hint: If you are on an Apple ARM machine (e.g. M1) this is likely due to running Python under Rosetta.
+It is recommended to install a native version of Python that does not run under Rosetta x86-64 emulation.
+
+If you believe this warning to be a false positive, you can set the `POLARS_SKIP_CPU_CHECK` environment variable to bypass this check.
+
+  warnings.warn(
+>>> 
+```
+
+The above output indicates that polars default binaries do not compile on my system (even after using the lts package).
+
+Can I compile it from source? That worked for R arrow, after much trial and error.
+[Python: compile Polars from source](https://crates.io/crates/polars) says to try the code below,
+
+```
+(2024-09-polars) tdhock@tdhock-MacBook:~$ git clone git@github.com:tdhock/polars
+Clonage dans 'polars'...
+remote: Enumerating objects: 176647, done.        
+remote: Counting objects: 100% (1899/1899), done.        
+remote: Compressing objects: 100% (921/921), done.        
+remote: Total 176647 (delta 985), reused 1716 (delta 967), pack-reused 174748 (from 1)        
+Réception d'objets: 100% (176647/176647), 102.59 Mio | 12.05 Mio/s, fait.
+Résolution des deltas: 100% (138986/138986), fait.
+(2024-09-polars) tdhock@tdhock-MacBook:~$ cd polars/py-polars/
+(2024-09-polars) tdhock@tdhock-MacBook:~/polars/py-polars[main]$ make build
+Collecting uv
+  Downloading uv-0.4.16-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (12.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.3/12.3 MB 10.3 MB/s eta 0:00:00
+
+Installing collected packages: uv
+Successfully installed uv-0.4.16
+
+[notice] A new release of pip is available: 23.0.1 -> 24.2
+[notice] To update, run: python -m pip install --upgrade pip
+Resolved 206 packages in 5.35s
+⠙ Preparing packages... (0/206)
+...
+  Downloaded winapi-i686-pc-windows-gnu v0.4.0
+  Downloaded windows v0.57.0
+🍹 Building a mixed python/rust project
+🔗 Found pyo3 bindings with abi3 support for Python ≥ 3.8
+🐍 Not using a specific python interpreter
+   Compiling proc-macro2 v1.0.86
+   Compiling unicode-ident v1.0.12
+...
+   Compiling futures-io v0.3.30
+   Compiling hashbrown v0.14.5
+error[E0554]: `#![feature]` may not be used on the stable release channel
+  --> /home/tdhock/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hashbrown-0.14.5/src/lib.rs:15:5
+   |
+15 | /     feature(
+16 | |         test,
+17 | |         core_intrinsics,
+18 | |         dropck_eyepatch,
+...  |
+24 | |         strict_provenance
+25 | |     )
+   | |_____^
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+  --> /home/tdhock/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hashbrown-0.14.5/src/lib.rs:16:9
+   |
+16 |         test,
+   |         ^^^^
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+  --> /home/tdhock/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hashbrown-0.14.5/src/lib.rs:17:9
+   |
+17 |         core_intrinsics,
+   |         ^^^^^^^^^^^^^^^
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+  --> /home/tdhock/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hashbrown-0.14.5/src/lib.rs:20:9
+   |
+20 |         extend_one,
+   |         ^^^^^^^^^^
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+  --> /home/tdhock/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hashbrown-0.14.5/src/lib.rs:21:9
+   |
+21 |         allocator_api,
+   |         ^^^^^^^^^^^^^
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+  --> /home/tdhock/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hashbrown-0.14.5/src/lib.rs:22:9
+   |
+22 |         slice_ptr_get,
+   |         ^^^^^^^^^^^^^
+
+error[E0554]: `#![feature]` may not be used on the stable release channel
+  --> /home/tdhock/.cargo/registry/src/index.crates.io-6f17d22bba15001f/hashbrown-0.14.5/src/lib.rs:23:9
+   |
+23 |         maybe_uninit_array_assume_init,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   Compiling tinyvec_macros v0.1.1
+   Compiling futures-task v0.3.30
+   Compiling futures-util v0.3.30
+For more information about this error, try `rustc --explain E0554`.
+error: could not compile `hashbrown` (lib) due to 7 previous errors
+warning: build failed, waiting for other jobs to finish...
+💥 maturin failed
+  Caused by: Failed to build a native library through cargo
+  Caused by: Cargo build finished with "exit status: 101": `env -u CARGO PYO3_ENVIRONMENT_SIGNATURE="cpython-3.10-64bit" PYO3_PYTHON="/home/tdhock/polars/.venv/bin/python" PYTHON_SYS_EXECUTABLE="/home/tdhock/polars/.venv/bin/python" "cargo" "rustc" "--message-format" "json-render-diagnostics" "--manifest-path" "/home/tdhock/polars/py-polars/Cargo.toml" "--lib"`
+make[1]: *** [Makefile:37 : build] Erreur 1
+make: *** [Makefile:27 : build] Erreur 2
+(2024-09-polars) tdhock@tdhock-MacBook:~/polars/py-polars[main]$ rustc --explain E0554
+
+Feature attributes are only allowed on the nightly release channel. Stable or beta compilers will not comply.
+
+Erroneous code example:
+
+#![feature(lang_items)] // error: `#![feature]` may not be used on the
+                        //        stable release channel
+
+If you need the feature, make sure to use a nightly release of the compiler (but be warned that the feature may be removed or altered in
+the future).
+```
+
+The output above seems to indicate that my rust compiler is too old for the source code that I am trying to compile.
+What version of rust am I using? An old version from APT/Ubuntu repositories, so definitely not nightly. I can try to fix by [installing nightly](https://www.rust-lang.org/tools/install):
+
+```shell
+78(2024-09-polars) tdhock@tdhock-MacBook:~/polars/py-polars[main]$ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+info: downloading installer
+
+Welcome to Rust!
+
+This will download and install the official compiler for the Rust
+programming language, and its package manager, Cargo.
+
+Rustup metadata and toolchains will be installed into the Rustup
+home directory, located at:
+
+  /home/tdhock/.rustup
+
+This can be modified with the RUSTUP_HOME environment variable.
+
+The Cargo home directory is located at:
+
+  /home/tdhock/.cargo
+
+This can be modified with the CARGO_HOME environment variable.
+
+The cargo, rustc, rustup and other commands will be added to
+Cargo's bin directory, located at:
+
+  /home/tdhock/.cargo/bin
+
+This path will then be added to your PATH environment variable by
+modifying the profile files located at:
+
+  /home/tdhock/.profile
+  /home/tdhock/.bashrc
+
+You can uninstall at any time with rustup self uninstall and
+these changes will be reverted.
+
+Current installation options:
+
+
+   default host triple: x86_64-unknown-linux-gnu
+     default toolchain: stable (default)
+               profile: default
+  modify PATH variable: yes
+
+1) Proceed with standard installation (default - just press enter)
+2) Customize installation
+3) Cancel installation
+>2
+
+I'm going to ask you the value of each of these installation options.
+You may simply press the Enter key to leave unchanged.
+
+Default host triple? [x86_64-unknown-linux-gnu]
+
+
+Default toolchain? (stable/beta/nightly/none) [stable]
+nightly
+
+Profile (which tools and data to install)? (minimal/default/complete) [default]
+
+
+Modify PATH variable? (Y/n)
+
+
+
+Current installation options:
+
+
+   default host triple: x86_64-unknown-linux-gnu
+     default toolchain: nightly
+               profile: default
+  modify PATH variable: yes
+
+1) Proceed with selected options (default - just press enter)
+2) Customize installation
+3) Cancel installation
+>
+
+info: profile set to 'default'
+info: setting default host triple to x86_64-unknown-linux-gnu
+info: syncing channel updates for 'nightly-x86_64-unknown-linux-gnu'
+info: latest update on 2024-09-26, rust version 1.83.0-nightly (9e394f551 2024-09-25)
+info: downloading component 'cargo'
+info: downloading component 'clippy'
+...
+info: installing component 'rustfmt'
+info: default toolchain set to 'nightly-x86_64-unknown-linux-gnu'
+
+  nightly-x86_64-unknown-linux-gnu installed - rustc 1.83.0-nightly (9e394f551 2024-09-25)
+
+
+Rust is installed now. Great!
+
+To get started you may need to restart your current shell.
+This would reload your PATH environment variable to include
+Cargo's bin directory ($HOME/.cargo/bin).
+
+To configure your current shell, you need to source
+the corresponding env file under $HOME/.cargo.
+
+This is usually done by running one of the following (note the leading DOT):
+. "$HOME/.cargo/env"            # For sh/bash/zsh/ash/dash/pdksh
+source "$HOME/.cargo/env.fish"  # For fish
+(base) tdhock@tdhock-MacBook:~/polars/py-polars[main]$ make build
+🍹 Building a mixed python/rust project
+🔗 Found pyo3 bindings with abi3 support for Python ≥ 3.8
+🐍 Not using a specific python interpreter
+   Compiling proc-macro2 v1.0.86
+   Compiling unicode-ident v1.0.12
+...
+   Compiling futures-util v0.3.30
+   Compiling hashbrown v0.14.5
+   Compiling indexmap v2.5.0
+...
+   Compiling blake3 v1.5.4
+   Compiling hex v0.4.3
+error: could not compile `polars-ops` (lib)
+
+Caused by:
+  process didn't exit successfully: `/home/tdhock/.rustup/toolchains/nightly-2024-08-26-x86_64-unknown-linux-gnu/bin/rustc --crate-name polars_ops --edition=2021 crates/polars-ops/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --diagnostic-width=158 --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debuginfo=2 --cfg 'feature="abs"' --cfg 'feature="aho-corasick"' --cfg 'feature="approx_unique"' --cfg 'feature="array_any_all"' --cfg 'feature="array_count"' --cfg 'feature="array_to_struct"' --cfg 'feature="asof_join"' --cfg 'feature="base64"' --cfg 'feature="binary_encoding"' --cfg 'feature="business"' --cfg 'feature="chrono"' --cfg 'feature="chrono-tz"' --cfg 'feature="chunked_ids"' --cfg 'feature="cov"' --cfg 'feature="cross_join"' --cfg 'feature="cum_agg"' --cfg 'feature="cutqcut"' --cfg 'feature="diff"' --cfg 'feature="dtype-array"' --cfg 'feature="dtype-categorical"' --cfg 'feature="dtype-date"' --cfg 'feature="dtype-datetime"' --cfg 'feature="dtype-decimal"' --cfg 'feature="dtype-duration"' --cfg 'feature="dtype-i16"' --cfg 'feature="dtype-i8"' --cfg 'feature="dtype-struct"' --cfg 'feature="dtype-time"' --cfg 'feature="dtype-u16"' --cfg 'feature="dtype-u8"' --cfg 'feature="ewma"' --cfg 'feature="ewma_by"' --cfg 'feature="extract_groups"' --cfg 'feature="extract_jsonpath"' --cfg 'feature="find_many"' --cfg 'feature="fused"' --cfg 'feature="hash"' --cfg 'feature="hex"' --cfg 'feature="hist"' --cfg 'feature="iejoin"' --cfg 'feature="interpolate"' --cfg 'feature="interpolate_by"' --cfg 'feature="is_between"' --cfg 'feature="is_first_distinct"' --cfg 'feature="is_in"' --cfg 'feature="is_last_distinct"' --cfg 'feature="is_unique"' --cfg 'feature="jsonpath_lib"' --cfg 'feature="list_any_all"' --cfg 'feature="list_count"' --cfg 'feature="list_drop_nulls"' --cfg 'feature="list_gather"' --cfg 'feature="list_sample"' --cfg 'feature="list_sets"' --cfg 'feature="list_to_struct"' --cfg 'feature="log"' --cfg 'feature="merge_sorted"' --cfg 'feature="mode"' --cfg 'feature="moment"' --cfg 'feature="nightly"' --cfg 'feature="pct_change"' --cfg 'feature="peaks"' --cfg 'feature="performant"' --cfg 'feature="pivot"' --cfg 'feature="polars-json"' --cfg 'feature="propagate_nans"' --cfg 'feature="rand"' --cfg 'feature="rand_distr"' --cfg 'feature="random"' --cfg 'feature="rank"' --cfg 'feature="reinterpret"' --cfg 'feature="repeat_by"' --cfg 'feature="replace"' --cfg 'feature="rle"' --cfg 'feature="rolling_window"' --cfg 'feature="rolling_window_by"' --cfg 'feature="round_series"' --cfg 'feature="search_sorted"' --cfg 'feature="semi_anti_join"' --cfg 'feature="serde"' --cfg 'feature="serde_json"' --cfg 'feature="simd"' --cfg 'feature="string_encoding"' --cfg 'feature="string_pad"' --cfg 'feature="string_reverse"' --cfg 'feature="string_to_integer"' --cfg 'feature="strings"' --cfg 'feature="timezones"' --cfg 'feature="to_dummies"' --cfg 'feature="top_k"' --cfg 'feature="unicode-reverse"' --cfg 'feature="unique_counts"' --check-cfg 'cfg(docsrs)' --check-cfg 'cfg(feature, values("abs", "aho-corasick", "approx_unique", "array_any_all", "array_count", "array_to_struct", "asof_join", "base64", "big_idx", "binary_encoding", "business", "chrono", "chrono-tz", "chunked_ids", "cov", "cross_join", "cum_agg", "cutqcut", "diff", "dtype-array", "dtype-categorical", "dtype-date", "dtype-datetime", "dtype-decimal", "dtype-duration", "dtype-i16", "dtype-i8", "dtype-struct", "dtype-time", "dtype-u16", "dtype-u8", "ewma", "ewma_by", "extract_groups", "extract_jsonpath", "find_many", "fused", "gather", "hash", "hex", "hist", "iejoin", "interpolate", "interpolate_by", "is_between", "is_first_distinct", "is_in", "is_last_distinct", "is_unique", "jsonpath_lib", "list_any_all", "list_count", "list_drop_nulls", "list_gather", "list_sample", "list_sets", "list_to_struct", "log", "merge_sorted", "mode", "moment", "nightly", "object", "pct_change", "peaks", "performant", "pivot", "polars-json", "propagate_nans", "rand", "rand_distr", "random", "rank", "reinterpret", "repeat_by", "replace", "rle", "rolling_window", "rolling_window_by", "round_series", "search_sorted", "semi_anti_join", "serde", "serde_json", "simd", "string_encoding", "string_pad", "string_reverse", "string_to_integer", "strings", "timezones", "to_dummies", "top_k", "unicode-reverse", "unique_counts"))' -C metadata=b142facfb2980914 -C extra-filename=-b142facfb2980914 --out-dir /home/tdhock/polars/target/debug/deps -C incremental=/home/tdhock/polars/target/debug/incremental -L dependency=/home/tdhock/polars/target/debug/deps --extern ahash=/home/tdhock/polars/target/debug/deps/libahash-818d695fa7a9bd8e.rmeta --extern aho_corasick=/home/tdhock/polars/target/debug/deps/libaho_corasick-d5aca9f7c08bf60b.rmeta --extern argminmax=/home/tdhock/polars/target/debug/deps/libargminmax-be088481fd562818.rmeta --extern base64=/home/tdhock/polars/target/debug/deps/libbase64-c167c3eb3ecc322f.rmeta --extern bytemuck=/home/tdhock/polars/target/debug/deps/libbytemuck-022494368bdc5299.rmeta --extern chrono=/home/tdhock/polars/target/debug/deps/libchrono-8862cbd9e42bcb49.rmeta --extern chrono_tz=/home/tdhock/polars/target/debug/deps/libchrono_tz-f000f17e8dd3fcc1.rmeta --extern either=/home/tdhock/polars/target/debug/deps/libeither-193f0d4e2d5b2b05.rmeta --extern hashbrown=/home/tdhock/polars/target/debug/deps/libhashbrown-169a0f0ac94e7e8f.rmeta --extern hex=/home/tdhock/polars/target/debug/deps/libhex-718b4f18bb2e7953.rmeta --extern indexmap=/home/tdhock/polars/target/debug/deps/libindexmap-608c3f5bc0772da8.rmeta --extern jsonpath_lib=/home/tdhock/polars/target/debug/deps/libjsonpath_lib-e505b7102b1280ec.rlib --extern memchr=/home/tdhock/polars/target/debug/deps/libmemchr-c7ff0286392b94eb.rmeta --extern num_traits=/home/tdhock/polars/target/debug/deps/libnum_traits-a3a38b2bbfcd825e.rmeta --extern arrow=/home/tdhock/polars/target/debug/deps/libpolars_arrow-1e31fbccb39b45e3.rmeta --extern polars_compute=/home/tdhock/polars/target/debug/deps/libpolars_compute-4fe7157e557c9a41.rmeta --extern polars_core=/home/tdhock/polars/target/debug/deps/libpolars_core-b0da04850a6521da.rmeta --extern polars_error=/home/tdhock/polars/target/debug/deps/libpolars_error-33c9415517418a03.rmeta --extern polars_json=/home/tdhock/polars/target/debug/deps/libpolars_json-149c9f70e7999f90.rmeta --extern polars_schema=/home/tdhock/polars/target/debug/deps/libpolars_schema-972546771b2e24ea.rmeta --extern polars_utils=/home/tdhock/polars/target/debug/deps/libpolars_utils-bc72fc09a53d08ea.rmeta --extern rand=/home/tdhock/polars/target/debug/deps/librand-02b9143d65626191.rmeta --extern rand_distr=/home/tdhock/polars/target/debug/deps/librand_distr-fceadba83ed94e53.rmeta --extern rayon=/home/tdhock/polars/target/debug/deps/librayon-a39eeb811e1312bd.rmeta --extern regex=/home/tdhock/polars/target/debug/deps/libregex-ae83f6c5d822bc86.rmeta --extern serde=/home/tdhock/polars/target/debug/deps/libserde-d2c92b8c60c3afd2.rmeta --extern serde_json=/home/tdhock/polars/target/debug/deps/libserde_json-e8bb76c5a147c8f6.rmeta --extern unicode_reverse=/home/tdhock/polars/target/debug/deps/libunicode_reverse-534480aa2876591f.rmeta -L native=/home/tdhock/polars/target/debug/build/lz4-sys-8b03502b0486afc3/out -L native=/home/tdhock/polars/target/debug/build/ring-9d05959480781960/out -L native=/home/tdhock/polars/target/debug/build/psm-48d9ddfe6691256c/out -L native=/home/tdhock/polars/target/debug/build/zstd-sys-7bd0a46595ccdb18/out --cfg 'feature="nightly"'` (signal: 9, SIGKILL: kill)
+warning: build failed, waiting for other jobs to finish...
+💥 maturin failed
+  Caused by: Failed to build a native library through cargo
+  Caused by: Cargo build finished with "exit status: 101": `env -u CARGO PYO3_ENVIRONMENT_SIGNATURE="cpython-3.10-64bit" PYO3_PYTHON="/home/tdhock/polars/.venv/bin/python" PYTHON_SYS_EXECUTABLE="/home/tdhock/polars/.venv/bin/python" "cargo" "rustc" "--message-format" "json-render-diagnostics" "--manifest-path" "/home/tdhock/polars/py-polars/Cargo.toml" "--lib"`
+make[1]: *** [Makefile:37 : build] Erreur 1
+make: *** [Makefile:27 : build] Erreur 2
+```
+
+From the output I was seeing on my System Monitor, it looks like the compilation may have been killed because it was about to swap (used too much memory).
+So maybe I can just try again?
+
+```
+(base) tdhock@tdhock-MacBook:~/polars/py-polars[main]$ make build
+🍹 Building a mixed python/rust project
+🔗 Found pyo3 bindings with abi3 support for Python ≥ 3.8
+🐍 Not using a specific python interpreter
+   Compiling blake3 v1.5.4
+   Compiling polars-ops v0.43.1 (/home/tdhock/polars/crates/polars-ops)
+   Compiling async-stream v0.3.5
+...
+   Compiling built v0.7.4
+   Compiling polars-python v0.43.1 (/home/tdhock/polars/crates/polars-python)
+   Compiling rustc-hash v1.1.0
+   Compiling numpy v0.21.0 (https://github.com/stinodego/rust-numpy.git?rev=9ba9962ae57ba26e35babdce6f179edf5fe5b9c8#9ba9962a)
+   Compiling py-polars v1.8.2 (/home/tdhock/polars/py-polars)
+   Compiling arboard v3.4.0
+   Compiling jemallocator v0.5.4
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 21m 07s
+make[1]: *** [Makefile:37 : build] Erreur 1
+make: *** [Makefile:27 : build] Erreur 2
+```
+
+Output above seems to have `Finished` so why are there errors?
+
+```python
+(base) tdhock@tdhock-MacBook:~/polars/py-polars[main]$ python
+Python 3.10.10 (main, Mar 21 2023, 18:45:11) [GCC 11.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import polars as pl
+/home/tdhock/polars/py-polars/polars/meta/build.py:5: UserWarning: Polars binary is missing!
+  from polars._utils.polars_version import get_polars_version
+>>> s = pl.Series("a", [1, 2, 3])
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/home/tdhock/polars/py-polars/polars/series/series.py", line 292, in __init__
+    self._s = sequence_to_pyseries(
+  File "/home/tdhock/polars/py-polars/polars/_utils/construction/series.py", line 276, in sequence_to_pyseries
+    elif python_dtype == PySeries:
+NameError: name 'PySeries' is not defined. Did you mean: 'pyseries'?
+```
+
+```{python}
+
+import polars as pl
+
+df = pl.DataFrame(
+    data={
+        "url": [
+            "http://vote.com/ballon_dor?candidate=messi&ref=python",
+            "http://vote.com/ballon_dor?candidate=weghorst&ref=polars",
+            "http://vote.com/ballon_dor?error=404&ref=rust",
+        ]
+    }
+)
+
+pattern = r"candidate=(?<candidate>\w+)&ref=(?<ref>\w+)"
+
+df.select(captures=pl.col("url").str.extract_groups(pattern)).unnest(
+    "captures"
+)
+
+```
+
+The polars in python docs say there are related methods
+* [extract](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.str.extract.html)
+  creates a new column from either the whole match, or one of the
+  capture groups.
+* [`extract_groups`](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.str.extract_groups.html)
+  creates a new column for each of the capture groups.
+* the analog of extractall in pandas is [`extract_all`](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.str.extract_all.html).
+
+## Pure Rust?
+
+https://blog.burntsushi.net/regex-internals/#brief-history
+
+
+## Conclusions
+
+We have shown that there are some asymptotic time/memory differences,
+between the different methods of estimating ordinary least squares regression
+coefficients.
+
+## Session info
+
+```{r}
+sessionInfo()
+```

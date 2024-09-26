@@ -97,17 +97,73 @@ meta.dt[, json.list := {
 }, by=.I]
 ```
 
+The code below examines what names are present in each downloaded JSON file:
+
 ```{r}
 lapply(meta.dt$json.list, names)
 ```
 
-```{r}
-tidyr::unnest_wider(meta.dt, json.list)
-```
+### data.table analogs of tidyr functions
+
+`tidyr` provides several functions related to nesting. 
+Below we use the wider function, which creates a table with one row for each list element, and one column for each list name.
 
 ```{r}
-tidyr::unnest_longer(meta.dt, json.list)
+only.json <- meta.dt[,.(json.list)]
+tidyr::unnest_wider(only.json, json.list)
 ```
+
+We see in the table above that there are `<NULL>` in some rows of
+`durations` and `time` columns, which is consistent with the `lapply`
+output we saw earlier.
+
+The analog in `data.table` would be to use 
+* `by=.I` to run some code for each row,
+* `json.list[[1]]` to get the inner/nested list out of the list column,
+* and `as.data.table` to create a data table with a list column for each inner list element.
+
+```{r}
+only.json[, as.data.table(json.list[[1]]), by=.I]
+```
+
+The output above shows an error; `data.table` does not want to do this operation for you, because the number of items/columns in each group do not match. 
+To get around that, you can explicitly specify what items/columsn you want:
+
+```{r}
+(after.wider <- only.json[, with(json.list[[1]], .(
+  geoms=list(geoms), title
+)), by=.I])
+```
+
+So as we see above, the unnest wider operation can be achieved using
+plain `data.table` code, although it is more explicit, and less
+convenient, than the corresponding `tidyr` code.
+
+Next we do an unnest which expands the list of geoms into one row per geom.
+
+```{r}
+only.geoms <- after.wider[,.(title,geoms)]
+tidyr::unnest_longer(only.geoms, geoms, "geom_info")
+```
+
+The equivalent in `data.table` is similar to the wider approach above:
+
+```{r}
+(after.longer <- only.geoms[, .(
+  geom_info=geoms[[1]], geom_info_id=names(geoms[[1]])
+), by=title])
+```
+
+We can again go wider to get info about each geom, such as counts of which geoms are most frequently used below.
+
+```{r}
+tidyr::unnest_wider(after.longer, geom_info) 
+second.wider <- after.longer[, .(short_title=substr(title,1,20), geom=sapply(geom_info, "[[", "geom"))]
+dcast(second.wider, geom ~ ., length)
+dcast(second.wider, short_title ~ geom, length)
+```
+
+Another way to get the same info is via TODO
 
 ```{r}
 hoist.result <- tidyr::hoist(meta.dt, json.list, "geoms", "plots", "selectors")
