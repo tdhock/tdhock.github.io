@@ -456,6 +456,46 @@ make: *** [Makefile:27 : build] Erreur 2
 
 Output above seems to have `Finished` so why are there errors?
 
+On an [issue I filed](https://github.com/pola-rs/polars/issues/18956), they told me to try `make requirements` but that did not help:
+
+```shell
+(base) tdhock@tdhock-MacBook:~/polars/py-polars[main]$ make requirements
+Requirement already satisfied: uv in ./.venv/lib/python3.10/site-packages (0.4.16)
+Resolved 206 packages in 4.08s
+aiohappyeyeballs ------------------------------ 6.73 KiB/13.77 KiB
+botocore-stubs ------------------------------ 10.77 KiB/58.72 KiB
+boto3-stubs ------------------------------ 32.00 KiB/60.03 KiB
+botocore-stubs ------------------------------ 30.80 KiB/58.72 KiB
+pymdown-extensions ------------------------------ 231.50 KiB/252.97 KiB
+yarl       ------------------------------ 385.48 KiB/437.41 KiB
+⠦ Preparing packages... (4/6)
+...
+⠋ Preparing packages... (5/6)
+Prepared 6 packages in 1.76s
+Uninstalled 6 packages in 26ms
+Installed 6 packages in 16ms
+Bytecode compiled 26430 files in 7.95s
+ - aiohappyeyeballs==2.4.0
+ + aiohappyeyeballs==2.4.2
+ - boto3-stubs==1.35.27
+ + boto3-stubs==1.35.28
+ - botocore-stubs==1.35.27
+ + botocore-stubs==1.35.28
+ - maturin==1.7.3
+ + maturin==1.7.4
+ - pymdown-extensions==10.10.1
+ + pymdown-extensions==10.10.2
+ - yarl==1.12.1
+ + yarl==1.13.0
+(base) tdhock@tdhock-MacBook:~/polars/py-polars[main]$ make build
+🍹 Building a mixed python/rust project
+🔗 Found pyo3 bindings with abi3 support for Python ≥ 3.8
+🐍 Not using a specific python interpreter
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.06s
+make[1]: *** [Makefile:37 : build] Erreur 1
+make: *** [Makefile:27 : build] Erreur 2
+```
+
 ```python
 (base) tdhock@tdhock-MacBook:~/polars/py-polars[main]$ python
 Python 3.10.10 (main, Mar 21 2023, 18:45:11) [GCC 11.2.0] on linux
