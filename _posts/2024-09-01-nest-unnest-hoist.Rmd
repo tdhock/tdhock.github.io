@@ -62,14 +62,14 @@ str(two.rows)
 
 The output above shows that
 * `L_INT_LOG` is a list of two items, of types integer and logical.
-* `L_NUM_CHR` is a list of two items, of types numeric and list. This
+* `L_NUM_LIST` is a list of two items, of types numeric and list. This
   internal/nested list has 3 items, of types character, function, and symbol.
   
 ## animint JSON example
 
 List columns can be useful when parsing JSON data.
 
-For example, consider data from the animint gallery.
+For example, consider data from the [animint gallery](https://animint.github.io/gallery/).
 
 ```{r}
 meta.csv <- "~/R/gallery/meta.csv"
@@ -122,7 +122,7 @@ The analog in `data.table` would be to use
 * `json.list[[1]]` to get the inner/nested list out of the list column,
 * and `as.data.table` to create a data table with a list column for each inner list element.
 
-```{r}
+```{r err, purl=TRUE, error=TRUE}
 only.json[, as.data.table(json.list[[1]]), by=.I]
 ```
 
@@ -130,7 +130,7 @@ The output above shows an error; `data.table` does not want to do this operation
 To get around that, you can explicitly specify what items/columsn you want:
 
 ```{r}
-(after.wider <- only.json[, with(json.list[[1]], .(
+(after.wider <- only.json[, with(json.list[[1]], data.table(
   geoms=list(geoms), title
 )), by=.I])
 ```
@@ -163,37 +163,37 @@ dcast(second.wider, geom ~ ., length)
 dcast(second.wider, short_title ~ geom, length)
 ```
 
-Another way to get the same info is via TODO
+### `tidyr::hoist` and `unnest::unnest`
+
+Another way to get the same info is via 
 
 ```{r}
-hoist.result <- tidyr::hoist(meta.dt, json.list, "geoms", "plots", "selectors")
+tibble::tibble(tidyr::hoist(after.longer, geom_info, "geom"))
 ```
 
-```{r}
-meta.dt[, geoms := list(json.list[[1]]$geoms), by=.I]
-```
+or even more efficiently:
 
 ```{r}
-spec <- unnest::s(
-  stack = TRUE,
-  unnest::s("geoms"),
-  unnest::s("plots"),
-      "owner",
-      unnest::s("login"))))
-unnest.result <- unnest::unnest(gh_repos, spec)
+unnest.result <- unnest::unnest(
+  meta.dt$json.list,
+  unnest::s(
+    stack=TRUE,
+    unnest::s("title"),
+    unnest::s(
+      "geoms",
+      unnest::s(
+        stack=TRUE,
+        unnest::s("geom")))))
+(unnest.dt <- data.table(unnest.result)[, short_title := substr(title,1,20)][])
+dcast(unnest.dt, geoms.geom ~ ., length)
+dcast(unnest.dt, short_title ~ geoms.geom, length)
 ```
 
+### Benchmark
+
+Which method is fastest?
+
 ```{r}
-Rdatatable.members <- gh::gh("/orgs/Rdatatable/members")
-Rdatatable.roles <- gh::gh("/orgs/Rdatatable/organization-roles")
-str(Rdatatable.members[1:2])
-library(data.table)
-do.call(rbind, lapply(Rdatatable.members, as.data.table))
-dt.list.col <- data.table(L=Rdatatable.members)
-tidyr::unnest_wider(dt.list.col, L)
-dt.list.col[, L[[1]], by=.I]
-hoist.result <- tidyr::hoist(dt.list.col, L, "login", "type")
-dt.list.col
 
 data("gh_repos",package="repurrrsive")
 length(gh_repos)

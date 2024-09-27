@@ -145,13 +145,6 @@ head(stats::reshape(
 
 ``` r
 library(data.table)
-```
-
-```
-## data.table 1.15.99 IN DEVELOPMENT built 2024-08-07 15:42:29 UTC using 3 threads (see ?getDTthreads).  Latest news: r-datatable.com
-```
-
-``` r
 iris.dt <- data.table(iris)
 melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 ```
@@ -174,20 +167,6 @@ melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 
 ``` r
 tidyr::pivot_longer(iris, cols.to.reshape, values_to = "cm")
-```
-
-```
-## Warning: Using an external vector in selections was deprecated in tidyselect 1.1.0.
-## ℹ Please use `all_of()` or `any_of()` instead.
-##   # Was:
-##   data %>% select(cols.to.reshape)
-## 
-##   # Now:
-##   data %>% select(all_of(cols.to.reshape))
-## 
-## See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 ```
 
 ```
@@ -219,6 +198,21 @@ head(collapse::pivot(iris, values=cols.to.reshape, names=list("variable", "cm"))
 ## 4  setosa Sepal.Length 4.6
 ## 5  setosa Sepal.Length 5.0
 ## 6  setosa Sepal.Length 5.4
+```
+
+``` r
+polars::as_polars_df(iris)$unpivot(index="Species", value_name="cm")
+```
+
+```{=html}
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (600, 3)</small><table border="1" class="dataframe"><thead><tr><th>Species</th><th>variable</th><th>cm</th></tr><tr><td>cat</td><td>str</td><td>f64</td></tr></thead><tbody><tr><td>&quot;setosa&quot;</td><td>&quot;Sepal.Length&quot;</td><td>5.1</td></tr><tr><td>&quot;setosa&quot;</td><td>&quot;Sepal.Length&quot;</td><td>4.9</td></tr><tr><td>&quot;setosa&quot;</td><td>&quot;Sepal.Length&quot;</td><td>4.7</td></tr><tr><td>&quot;setosa&quot;</td><td>&quot;Sepal.Length&quot;</td><td>4.6</td></tr><tr><td>&quot;setosa&quot;</td><td>&quot;Sepal.Length&quot;</td><td>5.0</td></tr><tr><td>&hellip;</td><td>&hellip;</td><td>&hellip;</td></tr><tr><td>&quot;virginica&quot;</td><td>&quot;Petal.Width&quot;</td><td>2.3</td></tr><tr><td>&quot;virginica&quot;</td><td>&quot;Petal.Width&quot;</td><td>1.9</td></tr><tr><td>&quot;virginica&quot;</td><td>&quot;Petal.Width&quot;</td><td>2.0</td></tr><tr><td>&quot;virginica&quot;</td><td>&quot;Petal.Width&quot;</td><td>2.3</td></tr><tr><td>&quot;virginica&quot;</td><td>&quot;Petal.Width&quot;</td><td>1.8</td></tr></tbody></table></div>
 ```
 
 Below we define a larger version of iris data, as a function of number
@@ -274,8 +268,11 @@ a.res <- atime::atime(
     (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
     N.df <- iris[row.id.vec,]
     (N.dt <- data.table(N.df))
+    polars_df <- polars::as_polars_df(N.df)
   },
   seconds.limit=0.1,
+  "polars\nas_polars_df"=polars::as_polars_df(N.df),
+  "polars\nunpivot"=polars_df$unpivot(index="Species", value_name="cm"),
   "stats\nreshape"=suppressWarnings(stats::reshape(N.df, direction="long", varying=list(cols.to.reshape), v.names="cm")),
   "data.table\nmelt"=melt(N.dt, measure.vars=cols.to.reshape, value.name="cm"),
   "tidyr\npivot_longer"=tidyr::pivot_longer(N.df, cols.to.reshape, values_to = "cm"),
@@ -283,10 +280,6 @@ a.res <- atime::atime(
 a.refs <- atime::references_best(a.res)
 a.pred <- predict(a.refs)
 plot(a.pred)+coord_cartesian(xlim=c(1e2,1e7))
-```
-
-```
-## Loading required namespace: directlabels
 ```
 
 ```
@@ -367,7 +360,8 @@ tidyr::pivot_longer(two.iris.wide, cols.to.reshape, names_pattern = "(.*)[.](.*)
 
 However `?collapse::pivot` explains that it "currently does not
 support concurrently melting/pivoting longer to multiple columns."
-Below we compare the performance of these methods:
+And [unpivot](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.unpivot.html#polars.DataFrame.unpivot) does not support multiple output columns either.
+Below we compare the performance of the methods that do support multiple output columns:
 
 
 ``` r
@@ -485,18 +479,19 @@ str(reshape_wider(N.tall.df))
 
 ``` r
 N.tall.dt <- data.table(N.tall.df)
-str(dcast(N.tall.dt, orig.row.i ~ orig.col.name, value.var = "value"))
+str(dcast(N.tall.dt, orig.row.i + Species ~ orig.col.name, value.var = "value"))
 ```
 
 ```
-## Classes 'data.table' and 'data.frame':	250 obs. of  5 variables:
+## Classes 'data.table' and 'data.frame':	250 obs. of  6 variables:
 ##  $ orig.row.i  : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ Species     : Factor w/ 3 levels "setosa","versicolor",..: 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
 ##  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
 ##  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
 ##  $ Sepal.Width : num  3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
 ##  - attr(*, ".internal.selfref")=<externalptr> 
-##  - attr(*, "sorted")= chr "orig.row.i"
+##  - attr(*, "sorted")= chr [1:2] "orig.row.i" "Species"
 ```
 
 ``` r
@@ -504,8 +499,8 @@ str(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"
 ```
 
 ```
-## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : some constant variables
-## (orig.col.i) are really varying
+## Warning in reshapeWide(data, idvar = idvar, timevar = timevar, varying = varying, : certaines variables constantes
+## (orig.col.i) varient
 ```
 
 ```
@@ -527,12 +522,13 @@ str(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"
 ```
 
 ``` r
-str(tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=orig.row.i))
+str(tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=c(orig.row.i,Species)))
 ```
 
 ```
-## tibble [250 × 5] (S3: tbl_df/tbl/data.frame)
+## tibble [250 × 6] (S3: tbl_df/tbl/data.frame)
 ##  $ orig.row.i  : int [1:250] 1 2 3 4 5 6 7 8 9 10 ...
+##  $ Species     : Factor w/ 3 levels "setosa","versicolor",..: 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ Sepal.Length: num [1:250] 5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
 ##  $ Sepal.Width : num [1:250] 3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
 ##  $ Petal.Length: num [1:250] 1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
@@ -540,16 +536,32 @@ str(tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, i
 ```
 
 ``` r
-str(collapse::pivot(N.tall.df, how="w", ids="orig.row.i", values="value", names="orig.col.name"))
+str(collapse::pivot(N.tall.df, how="w", ids=c("orig.row.i","Species"), values="value", names="orig.col.name"))
 ```
 
 ```
-## 'data.frame':	250 obs. of  5 variables:
+## 'data.frame':	250 obs. of  6 variables:
 ##  $ orig.row.i  : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ Species     : Factor w/ 3 levels "setosa","versicolor",..: 1 1 1 1 1 1 1 1 1 1 ...
 ##  $ Sepal.Length: num  5.1 4.9 4.7 4.6 5 5.4 4.6 5 4.4 4.9 ...
 ##  $ Sepal.Width : num  3.5 3 3.2 3.1 3.6 3.9 3.4 3.4 2.9 3.1 ...
 ##  $ Petal.Length: num  1.4 1.4 1.3 1.5 1.4 1.7 1.4 1.5 1.4 1.5 ...
 ##  $ Petal.Width : num  0.2 0.2 0.2 0.2 0.2 0.4 0.3 0.2 0.2 0.1 ...
+```
+
+``` r
+polars::as_polars_df(N.tall.df)$pivot(on="orig.col.name", index=c("orig.row.i","Species"), values="value")
+```
+
+```{=html}
+<div><style>
+.dataframe > thead > tr > th,
+.dataframe > tbody > tr > td {
+  text-align: right;
+  white-space: pre-wrap;
+}
+</style>
+<small>shape: (250, 6)</small><table border="1" class="dataframe"><thead><tr><th>orig.row.i</th><th>Species</th><th>Sepal.Length</th><th>Sepal.Width</th><th>Petal.Length</th><th>Petal.Width</th></tr><tr><td>i32</td><td>cat</td><td>f64</td><td>f64</td><td>f64</td><td>f64</td></tr></thead><tbody><tr><td>1</td><td>&quot;setosa&quot;</td><td>5.1</td><td>3.5</td><td>1.4</td><td>0.2</td></tr><tr><td>2</td><td>&quot;setosa&quot;</td><td>4.9</td><td>3.0</td><td>1.4</td><td>0.2</td></tr><tr><td>3</td><td>&quot;setosa&quot;</td><td>4.7</td><td>3.2</td><td>1.3</td><td>0.2</td></tr><tr><td>4</td><td>&quot;setosa&quot;</td><td>4.6</td><td>3.1</td><td>1.5</td><td>0.2</td></tr><tr><td>5</td><td>&quot;setosa&quot;</td><td>5.0</td><td>3.6</td><td>1.4</td><td>0.2</td></tr><tr><td>&hellip;</td><td>&hellip;</td><td>&hellip;</td><td>&hellip;</td><td>&hellip;</td><td>&hellip;</td></tr><tr><td>246</td><td>&quot;versicolor&quot;</td><td>5.7</td><td>3.0</td><td>4.2</td><td>1.2</td></tr><tr><td>247</td><td>&quot;versicolor&quot;</td><td>5.7</td><td>2.9</td><td>4.2</td><td>1.3</td></tr><tr><td>248</td><td>&quot;versicolor&quot;</td><td>6.2</td><td>2.9</td><td>4.3</td><td>1.3</td></tr><tr><td>249</td><td>&quot;versicolor&quot;</td><td>5.1</td><td>2.5</td><td>3.0</td><td>1.1</td></tr><tr><td>250</td><td>&quot;versicolor&quot;</td><td>5.7</td><td>2.8</td><td>4.1</td><td>1.3</td></tr></tbody></table></div>
 ```
 
 In all of the code examples above there are a few common elements
@@ -564,6 +576,7 @@ In all of the code examples above there are a few common elements
 | `stats::reshape`     | `idvar`        | `timevar`      | `v.names`     |
 | `tidyr::pivot_wider` | `id_cols`      | `names_from`   | `values_from` |
 | `collapse::pivot`    | `ids`          | `names`        | `values`      |
+| `polars $pivot`      | `index`        | `on`           | `values`      |
 
 Timings below
 
@@ -576,8 +589,11 @@ w.res <- atime::atime(
     N.df <- iris[row.id.vec,]
     N.tall.df <- reshape_taller(N.df,1:4)
     N.tall.dt <- data.table(N.tall.df)
+    polars.df <- polars::as_polars_df(N.tall.df)
   },
   seconds.limit=0.1,
+  "polars\nas_polars_df"=polars::as_polars_df(N.tall.df),
+  "polars\npivot"=polars.df$pivot(on="orig.col.name", index=c("orig.row.i","Species"), values="value"),
   "data.table\ndcast"=dcast(N.tall.dt, orig.row.i ~ orig.col.name, value.var = "value"),
   "stats\nreshape"=suppressWarnings(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"), timevar="orig.col.name", v.names="value")),
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=orig.row.i),
@@ -720,6 +736,7 @@ indicate that only one column should be output). The table below summarizes the 
 | `stats::aggregate`   | `by`           | all column names | all input values | `FUN`           |
 | `tidyr::pivot_wider` | `id_cols`      | `names_from`     | `values_from`    | `values_fn`     |
 | `collapse::pivot`    | `ids`          | `names`          | `values`         | `FUN`           |
+| `polars $pivot`      | `index`        | `on`             | `values`         | -               |
 
 Below we compare the performance of these different functions.
 
@@ -849,12 +866,18 @@ differences in functionality.
 | `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)?  |
 | `stats`      | yes              | no           | no            | O(N log N)?  | O(N)         |
 | `collapse`   | no               | no           | no            | O(N log N)?  | O(N log N)?  |
+| `polars`     | no               | no           | no            | no support   | O(N log N)?  |
+
+UPDATE 26 sept 2024 added polars row based on docs for
+[pivot](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.pivot.html)
+and
+[unpivot](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.unpivot.html#polars.DataFrame.unpivot).
 
 For future work, 
 
 * `data.table`/`tidyr` may consider trying to speed up the constant factors in the reshape wide code without aggregation.
 * `collapse` reshape wide with aggregation seems asymptotically log-linear, and so may consider investigating the possibility of a speedup to asymptotically linear.
-* `tidyr`/`collapse` may consider implementing the advanced reshaping features that `data.table` currently supports (multiple outputs, regex).
+* `tidyr`/`collapse`/`polars` may consider implementing the advanced reshaping features that `data.table` currently supports (multiple outputs, regex).
 
 ## Session info
 
@@ -864,34 +887,37 @@ sessionInfo()
 ```
 
 ```
-## R version 4.4.1 (2024-06-14 ucrt)
-## Platform: x86_64-w64-mingw32/x64
-## Running under: Windows 11 x64 (build 22631)
+## R version 4.4.1 (2024-06-14)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 22.04.5 LTS
 ## 
 ## Matrix products: default
-## 
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
 ## 
 ## locale:
-## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
-## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
-## time zone: America/Toronto
-## tzcode source: internal
+## time zone: America/New_York
+## tzcode source: system (glibc)
 ## 
 ## attached base packages:
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## other attached packages:
-## [1] data.table_1.15.99 ggplot2_3.5.1     
+## [1] ggplot2_3.5.1      data.table_1.16.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] gtable_0.3.5           dplyr_1.1.4            compiler_4.4.1         highr_0.11             crayon_1.5.3          
-##  [6] tidyselect_1.2.1       Rcpp_1.0.13            collapse_2.0.15        parallel_4.4.1         tidyr_1.3.1           
-## [11] scales_1.3.0           directlabels_2024.1.21 lattice_0.22-6         R6_2.5.1               labeling_0.4.3        
-## [16] generics_0.1.3         knitr_1.48             tibble_3.2.1           munsell_0.5.1          atime_2024.8.7        
-## [21] pillar_1.9.0           rlang_1.1.4            utf8_1.2.4             xfun_0.46              quadprog_1.5-8        
-## [26] cli_3.6.3              withr_3.0.1            magrittr_2.0.3         grid_4.4.1             nc_2024.2.21          
-## [31] lifecycle_1.0.4        vctrs_0.6.5            bench_1.1.3            evaluate_0.24.0        glue_1.7.0            
-## [36] farver_2.1.2           profmem_0.6.0          fansi_1.0.6            colorspace_2.1-1       purrr_1.0.2           
-## [41] tools_4.4.1            pkgconfig_2.0.3
+##  [1] gtable_0.3.4           highr_0.11             dplyr_1.1.4            compiler_4.4.1         crayon_1.5.2          
+##  [6] tidyselect_1.2.1       Rcpp_1.0.12            collapse_2.0.15        parallel_4.4.1         tidyr_1.3.1           
+## [11] scales_1.3.0           directlabels_2024.1.21 fastmap_1.1.1          lattice_0.22-6         R6_2.5.1              
+## [16] labeling_0.4.3         generics_0.1.3         knitr_1.47             tibble_3.2.1           polars_0.19.1         
+## [21] munsell_0.5.0          atime_2024.9.25        pillar_1.9.0           rlang_1.1.3            utf8_1.2.4            
+## [26] xfun_0.45              quadprog_1.5-8         cli_3.6.2              withr_3.0.0            magrittr_2.0.3        
+## [31] digest_0.6.34          grid_4.4.1             nc_2024.9.19           lifecycle_1.0.4        vctrs_0.6.5           
+## [36] bench_1.1.3            evaluate_0.23          glue_1.7.0             farver_2.1.1           profmem_0.6.0         
+## [41] fansi_1.0.6            colorspace_2.1-0       rmarkdown_2.25.1       purrr_1.0.2            htmltools_0.5.7       
+## [46] tools_4.4.1            pkgconfig_2.0.3
 ```

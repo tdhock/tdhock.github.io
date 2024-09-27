@@ -113,6 +113,7 @@ iris.dt <- data.table(iris)
 melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 tidyr::pivot_longer(iris, cols.to.reshape, values_to = "cm")
 head(collapse::pivot(iris, values=cols.to.reshape, names=list("variable", "cm")))
+polars::as_polars_df(iris)$unpivot(index="Species", value_name="cm")
 ```
 
 Below we define a larger version of iris data, as a function of number
@@ -135,8 +136,11 @@ a.res <- atime::atime(
     (row.id.vec <- 1+(seq(0,N-1) %% nrow(iris)))
     N.df <- iris[row.id.vec,]
     (N.dt <- data.table(N.df))
+    polars_df <- polars::as_polars_df(N.df)
   },
   seconds.limit=0.1,
+  "polars\nas_polars_df"=polars::as_polars_df(N.df),
+  "polars\nunpivot"=polars_df$unpivot(index="Species", value_name="cm"),
   "stats\nreshape"=suppressWarnings(stats::reshape(N.df, direction="long", varying=list(cols.to.reshape), v.names="cm")),
   "data.table\nmelt"=melt(N.dt, measure.vars=cols.to.reshape, value.name="cm"),
   "tidyr\npivot_longer"=tidyr::pivot_longer(N.df, cols.to.reshape, values_to = "cm"),
@@ -180,7 +184,8 @@ tidyr::pivot_longer(two.iris.wide, cols.to.reshape, names_pattern = "(.*)[.](.*)
 
 However `?collapse::pivot` explains that it "currently does not
 support concurrently melting/pivoting longer to multiple columns."
-Below we compare the performance of these methods:
+And [unpivot](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.unpivot.html#polars.DataFrame.unpivot) does not support multiple output columns either.
+Below we compare the performance of the methods that do support multiple output columns:
 
 ```{r atime-regex}
 r.res <- atime::atime(
@@ -249,10 +254,11 @@ library(data.table)
 N.tall.df <- reshape_taller(N.df,1:4)
 str(reshape_wider(N.tall.df))
 N.tall.dt <- data.table(N.tall.df)
-str(dcast(N.tall.dt, orig.row.i ~ orig.col.name, value.var = "value"))
+str(dcast(N.tall.dt, orig.row.i + Species ~ orig.col.name, value.var = "value"))
 str(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"), timevar="orig.col.name", v.names="value"))
-str(tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=orig.row.i))
-str(collapse::pivot(N.tall.df, how="w", ids="orig.row.i", values="value", names="orig.col.name"))
+str(tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=c(orig.row.i,Species)))
+str(collapse::pivot(N.tall.df, how="w", ids=c("orig.row.i","Species"), values="value", names="orig.col.name"))
+polars::as_polars_df(N.tall.df)$pivot(on="orig.col.name", index=c("orig.row.i","Species"), values="value")
 ```
 
 In all of the code examples above there are a few common elements
@@ -267,6 +273,7 @@ In all of the code examples above there are a few common elements
 | `stats::reshape`     | `idvar`        | `timevar`      | `v.names`     |
 | `tidyr::pivot_wider` | `id_cols`      | `names_from`   | `values_from` |
 | `collapse::pivot`    | `ids`          | `names`        | `values`      |
+| `polars $pivot`      | `index`        | `on`           | `values`      |
 
 Timings below
 
@@ -278,8 +285,11 @@ w.res <- atime::atime(
     N.df <- iris[row.id.vec,]
     N.tall.df <- reshape_taller(N.df,1:4)
     N.tall.dt <- data.table(N.tall.df)
+    polars.df <- polars::as_polars_df(N.tall.df)
   },
   seconds.limit=0.1,
+  "polars\nas_polars_df"=polars::as_polars_df(N.tall.df),
+  "polars\npivot"=polars.df$pivot(on="orig.col.name", index=c("orig.row.i","Species"), values="value"),
   "data.table\ndcast"=dcast(N.tall.dt, orig.row.i ~ orig.col.name, value.var = "value"),
   "stats\nreshape"=suppressWarnings(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"), timevar="orig.col.name", v.names="value")),
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=orig.row.i),
@@ -330,6 +340,7 @@ indicate that only one column should be output). The table below summarizes the 
 | `stats::aggregate`   | `by`           | all column names | all input values | `FUN`           |
 | `tidyr::pivot_wider` | `id_cols`      | `names_from`     | `values_from`    | `values_fn`     |
 | `collapse::pivot`    | `ids`          | `names`          | `values`         | `FUN`           |
+| `polars $pivot`      | `index`        | `on`             | `values`         | -               |
 
 Below we compare the performance of these different functions.
 
@@ -425,12 +436,18 @@ differences in functionality.
 | `tidyr`      | yes              | yes          | no            | O(N)         | O(N log N)?  |
 | `stats`      | yes              | no           | no            | O(N log N)?  | O(N)         |
 | `collapse`   | no               | no           | no            | O(N log N)?  | O(N log N)?  |
+| `polars`     | no               | no           | no            | no support   | O(N log N)?  |
+
+UPDATE 26 sept 2024 added polars row based on docs for
+[pivot](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.pivot.html)
+and
+[unpivot](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.unpivot.html#polars.DataFrame.unpivot).
 
 For future work, 
 
 * `data.table`/`tidyr` may consider trying to speed up the constant factors in the reshape wide code without aggregation.
 * `collapse` reshape wide with aggregation seems asymptotically log-linear, and so may consider investigating the possibility of a speedup to asymptotically linear.
-* `tidyr`/`collapse` may consider implementing the advanced reshaping features that `data.table` currently supports (multiple outputs, regex).
+* `tidyr`/`collapse`/`polars` may consider implementing the advanced reshaping features that `data.table` currently supports (multiple outputs, regex).
 
 ## Session info
 
