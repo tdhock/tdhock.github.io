@@ -114,6 +114,9 @@ melt(iris.dt, measure.vars=cols.to.reshape, value.name="cm")
 tidyr::pivot_longer(iris, cols.to.reshape, values_to = "cm")
 head(collapse::pivot(iris, values=cols.to.reshape, names=list("variable", "cm")))
 polars::as_polars_df(iris)$unpivot(index="Species", value_name="cm")
+con <- duckdb::dbConnect(duckdb::duckdb(), dbdir = ":memory:")
+duckdb::dbWriteTable(con, "iris_table", iris)
+DBI::dbGetQuery(con, 'UNPIVOT iris_table ON "Sepal.Length", "Petal.Length", "Sepal.Width", "Petal.Width" INTO NAME part_dim VALUE cm')
 ```
 
 Below we define a larger version of iris data, as a function of number
@@ -137,8 +140,11 @@ a.res <- atime::atime(
     N.df <- iris[row.id.vec,]
     (N.dt <- data.table(N.df))
     polars_df <- polars::as_polars_df(N.df)
+    duckdb::dbWriteTable(con, "iris_table", N.df, overwrite=TRUE)
   },
   seconds.limit=0.1,
+  "duckdb\ndbWriteTable"=duckdb::dbWriteTable(con, "iris_table", N.df, overwrite=TRUE),
+  "duckdb\nUNPIVOT"=DBI::dbGetQuery(con, 'UNPIVOT iris_table ON "Sepal.Length", "Petal.Length", "Sepal.Width", "Petal.Width" INTO NAME part_dim VALUE cm'),
   "polars\nas_polars_df"=polars::as_polars_df(N.df),
   "polars\nunpivot"=polars_df$unpivot(index="Species", value_name="cm"),
   "stats\nreshape"=suppressWarnings(stats::reshape(N.df, direction="long", varying=list(cols.to.reshape), v.names="cm")),
@@ -259,6 +265,8 @@ str(stats::reshape(N.tall.df, direction = "wide", idvar=c("orig.row.i","Species"
 str(tidyr::pivot_wider(N.tall.df, names_from=orig.col.name, values_from=value, id_cols=c(orig.row.i,Species)))
 str(collapse::pivot(N.tall.df, how="w", ids=c("orig.row.i","Species"), values="value", names="orig.col.name"))
 polars::as_polars_df(N.tall.df)$pivot(on="orig.col.name", index=c("orig.row.i","Species"), values="value")
+duckdb::dbWriteTable(con, "iris_tall", N.tall.df, overwrite=TRUE)
+DBI::dbGetQuery(con, 'PIVOT iris_tall ON "orig.col.name" USING sum(value) GROUP BY "orig.row.i", "orig.row.name" ORDER BY "orig.row.i"')
 ```
 
 In all of the code examples above there are a few common elements
@@ -286,8 +294,11 @@ w.res <- atime::atime(
     N.tall.df <- reshape_taller(N.df,1:4)
     N.tall.dt <- data.table(N.tall.df)
     polars.df <- polars::as_polars_df(N.tall.df)
+    duckdb::dbWriteTable(con, "iris_tall", N.tall.df, overwrite=TRUE)
   },
   seconds.limit=0.1,
+  "duckdb\ndbWriteTable"=duckdb::dbWriteTable(con, "iris_tall", N.tall.df, overwrite=TRUE),
+  "duckdb\nPIVOT"=DBI::dbGetQuery(con, 'PIVOT iris_tall ON "orig.col.name" USING sum(value) GROUP BY "orig.row.i", "orig.row.name" ORDER BY "orig.row.i"'),
   "polars\nas_polars_df"=polars::as_polars_df(N.tall.df),
   "polars\npivot"=polars.df$pivot(on="orig.col.name", index=c("orig.row.i","Species"), values="value"),
   "data.table\ndcast"=dcast(N.tall.dt, orig.row.i ~ orig.col.name, value.var = "value"),
@@ -327,6 +338,7 @@ stats::aggregate(N.tall.df[,"value",drop=FALSE], by=with(N.tall.df, list(orig.co
 N.tall.df$name <- "foo"
 tidyr::pivot_wider(N.tall.df, names_from=name, values_from=value, id_cols=c(orig.col.name,Species), values_fn=mean)
 collapse::pivot(N.tall.df, how="w", ids=c("orig.col.name","Species"), values="value", names="name", FUN=mean)
+DBI::dbGetQuery(con, 'PIVOT iris_tall USING mean(value) GROUP BY "orig.col.name", "Species"')
 ```
 
 Note in the code above that to get the `tidyr` and `collapse` methods
@@ -341,6 +353,9 @@ indicate that only one column should be output). The table below summarizes the 
 | `tidyr::pivot_wider` | `id_cols`      | `names_from`     | `values_from`    | `values_fn`     |
 | `collapse::pivot`    | `ids`          | `names`          | `values`         | `FUN`           |
 | `polars $pivot`      | `index`        | `on`             | `values`         | -               |
+| `duckdb PIVOT`       | `GROUP BY`     | `ON`             | `USING`          | `USING`         |
+
+UPDATE 27 Sept 2024: added duckdb based on docs [overview](https://duckdb.org/docs/api/r.html), [pivot](https://duckdb.org/docs/sql/statements/pivot.html), [unpivot](https://duckdb.org/docs/sql/statements/unpivot.html). Note that duckdb supports multiple value columns, and multiple aggregation functions, but you need to specify each combination of column/aggregation in a separate entry of `USING`, so this is less convenient than `data.table::dcast`, which computes each aggregation function for each value column.
 
 Below we compare the performance of these different functions.
 
@@ -354,7 +369,9 @@ m.res <- atime::atime(
     N.tall.df$name <- "foo"
     N.tall.dt <- data.table(N.tall.df)
   },
-  seconds.limit=0.1,
+  seconds.limit=0.1,  
+  ##"duckdb\ndbWriteTable"=duckdb::dbWriteTable(con, "iris_tall", N.tall.df, overwrite=TRUE),
+  ##"duckdb\nPIVOT"=DBI::dbGetQuery(con, 'PIVOT iris_tall USING mean(value) GROUP BY "orig.col.name", "Species"'),
   "stats\naggregate"=stats::aggregate(N.tall.df[,"value",drop=FALSE], by=with(N.tall.df, list(orig.col.name=orig.col.name,Species=Species)), FUN=mean),
   "tidyr\npivot_wider"=tidyr::pivot_wider(N.tall.df, names_from=name, values_from=value, id_cols=c(orig.col.name,Species), values_fn=mean),
   "collapse\npivot"=collapse::pivot(N.tall.df, how="w", ids=c("orig.col.name","Species"), values="value", names="name", FUN=mean),
@@ -437,6 +454,7 @@ differences in functionality.
 | `stats`      | yes              | no           | no            | O(N log N)?  | O(N)         |
 | `collapse`   | no               | no           | no            | O(N log N)?  | O(N log N)?  |
 | `polars`     | no               | no           | no            | no support   | O(N log N)?  |
+| `duckdb`     | no               | no           | yes           | O(N)?        | O(N)?        |
 
 UPDATE 26 sept 2024 added polars row based on docs for
 [pivot](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.pivot.html)
