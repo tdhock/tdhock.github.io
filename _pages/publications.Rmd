@@ -165,5 +165,5 @@ cat(paste0(
   paste(refs.wide[order(year), ref], collapse=","),
   "}."),
   file="../assets/citep.tex")
-system(paste("cd ../assets && rm -f TDH-refs.pdf TDH-refs.aux TDH-refs.bbl && pdflatex TDH-refs && bibtex TDH-refs && pdflatex TDH-refs && pdflatex TDH-refs && evince TDH-refs.pdf &"))
+suppressWarnings(system(paste("cd ../assets && rm -f TDH-refs.pdf TDH-refs.aux TDH-refs.bbl && pdflatex TDH-refs && bibtex TDH-refs && pdflatex TDH-refs && pdflatex TDH-refs && evince TDH-refs.pdf &")))
 ```

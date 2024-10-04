@@ -128,8 +128,3 @@ description: Peer-reviewed papers and preprints with links to code and data
 |<img src="/assets/img/publications/thumb/Doyon2008heritable.png" width="150" />                            |2008        |Doyon Y, McCammon JM, Miller JC, Faraji F, Ngo C, Katibah GE, Amora R, Hocking TD, Zhang L, Rebar EJ, Gregory PD, Urnov FD, Amacher SL                                                                                                                                                                                                                                                                                          |Heritable targeted gene disruption in zebrafish using designed zinc-finger nucleases                                      |Nature biotechnology 26(6)                                                                                                                        |[Pubmed](http://www.ncbi.nlm.nih.gov/pubmed/18500334)                                                 |
 
 
-```
-## Warning in system(paste("cd ../assets && rm -f TDH-refs.pdf TDH-refs.aux
-## TDH-refs.bbl && pdflatex TDH-refs && bibtex TDH-refs && pdflatex TDH-refs &&
-## pdflatex TDH-refs && evince TDH-refs.pdf &")): 'cd' not found
-```
