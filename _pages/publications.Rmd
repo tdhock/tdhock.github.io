@@ -121,8 +121,9 @@ for(large.png in Sys.glob("../assets/img/publications/*.png")){
     basename(large.png))
   if(!file.exists(thumb.png)){
     dir.create(dirname(thumb.png),showWarnings=FALSE)
-    convert.cmd <- paste("convert", large.png, "-scale 150", thumb.png)
-    system(convert.cmd)
+    large.img <- magick::image_read(large.png)
+    thumb.img <- magick::image_resize(large.img, "150")
+    magick::image_write(thumb.img, thumb.png)
   }
 }
 knitr::kable(refs.wide[
