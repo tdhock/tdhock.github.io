@@ -128,58 +128,86 @@ For the students below, my role is primary advisor, unless another primary advis
 * [Brandon Dunn](https://github.com/bd288), EE master, Fall 2018 - Spring 2019, then went to [Raytheon](https://www.rtx.com/).
 
 ### ASU West ML day, Apr 2024
+
 Left to right: Tung, Toby, Doris, Bilal, Danny.
+
 ![ASU West ML day Apr 2024](/assets/img/lab-photos/2024-04-26-ASU-West-ML-Day.JPG)
 
 ### Cross-country ski day, Feb 2024
+
 Left to right: Toby, Tung, Doris, Danny.
+
 ![Cross-country ski day Feb 2024](/assets/img/lab-photos/2024-02-20-toby-tung-doris-danny-lunch.jpg)
 
 ### ML group meeting, Sep 2023
-Left to right: Richard, Trevor, Bilal, Danny, Toby, Doris, Karl.
+
+Left to right: Richard, Trevor, Bilal, Danny, Toby, Doris, Karl. We
+      are showing "six" fingers for SICCS (School of Informatics,
+      Computing and Cyber Systems).
+
 ![ML group meeting Sep 2023](/assets/img/lab-photos/2023-09-13-ml-group-meeting.jpg)
 
 ### SICCS ML lab at ASU West ML Day, April 2023
+
 Left to right: Bilal, Toby, Anirban, Danny, Austin, Jadon.
+
 ![SICCS at ASU April 2023](/assets/img/lab-photos/2023-04-14-ASU-ML-Day.jpg)
 
 ### ML group meeting, Feb 2023
+
 Left to right: Austin, Jadon, Danny, Toby, Bilal, Cam.
+
 ![SICCS group meeting 2023 Feb 2](/assets/img/lab-photos/2023-02-02-group-meeting.jpg)
 
 ### SICCS camping, Oct 2022
+
 Left to right: Kyle, Toby, Danny, Basil.
+
 ![SICCS camping](/assets/img/lab-photos/2022-10-14_ML_camp_fire.jpg)
 
 ### ML group meeting, Oct 2022
+
 Left to right: Cam, Bilal, Toby, Danny, Kyle, Gabi.
+
 ![group meeting Oct 2022](/assets/img/lab-photos/2022-10-14_ML_group_meeting.jpg)
 
 ### RcppDeepState project members, Oct 2021
+
 Left to right: Toby, Alex, Akhila.
+
 ![Rcpp project members](/assets/img/lab-photos/2021-10-12-Toby-Alex-Akhila.jpg)
 
 ### First fall semester group meeting, Aug 2021
+
 Left to right: Tristan, Anirban, Toby, Shadmaan, Akhila, Balaji, Kyle.
+
 ![lab meeting fall 2021](/assets/img/lab-photos/2021-08-16-first-fall-ml-group-meeting.jpg)
 
 ### Downhill ski day, Mar 2021
+
 Left to right: Toby, Jon, Tristan, Frank, Akhila, Alyssa.
+
 ![ski 2021](/assets/img/lab-photos/2021-03-lab-ski-lunch.jpg)
 
 ### Summer Pizza Party, July 2020
-Foreground: Akhila, left to right in the back: Benoît, Arnaud,
-      Toby, Basil, John.
+
+Foreground: Akhila, left to right in the back: Benoît, Arnaud, Toby,
+      Basil, John.
+
 ![summer pizza](/assets/img/lab-photos/2020-07-summer-pizza-ben-baz.jpg)
 
 ### Winter Pizza Party, Feb 2020
+
 Left to right: Atiyeh, Darien, Joe, Arnaud, Benoît, Toby.<br />
       We are showing "six" fingers for SICCS (School of Informatics,
       Computing and Cyber Systems). 
+
 ![winter pizza](/assets/img/lab-photos/2020-02-ml-lab-pizza-cropped-lores.jpeg)
 
 ### Hiking in Sedona, Dec 2019
+
 Left to right: Joe, Toby, Farnoosh, Atiyeh, Anuraag, Zaoyi.
+
 ![sedona](/assets/img/lab-photos/2019-12-ml-lab-sedona-cropped-lores.jpeg)
 
 ## Google Summer of Code students mentored
