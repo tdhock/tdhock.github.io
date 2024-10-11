@@ -136,10 +136,23 @@ gg = p9.ggplot()+\
             xend="max_thresh",
             y="value",
             yend="value",
-            color="value",
-            size="value"
+            color="variable",
+            size="variable"
         ),
-        data=edf_long)
+        data=edf_long)+\
+    p9.scale_color_manual(
+        values={
+            "fp":"red",
+            "fn":"deepskyblue",
+            "min":"black"
+        })+\
+    p9.scale_size_manual(
+        values={
+            "fp":3,
+            "fn":5,
+            "min":1,
+        })
+gg
 show(gg, "err_funs")
 ```
 
