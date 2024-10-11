@@ -72,7 +72,10 @@ Below I wrote an implementation of our AUM loss function,
 ```{python}
 import torch
 import pandas as pd
-def error_funs(pred_tensor, label_tensor):
+def ROC(pred_tensor, label_tensor):
+    """Receiver Operating Characteristic curve
+
+    """
     is_positive = label_tensor == 1
     is_negative = label_tensor != 1
     fn_diff = torch.where(is_positive, -1, 0)
@@ -92,7 +95,16 @@ def error_funs(pred_tensor, label_tensor):
     uniq_thresh = sorted_thresh[sorted_fp_end]
     uniq_fp_after = sorted_fp_cum[sorted_fp_end]
     uniq_fn_before = sorted_fn_cum[sorted_fn_end]
-    return uniq_thresh, uniq_fp_after, uniq_fn_before
+    FPR = torch.cat([torch.tensor([0.0]), uniq_fp_after])
+    FNR = torch.cat([uniq_fn_before, torch.tensor([0.0])])
+    return {
+        "FPR":FPR,
+        "FNR":FNR,
+        "TPR":1 - FNR,
+        "min":torch.minimum(FPR, FNR),
+        "min_thresh":torch.cat([torch.tensor([-torch.inf]), uniq_thresh]),
+        "max_thresh":torch.cat([uniq_thresh, torch.tensor([torch.inf])])
+    }
 
 def AUM(pred_tensor, label_tensor):
     """Area Under Min(FP,FN)
@@ -104,29 +116,24 @@ def AUM(pred_tensor, label_tensor):
     labels for each observation in the set/batch).
 
     """
-    uniq_thresh, uniq_fp_after, uniq_fn_before = error_funs(pred_tensor, label_tensor)
-    uniq_min = torch.minimum(uniq_fn_before[1:], uniq_fp_after[:-1])
-    return torch.sum(uniq_min * uniq_thresh.diff())
+    roc = ROC(pred_tensor, label_tensor)
+    return torch.sum(roc["min"][1:-1] * roc["min_thresh"][1:].diff())
 
-def error_fun_df(pred_tensor, label_tensor):
-    uniq_thresh, uniq_fp_after, uniq_fn_before = error_funs(pred_tensor, label_tensor)
-    fp = torch.cat([torch.tensor([0.0]), uniq_fp_after])
-    fn = torch.cat([uniq_fn_before, torch.tensor([0.0])])
-    return pd.DataFrame({
-        "fp":fp,
-        "fn":fn,
-        "min":torch.minimum(fp, fn),
-        "min_thresh":torch.cat([torch.tensor([-torch.inf]), uniq_thresh]),
-        "max_thresh":torch.cat([uniq_thresh, torch.tensor([torch.inf])])
-    })    
-
+def AUC(pred_tensor, label_tensor):
+    roc = ROC(pred_tensor, label_tensor)
+    FPR_diff = roc["FPR"][1:]-roc["FPR"][:-1]
+    TPR_sum = roc["TPR"][1:]+roc["TPR"][:-1]
+    return torch.sum(FPR_diff*TPR_sum/2.0)
+    
 label_vec = torch.tensor([0,0,1,1])
 pred_vec = torch.tensor([1.0, -1, 1, 0])
 pred_vec = torch.tensor([1.0, 2, 3, 4])
 AUM(pred_vec, label_vec)
-error_funs(pred_vec, label_vec)
-edf = error_fun_df(pred_vec, label_vec)
-edf_long = pd.melt(edf, value_vars=["fp","fn","min"], id_vars=["min_thresh","max_thresh"])
+AUC(pred_vec, label_vec)
+ROC(pred_vec, label_vec)
+
+roc_wide = ROC(pred_vec, label_vec)
+roc_long = pd.melt(edf, value_vars=["fp","fn","min"], id_vars=["min_thresh","max_thresh"])
 
 import plotnine as p9
 gg = p9.ggplot()+\
@@ -139,17 +146,17 @@ gg = p9.ggplot()+\
             color="variable",
             size="variable"
         ),
-        data=edf_long)+\
+        data=roc_long)+\
     p9.scale_color_manual(
         values={
-            "fp":"red",
-            "fn":"deepskyblue",
+            "FPR":"red",
+            "FNR":"deepskyblue",
             "min":"black"
         })+\
     p9.scale_size_manual(
         values={
-            "fp":3,
-            "fn":5,
+            "FPR":3,
+            "FNR":5,
             "min":1,
         })
 gg
