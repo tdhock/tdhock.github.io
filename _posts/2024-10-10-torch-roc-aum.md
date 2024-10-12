@@ -4,66 +4,14 @@ title: AUC and AUM in torch
 description: Demonstration of auto-grad
 ---
 
-```{r Ropts, echo=FALSE}
-repo.dir <- normalizePath("..")
-post.id <- "2024-10-10-torch-roc-aum"
-fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
-dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
-knitr::opts_chunk$set(
-  dpi=100,
-  fig.path=fig.path,
-  fig.width=10,
-  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
-conda.env <- "2023-08-deep-learning"
-Sys.setenv(RETICULATE_PYTHON=sprintf(if(.Platform$OS.type=="unix")
-  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
-  "/home/tdhock/miniconda3/envs/%s/bin/python"
-  else "~/Miniconda3/envs/%s/python.exe", conda.env))
-reticulate::use_condaenv(conda.env, required=TRUE)
-in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
-in_knit <- isTRUE(getOption('knitr.in.progress'))
-options(width=120)
-if(FALSE){
-  knitr::knit(paste0(post.id, ".Rmd"))
-}
-```
+
 
 The goal of this post is to show how to use torch to compute ROC-AUC
 (classic evaluation metric for binary classification) and AUM (Area
 Under Min of False Positive and False Negative rates, our newly
 proposed surrogate loss for ROC curve optimization).
 
-```{python echo=FALSE}
-repo_dir = r["repo.dir"]
-fig_path = r["fig.path"]
-import warnings
-def p9_save(g, name):
-    out_png = fig_path+name+".png"
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        g.save(out_png)
-    web_link = out_png.replace(repo_dir, "")
-    print('![plot of %s](%s)'%(name, web_link))
-# work-around for rendering plots under windows, which hangs within
-# emacs python shell: instead write a PNG file and view in browser.
-import os
-import webbrowser
-on_windows = os.name == "nt"
-rendering = 'r' in dir()
-using_agg = on_windows and not rendering
-if using_agg:
-    import matplotlib
-    matplotlib.use("agg")
-def show(name):
-    g = eval(name)
-    if not on_windows and not rendering:
-        return g
-    if not using_agg:
-        return p9_save(g, name)
-    g.save("tmp.png")
-    webbrowser.open('tmp.png')
-```
+
 
 ## Introduction: binary classification and zero-one loss
 
@@ -72,7 +20,8 @@ In supervised binary classification, our goal is to learn a function
 that `f(x)=y` (on new/test data). To illustrate, the code below
 defines a data set with four samples:
 
-```{python}
+
+``` python
 import torch
 four_labels = torch.tensor([-1,-1,1,1])
 four_pred = torch.tensor([2.0, -3.5, -1.0, 1.5])
@@ -88,7 +37,8 @@ evaluation is the zero-one loss, which computes the number/proportion
 of labels which are mis-classified (in the test set).
 The zero-one loss first computes the real `f(x)` scores to a class by thresholding at zero, and then computes the proportion of predicted classes do not match the label classes.
 
-```{python}
+
+``` python
 def score_to_class(pred_score):
     return torch.where(pred_score < 0, -1, 1)
 def pred_is_correct(pred_score, label_vec):
@@ -105,10 +55,23 @@ zero_one_df = pd.DataFrame({
 zero_one_df
 ```
 
+```
+##    label  score  zero_one_loss
+## 0     -1    2.0              1
+## 1     -1   -3.5              0
+## 2      1   -1.0              1
+## 3      1    1.5              0
+```
+
 The output above is a table with one row for each sample. The `zero_one_loss` column shows that if the sign of the score matches the label, then the zero-one loss is 0 (correct), otherwise it is 1 (incorrect). Below we take the mean of that vector, to get the proportion of incorrectly predicted labels:
 
-```{python}
+
+``` python
 zero_one_df.zero_one_loss.mean()
+```
+
+```
+## 0.5
 ```
 
 ## Imbalanced data and confusion matrices
@@ -139,7 +102,8 @@ These terms are also names for the entries in the confusion matrix,
 
 Below we add a confusion column with these names to our previous table:
 
-```{python}
+
+``` python
 import numpy as np
 def TF_pos_neg(pred_score, label_vec):
     pred_is_positive = score_to_class(pred_score) == 1
@@ -151,26 +115,44 @@ zero_one_df["confusion"]=TF_pos_neg(four_pred, four_labels)
 zero_one_df
 ```
 
+```
+##    label  score  zero_one_loss       confusion
+## 0     -1    2.0              1  False Positive
+## 1     -1   -3.5              0   True Negative
+## 2      1   -1.0              1  False Negative
+## 3      1    1.5              0   True Positive
+```
+
 The `confusion` column shows where each sample would appear in the
 confusion matrix.  When we compute a ROC curve, we compute two
 quantities. First, the True Positive Rate (TPR) is the number of true
 positives, divided by the number of possible true positives (number of
 positive labels).
 
-```{python}
+
+``` python
 def get_TPR(df):
     return (df.confusion=="True Positive").sum()/(df.label==1).sum()
 get_TPR(zero_one_df)
+```
+
+```
+## 0.5
 ```
 
 Next, the False Positive Rate (FPR) is the number of false positives,
 divided by the number of possible false positives (number of negative
 labels).
 
-```{python}
+
+``` python
 def get_FPR(df):
     return (df.confusion=="False Positive").sum()/(df.label== -1).sum()
 get_FPR(zero_one_df)
+```
+
+```
+## 0.5
 ```
 
 Both True Positive Rate and False Positive Rate are 0.5 in this
@@ -191,7 +173,8 @@ If `c` is very large, then `f(x_i)+c > 0` for all data `i`, so
   code below).
 
 
-```{python}
+
+``` python
 def error_one_constant(constant):
     pred_const = four_pred+constant
     return pd.DataFrame({
@@ -203,24 +186,51 @@ def error_one_constant(constant):
 error_one_constant(5)
 ```
 
+```
+##    label  score  zero_one_loss       confusion
+## 0     -1    2.0              1  False Positive
+## 1     -1   -3.5              1  False Positive
+## 2      1   -1.0              0   True Positive
+## 3      1    1.5              0   True Positive
+```
+
 If `c` is very small, then `f(x_i)+c < 0` for all data `i`, so
  `FPR(c)=0` and `TPR(c)=0` (all data classified as negative as in the code below).
 
-```{python}
+
+``` python
 error_one_constant(-10)
+```
+
+```
+##    label  score  zero_one_loss       confusion
+## 0     -1    2.0              0   True Negative
+## 1     -1   -3.5              0   True Negative
+## 2      1   -1.0              1  False Negative
+## 3      1    1.5              1  False Negative
 ```
 
 Note that there are infinitely many different constants which we could add to the predicted values, which result in the same `confusion` values, and therefore the same point on the ROC curve. For example, below is another small constant which results in all negative predictions:
 
-```{python}
+
+``` python
 error_one_constant(-20)
+```
+
+```
+##    label  score  zero_one_loss       confusion
+## 0     -1    2.0              0   True Negative
+## 1     -1   -3.5              0   True Negative
+## 2      1   -1.0              1  False Negative
+## 3      1    1.5              1  False Negative
 ```
 
 We can compute a ROC curve (inefficiently, quadratic time in the
 number of samples) by looping over constants, and repeating the
 computations, as in the code below.
 
-```{python}
+
+``` python
 four_roc_df_list = []
 constant_vec = list(-four_pred)+[-torch.inf]
 constant_vec.sort()
@@ -237,9 +247,19 @@ roc_inefficient_df = pd.concat([
 roc_inefficient_df
 ```
 
+```
+##    constant  TPR  FPR
+## 0      -inf  0.0  0.0
+## 0      -2.0  0.0  0.5
+## 0      -1.5  0.5  0.5
+## 0       1.0  1.0  0.5
+## 0       3.5  1.0  1.0
+```
+
 The table above has one row for each point on the ROC curve, which is visualized using the code below.
 
-```{python results='asis'}
+
+``` python
 import plotnine as p9
 gg_roc_inefficient = p9.ggplot()+\
     p9.coord_equal()+\
@@ -260,6 +280,8 @@ gg_roc_inefficient = p9.ggplot()+\
 show("gg_roc_inefficient")
 ```
 
+![plot of gg_roc_inefficient](/assets/img/2024-10-10-torch-roc-aum/gg_roc_inefficient.png)
+
 The figure above shows a ROC curve with 5 points (the maximum number
 of points for 4 data; there could be fewer if there are ties in the
 predicted scores vector). We mentioned above that it was computed
@@ -267,7 +289,8 @@ inefficiently, which is caused by the for loop over constants. To
 avoid that loop (quadratic time overall), we can instead sort the
 predicted scores (log-linear time overall), as in the code below:
 
-```{python}
+
+``` python
 def ROC_curve(pred_tensor, label_tensor):
     """Receiver Operating Characteristic curve.
     """
@@ -304,14 +327,29 @@ roc_efficient_df = pd.DataFrame(ROC_curve(four_pred, four_labels))
 roc_efficient_df
 ```
 
+```
+##    FPR  FNR  TPR  min(FPR,FNR)  min_constant  max_constant
+## 0  0.0  1.0  0.0           0.0          -inf          -2.0
+## 1  0.5  1.0  0.0           0.5          -2.0          -1.5
+## 2  0.5  0.5  0.5           0.5          -1.5           1.0
+## 3  0.5  0.0  1.0           0.0           1.0           3.5
+## 4  1.0  0.0  1.0           0.0           3.5           inf
+```
+
 The table above also has one row for each point on the ROC curve (same as the previous table), and it has additional columns which we will use later:
 
 * `FNR=1-TPR` is the False Negative Rate,
 * `min` is the minimum of `FPR` and `FNR`,
 * and `min_constant`, `max_constant` give the range of constants which result in the corresponding error values (`min_constant` is actually the same as `roc_inefficient_df.constant`). For example, the second row means that adding any constant between -2 and -1.5 results in predicted classes that give FPR=0.5 and TPR=0, as we can verify using our previous function in the code below:
 
-```{python}
+
+``` python
 one_roc_point(-1.7)
+```
+
+```
+##    constant  TPR  FPR
+## 0      -1.7  0.0  0.5
 ```
 
 Exercise for the reader: try `one_roc_point` with some other constants, and check to make sure the results are consistent with `roc_efficient_df` above. 
@@ -329,7 +367,8 @@ How do we interpret the ROC curve? An ideal ROC curve would
 
 So when we do ROC analysis, we can look at the curves, to see how close they get to the upper left, or we can just compute the Area Under the Curve (larger is better). To compute the Area Under the Curve, we use the trapezoidal area formula, which amounts to summing the rectangle and triangle under each segment of the curve, as in the code below.
 
-```{python}
+
+``` python
 def ROC_AUC(pred_tensor, label_tensor):
     roc = ROC_curve(pred_tensor, label_tensor)
     FPR_diff = roc["FPR"][1:]-roc["FPR"][:-1]
@@ -338,9 +377,14 @@ def ROC_AUC(pred_tensor, label_tensor):
 ROC_AUC(four_pred, four_labels)
 ```
 
+```
+## tensor(0.5000)
+```
+
 How do we get an ideal ROC curve, with AUC=1? We need to have predicted scores that are smaller for negative labels, and larger for positive labels. If any score for a negative label is greater than or equal to a score for a positive label, then that will result in a sub-optimal ROC curve. Note that positive scores for negative labels still can result in an ideal ROC curve, as long as those scores are less than the scores for the positive labels. Three example predicted score vectors are defined below:
 
-```{python}
+
+``` python
 pred_dict = {
     "ideal":[1.0, 2, 3, 4],
     "constant":[9.0, 9, 9, 9],
@@ -351,11 +395,20 @@ example_pred_df["label"] = four_labels
 example_pred_df
 ```
 
+```
+##    ideal  constant  anti-learning  label
+## 0    1.0       9.0            4.0     -1
+## 1    2.0       9.0            3.0     -1
+## 2    3.0       9.0            2.0      1
+## 3    4.0       9.0            1.0      1
+```
+
 The constant predictions result in the worst ROC curve, which jumps
 from FPR=TPR=0 to FPR=TPR=1. The anti-learning predictions have large scores for negative labels, and small scores for positive predictions (called anti-learning because we could just invert the score to obtain an ideal score). 
 The code below visualizes the ROC curve for each of these three predictions:
 
-```{python results='asis'}
+
+``` python
 example_roc_df_list = []
 for model, pred_list in pred_dict.items():
     pred_tensor = torch.tensor(pred_list)
@@ -384,6 +437,8 @@ gg_roc_example = p9.ggplot()+\
 show("gg_roc_example")
 ```
 
+![plot of gg_roc_example](/assets/img/2024-10-10-torch-roc-aum/gg_roc_example.png)
+
 We can see in the figure above three ROC curves, and their
 corresponding AUC values. Two of the curves have five points, which is
 the max possible for four samples (no tied scores); the curve for
@@ -402,32 +457,48 @@ loss, or the hinge loss, which have linear tails (gradient is -1 when
 prediction is bad, which tells the learning algorithm to increase
 those predictions). It is computed as in the code below, for each observation:
 
-```{python}
+
+``` python
 def log_loss(pred_tensor, label_tensor):
     return torch.log(1+torch.exp(-label_tensor*pred_tensor))
 log_loss(four_pred, four_labels)
 ```
 
+```
+## tensor([2.1269, 0.0298, 1.3133, 0.2014])
+```
+
 The code below computes the mean log loss over all samples:
 
-```{python}
+
+``` python
 def mean_log_loss(pred_tensor, label_tensor):
     return log_loss(pred_tensor, label_tensor).mean()
 mean_log_loss(four_pred, four_labels)
 ```
 
+```
+## tensor(0.9178)
+```
+
 And the code below computes the proportion incorrectly classified samples (error rate):
 
-```{python}
+
+``` python
 def prop_incorrect(pred_tensor, label_tensor):
     return zero_one_loss(pred_tensor, label_tensor).float().mean()
 prop_incorrect(four_pred, four_labels)
 ```
 
+```
+## tensor(0.5000)
+```
+
 These functions and their gradients can be visualized using the code
 below.
 
-```{python results='asis'}
+
+``` python
 log_grad_df_list = []
 pred_grid = np.arange(-4.0, 4, 0.5)
 for objective in "prop_incorrect", "mean_log_loss":
@@ -473,6 +544,8 @@ gg_log_grad = p9.ggplot()+\
 show("gg_log_grad")
 ```
 
+![plot of gg_log_grad](/assets/img/2024-10-10-torch-roc-aum/gg_log_grad.png)
+
 The figure above shows that the log loss (for a positive label)
 outputs linear tails for negative predicted scores, which means a
 derivative of -1 that can be used to find model parameters that result
@@ -501,7 +574,8 @@ large AUC. Computation of the AUM loss requires first
 computing ROC curves (same as above), which we visualize below using a
 letter next to each point on the curve:
 
-```{python results='asis'}
+
+``` python
 roc_efficient_df["letter"]=["A","B","C","D","E"]
 gg_roc_efficient = p9.ggplot()+\
     p9.coord_equal()+\
@@ -530,9 +604,12 @@ gg_roc_efficient = p9.ggplot()+\
 show("gg_roc_efficient")
 ```
 
+![plot of gg_roc_efficient](/assets/img/2024-10-10-torch-roc-aum/gg_roc_efficient.png)
+
 The AUM loss is defined as the area under the minimum of False Positive and False Negative rates, which are the same data we used to compute the ROC curve, and can be visualized using the code below:
 
-```{python results='asis'}
+
+``` python
 roc_long = pd.melt(
     roc_efficient_df,
     value_vars=["FPR","FNR","min(FPR,FNR)"],
@@ -594,12 +671,15 @@ gg_error_funs = p9.ggplot()+\
 show("gg_error_funs")
 ```
 
+![plot of gg_error_funs](/assets/img/2024-10-10-torch-roc-aum/gg_error_funs.png)
+
 TODO
 
 Below I wrote an implementation of
 our AUM loss function,
 
-```{python}
+
+``` python
 def Proposed_AUM(pred_tensor, label_tensor):
     """Area Under Min(FP,FN)
 
@@ -618,12 +698,17 @@ def Proposed_AUM(pred_tensor, label_tensor):
 Proposed_AUM(four_pred, four_labels)
 ```
 
+```
+## tensor(1.5000)
+```
+
 The implementation above consists of vectorized torch operations, all
 of which should be differentiable almost everywhere. To check the
 automatically computed gradient from torch with the directional
 derivatives described in our paper, we can use the backward method,
 
-```{python}
+
+``` python
 label_vec = [0, 1]
 pred_diff_vec = torch.arange(-2, 2, 0.5)
 aum_grad_df_list = []
@@ -669,14 +754,37 @@ gg_aum_grad = p9.ggplot()+\
 show("gg_aum_grad")    
 ```
 
+```
+## ![plot of gg_aum_grad](/assets/img/2024-10-10-torch-roc-aum/gg_aum_grad.png)
+```
+
 ## Conclusions
 
 TODO
 
 ## Session info
 
-```{python}
+
+``` python
 torch.__version__
+```
+
+```
+## '2.4.1'
+```
+
+``` python
 np.__version__
+```
+
+```
+## '1.26.0'
+```
+
+``` python
 p9.__version__
+```
+
+```
+## '0.12.1'
 ```
