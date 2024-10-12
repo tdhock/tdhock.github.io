@@ -238,6 +238,7 @@ The table above has one row for each point on the ROC curve, which is visualized
 ```{python}
 import plotnine as p9
 p9.ggplot()+\
+    p9.coord_equal()+\
     p9.geom_line(
         p9.aes(
             x="FPR",
@@ -479,8 +480,8 @@ The log loss can be intepreted as a differentiable surrogate for the
 zero-one loss. There is no derivative for the zero-one loss, so the
 next best thing is to learn using the log loss, which is a convex/L1
 relaxation (L1 meaning the log loss has linear tails and constant
-gradient).  Is it possible to do something similar with the ROC AUC?
-Yes!  Recently [in JMLR23](https://jmlr.org/papers/v24/21-0751.html)
+gradient). Is it possible to do something similar with the ROC AUC?
+Yes! Recently [in JMLR23](https://jmlr.org/papers/v24/21-0751.html)
 we proposed a new loss function called the AUM, Area Under Min of
 False Positive and False Negative rates. We showed that is can be
 interpreted as a L1 relaxation of the sum of min of False Positive and
@@ -496,6 +497,7 @@ letter next to each point on the curve:
 ```{python}
 roc_efficient_df["letter"]=["A","B","C","D","E"]
 p9.ggplot()+\
+    p9.coord_equal()+\
     p9.geom_line(
         p9.aes(
             x="FPR",
@@ -527,6 +529,13 @@ roc_long = pd.melt(
     roc_efficient_df,
     value_vars=["FPR","FNR","min(FPR,FNR)"],
     id_vars=["min_constant","max_constant"])
+roc_efficient_df["xtext"]=np.where(
+    roc_efficient_df["min_constant"] == -np.inf,
+    roc_efficient_df["max_constant"]-1,
+    np.where(
+        roc_efficient_df["max_constant"] == np.inf,
+        roc_efficient_df["min_constant"]+1,
+        (roc_efficient_df["min_constant"]+roc_efficient_df["max_constant"])/2))
 gg = p9.ggplot()+\
     p9.theme_bw()+\
     p9.geom_rect(
@@ -535,6 +544,19 @@ gg = p9.ggplot()+\
             xmax="max_constant",
             ymin="0",
             ymax="min(FPR,FNR)"
+        ),
+        data=roc_efficient_df)+\
+    p9.geom_vline(
+        p9.aes(
+            xintercept="min_constant",
+        ),
+        color="grey",
+        data=roc_efficient_df)+\
+    p9.geom_text(
+        p9.aes(
+            x="xtext",
+            y="0.75",
+            label="letter"
         ),
         data=roc_efficient_df)+\
     p9.geom_segment(
@@ -558,7 +580,9 @@ gg = p9.ggplot()+\
             "FPR":3,
             "FNR":5,
             "min(FPR,FNR)":1,
-        })
+        })+\
+    p9.scale_x_continuous("Constant added to predicted values")+\
+    p9.scale_y_continuous("value")
 gg
 show(gg, "err_funs")
 ```
