@@ -9,7 +9,7 @@ description: Demonstration of auto-grad
 The goal of this post is to show how to use torch to compute ROC-AUC
 (classic evaluation metric for binary classification) and AUM (Area
 Under Min of False Positive and False Negative rates, our newly
-proposed surrogate loss for ROC curve optimization).
+Proposed surrogate loss for ROC curve optimization).
 
 
 
@@ -261,7 +261,9 @@ The table above has one row for each point on the ROC curve, which is visualized
 
 ``` python
 import plotnine as p9
+p9.options.figure_size=(8,4)#https://github.com/rstudio/reticulate/issues/1140
 gg_roc_inefficient = p9.ggplot()+\
+    p9.theme(figure_size=(4,4))+
     p9.coord_equal()+\
     p9.geom_line(
         p9.aes(
@@ -280,7 +282,7 @@ gg_roc_inefficient = p9.ggplot()+\
 show("gg_roc_inefficient")
 ```
 
-![plot of gg_roc_inefficient](/assets/img/2024-10-10-torch-roc-aum/gg_roc_inefficient.png)
+invalid syntax (<string>, line 4)
 
 The figure above shows a ROC curve with 5 points (the maximum number
 of points for 4 data; there could be fewer if there are ties in the
@@ -339,7 +341,7 @@ roc_efficient_df
 The table above also has one row for each point on the ROC curve (same as the previous table), and it has additional columns which we will use later:
 
 * `FNR=1-TPR` is the False Negative Rate,
-* `min` is the minimum of `FPR` and `FNR`,
+* `min(FPR,FNR)` is the minimum of `FPR` and `FNR`,
 * and `min_constant`, `max_constant` give the range of constants which result in the corresponding error values (`min_constant` is actually the same as `roc_inefficient_df.constant`). For example, the second row means that adding any constant between -2 and -1.5 results in predicted classes that give FPR=0.5 and TPR=0, as we can verify using our previous function in the code below:
 
 
@@ -468,7 +470,7 @@ log_loss(four_pred, four_labels)
 ## tensor([2.1269, 0.0298, 1.3133, 0.2014])
 ```
 
-The code below computes the mean log loss over all samples:
+The code below computes the mean log loss (same as `torch.nn.BCEWithLogitsLoss`) over all samples:
 
 
 ``` python
@@ -479,6 +481,15 @@ mean_log_loss(four_pred, four_labels)
 
 ```
 ## tensor(0.9178)
+```
+
+``` python
+mean_log_loss_torch = torch.nn.BCEWithLogitsLoss()
+mean_log_loss_torch(four_pred, four_labels.float())
+```
+
+```
+## tensor(0.5428)
 ```
 
 And the code below computes the proportion incorrectly classified samples (error rate):
@@ -577,27 +588,12 @@ letter next to each point on the curve:
 
 ``` python
 roc_efficient_df["letter"]=["A","B","C","D","E"]
-gg_roc_efficient = p9.ggplot()+\
-    p9.coord_equal()+\
-    p9.geom_line(
-        p9.aes(
-            x="FPR",
-            y="TPR",
-        ),
-        data=roc_efficient_df
-    )+\
+gg_roc_efficient = gg_roc_inefficient+\
     p9.geom_text(
         p9.aes(
             x="FPR+0.05",
             y="TPR+0.05",
             label="letter",
-        ),
-        data=roc_efficient_df
-    )+\
-    p9.geom_point(
-        p9.aes(
-            x="FPR",
-            y="TPR",
         ),
         data=roc_efficient_df
     )
@@ -733,9 +729,9 @@ for pred_diff in pred_diff_vec:
             "value":torch.cat([loss.reshape(1),g_vec]).detach().numpy(),
         }))
 aum_grad_df = pd.concat(aum_grad_df_list)
-
 gg_aum_grad = p9.ggplot()+\
     p9.theme_bw()+\
+    p9.theme(fig_size=(8,5))+\
     p9.geom_hline(
         p9.aes(
             yintercept="value"
@@ -751,12 +747,17 @@ gg_aum_grad = p9.ggplot()+\
         data=aum_grad_df
     )+\
     p9.facet_grid("function ~ objective", labeller="label_both")
-show("gg_aum_grad")    
 ```
 
 ```
-## ![plot of gg_aum_grad](/assets/img/2024-10-10-torch-roc-aum/gg_aum_grad.png)
+## 'There no themeable element called: fig_size'
 ```
+
+``` python
+show("gg_aum_grad")    
+```
+
+![plot of gg_aum_grad](/assets/img/2024-10-10-torch-roc-aum/gg_aum_grad.png)
 
 ## Conclusions
 
