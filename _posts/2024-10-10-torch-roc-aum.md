@@ -263,7 +263,7 @@ The table above has one row for each point on the ROC curve, which is visualized
 import plotnine as p9
 p9.options.figure_size=(8,4)#https://github.com/rstudio/reticulate/issues/1140
 gg_roc_inefficient = p9.ggplot()+\
-    p9.theme(figure_size=(4,4))+
+    p9.theme(figure_size=(4,4))+\
     p9.coord_equal()+\
     p9.geom_line(
         p9.aes(
@@ -282,7 +282,7 @@ gg_roc_inefficient = p9.ggplot()+\
 show("gg_roc_inefficient")
 ```
 
-invalid syntax (<string>, line 4)
+![plot of gg_roc_inefficient](/assets/img/2024-10-10-torch-roc-aum/gg_roc_inefficient.png)
 
 The figure above shows a ROC curve with 5 points (the maximum number
 of points for 4 data; there could be fewer if there are ties in the
@@ -669,8 +669,8 @@ show("gg_error_funs")
 
 ![plot of gg_error_funs](/assets/img/2024-10-10-torch-roc-aum/gg_error_funs.png)
 
-The figure above shows three piecewise constant functions of the constant added to predicted values: FPR, FNR, and their minimum. 
-The AUM is shown in the figure above as the shaded grey region, under the black min function. 
+The figure above shows three piecewise constant functions of the constant added to predicted values: FPR, FNR, and their minimum.
+The AUM is shown in the figure above as the shaded grey region, under the black min function.
 To compute the AUM, we can use the code below, which first computes the ROC curve.
 
 
@@ -771,7 +771,7 @@ show("gg_aum_grad")
 
 The figure above shows that the proposed AUM loss on the left, and the usual ROC AUC objective on the right. We can see that
 
-* The ROC AUC is 0 when the prediction difference is negative, meaning the predicted score for the positive example is less than the predicted score for the negative example (bad/incorrect ranking). 
+* The ROC AUC is 0 when the prediction difference is negative, meaning the predicted score for the positive example is less than the predicted score for the negative example (bad/incorrect ranking).
 * The ROC AUC derivatives are zero everywhere except when the prediction difference is 0, where they are undefined.
 * The AUM increases linearly as the prediction difference gets more negative, so the derivatives are -1 for the positive example, and 1 for the negative example.
 * These derivatives mean that the AUM can be decreased by increasing the predicted score for the positive example, or decreasing the predicted score for the negative example.
