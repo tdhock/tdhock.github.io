@@ -485,11 +485,11 @@ mean_log_loss(four_pred, four_labels)
 
 ``` python
 mean_log_loss_torch = torch.nn.BCEWithLogitsLoss()
-mean_log_loss_torch(four_pred, four_labels.float())
+mean_log_loss_torch(four_pred, torch.where(four_labels==1, 1.0, 0.0))
 ```
 
 ```
-## tensor(0.5428)
+## tensor(0.9178)
 ```
 
 And the code below computes the proportion incorrectly classified samples (error rate):
@@ -515,9 +515,9 @@ pred_grid = np.arange(-4.0, 4, 0.5)
 for objective in "prop_incorrect", "mean_log_loss":
     ofun = eval(objective)
     for pred_val in pred_grid:
-        pred_tensor=torch.tensor(pred_val)
+        pred_tensor=torch.tensor([pred_val])
         pred_tensor.requires_grad = True
-        label_tensor = torch.tensor([1])
+        label_tensor = torch.tensor([1.0])
         loss = ofun(pred_tensor, label_tensor)
         try:
             loss.backward()
@@ -669,10 +669,9 @@ show("gg_error_funs")
 
 ![plot of gg_error_funs](/assets/img/2024-10-10-torch-roc-aum/gg_error_funs.png)
 
-TODO
-
-Below I wrote an implementation of
-our AUM loss function,
+The figure above shows three piecewise constant functions of the constant added to predicted values: FPR, FNR, and their minimum. 
+The AUM is shown in the figure above as the shaded grey region, under the black min function. 
+To compute the AUM, we can use the code below, which first computes the ROC curve.
 
 
 ``` python
@@ -689,8 +688,18 @@ def Proposed_AUM(pred_tensor, label_tensor):
 
     """
     roc = ROC_curve(pred_tensor, label_tensor)
-    return torch.sum(roc["min(FPR,FNR)"][1:-1] * roc["min_constant"][1:].diff())
+    min_FPR_FNR = roc["min(FPR,FNR)"][1:-1]
+    constant_diff = roc["min_constant"][1:].diff()
+    return torch.sum(min_FPR_FNR * constant_diff)
+```
 
+The implementation above uses the `ROC_curve` sub-routine, to
+emphasize the similarity with the AUC computation. The `Proposed_AUM`
+function can be used as a drop-in replacement for the logistic loss
+(`torch.BCEWithLogitsLoss`), as can be seen below:
+
+
+``` python
 Proposed_AUM(four_pred, four_labels)
 ```
 
@@ -698,10 +707,16 @@ Proposed_AUM(four_pred, four_labels)
 ## tensor(1.5000)
 ```
 
-The implementation above consists of vectorized torch operations, all
-of which should be differentiable almost everywhere. To check the
-automatically computed gradient from torch with the directional
-derivatives described in our paper, we can use the backward method,
+The AUM loss and its gradient can be visualized using the setup below.
+
+* We assume there are two samples: one positive label, and one negative label.
+* We plot the AUM loss and its gradient (with respect to the two
+  predicted scores) for a grid different values of `f(x1)` (predicted
+  score for positive example), while keeping constant `f(x0)`
+  (predicted score for negative example).
+* We represent these in the plot below on an X axis called "Difference
+  between predicted scores" because AUM only depends on the
+  difference/rank of predicted scores (not absolute values).
 
 
 ``` python
@@ -731,7 +746,7 @@ for pred_diff in pred_diff_vec:
 aum_grad_df = pd.concat(aum_grad_df_list)
 gg_aum_grad = p9.ggplot()+\
     p9.theme_bw()+\
-    p9.theme(fig_size=(8,5))+\
+    p9.theme(figure_size=(8,5))+\
     p9.geom_hline(
         p9.aes(
             yintercept="value"
@@ -746,22 +761,35 @@ gg_aum_grad = p9.ggplot()+\
         ),
         data=aum_grad_df
     )+\
-    p9.facet_grid("function ~ objective", labeller="label_both")
-```
-
-```
-## 'There no themeable element called: fig_size'
-```
-
-``` python
+    p9.facet_grid("function ~ objective", labeller="label_both")+\
+    p9.scale_x_continuous(
+        name="Difference between predicted scores = f(x1)-f(x0)")
 show("gg_aum_grad")    
 ```
 
 ![plot of gg_aum_grad](/assets/img/2024-10-10-torch-roc-aum/gg_aum_grad.png)
 
+The figure above shows that the proposed AUM loss on the left, and the usual ROC AUC objective on the right. We can see that
+
+* The ROC AUC is 0 when the prediction difference is negative, meaning the predicted score for the positive example is less than the predicted score for the negative example (bad/incorrect ranking). 
+* The ROC AUC derivatives are zero everywhere except when the prediction difference is 0, where they are undefined.
+* The AUM increases linearly as the prediction difference gets more negative, so the derivatives are -1 for the positive example, and 1 for the negative example.
+* These derivatives mean that the AUM can be decreased by increasing the predicted score for the positive example, or decreasing the predicted score for the negative example.
+
 ## Conclusions
 
-TODO
+We have explored the relationship between the zero-one loss and its differentiable surrogate, the logistic loss.
+We showed how the proposed AUM loss can be interpreted as a differentiable surrogate for the ROC AUC, as shown in the table below.
+
+| Sum over            | Piecewise constant         | Differentiable Surrogate      |
+|---------------------|----------------------------|-------------------------------|
+| Samples             | Zero-one loss              | Logistic loss                 |
+| Points on ROC curve | AUC = Area Under ROC Curve | AUM = Area Under Min(FPR,FNR) |
+
+
+The proposed AUM loss can be implemented in torch code, by first computing the ROC curve, plotting the FPR/FNR as a function of constants added to predicted values, and then summing the Area Under the Min (AUM).
+
+How is AUM different from other differentiable AUC surrogates that sum over all pairs of positive and negative examples? Stay tuned for a new blog post comparing AUM to related work such as [Rust and Hocking, Squared Hinge surrogate](https://arxiv.org/abs/2302.11062), LibAUC, etc.
 
 ## Session info
 
