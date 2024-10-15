@@ -74,6 +74,8 @@ zero_one_df.zero_one_loss.mean()
 ## 0.5
 ```
 
+The output above indicates that 50% of the rows are classified incorrectly.
+
 ## Imbalanced data and confusion matrices
 
 In imbalanced data, for example with 99% negative and 1% positive
@@ -180,6 +182,7 @@ def error_one_constant(constant):
     return pd.DataFrame({
         "label":four_labels,
         "score":four_pred,
+        "score_plus_constant":pred_const,
         "zero_one_loss":zero_one_loss(pred_const, four_labels),
         "confusion":TF_pos_neg(pred_const, four_labels)
     })
@@ -187,11 +190,11 @@ error_one_constant(5)
 ```
 
 ```
-##    label  score  zero_one_loss       confusion
-## 0     -1    2.0              1  False Positive
-## 1     -1   -3.5              1  False Positive
-## 2      1   -1.0              0   True Positive
-## 3      1    1.5              0   True Positive
+##    label  score  score_plus_constant  zero_one_loss       confusion
+## 0     -1    2.0                  7.0              1  False Positive
+## 1     -1   -3.5                  1.5              1  False Positive
+## 2      1   -1.0                  4.0              0   True Positive
+## 3      1    1.5                  6.5              0   True Positive
 ```
 
 If `c` is very small, then `f(x_i)+c < 0` for all data `i`, so
@@ -203,11 +206,11 @@ error_one_constant(-10)
 ```
 
 ```
-##    label  score  zero_one_loss       confusion
-## 0     -1    2.0              0   True Negative
-## 1     -1   -3.5              0   True Negative
-## 2      1   -1.0              1  False Negative
-## 3      1    1.5              1  False Negative
+##    label  score  score_plus_constant  zero_one_loss       confusion
+## 0     -1    2.0                 -8.0              0   True Negative
+## 1     -1   -3.5                -13.5              0   True Negative
+## 2      1   -1.0                -11.0              1  False Negative
+## 3      1    1.5                 -8.5              1  False Negative
 ```
 
 Note that there are infinitely many different constants which we could add to the predicted values, which result in the same `confusion` values, and therefore the same point on the ROC curve. For example, below is another small constant which results in all negative predictions:
@@ -218,11 +221,11 @@ error_one_constant(-20)
 ```
 
 ```
-##    label  score  zero_one_loss       confusion
-## 0     -1    2.0              0   True Negative
-## 1     -1   -3.5              0   True Negative
-## 2      1   -1.0              1  False Negative
-## 3      1    1.5              1  False Negative
+##    label  score  score_plus_constant  zero_one_loss       confusion
+## 0     -1    2.0                -18.0              0   True Negative
+## 1     -1   -3.5                -23.5              0   True Negative
+## 2      1   -1.0                -21.0              1  False Negative
+## 3      1    1.5                -18.5              1  False Negative
 ```
 
 We can compute a ROC curve (inefficiently, quadratic time in the
@@ -807,7 +810,7 @@ np.__version__
 ```
 
 ```
-## '1.26.0'
+## '1.26.4'
 ```
 
 ``` python
@@ -815,5 +818,5 @@ p9.__version__
 ```
 
 ```
-## '0.12.1'
+## '0.13.6'
 ```

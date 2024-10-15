@@ -4,7 +4,7 @@ title: AUC and AUM in torch
 description: Demonstration of auto-grad
 ---
 
-```{r Ropts, echo=FALSE}
+```{r Ropts, echo=FALSE, results='hide'}
 repo.dir <- normalizePath("..")
 post.id <- "2024-10-10-torch-roc-aum"
 fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
@@ -16,11 +16,13 @@ knitr::opts_chunk$set(
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
 conda.env <- "2023-08-deep-learning"
-Sys.setenv(RETICULATE_PYTHON=sprintf(if(.Platform$OS.type=="unix")
+conda.env <- "torch-aum"
+RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
   ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
   "/home/tdhock/miniconda3/envs/%s/bin/python"
-  else "~/Miniconda3/envs/%s/python.exe", conda.env))
-reticulate::use_condaenv(conda.env, required=TRUE)
+  else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
+Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
+reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
 in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
 in_knit <- isTRUE(getOption('knitr.in.progress'))
 options(width=120)
@@ -111,6 +113,8 @@ The output above is a table with one row for each sample. The `zero_one_loss` co
 zero_one_df.zero_one_loss.mean()
 ```
 
+The output above indicates that 50% of the rows are classified incorrectly.
+
 ## Imbalanced data and confusion matrices
 
 In imbalanced data, for example with 99% negative and 1% positive
@@ -197,6 +201,7 @@ def error_one_constant(constant):
     return pd.DataFrame({
         "label":four_labels,
         "score":four_pred,
+        "score_plus_constant":pred_const,
         "zero_one_loss":zero_one_loss(pred_const, four_labels),
         "confusion":TF_pos_neg(pred_const, four_labels)
     })
