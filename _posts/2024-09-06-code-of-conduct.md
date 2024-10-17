@@ -101,3 +101,8 @@ Conduct, may have their roles/funds revoked.
 
 This Code of Conduct is adapted from [data.table code of conduct](https://github.com/Rdatatable/data.table/blob/master/GOVERNANCE.md#code-of-conduct).
 
+### TODOs
+
+- anonymous reporting?
+- policy on resolving disagreements, including steps to follow before
+  escalation?
