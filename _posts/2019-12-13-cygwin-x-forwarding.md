@@ -21,6 +21,7 @@ For each package, under the New column, click the arrow and then
 choose the most recent version to install.
 
 After installation, go to Start menu -> Xwin server.
+Or on recent versions of windows, for some reason there is no Xwin server under start menu, but you can always open up cygwin terminal and then run `startxwin`.
 
 Then in a Cygwin64 terminal:
 
