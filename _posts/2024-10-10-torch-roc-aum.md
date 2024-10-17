@@ -35,7 +35,7 @@ To answer that question, we use an objective function, which computes a number t
 The classic objective function for
 evaluation is the zero-one loss, which computes the number/proportion
 of labels which are mis-classified (in the test set).
-The zero-one loss first computes the real `f(x)` scores to a class by thresholding at zero, and then computes the proportion of predicted classes do not match the label classes.
+The zero-one loss first each real-valued `f(x)` score to a class by thresholding at zero, and then computes the proportion of predicted classes that do not match the label classes.
 
 
 ``` python
@@ -85,7 +85,7 @@ curve](https://en.wikipedia.org/wiki/Receiver_operating_characteristic)
 is a plot of True Positive Rate, as a function of False Positive
 Rate. What are those?
 
-* True Positive is when `f(x) > 0` (predict positive), and `y=0`
+* True Positive is when `f(x) > 0` (predict positive), and `y=1`
   (label positive), this is good! The opposite/negative prediction,
   `f(x) < 0`, with the same positive label, is called a False Negative
   (bad).
@@ -96,11 +96,11 @@ Rate. What are those?
 
 These terms are also names for the entries in the confusion matrix, 
 
-|          | prediction     |                |
-| label    | `f(x) < 0`     | `f(x) > 0`     |
-|----------|----------------|----------------|
-| `y = -1` | True Negative  | False Positive |
-| `y = 1`  | False Negative | True Positive  |
+|                    | prediction           |                      |
+| label              | negative, `f(x) < 0` | positive, `f(x) > 0` |
+|--------------------|----------------------|----------------------|
+| negative, `y = -1` | True Negative        | False Positive       |
+| negative, `y = 1`  | False Negative       | True Positive        |
 
 Below we add a confusion column with these names to our previous table:
 
