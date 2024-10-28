@@ -1,0 +1,246 @@
+---
+layout: post
+title: Overhead of auto-grad in torch
+description: Comparison with explicit gradients
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2024-10-28-auto-grad-overhead"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+conda.env <- "2023-08-deep-learning"
+conda.env <- "torch-aum"
+RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
+  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
+  "/home/tdhock/miniconda3/envs/%s/bin/python"
+  else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
+Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
+##reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to show how to use R torch to compute AUM
+(Area Under Min of False Positive and False Negative rates, our newly
+Proposed surrogate loss for ROC curve optimization).
+
+## Introduction: binary classification and zero-one loss
+
+In supervised binary classification, our goal is to learn a function
+`f` using training inputs/features `x`, and outputs/labels `y`, such
+that `f(x)=y` (on new/test data). To illustrate, the code below
+defines a data set with four samples:
+
+```{r}
+four_labels_vec <- c(-1,-1,1,1)
+four_pred_vec <- c(2.0, -3.5, -1.0, 1.5)
+four_labels <- torch::torch_tensor()
+four_pred <- torch::torch_tensor(four_pred_vec)
+
+ROC_curve <- function(pred_tensor, label_tensor){
+  is_positive = label_tensor == 1
+  is_negative = label_tensor != 1
+  fn_diff = torch::torch_where(is_positive, -1, 0)
+  fp_diff = torch::torch_where(is_positive, 0, 1)
+  thresh_tensor = -pred_tensor$flatten()
+  sorted_indices = torch::torch_argsort(thresh_tensor)
+  fp_denom = torch::torch_sum(is_negative) #or 1 for AUM based on count instead of rate
+  fn_denom = torch::torch_sum(is_positive) #or 1 for AUM based on count instead of rate
+  sorted_fp_cum = fp_diff[sorted_indices]$cumsum(dim=1)/fp_denom
+  sorted_fn_cum = -fn_diff[sorted_indices]$flip(1)$cumsum(dim=1)$flip(1)/fn_denom
+  sorted_thresh = thresh_tensor[sorted_indices]
+  sorted_is_diff = sorted_thresh$diff() != 0
+  sorted_fp_end = torch::torch_cat(c(sorted_is_diff, torch::torch_tensor(TRUE)))
+  sorted_fn_end = torch::torch_cat(c(torch::torch_tensor(TRUE), sorted_is_diff))
+  uniq_thresh = sorted_thresh[sorted_fp_end]
+  uniq_fp_after = sorted_fp_cum[sorted_fp_end]
+  uniq_fn_before = sorted_fn_cum[sorted_fn_end]
+  FPR = torch::torch_cat(c(torch::torch_tensor(0.0), uniq_fp_after))
+  FNR = torch::torch_cat(c(uniq_fn_before, torch::torch_tensor(0.0)))
+  list(
+    FPR=FPR,
+    FNR=FNR,
+    TPR=1 - FNR,
+    "min(FPR,FNR)"=torch::torch_minimum(FPR, FNR),
+    min_constant=torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh)),
+    max_constant=torch::torch_cat(c(uniq_thresh, torch::torch_tensor(Inf))))
+}
+
+list.of.tensors <- ROC_curve(four_pred, four_labels)
+data.frame(lapply(list.of.tensors, torch::as_array))
+```
+
+The table above also has one row for each point on the ROC curve (same as the previous table), and it has additional columns which we will use later:
+
+* `FNR=1-TPR` is the False Negative Rate,
+* `min(FPR,FNR)` is the minimum of `FPR` and `FNR`,
+* and `min_constant`, `max_constant` give the range of constants which result in the corresponding error values (`min_constant` is actually the same as `roc_inefficient_df.constant`). For example, the second row means that adding any constant between -2 and -1.5 results in predicted classes that give FPR=0.5 and TPR=0, as we can verify using our previous function in the code below:
+
+## ROC curve interpretation and examples
+
+How do we interpret the ROC curve? An ideal ROC curve would
+
+* start at the bottom left (FPR=TPR=0, every sample predicted negative), 
+* and then go straight to the upper left (FPR=0,TPR=1, every sample
+  predicted correctly),
+* and then go straight to the upper right (FPR=TPR=1, every sample
+  predicted positive),
+* so it would have an Area Under the Curve of 1.
+
+So when we do ROC analysis, we can look at the curves, to see how close they get to the upper left, or we can just compute the Area Under the Curve (larger is better). To compute the Area Under the Curve, we use the trapezoidal area formula, which amounts to summing the rectangle and triangle under each segment of the curve, as in the code below.
+
+```{r}
+ROC_AUC <- function(pred_tensor, label_tensor){
+    roc = ROC_curve(pred_tensor, label_tensor)
+    FPR_diff = roc$FPR[2:N]-roc$FPR[1:-2]
+    TPR_sum = roc$TPR[2:N]+roc$TPR[1:-2]
+    torch::torch_sum(FPR_diff*TPR_sum/2.0)
+}
+ROC_AUC(four_pred, four_labels)
+```
+
+## Proposed AUM loss for ROC optimization
+
+The log loss can be intepreted as a differentiable surrogate for the
+zero-one loss. There is no derivative for the zero-one loss, so the
+next best thing is to learn using the log loss, which is a convex/L1
+relaxation (L1 meaning the log loss has linear tails and constant
+gradient). Is it possible to do something similar with the ROC AUC?
+Yes! Recently [in JMLR23](https://jmlr.org/papers/v24/21-0751.html)
+we proposed a new loss function called the AUM, Area Under Min of
+False Positive and False Negative rates. We showed that is can be
+interpreted as a L1 relaxation of the sum of min of False Positive and
+False Negative rates, over all points on the ROC curve. We
+additionally showed that AUM is piecewise linear, and differentiable
+almost everywhere, so can be used in gradient descent learning
+algorithms. Finally, we showed that minimizing AUM encourages points
+on the ROC curve to move toward the upper left, thereby encouraging
+large AUC. Computation of the AUM loss requires first
+computing ROC curves (same as above), as in the code below.
+
+```{r}
+Proposed_AUM <- function(pred_tensor, label_tensor){
+  roc = ROC_curve(pred_tensor, label_tensor)
+  min_FPR_FNR = roc[["min(FPR,FNR)"]][2:-2]
+  constant_diff = roc$min_constant[2:N]$diff()
+  torch::torch_sum(min_FPR_FNR * constant_diff)
+}
+```
+
+The implementation above uses the `ROC_curve` sub-routine, to
+emphasize the similarity with the AUC computation. By calling
+`backward()` on the result from `Proposed_AUM`, we assign the `grad`
+attribute of the predictions, as can be seen below:
+
+```{r}
+four_pred$requires_grad <- TRUE
+(four_aum <- Proposed_AUM(four_pred, four_labels))
+four_aum$backward()
+four_pred$grad
+```
+
+We can compare the result from auto-grad above, to the result from the
+R `aum` package below (explicit gradients), and see that they are the same:
+
+```{r}
+four_labels_diff_dt <- aum::aum_diffs_binary(four_labels_vec, denominator = "rate")
+aum::aum(four_labels_diff_dt, four_pred_vec)
+```
+
+The AUM loss and its gradient can be visualized using the setup below.
+
+* We assume there are two samples: one positive label, and one negative label.
+* We plot the AUM loss and its gradient (with respect to the two
+  predicted scores) for a grid different values of `f(x1)` (predicted
+  score for positive example), while keeping constant `f(x0)`
+  (predicted score for negative example).
+* We represent these in the plot below on an X axis called "Difference
+  between predicted scores" because AUM only depends on the
+  difference/rank of predicted scores (not absolute values).
+
+```{r}
+label_vec = c(0, 1)
+pred_diff_vec = seq(-2, 2, by=0.5)
+aum_grad_df_list = list()
+for(pred_diff in pred_diff_vec){
+  pred_vec = c(0, pred_diff)
+  pred_tensor = torch::torch_tensor(pred_vec)
+  pred_tensor$requires_grad = TRUE
+  label_tensor = torch::torch_tensor(label_vec)
+  loss = Proposed_AUM(pred_tensor, label_tensor)
+  loss$backward()
+  g_vec = pred_tensor$grad
+  diff_dt <- aum::aum_diffs_binary(label_vec, denominator = "rate")
+  aum.info <- aum::aum(diff_dt, pred_vec)
+  ##TODO
+}
+```
+
+The figure above shows that the proposed AUM loss on the left, and the usual ROC AUC objective on the right. We can see that
+
+* The ROC AUC is 0 when the prediction difference is negative, meaning the predicted score for the positive example is less than the predicted score for the negative example (bad/incorrect ranking).
+* The ROC AUC derivatives are zero everywhere except when the prediction difference is 0, where they are undefined.
+* The AUM increases linearly as the prediction difference gets more negative, so the derivatives are -1 for the positive example, and 1 for the negative example.
+* These derivatives mean that the AUM can be decreased by increasing the predicted score for the positive example, or decreasing the predicted score for the negative example.
+
+## Time comparison
+
+```{r}
+a_res <- atime::atime(
+  setup={
+    set.seed(1)
+    pred_vec = rnorm(N)
+    label_vec = rep(0:1, l=N)
+  },
+  auto_grad={
+    pred_tensor = torch::torch_tensor(pred_vec)
+    pred_tensor$requires_grad = TRUE
+    label_tensor = torch::torch_tensor(label_vec)
+    loss = Proposed_AUM(pred_tensor, label_tensor)
+    loss$backward()
+    torch::as_array(pred_tensor$grad)
+  },
+  explicit={
+    diff_dt <- aum::aum_diffs_binary(label_vec, denominator = "rate")
+    aum.info <- aum::aum(diff_dt, pred_vec)
+    aum.info$derivative_mat
+  }
+)
+plot(a_res)
+a_refs <- atime::references_best(a_res)
+plot(a_refs)
+```
+
+## Conclusions
+
+We have explored the relationship between the zero-one loss and its differentiable surrogate, the logistic loss.
+We showed how the proposed AUM loss can be interpreted as a differentiable surrogate for the ROC AUC, as shown in the table below.
+
+| Sum over            | Piecewise constant         | Differentiable Surrogate      |
+|---------------------|----------------------------|-------------------------------|
+| Samples             | Zero-one loss              | Logistic loss                 |
+| Points on ROC curve | AUC = Area Under ROC Curve | AUM = Area Under Min(FPR,FNR) |
+
+
+The proposed AUM loss can be implemented in torch code, by first computing the ROC curve, plotting the FPR/FNR as a function of constants added to predicted values, and then summing the Area Under the Min (AUM).
+
+How is AUM different from other differentiable AUC surrogates that sum over all pairs of positive and negative examples? Stay tuned for a new blog post comparing AUM to related work such as [Rust and Hocking, Squared Hinge surrogate](https://arxiv.org/abs/2302.11062), LibAUC, etc.
+
+## Session info
+
+```{python}
+torch.__version__
+np.__version__
+p9.__version__
+```
