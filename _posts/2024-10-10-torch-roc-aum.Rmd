@@ -680,7 +680,7 @@ gg_aum_grad = p9.ggplot()+\
 show("gg_aum_grad")    
 ```
 
-The figure above shows that the proposed AUM loss on the left, and the usual ROC AUC objective on the right. We can see that
+The figure above shows the proposed AUM loss on the left, and the usual ROC AUC objective on the right. We can see that
 
 * The ROC AUC is 0 when the prediction difference is negative, meaning the predicted score for the positive example is less than the predicted score for the negative example (bad/incorrect ranking).
 * The ROC AUC derivatives are zero everywhere except when the prediction difference is 0, where they are undefined.

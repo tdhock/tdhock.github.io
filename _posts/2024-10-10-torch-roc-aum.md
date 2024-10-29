@@ -23,8 +23,26 @@ defines a data set with four samples:
 
 ``` python
 import torch
+```
+
+```
+## OSError: [WinError 127] The specified procedure could not be found. Error loading "C:\Users\hoct2726\AppData\Local\MINICO~1\envs\TORCH-~1\Lib\site-packages\torch\lib\torch_cpu.dll" or one of its dependencies.
+```
+
+``` python
 four_labels = torch.tensor([-1,-1,1,1])
+```
+
+```
+## NameError: name 'torch' is not defined
+```
+
+``` python
 four_pred = torch.tensor([2.0, -3.5, -1.0, 1.5])
+```
+
+```
+## NameError: name 'torch' is not defined
 ```
 
 Note that `four_pred` in the code above is a vector of four `f(x)`
@@ -52,15 +70,18 @@ zero_one_df = pd.DataFrame({
     "score":four_pred,
     "zero_one_loss":zero_one_loss(four_pred, four_labels)
 })
+```
+
+```
+## NameError: name 'four_labels' is not defined
+```
+
+``` python
 zero_one_df
 ```
 
 ```
-##    label  score  zero_one_loss
-## 0     -1    2.0              1
-## 1     -1   -3.5              0
-## 2      1   -1.0              1
-## 3      1    1.5              0
+## NameError: name 'zero_one_df' is not defined
 ```
 
 The output above is a table with one row for each sample. The `zero_one_loss` column shows that if the sign of the score matches the label, then the zero-one loss is 0 (correct), otherwise it is 1 (incorrect). Below we take the mean of that vector, to get the proportion of incorrectly predicted labels:
@@ -71,7 +92,7 @@ zero_one_df.zero_one_loss.mean()
 ```
 
 ```
-## 0.5
+## NameError: name 'zero_one_df' is not defined
 ```
 
 The output above indicates that 50% of the rows are classified incorrectly.
@@ -114,15 +135,18 @@ def TF_pos_neg(pred_score, label_vec):
     T_or_F_space = np.char.add(T_or_F.astype(str), " ")
     return np.char.add(T_or_F_space, pred_name)
 zero_one_df["confusion"]=TF_pos_neg(four_pred, four_labels)
+```
+
+```
+## NameError: name 'four_pred' is not defined
+```
+
+``` python
 zero_one_df
 ```
 
 ```
-##    label  score  zero_one_loss       confusion
-## 0     -1    2.0              1  False Positive
-## 1     -1   -3.5              0   True Negative
-## 2      1   -1.0              1  False Negative
-## 3      1    1.5              0   True Positive
+## NameError: name 'zero_one_df' is not defined
 ```
 
 The `confusion` column shows where each sample would appear in the
@@ -139,7 +163,7 @@ get_TPR(zero_one_df)
 ```
 
 ```
-## 0.5
+## NameError: name 'zero_one_df' is not defined
 ```
 
 Next, the False Positive Rate (FPR) is the number of false positives,
@@ -154,7 +178,7 @@ get_FPR(zero_one_df)
 ```
 
 ```
-## 0.5
+## NameError: name 'zero_one_df' is not defined
 ```
 
 Both True Positive Rate and False Positive Rate are 0.5 in this
@@ -190,11 +214,7 @@ error_one_constant(5)
 ```
 
 ```
-##    label  score  score_plus_constant  zero_one_loss       confusion
-## 0     -1    2.0                  7.0              1  False Positive
-## 1     -1   -3.5                  1.5              1  False Positive
-## 2      1   -1.0                  4.0              0   True Positive
-## 3      1    1.5                  6.5              0   True Positive
+## NameError: name 'four_pred' is not defined
 ```
 
 If `c` is very small, then `f(x_i)+c < 0` for all data `i`, so
@@ -206,11 +226,7 @@ error_one_constant(-10)
 ```
 
 ```
-##    label  score  score_plus_constant  zero_one_loss       confusion
-## 0     -1    2.0                 -8.0              0   True Negative
-## 1     -1   -3.5                -13.5              0   True Negative
-## 2      1   -1.0                -11.0              1  False Negative
-## 3      1    1.5                 -8.5              1  False Negative
+## NameError: name 'four_pred' is not defined
 ```
 
 Note that there are infinitely many different constants which we could add to the predicted values, which result in the same `confusion` values, and therefore the same point on the ROC curve. For example, below is another small constant which results in all negative predictions:
@@ -221,11 +237,7 @@ error_one_constant(-20)
 ```
 
 ```
-##    label  score  score_plus_constant  zero_one_loss       confusion
-## 0     -1    2.0                -18.0              0   True Negative
-## 1     -1   -3.5                -23.5              0   True Negative
-## 2      1   -1.0                -21.0              1  False Negative
-## 3      1    1.5                -18.5              1  False Negative
+## NameError: name 'four_pred' is not defined
 ```
 
 We can compute a ROC curve (inefficiently, quadratic time in the
@@ -236,7 +248,21 @@ computations, as in the code below.
 ``` python
 four_roc_df_list = []
 constant_vec = list(-four_pred)+[-torch.inf]
+```
+
+```
+## NameError: name 'four_pred' is not defined
+```
+
+``` python
 constant_vec.sort()
+```
+
+```
+## NameError: name 'constant_vec' is not defined
+```
+
+``` python
 def one_roc_point(constant):
     one_df = error_one_constant(constant)
     return pd.DataFrame({
@@ -247,16 +273,18 @@ def one_roc_point(constant):
 roc_inefficient_df = pd.concat([
     one_roc_point(constant) for constant in constant_vec
 ])
+```
+
+```
+## NameError: name 'constant_vec' is not defined
+```
+
+``` python
 roc_inefficient_df
 ```
 
 ```
-##    constant  TPR  FPR
-## 0      -inf  0.0  0.0
-## 0      -2.0  0.0  0.5
-## 0      -1.5  0.5  0.5
-## 0       1.0  1.0  0.5
-## 0       3.5  1.0  1.0
+## NameError: name 'roc_inefficient_df' is not defined
 ```
 
 The table above has one row for each point on the ROC curve, which is visualized using the code below.
@@ -282,17 +310,23 @@ gg_roc_inefficient = p9.ggplot()+\
         ),
         data=roc_inefficient_df
     )
+```
+
+NameError: name 'roc_inefficient_df' is not defined
+
+``` python
 show("gg_roc_inefficient")
 ```
 
-![plot of gg_roc_inefficient](/assets/img/2024-10-10-torch-roc-aum/gg_roc_inefficient.png)
+NameError: name 'gg_roc_inefficient' is not defined
 
 The figure above shows a ROC curve with 5 points (the maximum number
 of points for 4 data; there could be fewer if there are ties in the
 predicted scores vector). We mentioned above that it was computed
 inefficiently, which is caused by the for loop over constants. To
 avoid that loop (quadratic time overall), we can instead sort the
-predicted scores (log-linear time overall), as in the code below:
+predicted scores (log-linear time overall), and use the cumulative
+sum, as in the code below:
 
 
 ``` python
@@ -329,16 +363,18 @@ def ROC_curve(pred_tensor, label_tensor):
         "max_constant":torch.cat([uniq_thresh, torch.tensor([torch.inf])])
     }
 roc_efficient_df = pd.DataFrame(ROC_curve(four_pred, four_labels))
+```
+
+```
+## NameError: name 'four_pred' is not defined
+```
+
+``` python
 roc_efficient_df
 ```
 
 ```
-##    FPR  FNR  TPR  min(FPR,FNR)  min_constant  max_constant
-## 0  0.0  1.0  0.0           0.0          -inf          -2.0
-## 1  0.5  1.0  0.0           0.5          -2.0          -1.5
-## 2  0.5  0.5  0.5           0.5          -1.5           1.0
-## 3  0.5  0.0  1.0           0.0           1.0           3.5
-## 4  1.0  0.0  1.0           0.0           3.5           inf
+## NameError: name 'roc_efficient_df' is not defined
 ```
 
 The table above also has one row for each point on the ROC curve (same as the previous table), and it has additional columns which we will use later:
@@ -353,8 +389,7 @@ one_roc_point(-1.7)
 ```
 
 ```
-##    constant  TPR  FPR
-## 0      -1.7  0.0  0.5
+## NameError: name 'four_pred' is not defined
 ```
 
 Exercise for the reader: try `one_roc_point` with some other constants, and check to make sure the results are consistent with `roc_efficient_df` above. 
@@ -383,7 +418,7 @@ ROC_AUC(four_pred, four_labels)
 ```
 
 ```
-## tensor(0.5000)
+## NameError: name 'four_pred' is not defined
 ```
 
 How do we get an ideal ROC curve, with AUC=1? We need to have predicted scores that are smaller for negative labels, and larger for positive labels. If any score for a negative label is greater than or equal to a score for a positive label, then that will result in a sub-optimal ROC curve. Note that positive scores for negative labels still can result in an ideal ROC curve, as long as those scores are less than the scores for the positive labels. Three example predicted score vectors are defined below:
@@ -397,15 +432,22 @@ pred_dict = {
 }
 example_pred_df = pd.DataFrame(pred_dict)
 example_pred_df["label"] = four_labels
+```
+
+```
+## NameError: name 'four_labels' is not defined
+```
+
+``` python
 example_pred_df
 ```
 
 ```
-##    ideal  constant  anti-learning  label
-## 0    1.0       9.0            4.0     -1
-## 1    2.0       9.0            3.0     -1
-## 2    3.0       9.0            2.0      1
-## 3    4.0       9.0            1.0      1
+##    ideal  constant  anti-learning
+## 0    1.0       9.0            4.0
+## 1    2.0       9.0            3.0
+## 2    3.0       9.0            2.0
+## 3    4.0       9.0            1.0
 ```
 
 The constant predictions result in the worst ROC curve, which jumps
@@ -421,7 +463,17 @@ for model, pred_list in pred_dict.items():
     one_roc['model']=model
     one_roc["AUC"]=ROC_AUC(pred_tensor, four_labels).numpy()
     example_roc_df_list.append(pd.DataFrame(one_roc))
+```
+
+NameError: name 'torch' is not defined
+
+``` python
 example_roc_df = pd.concat(example_roc_df_list)
+```
+
+ValueError: No objects to concatenate
+
+``` python
 gg_roc_example = p9.ggplot()+\
     p9.facet_grid(". ~ AUC + model", labeller="label_both")+\
     p9.coord_equal()+\
@@ -439,10 +491,15 @@ gg_roc_example = p9.ggplot()+\
         ),
         data=example_roc_df
     )
+```
+
+NameError: name 'example_roc_df' is not defined
+
+``` python
 show("gg_roc_example")
 ```
 
-![plot of gg_roc_example](/assets/img/2024-10-10-torch-roc-aum/gg_roc_example.png)
+NameError: name 'gg_roc_example' is not defined
 
 We can see in the figure above three ROC curves, and their
 corresponding AUC values. Two of the curves have five points, which is
@@ -470,7 +527,7 @@ log_loss(four_pred, four_labels)
 ```
 
 ```
-## tensor([2.1269, 0.0298, 1.3133, 0.2014])
+## NameError: name 'four_pred' is not defined
 ```
 
 The code below computes the mean log loss (same as `torch.nn.BCEWithLogitsLoss`) over all samples:
@@ -483,16 +540,23 @@ mean_log_loss(four_pred, four_labels)
 ```
 
 ```
-## tensor(0.9178)
+## NameError: name 'four_pred' is not defined
 ```
 
 ``` python
 mean_log_loss_torch = torch.nn.BCEWithLogitsLoss()
+```
+
+```
+## NameError: name 'torch' is not defined
+```
+
+``` python
 mean_log_loss_torch(four_pred, torch.where(four_labels==1, 1.0, 0.0))
 ```
 
 ```
-## tensor(0.9178)
+## NameError: name 'mean_log_loss_torch' is not defined
 ```
 
 And the code below computes the proportion incorrectly classified samples (error rate):
@@ -505,7 +569,7 @@ prop_incorrect(four_pred, four_labels)
 ```
 
 ```
-## tensor(0.5000)
+## NameError: name 'four_pred' is not defined
 ```
 
 These functions and their gradients can be visualized using the code
@@ -537,7 +601,17 @@ for objective in "prop_incorrect", "mean_log_loss":
                 g_vec.reshape(1)
             ]).detach().numpy(),
         }))
+```
+
+NameError: name 'torch' is not defined
+
+``` python
 log_grad_df = pd.concat(log_grad_df_list)
+```
+
+ValueError: No objects to concatenate
+
+``` python
 gg_log_grad = p9.ggplot()+\
     p9.theme_bw()+\
     p9.geom_hline(
@@ -555,10 +629,15 @@ gg_log_grad = p9.ggplot()+\
         data=log_grad_df
     )+\
     p9.facet_grid("function ~ objective", labeller="label_both")
+```
+
+NameError: name 'log_grad_df' is not defined
+
+``` python
 show("gg_log_grad")
 ```
 
-![plot of gg_log_grad](/assets/img/2024-10-10-torch-roc-aum/gg_log_grad.png)
+NameError: name 'gg_log_grad' is not defined
 
 The figure above shows that the log loss (for a positive label)
 outputs linear tails for negative predicted scores, which means a
@@ -591,6 +670,11 @@ letter next to each point on the curve:
 
 ``` python
 roc_efficient_df["letter"]=["A","B","C","D","E"]
+```
+
+NameError: name 'roc_efficient_df' is not defined
+
+``` python
 gg_roc_efficient = gg_roc_inefficient+\
     p9.geom_text(
         p9.aes(
@@ -600,10 +684,15 @@ gg_roc_efficient = gg_roc_inefficient+\
         ),
         data=roc_efficient_df
     )
+```
+
+NameError: name 'gg_roc_inefficient' is not defined
+
+``` python
 show("gg_roc_efficient")
 ```
 
-![plot of gg_roc_efficient](/assets/img/2024-10-10-torch-roc-aum/gg_roc_efficient.png)
+NameError: name 'gg_roc_efficient' is not defined
 
 The AUM loss is defined as the area under the minimum of False Positive and False Negative rates, which are the same data we used to compute the ROC curve, and can be visualized using the code below:
 
@@ -613,6 +702,11 @@ roc_long = pd.melt(
     roc_efficient_df,
     value_vars=["FPR","FNR","min(FPR,FNR)"],
     id_vars=["min_constant","max_constant"])
+```
+
+NameError: name 'roc_efficient_df' is not defined
+
+``` python
 roc_efficient_df["xtext"]=np.where(
     roc_efficient_df["min_constant"] == -np.inf,
     roc_efficient_df["max_constant"]-1,
@@ -620,6 +714,11 @@ roc_efficient_df["xtext"]=np.where(
         roc_efficient_df["max_constant"] == np.inf,
         roc_efficient_df["min_constant"]+1,
         (roc_efficient_df["min_constant"]+roc_efficient_df["max_constant"])/2))
+```
+
+NameError: name 'roc_efficient_df' is not defined
+
+``` python
 gg_error_funs = p9.ggplot()+\
     p9.theme_bw()+\
     p9.geom_rect(
@@ -667,10 +766,15 @@ gg_error_funs = p9.ggplot()+\
         })+\
     p9.xlab("Constant added to predicted values")+\
     p9.scale_y_continuous(name="value", breaks=[0,0.5,1])
+```
+
+NameError: name 'roc_efficient_df' is not defined
+
+``` python
 show("gg_error_funs")
 ```
 
-![plot of gg_error_funs](/assets/img/2024-10-10-torch-roc-aum/gg_error_funs.png)
+NameError: name 'gg_error_funs' is not defined
 
 The figure above shows three piecewise constant functions of the constant added to predicted values: FPR, FNR, and their minimum.
 The AUM is shown in the figure above as the shaded grey region, under the black min function.
@@ -707,7 +811,7 @@ Proposed_AUM(four_pred, four_labels)
 ```
 
 ```
-## tensor(1.5000)
+## NameError: name 'four_pred' is not defined
 ```
 
 The AUM loss and its gradient can be visualized using the setup below.
@@ -725,6 +829,11 @@ The AUM loss and its gradient can be visualized using the setup below.
 ``` python
 label_vec = [0, 1]
 pred_diff_vec = torch.arange(-2, 2, 0.5)
+```
+
+NameError: name 'torch' is not defined
+
+``` python
 aum_grad_df_list = []
 for pred_diff in pred_diff_vec:
     pred_vec = [0, pred_diff]
@@ -746,7 +855,17 @@ for pred_diff in pred_diff_vec:
             "function":["output","deriv0","deriv1"],
             "value":torch.cat([loss.reshape(1),g_vec]).detach().numpy(),
         }))
+```
+
+NameError: name 'pred_diff_vec' is not defined
+
+``` python
 aum_grad_df = pd.concat(aum_grad_df_list)
+```
+
+ValueError: No objects to concatenate
+
+``` python
 gg_aum_grad = p9.ggplot()+\
     p9.theme_bw()+\
     p9.theme(figure_size=(8,5))+\
@@ -767,12 +886,17 @@ gg_aum_grad = p9.ggplot()+\
     p9.facet_grid("function ~ objective", labeller="label_both")+\
     p9.scale_x_continuous(
         name="Difference between predicted scores = f(x1)-f(x0)")
+```
+
+NameError: name 'aum_grad_df' is not defined
+
+``` python
 show("gg_aum_grad")    
 ```
 
-![plot of gg_aum_grad](/assets/img/2024-10-10-torch-roc-aum/gg_aum_grad.png)
+NameError: name 'gg_aum_grad' is not defined
 
-The figure above shows that the proposed AUM loss on the left, and the usual ROC AUC objective on the right. We can see that
+The figure above shows the proposed AUM loss on the left, and the usual ROC AUC objective on the right. We can see that
 
 * The ROC AUC is 0 when the prediction difference is negative, meaning the predicted score for the positive example is less than the predicted score for the negative example (bad/incorrect ranking).
 * The ROC AUC derivatives are zero everywhere except when the prediction difference is 0, where they are undefined.
@@ -802,7 +926,7 @@ torch.__version__
 ```
 
 ```
-## '2.4.1'
+## NameError: name 'torch' is not defined
 ```
 
 ``` python

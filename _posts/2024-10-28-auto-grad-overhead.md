@@ -4,32 +4,7 @@ title: Overhead of auto-grad in torch
 description: Comparison with explicit gradients
 ---
 
-```{r Ropts, echo=FALSE, results='hide'}
-repo.dir <- normalizePath("..")
-post.id <- "2024-10-28-auto-grad-overhead"
-fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
-dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
-knitr::opts_chunk$set(
-  dpi=100,
-  fig.path=fig.path,
-  fig.width=10, ## TODO python figures wider? look at prev issue.
-  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
-conda.env <- "2023-08-deep-learning"
-conda.env <- "torch-aum"
-RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
-  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
-  "/home/tdhock/miniconda3/envs/%s/bin/python"
-  else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
-Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
-##reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
-in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
-in_knit <- isTRUE(getOption('knitr.in.progress'))
-options(width=120)
-if(FALSE){
-  knitr::knit(paste0(post.id, ".Rmd"))
-}
-```
+
 
 The goal of this post is to show how to use R torch to compute AUM
 (Area Under Min of False Positive and False Negative rates, our newly
@@ -46,7 +21,8 @@ In supervised binary classification, our goal is to learn a function
 that `f(x)=y` (on new/test data). To illustrate, the code below
 defines a data set with four samples:
 
-```{r}
+
+``` r
 four_labels_vec <- c(-1,-1,1,1)
 four_pred_vec <- c(2.0, -3.5, -1.0, 1.5)
 ```
@@ -57,7 +33,8 @@ zero to determine a predicted class. The ROC curve shows how the
 prediction error rates change, as we add constants from negative to
 positive infinity to the predicted scores. To compute the ROC curve using torch, we can use the code below.
 
-```{r}
+
+``` r
 ROC_curve <- function(pred_tensor, label_tensor){
   is_positive = label_tensor == 1
   is_negative = label_tensor != 1
@@ -92,6 +69,15 @@ list.of.tensors <- ROC_curve(four_pred, four_labels)
 data.frame(lapply(list.of.tensors, torch::as_array))
 ```
 
+```
+##   FPR FNR TPR min.FPR.FNR. min_constant max_constant
+## 1 0.0 1.0 0.0          0.0         -Inf         -2.0
+## 2 0.5 1.0 0.0          0.5         -2.0         -1.5
+## 3 0.5 0.5 0.5          0.5         -1.5          1.0
+## 4 0.5 0.0 1.0          0.0          1.0          3.5
+## 5 1.0 0.0 1.0          0.0          3.5          Inf
+```
+
 The table above also has one row for each point on the ROC curve, and the following columns:
 
 * `FPR` is the False Positive Rate (X axis of ROC curve plot),
@@ -111,7 +97,8 @@ How do we interpret the ROC curve? An ideal ROC curve would
 
 So when we do ROC analysis, we can look at the curves, to see how close they get to the upper left, or we can just compute the Area Under the Curve (larger is better). To compute the Area Under the Curve, we use the trapezoidal area formula, which amounts to summing the rectangle and triangle under each segment of the curve, as in the code below.
 
-```{r}
+
+``` r
 ROC_AUC <- function(pred_tensor, label_tensor){
   roc = ROC_curve(pred_tensor, label_tensor)
   FPR_diff = roc$FPR[2:N]-roc$FPR[1:-2]
@@ -119,6 +106,12 @@ ROC_AUC <- function(pred_tensor, label_tensor){
   torch::torch_sum(FPR_diff*TPR_sum/2.0)
 }
 ROC_AUC(four_pred, four_labels)
+```
+
+```
+## torch_tensor
+## 0.5
+## [ CPUFloatType{} ]
 ```
 
 The ROC AUC value is 0.5, indicating that `four_pred` is not a very
@@ -138,7 +131,8 @@ on the ROC curve to move toward the upper left, thereby encouraging
 large AUC. Computation of the AUM loss requires first
 computing ROC curves (same as above), as in the code below.
 
-```{r}
+
+``` r
 Proposed_AUM <- function(pred_tensor, label_tensor){
   roc = ROC_curve(pred_tensor, label_tensor)
   min_FPR_FNR = roc[["min(FPR,FNR)"]][2:-2]
@@ -155,12 +149,39 @@ predicted values requires a gradient, then we call `backward()` on the
 result from `Proposed_AUM`, which assigns the `grad` attribute of the
 predictions, as can be seen below:
 
-```{r}
+
+``` r
 four_pred$requires_grad <- TRUE
 (four_aum <- Proposed_AUM(four_pred, four_labels))
+```
+
+```
+## torch_tensor
+## 1.5
+## [ CPUFloatType{} ][ grad_fn = <SumBackward0> ]
+```
+
+``` r
 four_pred$grad
+```
+
+```
+## torch_tensor
+## [ Tensor (undefined) ]
+```
+
+``` r
 four_aum$backward()
 four_pred$grad
+```
+
+```
+## torch_tensor
+##  0.5000
+## -0.0000
+## -0.5000
+## -0.0000
+## [ CPUFloatType{4} ]
 ```
 
 We can compare the result from auto-grad above, to the result from the
@@ -172,9 +193,29 @@ non-differentiable points). We see that the gradient vector above
 (from `torch` auto-grad) is consistent with the directional derivative
 matrix below (from R package `aum`):
 
-```{r}
+
+``` r
 four_labels_diff_dt <- aum::aum_diffs_binary(four_labels_vec, denominator = "rate")
 aum::aum(four_labels_diff_dt, four_pred_vec)
+```
+
+```
+## $aum
+## [1] 1.5
+## 
+## $derivative_mat
+##      [,1] [,2]
+## [1,]  0.5  0.5
+## [2,]  0.0  0.0
+## [3,] -0.5 -0.5
+## [4,]  0.0  0.0
+## 
+## $total_error
+##   thresh fp_before fn_before
+## 1   -2.0       0.0       1.0
+## 2    3.5       0.5       0.0
+## 3    1.0       0.5       0.5
+## 4   -1.5       0.5       1.0
 ```
 
 The AUM loss and its gradient can be visualized using the setup below.
@@ -188,7 +229,8 @@ The AUM loss and its gradient can be visualized using the setup below.
   between predicted scores" because AUM only depends on the
   difference/rank of predicted scores (not absolute values).
 
-```{r autoVsExplicitSubGradients}
+
+``` r
 label_vec = c(0, 1)
 pred_diff_vec = seq(-3, 3, by=0.5)
 aum_grad_dt_list = list()
@@ -216,6 +258,67 @@ for(pred_diff in pred_diff_vec){
 (aum_grad_dt <- rbindlist(aum_grad_dt_list)[
 , mean := (min+max)/2
 ][])
+```
+
+```
+##     label pred_diff   method   min   max  mean
+##     <num>     <num>   <char> <num> <num> <num>
+##  1:     0      -3.0 explicit     1     1   1.0
+##  2:     1      -3.0 explicit    -1    -1  -1.0
+##  3:     0      -3.0     auto     1     1   1.0
+##  4:     1      -3.0     auto    -1    -1  -1.0
+##  5:     0      -2.5 explicit     1     1   1.0
+##  6:     1      -2.5 explicit    -1    -1  -1.0
+##  7:     0      -2.5     auto     1     1   1.0
+##  8:     1      -2.5     auto    -1    -1  -1.0
+##  9:     0      -2.0 explicit     1     1   1.0
+## 10:     1      -2.0 explicit    -1    -1  -1.0
+## 11:     0      -2.0     auto     1     1   1.0
+## 12:     1      -2.0     auto    -1    -1  -1.0
+## 13:     0      -1.5 explicit     1     1   1.0
+## 14:     1      -1.5 explicit    -1    -1  -1.0
+## 15:     0      -1.5     auto     1     1   1.0
+## 16:     1      -1.5     auto    -1    -1  -1.0
+## 17:     0      -1.0 explicit     1     1   1.0
+## 18:     1      -1.0 explicit    -1    -1  -1.0
+## 19:     0      -1.0     auto     1     1   1.0
+## 20:     1      -1.0     auto    -1    -1  -1.0
+## 21:     0      -0.5 explicit     1     1   1.0
+## 22:     1      -0.5 explicit    -1    -1  -1.0
+## 23:     0      -0.5     auto     1     1   1.0
+## 24:     1      -0.5     auto    -1    -1  -1.0
+## 25:     0       0.0 explicit     0     1   0.5
+## 26:     1       0.0 explicit    -1     0  -0.5
+## 27:     0       0.0     auto     0     0   0.0
+## 28:     1       0.0     auto     0     0   0.0
+## 29:     0       0.5 explicit     0     0   0.0
+## 30:     1       0.5 explicit     0     0   0.0
+## 31:     0       0.5     auto     0     0   0.0
+## 32:     1       0.5     auto     0     0   0.0
+## 33:     0       1.0 explicit     0     0   0.0
+## 34:     1       1.0 explicit     0     0   0.0
+## 35:     0       1.0     auto     0     0   0.0
+## 36:     1       1.0     auto     0     0   0.0
+## 37:     0       1.5 explicit     0     0   0.0
+## 38:     1       1.5 explicit     0     0   0.0
+## 39:     0       1.5     auto     0     0   0.0
+## 40:     1       1.5     auto     0     0   0.0
+## 41:     0       2.0 explicit     0     0   0.0
+## 42:     1       2.0 explicit     0     0   0.0
+## 43:     0       2.0     auto     0     0   0.0
+## 44:     1       2.0     auto     0     0   0.0
+## 45:     0       2.5 explicit     0     0   0.0
+## 46:     1       2.5 explicit     0     0   0.0
+## 47:     0       2.5     auto     0     0   0.0
+## 48:     1       2.5     auto     0     0   0.0
+## 49:     0       3.0 explicit     0     0   0.0
+## 50:     1       3.0 explicit     0     0   0.0
+## 51:     0       3.0     auto     0     0   0.0
+## 52:     1       3.0     auto     0     0   0.0
+##     label pred_diff   method   min   max  mean
+```
+
+``` r
 aum_grad_points <- melt(
   aum_grad_dt,
   measure.vars=c("min","max","mean"),
@@ -245,6 +348,8 @@ ggplot()+
   facet_grid(method ~ label, labeller=label_both)
 ```
 
+![plot of chunk autoVsExplicitSubGradients](/assets/img/2024-10-28-auto-grad-overhead/autoVsExplicitSubGradients-1.png)
+
 The figure above shows the [sub-differential](https://en.wikipedia.org/wiki/Subderivative) as a function of difference between predicted scores.
 
 * Label: 0 (left) shows the range of sub-gradients with respect to the predicted score for the negative example, 
@@ -258,7 +363,8 @@ The figure above shows the [sub-differential](https://en.wikipedia.org/wiki/Subd
 In this section, we compare the computation time of the two methods
 for computing gradients.
 
-```{r atimeGrad}
+
+``` r
 a_res <- atime::atime(
   setup={
     set.seed(1)
@@ -281,8 +387,17 @@ a_res <- atime::atime(
   result = TRUE,
   seconds.limit=0.1
 )
+```
+
+```
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+```
+
+``` r
 plot(a_res)
 ```
+
+![plot of chunk atimeGrad](/assets/img/2024-10-28-auto-grad-overhead/atimeGrad-1.png)
 
 Above we see that `auto` has about 10x more computation time overhead
 than `explicit` (for small N, less than 1e3). But we see that for
@@ -295,7 +410,8 @@ that usage is under-estimated).
 
 Below we verify that the results are the same.
 
-```{r}
+
+``` r
 result_wide <- dcast(
   a_res$measurements, N ~ expr.name, value.var="result"
 )[
@@ -305,13 +421,38 @@ result_wide <- dcast(
 tibble::tibble(result_wide)
 ```
 
+```
+## # A tibble: 18 × 4
+##         N auto            explicit        equal
+##     <int> <list>          <list>          <chr>
+##  1      2 <dbl [2]>       <dbl [2]>       TRUE 
+##  2      4 <dbl [4]>       <dbl [4]>       TRUE 
+##  3      8 <dbl [8]>       <dbl [8]>       TRUE 
+##  4     16 <dbl [16]>      <dbl [16]>      TRUE 
+##  5     32 <dbl [32]>      <dbl [32]>      TRUE 
+##  6     64 <dbl [64]>      <dbl [64]>      TRUE 
+##  7    128 <dbl [128]>     <dbl [128]>     TRUE 
+##  8    256 <dbl [256]>     <dbl [256]>     TRUE 
+##  9    512 <dbl [512]>     <dbl [512]>     TRUE 
+## 10   1024 <dbl [1,024]>   <dbl [1,024]>   TRUE 
+## 11   2048 <dbl [2,048]>   <dbl [2,048]>   TRUE 
+## 12   4096 <dbl [4,096]>   <dbl [4,096]>   TRUE 
+## 13   8192 <dbl [8,192]>   <dbl [8,192]>   TRUE 
+## 14  16384 <dbl [16,384]>  <dbl [16,384]>  TRUE 
+## 15  32768 <dbl [32,768]>  <dbl [32,768]>  TRUE 
+## 16  65536 <dbl [65,536]>  <dbl [65,536]>  TRUE 
+## 17 131072 <dbl [131,072]> <dbl [131,072]> TRUE 
+## 18 262144 <dbl [262,144]> <dbl [262,144]> TRUE
+```
+
 Note that we used `torch::torch_tensor(pred_vec, "double")` above, for
 consistency with R double precision numeric vectors (torch default is
 single precision, which can lead to numerical differences for large N,
 exercise for the reader, use the code below to explore those
 differences).
 
-```{r}
+
+``` r
 result_wide[
   which.max(N),
   lapply(.SD, "[[", 1)
@@ -322,12 +463,32 @@ result_wide[
 ]
 ```
 
+```
+## Key: <N>
+##              N          auto      explicit  equal  diff
+##          <int>         <num>         <num> <char> <num>
+##      1: 262144  0.000000e+00  0.000000e+00   TRUE     0
+##      2: 262144  0.000000e+00  0.000000e+00   TRUE     0
+##      3: 262144  0.000000e+00  0.000000e+00   TRUE     0
+##      4: 262144  0.000000e+00  0.000000e+00   TRUE     0
+##      5: 262144  7.629395e-06  7.629395e-06   TRUE     0
+##     ---                                                
+## 262140: 262144  0.000000e+00  0.000000e+00   TRUE     0
+## 262141: 262144  0.000000e+00  0.000000e+00   TRUE     0
+## 262142: 262144 -7.629395e-06 -7.629395e-06   TRUE     0
+## 262143: 262144  0.000000e+00  0.000000e+00   TRUE     0
+## 262144: 262144  0.000000e+00  0.000000e+00   TRUE     0
+```
+
 Below we estimate the asymptotic complexity class,
 
-```{r atimeGradRef}
+
+``` r
 a_refs <- atime::references_best(a_res)
 plot(a_refs)
 ```
+
+![plot of chunk atimeGradRef](/assets/img/2024-10-28-auto-grad-overhead/atimeGradRef-1.png)
 
 The plot above suggests that memory usage (kilobytes) is linear (N),
 and computation time (seconds) is linear or log-linear (N log N),
@@ -343,6 +504,40 @@ same/linear amount of time.
 
 ## Session info
 
-```{r}
+
+``` r
 sessionInfo()
+```
+
+```
+## R version 4.4.1 (2024-06-14 ucrt)
+## Platform: x86_64-w64-mingw32/x64
+## Running under: Windows 11 x64 (build 22631)
+## 
+## Matrix products: default
+## 
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+## 
+## time zone: America/Toronto
+## tzcode source: internal
+## 
+## attached base packages:
+## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## 
+## other attached packages:
+## [1] ggplot2_3.5.1      data.table_1.16.99
+## 
+## loaded via a namespace (and not attached):
+##  [1] bit_4.0.5              gtable_0.3.5           dplyr_1.1.4            compiler_4.4.1         highr_0.11            
+##  [6] tidyselect_1.2.1       Rcpp_1.0.13            callr_3.7.6            directlabels_2024.1.21 scales_1.3.0          
+## [11] lattice_0.22-6         R6_2.5.1               labeling_0.4.3         generics_0.1.3         knitr_1.48            
+## [16] tibble_3.2.1           munsell_0.5.1          atime_2024.10.5        pillar_1.9.0           rlang_1.1.4           
+## [21] utf8_1.2.4             xfun_0.47              quadprog_1.5-8         bit64_4.0.5            aum_2024.6.19         
+## [26] cli_3.6.3              withr_3.0.1            magrittr_2.0.3         ps_1.7.7               grid_4.4.1            
+## [31] processx_3.8.4         torch_0.13.0           lifecycle_1.0.4        coro_1.0.5             vctrs_0.6.5           
+## [36] bench_1.1.3            evaluate_0.24.0        glue_1.7.0             farver_2.1.2           profmem_0.6.0         
+## [41] fansi_1.0.6            colorspace_2.1-1       tools_4.4.1            pkgconfig_2.0.3
 ```
