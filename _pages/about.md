@@ -6,7 +6,7 @@ description: Statistical machine learning researcher, focusing on fast, accurate
 
 profile:
   align: right
-  image: prof_pic.jpg
+  image: prof_pic_2024.jpg
   address: >
     <p><a href="https://lassolab.org/">LASSO lab director</a>, Département d'informatique, Université de Sherbrooke</p>
     <p>toby.dylan.hocking@usherbrooke.ca</p>
