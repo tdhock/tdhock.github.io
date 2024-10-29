@@ -54,3 +54,4 @@ and those files can be shared via:
 - Another publishing option is github pages, but there are space
   limitations: [100MiB per file max in regular repos](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github), and [git large file storage is now an option](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage).
 - Google Drive: 10GB.
+- Hugging Face (can be used by github commands): a total storage capacity of 300 GB per repo, with a maximum file size of 20 GB and a limit of 100,000 files per repo. For example, my student repository contains genome sequences, such as the one found here: [chipseq](https://huggingface.co/datasets/lamtung16/compressed_chipseq).
