@@ -45,9 +45,9 @@ and those files can be shared via:
   too, setup group in globus, then setup a share, then collaborators
   can upload to some directory on your monsoon project space.
 - [rcdata](https://in.nau.edu/arc/data-portal/): Monsoon projects web
-  sharing. You run publish_data on monsoon, then others can access
-  here,
-  https://rcdata.nau.edu/genomic-ml/animint2-manual/Ch02-ggplot2.html
+  sharing. You do `cd /projects/genomic-ml` on monsoon, then run
+  `publish_data path/to/folder` then others can access at
+  <https://rcdata.nau.edu/genomic-ml/>
 
 ## Anybody
 
