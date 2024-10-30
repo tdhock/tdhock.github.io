@@ -260,6 +260,7 @@ for computing gradients.
 
 ```{r atimeGrad}
 a_res <- atime::atime(
+  N=10^seq(2,7,by=0.25),
   setup={
     set.seed(1)
     pred_vec = rnorm(N)
@@ -279,7 +280,7 @@ a_res <- atime::atime(
     rowMeans(aum.info$derivative_mat)
   },
   result = TRUE,
-  seconds.limit=0.1
+  seconds.limit=1
 )
 plot(a_res)
 ```
@@ -339,7 +340,7 @@ We have shown how to compute our proposed AUM using R torch, and
 compared the computation time of torch auto-grad with "explicit
 gradients" from R package `aum`. We observed that there is some
 overhead to using torch, but asymptotically the two methods take the
-same/linear amount of time.
+same amount of time: log-linear `O(N log N)`, in number of samples `N`.
 
 ## Session info
 

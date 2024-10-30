@@ -235,6 +235,13 @@ label_vec = c(0, 1)
 pred_diff_vec = seq(-3, 3, by=0.5)
 aum_grad_dt_list = list()
 library(data.table)
+```
+
+```
+## data.table 1.16.99 IN DEVELOPMENT built 2024-10-18 20:05:08 UTC using 3 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+``` r
 for(pred_diff in pred_diff_vec){
   pred_vec = c(0, pred_diff)
   pred_tensor = torch::torch_tensor(pred_vec)
@@ -366,6 +373,7 @@ for computing gradients.
 
 ``` r
 a_res <- atime::atime(
+  N=10^seq(2,7,by=0.25),
   setup={
     set.seed(1)
     pred_vec = rnorm(N)
@@ -385,16 +393,24 @@ a_res <- atime::atime(
     rowMeans(aum.info$derivative_mat)
   },
   result = TRUE,
-  seconds.limit=0.1
+  seconds.limit=1
 )
 ```
 
 ```
 ## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
 ```
 
 ``` r
 plot(a_res)
+```
+
+```
+## Loading required namespace: directlabels
 ```
 
 ![plot of chunk atimeGrad](/assets/img/2024-10-28-auto-grad-overhead/atimeGrad-1.png)
@@ -418,31 +434,18 @@ result_wide <- dcast(
 , equal := paste(all.equal(auto, explicit))
 , by=N
 ][]
+```
+
+```
+## Error in `[.data.table`(dcast(a_res$measurements, N ~ expr.name, value.var = "result"), : Supplied 3 items to be assigned to group 19 of size 1 in column 'equal'. The RHS length must either be 1 (single values are ok) or match the LHS length exactly. If you wish to 'recycle' the RHS please use rep() explicitly to make this intent clear to readers of your code.
+```
+
+``` r
 tibble::tibble(result_wide)
 ```
 
 ```
-## # A tibble: 18 × 4
-##         N auto            explicit        equal
-##     <int> <list>          <list>          <chr>
-##  1      2 <dbl [2]>       <dbl [2]>       TRUE 
-##  2      4 <dbl [4]>       <dbl [4]>       TRUE 
-##  3      8 <dbl [8]>       <dbl [8]>       TRUE 
-##  4     16 <dbl [16]>      <dbl [16]>      TRUE 
-##  5     32 <dbl [32]>      <dbl [32]>      TRUE 
-##  6     64 <dbl [64]>      <dbl [64]>      TRUE 
-##  7    128 <dbl [128]>     <dbl [128]>     TRUE 
-##  8    256 <dbl [256]>     <dbl [256]>     TRUE 
-##  9    512 <dbl [512]>     <dbl [512]>     TRUE 
-## 10   1024 <dbl [1,024]>   <dbl [1,024]>   TRUE 
-## 11   2048 <dbl [2,048]>   <dbl [2,048]>   TRUE 
-## 12   4096 <dbl [4,096]>   <dbl [4,096]>   TRUE 
-## 13   8192 <dbl [8,192]>   <dbl [8,192]>   TRUE 
-## 14  16384 <dbl [16,384]>  <dbl [16,384]>  TRUE 
-## 15  32768 <dbl [32,768]>  <dbl [32,768]>  TRUE 
-## 16  65536 <dbl [65,536]>  <dbl [65,536]>  TRUE 
-## 17 131072 <dbl [131,072]> <dbl [131,072]> TRUE 
-## 18 262144 <dbl [262,144]> <dbl [262,144]> TRUE
+## Error: object 'result_wide' not found
 ```
 
 Note that we used `torch::torch_tensor(pred_vec, "double")` above, for
@@ -464,20 +467,7 @@ result_wide[
 ```
 
 ```
-## Key: <N>
-##              N          auto      explicit  equal  diff
-##          <int>         <num>         <num> <char> <num>
-##      1: 262144  0.000000e+00  0.000000e+00   TRUE     0
-##      2: 262144  0.000000e+00  0.000000e+00   TRUE     0
-##      3: 262144  0.000000e+00  0.000000e+00   TRUE     0
-##      4: 262144  0.000000e+00  0.000000e+00   TRUE     0
-##      5: 262144  7.629395e-06  7.629395e-06   TRUE     0
-##     ---                                                
-## 262140: 262144  0.000000e+00  0.000000e+00   TRUE     0
-## 262141: 262144  0.000000e+00  0.000000e+00   TRUE     0
-## 262142: 262144 -7.629395e-06 -7.629395e-06   TRUE     0
-## 262143: 262144  0.000000e+00  0.000000e+00   TRUE     0
-## 262144: 262144  0.000000e+00  0.000000e+00   TRUE     0
+## Error in eval(expr, envir, enclos): object 'result_wide' not found
 ```
 
 Below we estimate the asymptotic complexity class,
@@ -500,7 +490,7 @@ We have shown how to compute our proposed AUM using R torch, and
 compared the computation time of torch auto-grad with "explicit
 gradients" from R package `aum`. We observed that there is some
 overhead to using torch, but asymptotically the two methods take the
-same/linear amount of time.
+same amount of time: log-linear `O(N log N)`, in number of samples `N`.
 
 ## Session info
 
@@ -531,7 +521,7 @@ sessionInfo()
 ## [1] ggplot2_3.5.1      data.table_1.16.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] bit_4.0.5              gtable_0.3.5           dplyr_1.1.4            compiler_4.4.1         highr_0.11            
+##  [1] bit_4.0.5              gtable_0.3.5           highr_0.11             dplyr_1.1.4            compiler_4.4.1        
 ##  [6] tidyselect_1.2.1       Rcpp_1.0.13            callr_3.7.6            directlabels_2024.1.21 scales_1.3.0          
 ## [11] lattice_0.22-6         R6_2.5.1               labeling_0.4.3         generics_0.1.3         knitr_1.48            
 ## [16] tibble_3.2.1           munsell_0.5.1          atime_2024.10.5        pillar_1.9.0           rlang_1.1.4           
