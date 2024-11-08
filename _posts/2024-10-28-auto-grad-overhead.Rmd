@@ -15,16 +15,6 @@ knitr::opts_chunk$set(
   fig.width=10, ## TODO python figures wider? look at prev issue.
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
-conda.env <- "2023-08-deep-learning"
-conda.env <- "torch-aum"
-RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
-  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
-  "/home/tdhock/miniconda3/envs/%s/bin/python"
-  else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
-Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
-##reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
-in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
-in_knit <- isTRUE(getOption('knitr.in.progress'))
 options(width=120)
 if(FALSE){
   knitr::knit(paste0(post.id, ".Rmd"))
@@ -260,7 +250,7 @@ for computing gradients.
 
 ```{r atimeGrad}
 a_res <- atime::atime(
-  N=10^seq(2,7,by=0.25),
+  N=as.integer(10^seq(2,7,by=0.25)),
   setup={
     set.seed(1)
     pred_vec = rnorm(N)
@@ -294,34 +284,29 @@ package `aum`. We can also see constant factor differences in memory
 usage, because `atime` only measures R memory (not torch memory, so
 that usage is under-estimated).
 
-Below we verify that the results are the same.
-
-```{r}
-result_wide <- dcast(
-  a_res$measurements, N ~ expr.name, value.var="result"
-)[
-, equal := paste(all.equal(auto, explicit))
-, by=N
-][]
-tibble::tibble(result_wide)
-```
 
 Note that we used `torch::torch_tensor(pred_vec, "double")` above, for
 consistency with R double precision numeric vectors (torch default is
 single precision, which can lead to numerical differences for large N,
 exercise for the reader, use the code below to explore those
 differences).
+Below we verify that the results are the same.
 
 ```{r}
-result_wide[
-  which.max(N),
-  lapply(.SD, "[[", 1)
-][
+res.long <- a_res$measurements[, {
+  grad <- result[[1]]
+  data.table(grad, i=seq_along(grad))
+}, by=.(N,expr.name)]
+(res.wide <- dcast(
+  res.long, N + i ~ expr.name, value.var="grad"
+)[
 , diff := auto-explicit
-][
-  order(abs(diff))
-]
+][])
+res.wide[is.na(diff)]
+dcast(res.wide, N ~ ., list(mean, median, max), value.var="diff")
 ```
+
+The result above shows that there are very little differences between the gradients in the two methods.
 
 Below we estimate the asymptotic complexity class,
 

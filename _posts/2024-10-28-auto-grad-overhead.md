@@ -235,13 +235,6 @@ label_vec = c(0, 1)
 pred_diff_vec = seq(-3, 3, by=0.5)
 aum_grad_dt_list = list()
 library(data.table)
-```
-
-```
-## data.table 1.16.99 IN DEVELOPMENT built 2024-10-18 20:05:08 UTC using 3 threads (see ?getDTthreads).  Latest news: r-datatable.com
-```
-
-``` r
 for(pred_diff in pred_diff_vec){
   pred_vec = c(0, pred_diff)
   pred_tensor = torch::torch_tensor(pred_vec)
@@ -373,7 +366,7 @@ for computing gradients.
 
 ``` r
 a_res <- atime::atime(
-  N=10^seq(2,7,by=0.25),
+  N=as.integer(10^seq(2,7,by=0.25)),
   setup={
     set.seed(1)
     pred_vec = rnorm(N)
@@ -400,17 +393,10 @@ a_res <- atime::atime(
 ```
 ## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
 ## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
-## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
-## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
-## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
 ```
 
 ``` r
 plot(a_res)
-```
-
-```
-## Loading required namespace: directlabels
 ```
 
 ![plot of chunk atimeGrad](/assets/img/2024-10-28-auto-grad-overhead/atimeGrad-1.png)
@@ -424,51 +410,101 @@ package `aum`. We can also see constant factor differences in memory
 usage, because `atime` only measures R memory (not torch memory, so
 that usage is under-estimated).
 
-Below we verify that the results are the same.
-
-
-``` r
-result_wide <- dcast(
-  a_res$measurements, N ~ expr.name, value.var="result"
-)[
-, equal := paste(all.equal(auto, explicit))
-, by=N
-][]
-```
-
-```
-## Error in `[.data.table`(dcast(a_res$measurements, N ~ expr.name, value.var = "result"), : Supplied 3 items to be assigned to group 19 of size 1 in column 'equal'. The RHS length must either be 1 (single values are ok) or match the LHS length exactly. If you wish to 'recycle' the RHS please use rep() explicitly to make this intent clear to readers of your code.
-```
-
-``` r
-tibble::tibble(result_wide)
-```
-
-```
-## Error: object 'result_wide' not found
-```
 
 Note that we used `torch::torch_tensor(pred_vec, "double")` above, for
 consistency with R double precision numeric vectors (torch default is
 single precision, which can lead to numerical differences for large N,
 exercise for the reader, use the code below to explore those
 differences).
+Below we verify that the results are the same.
 
 
 ``` r
-result_wide[
-  which.max(N),
-  lapply(.SD, "[[", 1)
-][
-, diff := auto-explicit
-][
-  order(abs(diff))
-]
+res.long <- a_res$measurements[, {
+  grad <- result[[1]]
+  data.table(grad, i=seq_along(grad))
+}, by=.(N,expr.name)]
 ```
 
 ```
-## Error in eval(expr, envir, enclos): object 'result_wide' not found
+## Traitement de 34 groupes sur 35. 97% terminé. Temps écoulé : 3s. Heure d'arrivée prévue : 0s.Traitement de 35 groupes sur 35. 100% terminé. Temps écoulé : 4s. Heure d'arrivée prévue : 0s.Traitement de 35 groupes sur 35. 100% terminé. Temps écoulé : 4s. Heure d'arrivée prévue : 0s.
 ```
+
+``` r
+(res.wide <- dcast(
+  res.long, N + i ~ expr.name, value.var="grad"
+)[
+, diff := auto-explicit
+][])
+```
+
+```
+## Key: <N, i>
+##                N       i         auto explicit         diff
+##            <int>   <int>        <num>    <num>        <num>
+##       1:     100       1 0.000000e+00     0.00 0.000000e+00
+##       2:     100       2 0.000000e+00     0.00 0.000000e+00
+##       3:     100       3 0.000000e+00     0.00 0.000000e+00
+##       4:     100       4 0.000000e+00     0.00 0.000000e+00
+##       5:     100       5 2.000004e-02     0.02 4.053116e-08
+##      ---                                                   
+## 4063026: 1778279 1778275 0.000000e+00       NA           NA
+## 4063027: 1778279 1778276 0.000000e+00       NA           NA
+## 4063028: 1778279 1778277 1.117587e-06       NA           NA
+## 4063029: 1778279 1778278 0.000000e+00       NA           NA
+## 4063030: 1778279 1778279 1.102686e-06       NA           NA
+```
+
+``` r
+res.wide[is.na(diff)]
+```
+
+```
+## Key: <N, i>
+##                N       i         auto explicit  diff
+##            <int>   <int>        <num>    <num> <num>
+##       1: 1778279       1 0.000000e+00       NA    NA
+##       2: 1778279       2 0.000000e+00       NA    NA
+##       3: 1778279       3 0.000000e+00       NA    NA
+##       4: 1778279       4 0.000000e+00       NA    NA
+##       5: 1778279       5 1.102686e-06       NA    NA
+##      ---                                            
+## 1778275: 1778279 1778275 0.000000e+00       NA    NA
+## 1778276: 1778279 1778276 0.000000e+00       NA    NA
+## 1778277: 1778279 1778277 1.117587e-06       NA    NA
+## 1778278: 1778279 1778278 0.000000e+00       NA    NA
+## 1778279: 1778279 1778279 1.102686e-06       NA    NA
+```
+
+``` r
+dcast(res.wide, N ~ ., list(mean, median, max), value.var="diff")
+```
+
+```
+## Key: <N>
+##           N     diff_mean diff_median     diff_max
+##       <int>         <num>       <num>        <num>
+##  1:     100  0.000000e+00           0 4.053116e-08
+##  2:     177 -3.038216e-19           0 2.712346e-08
+##  3:     316  0.000000e+00           0 2.452090e-08
+##  4:     562  0.000000e+00           0 2.354490e-08
+##  5:    1000  0.000000e+00           0 2.574921e-08
+##  6:    1778  0.000000e+00           0 2.926595e-08
+##  7:    3162  0.000000e+00           0 4.618323e-08
+##  8:    5623  2.313795e-22           0 2.476636e-08
+##  9:   10000  0.000000e+00           0 2.641678e-08
+## 10:   17782  0.000000e+00           0 2.912523e-08
+## 11:   31622  0.000000e+00           0 2.322398e-08
+## 12:   56234  0.000000e+00           0 1.830092e-08
+## 13:  100000  0.000000e+00           0 2.716064e-08
+## 14:  177827  5.718850e-23           0 1.845509e-08
+## 15:  316227  3.848900e-23           0 2.334403e-08
+## 16:  562341  8.394171e-24           0 1.972413e-08
+## 17: 1000000  0.000000e+00           0 2.655792e-08
+## 18: 1778279            NA          NA           NA
+```
+
+The result above shows that there are very little differences between the gradients in the two methods.
 
 Below we estimate the asymptotic complexity class,
 
@@ -500,19 +536,21 @@ sessionInfo()
 ```
 
 ```
-## R version 4.4.1 (2024-06-14 ucrt)
-## Platform: x86_64-w64-mingw32/x64
-## Running under: Windows 11 x64 (build 22631)
+## R Under development (unstable) (2024-10-01 r87205)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 22.04.5 LTS
 ## 
 ## Matrix products: default
-## 
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
 ## 
 ## locale:
-## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
-## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
-## time zone: America/Toronto
-## tzcode source: internal
+## time zone: America/New_York
+## tzcode source: system (glibc)
 ## 
 ## attached base packages:
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
@@ -521,13 +559,13 @@ sessionInfo()
 ## [1] ggplot2_3.5.1      data.table_1.16.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] bit_4.0.5              gtable_0.3.5           highr_0.11             dplyr_1.1.4            compiler_4.4.1        
-##  [6] tidyselect_1.2.1       Rcpp_1.0.13            callr_3.7.6            directlabels_2024.1.21 scales_1.3.0          
-## [11] lattice_0.22-6         R6_2.5.1               labeling_0.4.3         generics_0.1.3         knitr_1.48            
-## [16] tibble_3.2.1           munsell_0.5.1          atime_2024.10.5        pillar_1.9.0           rlang_1.1.4           
-## [21] utf8_1.2.4             xfun_0.47              quadprog_1.5-8         bit64_4.0.5            aum_2024.6.19         
-## [26] cli_3.6.3              withr_3.0.1            magrittr_2.0.3         ps_1.7.7               grid_4.4.1            
-## [31] processx_3.8.4         torch_0.13.0           lifecycle_1.0.4        coro_1.0.5             vctrs_0.6.5           
-## [36] bench_1.1.3            evaluate_0.24.0        glue_1.7.0             farver_2.1.2           profmem_0.6.0         
-## [41] fansi_1.0.6            colorspace_2.1-1       tools_4.4.1            pkgconfig_2.0.3
+##  [1] bit_4.0.5              gtable_0.3.4           highr_0.11             dplyr_1.1.4            compiler_4.5.0        
+##  [6] tidyselect_1.2.1       Rcpp_1.0.12            callr_3.7.3            directlabels_2024.1.21 scales_1.3.0          
+## [11] lattice_0.22-6         R6_2.5.1               labeling_0.4.3         generics_0.1.3         knitr_1.47            
+## [16] tibble_3.2.1           desc_1.4.3             munsell_0.5.0          atime_2024.11.5        pillar_1.9.0          
+## [21] rlang_1.1.3            utf8_1.2.4             xfun_0.45              quadprog_1.5-8         bit64_4.0.5           
+## [26] aum_2024.6.19          cli_3.6.2              withr_3.0.0            magrittr_2.0.3         ps_1.7.6              
+## [31] grid_4.5.0             processx_3.8.3         torch_0.13.0           lifecycle_1.0.4        coro_1.1.0            
+## [36] vctrs_0.6.5            bench_1.1.3            evaluate_0.23          glue_1.7.0             farver_2.1.1          
+## [41] profmem_0.6.0          fansi_1.0.6            colorspace_2.1-0       tools_4.5.0            pkgconfig_2.0.3
 ```
