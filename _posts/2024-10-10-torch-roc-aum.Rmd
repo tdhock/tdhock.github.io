@@ -15,14 +15,14 @@ knitr::opts_chunk$set(
   fig.width=10, ## TODO python figures wider? look at prev issue.
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
-conda.env <- "2023-08-deep-learning"
 conda.env <- "torch-aum"
+conda.env <- "2023-08-deep-learning"
 RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
   ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
   "/home/tdhock/miniconda3/envs/%s/bin/python"
   else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
 Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
-reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
+reticulate::use_condaenv(conda.env, required=TRUE)
 in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
 in_knit <- isTRUE(getOption('knitr.in.progress'))
 options(width=120)
