@@ -9,8 +9,10 @@ My main contributions to free/open-source software are
 [R](http://r-project.org) packages that provide implementations of the
 methods described in my research papers (see below). 
 
-### R and statistical software research community
+### Service to open science and software
 
+- Co-leader, Volet Science Ouverte (Open Science Initiative), Réseau
+  Santé Numérique (Network On Digital Health), 2024-2032.
 - Program Committee, international useR 2024 conference, Salzburg,
   Austria, July 8-11.
 - Since 2023, I serve as Associate Editor for the journal
