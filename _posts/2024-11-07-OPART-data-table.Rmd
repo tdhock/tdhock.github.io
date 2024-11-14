@@ -83,97 +83,10 @@ ggplot()+
     linewidth=2,
     data=true.mean.dt)
 
-OPART_dt_update <- function(x.mat, penalty){
-  n.data <- nrow(x.mat)
-  best.change <- rep(NA,n.data)
-  best.cost <- rep(NA,n.data)
-  n.dim <- ncol(x.mat)
-  best.param <- matrix(NA,n.data,n.dim)
-  cum.mat <- rbind(0,apply(x.mat,2,cumsum))
-  sq.mat <- rbind(0,apply(x.mat^2,2,cumsum))
-  best.cost <- best.change <- best.Nsegs <- rep(NA,nrow(x.mat))
-  for(last.seg.end in seq_along(best.cost)){
-    last.seg.start <- seq(1, last.seg.end)
-    get_sum <- function(m){
-      matrix(
-        m[last.seg.end+1,], last.seg.end, ncol(m), byrow=TRUE
-      )-m[last.seg.start,]
-    }
-    N.vec <- last.seg.end-last.seg.start+1
-    candidate.dt <- data.table(
-      last.seg.start,
-      last.seg.cost=rowSums(get_sum(sq.mat)-get_sum(cum.mat)^2/N.vec)
-    )[
-      last.seg.start==1, `:=`(
-        prev.cost=0,
-        Nsegs=1
-      )
-    ][
-      last.seg.start>1, `:=`(
-        prev.cost=best.cost[last.seg.start-1]+penalty,
-        Nsegs=best.Nsegs[last.seg.start-1]+1L
-      )
-    ][
-    , total.cost := prev.cost + last.seg.cost
-    ][]
-    best.row <- candidate.dt[which.min(total.cost)]
-    best.cost[last.seg.end] <- best.row$total.cost
-    best.Nsegs[last.seg.end] <- best.row$Nsegs
-    best.change[last.seg.end] <- best.row$last.seg.start
-  }
-  data.table(best.change, best.cost, best.Nsegs)
-}
-
-OPART_dt <- function(x.mat, penalty){
-  n.data <- nrow(x.mat)
-  best.change <- rep(NA,n.data)
-  best.cost <- rep(NA,n.data)
-  n.dim <- ncol(x.mat)
-  best.param <- matrix(NA,n.data,n.dim)
-  cum.mat <- rbind(0,apply(x.mat,2,cumsum))
-  sq.mat <- rbind(0,apply(x.mat^2,2,cumsum))
-  best.cost <- best.change <- rep(NA,nrow(x.mat))
-  for(last.seg.end in seq_along(best.cost)){
-    last.seg.start <- seq(1, last.seg.end)
-    get_sum <- function(m){
-      matrix(
-        m[last.seg.end+1,], last.seg.end, ncol(m), byrow=TRUE
-      )-m[last.seg.start,]
-    }
-    N.vec <- last.seg.end-last.seg.start+1
-    candidate.dt <- data.table(
-      last.seg.start,
-      last.seg.cost=rowSums(get_sum(sq.mat)-get_sum(cum.mat)^2/N.vec)
-    )
-    ## [
-    ##   ## last.seg.start==1, `:=`(
-    ##   ##   prev.cost=0
-    ##   ## )
-    ## ][
-    ##   ## last.seg.start>1, `:=`(
-    ##   ##   prev.cost=best.cost[last.seg.start-1]+penalty
-    ##   ## )
-    ## ][
-    ## ##, total.cost := prev.cost + last.seg.cost
-    ## ][]
-    last.seg.cost <- rowSums(get_sum(sq.mat)-get_sum(cum.mat)^2/N.vec)
-    prev.cost <- ifelse(last.seg.start==1, 0, best.cost[last.seg.start-1]+penalty)
-
-    total.cost <- prev.cost + last.seg.cost
-    best.i <- which.min(total.cost)
-    best.cost[last.seg.end] <- total.cost[best.i]
-    best.change[last.seg.end] <- best.i
-  }
-  data.table(best.change, best.cost)
-}
-
 sim.wide <- dcast(sim.dt, data.i ~ dim.i, value.var="value")
 sim.mat <- as.matrix(sim.wide[,-1])
 penalty <- 15
-why.slow <- OPART_dt_update(sim.mat,penalty)
-mod.res <- OPART_dt(sim.mat,penalty)
-
-OPART_fast <- function(sim.mat,penalty){
+OPART <- function(sim.mat,penalty){
   cum.data <- rbind(0,apply(sim.mat,2,cumsum))
   cum.squares <- rbind(0,apply(sim.mat^2,2,cumsum))
   best.cost <- rep(NA_real_,nrow(sim.mat))
@@ -195,30 +108,11 @@ OPART_fast <- function(sim.mat,penalty){
   }
   data.table(best.change,best.cost)
 }
-obase <- OPART_fast(sim.mat,penalty)
-
-suffix.vec <- c("dt","dt_update","fast")
-expr.list <- atime::atime_grid(
-  list(FUN=paste0("OPART_",suffix.vec)),
-  OPART=FUN(x.mat,15),
-  symbol.params = "FUN")
-ores <- atime::atime(
-  N=unique(as.integer(10^seq(1,3,by=0.25))),
-  setup={
-    str(N)
-    x.mat <- sim.mat[1:N,]
-  },
-  seconds.limit=0.1,
-  expr.list=expr.list)
-plot(ores)
-oref <- atime::references_best(ores)
-plot(oref)
-all.equal(why.slow$best.cost, obase$best.cost)
-
+obase <- OPART(sim.mat,penalty)
 decode <- function(best.change){
   seg.dt.list <- list()
   last.i <- length(best.change)
-  while(print(last.i)>0){
+  while(last.i>0){
     first.i <- best.change[last.i]
     seg.dt.list[[paste(last.i)]] <- data.table(
       first.i, last.i)
@@ -227,27 +121,9 @@ decode <- function(best.change){
   rbindlist(seg.dt.list)[seq(.N,1)]
 }
 decode(obase$best.change)
-
-min.list <- list(
-  base=function(x){
-    i <- which.min(x)
-    x[i]
-  },
-  dt=function(x){
-    data.table(x)[which.min(x), x]
-  })
-expr.list <- atime::atime_grid(
-  list(fun=names(min.list)),
-  min=min.list[[fun]](x.vec))
-ares <- atime::atime(
-  setup={
-    set.seed(1)
-    x.vec <- rnorm(N)
-  },
-  expr.list=expr.list)
-plot(ares)
-
 ```
+
+TODO PELT
 
 ## Conclusions
 
