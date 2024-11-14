@@ -37,7 +37,7 @@ partitioning algorithm in R.
 ```{r}
 library(ggplot2)
 library(data.table)
-N.per.seg <- 100
+N.per.seg <- 100000
 set.seed(1)
 N.segs <- 3
 N.dim <- 2
@@ -80,7 +80,7 @@ ggplot()+
     first.i, mean.param,
     color=parameter,
     xend=last.i, yend=mean.param),
-    linewidth=2,
+    size=2,
     data=true.mean.dt)
 
 OPART_dt_update <- function(x.mat, penalty){
