@@ -557,6 +557,19 @@ ggplot()+
     "Max validation AUC (Mean ± SD over 4 random initializations)")
 ```
 
+Also note the code below, which provides an alternative method for computing the p-values:
+
+```{r}
+best.dt[, {
+  proposed <- auc[loss=="AUM"]
+  .SD[
+    i  = loss!="AUM",
+    j  = t.test(proposed, auc, alternative="g")["p.value"],
+    by = loss]
+}, by = .(N,Data)][order(loss,N)]
+```
+
+
 ## Display accuracy and computation time in scatter plot
 
 In the plots above, we only examined prediction accuracy. Below we

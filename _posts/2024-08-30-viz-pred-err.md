@@ -837,6 +837,33 @@ ggplot()+
 
 ![plot of chunk p-others-no-drop](/assets/img/2024-08-30-viz-pred-err/p-others-no-drop-1.png)
 
+Also note the code below, which provides an alternative method for computing the p-values:
+
+
+``` r
+best.dt[, {
+  proposed <- auc[loss=="AUM"]
+  .SD[
+    i  = loss!="AUM",
+    j  = t.test(proposed, auc, alternative="g")["p.value"],
+    by = loss]
+}, by = .(N,Data)][order(loss,N)]
+```
+
+```
+##        N         Data         loss      p.value
+##    <int>       <char>       <char>        <num>
+## 1:  1778        STL10     Logistic 1.564229e-03
+## 2:  5623      CIFAR10     Logistic 1.108887e-02
+## 3: 10000 FashionMNIST     Logistic 1.010710e-09
+## 4: 18032        MNIST     Logistic 7.150765e-09
+## 5:  1778        STL10 SquaredHinge 1.290625e-02
+## 6:  5623      CIFAR10 SquaredHinge 5.033883e-03
+## 7: 10000 FashionMNIST SquaredHinge 7.193508e-02
+## 8: 18032        MNIST SquaredHinge 2.763356e-01
+```
+
+
 ## Display accuracy and computation time in scatter plot
 
 In the plots above, we only examined prediction accuracy. Below we
@@ -1026,32 +1053,30 @@ sessionInfo()
 ```
 
 ```
-## R version 4.4.1 (2024-06-14)
-## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 22.04.4 LTS
+## R Under development (unstable) (2024-11-11 r87319 ucrt)
+## Platform: x86_64-w64-mingw32/x64
+## Running under: Windows 11 x64 (build 22631)
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
+## 
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
 ## 
-## time zone: America/New_York
-## tzcode source: system (glibc)
+## time zone: America/Toronto
+## tzcode source: internal
 ## 
 ## attached base packages:
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_3.5.1     data.table_1.16.0
+## [1] ggplot2_3.5.1      data.table_1.16.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] vctrs_0.6.5        cli_3.6.2          knitr_1.47         rlang_1.1.3        xfun_0.45          highr_0.11        
-##  [7] generics_0.1.3     glue_1.7.0         labeling_0.4.3     colorspace_2.1-0   scales_1.3.0       fansi_1.0.6       
-## [13] grid_4.4.1         munsell_0.5.0      evaluate_0.23      tibble_3.2.1       lifecycle_1.0.4    compiler_4.4.1    
-## [19] dplyr_1.1.4        RColorBrewer_1.1-3 pkgconfig_2.0.3    farver_2.1.1       R6_2.5.1           tidyselect_1.2.1  
-## [25] utf8_1.2.4         pillar_1.9.0       magrittr_2.0.3     tools_4.4.1        withr_3.0.0        gtable_0.3.4
+##  [1] vctrs_0.6.5        cli_3.6.3          knitr_1.49         rlang_1.1.4        xfun_0.49          generics_0.1.3    
+##  [7] glue_1.8.0         labeling_0.4.3     colorspace_2.1-1   scales_1.3.0       fansi_1.0.6        grid_4.5.0        
+## [13] munsell_0.5.1      evaluate_1.0.1     tibble_3.2.1       lifecycle_1.0.4    compiler_4.5.0     dplyr_1.1.4       
+## [19] RColorBrewer_1.1-3 pkgconfig_2.0.3    farver_2.1.2       R6_2.5.1           tidyselect_1.2.1   utf8_1.2.4        
+## [25] pillar_1.9.0       magrittr_2.0.3     tools_4.5.0        withr_3.0.2        gtable_0.3.5
 ```
