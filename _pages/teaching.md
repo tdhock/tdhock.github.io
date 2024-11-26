@@ -111,7 +111,7 @@ For the students below, my role is primary advisor, unless another primary advis
 * [Tayler Skirvin](https://github.com/tds325), CS undergrad, Spring 2022, then went to work as software developer at [Cognizant](https://www.cognizant.com).
 * [Brooke Sebranek](https://github.com/brookesebranek), Biomedical Sciences undergrad, Fall 2021 - Spring 2022.
 * [Shadmaan Hye](https://github.com/Prapti-044), Informatics and Computing PHD, Fall 2021, then went to University of Arizona CS as PHD student.
-* [Tristan Miller](https://github.com/deltarod), BS CS research associate, Fall 2020 - Fall 2021, then went to work at a tech startup.
+* [Tristan Miller](https://github.com/deltarod), BS CS research associate, Fall 2020 - Fall 2021, then went to work at a tech startup, [Ezoic](https://www.ezoic.com/).
 * [Akhila Chowdary Kolla](https://github.com/akhikolla), CS master, Spring 2020 - Fall 2021, then went to work as software developer at [Amazon](https://www.amazon.com).
 * [Alyssa Stenberg](https://github.com/alyssajs), CS master, Spring 2020, then went to [J.B. Hunt](https://www.jbhunt.com/) as a software engineer (Machine Learning Operations team).
 * [Jonathan Hillman](https://github.com/JonathanHillman), CS undergrad, Summer 2020 - Summer 2021, then did Math master at NAU.
