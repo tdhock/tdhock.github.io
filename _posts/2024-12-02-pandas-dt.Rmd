@@ -109,7 +109,11 @@ The code below shows the throughput of each function at the specified time limit
 ```{r pred-write-chr-cols}
 refs.write.chr.cols <- atime::references_best(atime.write.chr.cols)
 pred.write.chr.cols <- predict(refs.write.chr.cols)
-plot(pred.write.chr.cols)+scale_x_log10("N = number of columns")+scale_y_log10("median line, min/max band",limits=c(1e-4,0.5))
+plot(pred.write.chr.cols)+
+  ggtitle("Write strings to CSV, 100 x N")+
+  scale_x_log10("N = number of columns to write")+
+  scale_y_log10("Computation time (seconds)\nmedian line, min/max band\nover 10 timings",limits=c(1e-4,0.5))+
+  facet_null()
 ```
 
 The plot above shows that `data.table` is competitive with the other
@@ -144,7 +148,11 @@ atime.read.chr.cols <- atime::atime(
 )
 refs.read.chr.cols <- atime::references_best(atime.read.chr.cols)
 pred.read.chr.cols <- predict(refs.read.chr.cols)
-plot(pred.read.chr.cols)+scale_x_log10("N = number of columns")
+plot(pred.read.chr.cols)+
+  ggtitle("Read strings from CSV, 100 x N")+
+  scale_x_log10("N = number of columns to read")+
+  scale_y_log10("Computation time (seconds)\nmedian line, min/max band\nover 10 timings",limits=c(1e-4,0.5))+
+  facet_null()
 ```
 
 The plot above shows that `data.table` has the fastest CSV reader.
@@ -195,7 +203,11 @@ atime.write.chr.rows <- atime::atime(
 )
 refs.write.chr.rows <- atime::references_best(atime.write.chr.rows)
 pred.write.chr.rows <- predict(refs.write.chr.rows)
-plot(pred.write.chr.rows)+scale_x_log10("N = number of rows")
+plot(pred.write.chr.rows)+
+  ggtitle("Write strings to CSV, N x 100")+
+  scale_y_log10("Computation time (seconds)\nmedian line, min/max band\nover 10 timings")+
+  facet_null()+
+  scale_x_log10("N = number of rows to write")
 ```
 
 The plot above again shows that `data.table` is the fastest CSV writer. 
@@ -239,7 +251,11 @@ atime.write.num.cols <- atime::atime(
 )
 refs.write.num.cols <- atime::references_best(atime.write.num.cols)
 pred.write.num.cols <- predict(refs.write.num.cols)
-plot(pred.write.num.cols)+scale_x_log10("N = number of columns")
+plot(pred.write.num.cols)+
+  ggtitle("Write real numbers to CSV, 100 x N")+
+  scale_y_log10("Computation time (seconds)\nmedian line, min/max band\nover 10 timings",limits=c(1e-4,0.5))+
+  facet_null()+
+  scale_x_log10("N = number of columns to write")
 ```
 
 The code above shows the throughput of each function at the specified time limit.
