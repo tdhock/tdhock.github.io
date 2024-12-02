@@ -1,723 +1,261 @@
 ---
-title: "Comparing Pandas in Python to data.table in R"
-output: html_document
-date: "2024-02-22"
+layout: post
+title: Comparing CSV reading and writing functions
+description: Demonstrating advantages of data.table
 ---
 
-
-```{r setup, include = FALSE}
-library(data.table)
-library(ggplot2)
-conda.env <- "torch-aum"
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2024-12-02-pandas-dt"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+conda.env <- "2023-08-deep-learning"
 RETICULATE_PYTHON <- normalizePath(sprintf(if(.Platform$OS.type=="unix")
   ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
   "/home/tdhock/miniconda3/envs/%s/bin/python"
   else "~/AppData/Local/miniconda3/envs/%s/python.exe", conda.env))
-##RETICULATE_PYTHON <- "~/AppData/Local/miniconda3/python.exe"
-##Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
-reticulate::use_condaenv("~/AppData/Local/miniconda3/envs/torch-aum")
-reticulate::py_run_string("input_df_pd.to_csv('data.csv', index=False)")
+Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
+reticulate::use_condaenv(conda.env)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
 ```
 
-```{r}
-write.colors <- c(
-  "data.table::fwrite" = "#D6604D",
-  "pandas::to_csv" = "#BF812D"
+The goal of this post is to demonstrate that the performance of
+`data.table` is competitive with similar libraries available in Python
+(pandas, duckdb, polars).
+
+## What is the overhead of communication with python from R?
+
+First, since we will be recording the timings of python code from R,
+we will run a test to determine what is the overhead.
+
+```{r overhead}
+atime.overhead <- atime::atime(
+  N = as.integer(10^seq(0, 3, by = 0.5)),
+  overhead = {
+    reticulate::py_run_string("x = 5")
+  }
 )
-n.rows <- 100
-atime.write.vary.cols <- atime::atime(
-  N = as.integer(10^seq(2, 6, by = 0.5)),
+atime.overhead$unit.col.vec <- c(seconds="median")
+plot(atime.overhead)
+(overhead.seconds <- median(atime.overhead$measurements$median))
+```
+
+The plot above shows that the overhead of communication between R and
+python is about `r overhead.seconds*1000`
+milliseconds. 
+
+## write csv, vary columns, char
+
+This section compares the performance of CSV files with a variable
+number of character/string columns..
+
+```{r write-chr-cols}
+library(data.table)
+reticulate::py_run_string("import pandas as pd")
+N_rows <- 100
+(N_col_seq <- unique(as.integer(10^seq(0, 6, by = 0.2))))
+main <- reticulate::py
+con <- duckdb::dbConnect(duckdb::duckdb(), dbdir = ":memory:")
+atime.write.chr.cols <- atime::atime(
+  N = N_col_seq,
   setup = {
-    set.seed(1)
-    input.vec <- rnorm(n.rows * N)
-    input.mat <- matrix(input.vec, n.rows, N)
-    input.df <- data.frame(input.mat)
-    ##pd <- reticulate::import("pandas")
-    ##input_df_pd <- pd$DataFrame(input.df)
+    input.chr <- matrix(c("foo", "x", "bar", NA), N_rows, N)
+    input.df <- data.frame(input.chr)
+    polars.df <- polars::as_polars_df(input.df)
+    main$input_df_pd <- input.df
+    input.dt <- data.table(input.df)
+    duckdb::dbWriteTable(con, "duck_table", input.df, overwrite=TRUE)
+    out.csv <- sprintf("%s/data_N=%d.csv", tempdir(), N)
   },
-  seconds.limit = 0.01,
-  "data.table::fwrite" = {
-    data.table::fwrite(input.df, tempfile(), showProgress = FALSE)
+  seconds.limit = 0.1,
+  "data.table\nfwrite" = {
+    data.table::fwrite(input.dt, out.csv, showProgress = FALSE)
   },
-  "pandas::to_csv" = {
+  "pandas\nto_csv" = {
     reticulate::py_run_string("input_df_pd.to_csv('data.csv', index=False)")
+  },
+  "polars\nto_csv" = {
+    polars.df$write_csv('polars.csv')
+  },
+  "duckdb\nCOPY" = { # https://duckdb.org/docs/guides/file_formats/csv_export.html
+    DBI::dbSendQuery(con, "COPY duck_table TO 'duck.csv' (HEADER, DELIMITER ',')")
   }
 )
-
+atime.write.chr.cols$unit.col.vec <- c(seconds="median")
+library(ggplot2)
+plot(atime.write.chr.cols)+
+  geom_hline(aes(
+    yintercept=overhead.seconds),
+    color="grey50",
+    data=data.frame(overhead.seconds))
 ```
 
+The plot above shows a colored curve for each CSV writing function.
+The grey horizontal line shows the overhead of communication with python from R.
+We see that the overhead (grey line) is insignificant, compared with the CSV writing timings (colored curves).
+The code below shows the throughput of each function at the specified time limit.
 
-
-
-
-```{r}
-refs.write.vary.cols <- atime::references_best(atime.write.vary.cols)
-pred.write.vary.cols <- predict(refs.write.vary.cols)
-
-gg.write.dt.pd <- plot(pred.write.vary.cols)+
-  theme(text=element_text(size=20))+
-  ggtitle(sprintf("Write real numbers to CSV, with pandas in Python and data.table in R, %d x N", n.rows))+
-  scale_x_log10("N = number of columns to write")+
-  scale_y_log10("Computation time (seconds)
-median line, min/max band
-over 10 timings")+
-  facet_null()+
-  scale_fill_manual(values=write.colors)+
-  scale_color_manual(values=write.colors)
+```{r pred-write-chr-cols}
+refs.write.chr.cols <- atime::references_best(atime.write.chr.cols)
+pred.write.chr.cols <- predict(refs.write.chr.cols)
+plot(pred.write.chr.cols)+scale_x_log10("N = number of columns")+scale_y_log10(limits=c(1e-4,0.5))
 ```
 
+The plot above shows that `data.table` is competitive with the other
+libraries: about 2x faster than polars, and 10x faster than pandas/duckdb.
 
+# read CSV, vary columns, char
 
+In this section we compare performance of CSV readers.
 
-```{r}
-png()
-print(gg.write.dt.pd)
-ggsave("gg.write.dt.pd.png", gg.write.dt.pd, width = 10, height = 6, units = "in", dpi = 300)
-dev.off()
-```
-
-
-# read a Csv files with Pandas and data.table
-```{python}
-file_path = 'data.csv',
-```
-
-```{r}
-read.colors <- c(
-  "data.table::fread" = "#D6604D",
-  "pandas::read_csv" = "#BF812D"
-)
-n.rows <- 100
-seconds.limit <- 1
-
-
-atime.read <- atime::atime(
+```{r read-chr-cols}
+atime.read.chr.cols <- atime::atime(
+  N = N_col_seq,
   setup = {
-    set.seed(1)
-    input.vec <- rnorm(n.rows*N)
-    input.mat <- matrix(input.vec, n.rows, N)
-    input.df <- data.frame(input.mat)
-    input.csv <- tempfile()
-    fwrite(input.df, "data.csv")
-    
-    pd <- import("pandas")
-    input_df_pd <- pd$DataFrame(input.df)
-    #input_df_pd.to_csv('input.csv', index=False)
-    
-    
+    in.csv <- sprintf("%s/data_N=%d.csv", tempdir(), N)
+    pandas_cmd <- sprintf("pd.read_csv('%s')", in.csv)
+    ## https://duckdb.org/docs/data/csv/overview.html
+    duck_cmd <- sprintf("SELECT * FROM read_csv('%s', delim=',', header=true)", in.csv)
   },
-  seconds.limit = seconds.limit,
-  "data.table::fread" = {
-    data.table::fread("data.csv", showProgress = FALSE)
-    
-    
+  seconds.limit = 0.1,
+  "data.table\nfread" = {
+    data.table::fread(in.csv, showProgress = FALSE)
   },
-  "pandas::read_csv" = {
-    pd <- import("pandas")
-    reticulate::py_run_string("import pandas as pd")
-    reticulate::py_run_string("pd.read_csv(file_path)")
-    #py$input_df_pd
+  "pandas\nread_csv" = {
+    reticulate::py_run_string(pandas_cmd)
+  },
+  "duckdb\nread_csv" = {
+    DBI::dbSendQuery(con, duck_cmd)
+  },
+  "polars\nread_csv" = {
+    polars::pl$read_csv(in.csv)
   }
 )
+refs.read.chr.cols <- atime::references_best(atime.read.chr.cols)
+pred.read.chr.cols <- predict(refs.read.chr.cols)
+plot(pred.read.chr.cols)+scale_x_log10("N = number of columns")
 ```
 
-import pandas as pd
+The plot above shows that `data.table` has the fastest CSV reader.
+The plot above shows the throughput at the time limit, which reveals
+that `data.table` is faster than polars by a small factor (less than
+2x), but faster than duckdb/pandas by a larger amount (3-5x).
 
-# Read the CSV file
-df = pd.read_csv('path/to/file.csv')
+# variants of these benchmarks
 
-# Display the contents of the DataFrame
-print(df)
+There are several variables we can play with in these benchmarks.
 
-```{r}
-refs.read.vary.cols <- atime::references_best(atime.read)
-pred.read.vary.cols <- predict(refs.read.vary.cols)
+* variable number of rows or columns (we did columns above)
+* numeric or character/string data (we did character/string above)
+* read or write (we did both above)
 
-gg.read.pd <- plot(pred.read.vary.cols)+
-  theme(text=element_text(size=20))+
-  ggtitle(sprintf("Read real numbers to CSV, with pandas in Python and data.table in R, %d x N", n.rows))+
-  scale_x_log10("N = number of columns to write")+
-  scale_y_log10("Computation time (seconds)
-median line, min/max band
-over 10 timings")+
-  facet_null()+
-  scale_fill_manual(values=read.colors)+
-  scale_color_manual(values=read.colors)
-```
+Below we consider two variants of the benchmark.
 
-```{r}
-png()
-print(gg.read.pd)
-ggsave("gg.read.pd.png", gg.read.pd, width = 10, height = 6, units = "in", dpi = 300)
-dev.off()
+## write csv, variable rows
 
-gg.read.pd
+Here we consider writing a variable number of rows (instead of cols above)
+for character/string data. (numeric data and reading are exercises for the
+reader)
 
-```
-
-
-# Reshaping data
-
-Wide to long
-
-```{r}
-ml.colors <- c(
-  "data.table::melt"="#D6604D",
-  "pandas::pd.melt" = "#BF812D"
-  )
-n.folds <- 10
-n.rows <- 100
-seconds.limit <- 1
-
-ml.reshape.atime <- atime::atime(
-  N=as.integer(10^seq(2, 15, by=0.5)),
-  setup={
-    df <- data.frame(
-      id = rep(1:N, each = 2),
-      category = rep(c("A", "B"), N),
-      value = rnorm(2 * N)
-      )
-    },
-  seconds.limit= seconds.limit,
-  
-  "data.table::melt" = {
-    data.table::melt(data.table(df), id.vars = c("id",  "category"),variable.names="variable", value.name = "value")
-  },
-  "pandas::pd.melt" = {
-    py_df <- reticulate::r_to_py(df)
-    pd <- import("pandas")
-    pd$melt(py_df, id_vars = c("id", "category"), value_name = "score")
-    #reticulate::py_run_string("import pandas as pd")
-    #reticulate::py_run_string(pd$melt(py_df, id_vars = c('id', 'category'), value_name = 'score'))
-    #melted_df <- py_to_r(melt_df)
-    
-  #reticulate::py_run_string("import pandas as pd")
-  #reticulate::py_run_string(pd$melt(df_pd, id_vars = c("id", "category"), var_name = "variable", value_name = "melted_value"))
-  }
-
-  )
-
-```
-
-```{r}
-
-ml.reshape.refs <- atime::references_best(ml.reshape.atime)
-ml.reshape.pred <- predict(ml.reshape.refs)
-ml.wide2long.pd <- plot(ml.reshape.pred)+
-  theme(text=element_text(size=15))+
-  ggtitle(sprintf("Reshaping from wide to long panda & data.tableover %dreal numbers, N times", n.folds))+
-  scale_x_log10("N = number of Mean,SD,Length to compute")+
-  scale_y_log10("Computation time (seconds)
-median line, min/max band
-over 10 timings")+
-  facet_null()+
-  scale_fill_manual(values=ml.colors)+
-  scale_color_manual(values=ml.colors)
-```
-
-```{r}
-png()
-print(ml.wide2long.pd)
-ggsave("ml.wide2long.pd.png", ml.wide2long.pd, width = 10, height = 6, units = "in", dpi = 300)
-dev.off()
-
-ml.wide2long.pd
-```
-
-
-
-
-
-```{r}
-ml.wide2long.atime <- atime::atime(
-  N=as.integer(10^seq(2, 15, by=0.5)),
-  setup={
-    df <- data.frame(
-      id = rep(1:N, each = 2),
-      category = rep(c("A", "B"), N),
-      value = rnorm(2 * N)
-    )
-  },
-  seconds.limit= seconds.limit,
-  "data.table::melt" = {
-    data.table::melt(data.table(df), id.vars = c("id",  "category"),variable.names="variable", value.name = "value")
-  },
-  "pandas::pd.melt" = {
-    pd <- import("pandas")
-    reticulate::py_run_string("import pandas as pd")
-    df_pd <- r_to_py(df)
-    reticulate::py_run_string(pd$melt(df_pd, id_vars = c("id", "category"), var_name = "variable", value_name = "melted_value"))
-  }
-)
-```
-
-
-
-
-
-
-```{r}
-
-ml.colors <- c(
-  "data.table::melt" = "#D6604D",
-  "pandas::pd.melt" = "#BF812D"
-)
-
-ml.wide2long.atime <- atime::atime(
-  N=as.integer(10^seq(2, 15, by=0.5)),
-  setup={
-    df <- data.frame(
-      id = rep(1:N, each = 2),
-      category = rep(c("A", "B"), N),
-      value = rnorm(2 * N)
-    )
-  },
-  seconds.limit= seconds.limit,
-  "data.table::melt" = {
-    data.table::melt(data.table(df), id.vars = c("id",  "category"),variable.names="variable", value.name = "value")
-  },
-  "pandas::pd.melt" = {
-    pd <- import("pandas")
-    reticulate::py_run_string("import pandas as pd")
-    df_pd <- r_to_py(df)
-    reticulate::py_run_string(pd$melt(df_pd, id_vars = c("id", "category"), var_name = "variable", value_name = "melted_value"))
-                              
-    #reticulate::py_run_string(pd$melt(df_pd, id_vars = c("id", "category"), var_name = "variable", value_name = "value"))
-    #reticulate::py_run_string(pd$pd.melt(df_pd, id_vars = c("id", "category"), var_name = "variable", value_name = "value"))
-  }
-)
-```
-
-
-
-
-
-```{r,warning=FALSE,message=FALSE}
-
-ml.colors <- c(
-  "data.table::melt" = "#D6604D",
-  "pandas::pivot_table" = "#BF812D"
-)
-
-n.folds <- 10
-n.rows <- 100
-seconds.limit <- 10
-
-ml.long2wide.atime <- atime::atime(
-  N=as.integer(10^seq(2, 7, by=0.2)),
-  
-  setup={
-    df <- data.frame(
-      id = rep(1:N, each = 2),
-      category = rep(c("A", "B"), N),
-      value = rnorm(2 * N)
-      )
-    },
-  seconds.limit= seconds.limit,
-  "data.table::dcast" = {
-    data.table::dcast(data.table(df), id ~ category, value.var = "value")
-  },
-  "pandas::pivot_table" = {
-    py_df <- reticulate::r_to_py(df)
-    pd <- import("pandas")
-    pd$pivot_table(py_data, values = "value", index = "id", columns = "category")
-  }
-  )
-
-```
-
-
-
-```{r,warning=FALSE,message=FALSE}
-ml.long2wide.refs <- atime::references_best(ml.long2wide.atime)
-ml.long2wide.pred <- predict(ml.long2wide.refs)
-ml.long2wide <- plot(ml.long2wide.pred)+
-  theme(text=element_text(size=20))+
-  ggtitle(sprintf("Reshaping from long to wide over %dreal numbers, N times", n.folds))+
-  scale_x_log10("N = number of Mean,SD,Length to compute")+
-  scale_y_log10("Computation time (seconds)
-median line, min/max band
-over 10 timings")+
-  facet_null()+
-  scale_fill_manual(values=ml.colors)+
-  scale_color_manual(values=ml.colors)
-
-```
-
-```{r}
-#print(ml.long2wide)
-ggsave("ml.long2wide.png", ml.long2wide, width = 10, height = 6, units = "in", dpi = 300)
-#dev.off()
-
-#ml.long2wide
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-pd <- import("pandas")
-    reticulate::py_run_string("import pandas as pd")
-    reticulate::py_run_string("pd.read_csv(file_path)")
-
-library(reticulate)
-
-ml.wide2long.atime <- atime::atime(
-  N = as.integer(10^seq(2, 15, by = 0.5)),
+```{r write-chr-rows}
+atime.write.chr.rows <- atime::atime(
   setup = {
-    df <- data.frame(
-      id = rep(1:N, each = 2),
-      category = rep(c("A", "B"), N),
-      value = rnorm(2 * N)
-    )
-    df
-  },
-  seconds.limit = seconds.limit,
-  "data.table::melt" = {
-    data.table::melt(data.table(df), id.vars = c("id", "category"), variable.name = "variable", value.name = "value")
-  },
-  "pandas::pd.melt" = {
-    pd <- import("pandas")
-    df_pd <- r_to_py(df)
-    pd$pd.melt(df_pd, id_vars = c("id", "category"), var_name = "variable", value_name = "value")
-  }
-)
-
-# Summarizing by group
-
-```{r}
-ml.colors <- c(
-  "dplyr::summarise"="#00FF00",
-  "[.data.table"="#D6604D",
-  "stats::aggregate"="#4DB3E6",
-  "summarytools::descr"="#00BFC4",
-  "psych::describe"="#FFA500",
-  "plyr::ddply"="#FF0000FF")
-  
-options(dplyr.summarise.inform=FALSE)
-n.folds <- 10
-ml.atime <- atime::atime(
-  N=as.integer(10^seq(2, 7, by=0.5)),
-  setup={
-    loss.dt <- data.table(
-      name="loss", 
-      fold=rep(1:n.folds, each=2*N),
-      loss=rnorm(2*N*n.folds),
-      set=rep(c("subtrain","validation"),each=N),
-      epoch=1:N,
-      key=c("set","epoch","fold"))
-  },
-  seconds.limit=seconds.limit,
-  "[.data.table"={
-    loss.dt[, .(
-      loss_length=.N,
-      loss_mean=mean(loss),
-      loss_sd=sd(loss)
-    ), by=.(set, epoch)]
-  },
-  "stats::aggregate"={
-    res <- stats::aggregate(
-      loss ~ set + epoch, 
-      loss.dt, 
-      function(values)list(c(
-        loss_length=length(values),
-        loss_mean=mean(values), 
-        loss_sd=sd(values))))
-    data.frame(
-      subset(res, select=-loss), 
-      do.call(rbind, res$loss))
-  },
-  "plyr::ddply"={
-    ddply(loss.dt, c("set", "epoch"), summarize,
-          loss_length = length(loss),
-          loss_mean = mean(loss),
-          loss_sd = sd(loss))
-  }
-)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-write.colors <- c(
-  "data.table::fwrite" = "#D6604D",
-  "pandas::to_csv" = "#BF812D"
-)
-n.rows <- 100
-atime.write.vary.cols <- atime::atime(
-  N = as.integer(10^seq(2, 6, by = 0.5)),
-  setup = {
-    set.seed(1)
-    input.vec <- rnorm(n.rows * N)
-    input.mat <- matrix(input.vec, n.rows, N)
-    input.df <- data.frame(input.mat)
-    py_run_string("import pandas as pd")
-    py_set_attr(x = py, name = "input_mat_pd", value = input.mat)  
-    py_run_string("input_df_pd = r_to_py(input_mat_pd)")
-    input_df_pd = r_to_py(py$input_mat_pd)
+    input.chr <- matrix(c("foo", "x", "bar", NA), N, 10)
+    input.df <- data.frame(input.chr)
+    polars.df <- polars::as_polars_df(input.df)
+    main$input_df_pd <- input.df
+    input.dt <- data.table(input.df)
+    duckdb::dbWriteTable(con, "duck_table", input.df, overwrite=TRUE)
+    out.csv <- sprintf("%s/data_N=%d.csv", tempdir(), N)
   },
   seconds.limit = 0.01,
-  "data.table::fwrite" = {
-    data.table::fwrite(input.df, tempfile(), showProgress = FALSE)
+  "data.table\nfwrite" = {
+    data.table::fwrite(input.dt, out.csv, showProgress = FALSE)
   },
-  "pandas::to_csv" = {
-    py_run_string("input_df_pd.to_csv(file_path, index=False)")
+  "pandas\nto_csv" = {
+    reticulate::py_run_string("input_df_pd.to_csv('data.csv', index=False)")
+  },
+  "polars\nto_csv" = {
+    polars.df$write_csv('polars.csv')
+  },
+  "duckdb\nCOPY" = { # https://duckdb.org/docs/guides/file_formats/csv_export.html
+    DBI::dbSendQuery(con, "COPY duck_table TO 'duck.csv' (HEADER, DELIMITER ',')")
   }
 )
+refs.write.chr.rows <- atime::references_best(atime.write.chr.rows)
+pred.write.chr.rows <- predict(refs.write.chr.rows)
+plot(pred.write.chr.rows)+scale_x_log10("N = number of rows")
 ```
 
+The plot above again shows that `data.table` is the fastest CSV writer. 
+It is about the same as polars (within 2x), 
+about 3x faster than duckdb, 
+and 10x faster than pandas.
 
+## write csv, numeric cols
 
-```{r}
-refs.write.vary.cols <- atime::references_best(atime.write.vary.cols)
-pred.write.vary.cols <- predict(refs.write.vary.cols)
+Here we consider writing a variable number of cols for numeric data
+(instead of character/string data above). Variable number of rows, and
+reading instead of writing, are exercises for the reader.
 
-gg.write.dt.pd <- plot(pred.write.vary.cols)+
-  theme(text=element_text(size=20))+
-  ggtitle(sprintf("Write real numbers to CSV, with pandas in Python and data.table in R, %d x N", n.rows))+
-  scale_x_log10("N = number of columns to write")+
-  scale_y_log10("Computation time (seconds)
-median line, min/max band
-over 10 timings")+
-  facet_null()+
-  scale_fill_manual(values=write.colors)+
-  scale_color_manual(values=write.colors)
-```
-
-```{r}
-png()
-print(gg.write.dt.pd)
-ggsave("gg.write.dt.pd.png", gg.write.dt.pd, width = 10, height = 6, units = "in", dpi = 300)
-dev.off()
-
-```
-
-
-
-# Reading  csv Files with Pandas in Python and data.table in R
-
-```{python}
-import pandas as pd
-import numpy as np
-
-# Read the CSV file using pandas
-input_df_pd = pd.read_csv(file_path)
-
-# Convert the pandas DataFrame to a numpy array
-input_mat_pd = input_df_pd.values
-
-# Convert the numpy array to a list
-input_vec_pd = input_mat_pd.flatten().tolist()
-
-# Convert the list to a data.table object in R
-input_df_r = reticulate::r.data.frame(input_vec_pd, stringsAsFactors=FALSE)
-```
-
-
-```{r}
-file_path = 'data.csv'
-
-write.colors <- c(
-  "data.table::fread" = "#D6604D",
-  "pandas::read_csv" = "#BF812D"
-)
-
-atime.read <- atime::atime(
+```{r write-num-cols}
+atime.write.num.cols <- atime::atime(
+  N = N_col_seq,
   setup = {
-    input.vec <- rnorm(n_rows * N)
-    input.mat <- matrix(input.vec, n_rows, N)
-    input.df <- data.frame(input.mat)
-    input.csv <- tempfile()
-    fwrite(input.df, input.csv)
-    
+    set.seed(1)
+    input.num <- matrix(rnorm(N_rows * N), N_rows, N)
+    input.num[sample(N_rows*N, N)] <- NA
+    input.df <- data.frame(input.num)
+    polars.df <- polars::as_polars_df(input.df)
+    main$input_df_pd <- input.df
+    input.dt <- data.table(input.df)
+    duckdb::dbWriteTable(con, "duck_table", input.df, overwrite=TRUE)
+    out.csv <- sprintf("%s/data_N=%d.csv", tempdir(), N)
   },
-  seconds.limit = seconds.limit,
-  "data.table::fread" = {
-    data.table::fread(input.csv, showProgress = FALSE)
+  seconds.limit = 0.1,
+  "data.table\nfwrite" = {
+    data.table::fwrite(input.dt, out.csv, showProgress = FALSE)
   },
-  "pandas::read_csv" = {
-    py_run_string("input_df_pd = pd.read_csv('", file_path, "')")
-    py$input_df_pd
+  "pandas\nto_csv" = {
+    reticulate::py_run_string("input_df_pd.to_csv('data.csv', index=False)")
+  },
+  "polars\nto_csv" = {
+    polars.df$write_csv('polars.csv')
+  },
+  "duckdb\nCOPY" = { # https://duckdb.org/docs/guides/file_formats/csv_export.html
+    DBI::dbSendQuery(con, "COPY duck_table TO 'duck.csv' (HEADER, DELIMITER ',')")
   }
 )
+refs.write.num.cols <- atime::references_best(atime.write.num.cols)
+pred.write.num.cols <- predict(refs.write.num.cols)
+plot(pred.write.num.cols)+scale_x_log10("N = number of columns")
 ```
 
+The code above shows the throughput of each function at the specified time limit.
+The plot above shows that `data.table` is competitive with the other
+libraries: almost as fast as polars, and several times faster than
+pandas/duckdb.
+
+# Conclusions
+
+We have shown that `data.table` CSV reading and writing can be faster
+than similar libraries which can be used from python or R.  We
+observed that `data.table` is especially efficient for
+character/string data (rather than numeric data).
+
+# Session info
 
 ```{r}
-# Read the CSV file using data.table
-
-write.colors <- c(
-  "data.table::fread" = "#D6604D",
-  "pandas::read_csv" = "#BF812D"
-)
-
-atime.read <- atime::atime(
-  setup = {
-    input.vec <- rnorm(n.rows*N)
-    input.mat <- matrix(input.vec, n.rows, N)
-    input.df <- data.frame(input.mat)
-    input.csv <- tempfile()
-    fwrite(input.df, input.csv)
-    
-  },
-  seconds.limit = seconds.limit,
-  "data.table::fread"={
-    data.table::fread(input.csv, showProgress = FALSE)
-  },
-  "pandas::read_csv" = {
-    py_run_string(paste0("input_df_pd = pd.read_csv('", file_path, "')"))
-    py$input_df_pd
-  }
-)
+sessionInfo()
 ```
-
-
-```{r}
-refs.read.vary.cols <- atime::references_best(atime.read.vary.cols)
-pred.read.vary.cols <- predict(refs.read.vary.cols)
-
-gg.read.pd <- plot(pred.read.vary.cols)+
-  theme(text=element_text(size=20))+
-  ggtitle(sprintf("Read real numbers to CSV, with pandas in Python and data.table in R, %d x N", n.rows))+
-  scale_x_log10("N = number of columns to write")+
-  scale_y_log10("Computation time (seconds)
-median line, min/max band
-over 10 timings")+
-  facet_null()+
-  scale_fill_manual(values=read.colors)+
-  scale_color_manual(values=read.colors)
-```
-
-```{r}
-png()
-print(gg.read.pd)
-ggsave("gg.read.pd.png", gg.read, width = 10, height = 6, units = "in", dpi = 300)
-dev.off()
-
-gg.read.pd
-
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-write.colors <- c(
-  "data.table::fread" = "#D6604D",
-  "pandas::read_csv" = "#BF812D"
-)
-
-
-atime.read.vary.cols <- atime::atime(
-  N = as.integer(10^seq(2, 6, by = 0.5)),
-  setup = {
-    input.vec <- rnorm(n.rows*N)
-    input.mat <- matrix(input.vec, n.rows, N)
-    input.df <- data.frame(input.mat)
-    input.csv <- tempfile()
-    fwrite(input.df, input.csv)
-    
-  },
-  seconds.limit = seconds.limit,
-  "data.table::fread"={
-    data.table::fread(input.csv, showProgress = FALSE)
-  },
-  "pandas::read_csv" = {
-    py_run_string("
-    ")
-  }
-)
-
-
-```
-
-
-```{r}
-refs.read.vary.cols <- atime::references_best(atime.read.vary.cols)
-pred.read.vary.cols <- predict(refs.read.vary.cols)
-
-gg.read <- plot(pred.read.vary.cols)+
-  theme(text=element_text(size=20))+
-  ggtitle(sprintf("Read real numbers to CSV, with pandas in Python and data.table in R, %d x N", n.rows))+
-  scale_x_log10("N = number of columns to write")+
-  scale_y_log10("Computation time (seconds)
-median line, min/max band
-over 10 timings")+
-  facet_null()+
-  scale_fill_manual(values=read.colors)+
-  scale_color_manual(values=read.colors)
-```
-
-```{r}
-print(gg.read)
-ggsave("gg.read.png", gg.read, width = 10, height = 6, units = "in", dpi = 300)
-dev.off()
-
-gg.read
-```
-
