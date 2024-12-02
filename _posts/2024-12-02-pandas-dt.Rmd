@@ -31,8 +31,11 @@ if(FALSE){
 ```
 
 The goal of this post is to demonstrate that the performance of
-`data.table` is competitive with similar libraries available in Python
-(pandas, duckdb, polars).
+`data.table` CSV readers/writers is competitive with similar libraries
+available in Python (pandas, duckdb, polars). Compare with [the
+previous post](https://tdhock.github.io/blog/2023/dt-atime-figures/),
+which compared R functions (not python), for different operations
+(summarization in addition to CSV reading/writing).
 
 ## What is the overhead of communication with python from R?
 
