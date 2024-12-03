@@ -266,6 +266,59 @@ The plot above shows that `data.table` is competitive with the other
 libraries: almost as fast as polars, and several times faster than
 pandas/duckdb.
 
+# Summarize by group
+
+```{r summarize}
+n.folds <- 10
+ml.atime <- atime::atime(
+  setup={
+    set.seed(1)
+    loss.dt <- data.table(
+      name="loss", 
+      fold=rep(1:n.folds, each=N),
+      loss=rnorm(N*n.folds),
+      set=rep(c("subtrain","validation"),each=N/2),
+      epoch=seq(1,N/2),
+      key=c("set","epoch","fold"))
+    loss.polars <- polars::as_polars_df(loss.dt)
+    main$loss_df_pd <- loss.dt
+    duckdb::dbWriteTable(con, "loss_table", loss.dt, overwrite=TRUE)
+  },
+  seconds.limit=0.1,
+  data.table={
+    loss.dt[, .(
+      loss_length=.N,
+      loss_mean=mean(loss),
+      loss_sd=sd(loss)
+    ), by=.(set, epoch)]
+  },
+  polars={
+    loss.polars$group_by(c("set","epoch"))$agg(
+      loss_len=polars::pl$col("loss")$len(),
+      loss_mean=polars::pl$col("loss")$mean(),
+      loss_std=polars::pl$col("loss")$std())
+  },
+  pandas={
+    reticulate::py_run_string("loss_df_pd.groupby(['set','epoch']).loss.agg(['size','mean','std'])")
+  },
+  duckdb={
+    DBI::dbSendQuery(con, "
+SELECT set, epoch, 
+count(*) as loss_count, 
+mean(loss) as loss_mean, 
+stddev(loss) as loss_stddev 
+FROM loss_table 
+GROUP BY set, epoch")
+  })
+ml.refs <- atime::references_best(ml.atime)
+ml.pred <- predict(ml.refs)
+plot(ml.pred)+
+  ggtitle(sprintf("Mean,SD,Length over %d real numbers, N times", n.folds))+
+  scale_x_log10("N = number of Mean,SD,Length to compute")+
+  scale_y_log10("Computation time (seconds)\nmedian line, min/max band\nover 10 timings")+
+  facet_null()
+```
+
 # Conclusions
 
 We have shown that `data.table` CSV reading and writing can be faster
