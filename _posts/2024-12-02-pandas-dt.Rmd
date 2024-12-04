@@ -16,12 +16,12 @@ knitr::opts_chunk$set(
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
 conda.env <- "2023-08-deep-learning"
-RETICULATE_PYTHON <- normalizePath(sprintf(if(.Platform$OS.type=="unix")
-  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
-  "/home/tdhock/miniconda3/envs/%s/bin/python"
-  else "~/AppData/Local/miniconda3/envs/%s/python.exe", conda.env))
-Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
-reticulate::use_condaenv(conda.env)
+## RETICULATE_PYTHON <- normalizePath(sprintf(if(.Platform$OS.type=="unix")
+##   ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
+##   "/home/tdhock/miniconda3/envs/%s/bin/python"
+##   else "~/AppData/Local/miniconda3/envs/%s/python.exe", conda.env))
+## Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
+suppressWarnings(reticulate::use_condaenv("~/AppData/Local/miniconda3/envs/torch-aum/python.exe"))
 in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
 in_knit <- isTRUE(getOption('knitr.in.progress'))
 options(width=120)

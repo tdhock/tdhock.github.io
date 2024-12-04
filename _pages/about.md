@@ -78,8 +78,17 @@ paper I write, I also provide
 - A reference implementation of the algorithm(s) described in the paper, typically as an R package.
 - Source code for doing the analyses and creating the figures, typically in a GitHub repo.
 
-For more info, see my
+For more info about my research activities, see my
 [publications](publications/) and [software](software/).
+
+See my [teaching](https://tdhock.github.io/teaching/) page for lists
+of university course materials, university research students
+supervised, and Google Summer of Code students mentored.
+
+As the leader of [Data Table Ninjas](https://datatableninjas.com/), I
+also provide consulting services related to R `data.table`,
+including big data analysis, machine learning, data visualization, and
+teaching specialized programming classes related to these subjects.
 
 If you want to send me encrypted messages, or verify my signed
 messages, you can use my [GPG public key](HOCKING-key.pub) (updated
