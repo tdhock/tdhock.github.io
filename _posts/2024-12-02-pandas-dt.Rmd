@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Comparing CSV reading and writing functions
-description: Demonstrating advantages of data.table
+title: Benchmarking `data.table` with `polars`, `duckdb`, and `pandas`
+description: Demonstrating advantages of `data.table`
 ---
 
 ```{r Ropts, echo=FALSE, results='hide'}
@@ -15,13 +15,6 @@ knitr::opts_chunk$set(
   fig.width=10, ## TODO python figures wider? look at prev issue.
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
-conda.env <- "2023-08-deep-learning"
-## RETICULATE_PYTHON <- normalizePath(sprintf(if(.Platform$OS.type=="unix")
-##   ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
-##   "/home/tdhock/miniconda3/envs/%s/bin/python"
-##   else "~/AppData/Local/miniconda3/envs/%s/python.exe", conda.env))
-## Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
-suppressWarnings(reticulate::use_condaenv("~/AppData/Local/miniconda3/envs/torch-aum/python.exe"))
 in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
 in_knit <- isTRUE(getOption('knitr.in.progress'))
 options(width=120)
@@ -34,13 +27,19 @@ The goal of this post is to demonstrate that the performance of
 `data.table` CSV readers/writers is competitive with similar libraries
 available in Python (pandas, duckdb, polars). Compare with [the
 previous post](https://tdhock.github.io/blog/2023/dt-atime-figures/),
-which compared R functions (not python), for different operations
-(summarization in addition to CSV reading/writing).
+which compared R functions (not python).
 
 ## What is the overhead of communication with python from R?
 
-First, since we will be recording the timings of python code from R,
-we will run a test to determine what is the overhead.
+We will be recording the timings of python code from R, via the reticulate package. To use that, we must tell reticulate where to find a python (conda environment) which has pandas installed:
+
+```{r}
+reticulate::use_condaenv("~/miniconda3/envs/2023-08-deep-learning/bin/python3.11")
+```
+
+If you want to reproduce the results in this blog on your own computer, make sure to change the line above to a valid conda environment.
+
+Below, we run a test to determine what is the overhead involved in communicating with python from R via reticulate.
 
 ```{r overhead}
 atime.overhead <- atime::atime(
@@ -265,8 +264,14 @@ The code above shows the throughput of each function at the specified time limit
 The plot above shows that `data.table` is competitive with the other
 libraries: almost as fast as polars, and several times faster than
 pandas/duckdb.
+This indicates that `data.table` is especially efficient for
+character/string data (rather than numeric data).
 
 # Summarize by group
+
+In this section, we compare the time required for computing a summarization.
+In machine learning we often run gradient descent for several epochs, and we want to average the loss over cross-validation folds.
+The experiment below assumes we have 10 cross-validation folds, and N epochs.
 
 ```{r summarize}
 n.folds <- 10
@@ -319,15 +324,17 @@ plot(ml.pred)+
   facet_null()
 ```
 
+The result above shows that `data.table` is 2-3x faster than the other software.
+
 # Conclusions
 
-We have shown that `data.table` CSV reading and writing can be faster
-than similar libraries which can be used from python or R.  We
-observed that `data.table` is especially efficient for
-character/string data (rather than numeric data).
+We have shown that `data.table` can be faster
+than similar libraries which can be used from python or R.  
 
 # Session info
 
 ```{r}
 sessionInfo()
+reticulate::py_run_string("print(pd.__version__)")
 ```
+
