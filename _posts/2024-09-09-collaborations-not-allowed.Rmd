@@ -194,6 +194,75 @@ tibble::tibble(plus.dt[
 a.dt[plus.dt, .(.N=.N, n.alias), on='name', by=.EACHI]
 ```
 
+## Bonus: French
+
+Below we combine the different parts of the regex code above into a
+single regex code block below, with some additions specific to the
+French version of the web page.
+
+```{r}
+## https://science.gc.ca/site/science/fr/protegez-votre-recherche/lignes-directrices-outils-pour-mise-oeuvre-securite-recherche/recherche-technologies-sensibles-affiliations-preoccupantes/organisations-recherche-nommees
+french.html <- "
+	<li><strong>Académie des transports militaires de l'armée <em>[Army Military Transportation Academy]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>Academy of Military Transportation</em></p>
+	</li>
+	<li><strong>Académie d'infanterie de l'armée <em>[Army Infantry Academy]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>Army Infantry Academy of PLA; PLA Army Infantry Academy; Nachang Army Academy</em></p>
+	</li>
+	<li><strong>Académie du service militaire <em>[Army Service Academy]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>PLA Army Service Academy</em></p>
+	</li>
+	<li><strong>Académie militaire d'artillerie et de la défense aérienne <em>[Army Academy of Artillery and Air Defense]</em></strong> (République populaire de Chine)</li>
+	<li><strong>Académie militaire de défense des frontières et des côtes <em>[Army Academy of Border and Coastal Defense]</em></strong> (République populaire de Chine)</li>
+	<li><strong>Académie militaire des forces blindées <em>[Army Academy of Armored Forces]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>Army Armored Forces Academy; Armored Forces Engineering Academy Académie navale de Dalian (Dalian)</em></p>
+	</li>
+	<li><strong>Académie navale de Dalian <em>[Dalian Naval Academy]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>PLA Dalian Naval Academy</em></p>
+	</li>
+	<li><strong>Association professionnelle de l'Organisation autonome à but non lucratif des concepteurs de systèmes informatiques <em>[Autonomous Noncommercial Organization Professional Association of Designers of Data Processing Systems]</em></strong> (Russie)
+	<p>Alias connu(s) : <em>ANO PO KSI</em></p>
+	</li>
+"
+french.dt <- nc::capture_all_str(
+  french.html,
+  "\n\t<li><strong>",
+  french=".*?",
+  " <em>\\[",
+  english=".*?",
+  "\\]</em></strong> [(]",
+  pays=".*?",
+  " *[)]",
+  nc::quantifier(
+    "\n+\t<p>Alias connu[(]s[)] : <em>", 
+    aliases=".*?",
+    "</em>",
+    "?"
+  )
+)
+abbrev <- function(x,m)paste0(substr(x,1,m),"…")
+(french.aliases <- french.dt[, let(
+  alias.list = strsplit(aliases,split="; "),
+  français = abbrev(french,25),
+  English = abbrev(english,20)
+)][
+, .(alias=alias.list[[1]]), by=français
+])
+```
+
+The result table above has one row for each alias.
+The code below produces an table with one row per organisation.
+
+```{r}
+french.aliases[french.dt, .(
+  English,
+  pays,  
+  Alias=if(.N)paste(abbrev(alias,10), collapse="; ") else ""
+), by=.EACHI, on="français"]
+```
+
+Exercise for the reader: download the French web page, and convert it to a table using this new regex code. Do you get the same number of organisations as with the English version?
+
 ## Conclusions
 
 We used regular expressions to help us understand that Canada does not

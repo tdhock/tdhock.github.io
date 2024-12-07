@@ -397,6 +397,104 @@ a.dt[plus.dt, .(.N=.N, n.alias), on='name', by=.EACHI]
 ## 103:                                                         48th Central Scientific Research Institute    10      10
 ```
 
+## Bonus: French
+
+Below we combine the different parts of the regex code above into a
+single regex code block below, with some additions specific to the
+French version of the web page.
+
+
+``` r
+## https://science.gc.ca/site/science/fr/protegez-votre-recherche/lignes-directrices-outils-pour-mise-oeuvre-securite-recherche/recherche-technologies-sensibles-affiliations-preoccupantes/organisations-recherche-nommees
+french.html <- "
+	<li><strong>Académie des transports militaires de l'armée <em>[Army Military Transportation Academy]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>Academy of Military Transportation</em></p>
+	</li>
+	<li><strong>Académie d'infanterie de l'armée <em>[Army Infantry Academy]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>Army Infantry Academy of PLA; PLA Army Infantry Academy; Nachang Army Academy</em></p>
+	</li>
+	<li><strong>Académie du service militaire <em>[Army Service Academy]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>PLA Army Service Academy</em></p>
+	</li>
+	<li><strong>Académie militaire d'artillerie et de la défense aérienne <em>[Army Academy of Artillery and Air Defense]</em></strong> (République populaire de Chine)</li>
+	<li><strong>Académie militaire de défense des frontières et des côtes <em>[Army Academy of Border and Coastal Defense]</em></strong> (République populaire de Chine)</li>
+	<li><strong>Académie militaire des forces blindées <em>[Army Academy of Armored Forces]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>Army Armored Forces Academy; Armored Forces Engineering Academy Académie navale de Dalian (Dalian)</em></p>
+	</li>
+	<li><strong>Académie navale de Dalian <em>[Dalian Naval Academy]</em></strong> (République populaire de Chine)
+	<p>Alias connu(s) : <em>PLA Dalian Naval Academy</em></p>
+	</li>
+	<li><strong>Association professionnelle de l'Organisation autonome à but non lucratif des concepteurs de systèmes informatiques <em>[Autonomous Noncommercial Organization Professional Association of Designers of Data Processing Systems]</em></strong> (Russie)
+	<p>Alias connu(s) : <em>ANO PO KSI</em></p>
+	</li>
+"
+french.dt <- nc::capture_all_str(
+  french.html,
+  "\n\t<li><strong>",
+  french=".*?",
+  " <em>\\[",
+  english=".*?",
+  "\\]</em></strong> [(]",
+  pays=".*?",
+  " *[)]",
+  nc::quantifier(
+    "\n+\t<p>Alias connu[(]s[)] : <em>", 
+    aliases=".*?",
+    "</em>",
+    "?"
+  )
+)
+abbrev <- function(x,m)paste0(substr(x,1,m),"…")
+(french.aliases <- french.dt[, let(
+  alias.list = strsplit(aliases,split="; "),
+  français = abbrev(french,25),
+  English = abbrev(english,20)
+)][
+, .(alias=alias.list[[1]]), by=français
+])
+```
+
+```
+##                      français                                                                 alias
+##                        <char>                                                                <char>
+## 1: Académie des transports m…                                    Academy of Military Transportation
+## 2: Académie d'infanterie de …                                          Army Infantry Academy of PLA
+## 3: Académie d'infanterie de …                                             PLA Army Infantry Academy
+## 4: Académie d'infanterie de …                                                  Nachang Army Academy
+## 5: Académie du service milit…                                              PLA Army Service Academy
+## 6: Académie militaire des fo…                                           Army Armored Forces Academy
+## 7: Académie militaire des fo… Armored Forces Engineering Academy Académie navale de Dalian (Dalian)
+## 8: Académie navale de Dalian…                                              PLA Dalian Naval Academy
+## 9: Association professionnel…                                                            ANO PO KSI
+```
+
+The result table above has one row for each alias.
+The code below produces an table with one row per organisation.
+
+
+``` r
+french.aliases[french.dt, .(
+  English,
+  pays,  
+  Alias=if(.N)paste(abbrev(alias,10), collapse="; ") else ""
+), by=.EACHI, on="français"]
+```
+
+```
+##                      français               English                          pays                                 Alias
+##                        <char>                <char>                        <char>                                <char>
+## 1: Académie des transports m… Army Military Transp… République populaire de Chine                           Academy of…
+## 2: Académie d'infanterie de … Army Infantry Academ… République populaire de Chine Army Infan…; PLA Army I…; Nachang Ar…
+## 3: Académie du service milit… Army Service Academy… République populaire de Chine                           PLA Army S…
+## 4: Académie militaire d'arti… Army Academy of Arti… République populaire de Chine                                      
+## 5: Académie militaire de déf… Army Academy of Bord… République populaire de Chine                                      
+## 6: Académie militaire des fo… Army Academy of Armo… République populaire de Chine              Army Armor…; Armored Fo…
+## 7: Académie navale de Dalian… Dalian Naval Academy… République populaire de Chine                           PLA Dalian…
+## 8: Association professionnel… Autonomous Noncommer…                        Russie                           ANO PO KSI…
+```
+
+Exercise for the reader: download the French web page, and convert it to a table using this new regex code. Do you get the same number of organisations as with the English version?
+
 ## Conclusions
 
 We used regular expressions to help us understand that Canada does not
@@ -411,25 +509,27 @@ sessionInfo()
 ```
 
 ```
-## R version 4.4.1 (2024-06-14 ucrt)
-## Platform: x86_64-w64-mingw32/x64
-## Running under: Windows 11 x64 (build 22631)
+## R Under development (unstable) (2024-10-01 r87205)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 22.04.5 LTS
 ## 
 ## Matrix products: default
-## 
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0
 ## 
 ## locale:
-## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
-## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
-## time zone: America/Toronto
-## tzcode source: internal
+## time zone: America/New_York
+## tzcode source: system (glibc)
 ## 
 ## attached base packages:
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] utf8_1.2.4         xfun_0.47          nc_2024.9.20       magrittr_2.0.3     glue_1.7.0         tibble_3.2.1      
-##  [7] knitr_1.48         pkgconfig_2.0.3    lifecycle_1.0.4    cli_3.6.3          fansi_1.0.6        vctrs_0.6.5       
-## [13] data.table_1.16.99 compiler_4.4.1     tools_4.4.1        evaluate_0.24.0    pillar_1.9.0       rlang_1.1.4
+##  [1] utf8_1.2.4        xfun_0.45         nc_2024.9.19      magrittr_2.0.3    glue_1.7.0        tibble_3.2.1     
+##  [7] knitr_1.47        pkgconfig_2.0.3   lifecycle_1.0.4   cli_3.6.2         fansi_1.0.6       vctrs_0.6.5      
+## [13] data.table_1.16.2 compiler_4.5.0    tools_4.5.0       evaluate_0.23     pillar_1.9.0      rlang_1.1.3
 ```
