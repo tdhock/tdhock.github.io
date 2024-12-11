@@ -240,7 +240,7 @@ french.dt <- nc::capture_all_str(
     "?"
   )
 )
-abbrev <- function(x,m)paste0(substr(x,1,m),"…")
+abbrev <- function(x,m)ifelse(nchar(x)>m, paste0(substr(x,1,m-1),"…"), x)
 (french.aliases <- french.dt[, let(
   alias.list = strsplit(aliases,split="; "),
   français = abbrev(french,25),
@@ -251,17 +251,17 @@ abbrev <- function(x,m)paste0(substr(x,1,m),"…")
 ```
 
 The result table above has one row for each alias.
-The code below produces an table with one row per organisation.
+The code below produces a table with one row per organization.
 
 ```{r}
 french.aliases[french.dt, .(
   English,
-  pays,  
+  pays=abbrev(pays,10),
   Alias=if(.N)paste(abbrev(alias,10), collapse="; ") else ""
 ), by=.EACHI, on="français"]
 ```
 
-Exercise for the reader: download the French web page, and convert it to a table using this new regex code. Do you get the same number of organisations as with the English version?
+Exercise for the reader: download the French web page, and convert it to a table using this new regex code. Do you get the same number of organizations as with the English version?
 
 ## Conclusions
 
