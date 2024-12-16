@@ -34,16 +34,31 @@ if(FALSE){
 The goal of this post is to show how to implement the optimal
 partitioning algorithm in R.
 
+# Simulate data sequence
+
+The optimal partitioning algorithm (Jackson et al, 2005) is a classic
+dynamic programming algorithm for change-point detection in sequential
+data (measured over time or space). To illustrate its computation, we
+simulate some data below.
+
 ```{r}
-library(ggplot2)
-library(data.table)
-N.per.seg <- 100000
 set.seed(1)
 N.segs <- 3
 N.dim <- 2
 (mean.mat <- matrix(
   runif(N.segs*N.dim, 0, 10),
   N.segs, N.dim))
+```
+
+The code above creates a matrix with one column for each dimension of
+data, and one row for each segment. The code below uses those segment
+mean values to simulate a certain number of data points per segment,
+using a normal distribution.
+
+```{r}
+library(data.table)
+N.per.seg <- 1000
+set.seed(1)
 sim.dt.list <- list()
 true.mean.dt.list <- list()
 for(seg.i in 1:N.segs){
@@ -63,121 +78,356 @@ for(seg.i in 1:N.segs){
       seg.i, dim.i, i.in.seg=1:N.per.seg, value=num.vec)
   }
 }
-true.mean.dt <- rbindlist(true.mean.dt.list)
+(true.mean.dt <- rbindlist(true.mean.dt.list))
+```
+
+One of the results of the code above is the data table of true means,
+with one row for each segment and each dimension in the true signal.
+The other result of the simulation is the table of simulated data,
+which are shown below,
+
+```{r}
 (sim.dt <- rbindlist(
   sim.dt.list
 )[
 , data.i := seq_along(seg.i)
 , by=dim.i][])
+```
 
+To visualize the simulated data, we use the code below.
+
+```{r}
+library(ggplot2)
 ggplot()+
+  facet_grid(dim.i ~ ., labeller=label_both)+
   geom_point(aes(
     data.i, value),
     shape=1,
     data=sim.dt)+
-  facet_grid(dim.i ~ ., labeller=label_both)+
   geom_segment(aes(
-    first.i, mean.param,
+    start, mean.param,
     color=parameter,
-    xend=last.i, yend=mean.param),
+    xend=end, yend=mean.param),
     size=2,
-    data=true.mean.dt)
+    data=true.mean.dt)+
+  scale_x_continuous(
+    "Position in data sequence")+
+  scale_y_continuous(
+    "Data value")
+```
 
-OPART_dt_update <- function(x.mat, penalty){
-  n.data <- nrow(x.mat)
-  best.change <- rep(NA,n.data)
-  best.cost <- rep(NA,n.data)
-  n.dim <- ncol(x.mat)
-  best.param <- matrix(NA,n.data,n.dim)
-  cum.mat <- rbind(0,apply(x.mat,2,cumsum))
-  sq.mat <- rbind(0,apply(x.mat^2,2,cumsum))
-  best.cost <- best.change <- best.Nsegs <- rep(NA,nrow(x.mat))
-  for(last.seg.end in seq_along(best.cost)){
-    last.seg.start <- seq(1, last.seg.end)
-    get_sum <- function(m){
-      matrix(
-        m[last.seg.end+1,], last.seg.end, ncol(m), byrow=TRUE
-      )-m[last.seg.start,]
-    }
-    N.vec <- last.seg.end-last.seg.start+1
-    candidate.dt <- data.table(
-      last.seg.start,
-      last.seg.cost=rowSums(get_sum(sq.mat)-get_sum(cum.mat)^2/N.vec)
-    )[
-      last.seg.start==1, `:=`(
-        prev.cost=0,
-        Nsegs=1
-      )
-    ][
-      last.seg.start>1, `:=`(
-        prev.cost=best.cost[last.seg.start-1]+penalty,
-        Nsegs=best.Nsegs[last.seg.start-1]+1L
-      )
-    ][
-    , total.cost := prev.cost + last.seg.cost
-    ][]
-    best.row <- candidate.dt[which.min(total.cost)]
-    best.cost[last.seg.end] <- best.row$total.cost
-    best.Nsegs[last.seg.end] <- best.row$Nsegs
-    best.change[last.seg.end] <- best.row$last.seg.start
-  }
-  data.table(best.change, best.cost, best.Nsegs)
-}
+The figure above shows the simulated data (black points) and segment
+means (orange line segments). The primary goal of change-point
+detection algorithms like optimal partitioning is to recover the true
+segment means, using only the noisy simulated data.
 
-OPART_dt <- function(x.mat, penalty){
-  n.data <- nrow(x.mat)
-  best.change <- rep(NA,n.data)
-  best.cost <- rep(NA,n.data)
-  n.dim <- ncol(x.mat)
-  best.param <- matrix(NA,n.data,n.dim)
-  cum.mat <- rbind(0,apply(x.mat,2,cumsum))
-  sq.mat <- rbind(0,apply(x.mat^2,2,cumsum))
-  best.cost <- best.change <- rep(NA,nrow(x.mat))
-  for(last.seg.end in seq_along(best.cost)){
-    last.seg.start <- seq(1, last.seg.end)
-    get_sum <- function(m){
-      matrix(
-        m[last.seg.end+1,], last.seg.end, ncol(m), byrow=TRUE
-      )-m[last.seg.start,]
-    }
-    N.vec <- last.seg.end-last.seg.start+1
-    candidate.dt <- data.table(
-      last.seg.start,
-      last.seg.cost=rowSums(get_sum(sq.mat)-get_sum(cum.mat)^2/N.vec)
-    )
-    ## [
-    ##   ## last.seg.start==1, `:=`(
-    ##   ##   prev.cost=0
-    ##   ## )
-    ## ][
-    ##   ## last.seg.start>1, `:=`(
-    ##   ##   prev.cost=best.cost[last.seg.start-1]+penalty
-    ##   ## )
-    ## ][
-    ## ##, total.cost := prev.cost + last.seg.cost
-    ## ][]
-    last.seg.cost <- rowSums(get_sum(sq.mat)-get_sum(cum.mat)^2/N.vec)
-    prev.cost <- ifelse(last.seg.start==1, 0, best.cost[last.seg.start-1]+penalty)
+Another way to view these data is in matrix form, with one row per
+position in the data sequence, and one column per dimension:
 
-    total.cost <- prev.cost + last.seg.cost
-    best.i <- which.min(total.cost)
-    best.cost[last.seg.end] <- total.cost[best.i]
-    best.change[last.seg.end] <- best.i
-  }
-  data.table(best.change, best.cost)
-}
-
+```{r}
 sim.wide <- dcast(sim.dt, data.i ~ dim.i, value.var="value")
 sim.mat <- as.matrix(sim.wide[,-1])
-penalty <- 15
-why.slow <- OPART_dt_update(sim.mat,penalty)
-mod.res <- OPART_dt(sim.mat,penalty)
+head(sim.mat)
+```
 
-OPART_fast <- function(sim.mat,penalty){
-  cum.data <- rbind(0,apply(sim.mat,2,cumsum))
-  cum.squares <- rbind(0,apply(sim.mat^2,2,cumsum))
-  best.cost <- rep(NA_real_,nrow(sim.mat))
-  best.change <- rep(NA_integer_,nrow(sim.mat))
+# Implementing optimal partitioning in R
+
+The goal of the optimal partitioning algorithm is to compute the
+segmentation with the best cost, given a data set, and a non-negative
+penalty value. The cost is defined as the total squared error plus a
+penalty for each change-point added. The main idea of the algorithm is
+to compute the optimal cost recursively, so we need to initialize a
+vector of optimal cost values which start as missing, but we will fill in later:
+
+```{r}
+N.data <- nrow(sim.mat)
+best.cost.vec <- rep(NA_real_, N.data)
+```
+
+## First data point
+
+We start at the first data point, which in this case is:
+
+```{r}
+sim.mat[1,]
+```
+
+In a normal model, the best means are the data themselves, which
+result in a total squared error of zero, which is our value for the
+best cost at data point 1:
+
+```{r}
+best.mean1 <- sim.mat[1,]
+(best.cost1 <- sum((sim.mat[1,]-best.mean1)^2))
+best.cost.vec[1] <- best.cost1
+```
+
+## Second data point, slow computation with mean
+
+The second data point is
+
+```{r}
+sim.mat[2,]
+```
+
+Now, we have a choice. Do we put a change-point between the first and
+second data points, or not? For the model with no change-point, we
+compute the cost using the mean matrix below:
+
+```{r}
+(mean.from.1.to.2 <- matrix(
+  colMeans(sim.mat[1:2,]),
+  nrow=2, ncol=2, byrow=TRUE))
+```
+
+The cost is the total squared error:
+
+```{r}
+(cost.from.1.to.2.no.change <- sum((mean.from.1.to.2-sim.mat[1:2,])^2))
+```
+
+## Second data point, fast computation with cumsum trick
+
+It is difficult to see for the case of only two data points, but the
+cost computation above is asymptotically slow, because it is linear in
+the number of data points. We can reduce that to a constant time
+operation, if we use the cumulative sum trick, with the cost
+factorization trick.  Above we wrote the total squared error as the
+sum of the squared difference, but using the factorization trick, we
+can compute it using:
+
+```{r}
+(factorization.mat <- mean.from.1.to.2^2 - 2*mean.from.1.to.2*sim.mat[1:2,] + sim.mat[1:2,]^2)
+sum(factorization.mat)
+```
+
+The calculation above is still O(N), linear time in the number of
+data, because of the sum over rows. To get that down to constant time, we need
+to first compute matrices of cumulative sums:
+
+```{r}
+cum.data <- rbind(0,apply(sim.mat,2,cumsum))
+cum.squares <- rbind(0,apply(sim.mat^2,2,cumsum))
+```
+
+The code above is O(N) linear time, but it only needs to be computed once
+in the entire algorithm. Below we use those cumulative sum matrices to
+compute the cost in constant time.
+
+```{r}
+sum_trick <- function(m, start, end)m[end+1,,drop=FALSE]-m[start,,drop=FALSE]
+cost_trick <- function(start, end){
+  sum_trick(cum.squares, start, end)-
+    sum_trick(cum.data, start, end)^2/
+    (end+1-start)
+}
+(cost.1.2.trick.vec <- cost_trick(1,2))
+sum(cost.1.2.trick.vec)
+```
+
+Actually the sum above is O(D), linear in the number of
+columns/dimensions of data, but constant/independent of N, the number
+of rows/observations of data (which is the important part for OPART to
+be fast).
+
+## atime comparison
+
+We can verify the constant versus linear time complexity of the two computations using the atime code below:
+
+```{r}
+trick_vs_mean <- atime::atime(
+  N=unique(as.integer(10^seq(1, 3, by=0.2))),
+  trick=sum(cost_trick(1,N)),
+  mean={
+    sim.N.mat <- sim.mat[1:N,]
+    mean.mat <- matrix(
+      colMeans(sim.N.mat),
+      nrow=N, ncol=2, byrow=TRUE)
+    sum((sim.N.mat-mean.mat)^2)
+  },
+  result=TRUE)
+plot(trick_vs_mean)
+```
+
+It is clear from the plot above that time and memory usage increase
+with N for the mean method, but not for the trick method. The code
+below shows that they get the same result:
+
+```{r}
+(trick_vs_mean_result <- dcast(
+  trick_vs_mean$measurements,
+  N ~ expr.name,
+  value.var="result"))
+trick_vs_mean_result[, all.equal(mean, trick)]
+```
+
+## Second data point, cost of change-point
+
+We also have to consider the model with a change-point. In that case,
+there are two segments with zero squared error, and so the cost is
+equal to the penalty. Let's take a penalty value of
+
+```{r}
+penalty <- 15
+```
+
+So the two options are:
+```{r}
+cost.from.1.to.2.no.change
+(cost.from.1.to.2.change <- penalty)
+```
+
+We combine them into a vector:
+```{r}
+(cost.from.1.to.2.candidates <- c(cost.from.1.to.2.no.change, cost.from.1.to.2.change))
+```
+
+We then find the min cost in that vector:
+
+```{r}
+(best.i.from.1.to.2 <- which.min(cost.from.1.to.2.candidates))
+```
+
+And we end this iteration (for data point 2) by saving these values
+for the next iteration:
+
+```{r}
+best.change.vec <- rep(NA_integer_, N.data)
+best.change.vec[2] <- best.i.from.1.to.2
+best.cost.vec[2] <- cost.from.1.to.2.candidates[best.i.from.1.to.2]
+data.table(best.cost.vec,best.change.vec)
+```
+
+## Third data point
+
+The third data point is where we can start to see how to write a
+general and efficient implementation of the optimal partioning
+algorithm. We want to compute the best model among these candidates:
+
+* last segment starts at data point 1: no changes.
+* last segment starts at data point 2: change between data points 1 and 2.
+* last segment starts at data point 3: change between data points 2
+  and 3, and maybe another change before that.
+  
+Actually, for the third candidate, we already know that the best model
+up to data point 2 does not include a change between 1 and 2, and
+exploiting that existing result is the main idea of the dynamic
+programming algorithm.
+To compute the cost of these three candidates, we first compute the cost of the last segment in each candidate:
+
+```{r}
+up.to <- 3
+(last.seg.cost <- rowSums(cost_trick(1:up.to, rep(up.to, up.to))))
+```
+
+We also need to compute the cost of the other segments, before the last one. 
+
+* For the case of the first candidate, there are no other segments, so the cost is zero. 
+* For the case of the other candidates, we can use the optimal cost which has already been computed (this is dynamic programming), but we need to add the penalty for an additional change-point.
+
+```{r}
+(other.seg.cost <- c(0, best.cost.vec[seq(1, up.to-1)]+penalty))
+```
+
+The total cost is the sum of the cost on the last segment, and the other segments:
+
+```{r}
+(total.seg.cost <- last.seg.cost+other.seg.cost)
+```
+
+The iteration ends with a minimization:
+
+```{r}
+(best.i.from.1.to.3 <- which.min(total.seg.cost))
+best.change.vec[3] <- best.i.from.1.to.3
+best.cost.vec[3] <- total.seg.cost[best.i.from.1.to.3]
+data.table(best.cost.vec,best.change.vec)
+```
+
+## Other data points
+
+More generally, we can use the for loop below to compute the optimal
+cost up to any data point,
+
+```{r}
+for(up.to in 1:N.data){
+  last.seg.cost <- rowSums(cost_trick(1:up.to, rep(up.to, up.to)))
+  change.cost <- if(up.to>1)best.cost.vec[seq(1, up.to-1)]+penalty
+  other.seg.cost <- c(0, change.cost)
+  total.cost <- other.seg.cost+last.seg.cost
+  best.i <- which.min(total.cost)
+  best.change.vec[up.to] <- best.i
+  best.cost.vec[up.to] <- total.cost[best.i]
+}
+data.table(change=best.change.vec, cost=best.cost.vec)
+```
+
+The table above shows the first/last few rows of the resulting optimal
+cost and change. 
+
+# Decoding in R
+
+How can we use the table of optimal cost and change indices to find
+the optimal segmentation? The last row of the optimal cost/change
+table tells us where to look for the previous change-point:
+
+```{r}
+(last.seg.start <- best.change.vec[N.data])
+```
+
+We see that the last segment starts at the data point given in the
+result above. We can look at the entry just before that
+to determine the previous change-point:
+
+```{r}
+(second.to.last.seg.start <- best.change.vec[last.seg.start-1])
+```
+
+We see that the second to last segment starts at the data point given
+in the result above. We can look at the entry just before that to
+determine the previous change-point:
+
+```{r}
+(third.to.last.seg.start <- best.change.vec[second.to.last.seg.start-1])
+```
+
+We see the result above is 1, the first data point, so this must be
+the first segment. This algorithm is commonly known as "decoding" the
+optimal change position vector, to determine the optimal segmentation.
+Translating the logic above to a for loop, we get the code below:
+
+```{r}
+seg.dt.list <- list()
+last.i <- length(best.change.vec)
+while(print(last.i)>0){
+  first.i <- best.change.vec[last.i]
+  seg.dt.list[[paste(last.i)]] <- data.table(
+    first.i, last.i,
+    mean=sum_trick(cum.data, first.i, last.i)/(last.i+1-first.i))
+  last.i <- first.i-1L
+}
+rbindlist(seg.dt.list)[seq(.N,1)]
+```
+
+Compare the result above from dynamic programming to the true values
+from the simulation below:
+
+```{r}
+mean.mat
+```
+
+It is clear that dynamic programming computes a segmentation model
+with mean values that closely match the true values from the
+simulation.
+
+# Converting to functions
+
+```{r}
+OPART <- function(sim.mat, penalty){
+  cum.data <- rbind(0, apply(sim.mat, 2, cumsum))
+  cum.squares <- rbind(0, apply(sim.mat^2, 2, cumsum))
+  best.cost <- rep(NA_real_, nrow(sim.mat))
+  best.change <- rep(NA_integer_, nrow(sim.mat))
   for(last.seg.end in seq_along(best.cost)){
     last.seg.start <- seq(1, last.seg.end)
     get_sum <- function(m){
@@ -198,19 +448,19 @@ OPART_fast <- function(sim.mat,penalty){
 obase <- OPART_fast(sim.mat,penalty)
 
 suffix.vec <- c("dt","dt_update","fast")
-expr.list <- atime::atime_grid(
-  list(FUN=paste0("OPART_",suffix.vec)),
-  OPART=FUN(x.mat,15),
-  symbol.params = "FUN")
 ores <- atime::atime(
-  N=unique(as.integer(10^seq(1,3,by=0.25))),
+  N=unique(as.integer(10^seq(1,3,by=0.2))),
   setup={
     str(N)
     x.mat <- sim.mat[1:N,]
   },
   seconds.limit=0.1,
-  expr.list=expr.list)
+  expr.list=atime::atime_grid(
+    list(FUN=paste0("OPART_",suffix.vec)),
+    OPART=FUN(x.mat,15),
+    symbol.params = "FUN"))
 plot(ores)
+
 oref <- atime::references_best(ores)
 plot(oref)
 all.equal(why.slow$best.cost, obase$best.cost)
@@ -236,17 +486,15 @@ min.list <- list(
   dt=function(x){
     data.table(x)[which.min(x), x]
   })
-expr.list <- atime::atime_grid(
-  list(fun=names(min.list)),
-  min=min.list[[fun]](x.vec))
 ares <- atime::atime(
   setup={
     set.seed(1)
     x.vec <- rnorm(N)
   },
-  expr.list=expr.list)
+  expr.list=atime::atime_grid(
+    list(fun=names(min.list)),
+    min=min.list[[fun]](x.vec)))
 plot(ares)
-
 ```
 
 ## Conclusions
