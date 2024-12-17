@@ -420,6 +420,36 @@ It is clear that dynamic programming computes a segmentation model
 with mean values that closely match the true values from the
 simulation.
 
+## Pruning
+
+The Pelt Algorithm of Killick et al allows us to prune the set of
+change-points:
+
+```{r}
+pelt.change.vec <- rep(NA_integer_, N.data)
+pelt.cost.vec <- rep(NA_real_, N.data+1)
+pelt.cost.vec[1] <- -penalty
+pelt.candidates.vec <- rep(NA_integer_, N.data)
+candidate.vec <- 1L
+for(up.to in 1:N.data){
+  N.cand <- length(candidate.vec)
+  pelt.candidates.vec[up.to] <- N.cand
+  last.seg.cost <- rowSums(cost_trick(candidate.vec, rep(up.to, N.cand)))
+  prev.cost <- pelt.cost.vec[candidate.vec]
+  cost.no.penalty <- prev.cost+last.seg.cost
+  total.cost <- cost.no.penalty+penalty
+  best.i <- which.min(total.cost)
+  pelt.change.vec[up.to] <- candidate.vec[best.i]
+  total.cost.best <- total.cost[best.i]
+  pelt.cost.vec[up.to+1] <- total.cost.best
+  candidate.vec <- c(candidate.vec[cost.no.penalty < total.cost.best], up.to+1L)
+}
+data.table(change=pelt.change.vec, cost=pelt.cost.vec[-1], candidates=pelt.candidates.vec)
+all.equal(pelt.cost.vec[-1], best.cost.vec)
+all.equal(best.change.vec, pelt.change.vec)
+plot(pelt.candidates.vec)
+```
+
 # Converting to functions
 
 ```{r}
