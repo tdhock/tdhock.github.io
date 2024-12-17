@@ -96,7 +96,7 @@ which are shown below,
 
 To visualize the simulated data, we use the code below.
 
-```{r}
+```{r simulated-data}
 library(ggplot2)
 ggplot()+
   facet_grid(dim.i ~ ., labeller=label_both)+
@@ -422,18 +422,41 @@ simulation.
 
 ## Pruning
 
-The Pelt Algorithm of Killick et al allows us to prune the set of
-change-points:
+The Pruned Exact Linear Time (PELT) algorithm of Killick et al. (2012)
+allows us to prune the set of change-points, while retaining the same
+optimal solution. To implement that algorithm, we again allocate
+vectors to store the optimal cost and change-points.
 
 ```{r}
 pelt.change.vec <- rep(NA_integer_, N.data)
 pelt.cost.vec <- rep(NA_real_, N.data+1)
 pelt.cost.vec[1] <- -penalty
+```
+
+Above we initialize the first element of the cost vector to the
+negative penalty, so we don't have to treat the model with no changes
+as a special case. We can view `pelt.cost.vec[i]` as the best cost up
+to but not including data point `i` (and unlike the previous
+formulation, we always have to add a penalty to obtain the overall
+cost). Below we initialize vectors to store the total number of
+candidates considered by the algorithm, as well as the min and max
+over all candidates considered:
+
+```{r}
 pelt.candidates.vec <- rep(NA_integer_, N.data)
+pelt.candidates.min <- rep(NA_integer_, N.data)
+pelt.candidates.max <- rep(NA_integer_, N.data)
+```
+
+We initialize the vector of candidates, then proceed in a loop over data points.
+
+```{r}
 candidate.vec <- 1L
 for(up.to in 1:N.data){
   N.cand <- length(candidate.vec)
   pelt.candidates.vec[up.to] <- N.cand
+  pelt.candidates.min[up.to] <- min(candidate.vec)
+  pelt.candidates.max[up.to] <- max(candidate.vec)
   last.seg.cost <- rowSums(cost_trick(candidate.vec, rep(up.to, N.cand)))
   prev.cost <- pelt.cost.vec[candidate.vec]
   cost.no.penalty <- prev.cost+last.seg.cost
@@ -444,11 +467,67 @@ for(up.to in 1:N.data){
   pelt.cost.vec[up.to+1] <- total.cost.best
   candidate.vec <- c(candidate.vec[cost.no.penalty < total.cost.best], up.to+1L)
 }
-data.table(change=pelt.change.vec, cost=pelt.cost.vec[-1], candidates=pelt.candidates.vec)
-all.equal(pelt.cost.vec[-1], best.cost.vec)
-all.equal(best.change.vec, pelt.change.vec)
-plot(pelt.candidates.vec)
 ```
+
+The pruning rule is implemented in the last line of the loop above. We
+keep only the candidates that have a cost without penalty which is
+less than the total cost of the best model. We can view the results of
+the algorithm in the table below:
+
+```{r}
+(pelt.dt <- data.table(
+  iteration=seq_along(pelt.change.vec),
+  change=pelt.change.vec,
+  cost=pelt.cost.vec[-1],
+  candidates=pelt.candidates.vec,
+  min.candidate=pelt.candidates.min,
+  max.candidate=pelt.candidates.max))
+```
+
+Above the "candidate" columns let us analyze the empirical time
+complexity of the algorithm (more candidates to consider mean a slower
+algorithm). Below we verify that the `change` and `cost` columns are
+consistent with the values we obtained using OPART.
+
+```{r}
+all.equal(pelt.dt$cost, best.cost.vec)
+all.equal(pelt.dt$change, pelt.change.vec)
+```
+
+Below we visualize the change-point candidates that are considered
+during the two algorithms.
+
+```{r candidatesPELT}
+ggplot()+
+  geom_point(aes(
+    iteration, iteration, color=algorithm),
+    size=4,
+    data=data.table(pelt.dt, y="number of candidates", algorithm="OPART"))+
+  geom_point(aes(
+    iteration, candidates, color=algorithm),
+    size=2,
+    data=data.table(pelt.dt, y="number of candidates", algorithm="PELT"))+
+  facet_grid(y ~ ., scales="free")+
+  geom_segment(aes(
+    iteration, 1,
+    color=algorithm,
+    xend=iteration, yend=iteration),
+    data=data.table(pelt.dt, y="candidate range", algorithm="OPART"))+
+  geom_segment(aes(
+    iteration, min.candidate,
+    color=algorithm,
+    xend=iteration, yend=max.candidate),
+    data=data.table(pelt.dt, y="candidate range", algorithm="PELT"))
+```
+
+Above we can see two panels:
+
+* `candidate range` shows us the min/max of the indices considered for the minimization, in each iteration of the dynamic programming for loop. We see three small triangles along the diagonal for OPART (indicating linear time), and a large triangle for PELT (indicating quadratic time).
+* `number of candidates` shows us ho many indices are considered for the minimization, in each iteration of the dynamic programming for loop. We see that the number of candidates never exceeds 1000, because these data have a significant change every 1000 data points. In contrast, the number of candidates considered by OPART grows to the data size (3000).
+
+The figure above clearly shows why the algorithm was named "Linear
+Time" -- the number of candidates considered depends on the number of
+data points per segment (not the overall number of data points).
 
 # Converting to functions
 
