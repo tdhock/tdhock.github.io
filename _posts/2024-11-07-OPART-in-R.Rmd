@@ -1,12 +1,12 @@
 ---
 layout: post
-title: Optimal partitioning in R
-description: Vectorized implementations
+title: Implementing optimal partitioning in R
+description: Comparison with Pruned Exact Linear Time (PELT)
 ---
 
 ```{r Ropts, echo=FALSE, results='hide'}
 repo.dir <- normalizePath("..")
-post.id <- "2024-11-07-OPART-data-table"
+post.id <- "2024-11-07-OPART-in-R"
 fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
 dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
 knitr::opts_chunk$set(
@@ -609,7 +609,7 @@ Above we also implemented `OPART2` which uses `PELT` as a sub-routine,
 for a more direct comparison of the computation time.
 Below we use `atime` to compare the functions:
 
-```{r atime-pelt-opart, fig.height=5}
+```{r atime-pelt-opart, fig.height=6}
 atime_PELT <- function(data.mat, penalty)atime::atime(
   N=unique(as.integer(10^seq(1,3,by=0.2))),
   setup={
@@ -644,7 +644,7 @@ data with no changes).
 Below we simulate another data set with 10 data points per segment, so
 we should be able to see the difference between algorithms better.
 
-```{r atime-pelt-opart-more, fig.height=5}
+```{r atime-pelt-opart-more, fig.height=6}
 set.seed(1)
 more.mean.mat <- sim_means(N.segs=300, N.dim=2)
 more.sim.mat <- sim_data(more.mean.mat, N.per.seg=10)
