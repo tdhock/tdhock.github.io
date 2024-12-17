@@ -67,8 +67,8 @@ for(seg.i in 1:N.segs){
     num.vec <- rnorm(N.per.seg, mean.param)
     true.mean.dt.list[[paste(seg.i, dim.i)]] <- data.table(
       seg.i, dim.i, mean.param,
-      first.i=(seg.i-1)*N.per.seg+1, 
-      last.i=seg.i*N.per.seg, 
+      first.i=(seg.i-1)*N.per.seg+1,
+      last.i=seg.i*N.per.seg,
       parameter="true"
     )[, `:=`(
       start=first.i-0.5,
@@ -531,44 +531,143 @@ data points per segment (not the overall number of data points).
 
 # Converting to functions
 
+Below we define a function which implements OPART.
+
 ```{r}
 OPART <- function(sim.mat, penalty){
   cum.data <- rbind(0, apply(sim.mat, 2, cumsum))
   cum.squares <- rbind(0, apply(sim.mat^2, 2, cumsum))
-  best.cost <- rep(NA_real_, nrow(sim.mat))
-  best.change <- rep(NA_integer_, nrow(sim.mat))
-  for(last.seg.end in seq_along(best.cost)){
-    last.seg.start <- seq(1, last.seg.end)
-    get_sum <- function(m){
-      matrix(
-        m[last.seg.end+1,], last.seg.end, ncol(m), byrow=TRUE
-      )-m[last.seg.start,]
-    }
-    N.vec <- last.seg.end-last.seg.start+1
-    last.seg.cost <- rowSums(get_sum(cum.squares)-get_sum(cum.data)^2/N.vec)
-    other.cost <- c(0,best.cost[last.seg.start-1]+penalty)
-    total.cost <- other.cost+last.seg.cost
-    best.i <- which.min(total.cost)
-    best.change[last.seg.end] <- best.i
-    best.cost[last.seg.end] <- total.cost[best.i]
+  sum_trick <- function(m, start, end)m[end+1,,drop=FALSE]-m[start,,drop=FALSE]
+  cost_trick <- function(start, end){
+    sum_trick(cum.squares, start, end)-
+      sum_trick(cum.data, start, end)^2/
+      (end+1-start)
   }
-  data.table(best.change,best.cost)
+  out.dt <- data.table(
+    change=rep(NA_integer_, nrow(sim.mat)),
+    cost=rep(NA_real_, nrow(sim.mat)))
+  for(up.to in seq(1, nrow(sim.mat))){
+    last.seg.cost <- rowSums(cost_trick(1:up.to, rep(up.to, up.to)))
+    change.cost <- if(up.to>1)out.dt$cost[seq(1, up.to-1)]+penalty
+    other.seg.cost <- c(0, change.cost)
+    total.cost <- other.seg.cost+last.seg.cost
+    best.i <- which.min(total.cost)
+    best.cost <- total.cost[best.i]
+    set(out.dt, up.to, "change", best.i)
+    set(out.dt, up.to, "cost", best.cost)
+  }
+  list(out.dt, max.candidates=up.to)
 }
-obase <- OPART_fast(sim.mat,penalty)
+```
 
-suffix.vec <- c("dt","dt_update","fast")
-ores <- atime::atime(
+Below we define a function which implements PELT.
+
+```{r}
+PELT <- function(sim.mat, penalty, prune=TRUE){
+  cum.data <- rbind(0, apply(sim.mat, 2, cumsum))
+  cum.squares <- rbind(0, apply(sim.mat^2, 2, cumsum))
+  sum_trick <- function(m, start, end)m[end+1,,drop=FALSE]-m[start,,drop=FALSE]
+  cost_trick <- function(start, end){
+    sum_trick(cum.squares, start, end)-
+      sum_trick(cum.data, start, end)^2/
+      (end+1-start)
+  }
+  N.data <- nrow(sim.mat)
+  pelt.change.vec <- rep(NA_integer_, N.data)
+  pelt.cost.vec <- rep(NA_real_, N.data+1)
+  pelt.cost.vec[1] <- -penalty
+  pelt.candidates.vec <- rep(NA_integer_, N.data)
+  candidate.vec <- 1L
+  for(up.to in 1:N.data){
+    N.cand <- length(candidate.vec)
+    pelt.candidates.vec[up.to] <- N.cand
+    last.seg.cost <- rowSums(cost_trick(candidate.vec, rep(up.to, N.cand)))
+    prev.cost <- pelt.cost.vec[candidate.vec]
+    cost.no.penalty <- prev.cost+last.seg.cost
+    total.cost <- cost.no.penalty+penalty
+    best.i <- which.min(total.cost)
+    pelt.change.vec[up.to] <- candidate.vec[best.i]
+    total.cost.best <- total.cost[best.i]
+    pelt.cost.vec[up.to+1] <- total.cost.best
+    keep <- if(isTRUE(prune))cost.no.penalty < total.cost.best else TRUE
+    candidate.vec <- c(candidate.vec[keep], up.to+1L)
+  }
+  list(
+    change=pelt.change.vec,
+    cost=pelt.cost.vec,
+    max.candidates=max(pelt.candidates.vec))
+}
+OPART2 <- function(...)PELT(...,prune=FALSE)
+```
+
+Above we also implemented `OPART2` which uses `PELT` as a sub-routine,
+for a more direct comparison of the computation time.
+Below we use `atime` to compare the functions:
+
+```{r}
+opart_vs_pelt <- atime::atime(
   N=unique(as.integer(10^seq(1,3,by=0.2))),
   setup={
-    str(N)
     x.mat <- sim.mat[1:N,]
   },
+  result=function(L)with(L, data.table(max.candidates)),
   seconds.limit=0.1,
   expr.list=atime::atime_grid(
-    list(FUN=paste0("OPART_",suffix.vec)),
-    OPART=FUN(x.mat,15),
+    list(FUN=c("OPART","OPART2","PELT")),
+    OPART=FUN(x.mat,150),
     symbol.params = "FUN"))
-plot(ores)
+plot(opart_vs_pelt)
+```
+
+```{r}
+set.seed(1)
+N.segs <- 300
+N.dim <- 2
+mean.mat <- matrix(
+  runif(N.segs*N.dim, 0, 10),
+  N.segs, N.dim)
+N.per.seg <- 10
+set.seed(1)
+sim.dt.list <- list()
+true.mean.dt.list <- list()
+for(seg.i in 1:N.segs){
+  for(dim.i in 1:N.dim){
+    mean.param <- mean.mat[seg.i, dim.i]
+    num.vec <- rnorm(N.per.seg, mean.param)
+    true.mean.dt.list[[paste(seg.i, dim.i)]] <- data.table(
+      seg.i, dim.i, mean.param,
+      first.i=(seg.i-1)*N.per.seg+1, 
+      last.i=seg.i*N.per.seg, 
+      parameter="true"
+    )[, `:=`(
+      start=first.i-0.5,
+      end=last.i+0.5
+    )]
+    sim.dt.list[[paste(seg.i, dim.i)]] <- data.table(
+      seg.i, dim.i, i.in.seg=1:N.per.seg, value=num.vec)
+  }
+}
+true.mean.dt <- rbindlist(true.mean.dt.list)
+sim.dt <- rbindlist(
+  sim.dt.list
+)[
+, data.i := seq_along(seg.i)
+, by=dim.i][]
+sim.wide <- dcast(sim.dt, data.i ~ dim.i, value.var="value")
+sim.mat <- as.matrix(sim.wide[,-1])
+OPART2 <- function(...)PELT(...,prune=FALSE)
+opart_vs_pelt <- atime::atime(
+  N=unique(as.integer(10^seq(1,3,by=0.2))),
+  setup={
+    x.mat <- sim.mat[1:N,]
+  },
+  result=function(L)with(L, data.table(max.candidates)),
+  seconds.limit=0.1,
+  expr.list=atime::atime_grid(
+    list(FUN=c("OPART","OPART2","PELT")),
+    OPART=FUN(x.mat,150),
+    symbol.params = "FUN"))
+plot(opart_vs_pelt)
 
 oref <- atime::references_best(ores)
 plot(oref)
