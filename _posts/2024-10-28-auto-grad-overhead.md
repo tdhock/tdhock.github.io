@@ -8,7 +8,12 @@ description: Comparison with explicit gradients
 
 The goal of this post is to show how to use R torch to compute AUM
 (Area Under Min of False Positive and False Negative rates, our newly
-Proposed surrogate loss for ROC curve optimization), similar to what
+Proposed surrogate loss for ROC curve optimization).
+
+* Paper: [Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection](https://jmlr.org/papers/v24/21-0751.html).
+* Slides [PDF](https://github.com/tdhock/max-generalized-auc/blob/master/HOCKING-slides-toronto.pdf).
+
+This post is similar to what
 we did in [a previous blog post using
 python](https://tdhock.github.io/blog/2024/torch-roc-aum/). This blog
 uses R instead of python, in order to compare the auto-grad from torch
@@ -235,6 +240,13 @@ label_vec = c(0, 1)
 pred_diff_vec = seq(-3, 3, by=0.5)
 aum_grad_dt_list = list()
 library(data.table)
+```
+
+```
+## data.table 1.16.2 using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+``` r
 for(pred_diff in pred_diff_vec){
   pred_vec = c(0, pred_diff)
   pred_tensor = torch::torch_tensor(pred_vec)
@@ -366,7 +378,7 @@ for computing gradients.
 
 ``` r
 a_res <- atime::atime(
-  N=as.integer(10^seq(2,7,by=0.25)),
+  N=as.integer(10^seq(2,6,by=0.2)),
   setup={
     set.seed(1)
     pred_vec = rnorm(N)
@@ -393,10 +405,17 @@ a_res <- atime::atime(
 ```
 ## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
 ## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
+## Warning: Some expressions had a GC in every iteration; so filtering is disabled.
 ```
 
 ``` r
 plot(a_res)
+```
+
+```
+## Le chargement a nécessité le package : directlabels
 ```
 
 ![plot of chunk atimeGrad](/assets/img/2024-10-28-auto-grad-overhead/atimeGrad-1.png)
@@ -424,13 +443,6 @@ res.long <- a_res$measurements[, {
   grad <- result[[1]]
   data.table(grad, i=seq_along(grad))
 }, by=.(N,expr.name)]
-```
-
-```
-## Traitement de 34 groupes sur 35. 97% terminé. Temps écoulé : 3s. Heure d'arrivée prévue : 0s.Traitement de 35 groupes sur 35. 100% terminé. Temps écoulé : 4s. Heure d'arrivée prévue : 0s.Traitement de 35 groupes sur 35. 100% terminé. Temps écoulé : 4s. Heure d'arrivée prévue : 0s.
-```
-
-``` r
 (res.wide <- dcast(
   res.long, N + i ~ expr.name, value.var="grad"
 )[
@@ -440,19 +452,19 @@ res.long <- a_res$measurements[, {
 
 ```
 ## Key: <N, i>
-##                N       i         auto explicit         diff
-##            <int>   <int>        <num>    <num>        <num>
-##       1:     100       1 0.000000e+00     0.00 0.000000e+00
-##       2:     100       2 0.000000e+00     0.00 0.000000e+00
-##       3:     100       3 0.000000e+00     0.00 0.000000e+00
-##       4:     100       4 0.000000e+00     0.00 0.000000e+00
-##       5:     100       5 2.000004e-02     0.02 4.053116e-08
-##      ---                                                   
-## 4063026: 1778279 1778275 0.000000e+00       NA           NA
-## 4063027: 1778279 1778276 0.000000e+00       NA           NA
-## 4063028: 1778279 1778277 1.117587e-06       NA           NA
-## 4063029: 1778279 1778278 0.000000e+00       NA           NA
-## 4063030: 1778279 1778279 1.102686e-06       NA           NA
+##                N       i          auto explicit         diff
+##            <int>   <int>         <num>    <num>        <num>
+##       1:     100       1  0.000000e+00    0e+00 0.000000e+00
+##       2:     100       2  0.000000e+00    0e+00 0.000000e+00
+##       3:     100       3  0.000000e+00    0e+00 0.000000e+00
+##       4:     100       4  0.000000e+00    0e+00 0.000000e+00
+##       5:     100       5  2.000004e-02    2e-02 4.053116e-08
+##      ---                                                    
+## 2709530: 1000000  999996  0.000000e+00    0e+00 0.000000e+00
+## 2709531: 1000000  999997  0.000000e+00    0e+00 0.000000e+00
+## 2709532: 1000000  999998 -1.996756e-06   -2e-06 3.244400e-09
+## 2709533: 1000000  999999  2.000481e-06    2e-06 4.808903e-10
+## 2709534: 1000000 1000000  0.000000e+00    0e+00 0.000000e+00
 ```
 
 ``` r
@@ -461,19 +473,7 @@ res.wide[is.na(diff)]
 
 ```
 ## Key: <N, i>
-##                N       i         auto explicit  diff
-##            <int>   <int>        <num>    <num> <num>
-##       1: 1778279       1 0.000000e+00       NA    NA
-##       2: 1778279       2 0.000000e+00       NA    NA
-##       3: 1778279       3 0.000000e+00       NA    NA
-##       4: 1778279       4 0.000000e+00       NA    NA
-##       5: 1778279       5 1.102686e-06       NA    NA
-##      ---                                            
-## 1778275: 1778279 1778275 0.000000e+00       NA    NA
-## 1778276: 1778279 1778276 0.000000e+00       NA    NA
-## 1778277: 1778279 1778277 1.117587e-06       NA    NA
-## 1778278: 1778279 1778278 0.000000e+00       NA    NA
-## 1778279: 1778279 1778279 1.102686e-06       NA    NA
+## Empty data.table (0 rows and 5 cols): N,i,auto,explicit,diff
 ```
 
 ``` r
@@ -485,23 +485,27 @@ dcast(res.wide, N ~ ., list(mean, median, max), value.var="diff")
 ##           N     diff_mean diff_median     diff_max
 ##       <int>         <num>       <num>        <num>
 ##  1:     100  0.000000e+00           0 4.053116e-08
-##  2:     177 -3.038216e-19           0 2.712346e-08
-##  3:     316  0.000000e+00           0 2.452090e-08
-##  4:     562  0.000000e+00           0 2.354490e-08
-##  5:    1000  0.000000e+00           0 2.574921e-08
-##  6:    1778  0.000000e+00           0 2.926595e-08
-##  7:    3162  0.000000e+00           0 4.618323e-08
-##  8:    5623  2.313795e-22           0 2.476636e-08
-##  9:   10000  0.000000e+00           0 2.641678e-08
-## 10:   17782  0.000000e+00           0 2.912523e-08
-## 11:   31622  0.000000e+00           0 2.322398e-08
-## 12:   56234  0.000000e+00           0 1.830092e-08
-## 13:  100000  0.000000e+00           0 2.716064e-08
-## 14:  177827  5.718850e-23           0 1.845509e-08
-## 15:  316227  3.848900e-23           0 2.334403e-08
-## 16:  562341  8.394171e-24           0 1.972413e-08
-## 17: 1000000  0.000000e+00           0 2.655792e-08
-## 18: 1778279            NA          NA           NA
+##  2:     158  0.000000e+00           0 1.923947e-08
+##  3:     251  1.105800e-19           0 2.932927e-08
+##  4:     398  6.973763e-20           0 2.276358e-08
+##  5:     630  0.000000e+00           0 1.471194e-08
+##  6:    1000  0.000000e+00           0 2.574921e-08
+##  7:    1584  0.000000e+00           0 2.107235e-08
+##  8:    2511  2.417971e-21           0 2.050096e-08
+##  9:    3981 -1.443422e-21           0 4.540736e-08
+## 10:    6309 -3.436818e-23           0 2.059894e-08
+## 11:   10000  0.000000e+00           0 2.641678e-08
+## 12:   15848  0.000000e+00           0 1.585646e-08
+## 13:   25118  0.000000e+00           0 2.217080e-08
+## 14:   39810  0.000000e+00           0 2.172029e-08
+## 15:   63095 -3.575141e-22           0 1.886652e-08
+## 16:  100000  0.000000e+00           0 2.716064e-08
+## 17:  158489 -2.936919e-22           0 1.709201e-08
+## 18:  251188  0.000000e+00           0 2.485860e-08
+## 19:  398107  6.905837e-24           0 1.699747e-08
+## 20:  630957  1.131770e-23           0 1.906540e-08
+## 21: 1000000  0.000000e+00           0 2.655792e-08
+##           N     diff_mean diff_median     diff_max
 ```
 
 The result above shows that there are very little differences between the gradients in the two methods.
@@ -549,23 +553,23 @@ sessionInfo()
 ##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
 ##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
-## time zone: America/New_York
+## time zone: Europe/Paris
 ## tzcode source: system (glibc)
 ## 
 ## attached base packages:
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_3.5.1      data.table_1.16.99
+## [1] ggplot2_3.5.1     data.table_1.16.2
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] bit_4.0.5              gtable_0.3.4           highr_0.11             dplyr_1.1.4            compiler_4.5.0        
+##  [1] bit_4.0.5              gtable_0.3.4           dplyr_1.1.4            compiler_4.5.0         highr_0.11            
 ##  [6] tidyselect_1.2.1       Rcpp_1.0.12            callr_3.7.3            directlabels_2024.1.21 scales_1.3.0          
 ## [11] lattice_0.22-6         R6_2.5.1               labeling_0.4.3         generics_0.1.3         knitr_1.47            
-## [16] tibble_3.2.1           desc_1.4.3             munsell_0.5.0          atime_2024.11.5        pillar_1.9.0          
-## [21] rlang_1.1.3            utf8_1.2.4             xfun_0.45              quadprog_1.5-8         bit64_4.0.5           
-## [26] aum_2024.6.19          cli_3.6.2              withr_3.0.0            magrittr_2.0.3         ps_1.7.6              
-## [31] grid_4.5.0             processx_3.8.3         torch_0.13.0           lifecycle_1.0.4        coro_1.1.0            
-## [36] vctrs_0.6.5            bench_1.1.3            evaluate_0.23          glue_1.7.0             farver_2.1.1          
-## [41] profmem_0.6.0          fansi_1.0.6            colorspace_2.1-0       tools_4.5.0            pkgconfig_2.0.3
+## [16] tibble_3.2.1           munsell_0.5.0          atime_2024.12.3        pillar_1.9.0           rlang_1.1.3           
+## [21] utf8_1.2.4             xfun_0.45              quadprog_1.5-8         bit64_4.0.5            aum_2024.6.19         
+## [26] cli_3.6.2              withr_3.0.0            magrittr_2.0.3         ps_1.7.6               grid_4.5.0            
+## [31] processx_3.8.3         torch_0.13.0           lifecycle_1.0.4        coro_1.1.0             vctrs_0.6.5           
+## [36] bench_1.1.3            evaluate_0.23          glue_1.7.0             farver_2.1.1           profmem_0.6.0         
+## [41] fansi_1.0.6            colorspace_2.1-0       tools_4.5.0            pkgconfig_2.0.3
 ```

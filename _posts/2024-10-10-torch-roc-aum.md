@@ -11,6 +11,9 @@ The goal of this post is to show how to use torch to compute ROC-AUC
 Under Min of False Positive and False Negative rates, our newly
 Proposed surrogate loss for ROC curve optimization).
 
+* Paper: [Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection](https://jmlr.org/papers/v24/21-0751.html).
+* Slides [PDF](https://github.com/tdhock/max-generalized-auc/blob/master/HOCKING-slides-toronto.pdf).
+
 
 
 ## Introduction: binary classification and zero-one loss

@@ -23,7 +23,12 @@ if(FALSE){
 
 The goal of this post is to show how to use R torch to compute AUM
 (Area Under Min of False Positive and False Negative rates, our newly
-Proposed surrogate loss for ROC curve optimization), similar to what
+Proposed surrogate loss for ROC curve optimization).
+
+* Paper: [Optimizing ROC Curves with a Sort-Based Surrogate Loss for Binary Classification and Changepoint Detection](https://jmlr.org/papers/v24/21-0751.html).
+* Slides [PDF](https://github.com/tdhock/max-generalized-auc/blob/master/HOCKING-slides-toronto.pdf).
+
+This post is similar to what
 we did in [a previous blog post using
 python](https://tdhock.github.io/blog/2024/torch-roc-aum/). This blog
 uses R instead of python, in order to compare the auto-grad from torch
@@ -250,7 +255,7 @@ for computing gradients.
 
 ```{r atimeGrad}
 a_res <- atime::atime(
-  N=as.integer(10^seq(2,7,by=0.25)),
+  N=as.integer(10^seq(2,6,by=0.2)),
   setup={
     set.seed(1)
     pred_vec = rnorm(N)
