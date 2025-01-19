@@ -1,0 +1,395 @@
+---
+layout: post
+title: Bike ride map and time series data viz
+description: A demonstration of animint2 and sf
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-01-19-bike-ride-data-viz"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+conda.env <- "2023-08-deep-learning"
+conda.env <- "torch-aum"
+RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
+  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
+  "/home/tdhock/miniconda3/envs/%s/bin/python"
+  else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
+Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
+##reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to explain how to use
+[animint2](https://github.com/animint/animint2/), my R package for
+animated interactive data visualization, to create a linked map and
+time series of bike rides I did in 2009.
+
+## Background: master internship motivation for interactive graphics
+
+Since my master internship at INRA Jouy-en-Josas in 2009, I had some
+ideas about using interactive data visualization to better understand
+complex data and algorithms. At that time, I was studying an iterative
+sampling algorithm for inferring the parameters of a hierarchical
+Bayesian model. The best visualization tools at the time were
+lattice/ggplot2 and animation packages in R. Using that approach, the
+only interactions possible are moving forward and backward in time,
+which resulted in data visualizations such as [this
+one](https://nicholsonppp.r-forge.r-project.org/2009-08-19/index.htm),
+which remarkably still works after 15 years! You can click play and
+watch the animation like a video, but clicking on the plots does not
+accomplish any interaction.
+
+But it could be useful to be able to click the plot, for example to
+update the selected locus or time point! That is called "direct
+manipulation" in the interactive graphics literature. How could I make
+graphics with those kinds of interactions? They are a very specific
+kind of interaction, "click on some visual element, to change the
+highlighted value of some variable." (locus or generation in that
+example) At the end of my master internship, I decided to shift gears,
+and focus on studying the math behind machine learning, so these
+interactive graphics ideas sat on the backburner of my mind for a few
+years.
+
+## First version of animint
+
+In 2012, I defended my PHD in Paris, and then flew out to Tokyo to
+spend 2013 in Masashi Sugiyama's machine learning lab. During that
+time, I got to working on my interactive graphics ideas again, this
+time with a focus on visualizing machine learning algorithms. I coded
+a first version of the [animint](https://github.com/tdhock/animint) R
+package, and Susan VanderPlas worked in GSOC'13 to implement a bunch
+of key features. I then created a first
+[gallery](https://rcdata.nau.edu/genomic-ml/public_html/animint/) of
+examples, including a [re-make of my master internship data
+viz](https://rcdata.nau.edu/genomic-ml/public_html/animint/evolution/viz.html),
+but with the interactive features that I had envisioned.
+On that web page, 
+
+* the left plot shows a time series for the selected locus, and you
+  can click to select a different time point (generation).
+* the right plot shows an overview of all loci for the selected time
+  point (generation), and you can click to select a different locus.
+
+How do we define that data visualization? We use R/ggplot2 code, with
+two new keywords that can be defined for any geom:
+
+* `showSelected` means to only show data rows that correspond to the values of the current selection.
+* `clickSelects` means that the geom can be clicked to change the current selection.
+
+The code on that web page uses the old animint package, which is no longer recommended. Below we port the code to the new animint2 package, which is recommended:
+
+```{r}
+library(animint2)
+data(generation.loci)
+##generation.loci <- subset(generation.loci, generation %% 10 == 1)
+colormap <- c(blue="blue",red="red",ancestral="black",neutral="grey30")
+ancestral <- subset(generation.loci,population==1 & generation==1)
+ancestral$color <- "ancestral"
+viz <- animint(
+  title="Evolution simulation with drift and selection",
+  source="https://tdhock.github.io/blog/2025/bike-ride-data-viz/",
+  ts=ggplot()+
+    ggtitle("Click to select generation")+
+    theme(legend.position="none")+
+    geom_line(aes(
+      generation, frequency, group=paste(population,color),
+      colour=color),
+      showSelected=c("locus","color"),
+      data=generation.loci)+
+    make_text(generation.loci, 50, 1.05, "locus")+
+    make_tallrect(generation.loci, "generation")+
+    scale_colour_manual("population", values=colormap)+
+    geom_point(aes(
+      generation, frequency, color=color),
+      showSelected=c("locus","color"),
+      data=ancestral),
+  loci=ggplot()+
+    ggtitle("Click to select locus")+
+    geom_point(aes(
+      locus, frequency, colour=color,
+      key=paste(locus, population)),
+      showSelected="generation",
+      chunk_vars=character(),
+      data=generation.loci)+
+    geom_point(aes(
+      locus, frequency, colour=color),
+      data=ancestral)+
+    scale_colour_manual("population", values=colormap)+
+    make_tallrect(generation.loci, "locus")+
+    make_text(generation.loci, 35, 1, "generation"),
+  duration=list(generation=1000),
+  time=list(variable="generation", ms=2000))
+if(FALSE){
+  animint2pages(viz, "2025-01-19-evolution-drift-selection")
+}
+```
+
+The interactive data viz created using the code above [can be viewed
+here](https://tdhock.github.io/2025-01-19-evolution-drift-selection).
+Using this method, it is remarkably simple to create a wide variety of
+different data visualizations. The point of the [original
+gallery](https://rcdata.nau.edu/genomic-ml/public_html/animint/) was
+to highlight the variety of different kinds of visualizations which
+are possible to create. The [modern
+gallery](https://animint.github.io/gallery/) contains a much larger
+array of example data visualizations, but remarkably does not contain
+the interaction instructions that were present in the original gallery
+(click X to change Y). That kind of information can be very useful for
+somebody who does not know how to interact with the data
+visualization. Similar "help the user understand what interactions are
+possible" features are planned for the upcoming GSOC'25, which will
+hopefully implement a [guided
+tour](https://github.com/animint/animint2/issues/150) and [tutorial
+videos](https://github.com/animint/animint2/issues/151).
+
+## Back to the master
+
+Right now I am working in Paris again, and I thought it would be fun
+to re-visit another old project, [gpsdb, GPS data website
+generator](https://gpsdb.sourceforge.net/). For my birthday in 2009,
+my classmates gifted me a GPS, which I used to create data sets for my
+bike rides in and around Paris. The gpsdb software was a couple of
+python script that could download data from the GPS, and then convert
+it to KML files, which were required for visualizing the data on
+google maps, back in the day. Remarkably, the web site that I created,
+and those data files, are still online, 15 years later. For example
+[all.kml](https://gpsdb.sourceforge.net/out/all.kml) contains all of
+the GPS traces I created in 2009. However google maps no longer
+accepts arbitrary KML files (these are too large), so how can we
+visualize them? Below we explain how to do it using animint2.
+
+## Clone gpsdb and read GPS data
+
+First step: clone the repository to get the GPS data.
+
+```{r}
+if(!file.exists("gpsdb-code")){
+  system("hg clone http://hg.code.sf.net/p/gpsdb/code gpsdb-code")
+}
+gpx.glob <- "gpsdb-code/gpx/*"
+library(data.table)
+(gpx.dt <- data.table(gpx=Sys.glob(gpx.glob)))
+```
+
+The table above shows one row for each GPX data filex.
+Each one of them has contents as below:
+
+```{r}
+one.file <- gpx.dt$gpx[1]
+gpx.lines <- readLines(one.file)
+cat(gpx.lines[1:20],sep="\n")
+```
+
+The output above includes lat and lon values that we would like to
+extract and visualize on a map.  But oddly, these files have lat and
+lon reversed (Paris is actually near longitude=2 degrees, not
+latitude=2 degrees as is shown in the output above). To read these data, we can
+use the function below, which switches lat and lon:
+
+```{r}
+name_pat <- function(name, pattern)list(
+  pattern, '="', 
+  nc::group(name, "[0-9.]+", as.numeric))
+read_lat_lon <- function(path)nc::capture_all_str(
+  path,
+  name_pat("longitude","lat"),
+  '" ',
+  name_pat("latitude","lon"))
+read_lat_lon(one.file)
+```
+
+The code above uses regular expressions to read the GPS data. The
+`name_pat` function is useful for defining a pattern that occurs twice
+(lat and lon). The `read_lat_lon` function returns a data table with
+`longitude` and `latitude` columns, and one row for each GPS ping in
+the file, as can be seen in the output above.
+
+To read all of the files into a data table, we use the code below,
+
+```{r}
+(lat.lon.dt <- nc::capture_first_glob(
+  gpx.glob,
+  "/", timestamp="[^/]+", "[.]gpx$",
+  READ=read_lat_lon))
+```
+
+The output above includes a `timestamp` column which comes from the
+file name, and the other columns which come from the result of reading
+the file contents. The `gpx.glob` defines a set of file names, which
+are matched to the provided pattern, with named arguments/groups
+included in the output (`timestamp`). The `READ` argument specifies
+how to read each file, via the `read_lat_lon` function.
+
+Already we can visualize these data on a map:
+
+```{r pathAll}
+library(animint2)
+ggplot()+
+  geom_path(aes(
+    longitude, latitude, group=timestamp),
+    data=lat.lon.dt)
+```
+
+In the plot above, we see that there is a large set of data in the
+upper left, and a small amount of data in the lower right.
+We can zoom to the upper left via the code below:
+
+```{r pathZoom}
+path.show <- lat.lon.dt[longitude < 4]
+(gg.path <- ggplot()+
+  geom_path(aes(
+    longitude, latitude, group=timestamp),
+    data=path.show))
+```
+
+The figure above kind of looks like a spider web, with the center
+being Paris. 
+
+We can add details about the start and end of each trip via the code below:
+
+```{r pathEnds}
+start.end.dt <- path.show[
+, .SD[c(1,.N), .(
+  latitude,longitude,where=c("start","end"),
+  direction=diff(longitude))]
+, by=timestamp]
+gg.path+
+  geom_point(aes(
+    longitude, latitude, fill=where),
+    shape=21,
+    data=start.end.dt)+
+  scale_fill_manual(values=c(start="white",end="black"))
+```
+
+The plot above shows a dot at the start and end of each trip.
+
+## Context: nearby cities
+
+The current map is not super useful currently, because we do not see
+names of the start/end cities (nor a familiar unit of distance like
+kilometers). To get the context of nearby cities, we can download a
+data set which has lat/lon coordinates of each city in France.
+
+```{r allCities}
+if(!file.exists("gps-villes-de-france.csv")){
+  download.file("https://www.data.gouv.fr/fr/datasets/r/51606633-fb13-4820-b795-9a2a575a72f1", "gps-villes-de-france.csv")
+}
+(villes.dt <- fread("gps-villes-de-france.csv"))
+ggplot()+
+  geom_point(aes(
+    longitude, latitude),
+    data=villes.dt)
+```
+
+Looking at the plot above, we see a hexagon in the upper right, which
+corresponds to "France métropolitaine" (mainland European France). The
+other points correspond to outlying islands and other territories. Our
+map only needs context of the Paris region, so we don't want to
+display all of these cities. Let's just display the nearest cities to
+the start and end. To do that we can use
+[`sf::st_nearest_feature`](https://r-spatial.github.io/sf/reference/st_nearest_feature.html),
+but first we have to convert our data to `sf` structures, as in the
+code below.
+
+* `sf::st_point` creates a single geometry representing a point on a map.
+* `sf::st_sfc` creates a list column of geometries, 
+* `sf::st_sf` creates a data frame with a simple feature list column
+  (so you can associate various other data to each geometry, such as
+  timestamp, etc).
+
+```{r}
+(start.end.sf <- sf::st_sf(start.end.dt[, .(
+  timestamp, where,
+  geometry=sf::st_sfc(apply(
+    cbind(longitude, latitude),
+    1,
+    sf::st_point,
+    simplify=FALSE
+  ))
+)]))
+(villes.sf <- sf::st_sf(villes.dt[, .(
+  label,
+  geometry=sf::st_sfc(apply(
+    cbind(longitude, latitude),
+    1,
+    sf::st_point,
+    simplify=FALSE
+  ))
+)]))
+nearest.index.vec <- sf::st_nearest_feature(start.end.sf, villes.sf)
+(villes.start.end <- data.table(
+  start.end.dt[,.(timestamp,direction,where)],
+  villes.dt[nearest.index.vec]))
+```
+
+The table above contains one row for each start/end position, and
+columns that describe the closest nearby city, which can be displayed via:
+
+```{r nearbyCities}
+ggplot()+
+  geom_path(aes(
+    longitude, latitude, group=timestamp, color=what),
+    data=data.table(path.show, what="ride"))+
+  geom_point(aes(
+    longitude, latitude, fill=where, color=what),
+    shape=21,
+    data=data.table(start.end.dt, what="ride"))+
+  scale_fill_manual(values=c(start="white",end="black"))+
+  scale_color_manual(values=c(
+    ride="black",
+    "nearby cities"="red"))+
+  geom_point(aes(
+    longitude, latitude, fill=where,
+    color=what),
+    shape=21,
+    data=data.table(villes.start.end, what="nearby cities"))+
+  geom_text(aes(
+    longitude, latitude, label=label,
+    color=what,
+    hjust=ifelse(
+      direction<0,
+      ifelse(where=="start", 0, 1),
+      ifelse(where=="start", 1, 0))),
+    showSelected=c("timestamp","where"),
+    data=data.table(villes.start.end, what="nearby cities"))
+```
+
+The map above is overplotted, so interactivity is useful to focus on
+some details. We would like to be able to click on one trip, and show
+its details only. How to implement that? Using animint2 we would specify
+
+* `clickSelects="timestamp"` to specify that we want to click on an
+  element to specify the selected ride (file timestamp).
+* `showSelected="timestamp"` to specify that we want to display only
+  the subset of data for the currently selected ride (file timestamp).
+  
+The end result looks like
+[this](https://tdhock.github.io/2025-01-19-bike-rides-around-paris-2009/). Exercise
+for the reader: starting from the code above, can you create the
+interactive map and time series yourself?
+
+## Conclusions
+
+We have explored how to read GPS bike ride data into R, along with
+city locations for context, and then display them together on a
+map. We explained various features of `animint2` for interactive data
+visualization, and `sf` for spatial data manipulation (finding the
+closest city to the start/end coordinates of each ride).
+
+## Session info
+
+```{r}
+sessionInfo()
+```

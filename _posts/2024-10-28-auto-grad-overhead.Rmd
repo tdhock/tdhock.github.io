@@ -10,11 +10,11 @@ post.id <- "2024-10-28-auto-grad-overhead"
 fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
 dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
 knitr::opts_chunk$set(
-  dpi=100,
+  dpi=200,
   fig.path=fig.path,
-  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.width=7.5, ## TODO python figures wider? look at prev issue.
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
+  fig.height=3)
 options(width=120)
 if(FALSE){
   knitr::knit(paste0(post.id, ".Rmd"))
