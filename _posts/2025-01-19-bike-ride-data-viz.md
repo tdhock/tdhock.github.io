@@ -137,7 +137,7 @@ to re-visit another old project, [gpsdb, GPS data website
 generator](https://gpsdb.sourceforge.net/). For my birthday in 2009,
 my classmates gifted me a GPS, which I used to create data sets for my
 bike rides in and around Paris. The gpsdb software was a couple of
-python script that could download data from the GPS, and then convert
+python scripts that could download data from the GPS, and then convert
 it to KML files, which were required for visualizing the data on
 google maps, back in the day. Remarkably, the web site that I created,
 and those data files, are still online, 15 years later. For example
@@ -176,7 +176,7 @@ library(data.table)
 ## 118: gpsdb-code/gpx/2009-10-25:10:25:19.gpx
 ```
 
-The table above shows one row for each GPX data filex.
+The table above shows one row for each GPX data file.
 Each one of them has contents as below:
 
 
