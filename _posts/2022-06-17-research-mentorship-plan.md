@@ -41,6 +41,7 @@ expect to learn how to:
   in order to facilitate reproducible research.
 - write scholarship/grant applications which describe future research
   directions.
+- use writing that is inclusive, see [Sherbrooke French guide](https://www.usherbrooke.ca/langue/fileadmin/sites/langue/documents/Guide_redaction_inclusive_vf.pdf).
   
 Students should expect to do the following:
 - keep a lab notebook / research journal on google docs / github
@@ -107,3 +108,5 @@ Updated 4 Jan 2024: added Druyan quote about scientific method.
 Updated 18 Jan 2024: added Sagan quote about scientific method.
 
 Updated 6 Aug 2024: added Sherbrooke storage links.
+
+Updated 5 Feb 2025: added link to Sherbrooke inclusive guide.
