@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Overhead of auto-grad in torch
-description: Comparison with explicit gradients
+title: Cross-validation with neural networks
+description: Demonstration of mlr3torch + mlr3resampling
 ---
 
 ```{r Ropts, echo=FALSE, results='hide'}
@@ -33,7 +33,9 @@ if(FALSE){
 
 The goal of this post is to show how to use the mlr3torch package in R
 with AUM (Area Under Min of False Positive and False Negative rates,
-our newly Proposed surrogate loss for ROC curve optimization).
+our newly Proposed surrogate loss for ROC curve optimization), in
+combination with the new cross-validation methods we proposed in our
+[SOAK paper](https://arxiv.org/abs/2410.08643).
 
 ## Introduction 
 
@@ -66,13 +68,248 @@ for(data.name in data.name.vec){
 }
 ```
 
-Figure 5 from that paper shows that
+Next we read these data into R (only the first few rows, for
+demonstration purposes).
 
-https://rcdata.nau.edu/genomic-ml/cv-same-other-paper/data_Classif/
+```{r}
+data.list <- list()
+library(data.table)
+for(data.name in data.name.vec){
+  data.csv <- paste0(data.name, ".csv")
+  local.csv <- file.path(data_Classif, data.csv)
+  data.list[[data.name]] <- fread(local.csv, nrows = 100)
+}
+```
+
+Next, we plot an example of each class. To do that in the ggplot
+framework, we need to create a data frame with one row per pixel to
+display, as in the code below.
+
+```{r}
+n.pixels <- 28
+pseq <- 1:n.pixels
+(one.ex.dt <- data.table(Data=data.name.vec)[, {
+  data.list[[Data]][, data.table(
+    intensity=unlist(.SD[1]),
+    pixel_j=rep(pseq, n.pixels),
+    pixel_i=rep(pseq, each=n.pixels)
+  ), by=y, .SDcols=patterns("[0-9]")]
+}, by=Data])
+```
+
+We can visualize the images by using the ggplot code below.
+
+```{r}
+library(ggplot2)
+ggplot()+
+  theme_bw()+
+  theme(panel.spacing=grid::unit(0,"lines"))+
+  scale_y_reverse()+
+  scale_fill_gradient(low="white",high="black")+
+  geom_tile(aes(
+    pixel_j, pixel_i, fill=intensity),
+    data=one.ex.dt)+
+  facet_grid(Data ~ y)+
+  coord_equal()
+```
+
+We see in the image above that the EMNIST digits are rotated 90
+degrees and flipped with respect to the MNIST digits.
+
+## Convert data to torch tensors
+
+In my [Res Baz 2023
+tutorial](https://rcdata.nau.edu/genomic-ml/2023-res-baz-az/2023-04-19-deep-learning.html),
+I explained how to use torch in R. The first step is to convert the
+data from R to a torch tensor.
+
+```{r}
+names(data.list)
+two.dt <- data.list$FashionMNIST[1:2]
+two.X.mat <- as.matrix(two.dt[,-(1:2),with=FALSE])
+two.X.array <- array(two.X.mat, c(2, 1, n.pixels, n.pixels))
+(two.X.tensor <- torch::torch_tensor(two.X.array))
+(two.y.tensor <- torch::torch_tensor(two.dt$y+1L, torch::torch_long()))
+```
+
+The data above represents two images in torch. Note that there are
+four dimensions used to represent the images:
+
+* the first dimension represents the different images (2 elements in
+  the example above, representing two images).
+* the second dimension represents the color channels (1 in the example
+  above, for grayscale images).
+* the third and fourth dimensions represent the height and width of
+  the image in pixels (28 in the example above).
+
+## torch linear model
+
+A linear model is defined in the code below.
+
+```{r}
+n.features <- ncol(two.X.mat)
+n.classes <- 10
+seq_linear_model <- torch::nn_sequential(
+  torch::nn_flatten(),
+  torch::nn_linear(n.features, n.classes))
+(seq_linear_model_pred <- seq_linear_model(two.X.tensor))
+```
+
+The prediction of the linear model is a tensor with two rows and ten
+columns (one output column for each class). To do learning we need to
+call backward on the result of a loss function, as in the code below.
+
+```{r}
+seq_linear_model$parameters[[2]]$grad
+celoss <- torch::nn_cross_entropy_loss()
+(seq_linear_model_loss = celoss(seq_linear_model_pred, two.y.tensor))
+seq_linear_model_loss$backward()
+seq_linear_model$parameters[[2]]$grad
+```
+
+Note in the output above that `grad` is undefined at first, and then
+defined after having called `backward()`.
+
+## torch convolutional neural network
+
+Below we define a convolutional network.
+
+```{r}
+seq2flat <- torch::nn_sequential(
+  torch::nn_conv2d(in_channels = 1, out_channels = 20, kernel_size = 3),
+  torch::nn_relu(),
+  torch::nn_max_pool2d(kernel_size = 2),
+  torch::nn_flatten())
+two.flat <- seq2flat(two.X.tensor)
+n.flat <- ncol(two.flat)
+n.hidden.units <- 100
+seq_conv_model <- torch::nn_sequential(
+  seq2flat,
+  torch::nn_linear(n.flat, n.hidden.units),
+  torch::nn_relu(),
+  torch::nn_linear(n.hidden.units, n.classes))
+(seq_conv_model_pred <- seq_conv_model(two.X.tensor))
+seq_conv_model$parameters[[2]]$grad
+(seq_conv_model_loss = celoss(seq_conv_model_pred, two.y.tensor))
+seq_conv_model_loss$backward()
+seq_conv_model$parameters[[2]]$grad
+```
+
+The output above indicates a gradient has been computed for the
+convolutional network.
+
+## mlr3torch
+
+The mlr3torch package provides an alternative way of defining torch
+models, using the
+[pipeops](https://mlr3torch.mlr-org.com/articles/pipeop_torch.html)
+framework. The advantage of this approach is that each model can be
+converted to a `Learner` object, which can be run alongside other
+non-torch learners (such as glmnet), on lots of different data sets
+and train/test splits (in parallel using mlr3batchmark). They can be
+even run using my newly proposed SOAK algorithm (Same/Other/All K-fold
+cross-validation), which can be implemented using the code below.
+
+```{r}
+soak <- mlr3resampling::ResamplingSameOtherSizesCV$new()
+```
+
+Note that it is important to run the line of code above, before
+creating the tasks using the code below, because `mlr3resampling`
+package needs to be loaded in order to avoid an error (`subset` is not
+a valid column role).
+The code below converts each data set of interest to a Task.
+
+```{r}
+task.list <- list()
+for(other.name in other.name.vec){
+  ipair.dt.list <- list()
+  for(Data in c(other.name,"MNIST")){
+    one.dt <- data.list[[Data]][,-1][, y := factor(y)][]
+    setnames(one.dt, c("y", paste0("X", names(one.dt)[-1])))
+    ipair.dt.list[[Data]] <- data.table(Data, one.dt)
+  }
+  ipair.dt <- rbindlist(ipair.dt.list)
+  ipair.name <- paste0("MNIST_",other.name)
+  itask <- mlr3::TaskClassif$new(
+    ipair.name, ipair.dt, target="y")
+  itask$col_roles$stratum <- "y"
+  itask$col_roles$subset <- "Data"
+  task.list[[ipair.name]] <- itask
+}
+task.list
+```
+
+Note that the code above produces a list of two tasks, each of which
+has two subsets.
+
+* `MNIST_FashionMNIST` has two subsets: half MNIST images (digits),
+  half FashionMNIST images (clothing). It should not be possible to
+  get good accuracy when training on MNIST and predicting on
+  FashionMNIST.
+* `MNIST_EMNIST` has two subsets: half MNIST images (digits), half
+  EMNIST images (also digits), so it may be possible to get good
+  prediction, even though the two data sets have different
+  pre-processing methods (slightly different position / size of digit
+  images).
+
+I understand from `?mlr3torch::PipeOpTorchIngressNumeric` that we need
+`po("torch_ingress_num")` to convert regular R features to torch
+tensors. And we need `nn_head` pipeop at the end of the network,
+before `torch_loss`?
+
+```{r}
+library(mlr3pipelines)
+library(mlr3torch)
+graph <- po("select", selector = selector_type(c("numeric", "integer"))) %>>%
+  po("torch_ingress_num") %>>%
+  po("nn_reshape", shape=c(-1,1,n.pixels,n.pixels)) %>>%
+  po("nn_conv2d_1", out_channels = 20, kernel_size = 3) %>>%
+  po("nn_relu_1", inplace = TRUE) %>>%
+  po("nn_max_pool2d_1", kernel_size = 2) %>>%
+  po("nn_flatten") %>>%
+  po("nn_linear", out_features = 100) %>>%
+  po("nn_head") %>>%
+  po("torch_loss", t_loss("cross_entropy")) %>>%
+  po("torch_optimizer", t_opt("sgd", lr=0.01)) %>>%
+  po("torch_model_classif", batch_size = 32, epochs = 2L)
+glearner <- as_learner(graph)
+```
+
+[`TaskClassif_mnist.R`](https://github.com/mlr-org/mlr3torch/blob/main/R/TaskClassif_mnist.R) says that image should be a lazy list column?
+
+Figure 5 from that paper shows that
 
 https://cran.r-project.org/web/packages/mlr3torch/readme/README.html
 
-https://mlr3torch.mlr-org.com/articles/pipeop_torch.html
+## MRE for issue
+
+```{r}
+N.pixels <- 10
+N.classes <- 5
+N.features <- 100
+N.images <- 200
+set.seed(1)
+my.X.mat <- matrix(runif(N.features*N.images), N.images, N.features)
+my.df <- data.frame(y=factor(1:N.classes), my.X.mat)
+my.task <- mlr3::TaskClassif$new("MyTask", my.df, target="y")
+library(mlr3pipelines)
+library(mlr3torch)
+graph <- po("select", selector = selector_type(c("numeric", "integer"))) %>>%
+  po("torch_ingress_num") %>>%
+  po("nn_reshape", shape=c(-1,1,N.pixels,N.pixels)) %>>%
+  po("nn_conv2d_1", out_channels = 20, kernel_size = 3) %>>%
+  po("nn_relu_1", inplace = TRUE) %>>%
+  po("nn_max_pool2d_1", kernel_size = 2) %>>%
+  po("nn_flatten") %>>%
+  po("nn_linear", out_features = 100) %>>%
+  po("nn_head") %>>%
+  po("torch_loss", t_loss("cross_entropy")) %>>%
+  po("torch_optimizer", t_opt("sgd", lr=0.01)) %>>%
+  po("torch_model_classif", batch_size = 25, epochs = 2L)
+graph$train(my.task)
+graph$predict(my.task)
+```
 
 ## Conclusions
 
