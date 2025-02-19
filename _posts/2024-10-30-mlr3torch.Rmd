@@ -77,7 +77,7 @@ library(data.table)
 for(data.name in data.name.vec){
   data.csv <- paste0(data.name, ".csv")
   local.csv <- file.path(data_Classif, data.csv)
-  data.list[[data.name]] <- fread(local.csv, nrows = 100)
+  data.list[[data.name]] <- fread(local.csv, nrows = 1000)
 }
 ```
 
@@ -113,8 +113,34 @@ ggplot()+
   coord_equal()
 ```
 
-We see in the image above that the EMNIST digits are rotated 90
-degrees and flipped with respect to the MNIST digits.
+We see in the image above that the EMNIST digits are transposed
+(rotated 90 degrees and flipped) with respect to the MNIST digits.
+Correction below.
+
+```{r}
+data.list$EMNIST_rot <- data.list$EMNIST[,c(
+  1,2,as.integer(matrix(seq(1,n.pixels^2),n.pixels,n.pixels,byrow=TRUE))+2
+),with=FALSE]
+(one.ex.dt <- data.table(Data=names(data.list))[, {
+  data.list[[Data]][, data.table(
+    intensity=unlist(.SD[1]),
+    pixel_j=rep(pseq, n.pixels),
+    pixel_i=rep(pseq, each=n.pixels)
+  ), by=y, .SDcols=patterns("[0-9]")]
+}, by=Data])
+ggplot()+
+  theme_bw()+
+  theme(panel.spacing=grid::unit(0,"lines"))+
+  scale_y_reverse()+
+  scale_fill_gradient(low="white",high="black")+
+  geom_tile(aes(
+    pixel_j, pixel_i, fill=intensity),
+    data=one.ex.dt)+
+  facet_grid(Data ~ y)+
+  coord_equal()
+```
+
+Above we see the `EMNIST_rot` data in the same orientation as the `MNIST` data.
 
 ## Convert data to torch tensors
 
@@ -124,19 +150,19 @@ I explained how to use torch in R. The first step is to convert the
 data from R to a torch tensor.
 
 ```{r}
-names(data.list)
-two.dt <- data.list$FashionMNIST[1:2]
-two.X.mat <- as.matrix(two.dt[,-(1:2),with=FALSE])
-two.X.array <- array(two.X.mat, c(2, 1, n.pixels, n.pixels))
-(two.X.tensor <- torch::torch_tensor(two.X.array))
-(two.y.tensor <- torch::torch_tensor(two.dt$y+1L, torch::torch_long()))
+ex.dt <- data.list$FashionMNIST
+ex.X.mat <- as.matrix(ex.dt[,-(1:2),with=FALSE])
+ex.X.array <- array(ex.X.mat, c(nrow(ex.dt), 1, n.pixels, n.pixels))
+ex.X.tensor <- torch::torch_tensor(ex.X.array)
+ex.X.tensor$shape
+(ex.y.tensor <- torch::torch_tensor(ex.dt$y+1L, torch::torch_long()))
 ```
 
-The data above represents two images in torch. Note that there are
+The data above represents a set of images in torch. Note that there are
 four dimensions used to represent the images:
 
-* the first dimension represents the different images (2 elements in
-  the example above, representing two images).
+* the first dimension represents the different images (`nrow(ex.dt)` elements in
+  the example above, one for each image).
 * the second dimension represents the color channels (1 in the example
   above, for grayscale images).
 * the third and fourth dimensions represent the height and width of
@@ -147,11 +173,12 @@ four dimensions used to represent the images:
 A linear model is defined in the code below.
 
 ```{r}
-n.features <- ncol(two.X.mat)
+n.features <- ncol(ex.X.mat)
 n.classes <- 10
 seq_linear_model <- torch::nn_sequential(
   torch::nn_flatten(),
   torch::nn_linear(n.features, n.classes))
+two.X.tensor <- ex.X.tensor[1:2,,,]
 (seq_linear_model_pred <- seq_linear_model(two.X.tensor))
 ```
 
@@ -162,13 +189,106 @@ call backward on the result of a loss function, as in the code below.
 ```{r}
 seq_linear_model$parameters[[2]]$grad
 celoss <- torch::nn_cross_entropy_loss()
-(seq_linear_model_loss = celoss(seq_linear_model_pred, two.y.tensor))
+two.y.tensor <- ex.y.tensor[1:2]
+(seq_linear_model_loss <- celoss(seq_linear_model_pred, two.y.tensor))
 seq_linear_model_loss$backward()
 seq_linear_model$parameters[[2]]$grad
 ```
 
 Note in the output above that `grad` is undefined at first, and then
 defined after having called `backward()`.
+
+## Learning with linear model
+
+For learning we should first divide train data into subtrain and validation.
+
+```{r}
+set_names <- c("validation", "subtrain")
+set_vec <- rep(set_names, l=nrow(ex.dt))
+table(set_vec, torch::as_array(ex.y.tensor))
+```
+
+Then we can use a gradient descent learning for loop,
+
+```{r}
+n.epochs <- 1000
+optimizer <- torch::optim_sgd(seq_linear_model$parameters, lr=0.1)
+loss_dt_list <- list()
+for(epoch in 1:n.epochs){
+  set_loss_list <- list()
+  for(set_name in set_names){
+    is_set <- set_vec==set_name
+    set_pred <- seq_linear_model(ex.X.tensor[is_set,,,])
+    set_y <- ex.y.tensor[is_set]
+    is_error <- set_y != set_pred$argmax(dim=2)
+    N_errors <- torch::as_array(is_error$sum())
+    set_loss_list[[set_name]] <- celoss(set_pred, set_y)
+    loss_dt_list[[paste(epoch, set_name)]] <- data.table(
+      epoch, set_name=factor(set_name, set_names),
+      variable=c("error_percent","loss"),
+      value=c(
+        100*N_errors/length(is_error),
+        torch::as_array(set_loss_list[[set_name]])))
+  }
+  optimizer$zero_grad()
+  set_loss_list$subtrain$backward()
+  optimizer$step()
+}
+(loss_dt <- rbindlist(loss_dt_list))
+
+(min_dt <- loss_dt[, .SD[which.min(value)], by=.(variable,set_name)])
+ggplot()+
+  geom_line(aes(
+    epoch, value, color=set_name),
+    data=loss_dt)+
+  geom_point(aes(
+    epoch, value, color=set_name),
+    shape=21,
+    fill="white",
+    data=min_dt)+
+  facet_grid(variable ~ ., scales="free")
+```
+
+The results above show that the best validation error is about 16%,
+around 300 epochs.
+
+## Comparison with glmnet
+
+Another implementation of linear models is given in the glmnet
+package, which has automatic parameter tuning.
+
+```{r}
+subtrain.X <- ex.X.mat[set_vec=="subtrain",]
+ex.y.fac <- factor(torch::as_array(ex.y.tensor))
+subtrain.y <- ex.y.fac[set_vec=="subtrain"]
+fit_glmnet <- glmnet::glmnet(subtrain.X, subtrain.y, family="multinomial")
+pred_glmnet <- predict(fit_glmnet, ex.X.mat, type="class")
+err_glmnet_mat <- pred_glmnet != ex.y.fac
+
+err_glmnet_dt_list <- list()
+for(set_name in set_names){
+  err_glmnet_dt_list[[set_name]] <- data.table(
+    set_name=factor(set_name, set_names),
+    penalty=fit_glmnet$lambda,
+    complexity=-log10(fit_glmnet$lambda),
+    error_percent=colMeans(err_glmnet_mat[set_vec==set_name,])*100)
+}
+err_glmnet_dt <- rbindlist(err_glmnet_dt_list)
+(min_glmnet_dt <- err_glmnet_dt[, .SD[which.min(error_percent)], by=set_name])
+ggplot()+
+  geom_line(aes(
+    complexity, error_percent, color=set_name),
+    data=err_glmnet_dt)+
+  geom_point(aes(
+    complexity, error_percent, color=set_name),
+    data=min_glmnet_dt,
+    shape=21,
+    fill="white")+
+  scale_x_log10()
+```
+
+The figure above shows that the min validation error is about 23%,
+slightly larger than the torch linear model.
 
 ## torch convolutional neural network
 
@@ -222,19 +342,20 @@ The code below converts each data set of interest to a Task.
 
 ```{r}
 task.list <- list()
-for(other.name in other.name.vec){
+for(other.name in c("EMNIST_rot","FashionMNIST")){
   ipair.dt.list <- list()
   for(Data in c(other.name,"MNIST")){
     one.dt <- data.list[[Data]][,-1][, y := factor(y)][]
     setnames(one.dt, c("y", paste0("X", names(one.dt)[-1])))
     ipair.dt.list[[Data]] <- data.table(Data, one.dt)
   }
-  ipair.dt <- rbindlist(ipair.dt.list)
+  ipair.dt <- rbindlist(ipair.dt.list, use.names=FALSE)
   ipair.name <- paste0("MNIST_",other.name)
   itask <- mlr3::TaskClassif$new(
     ipair.name, ipair.dt, target="y")
   itask$col_roles$stratum <- "y"
   itask$col_roles$subset <- "Data"
+  itask$col_roles$feature <- paste0("X",seq(0,n.pixels^2-1))
   task.list[[ipair.name]] <- itask
 }
 task.list
@@ -247,7 +368,7 @@ has two subsets.
   half FashionMNIST images (clothing). It should not be possible to
   get good accuracy when training on MNIST and predicting on
   FashionMNIST.
-* `MNIST_EMNIST` has two subsets: half MNIST images (digits), half
+* `MNIST_EMNIST_rot` has two subsets: half MNIST images (digits), half
   EMNIST images (also digits), so it may be possible to get good
   prediction, even though the two data sets have different
   pre-processing methods (slightly different position / size of digit
@@ -259,21 +380,22 @@ tensors. And we need `nn_head` pipeop at the end of the network,
 before `torch_loss`?
 
 ```{r}
-library(mlr3pipelines)
-library(mlr3torch)
-graph <- po("select", selector = selector_type(c("numeric", "integer"))) %>>%
-  po("torch_ingress_num") %>>%
-  po("nn_reshape", shape=c(-1,1,n.pixels,n.pixels)) %>>%
-  po("nn_conv2d_1", out_channels = 20, kernel_size = 3) %>>%
-  po("nn_relu_1", inplace = TRUE) %>>%
-  po("nn_max_pool2d_1", kernel_size = 2) %>>%
-  po("nn_flatten") %>>%
-  po("nn_linear", out_features = 100) %>>%
-  po("nn_head") %>>%
-  po("torch_loss", t_loss("cross_entropy")) %>>%
-  po("torch_optimizer", t_opt("sgd", lr=0.01)) %>>%
-  po("torch_model_classif", batch_size = 32, epochs = 2L)
-glearner <- as_learner(graph)
+po_list <- list(
+  mlr3pipelines::po("select", selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
+  ##mlr3pipelines::po("torch_ingress_num"),
+  mlr3torch::PipeOpTorchIngressNumeric$new(),
+  mlr3pipelines::po("nn_reshape", shape=c(-1,1,n.pixels,n.pixels)),
+  mlr3pipelines::po("nn_conv2d_1", out_channels = 20, kernel_size = 3),
+  mlr3pipelines::po("nn_relu_1", inplace = TRUE),
+  mlr3pipelines::po("nn_max_pool2d_1", kernel_size = 2),
+  mlr3pipelines::po("nn_flatten"),
+  mlr3pipelines::po("nn_linear", out_features = 100),
+  mlr3pipelines::po("nn_head"),
+  mlr3pipelines::po("torch_loss", mlr3torch::t_loss("cross_entropy")),
+  mlr3pipelines::po("torch_optimizer", mlr3torch::t_opt("sgd", lr=0.01)),
+  mlr3pipelines::po("torch_model_classif", batch_size = 32, epochs = 2L))
+graph <- Reduce(mlr3pipelines::concat_graphs, po_list)
+glearner <- mlr3::as_learner(graph)
 ```
 
 [`TaskClassif_mnist.R`](https://github.com/mlr-org/mlr3torch/blob/main/R/TaskClassif_mnist.R) says that image should be a lazy list column?
@@ -295,18 +417,18 @@ my.df <- data.frame(y=factor(1:N.classes), my.X.mat)
 my.task <- mlr3::TaskClassif$new("MyTask", my.df, target="y")
 library(mlr3pipelines)
 library(mlr3torch)
-graph <- po("select", selector = selector_type(c("numeric", "integer"))) %>>%
-  po("torch_ingress_num") %>>%
-  po("nn_reshape", shape=c(-1,1,N.pixels,N.pixels)) %>>%
-  po("nn_conv2d_1", out_channels = 20, kernel_size = 3) %>>%
-  po("nn_relu_1", inplace = TRUE) %>>%
-  po("nn_max_pool2d_1", kernel_size = 2) %>>%
-  po("nn_flatten") %>>%
-  po("nn_linear", out_features = 100) %>>%
-  po("nn_head") %>>%
-  po("torch_loss", t_loss("cross_entropy")) %>>%
-  po("torch_optimizer", t_opt("sgd", lr=0.01)) %>>%
-  po("torch_model_classif", batch_size = 25, epochs = 2L)
+graph <- mlr3pipelines::po("select", selector = selector_type(c("numeric", "integer"))),
+  mlr3pipelines::po("torch_ingress_num"),
+  mlr3pipelines::po("nn_reshape", shape=c(-1,1,N.pixels,N.pixels)),
+  mlr3pipelines::po("nn_conv2d_1", out_channels = 20, kernel_size = 3),
+  mlr3pipelines::po("nn_relu_1", inplace = TRUE),
+  mlr3pipelines::po("nn_max_pool2d_1", kernel_size = 2),
+  mlr3pipelines::po("nn_flatten"),
+  mlr3pipelines::po("nn_linear", out_features = 100),
+  mlr3pipelines::po("nn_head"),
+  mlr3pipelines::po("torch_loss", t_loss("cross_entropy")),
+  mlr3pipelines::po("torch_optimizer", t_opt("sgd", lr=0.01)),
+  mlr3pipelines::po("torch_model_classif", batch_size = 25, epochs = 2L)
 graph$train(my.task)
 graph$predict(my.task)
 ```
@@ -413,7 +535,7 @@ So below is the mlr3torch version,
 mlr3torch_AUM_loss = mlr3torch::TorchLoss$new(
   torch_loss = nn_AUM_loss,
   task_types = "classif")
-po_AUM <- mlr3pipelines::po("torch_loss", mlr3torch_AUM_loss)
+po_AUM <- mlr3pipelines::mlr3pipelines::po("torch_loss", mlr3torch_AUM_loss)
 ```
 
 ## Conclusions
