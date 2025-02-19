@@ -180,15 +180,15 @@ atime_list <- atime::atime(
 ```
 
 ``` r
-plot(atime_list)
+plot(atime_list)+
+  ggplot2::scale_x_log10(
+    breaks=2^seq(1,5),
+    limits=c(2,100))
 ```
 
 ```
-## Le chargement a nécessité le package : ggplot2
-```
-
-```
-## Le chargement a nécessité le package : directlabels
+## Scale for x is already present.
+## Adding another scale for x, which will replace the existing scale.
 ```
 
 ![plot of chunk plot-atime](/assets/img/2025-02-19-linear-vs-quadratic-pipe-ops/plot-atime-1.png)

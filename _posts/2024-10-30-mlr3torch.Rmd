@@ -99,7 +99,7 @@ pseq <- 1:n.pixels
 
 We can visualize the images by using the ggplot code below.
 
-```{r}
+```{r plot-images}
 library(ggplot2)
 ggplot()+
   theme_bw()+
@@ -117,7 +117,7 @@ We see in the image above that the EMNIST digits are transposed
 (rotated 90 degrees and flipped) with respect to the MNIST digits.
 Correction below.
 
-```{r}
+```{r plot-EMNIST-rot}
 data.list$EMNIST_rot <- data.list$EMNIST[,c(
   1,2,as.integer(matrix(seq(1,n.pixels^2),n.pixels,n.pixels,byrow=TRUE))+2
 ),with=FALSE]
@@ -210,7 +210,7 @@ table(set_vec, torch::as_array(ex.y.tensor))
 
 Then we can use a gradient descent learning for loop,
 
-```{r}
+```{r plot-torch-linear}
 n.epochs <- 1000
 optimizer <- torch::optim_sgd(seq_linear_model$parameters, lr=0.1)
 loss_dt_list <- list()
@@ -255,9 +255,11 @@ around 300 epochs.
 ## Comparison with glmnet
 
 Another implementation of linear models is given in the glmnet
-package, which has automatic parameter tuning.
+package, which has automatic regularization parameter tuning via the
+`cv.glmnet` function, but below we use the `glmnet` function for a
+more direct comparison with what we did using torch above.
 
-```{r}
+```{r plot-glmnet}
 subtrain.X <- ex.X.mat[set_vec=="subtrain",]
 ex.y.fac <- factor(torch::as_array(ex.y.tensor))
 subtrain.y <- ex.y.fac[set_vec=="subtrain"]
@@ -316,7 +318,45 @@ seq_conv_model$parameters[[2]]$grad
 ```
 
 The output above indicates a gradient has been computed for the
-convolutional network.
+convolutional network. Below we do the learning loop,
+
+```{r}
+n.epochs <- 100
+optimizer <- torch::optim_sgd(seq_conv_model$parameters, lr=0.1)
+conv_loss_dt_list <- list()
+for(epoch in 1:n.epochs){
+  set_loss_list <- list()
+  for(set_name in set_names){
+    is_set <- set_vec==set_name
+    set_pred <- seq_conv_model(ex.X.tensor[is_set,,,])
+    set_y <- ex.y.tensor[is_set]
+    is_error <- set_y != set_pred$argmax(dim=2)
+    N_errors <- torch::as_array(is_error$sum())
+    set_loss_list[[set_name]] <- celoss(set_pred, set_y)
+    conv_loss_dt_list[[paste(epoch, set_name)]] <- data.table(
+      epoch, set_name=factor(set_name, set_names),
+      variable=c("error_percent","loss"),
+      value=c(
+        100*N_errors/length(is_error),
+        torch::as_array(set_loss_list[[set_name]])))
+  }
+  optimizer$zero_grad()
+  set_loss_list$subtrain$backward()
+  optimizer$step()
+}
+(conv_loss_dt <- rbindlist(conv_loss_dt_list))
+(conv_min_dt <- conv_loss_dt[, .SD[which.min(value)], by=.(variable,set_name)])
+ggplot()+
+  geom_line(aes(
+    epoch, value, color=set_name),
+    data=conv_loss_dt)+
+  geom_point(aes(
+    epoch, value, color=set_name),
+    shape=21,
+    fill="white",
+    data=conv_min_dt)+
+  facet_grid(variable ~ ., scales="free")
+```
 
 ## mlr3torch
 
