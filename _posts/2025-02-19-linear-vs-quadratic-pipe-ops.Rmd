@@ -1,0 +1,167 @@
+---
+layout: post
+title: Are pipe operations linear or quadratic?
+description: A demonstration of atime on mlr3torch
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-02-19-linear-vs-quadratic-pipe-ops"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+conda.env <- "2023-08-deep-learning"
+conda.env <- "torch-aum"
+RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
+  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
+  "/home/tdhock/miniconda3/envs/%s/bin/python"
+  else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
+Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
+##reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to explain how to use
+[atime](https://github.com/tdhock/atime), my R package for asymptotic
+benchmarking, to determine the asymptotic complexity of pipe
+operations in mlr3.
+
+## Background: mlr3pipelines man page
+
+mlr3 is a framework for machine learning in R.  One related package is
+mlr3pipelines, which makes it easy to create "pipelines" of operations
+related to machine learning model training (feature selection,
+etc). To create a pipeline we use the `%>>%` operator; its documentation on
+`help("%>>%",package="mlr3pipelines")` says
+
+```
+%>>% always creates deep copies of its input arguments, so they
+cannot be modified by reference afterwards. To access individual
+‘PipeOp’s after composition, use the resulting ‘Graph’'s $pipeops
+list. %>>!%, on the other hand, tries to avoid cloning its first
+argument: If it is a ‘Graph’, then this ‘Graph’ will be modified
+in-place.
+
+When %>>!% fails, then it leaves ‘g1’ in an incompletely modified
+state. It is therefore usually recommended to use %>>%, since the
+very marginal gain of performance from using %>>!% often does not
+outweigh the risk of either modifying objects by-reference that
+should not be modified or getting graphs that are in an
+incompletely modified state. However, when creating long ‘Graph’s,
+chaining with %>>!% instead of %>>% can give noticeable
+performance benefits because %>>% makes a number of
+‘clone()’-calls that is quadratic in chain length, %>>!% only
+linear.
+```
+
+The man page above indicates that there are two operators which can be
+used to create a pipeline:
+
+* `%>>%` copies its arguments and is supposed to be quadratic time,
+* `%>>!%` avoids copies and is supposed to be linear time.
+
+The goal of this post is to use atime to verify these claims.
+
+## Test
+
+First we list available pipe ops:
+
+```{r}
+mlr3pipelines::po()
+```
+
+Below, we combine a few instances of the first operation shown above:
+
+```{r}
+po_list <- list(
+  mlr3pipelines::po("adas_1"),
+  mlr3pipelines::po("adas_2"))
+Reduce(mlr3pipelines::`%>>%`, po_list)
+Reduce(mlr3pipelines::`%>>!%`, po_list)
+```
+
+We see above that the two results are consistent.  Note that we use
+`Reduce` with a list of pipe operations, to avoid attaching,
+`library(mlr3pipelines)` (easier to see which objects are defined in
+which packages).
+
+## Verification
+
+One way to test would be to use binary operators, as below:
+
+```{r}
+FUN_names <- paste0("%>>",c("","!"),"%")
+FUN_list <- lapply(FUN_names, getFromNamespace, "mlr3pipelines")
+names(FUN_list) <- FUN_names
+(expr.list.binary <- atime::atime_grid(
+  list(FUN=FUN_names),
+  binary=Reduce(FUN_list[[FUN]], po_list)))
+```
+
+Another way would be to use the `concat_graphs` function, as below:
+
+```{r}
+(expr.list.concat <- atime::atime_grid(
+  list(in_place=c(TRUE,FALSE)),
+  concat=Reduce(
+    function(x,y)mlr3pipelines::concat_graphs(x,y,in_place=in_place),
+    po_list)))
+```
+
+We can test both by combining the lists in the code below:
+
+```{r plot-atime}
+atime_list <- atime::atime(
+  setup={
+    po_list <- lapply(
+      paste0("adas_", 1:N),
+      mlr3pipelines::po)
+  },
+  expr.list=c(expr.list.binary, expr.list.concat),
+  seconds.limit=1)
+plot(atime_list)+
+  ggplot2::scale_x_log10(
+    breaks=2^seq(1,5),
+    limits=c(2,100))
+```
+
+From the figure above, we see that there are two different slopes on the log-log plot:
+
+* `binary FUN=%>>%` and `concat in_place=FALSE` have larger slope.
+* `binary FUN=%>>!%` and `concat in_place=TRUE` have smaller slope.
+
+We estimate the asymptotic complexity class via the code below,
+
+
+```{r plot-refs}
+atime_refs <- atime::references_best(atime_list)
+plot(atime_refs)
+```
+
+The figure above suggests that
+
+* `binary FUN=%>>%` and `concat in_place=FALSE` have quadratic `N^2` time complexity
+* `binary FUN=%>>!%` and `concat in_place=TRUE` have linear `N` time complexity,
+
+where `N` is the number of operations in the pipeline.
+
+## Conclusions
+
+We have used atime to verify the linear/quadratic time complexity
+claims in the mlr3pipelines package.
+
+## Session info
+
+```{r}
+sessionInfo()
+```
