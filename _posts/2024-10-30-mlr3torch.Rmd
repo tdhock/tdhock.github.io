@@ -208,6 +208,7 @@ set_vec <- rep(set_names, l=nrow(ex.dt))
 table(set_vec, torch::as_array(ex.y.tensor))
 ```
 
+The table above shows that there are about an equal number of observations in each class and set.
 Then we can use a gradient descent learning for loop,
 
 ```{r plot-torch-linear}
