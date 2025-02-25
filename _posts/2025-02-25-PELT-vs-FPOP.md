@@ -176,7 +176,6 @@ ggplot()+
   geom_point(aes(
     data_index, data_value),
     color="grey50",
-    shape=1,
     data=sim_data)+
   facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
   scale_x_continuous(
@@ -397,7 +396,6 @@ ggplot()+
   scale_color_manual(values=algo.colors)+
   geom_point(aes(
     data_index, candidates, color=algo),
-    shape=1,
     data=pelt_info)+
   facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
   scale_x_continuous(
@@ -525,7 +523,6 @@ ggplot()+
   scale_color_manual(values=algo.colors)+
   geom_point(aes(
     data_index, candidates, color=algo),
-    shape=1,
     data=both_info)+
   facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
   scale_x_continuous(
