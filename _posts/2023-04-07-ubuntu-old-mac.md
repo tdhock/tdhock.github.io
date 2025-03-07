@@ -50,12 +50,16 @@ to firefox.
 
 Settings, trackpad, natural scrolling off.
 
+settings, accessibilité, Vision, Grand texte.
+
+screenshot is FN then S on HP laptop keyboard, goes to clipboard and ~/Images/Captures d'écran.
+
 ```
 sudo snap install emacs
 sudo apt install git gnome-tweak-tool
 ```
 
-[Caps lock is another control key](https://askubuntu.com/questions/33774/how-do-i-remap-the-caps-lock-and-ctrl-keys). gnome-tweaks -> Keyboard & Mouse -> Additional Layout Options, Ctrl position, Caps Lock as Ctrl.
+[Caps lock is another control key](https://askubuntu.com/questions/33774/how-do-i-remap-the-caps-lock-and-ctrl-keys). gnome-tweaks -> Keyboard & Mouse -> Additional Layout Options, Ctrl position, Caps Lock as Ctrl. In French this is Clavier -> Options supplémentaires d'agencement -> Position de Ctrl -> Verr. Maj. comme Ctrl.
 
 Region and Language, Manage installed languages, install,
 install/remove languages, French check mark, apply, logout,
