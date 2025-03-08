@@ -50,12 +50,16 @@ to firefox.
 
 Settings, trackpad, natural scrolling off.
 
+settings, accessibilité, Vision, Grand texte.
+
+screenshot is FN then S on HP laptop keyboard, goes to clipboard and ~/Images/Captures d'écran.
+
 ```
 sudo snap install emacs
 sudo apt install git gnome-tweak-tool
 ```
 
-[Caps lock is another control key](https://askubuntu.com/questions/33774/how-do-i-remap-the-caps-lock-and-ctrl-keys). gnome-tweaks -> Keyboard & Mouse -> Additional Layout Options, Ctrl position, Caps Lock as Ctrl.
+[Caps lock is another control key](https://askubuntu.com/questions/33774/how-do-i-remap-the-caps-lock-and-ctrl-keys). gnome-tweaks -> Keyboard & Mouse -> Additional Layout Options, Ctrl position, Caps Lock as Ctrl. In French this is Clavier -> Options supplémentaires d'agencement -> Position de Ctrl -> Verr. Maj. comme Ctrl.
 
 Region and Language, Manage installed languages, install,
 install/remove languages, French check mark, apply, logout,
@@ -207,6 +211,18 @@ NAU VPN
 ```
 sudo apt install network-manager-openconnect-gnome
 ```
+
+Up until Mar 2025, I used to be able to do two-step VPN auth in Ubuntu
+directly, by creating an entry in Settings, Network, VPN, Identity,
+Gateway=vpn.nau.edu or rpv.usherbrooke.ca, then when connecting it
+would give two password fields. First one for typed/keyboard password,
+second password is two-factor auth, which is either the six-digit code
+from the app/dongle, or the word "push" which sends a message to the
+app which must be approved. This [SO
+post](https://askubuntu.com/questions/1495653/networkmanager-does-not-support-2fa-totp-for-openconnect-anyconnect-vpn)
+explains a work around for the recent bug, but I found it was easier
+to just use Windows Key, Cisco Secure Client, Connect to: vpn.nau.edu
+or rpv.usherbrooke.ca, Connect.
 
 get private key
 
