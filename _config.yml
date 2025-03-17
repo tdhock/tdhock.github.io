@@ -2,7 +2,7 @@
 # Site settings
 # -----------------------------------------------------------------------------
 name: Toby Dylan Hocking
-email: toby.hocking@nau.edu
+email: toby.dylan.hocking@usherbrooke.ca
 description: > # this means to ignore newlines until "url:"
   Statistical machine learning researcher working on fast optimization algorithms for large data.
 
