@@ -113,7 +113,12 @@ type2long <- c(
   phdthesis="PHD thesis")
 knitr::kable(
   refs.wide[, .(count=.N), by=.(Type=type2long[type])][order(-count)],
-   format = "html", table.attr = "style='width:30%;'")#from https://stackoverflow.com/questions/41900335/adjusting-width-of-tables-made-with-kable-in-rmarkdown-documents
+  format = "html", table.attr = "style='width:30%;'")#from https://stackoverflow.com/questions/41900335/adjusting-width-of-tables-made-with-kable-in-rmarkdown-documents
+suppressMessages({
+  for(pkg in c("magick","nc")){
+    if(!requireNamespace(pkg))install.packages(pkg)
+  }
+})
 for(large.png in Sys.glob("../assets/img/publications/*.png")){
   thumb.png <- file.path(
     dirname(large.png),
