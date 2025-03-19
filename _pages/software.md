@@ -59,7 +59,11 @@ ROC-AUC), we created the [aum](https://github.com/tdhock/aum) R
 package which has a C++ implementation of directional derivatives, and
 a [python torch
 function](https://tdhock.github.io/blog/2022/torch-auto-grad-non-diff/)
-which can be used with automatic differentiation.
+which can be used with automatic differentiation. See also my
+explanations of how to code the AUM loss in torch using the ROC curve
+as a sub-routine:
+[python](https://tdhock.github.io/blog/2024/torch-roc-aum/),
+[R](https://tdhock.github.io/blog/2024/auto-grad-overhead/)
 
 ### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
 
