@@ -13,10 +13,12 @@ knitr::opts_chunk$set(
   fig.path=fig.path,
   fig.width=10,
   fig.height=6)
-Sys.setenv(RETICULATE_PYTHON=if(.Platform$OS.type=="unix")
-  "/home/tdhock/.local/share/r-miniconda/envs/cs570s22/bin/python"
-  else "~/Miniconda3/envs/cs570s22/python.exe")
-reticulate::use_condaenv("cs570s22", required=TRUE)
+conda.env <- "2023-08-deep-learning"
+Sys.setenv(RETICULATE_PYTHON=file.path(
+  "~/miniconda3/envs",
+  conda.env,
+  "bin/python"))
+reticulate::use_condaenv(conda.env, required=TRUE)
 in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
 in_knit <- isTRUE(getOption('knitr.in.progress'))
 if(FALSE){
@@ -74,7 +76,10 @@ source code.
 Below I wrote an implementation of our AUM loss function, 
 
 ```{python}
+import sys
+sys.version
 import torch
+torch.__version__
 def AUM(pred_tensor, label_tensor):
     """Area Under Min(FP,FN)
 
@@ -198,6 +203,13 @@ may be points at which there are no subgradients. Some are used as
 What does auto-grad return in that case? (exercise for the reader)
 
 Update Aug 2024. The `AUM` function above uses the minimum of total FP and FN, whereas there now is a more complete python AUM implementation which can use rates (FPR/FNR) rather than totals.
-
 * [rate only](https://github.com/tdhock/max-generalized-auc/blob/master/data_Classif.py#L41)
 * [count total or rate](https://github.com/tdhock/max-generalized-auc/blob/master/figure-aum-neural-networks-data.py#L83)
+
+## Update March 2025
+
+See also my explanations of how to code the AUM loss in torch using
+the ROC curve as a sub-routine:
+[python](https://tdhock.github.io/blog/2024/torch-roc-aum/),
+[R](https://tdhock.github.io/blog/2024/auto-grad-overhead/)
+

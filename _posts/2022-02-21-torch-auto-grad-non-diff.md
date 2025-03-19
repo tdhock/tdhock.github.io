@@ -29,8 +29,25 @@ source code.
 Below I wrote an implementation of our AUM loss function, 
 
 
-```python
+``` python
+import sys
+sys.version
+```
+
+```
+## '3.11.4 (main, Jul  5 2023, 13:57:38) [GCC 11.2.0]'
+```
+
+``` python
 import torch
+torch.__version__
+```
+
+```
+## '2.6.0+cpu'
+```
+
+``` python
 def AUM(pred_tensor, label_tensor):
     """Area Under Min(FP,FN)
 
@@ -64,7 +81,7 @@ automatically computed gradient from torch with the directional
 derivatives described in our paper, we can use the backward method,
 
 
-```python
+``` python
 def loss_grad(pred_vec, label_vec):
     pred_tensor = torch.tensor(pred_vec)
     pred_tensor.requires_grad = True
@@ -79,7 +96,7 @@ def loss_grad(pred_vec, label_vec):
 Let us consider an example from the aum R package,
 
 
-```r
+``` r
 bin.diffs <- aum::aum_diffs_binary(c(0,1))
 aum::aum(bin.diffs, c(-10,10))
 ```
@@ -105,7 +122,7 @@ we have AUM=0 and directional derivatives are also zero. That is also
 seen in the python code below:
 
 
-```python
+``` python
 y_list = [0, 1]
 loss_grad([-10.0, 10.0], y_list)
 ```
@@ -118,7 +135,7 @@ Another example is for the same labels but the opposite predicted
 values, for which the R code is below,
 
 
-```r
+``` r
 aum::aum(bin.diffs, c(10,-10))
 ```
 
@@ -146,7 +163,7 @@ example. Consistent results can be observed from the python code
 below,
 
 
-```python
+``` python
 loss_grad([10.0, -10.0], y_list)
 ```
 
@@ -166,7 +183,7 @@ One example, again taken from the aum R package, is when both
 predicted values are zero,
 
 
-```r
+``` r
 aum::aum(bin.diffs, c(0,0))
 ```
 
@@ -195,7 +212,7 @@ increasing the predicted value results in no change to AUM. Is the
 python torch auto-grad code consistent?
 
 
-```python
+``` python
 loss_grad([0.0, 0.0], y_list)
 ```
 
@@ -218,6 +235,13 @@ may be points at which there are no subgradients. Some are used as
 What does auto-grad return in that case? (exercise for the reader)
 
 Update Aug 2024. The `AUM` function above uses the minimum of total FP and FN, whereas there now is a more complete python AUM implementation which can use rates (FPR/FNR) rather than totals.
-
 * [rate only](https://github.com/tdhock/max-generalized-auc/blob/master/data_Classif.py#L41)
 * [count total or rate](https://github.com/tdhock/max-generalized-auc/blob/master/figure-aum-neural-networks-data.py#L83)
+
+## Update March 2025
+
+See also my explanations of how to code the AUM loss in torch using
+the ROC curve as a sub-routine:
+[python](https://tdhock.github.io/blog/2024/torch-roc-aum/),
+[R](https://tdhock.github.io/blog/2024/auto-grad-overhead/)
+
