@@ -428,6 +428,59 @@ has two subsets.
   prediction, even though the two data sets have different
   pre-processing methods (slightly different position / size of digit
   images).
+  
+### Define linear model in mlr3torch
+
+I understand from `?mlr3torch::PipeOpTorchIngressNumeric` that we need
+`po("torch_ingress_num")` to convert regular R features to torch
+tensors. And we need `nn_head` pipeop at the end of the network, which
+automatically determines the right number of output units, based on
+the loss function.
+
+```{r}
+po_list_linear_ce <- list(
+  mlr3pipelines::po(
+    "select",
+    selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
+  mlr3torch::PipeOpTorchIngressNumeric$new(),
+  mlr3pipelines::po("nn_head"),
+  mlr3pipelines::po(
+    "torch_loss",
+    mlr3torch::t_loss("cross_entropy")),
+  mlr3pipelines::po(
+    "torch_optimizer",
+    mlr3torch::t_opt("sgd", lr=step_size)),
+  mlr3pipelines::po(
+    "torch_model_classif",
+    batch_size = batch_size,
+    epochs = n.epochs))
+graph_linear_ce <- Reduce(mlr3pipelines::concat_graphs, po_list_linear_ce)
+(glearner_linear_ce <- mlr3::as_learner(graph_linear_ce))
+glearner_linear_ce$base_learner()
+```
+
+To configure the learner object above, we use the code below, adapted
+from
+https://mlr-org.github.io/mlr3torch-course/notebooks/6-mlr3torch.html
+
+```{r}
+measure_list <- mlr3::msrs(c("classif.logloss", "classif.ce"))
+glearner_linear_ce$configure(
+  validate = 0.5,
+  callbacks = mlr3torch::t_clbk("history"),
+  predict_type = "prob",
+  measures_valid = measure_list,
+  measures_train = measure_list)
+```
+
+The code below does the learning
+
+```{r}
+glearner_linear_ce$train(task.list$MNIST_FashionMNIST)
+bl_linear_ce$callbacks
+```
+
+### Define neural network in mlr3torch
 
 I understand from `?mlr3torch::PipeOpTorchIngressNumeric` that we need
 `po("torch_ingress_num")` to convert regular R features to torch
@@ -631,7 +684,7 @@ So below is the mlr3torch version,
 mlr3torch_AUM_loss = mlr3torch::TorchLoss$new(
   torch_loss = nn_AUM_loss,
   task_types = "classif")
-po_AUM <- mlr3pipelines::mlr3pipelines::po("torch_loss", mlr3torch_AUM_loss)
+po_AUM <- mlr3pipelines::po("torch_loss", mlr3torch_AUM_loss)
 ```
 
 ## Conclusions
@@ -643,3 +696,4 @@ TODO
 ```{r}
 sessionInfo()
 ```
+
