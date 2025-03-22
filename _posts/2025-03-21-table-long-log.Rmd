@@ -1,0 +1,86 @@
+---
+layout: post
+title: Cross-validation with neural networks
+description: Demonstration of mlr3torch + mlr3resampling
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2024-10-30-mlr3torch"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+conda.env <- "2023-08-deep-learning"
+conda.env <- "torch-aum"
+RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
+  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
+  "/home/tdhock/miniconda3/envs/%s/bin/python"
+  else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
+Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
+##reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to show how to use the mlr3torch package in R
+with AUM (Area Under Min of False Positive and False Negative rates,
+our newly Proposed surrogate loss for ROC curve optimization), in
+combination with the new cross-validation methods we proposed in our
+[SOAK paper](https://arxiv.org/abs/2410.08643).
+
+```{r}
+ was calling table() on some long logical vectors and noticed that it took a long time.
+
+Out of curiosity I checked the performance of table() on different types, and had some unexpected results:
+
+    C <- sample(c("yes", "no"), 10^7, replace = TRUE)
+    F <- factor(sample(c("yes", "no"), 10^7, replace = TRUE))
+    N <- sample(c(1,0), 10^7, replace = TRUE)
+    I <- sample(c(1L,0L), 10^7, replace = TRUE)
+    L <- sample(c(TRUE, FALSE), 10^7, replace = TRUE)
+
+                           # ordered by execution time
+                           #   user  system elapsed
+    system.time(table(F))  #  0.088   0.006   0.093
+    system.time(table(C))  #  0.208   0.017   0.224
+    system.time(table(I))  #  0.242   0.019   0.261
+    system.time(table(L))  #  0.665   0.015   0.680
+    system.time(table(N))  #  1.771   0.019   1.791
+
+
+The performance for Integers and specially booleans is quite surprising.
+After investigating the source of table, I ended up on the reason being “as.character()”:
+
+    system.time(as.character(L))
+     user  system elapsed       
+    0.461   0.002   0.462       
+
+Even a manual conversion can achieve a speed-up by a factor of ~7:
+
+    system.time(c("FALSE", "TRUE")[L+1])
+     user  system elapsed               
+    0.061   0.006   0.067               
+```
+
+## Introduction 
+
+TODO 
+
+## Conclusions
+
+TODO
+
+## Session info
+
+```{r}
+sessionInfo()
+```

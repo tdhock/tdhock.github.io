@@ -1,0 +1,149 @@
+## torch convolutional neural network
+
+Below we define a convolutional network.
+
+```{r}
+torch::torch_manual_seed(1)
+out_channels <- 20
+conv_kernel_size <- 3
+pool_kernel_size <- 2
+seq2flat <- torch::nn_sequential(
+  torch::nn_conv2d(
+    in_channels = 1,
+    out_channels = out_channels,
+    kernel_size = conv_kernel_size),
+  torch::nn_relu(),
+  torch::nn_max_pool2d(
+    kernel_size = pool_kernel_size),
+  torch::nn_flatten())
+two.flat <- seq2flat(two.X.tensor)
+n.flat <- ncol(two.flat)
+n.hidden.units <- 20
+seq_conv_model <- torch::nn_sequential(
+  seq2flat,
+  torch::nn_linear(n.flat, n.hidden.units),
+  torch::nn_relu(),
+  torch::nn_linear(n.hidden.units, n.classes))
+(seq_conv_model_pred <- seq_conv_model(two.X.tensor))
+seq_conv_model$parameters[[2]]$grad
+(seq_conv_model_loss = celoss(seq_conv_model_pred, two.y.tensor))
+seq_conv_model_loss$backward()
+seq_conv_model$parameters[[2]]$grad
+```
+
+The output above indicates a gradient has been computed for the
+convolutional network. Below we do the learning loop,
+
+```{r}
+optimizer <- torch::optim_sgd(seq_conv_model$parameters, lr=step_size)
+conv_loss_dt_list <- list()
+for(epoch in 1:n.epochs){
+  cat(sprintf("%4d / %4d epochs\n", epoch, n.epochs))
+  set_loss_list <- list()
+  for(set_name in set_names){
+    is_set <- set_vec==set_name
+    set_pred <- seq_conv_model(ex.X.tensor[is_set,,,])
+    set_y <- ex.y.tensor[is_set]
+    is_error <- set_y != set_pred$argmax(dim=2)
+    if(set_name=="subtrain"){
+      batch_size <- length(ex.y.tensor)
+    }
+    N_errors <- torch::as_array(is_error$sum())
+    set_loss_list[[set_name]] <- celoss(set_pred, set_y)
+    conv_loss_dt_list[[paste(epoch, set_name)]] <- data.table(
+      epoch, set_name=factor(set_name, set_names),
+      variable=c("error_percent","loss"),
+      value=c(
+        100*N_errors/length(is_error),
+        torch::as_array(set_loss_list[[set_name]])))
+  }
+  optimizer$zero_grad()
+  set_loss_list$subtrain$backward()
+  optimizer$step()
+}
+(conv_loss_dt <- rbindlist(conv_loss_dt_list))
+(conv_min_dt <- conv_loss_dt[, .SD[which.min(value)], by=.(variable,set_name)])
+ggplot()+
+  geom_line(aes(
+    epoch, value, color=set_name),
+    data=conv_loss_dt)+
+  geom_point(aes(
+    epoch, value, color=set_name),
+    shape=21,
+    fill="white",
+    data=conv_min_dt)+
+  facet_grid(variable ~ ., scales="free")
+```
+
+### Define neural network in mlr3torch
+
+I understand from `?mlr3torch::PipeOpTorchIngressNumeric` that we need
+`po("torch_ingress_num")` to convert regular R features to torch
+tensors. And we need `nn_head` pipeop at the end of the network,
+before `torch_loss`?
+
+```{r}
+po_list <- list(
+  mlr3pipelines::po(
+    "select",
+    selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
+  mlr3torch::PipeOpTorchIngressNumeric$new(),
+  mlr3pipelines::po(
+    "nn_reshape",
+    shape=c(-1,1,n.pixels,n.pixels)),
+  mlr3pipelines::po(
+    "nn_conv2d_1",
+    out_channels = out_channels,
+    kernel_size = conv_kernel_size),
+  mlr3pipelines::po("nn_relu_1", inplace = TRUE),
+  mlr3pipelines::po(
+    "nn_max_pool2d_1",
+    kernel_size = pool_kernel_size),
+  mlr3pipelines::po("nn_flatten"),
+  mlr3pipelines::po(
+    "nn_linear",
+    out_features = n.hidden.units),
+  mlr3pipelines::po("nn_head"),
+  mlr3pipelines::po(
+    "torch_loss",
+    mlr3torch::t_loss("cross_entropy")),
+  mlr3pipelines::po(
+    "torch_optimizer",
+    mlr3torch::t_opt("sgd", lr=step_size)),
+  mlr3pipelines::po(
+    "torch_model_classif",
+    batch_size = 32,
+    epochs = n.epochs))
+graph <- Reduce(mlr3pipelines::concat_graphs, po_list)
+(glearner <- mlr3::as_learner(graph))
+glearner$base_learner()
+```
+
+To use the configure method of the `glearner` object above, we need to
+load the mlr3tuning package:
+
+```{r}
+measure_list <- mlr3::msrs(c("classif.logloss", "classif.ce"))
+glearner$validate <- 0.5
+glearner$predict_type <- "prob"
+bl <- glearner$base_learner()
+bl$callbacks <- list(mlr3torch::t_clbk("history"))
+bl$param_set$values$measures_train <- measure_list
+bl$param_set$values$measures_valid <- measure_list
+glearner$base_learner()
+
+## glearner$configure( #https://github.com/mlr-org/mlr3torch-course/issues/3
+##   validate = 0.5,
+##   callbacks = mlr3torch::t_clbk("history"),
+##   predict_type = "prob",
+##   measures_valid = measure_list,
+##   measures_train = measure_list)
+
+```
+
+[`TaskClassif_mnist.R`](https://github.com/mlr-org/mlr3torch/blob/main/R/TaskClassif_mnist.R) says that image should be a lazy list column?
+
+Figure 5 from that paper shows that
+
+https://cran.r-project.org/web/packages/mlr3torch/readme/README.html
+

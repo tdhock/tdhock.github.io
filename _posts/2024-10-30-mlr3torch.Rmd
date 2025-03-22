@@ -296,84 +296,7 @@ ggplot()+
 The figure above shows that the min validation error is about 23%,
 slightly larger than the torch linear model.
 
-## torch convolutional neural network
-
-Below we define a convolutional network.
-
-```{r}
-torch::torch_manual_seed(1)
-out_channels <- 20
-conv_kernel_size <- 3
-pool_kernel_size <- 2
-seq2flat <- torch::nn_sequential(
-  torch::nn_conv2d(
-    in_channels = 1,
-    out_channels = out_channels,
-    kernel_size = conv_kernel_size),
-  torch::nn_relu(),
-  torch::nn_max_pool2d(
-    kernel_size = pool_kernel_size),
-  torch::nn_flatten())
-two.flat <- seq2flat(two.X.tensor)
-n.flat <- ncol(two.flat)
-n.hidden.units <- 20
-seq_conv_model <- torch::nn_sequential(
-  seq2flat,
-  torch::nn_linear(n.flat, n.hidden.units),
-  torch::nn_relu(),
-  torch::nn_linear(n.hidden.units, n.classes))
-(seq_conv_model_pred <- seq_conv_model(two.X.tensor))
-seq_conv_model$parameters[[2]]$grad
-(seq_conv_model_loss = celoss(seq_conv_model_pred, two.y.tensor))
-seq_conv_model_loss$backward()
-seq_conv_model$parameters[[2]]$grad
-```
-
-The output above indicates a gradient has been computed for the
-convolutional network. Below we do the learning loop,
-
-```{r}
-optimizer <- torch::optim_sgd(seq_conv_model$parameters, lr=step_size)
-conv_loss_dt_list <- list()
-for(epoch in 1:n.epochs){
-  cat(sprintf("%4d / %4d epochs\n", epoch, n.epochs))
-  set_loss_list <- list()
-  for(set_name in set_names){
-    is_set <- set_vec==set_name
-    set_pred <- seq_conv_model(ex.X.tensor[is_set,,,])
-    set_y <- ex.y.tensor[is_set]
-    is_error <- set_y != set_pred$argmax(dim=2)
-    if(set_name=="subtrain"){
-      batch_size <- length(ex.y.tensor)
-    }
-    N_errors <- torch::as_array(is_error$sum())
-    set_loss_list[[set_name]] <- celoss(set_pred, set_y)
-    conv_loss_dt_list[[paste(epoch, set_name)]] <- data.table(
-      epoch, set_name=factor(set_name, set_names),
-      variable=c("error_percent","loss"),
-      value=c(
-        100*N_errors/length(is_error),
-        torch::as_array(set_loss_list[[set_name]])))
-  }
-  optimizer$zero_grad()
-  set_loss_list$subtrain$backward()
-  optimizer$step()
-}
-(conv_loss_dt <- rbindlist(conv_loss_dt_list))
-(conv_min_dt <- conv_loss_dt[, .SD[which.min(value)], by=.(variable,set_name)])
-ggplot()+
-  geom_line(aes(
-    epoch, value, color=set_name),
-    data=conv_loss_dt)+
-  geom_point(aes(
-    epoch, value, color=set_name),
-    shape=21,
-    fill="white",
-    data=conv_min_dt)+
-  facet_grid(variable ~ ., scales="free")
-```
-
-## mlr3torch
+## mlr3torch linear models
 
 The mlr3torch package provides an alternative way of defining torch
 models, using the
@@ -429,13 +352,98 @@ has two subsets.
   pre-processing methods (slightly different position / size of digit
   images).
   
-### Define linear model in mlr3torch
+### Define linear model using mlr3 MLP learner
 
+To define a torch linear model in the mlr3 framework,
+[@sebffischer](https://github.com/mlr-org/mlr3torch/issues/364#issuecomment-2742682366)
+advised me to first define a MLP, designating the number of epochs to
+tune, with patience equal to the number of total epochs (meaning it
+will always go up to the total number of epochs). Docs for this are in
+[mlr3 book chapter
+15](https://mlr3book.mlr-org.com/chapters/chapter15/predsets_valid_inttune.html),
+which explains about internal tuning via parameters like
+`early_stopping_rounds` and `patience`.
+
+```{r}
+measure_list <- mlr3::msrs(c("classif.logloss", "classif.ce"))
+mlp_learner = mlr3::lrn("classif.mlp",
+  epochs = paradox::to_tune(upper = n.epochs, internal = TRUE),
+  measures_train = measure_list,
+  measures_valid = measure_list,
+  patience = n.epochs,
+  optimizer = mlr3torch::t_opt("sgd", lr = step_size),
+  callbacks = mlr3torch::t_clbk("history"),
+  batch_size = N.images,
+  validate = 0.5,
+  predict_type = "prob")
+mlp_learner$predict_sets = NULL
+```
+
+Below we create an auto tuner learner based on the MLP learner,
+instructing it to use the (first) internal validation score as the
+measure to optimize.
+
+```{r}
+mlp_learner_auto = mlr3tuning::auto_tuner(
+  learner = mlp_learner,
+  tuner = mlr3tuning::tnr("internal"),
+  resampling = mlr3::rsmp("insample"),# the train/valid split is handled by the learner itself
+  measure = mlr3::msr("internal_valid_score", minimize = TRUE),# for the optimal model we will use the internal validation score computed during training
+  term_evals = 1,# early stopping just needs a single run
+  store_models = TRUE)# so we can access the history afterwards
+mlp_learner_auto$train(task.list$MNIST_FashionMNIST)
+mlp_learner_auto$model$learner$model$network
+```
+
+Below we reshape and plot the epoch-specific measures which were used
+to select the best number of epochs:
+
+```{r plot-mlp}
+pat <- function(...){
+  old2new <- c(...)
+  if(is.null(names(old2new))){
+    names(old2new) <- old2new
+  }
+  to.rep <- names(old2new)==""
+  names(old2new)[to.rep] <- old2new[to.rep]
+  list(
+    paste(names(old2new), collapse="|"),
+    function(x)factor(old2new[x], old2new))
+}
+melt_history <- function(DT)nc::capture_melt_single(
+  DT,
+  set=pat(valid="validation", train="subtrain"),
+  ".classif.",
+  measure=pat(ce="error_prop", auc="AUC", "logloss"))
+(measure_long <- melt_history(
+  mlp_learner_auto$archive$learners(1)[[1L]]$model$callbacks$history))
+(selected_row <- as.data.table(
+  mlp_learner_auto$tuning_result$internal_tuned_values[[1]]))
+ggplot()+
+  facet_grid(measure ~ ., scales="free")+
+  geom_vline(aes(
+    xintercept=epochs),
+    data=selected_row)+
+  geom_line(aes(
+    epoch, value, color=set),
+    data=measure_long)
+```
+
+The figure above has learning curves that look reasonable.
+
+### Define mlr3 linear model using pipe operations
+
+A more flexible way of defining a neural network involves pipe
+operations, as explained in
+[mlr3torch-course-ch6](https://mlr-org.github.io/mlr3torch-course/notebooks/6-mlr3torch.html)
+explains how to mlr3torch pipe operations to define a neural network.
 I understand from `?mlr3torch::PipeOpTorchIngressNumeric` that we need
 `po("torch_ingress_num")` to convert regular R features to torch
 tensors. And we need `nn_head` pipeop at the end of the network, which
 automatically determines the right number of output units, based on
-the loss function.
+the loss function. Whereas the mlr3 docs suggest using `%>>%` to
+combine pipe operations, I use a list/Reduce below, to emphasize which
+functions are defined in which packages.
 
 ```{r}
 po_list_linear_ce <- list(
@@ -451,216 +459,100 @@ po_list_linear_ce <- list(
     "torch_optimizer",
     mlr3torch::t_opt("sgd", lr=step_size)),
   mlr3pipelines::po(
+    "torch_callbacks",
+    mlr3torch::t_clbk("history")),
+  mlr3pipelines::po(
     "torch_model_classif",
-    callbacks = mlr3torch::t_clbk("history"),
-    batch_size = batch_size,
-    epochs = n.epochs))
+    batch_size = N.images,
+    patience=n.epochs,
+    measures_valid=measure_list,
+    measures_train=measure_list,
+    predict_type="prob",
+    epochs = paradox::to_tune(upper = n.epochs, internal = TRUE)))
+(graph_linear_ce <- Reduce(mlr3pipelines::concat_graphs, po_list_linear_ce))
+```
 
-graph_linear_ce <- Reduce(mlr3pipelines::concat_graphs, po_list_linear_ce)
+Code above defines the graph learner object, and code below converts
+it to a learner object. Note the `set_validate` is important to use
+with pipe operations, to avoid some errors.
+
+```{r}
 (glearner_linear_ce <- mlr3::as_learner(graph_linear_ce))
+mlr3::set_validate(glearner_linear_ce, validate = 0.5)
+glearner_linear_ce$predict_sets = NULL
 ```
 
-To configure the learner object above, we use the code below, adapted
-from
-* https://mlr-org.github.io/mlr3torch-course/notebooks/6-mlr3torch.html
-  which explains how to mlr3torch pipe operations to define a neural network, and
-* https://mlr3book.mlr-org.com/chapters/chapter15/predsets_valid_inttune.html
-  which explains about internal tuning via parameters like
-  `early_stopping_rounds` and `patience`.
+The code below defines an auto tuner based on the graph learner above. 
+It is the same as the corresponding code in the previous section with the MLP.
 
 ```{r}
-measure_list <- mlr3::msrs(c("classif.logloss", "classif.ce"))
-glearner_linear_ce$configure(
-  validate = 0.5,
-  predict_type = "prob",
-  ##torch_model_classif.patience=10,
-  torch_model_classif.measures_valid = measure_list,
-  torch_model_classif.measures_train = measure_list)
+glearner_auto = mlr3tuning::auto_tuner(
+  learner = glearner_linear_ce,
+  tuner = mlr3tuning::tnr("internal"),
+  resampling = mlr3::rsmp("insample"),
+  measure = mlr3::msr("internal_valid_score", minimize = TRUE),
+  term_evals = 1,
+  store_models = TRUE)
+glearner_auto$train(task.list$MNIST_FashionMNIST)
+glearner_auto$base_learner()$model$network
 ```
 
-The code below does the learning
+After training above, we visualize the model training below.
 
-```{r}
-glearner_linear_ce$train(task.list$MNIST_FashionMNIST)
-glearner_linear_ce$model$callbacks$history
-bl_linear_ce$model$callbacks$history
+```{r plot-pipe}
+glearner_model <- glearner_auto$archive$learners(1)[[1]]$model
+(glearner_long <- melt_history(
+  glearner_model$torch_model_classif$model$callbacks$history))
+(glearner_selected <- as.data.table(
+  glearner_auto$tuning_result$internal_tuned_values[[1]]))
+ggplot()+
+  facet_grid(measure ~ ., scales="free")+
+  geom_vline(aes(
+    xintercept=torch_model_classif.epochs),
+    data=glearner_selected)+
+  geom_line(aes(
+    epoch, value, color=set),
+    data=glearner_long)
 ```
 
-### Define neural network in mlr3torch
+Again the plot looks reasonable, and consistent with our previous
+results.
 
-I understand from `?mlr3torch::PipeOpTorchIngressNumeric` that we need
-`po("torch_ingress_num")` to convert regular R features to torch
-tensors. And we need `nn_head` pipeop at the end of the network,
-before `torch_loss`?
+## Benchmark experiment
 
-```{r}
-po_list <- list(
-  mlr3pipelines::po(
-    "select",
-    selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
-  mlr3torch::PipeOpTorchIngressNumeric$new(),
-  mlr3pipelines::po(
-    "nn_reshape",
-    shape=c(-1,1,n.pixels,n.pixels)),
-  mlr3pipelines::po(
-    "nn_conv2d_1",
-    out_channels = out_channels,
-    kernel_size = conv_kernel_size),
-  mlr3pipelines::po("nn_relu_1", inplace = TRUE),
-  mlr3pipelines::po(
-    "nn_max_pool2d_1",
-    kernel_size = pool_kernel_size),
-  mlr3pipelines::po("nn_flatten"),
-  mlr3pipelines::po(
-    "nn_linear",
-    out_features = n.hidden.units),
-  mlr3pipelines::po("nn_head"),
-  mlr3pipelines::po(
-    "torch_loss",
-    mlr3torch::t_loss("cross_entropy")),
-  mlr3pipelines::po(
-    "torch_optimizer",
-    mlr3torch::t_opt("sgd", lr=step_size)),
-  mlr3pipelines::po(
-    "torch_model_classif",
-    batch_size = 32,
-    epochs = n.epochs))
-graph <- Reduce(mlr3pipelines::concat_graphs, po_list)
-(glearner <- mlr3::as_learner(graph))
-glearner$base_learner()
-```
-
-To use the configure method of the `glearner` object above, we need to
-load the mlr3tuning package:
+Is the torch linear model as accurate as the glmnet linear model?
+Let's find out. First we create a grid of learners and tasks.
 
 ```{r}
-measure_list <- mlr3::msrs(c("classif.logloss", "classif.ce"))
-glearner$validate <- 0.5
-glearner$predict_type <- "prob"
-bl <- glearner$base_learner()
-bl$callbacks <- list(mlr3torch::t_clbk("history"))
-bl$param_set$values$measures_train <- measure_list
-bl$param_set$values$measures_valid <- measure_list
-glearner$base_learner()
-
-## glearner$configure( #https://github.com/mlr-org/mlr3torch-course/issues/3
-##   validate = 0.5,
-##   callbacks = mlr3torch::t_clbk("history"),
-##   predict_type = "prob",
-##   measures_valid = measure_list,
-##   measures_train = measure_list)
-
-```
-
-[`TaskClassif_mnist.R`](https://github.com/mlr-org/mlr3torch/blob/main/R/TaskClassif_mnist.R) says that image should be a lazy list column?
-
-Figure 5 from that paper shows that
-
-https://cran.r-project.org/web/packages/mlr3torch/readme/README.html
-
-## Custom loss function
-
-From `?mlr3torch::TorchLoss` I got
-
-```{r}
-torch_loss = mlr3torch::TorchLoss$new(
-  torch_loss = torch::nn_mse_loss,
-  task_types = "regr")
-```
-
-which implies that I need to make my own version of
-`torch::nn_mse_loss`. Its definition is in
-[nn-loss.R](https://github.com/mlverse/torch/blob/main/R/nn-loss.R),
-
-```{r}
-my_mse_loss <- torch::nn_module(
-  "my_mse_loss",
-  inherit = torch:::nn_loss,
-  initialize = function(reduction = "mean") {
-    super$initialize(reduction = reduction)
-  },
-  forward = function(input, target) {
-    torch::nnf_mse_loss(input, target, reduction = self$reduction)
-  }
-)
-```
-
-Note that we have to use triple colon syntax above, `torch:::nn_loss`.
-A work-around is below,
-
-```{r}
-my_mse_loss <- torch::nn_module(
-  "my_mse_loss",
-  inherit = torch::nn_mse_loss,
-  initialize = function(reduction = "mean") {
-    super$initialize(reduction = reduction)
-  },
-  forward = function(input, target) {
-    torch::nnf_mse_loss(input, target, reduction = self$reduction)
-  }
-)
-lfun <- my_mse_loss()
-lfun(torch::torch_tensor(2), torch::torch_tensor(-3))
-```
-
-So our custom AUM loss can be defined as below:
-
-```{r}
-ROC_curve <- function(pred_tensor, label_tensor){
-  is_positive = label_tensor == 1
-  is_negative = label_tensor != 1
-  fn_diff = torch::torch_where(is_positive, -1, 0)
-  fp_diff = torch::torch_where(is_positive, 0, 1)
-  thresh_tensor = -pred_tensor$flatten()
-  sorted_indices = torch::torch_argsort(thresh_tensor)
-  fp_denom = torch::torch_sum(is_negative) #or 1 for AUM based on count instead of rate
-  fn_denom = torch::torch_sum(is_positive) #or 1 for AUM based on count instead of rate
-  sorted_fp_cum = fp_diff[sorted_indices]$cumsum(dim=1)/fp_denom
-  sorted_fn_cum = -fn_diff[sorted_indices]$flip(1)$cumsum(dim=1)$flip(1)/fn_denom
-  sorted_thresh = thresh_tensor[sorted_indices]
-  sorted_is_diff = sorted_thresh$diff() != 0
-  sorted_fp_end = torch::torch_cat(c(sorted_is_diff, torch::torch_tensor(TRUE)))
-  sorted_fn_end = torch::torch_cat(c(torch::torch_tensor(TRUE), sorted_is_diff))
-  uniq_thresh = sorted_thresh[sorted_fp_end]
-  uniq_fp_after = sorted_fp_cum[sorted_fp_end]
-  uniq_fn_before = sorted_fn_cum[sorted_fn_end]
-  FPR = torch::torch_cat(c(torch::torch_tensor(0.0), uniq_fp_after))
-  FNR = torch::torch_cat(c(uniq_fn_before, torch::torch_tensor(0.0)))
+(bgrid <- mlr3::benchmark_grid(
+  task.list,
   list(
-    FPR=FPR,
-    FNR=FNR,
-    TPR=1 - FNR,
-    "min(FPR,FNR)"=torch::torch_minimum(FPR, FNR),
-    min_constant=torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh)),
-    max_constant=torch::torch_cat(c(uniq_thresh, torch::torch_tensor(Inf))))
-}
-Proposed_AUM <- function(pred_tensor, label_tensor){
-  roc = ROC_curve(pred_tensor, label_tensor)
-  min_FPR_FNR = roc[["min(FPR,FNR)"]][2:-2]
-  constant_diff = roc$min_constant[2:N]$diff()
-  torch::torch_sum(min_FPR_FNR * constant_diff)
-}
-nn_AUM_loss <- torch::nn_module(
-  "nn_AUM_loss",
-  inherit = torch::nn_mse_loss,
-  initialize = function() {
-    super$initialize()
-  },
-  forward = function(input, target) {
-    Proposed_AUM(input, target)
-  }
-)
-afun <- nn_AUM_loss()
-afun(torch::torch_tensor(c(5,-5)), torch::torch_tensor(c(0,1)))
+    glearner_auto,
+    mlp_learner_auto,
+    mlr3learners::LearnerClassifCVGlmnet$new(),
+    mlr3::LearnerClassifFeatureless$new()),
+  soak))
 ```
 
-So below is the mlr3torch version,
+Below declare a future plan for computation in parallel on this
+machine. For larger experiments you can use `mlr3batchmark` to compute
+in parallel on a cluster, see my blog on the [importance of
+hyper-parameter
+tuning](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/).
 
 ```{r}
-mlr3torch_AUM_loss = mlr3torch::TorchLoss$new(
-  torch_loss = nn_AUM_loss,
-  task_types = "classif")
-po_AUM <- mlr3pipelines::po("torch_loss", mlr3torch_AUM_loss)
+future::plan("multisession")
+```
+
+Then we run the benchmark:
+
+```{r}
+if(file.exists("2024-10-30-mlr3torch-benchmark.rds")){
+  b_result <- readRDS("2024-10-30-mlr3torch-benchmark.rds")
+}else{
+  b_result <- mlr3::benchmark(bgrid)
+  saveRDS(b_result, "2024-10-30-mlr3torch-benchmark.rds")
+}
 ```
 
 ## Conclusions

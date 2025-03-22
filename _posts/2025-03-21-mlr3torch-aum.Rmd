@@ -1,0 +1,104 @@
+## Custom loss function
+
+From `?mlr3torch::TorchLoss` I got
+
+```{r}
+torch_loss = mlr3torch::TorchLoss$new(
+  torch_loss = torch::nn_mse_loss,
+  task_types = "regr")
+```
+
+which implies that I need to make my own version of
+`torch::nn_mse_loss`. Its definition is in
+[nn-loss.R](https://github.com/mlverse/torch/blob/main/R/nn-loss.R),
+
+```{r}
+my_mse_loss <- torch::nn_module(
+  "my_mse_loss",
+  inherit = torch:::nn_loss,
+  initialize = function(reduction = "mean") {
+    super$initialize(reduction = reduction)
+  },
+  forward = function(input, target) {
+    torch::nnf_mse_loss(input, target, reduction = self$reduction)
+  }
+)
+```
+
+Note that we have to use triple colon syntax above, `torch:::nn_loss`.
+A work-around is below,
+
+```{r}
+my_mse_loss <- torch::nn_module(
+  "my_mse_loss",
+  inherit = torch::nn_mse_loss,
+  initialize = function(reduction = "mean") {
+    super$initialize(reduction = reduction)
+  },
+  forward = function(input, target) {
+    torch::nnf_mse_loss(input, target, reduction = self$reduction)
+  }
+)
+lfun <- my_mse_loss()
+lfun(torch::torch_tensor(2), torch::torch_tensor(-3))
+```
+
+So our custom AUM loss can be defined as below:
+
+```{r}
+ROC_curve <- function(pred_tensor, label_tensor){
+  is_positive = label_tensor == 1
+  is_negative = label_tensor != 1
+  fn_diff = torch::torch_where(is_positive, -1, 0)
+  fp_diff = torch::torch_where(is_positive, 0, 1)
+  thresh_tensor = -pred_tensor$flatten()
+  sorted_indices = torch::torch_argsort(thresh_tensor)
+  fp_denom = torch::torch_sum(is_negative) #or 1 for AUM based on count instead of rate
+  fn_denom = torch::torch_sum(is_positive) #or 1 for AUM based on count instead of rate
+  sorted_fp_cum = fp_diff[sorted_indices]$cumsum(dim=1)/fp_denom
+  sorted_fn_cum = -fn_diff[sorted_indices]$flip(1)$cumsum(dim=1)$flip(1)/fn_denom
+  sorted_thresh = thresh_tensor[sorted_indices]
+  sorted_is_diff = sorted_thresh$diff() != 0
+  sorted_fp_end = torch::torch_cat(c(sorted_is_diff, torch::torch_tensor(TRUE)))
+  sorted_fn_end = torch::torch_cat(c(torch::torch_tensor(TRUE), sorted_is_diff))
+  uniq_thresh = sorted_thresh[sorted_fp_end]
+  uniq_fp_after = sorted_fp_cum[sorted_fp_end]
+  uniq_fn_before = sorted_fn_cum[sorted_fn_end]
+  FPR = torch::torch_cat(c(torch::torch_tensor(0.0), uniq_fp_after))
+  FNR = torch::torch_cat(c(uniq_fn_before, torch::torch_tensor(0.0)))
+  list(
+    FPR=FPR,
+    FNR=FNR,
+    TPR=1 - FNR,
+    "min(FPR,FNR)"=torch::torch_minimum(FPR, FNR),
+    min_constant=torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh)),
+    max_constant=torch::torch_cat(c(uniq_thresh, torch::torch_tensor(Inf))))
+}
+Proposed_AUM <- function(pred_tensor, label_tensor){
+  roc = ROC_curve(pred_tensor, label_tensor)
+  min_FPR_FNR = roc[["min(FPR,FNR)"]][2:-2]
+  constant_diff = roc$min_constant[2:N]$diff()
+  torch::torch_sum(min_FPR_FNR * constant_diff)
+}
+nn_AUM_loss <- torch::nn_module(
+  "nn_AUM_loss",
+  inherit = torch::nn_mse_loss,
+  initialize = function() {
+    super$initialize()
+  },
+  forward = function(input, target) {
+    Proposed_AUM(input, target)
+  }
+)
+afun <- nn_AUM_loss()
+afun(torch::torch_tensor(c(5,-5)), torch::torch_tensor(c(0,1)))
+```
+
+So below is the mlr3torch version,
+
+```{r}
+mlr3torch_AUM_loss = mlr3torch::TorchLoss$new(
+  torch_loss = nn_AUM_loss,
+  task_types = "classif")
+po_AUM <- mlr3pipelines::po("torch_loss", mlr3torch_AUM_loss)
+```
