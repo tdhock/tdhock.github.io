@@ -376,7 +376,6 @@ mlp_learner = mlr3::lrn("classif.mlp",
   batch_size = N.images,
   validate = 0.5,
   predict_type = "prob")
-mlp_learner$predict_sets = NULL
 ```
 
 Below we create an auto tuner learner based on the MLP learner,
@@ -390,6 +389,7 @@ mlp_learner_auto = mlr3tuning::auto_tuner(
   resampling = mlr3::rsmp("insample"),# the train/valid split is handled by the learner itself
   measure = mlr3::msr("internal_valid_score", minimize = TRUE),# for the optimal model we will use the internal validation score computed during training
   term_evals = 1,# early stopping just needs a single run
+  id="linear_mlp",
   store_models = TRUE)# so we can access the history afterwards
 mlp_learner_auto$train(task.list$MNIST_FashionMNIST)
 mlp_learner_auto$model$learner$model$network
@@ -479,7 +479,6 @@ with pipe operations, to avoid some errors.
 ```{r}
 (glearner_linear_ce <- mlr3::as_learner(graph_linear_ce))
 mlr3::set_validate(glearner_linear_ce, validate = 0.5)
-glearner_linear_ce$predict_sets = NULL
 ```
 
 The code below defines an auto tuner based on the graph learner above. 
@@ -492,6 +491,7 @@ glearner_auto = mlr3tuning::auto_tuner(
   resampling = mlr3::rsmp("insample"),
   measure = mlr3::msr("internal_valid_score", minimize = TRUE),
   term_evals = 1,
+  id="linear_graph",
   store_models = TRUE)
 glearner_auto$train(task.list$MNIST_FashionMNIST)
 glearner_auto$base_learner()$model$network
@@ -544,7 +544,7 @@ tuning](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/).
 future::plan("multisession")
 ```
 
-Then we run the benchmark:
+Then we run/cache the benchmark:
 
 ```{r}
 if(file.exists("2024-10-30-mlr3torch-benchmark.rds")){
@@ -553,6 +553,12 @@ if(file.exists("2024-10-30-mlr3torch-benchmark.rds")){
   b_result <- mlr3::benchmark(bgrid)
   saveRDS(b_result, "2024-10-30-mlr3torch-benchmark.rds")
 }
+```
+
+Then we compute a table of evaluation metrics:
+
+```{r}
+score_dt <- mlr3resampling::score(b_result)
 ```
 
 ## Conclusions
@@ -564,195 +570,3 @@ TODO
 ```{r}
 sessionInfo()
 ```
-
-
-## MRE for issue
-
-```{r}
-N.pixels <- 10
-N.classes <- 2
-N.features <- 100
-N.images <- 200
-set.seed(1)
-my.X.mat <- matrix(runif(N.features*N.images), N.images, N.features)
-my.df <- data.frame(y=factor(1:N.classes), my.X.mat)
-my.task <- mlr3::TaskClassif$new("MyTask", my.df, target="y")
-measure_list <- mlr3::msrs(c("classif.logloss", "classif.ce", "classif.auc"))
-
-## regular MLP with patience works.
-lrn_mlp <- mlr3::lrn("classif.mlp",
-  neurons = c(50, 50),
-  batch_size = 256,
-  epochs = 30, # Number of training epochs
-  device = "auto", # Uses GPU if available, otherwise CPU
-  shuffle = TRUE, # because iris is sorted
-  optimizer = mlr3torch::t_opt("adamw"),
-  loss = mlr3torch::t_loss("cross_entropy"))
-lrn_mlp$configure(
-  validate = 0.3,
-  callbacks = mlr3torch::t_clbk("history"),
-  predict_type = "prob",
-  patience=10,
-  measures_valid = measure_list,
-  measures_train = measure_list)
-lrn_mlp$train(my.task)
-lrn_mlp$model$callbacks$history
-
-## Regular MLP with auto-tuner works.
-l = mlr3::lrn("classif.mlp",
-  epochs = paradox::to_tune(upper = 100L, internal = TRUE),
-  measures_train = measure_list,
-  measures_valid = measure_list,
-  patience = 100L,
-  optimizer = mlr3torch::t_opt("adamw", lr = 0.3),
-  callbacks = mlr3torch::t_clbk("history"),
-  batch_size = 64,
-  validate = 0.3,
-  predict_type = "prob")
-task = mlr3::tsk("sonar")
-l$predict_sets = NULL
-at = mlr3tuning::auto_tuner(
-  learner = l,
-  tuner = mlr3tuning::tnr("internal"),
-  # the train/valid split is handled by the learner itself
-  resampling = mlr3::rsmp("insample"),
-  # for the optimal model we will use the internal validation score
-  # computed during training
-  measure = mlr3::msr("internal_valid_score", minimize = TRUE),
-  # early stopping just needs a single run
-  term_evals = 1,
-  # so we can access the history afterwards
-  store_models = TRUE)
-at$train(task)
-
-## visualize measures from auto-tuner.
-pat <- function(name, ...){
-  old2new <- c(...)
-  nc::group(name, paste(names(old2new), collapse="|"), function(x)old2new[x])
-}
-measure_long <- nc::capture_melt_single(
-  at$archive$learners(1)[[1L]]$model$callbacks$history,
-  pat("set", train="subtrain", valid="validation"),
-  ".classif.",
-  pat("measure", ce="error_prop", auc="AUC", logloss="logloss"))
-selected_row <- as.data.table(at$tuning_result$internal_tuned_values[[1]])
-ggplot()+
-  facet_grid(measure ~ ., scales="free")+
-  geom_vline(aes(
-    xintercept=epochs),
-    data=selected_row)+
-  geom_line(aes(
-    epoch, value, color=set),
-    data=measure_long)
-
-## pipeops learner with patience works.
-po_list_linear_ce <- list(
-  mlr3pipelines::po(
-    "select",
-    selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
-  mlr3torch::PipeOpTorchIngressNumeric$new(),
-  mlr3pipelines::po("nn_head"),
-  mlr3pipelines::po(
-    "torch_loss",
-    mlr3torch::t_loss("cross_entropy")),
-  mlr3pipelines::po(
-    "torch_optimizer",
-    mlr3torch::t_opt("adamw")),
-  mlr3pipelines::po(
-    "torch_callbacks",
-    mlr3torch::t_clbk("history")),
-  mlr3pipelines::po(
-    "torch_model_classif",
-    batch_size = N.images,
-    patience=10,
-    measures_valid=measure_list,
-    measures_train=measure_list,
-    predict_type="prob",
-    epochs = 30))
-graph_linear_ce <- Reduce(mlr3pipelines::concat_graphs, po_list_linear_ce)
-glearner_linear_ce <- mlr3::as_learner(graph_linear_ce)
-mlr3::set_validate(glearner_linear_ce, validate = 0.5)
-glearner_linear_ce$train(my.task)
-glearner_linear_ce$model$torch_model_classif$model$callbacks$history
-
-## pipeops learner with autotuner?
-po_list_linear_ce <- list(
-  mlr3pipelines::po(
-    "select",
-    selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
-  mlr3torch::PipeOpTorchIngressNumeric$new(),
-  mlr3pipelines::po("nn_head"),
-  mlr3pipelines::po(
-    "torch_loss",
-    mlr3torch::t_loss("cross_entropy")),
-  mlr3pipelines::po(
-    "torch_optimizer",
-    mlr3torch::t_opt("adamw")),
-  mlr3pipelines::po(
-    "torch_callbacks",
-    mlr3torch::t_clbk("history")),
-  mlr3pipelines::po(
-    "torch_model_classif",
-    batch_size = N.images,
-    patience=100L,
-    measures_valid=measure_list,
-    measures_train=measure_list,
-    predict_type="prob",
-    epochs = paradox::to_tune(upper = 100L, internal = TRUE)))
-graph_linear_ce <- Reduce(mlr3pipelines::concat_graphs, po_list_linear_ce)
-glearner_linear_ce <- mlr3::as_learner(graph_linear_ce)
-mlr3::set_validate(glearner_linear_ce, validate = 0.5)
-glearner_linear_ce$predict_sets = NULL
-at = mlr3tuning::auto_tuner(
-  learner = glearner_linear_ce,
-  tuner = mlr3tuning::tnr("internal"),
-  # the train/valid split is handled by the learner itself
-  resampling = mlr3::rsmp("insample"),
-  # for the optimal model we will use the internal validation score
-  # computed during training
-  measure = mlr3::msr("internal_valid_score", minimize = TRUE),
-  # early stopping just needs a single run
-  term_evals = 1,
-  # so we can access the history afterwards
-  store_models = TRUE)
-at$train(my.task)
-
-## visualize measures from auto-tuner.
-pat <- function(name, ...){
-  old2new <- c(...)
-  nc::group(name, paste(names(old2new), collapse="|"), function(x)old2new[x])
-}
-m <- at$archive$learners(1)[[1]]$model
-measure_long <- nc::capture_melt_single(
-  m$torch_model_classif$model$callbacks$history,
-  pat("set", train="subtrain", valid="validation"),
-  ".classif.",
-  pat("measure", ce="error_prop", auc="AUC", logloss="logloss"))
-(selected_row <- as.data.table(at$tuning_result$internal_tuned_values[[1]]))
-ggplot()+
-  facet_grid(measure ~ ., scales="free")+
-  geom_vline(aes(
-    xintercept=torch_model_classif.epochs),
-    data=selected_row)+
-  geom_line(aes(
-    epoch, value, color=set),
-    data=measure_long)
-
-## conv
-graph <- mlr3pipelines::po("select", selector = selector_type(c("numeric", "integer"))),
-  mlr3pipelines::po("torch_ingress_num"),
-  mlr3pipelines::po("nn_reshape", shape=c(-1,1,N.pixels,N.pixels)),
-  mlr3pipelines::po("nn_conv2d_1", out_channels = 20, kernel_size = 3),
-  mlr3pipelines::po("nn_relu_1", inplace = TRUE),
-  mlr3pipelines::po("nn_max_pool2d_1", kernel_size = 2),
-  mlr3pipelines::po("nn_flatten"),
-  mlr3pipelines::po("nn_linear", out_features = 100),
-  mlr3pipelines::po("nn_head"),
-  mlr3pipelines::po("torch_loss", t_loss("cross_entropy")),
-  mlr3pipelines::po("torch_optimizer", t_opt("sgd", lr=0.01)),
-  mlr3pipelines::po("torch_model_classif", batch_size = 25, epochs = 2L)
-graph$train(my.task)
-graph$predict(my.task)
-
-```
-
