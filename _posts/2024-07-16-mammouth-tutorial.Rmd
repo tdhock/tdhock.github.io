@@ -568,6 +568,14 @@ Note the output above indicates that 4h time limit is invalid for the interactiv
 
 ## Q&A
 
+### Does torch work?
+
+torch in R does not seem to work on Mammouth. I got floating point
+exceptions when installing from CRAN, and link errors when installing
+binaries from a CDN. However I got torch in R to work on
+[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga) by installing
+from CRAN.
+
 ### Which partition to use?
 
 The scheduler will choose a partition for you, based on the amount of time and memory you request. 
