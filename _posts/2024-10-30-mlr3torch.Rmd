@@ -15,14 +15,6 @@ knitr::opts_chunk$set(
   fig.width=10, ## TODO python figures wider? look at prev issue.
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=4)
-conda.env <- "2023-08-deep-learning"
-conda.env <- "torch-aum"
-RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
-  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
-  "/home/tdhock/miniconda3/envs/%s/bin/python"
-  else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
-Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
-##reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
 in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
 in_knit <- isTRUE(getOption('knitr.in.progress'))
 options(width=120)
@@ -290,7 +282,8 @@ ggplot()+
     data=min_glmnet_dt,
     shape=21,
     fill="white")+
-  scale_x_log10()
+  scale_x_log10(
+    "Model complexity = -log10(L1 regularization parameter lambda)")
 ```
 
 The figure above shows that the min validation error is about 23%,
@@ -477,7 +470,7 @@ it to a learner object. Note the `set_validate` is important to use
 with pipe operations, to avoid some errors.
 
 ```{r}
-(glearner_linear_ce <- mlr3::as_learner(graph_linear_ce))
+(lgearner_linear_ce <- mlr3::as_learner(graph_linear_ce))
 mlr3::set_validate(glearner_linear_ce, validate = 0.5)
 ```
 
@@ -524,13 +517,18 @@ Is the torch linear model as accurate as the glmnet linear model?
 Let's find out. First we create a grid of learners and tasks.
 
 ```{r}
-(bgrid <- mlr3::benchmark_grid(
+learner.list <- list(
+  glearner_auto,
+  mlp_learner_auto,
+  mlr3::LearnerClassifFeatureless$new()$configure(id="featureless"))
+for(s_param in c("min", "1se")){
+  learner.list[[s_param]] <- mlr3learners::LearnerClassifCVGlmnet$new()$configure(
+    s=paste0("lambda.",s_param),
+    id=paste0("cv_glmnet_",s_param))
+}
+(bench.grid <- mlr3::benchmark_grid(
   task.list,
-  list(
-    glearner_auto,
-    mlp_learner_auto,
-    mlr3learners::LearnerClassifCVGlmnet$new(),
-    mlr3::LearnerClassifFeatureless$new()),
+  learner.list,
   soak))
 ```
 
@@ -539,31 +537,186 @@ machine. For larger experiments you can use `mlr3batchmark` to compute
 in parallel on a cluster, see my blog on the [importance of
 hyper-parameter
 tuning](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/).
-
-```{r}
-future::plan("multisession")
-```
-
 Then we run/cache the benchmark:
 
 ```{r}
-if(file.exists("2024-10-30-mlr3torch-benchmark.rds")){
-  b_result <- readRDS("2024-10-30-mlr3torch-benchmark.rds")
-}else{
-  b_result <- mlr3::benchmark(bgrid)
-  saveRDS(b_result, "2024-10-30-mlr3torch-benchmark.rds")
+cache.RData <- "2024-10-30-mlr3torch-benchmark.RData"
+if(file.exists(cache.RData)){
+  load(cache.RData)
+}else{#code below should be run interactively.
+  if(on.cluster){
+    reg.dir <- "2024-10-30-mlr3torch-benchmark"
+    unlink(reg.dir, recursive=TRUE)
+    reg = batchtools::makeExperimentRegistry(
+      file.dir = reg.dir,
+      seed = 1,
+      packages = "mlr3verse"
+    )
+    mlr3batchmark::batchmark(
+      bench.grid, store_models = TRUE, reg=reg)
+    job.table <- batchtools::getJobTable(reg=reg)
+    chunks <- data.frame(job.table, chunk=1)
+    batchtools::submitJobs(chunks, resources=list(
+      walltime = 60*60,#seconds
+      memory = 2000,#megabytes per cpu
+      ncpus=1,  #>1 for multicore/parallel jobs.
+      ntasks=1, #>1 for MPI jobs.
+      chunks.as.arrayjobs=TRUE), reg=reg)
+    batchtools::getStatus(reg=reg)
+    jobs.after <- batchtools::getJobTable(reg=reg)
+    table(jobs.after$error)
+    ids <- jobs.after[is.na(error), job.id]
+    bench.result <- mlr3batchmark::reduceResultsBatchmark(ids, reg = reg)
+  }else{
+    ## In the code below, we declare a multisession future plan to
+    ## compute each benchmark iteration in parallel on this computer
+    ## (data set, learning algorithm, cross-validation fold). For a
+    ## few dozen iterations, using the multisession backend is
+    ## probably sufficient (I have 12 CPUs on my work PC).
+    if(require(future))plan("multisession")
+    bench.result <- mlr3::benchmark(bench.grid, store_models = TRUE)
+  }
+  save(bench.result, file=cache.RData)
 }
 ```
 
-Then we compute a table of evaluation metrics:
+Then we compute and plot a table of evaluation metrics:
 
-```{r}
-score_dt <- mlr3resampling::score(b_result)
+```{r full-test-error, fig.height=4.5}
+score_dt <- mlr3resampling::score(bench.result)[
+, percent_error := 100*classif.ce
+][]
+score_dt[, .(task_id, test.subset, train.subsets, algorithm, percent_error)]
+
+ggplot()+
+  geom_point(aes(
+    percent_error, algorithm),
+    shape=1,
+    data=score_dt)+
+  facet_grid(train.subsets ~ task_id + test.subset, labeller=label_both)
 ```
+
+There is a lot of information in the plot above. It could be
+simplified by taking the mean and SD over the three folds:
+
+```{r mean-sd, fig.height=4.5}
+(score_stats <- dcast(
+  score_dt,
+  algorithm + task_id + test.subset + train.subsets ~ .,
+  list(mean, sd),
+  value.var="percent_error"))
+ggplot()+
+  geom_point(aes(
+    percent_error_mean, algorithm),
+    shape=1,
+    data=score_stats)+
+  geom_segment(aes(
+    percent_error_mean+percent_error_sd, algorithm,
+    xend=percent_error_mean-percent_error_sd, yend=algorithm),
+    data=score_stats)+
+  facet_grid(train.subsets ~ task_id + test.subset, labeller=label_both)
+```
+
+The plot above shows means and standard deviations for all the models.
+
+### Does training on the other subset work?
+
+We focus only on predicting MNIST, after training on another data set.
+
+```{r train-other, fig.height=2}
+score_other <- score_stats[test.subset=="MNIST" & train.subsets=="other"]
+ggplot()+
+  geom_point(aes(
+    percent_error_mean, algorithm),
+    shape=1,
+    data=score_other)+
+  geom_segment(aes(
+    percent_error_mean+percent_error_sd, algorithm,
+    xend=percent_error_mean-percent_error_sd, yend=algorithm),
+    data=score_other)+
+  facet_grid(. ~ task_id, labeller=label_both)+
+  scale_x_continuous(
+    "Test error on MNIST (mean +/- SD over 3 folds), after training on Other subset (EMNIST/Fashion)",
+    limits=c(40,100),
+    breaks=seq(40,100,by=10))
+```
+
+The figure above shows that
+* training on `EMNIST_rot` has significantly smaller error rates than
+  featureless, indicating that these data are similar enough to MNIST,
+  for the linear model to be able to learn something useful.
+* torch linear models are a bit more accurate than `cv_glmnet`
+  (surprising, since both are linear models).
+* there is not much difference between the two torch linear models (as expected).
+* there is not much difference between the two `cv_glmnet` linear
+  models (as expected), although the min variant has a slightly
+  smaller error rate (as expected).
+* training on `FashionMNIST` has significantly larger error rates than
+  featureless, indicating that the data are so different, that the
+  linear model does not learn anything relevant for accurate
+  predictions on the other subset.
+
+### Comparing Other and Same
+
+Is training on EMNIST as good as training on MNIST, if our goal is
+good predictions in MNIST?
+
+```{r same-other-all-mnist, fig.height=2}
+score_EMNIST <- score_stats[test.subset=="MNIST" & task_id=="MNIST_EMNIST_rot"]
+ggplot()+
+  ggtitle("SOAK results for MNIST_EMNIST_rot data")+
+  geom_point(aes(
+    percent_error_mean, algorithm,
+    color=train.subsets),
+    shape=1,
+    data=score_EMNIST)+
+  geom_segment(aes(
+    percent_error_mean+percent_error_sd, algorithm,
+    color=train.subsets,
+    xend=percent_error_mean-percent_error_sd, yend=algorithm),
+    data=score_EMNIST)+
+  scale_x_continuous(
+    "Test error on MNIST (mean +/- SD over 3 folds)",
+    limits=c(0,100),
+    breaks=seq(0,100,by=10))
+```
+
+The figure above indicates that the Other model (training on EMNIST)
+has much larger error rates, compared to the Same model (training on
+MNIST). These data indicate that the data subsets are not similar
+enough for the linear model to fully generalize between subsets.
+
+### Early stopping diagnostic plot
+
+For each of the models we can check if the early stopping
+regularization worked reasonably, via code as below.
+
+```{r plot-diag-glearner}
+one.glearner <- score_dt[algorithm=="linear_graph"]$learner[[1]]
+glearner_model <- one.glearner$archive$learners(1)[[1]]$model
+(glearner_long <- melt_history(
+  glearner_model$torch_model_classif$model$callbacks$history))
+(glearner_selected <- as.data.table(
+  one.glearner$tuning_result$internal_tuned_values[[1]]))
+ggplot()+
+  facet_grid(measure ~ ., scales="free")+
+  geom_vline(aes(
+    xintercept=torch_model_classif.epochs),
+    data=glearner_selected)+
+  geom_line(aes(
+    epoch, value, color=set),
+    data=glearner_long)
+```
+
+The figure above shows typical subtrain/validation error curves, with
+an optimal number of epochs chosen reasonably (an intermediate value
+that minimizes the log loss).
 
 ## Conclusions
 
-TODO
+We have shown how mlr3torch can be used to define neural networks,
+then run machine learning benchmark experiments in parallel, then
+interpret results using figures.
 
 ## Session info
 
