@@ -24,10 +24,9 @@ if(FALSE){
 ```
 
 The goal of this post is to show how to use the mlr3torch package in R
-with AUM (Area Under Min of False Positive and False Negative rates,
-our newly Proposed surrogate loss for ROC curve optimization), in
-combination with the new cross-validation methods we proposed in our
-[SOAK paper](https://arxiv.org/abs/2410.08643).
+with in combination with mlr3resampling, which contains the new
+cross-validation methods we proposed in our [SOAK
+paper](https://arxiv.org/abs/2410.08643).
 
 ## Introduction 
 
@@ -217,6 +216,7 @@ for(epoch in 1:n.epochs){
     set_y <- ex.y.tensor[is_set]
     is_error <- set_y != set_pred$argmax(dim=2)
     N_errors <- torch::as_array(is_error$sum())
+    batch_size <- length(set_y)
     set_loss_list[[set_name]] <- celoss(set_pred, set_y)
     loss_dt_list[[paste(epoch, set_name)]] <- data.table(
       epoch, set_name=factor(set_name, set_names),
@@ -245,7 +245,8 @@ ggplot()+
 ```
 
 The results above show that the best validation error is about 16%,
-around 300 epochs.
+around 300 epochs. Notice how in the code above, we need for loops
+over epochs and sets, which is flexible but complicated.
 
 ## Comparison with glmnet
 
@@ -359,17 +360,21 @@ which explains about internal tuning via parameters like
 
 ```{r}
 measure_list <- mlr3::msrs(c("classif.logloss", "classif.ce"))
-mlp_learner = mlr3::lrn("classif.mlp",
+(mlp_learner = mlr3::lrn("classif.mlp",
   epochs = paradox::to_tune(upper = n.epochs, internal = TRUE),
   measures_train = measure_list,
   measures_valid = measure_list,
   patience = n.epochs,
   optimizer = mlr3torch::t_opt("sgd", lr = step_size),
   callbacks = mlr3torch::t_clbk("history"),
-  batch_size = N.images,
+  batch_size = batch_size,
   validate = 0.5,
-  predict_type = "prob")
+  predict_type = "prob"))
 ```
+
+Note in the output above that
+* `neurons=integer(0)`, meaning there are no hidden units, implying a linear model.
+* `epochs=<InternalTuneToken>`, meaning that the number of epochs is to be tuned using a held-out validation set (as is defined in the code below).
 
 Below we create an auto tuner learner based on the MLP learner,
 instructing it to use the (first) internal validation score as the
@@ -385,9 +390,21 @@ mlp_learner_auto = mlr3tuning::auto_tuner(
   id="linear_mlp",
   store_models = TRUE)# so we can access the history afterwards
 mlp_learner_auto$train(task.list$MNIST_FashionMNIST)
+```
+
+Note how simple this code is, relative to the code in the previous
+section, with a for loop over epochs. The advantage of mlr3torch is
+that typical models and training scenarios are greatly simplified --
+some flexibility is sacrificed, but we do not need that flexibility
+here to implement the linear model. The code below checks that the
+learned model is indeed a linear model:
+
+```{r}
 mlp_learner_auto$model$learner$model$network
 ```
 
+We see that the number of parameters is consistent with a linear model
+for `28*28=784` input features, and 10 outputs/classes.
 Below we reshape and plot the epoch-specific measures which were used
 to select the best number of epochs:
 
@@ -428,15 +445,17 @@ The figure above has learning curves that look reasonable.
 
 A more flexible way of defining a neural network involves pipe
 operations, as explained in
-[mlr3torch-course-ch6](https://mlr-org.github.io/mlr3torch-course/notebooks/6-mlr3torch.html)
-explains how to mlr3torch pipe operations to define a neural network.
-I understand from `?mlr3torch::PipeOpTorchIngressNumeric` that we need
-`po("torch_ingress_num")` to convert regular R features to torch
-tensors. And we need `nn_head` pipeop at the end of the network, which
-automatically determines the right number of output units, based on
-the loss function. Whereas the mlr3 docs suggest using `%>>%` to
-combine pipe operations, I use a list/Reduce below, to emphasize which
-functions are defined in which packages.
+[mlr3torch-course-ch6](https://mlr-org.github.io/mlr3torch-course/notebooks/6-mlr3torch.html),
+which explains how to mlr3torch pipe operations to define a neural
+network. Actually, this flexibility is not needed to define a linear model, but it would be if we wanted to define a more complex neural network (for example with convolutional layers), which will be the topic for a future blog.
+
+I understand from `?mlr3torch::PipeOpTorchIngressNumeric`
+that we need `po("torch_ingress_num")` to convert regular R features
+to torch tensors. And we need `nn_head` pipeop at the end of the
+network, which automatically determines the right number of output
+units, based on the loss function. Whereas the mlr3 docs suggest using
+`%>>%` to combine pipe operations, I use list/Reduce below, to
+emphasize which functions are defined in which packages.
 
 ```{r}
 po_list_linear_ce <- list(
@@ -456,7 +475,7 @@ po_list_linear_ce <- list(
     mlr3torch::t_clbk("history")),
   mlr3pipelines::po(
     "torch_model_classif",
-    batch_size = N.images,
+    batch_size = batch_size,
     patience=n.epochs,
     measures_valid=measure_list,
     measures_train=measure_list,
@@ -470,7 +489,7 @@ it to a learner object. Note the `set_validate` is important to use
 with pipe operations, to avoid some errors.
 
 ```{r}
-(lgearner_linear_ce <- mlr3::as_learner(graph_linear_ce))
+(glearner_linear_ce <- mlr3::as_learner(graph_linear_ce))
 mlr3::set_validate(glearner_linear_ce, validate = 0.5)
 ```
 
@@ -514,7 +533,10 @@ results.
 ## Benchmark experiment
 
 Is the torch linear model as accurate as the glmnet linear model?
-Let's find out. First we create a grid of learners and tasks.
+Let's find out. First we create a grid of learners and tasks.  Note
+that we add two learners based on `glmnet`, so we can see if
+prediction error rates are affected by the choice of regularization
+parameter (min validation loss or simplest model within 1se of min).
 
 ```{r}
 learner.list <- list(
@@ -532,12 +554,18 @@ for(s_param in c("min", "1se")){
   soak))
 ```
 
-Below declare a future plan for computation in parallel on this
-machine. For larger experiments you can use `mlr3batchmark` to compute
-in parallel on a cluster, see my blog on the [importance of
-hyper-parameter
-tuning](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/).
-Then we run/cache the benchmark:
+Above we see a summary of the benchmark: two tasks, five learner, and
+one resampling method. Below we declare a future plan for computation
+in parallel on this machine. For larger experiments you can use
+`mlr3batchmark` to compute in parallel on a cluster, see my blogs on
+the [importance of hyper-parameter
+tuning](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/)
+and [Mammouth
+tutorial](https://tdhock.github.io/blog/2024/mammouth-tutorial/). However
+note that as of this writing, I have not got torch in R to work on
+Mammouth (Sherbrooke's super-computer), but a similar setup should
+work on Beluga (another Alliance Canada super-computer where I have
+got torch in R to work). Then we run/cache the benchmark:
 
 ```{r}
 cache.RData <- "2024-10-30-mlr3torch-benchmark.RData"
@@ -714,9 +742,12 @@ that minimizes the log loss).
 
 ## Conclusions
 
-We have shown how mlr3torch can be used to define neural networks,
-then run machine learning benchmark experiments in parallel, then
-interpret results using figures.
+We have shown two ways that mlr3torch can be used to define a linear
+model (either using MLP learner or via pipe operations), and we showed
+how it can simplify learning code, relative to using torch by itself
+(requires coding a for loop over epochs). We also showed how to run
+machine learning benchmark experiments in parallel, then interpret
+results using figures.
 
 ## Session info
 

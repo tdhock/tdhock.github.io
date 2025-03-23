@@ -1,3 +1,9 @@
+The goal of this post is to show how to use the mlr3torch package in R
+with AUM (Area Under Min of False Positive and False Negative rates,
+our newly Proposed surrogate loss for ROC curve optimization), in
+combination with the new cross-validation methods we proposed in our
+[SOAK paper](https://arxiv.org/abs/2410.08643).
+
 ## Custom loss function
 
 From `?mlr3torch::TorchLoss` I got
