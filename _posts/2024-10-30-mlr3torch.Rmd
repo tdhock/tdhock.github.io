@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Cross-validation with neural networks
+title: Cross-validation experiments with torch learners
 description: Demonstration of mlr3torch + mlr3resampling
 ---
 
@@ -554,7 +554,7 @@ for(s_param in c("min", "1se")){
   soak))
 ```
 
-Above we see a summary of the benchmark: two tasks, five learner, and
+Above we see a summary of the benchmark: two tasks, five learners, and
 one resampling method. Below we declare a future plan for computation
 in parallel on this machine. For larger experiments you can use
 `mlr3batchmark` to compute in parallel on a cluster, see my blogs on
