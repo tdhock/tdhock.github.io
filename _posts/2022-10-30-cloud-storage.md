@@ -52,6 +52,19 @@ and those files can be shared via:
 ## Anybody
 
 - Another publishing option is github pages, but there are space
-  limitations: [100MiB per file max in regular repos](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github), and [git large file storage is now an option](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage).
+  limitations:
+  - [max of 100MiB per file](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github),
+  - [git large file
+    storage](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage)
+    can be used to store files larger than that, but there is a limit
+    of 1GB of storage and monthly bandwidth per repo.
+  - [max number of repositories per user/org is 100,000](https://docs.github.com/en/repositories/creating-and-managing-repositories/repository-limits#organization-limits)
+  - I have not seen any limits on the number of files.
+  - [This SO
+    post](https://stackoverflow.com/questions/38768454/repository-size-limits-for-github-com)
+    has a nice discussion of the limits, including links to limits of
+    other services like
+    [GitLab](https://docs.gitlab.com/user/storage_usage_quotas/) and
+    [Bitbucket](https://www.atlassian.com/blog/it-teams/important-changes-coming-to-bitbucket-clouds-free-plan).
 - Google Drive: 10GB.
 - Hugging Face (can be used by github commands): a total storage capacity of 300 GB per repo, with a maximum file size of 20 GB and a limit of 100,000 files per repo. For example, my student repository contains genome sequences, such as the one found here: [chipseq](https://huggingface.co/datasets/lamtung16/compressed_chipseq).
