@@ -156,7 +156,7 @@ PELT <- function(sim.mat, penalty, prune=TRUE, verbose=FALSE){
     sum_vec <- sum_trick(cum.data, start, end)
     N <- end+1-start
     mean_vec <- sum_vec/N
-    sum_vec*(1-log(mean_vec))
+    ifelse(sum_vec==0, 0, sum_vec*(1-log(mean_vec)))
   }
   N.data <- nrow(sim.mat)
   pelt.change.vec <- rep(NA_integer_, N.data)
@@ -428,7 +428,8 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,6),
     limits=c(NA, 1e7))+
-  scale_y_log10("")
+  scale_y_log10("")+
+  theme(text=element_text(size=20))
 ```
 
 Above the figure shows a different curve for each algorithm, and a
@@ -470,7 +471,9 @@ ggplot()+
     breaks=10^seq(2,6),
     limits=c(NA, 1e7))+
   scale_y_log10("")+
-  theme(legend.position="none")
+  theme(
+    legend.position="none",
+    text=element_text(size=20))
 ```
 
 The plot above makes it easier to notice some interesting trends in
@@ -590,6 +593,169 @@ We have explored three algorithms for optimal change-point detection.
   quadratic time complexity as OPART.
 * The FPOP algorithm is fast (linear or log-linear) in both of the
   scenarios we examined.
+  
+## Verification of PELT with linear changes
+
+```{r}
+library(data.table)
+N_data_vec <- c(c(1,2,4,8)*1e3,c(1,2,4,8)*1e4)
+sim_data_list <- list()
+sim_changes_list <- list()
+for(N_data in N_data_vec){
+  for(simulation in names(sim_fun_list)){
+    sim_fun <- sim_fun_list[[simulation]]
+    data_mean_vec <- sim_fun(N_data)
+    end <- which(diff(data_mean_vec) != 0)
+    set.seed(1)
+    data_value <- rpois(N_data, data_mean_vec)
+    sim_data_list[[paste(N_data, simulation)]] <- data.table(
+      N_data, simulation, data_index=seq_along(data_value), data_value)
+    sim_changes_list[[paste(N_data, simulation)]] <- data.table(
+      N_data, simulation, end)
+  }
+}
+(sim_changes <- rbindlist(sim_changes_list))
+(sim_data <- rbindlist(sim_data_list))
+library(ggplot2)
+ggplot()+
+  theme_bw()+
+  geom_vline(aes(
+    xintercept=end+0.5),
+    data=sim_changes)+
+  geom_point(aes(
+    data_index, data_value),
+    color="grey50",
+    data=sim_data)+
+  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  scale_x_continuous(
+    limits=c(0,400),
+    breaks=seq(0,max(N_data_vec),by=25))
+
+PELT <- function(sim.mat, penalty, prune=TRUE, verbose=FALSE){
+  if(!is.matrix(sim.mat))sim.mat <- cbind(sim.mat)
+  print(cum.data <- rbind(0, apply(sim.mat, 2, cumsum)))
+  sum_trick <- function(m, start, end)m[end+1,,drop=FALSE]-m[start,,drop=FALSE]
+  cost_trick <- function(start, end){
+    sum_vec <- sum_trick(cum.data, start, end)
+    N <- end+1-start
+    mean_vec <- sum_vec/N
+    ifelse(sum_vec==0, 0, sum_vec*(1-log(mean_vec)))
+  }
+  N.data <- nrow(sim.mat)
+  pelt.change.vec <- rep(NA_integer_, N.data)
+  pelt.cost.vec <- rep(NA_real_, N.data+1)
+  pelt.cost.vec[1] <- -penalty
+  pelt.candidates.vec <- rep(NA_integer_, N.data)
+  candidate.vec <- 1L
+  if(verbose)index_dt_list <- list()
+  for(up.to in 1:N.data){
+    N.cand <- length(candidate.vec)
+    pelt.candidates.vec[up.to] <- N.cand
+    last.seg.cost <- rowSums(cost_trick(candidate.vec, rep(up.to, N.cand)))
+    prev.cost <- pelt.cost.vec[candidate.vec]
+    cost.no.penalty <- prev.cost+last.seg.cost
+    total.cost <- cost.no.penalty+penalty
+    if(verbose)index_dt_list[[up.to]] <- data.table(
+      data_index=up.to, change=candidate.vec, cost=total.cost/up.to)
+    best.i <- which.min(total.cost)
+    pelt.change.vec[up.to] <- candidate.vec[best.i]
+    total.cost.best <- total.cost[best.i]
+    pelt.cost.vec[up.to+1] <- total.cost.best
+    keep <- if(isTRUE(prune))cost.no.penalty < total.cost.best else TRUE
+    browser(expr=any(is.na(keep)))
+    candidate.vec <- c(candidate.vec[keep], up.to+1L)
+  }
+  list(
+    change=pelt.change.vec,
+    cost=pelt.cost.vec,
+    candidates=pelt.candidates.vec,
+    index_dt=if(verbose)rbindlist(index_dt_list))
+}
+decode <- function(best.change){
+  seg.dt.list <- list()
+  last.i <- length(best.change)
+  while(last.i>0){
+    first.i <- best.change[last.i]
+    seg.dt.list[[paste(last.i)]] <- data.table(
+      first.i, last.i)
+    last.i <- first.i-1L
+  }
+  rbindlist(seg.dt.list)[seq(.N,1)]
+}
+pelt_info_list <- list()
+pelt_segs_list <- list()
+both_index_list <- list()
+penalty <- 10
+algo.prune <- c(
+  ##OPART=FALSE,
+  PELT=TRUE)
+for(N_data in N_data_vec){
+  for(simulation in "linear_changes"){
+    N_sim <- paste(N_data, simulation)
+    data_value <- sim_data_list[[N_sim]]$data_value
+    for(algo in names(algo.prune)){
+      prune <- algo.prune[[algo]]
+      fit <- PELT(data_value, penalty=penalty, prune=prune, verbose = TRUE)
+      both_index_list[[paste(N_data, simulation, algo)]] <- data.table(
+        N_data, simulation, algo, fit$index_dt)
+      fit_seg_dt <- decode(fit$change)
+      pelt_info_list[[paste(N_data,simulation,algo)]] <- data.table(
+        N_data,simulation,algo,
+        candidates=fit$candidates,data_index=seq_along(data_value))
+      pelt_segs_list[[paste(N_data,simulation,algo)]] <- data.table(
+        N_data,simulation,algo,
+        fit_seg_dt)
+    }
+  }
+}
+(pelt_info <- rbindlist(pelt_info_list))
+(pelt_segs <- rbindlist(pelt_segs_list))
+algo.colors <- c(
+  FPOP="blue",
+  OPART="grey50",
+  PELT="red")
+
+ggplot()+
+  theme_bw()+
+  scale_color_manual(values=algo.colors)+
+  geom_line(aes(
+    data_index, candidates, color=algo),
+    data=pelt_info)+
+  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  scale_x_log10(
+    breaks=seq(0,max(N_data_vec),by=25))
+pelt_info[, .(mean.candidates=mean(candidates)), by=.(N_data,simulation)]
+
+pelt_info[, to_end := max(data_index)-data_index, by=N_data]
+ggplot()+
+  theme_bw()+
+  scale_color_manual(values=algo.colors)+
+  geom_line(aes(
+    to_end, candidates, color=algo),
+    data=pelt_info)+
+  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  scale_x_continuous(
+    limits=c(0,500),
+    breaks=seq(0,max(N_data_vec),by=25))
+
+algo.levs <- c("OPART","PELT","FPOP")
+(both_index <- rbindlist(both_index_list)[
+, Algorithm := factor(algo, algo.levs)
+][
+, to_end := max(data_index)-data_index, by=N_data
+][])
+ggplot()+
+  theme_bw()+
+  geom_tile(aes(
+    to_end, change, fill=cost),
+    data=both_index[N_data==80000 & to_end<500])+
+  scale_fill_gradient(low="black", high="red")+
+  facet_grid(simulation ~ N_data, label=label_both)
+
+
+```
+
+
 
 ## Session info
 
