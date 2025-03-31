@@ -148,7 +148,7 @@ Below we define a function which implements PELT for the Poisson loss,
 because we used a count data simulation above.
 
 ```{r}
-PELT <- function(sim.mat, penalty, prune=TRUE){
+PELT <- function(sim.mat, penalty, prune=TRUE, verbose=FALSE){
   if(!is.matrix(sim.mat))sim.mat <- cbind(sim.mat)
   cum.data <- rbind(0, apply(sim.mat, 2, cumsum))
   sum_trick <- function(m, start, end)m[end+1,,drop=FALSE]-m[start,,drop=FALSE]
@@ -164,6 +164,7 @@ PELT <- function(sim.mat, penalty, prune=TRUE){
   pelt.cost.vec[1] <- -penalty
   pelt.candidates.vec <- rep(NA_integer_, N.data)
   candidate.vec <- 1L
+  if(verbose)index_dt_list <- list()
   for(up.to in 1:N.data){
     N.cand <- length(candidate.vec)
     pelt.candidates.vec[up.to] <- N.cand
@@ -171,6 +172,8 @@ PELT <- function(sim.mat, penalty, prune=TRUE){
     prev.cost <- pelt.cost.vec[candidate.vec]
     cost.no.penalty <- prev.cost+last.seg.cost
     total.cost <- cost.no.penalty+penalty
+    if(verbose)index_dt_list[[up.to]] <- data.table(
+      data_index=up.to, change=candidate.vec, cost=total.cost/up.to)
     best.i <- which.min(total.cost)
     pelt.change.vec[up.to] <- candidate.vec[best.i]
     total.cost.best <- total.cost[best.i]
@@ -181,7 +184,8 @@ PELT <- function(sim.mat, penalty, prune=TRUE){
   list(
     change=pelt.change.vec,
     cost=pelt.cost.vec,
-    candidates=pelt.candidates.vec)
+    candidates=pelt.candidates.vec,
+    index_dt=if(verbose)rbindlist(index_dt_list))
 }
 decode <- function(best.change){
   seg.dt.list <- list()
@@ -196,6 +200,7 @@ decode <- function(best.change){
 }
 pelt_info_list <- list()
 pelt_segs_list <- list()
+both_index_list <- list()
 penalty <- 10
 algo.prune <- c(
   OPART=FALSE,
@@ -206,7 +211,9 @@ for(N_data in N_data_vec){
     data_value <- sim_data_list[[N_sim]]$data_value
     for(algo in names(algo.prune)){
       prune <- algo.prune[[algo]]
-      fit <- PELT(data_value, penalty=penalty, prune=prune)
+      fit <- PELT(data_value, penalty=penalty, prune=prune, verbose = TRUE)
+      both_index_list[[paste(N_data, simulation, algo)]] <- data.table(
+        N_data, simulation, algo, fit$index_dt)
       fit_seg_dt <- decode(fit$change)
       pelt_info_list[[paste(N_data,simulation,algo)]] <- data.table(
         N_data,simulation,algo,
@@ -228,7 +235,7 @@ candidates considered.
 ```{r pelt-prune}
 algo.colors <- c(
   FPOP="blue",
-  OPART="black",
+  OPART="grey50",
   PELT="red")
 ggplot()+
   theme_bw()+
@@ -259,11 +266,13 @@ change-point detected.
 
 ## FPOP
 
-Now we run FPOP. 
+Now we run FPOP, which is another pruning method, which is more
+complex to implement efficiently, so we use C++ code
+in the R package PeakSegOptimal.
 
 ```{r fpop-prune}
 if(FALSE){
-  remotes::install_github("tdhock/PeakSegOptimal@1b6223b9ccc3cd06c4018e4a737961a2a2aa19ba")
+  remotes::install_github("tdhock/PeakSegOptimal@f05834ad4b452070da1818f25412e5ac97454833")
 }
 fpop_info_list <- list()
 fpop_segs_list <- list()
@@ -271,7 +280,14 @@ for(N_data in N_data_vec){
   for(simulation in names(sim_fun_list)){
     N_sim <- paste(N_data, simulation)
     data_value <- sim_data_list[[N_sim]]$data_value
-    pfit <- PeakSegOptimal::UnconstrainedFPOP(data_value, penalty=penalty)
+    pfit <- PeakSegOptimal::UnconstrainedFPOP(
+      data_value, penalty=penalty, verbose_file=tempfile())
+    both_index_list[[paste(N_data, simulation, "FPOP")]] <- data.table(
+      N_data, simulation, algo="FPOP", pfit$index_dt
+    )[, let(
+      data_index=data_index+1L,
+      change=change+2L
+    )][]
     start <- rev(with(pfit, ends.vec[ends.vec>=0])+1L)
     end <- c(start[-1]-1L,length(data_value))
     fpop_info_list[[paste(N_data,simulation)]] <- data.table(
@@ -308,6 +324,48 @@ even with constant number of changes (larger segments).
   change-points candidates considered is linear in the number of data,
   so both OPART and PELT are quadratic time in the number of data,
   wheras FPOP is sub-quadratic (empirically linear or log-linear).
+  
+Another way to view this is by looking at the cost of each candidate
+change-point considered, as in the heat map below.
+
+```{r cost-heat}
+algo.levs <- c("OPART","PELT","FPOP")
+(both_index <- rbindlist(both_index_list)[
+, Algorithm := factor(algo, algo.levs)
+][])
+both_index[data_index==2 & N_data==400 & simulation=="constant_changes"]
+for(a in algo.levs){
+  gg <- ggplot()+
+    ggtitle(a)+
+    theme_bw()+
+    coord_equal()+
+    geom_tile(aes(
+      data_index, change, fill=cost),
+      data=both_index[Algorithm==a])+
+    scale_fill_gradient(low="black", high="red")+
+    facet_grid(simulation ~ N_data, label=label_both)
+  print(gg)
+}
+```
+
+Another way to visualize it is in the plot below, which super-imposes
+the three algos.
+
+```{r candidates-compare}
+ggplot()+
+  theme_bw()+
+  geom_tile(aes(
+    data_index, change, fill=Algorithm),
+    data=both_index)+
+  scale_fill_manual(values=algo.colors)+
+  scale_x_continuous(
+    breaks=seq(0,max(N_data_vec),by=25))+
+  facet_grid(simulation ~ N_data, label=label_both, scales="free", space="free")
+```
+
+It is clear that FPOP prunes much more than PELT, especially in the
+case of constant changes (segments that get larger with the overall
+number of data).
 
 ## atime comparison
 
@@ -368,8 +426,8 @@ ggplot()+
   facet_grid(unit ~ simulation, scales="free")+
   scale_x_log10(
     "N = number of data in sequence",
-    breaks=10^seq(2,5),
-    limits=c(NA, 1e6))+
+    breaks=10^seq(2,6),
+    limits=c(NA, 1e7))+
   scale_y_log10("")
 ```
 
@@ -394,7 +452,10 @@ Below we plot the same data in a different way, that facilitates
 comparisons across the type of simulation:
 
 ```{r compare-sims}
-refs_list$meas[, Simulation := sub("_","\n",simulation)]
+refs_list$meas[, let(
+  Simulation = sub("_","\n",simulation),
+  Algorithm = factor(expr.grid, algo.levs)
+)][]
 ggplot()+
   directlabels::geom_dl(aes(
     N, empirical, color=Simulation, label=Simulation),
@@ -403,11 +464,11 @@ ggplot()+
   geom_line(aes(
     N, empirical, color=Simulation),
     data=refs_list$measurements)+
-  facet_grid(unit ~ expr.grid, scales="free")+
+  facet_grid(unit ~ Algorithm, scales="free")+
   scale_x_log10(
     "N = number of data in sequence",
-    breaks=10^seq(2,5),
-    limits=c(NA, 1e6))+
+    breaks=10^seq(2,6),
+    limits=c(NA, 1e7))+
   scale_y_log10("")+
   theme(legend.position="none")
 ```
@@ -419,12 +480,17 @@ the mean number of candidates:
   constant number of changes, but at different rates (FPOP much slower
   than PELT).
 
-```{r plot-refs}
+```{r plot-refs, fig.width=12, fig.height=7}
+expr.levs <- CJ(
+  algo=algo.levs,
+  simulation=names(sim_fun_list)
+)[algo.levs, paste0(algo,"\n",simulation), on="algo"]
 edit_expr <- function(DT)DT[
-, expr.name := sub(" simulation=", "\n", expr.name)]
+, expr.name := factor(sub(" simulation=", "\n", expr.name), expr.levs)]
 edit_expr(refs_list$meas)
 edit_expr(refs_list$plot.ref)
-plot(refs_list)
+plot(refs_list)+
+  theme(panel.spacing=grid::unit(1,"lines"))
 ```
 
 The plot above is an empirical verification of our earlier complexity claims.
@@ -494,8 +560,8 @@ ggplot()+
   facet_grid(. ~ simulation, scales="free", labeller=label_both)+
   scale_x_log10(
     "N = number of data in sequence",
-    breaks=10^seq(2,5),
-    limits=c(NA, 1e6))+
+    breaks=10^seq(2,6),
+    limits=c(NA, 1e7))+
   scale_y_log10("Mean number of candidate change-points considered")
 ```
 
