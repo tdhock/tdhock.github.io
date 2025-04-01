@@ -331,7 +331,9 @@ even with constant number of changes (larger segments).
 * In the top simulation with constant changes, the number of
   change-points candidates considered is linear in the number of data,
   so both OPART and PELT are quadratic time in the number of data,
-  wheras FPOP is sub-quadratic (empirically linear or log-linear).
+  whereas FPOP is sub-quadratic (empirically linear or log-linear).
+  
+## Heat maps
   
 Another way to view this is by looking at the cost of each candidate
 change-point considered, as in the heat map below.
