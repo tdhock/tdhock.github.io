@@ -957,7 +957,7 @@ edit_expr <- function(DT)DT[
 edit_expr(refs_list$meas)
 edit_expr(refs_list$plot.ref)
 plot(refs_list)+
-  theme(panel.spacing=grid::unit(1,"lines"))
+  theme(panel.spacing=grid::unit(1.5,"lines"))
 ```
 
 ```
