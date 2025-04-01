@@ -1,8 +1,157 @@
-The goal of this post is to show how to use the mlr3torch package in R
-with AUM (Area Under Min of False Positive and False Negative rates,
-our newly Proposed surrogate loss for ROC curve optimization), in
-combination with the new cross-validation methods we proposed in our
-[SOAK paper](https://arxiv.org/abs/2410.08643).
+---
+layout: post
+title: Creating imbalanced data benchmarks
+description: And using AUM in mlr3torch
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-03-21-mlr3torch-aum"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to show how to use our recently proposed AUM
+loss (useful for unbalanced classification problems), with the
+mlr3torch package in R. We will create unbalanced classification data
+sets for use with our recently proposed [SOAK
+algorithm](https://arxiv.org/abs/2410.08643), which will be able to
+tell us if we can train on imbalanced data, and get accurate
+predictions on balanced data (and vice versa).
+
+## Read MNIST data
+
+We begin by reading the MNIST data,
+
+```{r}
+library(data.table)
+MNIST_dt <- fread("~/projects/cv-same-other-paper/data_Classif/MNIST.csv")
+data.table(
+  name=names(MNIST_dt),
+  first_row=unlist(MNIST_dt[1]),
+  last_row=unlist(MNIST_dt[.N]))
+```
+
+We see that these MNIST data have a `predefined.set` column, which we
+will ignore (use all data from train and test). The class distribution
+is as follows:
+
+```{r}
+(multi_counts <- MNIST_dt[, .(
+  count=.N,
+  prop=.N/nrow(MNIST_dt)
+), by=y][order(-prop)])
+```
+
+We see in the table above that there are about an equal amount of data
+for each class, from 9% to about 11%.
+
+```{r}
+set.seed(1)
+rand_ord <- MNIST_dt[, sample(.N)]
+prop_ord <- data.table(y=MNIST_dt$y[rand_ord])[
+, prop_y := seq(0,1,l=.N), by=y
+][, order(prop_y)]
+ord_list <- list(
+  random=rand_ord,
+  proportional=rand_ord[prop_ord])
+ord_prop_dt_list <- list()
+for(ord_name in names(ord_list)){
+  ord_vec <- ord_list[[ord_name]]
+  y_ord <- MNIST_dt$y[ord_vec]
+  for(prop_data in c(0.01, 0.1, 1)){
+    N <- nrow(MNIST_dt)*prop_data
+    N_props <- data.table(y=y_ord[1:N])[, .(
+      count=.N,
+      prop_y=.N/N
+    ), by=y][order(-prop_y)]
+    ord_prop_dt_list[[paste(ord_name, prop_data)]] <- data.table(
+      ord_name, prop_data, N_props)
+  }
+}
+ord_prop_dt <- rbindlist(ord_prop_dt_list)
+dcast(ord_prop_dt, ord_name + prop_data ~ y, value.var="prop_y")
+```
+
+To convert the data to a binary
+problem, we can create a new column that indicates if the data are
+odd=1 or even=0.
+
+```{r}
+(binary_counts <- MNIST_dt[
+, odd := y %% 2
+][, .(
+  count=.N,
+  prop=.N/nrow(MNIST_dt)
+), by=odd][order(-prop)])
+```
+
+Above we see that there are about an equal number of each class.
+Below we compute the number of
+
+```{r}
+target_prop <- c(0.5, 0.1, 0.05, 0.01, 0.005, 0.001)
+(larger_N <- binary_counts$count[1]/2)
+(smaller_dt <- data.table(
+  target_prop,
+  count=as.integer(target_prop*larger_N/(1-target_prop))
+)[
+, prop := count/(count+larger_N)
+][])
+unb_small_dt <- data.table(
+  subset="unbalanced",
+  binary_counts[2,.(odd)],
+  smaller_dt[-1])
+subset_mat <- matrix(
+  NA, nrow(MNIST_dt), nrow(unb_small_dt),
+  dimnames=list(NULL, target_prop=unb_small_dt$target_prop))
+MNIST_ord <- MNIST_dt[ord_list$proportional]
+emp_props_list <- list()
+emp_y_list <- list()
+for(unb_i in 1:nrow(unb_small_dt)){
+  unb_row <- unb_small_dt[unb_i]
+  unb_count_dt <- rbind(
+    data.table(subset="balanced", binary_counts[,.(odd)], smaller_dt[1]),
+    data.table(subset="unbalanced", binary_counts[1,.(odd)], smaller_dt[1]),
+    unb_row)
+  for(o in c(0,1)){
+    o_dt <- unb_count_dt[odd==o]
+    o_idx <- which(MNIST_ord$odd==o)
+    sub_vals <- o_dt[, rep(subset, count)]
+    some_idx <- o_idx[1:length(sub_vals)]
+    subset_mat[some_idx,unb_i] <- sub_vals
+  }
+  (unb_MNIST <- data.table(
+    target_prop=unb_row$target_prop,
+    subset=subset_mat[,unb_i],
+    odd=MNIST_ord$odd,
+    y=MNIST_ord$y)[!is.na(subset)])
+  emp_y_list[[unb_i]] <- unb_MNIST[, .(
+    count=.N
+  ), by=.(target_prop,subset,y)]
+  emp_props_list[[unb_i]] <- unb_MNIST[
+  , .(count=.N), by=.(target_prop,subset,odd)
+  ][
+  , prop_in_subset := count/sum(count)
+  , by=subset
+  ][]
+}
+emp_y <- rbindlist(emp_y_list)
+dcast(emp_y, subset + target_prop ~ y)
+(emp_props <- rbindlist(emp_props_list))
+```
 
 ## Custom loss function
 
