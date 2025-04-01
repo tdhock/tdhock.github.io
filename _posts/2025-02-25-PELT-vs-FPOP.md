@@ -94,47 +94,48 @@ for(N_data in N_data_vec){
       N_data, simulation, end)
   }
 }
-(sim_changes <- rbindlist(sim_changes_list))
+addSim <- function(DT)DT[, Simulation := paste0("\n", simulation)][]
+(sim_changes <- addSim(rbindlist(sim_changes_list)))
 ```
 
 ```
-##     N_data       simulation   end
-##      <num>           <char> <int>
-##  1:    100 constant_changes    25
-##  2:    100 constant_changes    50
-##  3:    100 constant_changes    75
-##  4:    100   linear_changes    25
-##  5:    100   linear_changes    50
-##  6:    100   linear_changes    75
-##  7:    200 constant_changes    50
-##  8:    200 constant_changes   100
-##  9:    200 constant_changes   150
-## 10:    200   linear_changes    25
-## 11:    200   linear_changes    50
-## 12:    200   linear_changes    75
-## 13:    200   linear_changes   100
-## 14:    200   linear_changes   125
-## 15:    200   linear_changes   150
-## 16:    200   linear_changes   175
-## 17:    400 constant_changes   100
-## 18:    400 constant_changes   200
-## 19:    400 constant_changes   300
-## 20:    400   linear_changes    25
-## 21:    400   linear_changes    50
-## 22:    400   linear_changes    75
-## 23:    400   linear_changes   100
-## 24:    400   linear_changes   125
-## 25:    400   linear_changes   150
-## 26:    400   linear_changes   175
-## 27:    400   linear_changes   200
-## 28:    400   linear_changes   225
-## 29:    400   linear_changes   250
-## 30:    400   linear_changes   275
-## 31:    400   linear_changes   300
-## 32:    400   linear_changes   325
-## 33:    400   linear_changes   350
-## 34:    400   linear_changes   375
-##     N_data       simulation   end
+##     N_data       simulation   end         Simulation
+##      <num>           <char> <int>             <char>
+##  1:    100 constant_changes    25 \nconstant_changes
+##  2:    100 constant_changes    50 \nconstant_changes
+##  3:    100 constant_changes    75 \nconstant_changes
+##  4:    100   linear_changes    25   \nlinear_changes
+##  5:    100   linear_changes    50   \nlinear_changes
+##  6:    100   linear_changes    75   \nlinear_changes
+##  7:    200 constant_changes    50 \nconstant_changes
+##  8:    200 constant_changes   100 \nconstant_changes
+##  9:    200 constant_changes   150 \nconstant_changes
+## 10:    200   linear_changes    25   \nlinear_changes
+## 11:    200   linear_changes    50   \nlinear_changes
+## 12:    200   linear_changes    75   \nlinear_changes
+## 13:    200   linear_changes   100   \nlinear_changes
+## 14:    200   linear_changes   125   \nlinear_changes
+## 15:    200   linear_changes   150   \nlinear_changes
+## 16:    200   linear_changes   175   \nlinear_changes
+## 17:    400 constant_changes   100 \nconstant_changes
+## 18:    400 constant_changes   200 \nconstant_changes
+## 19:    400 constant_changes   300 \nconstant_changes
+## 20:    400   linear_changes    25   \nlinear_changes
+## 21:    400   linear_changes    50   \nlinear_changes
+## 22:    400   linear_changes    75   \nlinear_changes
+## 23:    400   linear_changes   100   \nlinear_changes
+## 24:    400   linear_changes   125   \nlinear_changes
+## 25:    400   linear_changes   150   \nlinear_changes
+## 26:    400   linear_changes   175   \nlinear_changes
+## 27:    400   linear_changes   200   \nlinear_changes
+## 28:    400   linear_changes   225   \nlinear_changes
+## 29:    400   linear_changes   250   \nlinear_changes
+## 30:    400   linear_changes   275   \nlinear_changes
+## 31:    400   linear_changes   300   \nlinear_changes
+## 32:    400   linear_changes   325   \nlinear_changes
+## 33:    400   linear_changes   350   \nlinear_changes
+## 34:    400   linear_changes   375   \nlinear_changes
+##     N_data       simulation   end         Simulation
 ```
 
 Above we see the table of simulated change-points. 
@@ -147,29 +148,30 @@ Below we visualize the simulated data.
 
 
 ``` r
-(sim_data <- rbindlist(sim_data_list))
+(sim_data <- addSim(rbindlist(sim_data_list)))
 ```
 
 ```
-##       N_data       simulation data_index data_value
-##        <num>           <char>      <int>      <int>
-##    1:    100 constant_changes          1          8
-##    2:    100 constant_changes          2         10
-##    3:    100 constant_changes          3          7
-##    4:    100 constant_changes          4         11
-##    5:    100 constant_changes          5         14
-##   ---                                              
-## 1396:    400   linear_changes        396         24
-## 1397:    400   linear_changes        397         20
-## 1398:    400   linear_changes        398         22
-## 1399:    400   linear_changes        399         21
-## 1400:    400   linear_changes        400         23
+##       N_data       simulation data_index data_value         Simulation
+##        <num>           <char>      <int>      <int>             <char>
+##    1:    100 constant_changes          1          8 \nconstant_changes
+##    2:    100 constant_changes          2         10 \nconstant_changes
+##    3:    100 constant_changes          3          7 \nconstant_changes
+##    4:    100 constant_changes          4         11 \nconstant_changes
+##    5:    100 constant_changes          5         14 \nconstant_changes
+##   ---                                                                 
+## 1396:    400   linear_changes        396         24   \nlinear_changes
+## 1397:    400   linear_changes        397         20   \nlinear_changes
+## 1398:    400   linear_changes        398         22   \nlinear_changes
+## 1399:    400   linear_changes        399         21   \nlinear_changes
+## 1400:    400   linear_changes        400         23   \nlinear_changes
 ```
 
 ``` r
 library(ggplot2)
 ggplot()+
   theme_bw()+
+  theme(text=element_text(size=14))+
   geom_vline(aes(
     xintercept=end+0.5),
     data=sim_changes)+
@@ -177,9 +179,9 @@ ggplot()+
     data_index, data_value),
     color="grey50",
     data=sim_data)+
-  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
   scale_x_continuous(
-    breaks=seq(0,max(N_data_vec),by=25))
+    breaks=seq(0,max(N_data_vec),by=50))
 ```
 
 ![plot of chunk sim-data](/assets/img/2025-02-25-PELT-vs-FPOP/sim-data-1.png)
@@ -208,7 +210,7 @@ PELT <- function(sim.mat, penalty, prune=TRUE, verbose=FALSE){
     sum_vec <- sum_trick(cum.data, start, end)
     N <- end+1-start
     mean_vec <- sum_vec/N
-    sum_vec*(1-log(mean_vec))
+    ifelse(sum_vec==0, 0, sum_vec*(1-log(mean_vec)))
   }
   N.data <- nrow(sim.mat)
   pelt.change.vec <- rep(NA_integer_, N.data)
@@ -276,113 +278,113 @@ for(N_data in N_data_vec){
     }
   }
 }
-(pelt_info <- rbindlist(pelt_info_list))
+(pelt_info <- addSim(rbindlist(pelt_info_list)))
 ```
 
 ```
-##       N_data       simulation   algo candidates data_index
-##        <num>           <char> <char>      <int>      <int>
-##    1:    100 constant_changes  OPART          1          1
-##    2:    100 constant_changes  OPART          2          2
-##    3:    100 constant_changes  OPART          3          3
-##    4:    100 constant_changes  OPART          4          4
-##    5:    100 constant_changes  OPART          5          5
-##   ---                                                     
-## 2796:    400   linear_changes   PELT         21        396
-## 2797:    400   linear_changes   PELT         21        397
-## 2798:    400   linear_changes   PELT         22        398
-## 2799:    400   linear_changes   PELT         23        399
-## 2800:    400   linear_changes   PELT         24        400
+##       N_data       simulation   algo candidates data_index         Simulation
+##        <num>           <char> <char>      <int>      <int>             <char>
+##    1:    100 constant_changes  OPART          1          1 \nconstant_changes
+##    2:    100 constant_changes  OPART          2          2 \nconstant_changes
+##    3:    100 constant_changes  OPART          3          3 \nconstant_changes
+##    4:    100 constant_changes  OPART          4          4 \nconstant_changes
+##    5:    100 constant_changes  OPART          5          5 \nconstant_changes
+##   ---                                                                        
+## 2796:    400   linear_changes   PELT         20        396   \nlinear_changes
+## 2797:    400   linear_changes   PELT         20        397   \nlinear_changes
+## 2798:    400   linear_changes   PELT         21        398   \nlinear_changes
+## 2799:    400   linear_changes   PELT         22        399   \nlinear_changes
+## 2800:    400   linear_changes   PELT         23        400   \nlinear_changes
 ```
 
 ``` r
-(pelt_segs <- rbindlist(pelt_segs_list))
+(pelt_segs <- addSim(rbindlist(pelt_segs_list)))
 ```
 
 ```
-##     N_data       simulation   algo first.i last.i
-##      <num>           <char> <char>   <int>  <int>
-##  1:    100 constant_changes  OPART       1     25
-##  2:    100 constant_changes  OPART      26     50
-##  3:    100 constant_changes  OPART      51     75
-##  4:    100 constant_changes  OPART      76    100
-##  5:    100 constant_changes   PELT       1     25
-##  6:    100 constant_changes   PELT      26     50
-##  7:    100 constant_changes   PELT      51     75
-##  8:    100 constant_changes   PELT      76    100
-##  9:    100   linear_changes  OPART       1     25
-## 10:    100   linear_changes  OPART      26     50
-## 11:    100   linear_changes  OPART      51     75
-## 12:    100   linear_changes  OPART      76    100
-## 13:    100   linear_changes   PELT       1     25
-## 14:    100   linear_changes   PELT      26     50
-## 15:    100   linear_changes   PELT      51     75
-## 16:    100   linear_changes   PELT      76    100
-## 17:    200 constant_changes  OPART       1     50
-## 18:    200 constant_changes  OPART      51    100
-## 19:    200 constant_changes  OPART     101    150
-## 20:    200 constant_changes  OPART     151    200
-## 21:    200 constant_changes   PELT       1     50
-## 22:    200 constant_changes   PELT      51    100
-## 23:    200 constant_changes   PELT     101    150
-## 24:    200 constant_changes   PELT     151    200
-## 25:    200   linear_changes  OPART       1     25
-## 26:    200   linear_changes  OPART      26     50
-## 27:    200   linear_changes  OPART      51     75
-## 28:    200   linear_changes  OPART      76    100
-## 29:    200   linear_changes  OPART     101    125
-## 30:    200   linear_changes  OPART     126    150
-## 31:    200   linear_changes  OPART     151    175
-## 32:    200   linear_changes  OPART     176    200
-## 33:    200   linear_changes   PELT       1     25
-## 34:    200   linear_changes   PELT      26     50
-## 35:    200   linear_changes   PELT      51     75
-## 36:    200   linear_changes   PELT      76    100
-## 37:    200   linear_changes   PELT     101    125
-## 38:    200   linear_changes   PELT     126    150
-## 39:    200   linear_changes   PELT     151    175
-## 40:    200   linear_changes   PELT     176    200
-## 41:    400 constant_changes  OPART       1    100
-## 42:    400 constant_changes  OPART     101    200
-## 43:    400 constant_changes  OPART     201    300
-## 44:    400 constant_changes  OPART     301    400
-## 45:    400 constant_changes   PELT       1    100
-## 46:    400 constant_changes   PELT     101    200
-## 47:    400 constant_changes   PELT     201    300
-## 48:    400 constant_changes   PELT     301    400
-## 49:    400   linear_changes  OPART       1     25
-## 50:    400   linear_changes  OPART      26     50
-## 51:    400   linear_changes  OPART      51     75
-## 52:    400   linear_changes  OPART      76    100
-## 53:    400   linear_changes  OPART     101    125
-## 54:    400   linear_changes  OPART     126    150
-## 55:    400   linear_changes  OPART     151    175
-## 56:    400   linear_changes  OPART     176    201
-## 57:    400   linear_changes  OPART     202    224
-## 58:    400   linear_changes  OPART     225    250
-## 59:    400   linear_changes  OPART     251    275
-## 60:    400   linear_changes  OPART     276    300
-## 61:    400   linear_changes  OPART     301    325
-## 62:    400   linear_changes  OPART     326    350
-## 63:    400   linear_changes  OPART     351    375
-## 64:    400   linear_changes  OPART     376    400
-## 65:    400   linear_changes   PELT       1     25
-## 66:    400   linear_changes   PELT      26     50
-## 67:    400   linear_changes   PELT      51     75
-## 68:    400   linear_changes   PELT      76    100
-## 69:    400   linear_changes   PELT     101    125
-## 70:    400   linear_changes   PELT     126    150
-## 71:    400   linear_changes   PELT     151    175
-## 72:    400   linear_changes   PELT     176    201
-## 73:    400   linear_changes   PELT     202    224
-## 74:    400   linear_changes   PELT     225    250
-## 75:    400   linear_changes   PELT     251    275
-## 76:    400   linear_changes   PELT     276    300
-## 77:    400   linear_changes   PELT     301    325
-## 78:    400   linear_changes   PELT     326    349
-## 79:    400   linear_changes   PELT     350    375
-## 80:    400   linear_changes   PELT     376    400
-##     N_data       simulation   algo first.i last.i
+##     N_data       simulation   algo first.i last.i         Simulation
+##      <num>           <char> <char>   <int>  <int>             <char>
+##  1:    100 constant_changes  OPART       1     25 \nconstant_changes
+##  2:    100 constant_changes  OPART      26     50 \nconstant_changes
+##  3:    100 constant_changes  OPART      51     75 \nconstant_changes
+##  4:    100 constant_changes  OPART      76    100 \nconstant_changes
+##  5:    100 constant_changes   PELT       1     25 \nconstant_changes
+##  6:    100 constant_changes   PELT      26     50 \nconstant_changes
+##  7:    100 constant_changes   PELT      51     75 \nconstant_changes
+##  8:    100 constant_changes   PELT      76    100 \nconstant_changes
+##  9:    100   linear_changes  OPART       1     25   \nlinear_changes
+## 10:    100   linear_changes  OPART      26     50   \nlinear_changes
+## 11:    100   linear_changes  OPART      51     75   \nlinear_changes
+## 12:    100   linear_changes  OPART      76    100   \nlinear_changes
+## 13:    100   linear_changes   PELT       1     25   \nlinear_changes
+## 14:    100   linear_changes   PELT      26     50   \nlinear_changes
+## 15:    100   linear_changes   PELT      51     75   \nlinear_changes
+## 16:    100   linear_changes   PELT      76    100   \nlinear_changes
+## 17:    200 constant_changes  OPART       1     50 \nconstant_changes
+## 18:    200 constant_changes  OPART      51    100 \nconstant_changes
+## 19:    200 constant_changes  OPART     101    150 \nconstant_changes
+## 20:    200 constant_changes  OPART     151    200 \nconstant_changes
+## 21:    200 constant_changes   PELT       1     50 \nconstant_changes
+## 22:    200 constant_changes   PELT      51    100 \nconstant_changes
+## 23:    200 constant_changes   PELT     101    150 \nconstant_changes
+## 24:    200 constant_changes   PELT     151    200 \nconstant_changes
+## 25:    200   linear_changes  OPART       1     25   \nlinear_changes
+## 26:    200   linear_changes  OPART      26     50   \nlinear_changes
+## 27:    200   linear_changes  OPART      51     75   \nlinear_changes
+## 28:    200   linear_changes  OPART      76    100   \nlinear_changes
+## 29:    200   linear_changes  OPART     101    125   \nlinear_changes
+## 30:    200   linear_changes  OPART     126    150   \nlinear_changes
+## 31:    200   linear_changes  OPART     151    175   \nlinear_changes
+## 32:    200   linear_changes  OPART     176    200   \nlinear_changes
+## 33:    200   linear_changes   PELT       1     25   \nlinear_changes
+## 34:    200   linear_changes   PELT      26     50   \nlinear_changes
+## 35:    200   linear_changes   PELT      51     75   \nlinear_changes
+## 36:    200   linear_changes   PELT      76    100   \nlinear_changes
+## 37:    200   linear_changes   PELT     101    125   \nlinear_changes
+## 38:    200   linear_changes   PELT     126    150   \nlinear_changes
+## 39:    200   linear_changes   PELT     151    175   \nlinear_changes
+## 40:    200   linear_changes   PELT     176    200   \nlinear_changes
+## 41:    400 constant_changes  OPART       1    100 \nconstant_changes
+## 42:    400 constant_changes  OPART     101    200 \nconstant_changes
+## 43:    400 constant_changes  OPART     201    300 \nconstant_changes
+## 44:    400 constant_changes  OPART     301    400 \nconstant_changes
+## 45:    400 constant_changes   PELT       1    100 \nconstant_changes
+## 46:    400 constant_changes   PELT     101    200 \nconstant_changes
+## 47:    400 constant_changes   PELT     201    300 \nconstant_changes
+## 48:    400 constant_changes   PELT     301    400 \nconstant_changes
+## 49:    400   linear_changes  OPART       1     25   \nlinear_changes
+## 50:    400   linear_changes  OPART      26     50   \nlinear_changes
+## 51:    400   linear_changes  OPART      51     75   \nlinear_changes
+## 52:    400   linear_changes  OPART      76    100   \nlinear_changes
+## 53:    400   linear_changes  OPART     101    125   \nlinear_changes
+## 54:    400   linear_changes  OPART     126    150   \nlinear_changes
+## 55:    400   linear_changes  OPART     151    175   \nlinear_changes
+## 56:    400   linear_changes  OPART     176    201   \nlinear_changes
+## 57:    400   linear_changes  OPART     202    224   \nlinear_changes
+## 58:    400   linear_changes  OPART     225    250   \nlinear_changes
+## 59:    400   linear_changes  OPART     251    275   \nlinear_changes
+## 60:    400   linear_changes  OPART     276    300   \nlinear_changes
+## 61:    400   linear_changes  OPART     301    325   \nlinear_changes
+## 62:    400   linear_changes  OPART     326    350   \nlinear_changes
+## 63:    400   linear_changes  OPART     351    375   \nlinear_changes
+## 64:    400   linear_changes  OPART     376    400   \nlinear_changes
+## 65:    400   linear_changes   PELT       1     25   \nlinear_changes
+## 66:    400   linear_changes   PELT      26     50   \nlinear_changes
+## 67:    400   linear_changes   PELT      51     75   \nlinear_changes
+## 68:    400   linear_changes   PELT      76    100   \nlinear_changes
+## 69:    400   linear_changes   PELT     101    125   \nlinear_changes
+## 70:    400   linear_changes   PELT     126    150   \nlinear_changes
+## 71:    400   linear_changes   PELT     151    175   \nlinear_changes
+## 72:    400   linear_changes   PELT     176    201   \nlinear_changes
+## 73:    400   linear_changes   PELT     202    224   \nlinear_changes
+## 74:    400   linear_changes   PELT     225    250   \nlinear_changes
+## 75:    400   linear_changes   PELT     251    275   \nlinear_changes
+## 76:    400   linear_changes   PELT     276    300   \nlinear_changes
+## 77:    400   linear_changes   PELT     301    325   \nlinear_changes
+## 78:    400   linear_changes   PELT     326    350   \nlinear_changes
+## 79:    400   linear_changes   PELT     351    375   \nlinear_changes
+## 80:    400   linear_changes   PELT     376    400   \nlinear_changes
+##     N_data       simulation   algo first.i last.i         Simulation
 ```
 
 We see in the result tables above that the segmentations are the same,
@@ -397,6 +399,9 @@ algo.colors <- c(
   PELT="red")
 ggplot()+
   theme_bw()+
+  theme(
+    panel.spacing=grid::unit(1,"lines"),
+    text=element_text(size=15))+
   geom_vline(aes(
     xintercept=end+0.5),
     data=sim_changes)+
@@ -404,9 +409,9 @@ ggplot()+
   geom_point(aes(
     data_index, candidates, color=algo),
     data=pelt_info)+
-  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
   scale_x_continuous(
-    breaks=seq(0,max(N_data_vec),by=25))
+    breaks=seq(0,max(N_data_vec),by=50))
 ```
 
 ![plot of chunk pelt-prune](/assets/img/2025-02-25-PELT-vs-FPOP/pelt-prune-1.png)
@@ -460,23 +465,23 @@ for(N_data in N_data_vec){
       N_data,simulation,start,end)
   }
 }
-(fpop_info <- rbindlist(fpop_info_list))
+(fpop_info <- addSim(rbindlist(fpop_info_list)))
 ```
 
 ```
-##       N_data       simulation   algo candidates data_index
-##        <num>           <char> <char>      <int>      <int>
-##    1:    100 constant_changes   FPOP          1          1
-##    2:    100 constant_changes   FPOP          2          2
-##    3:    100 constant_changes   FPOP          3          3
-##    4:    100 constant_changes   FPOP          3          4
-##    5:    100 constant_changes   FPOP          3          5
-##   ---                                                     
-## 1396:    400   linear_changes   FPOP          5        396
-## 1397:    400   linear_changes   FPOP          5        397
-## 1398:    400   linear_changes   FPOP          6        398
-## 1399:    400   linear_changes   FPOP          6        399
-## 1400:    400   linear_changes   FPOP          6        400
+##       N_data       simulation   algo candidates data_index         Simulation
+##        <num>           <char> <char>      <int>      <int>             <char>
+##    1:    100 constant_changes   FPOP          1          1 \nconstant_changes
+##    2:    100 constant_changes   FPOP          2          2 \nconstant_changes
+##    3:    100 constant_changes   FPOP          3          3 \nconstant_changes
+##    4:    100 constant_changes   FPOP          3          4 \nconstant_changes
+##    5:    100 constant_changes   FPOP          3          5 \nconstant_changes
+##   ---                                                                        
+## 1396:    400   linear_changes   FPOP          5        396   \nlinear_changes
+## 1397:    400   linear_changes   FPOP          5        397   \nlinear_changes
+## 1398:    400   linear_changes   FPOP          6        398   \nlinear_changes
+## 1399:    400   linear_changes   FPOP          6        399   \nlinear_changes
+## 1400:    400   linear_changes   FPOP          6        400   \nlinear_changes
 ```
 
 ``` r
@@ -533,6 +538,9 @@ for(N_data in N_data_vec){
 both_info <- rbind(pelt_info, fpop_info)
 ggplot()+
   theme_bw()+
+  theme(
+    panel.spacing=grid::unit(1,"lines"),
+    text=element_text(size=15))+
   geom_vline(aes(
     xintercept=end+0.5),
     data=sim_changes)+
@@ -540,9 +548,9 @@ ggplot()+
   geom_point(aes(
     data_index, candidates, color=algo),
     data=both_info)+
-  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
   scale_x_continuous(
-    breaks=seq(0,max(N_data_vec),by=25))
+    breaks=seq(0,max(N_data_vec),by=50))
 ```
 
 ![plot of chunk fpop-prune](/assets/img/2025-02-25-PELT-vs-FPOP/fpop-prune-1.png)
@@ -562,25 +570,25 @@ change-point considered, as in the heat map below.
 
 ``` r
 algo.levs <- c("OPART","PELT","FPOP")
-(both_index <- rbindlist(both_index_list)[
-, Algorithm := factor(algo, algo.levs)
-][])
+(both_index <- addSim(rbindlist(both_index_list))[, let(
+  Algorithm = factor(algo, algo.levs)
+)][])
 ```
 
 ```
-##         N_data       simulation   algo data_index change       cost Algorithm
-##          <num>           <char> <char>      <int>  <int>      <num>    <fctr>
-##      1:    100 constant_changes  OPART          1      1  -8.635532     OPART
-##      2:    100 constant_changes  OPART          2      1 -10.775021     OPART
-##      3:    100 constant_changes  OPART          2      2  -5.830692     OPART
-##      4:    100 constant_changes  OPART          3      1  -9.335529     OPART
-##      5:    100 constant_changes  OPART          3      2  -6.005552     OPART
-##     ---                                                                      
-## 253874:    400   linear_changes   FPOP        400    397 -26.949800      FPOP
-## 253875:    400   linear_changes   FPOP        400    395 -26.952800      FPOP
-## 253876:    400   linear_changes   FPOP        400    394 -26.953300      FPOP
-## 253877:    400   linear_changes   FPOP        400    376 -26.969100      FPOP
-## 253878:    400   linear_changes   FPOP        400    400 -26.944700      FPOP
+##         N_data       simulation   algo data_index change       cost         Simulation Algorithm
+##          <num>           <char> <char>      <int>  <int>      <num>             <char>    <fctr>
+##      1:    100 constant_changes  OPART          1      1  -8.635532 \nconstant_changes     OPART
+##      2:    100 constant_changes  OPART          2      1 -10.775021 \nconstant_changes     OPART
+##      3:    100 constant_changes  OPART          2      2  -5.830692 \nconstant_changes     OPART
+##      4:    100 constant_changes  OPART          3      1  -9.335529 \nconstant_changes     OPART
+##      5:    100 constant_changes  OPART          3      2  -6.005552 \nconstant_changes     OPART
+##     ---                                                                                         
+## 253677:    400   linear_changes   FPOP        400    397 -26.949800   \nlinear_changes      FPOP
+## 253678:    400   linear_changes   FPOP        400    395 -26.952800   \nlinear_changes      FPOP
+## 253679:    400   linear_changes   FPOP        400    394 -26.953300   \nlinear_changes      FPOP
+## 253680:    400   linear_changes   FPOP        400    376 -26.969100   \nlinear_changes      FPOP
+## 253681:    400   linear_changes   FPOP        400    400 -26.944700   \nlinear_changes      FPOP
 ```
 
 ``` r
@@ -588,15 +596,15 @@ both_index[data_index==2 & N_data==400 & simulation=="constant_changes"]
 ```
 
 ```
-##    N_data       simulation   algo data_index change       cost Algorithm
-##     <num>           <char> <char>      <int>  <int>      <num>    <fctr>
-## 1:    400 constant_changes  OPART          2      1 -10.775021     OPART
-## 2:    400 constant_changes  OPART          2      2  -5.830692     OPART
-## 3:    400 constant_changes   PELT          2      1 -10.775021      PELT
-## 4:    400 constant_changes   PELT          2      2  -5.830692      PELT
-## 5:    400 constant_changes   FPOP          2      2  -5.830690      FPOP
-## 6:    400 constant_changes   FPOP          2      1 -10.775000      FPOP
-## 7:    400 constant_changes   FPOP          2      2  -5.830690      FPOP
+##    N_data       simulation   algo data_index change       cost         Simulation Algorithm
+##     <num>           <char> <char>      <int>  <int>      <num>             <char>    <fctr>
+## 1:    400 constant_changes  OPART          2      1 -10.775021 \nconstant_changes     OPART
+## 2:    400 constant_changes  OPART          2      2  -5.830692 \nconstant_changes     OPART
+## 3:    400 constant_changes   PELT          2      1 -10.775021 \nconstant_changes      PELT
+## 4:    400 constant_changes   PELT          2      2  -5.830692 \nconstant_changes      PELT
+## 5:    400 constant_changes   FPOP          2      2  -5.830690 \nconstant_changes      FPOP
+## 6:    400 constant_changes   FPOP          2      1 -10.775000 \nconstant_changes      FPOP
+## 7:    400 constant_changes   FPOP          2      2  -5.830690 \nconstant_changes      FPOP
 ```
 
 ``` r
@@ -604,23 +612,18 @@ for(a in algo.levs){
   gg <- ggplot()+
     ggtitle(a)+
     theme_bw()+
+    theme(text=element_text(size=20))+
     coord_equal()+
     geom_tile(aes(
       data_index, change, fill=cost),
       data=both_index[Algorithm==a])+
     scale_fill_gradient(low="black", high="red")+
-    facet_grid(simulation ~ N_data, label=label_both)
+    facet_grid(Simulation ~ N_data, label=label_both)
   print(gg)
 }
 ```
 
-![plot of chunk cost-heat](/assets/img/2025-02-25-PELT-vs-FPOP/cost-heat-1.png)
-
-```
-## Warning: Removed 241 rows containing missing values or values outside the scale range (`geom_tile()`).
-```
-
-![plot of chunk cost-heat](/assets/img/2025-02-25-PELT-vs-FPOP/cost-heat-2.png)![plot of chunk cost-heat](/assets/img/2025-02-25-PELT-vs-FPOP/cost-heat-3.png)
+![plot of chunk cost-heat](/assets/img/2025-02-25-PELT-vs-FPOP/cost-heat-1.png)![plot of chunk cost-heat](/assets/img/2025-02-25-PELT-vs-FPOP/cost-heat-2.png)![plot of chunk cost-heat](/assets/img/2025-02-25-PELT-vs-FPOP/cost-heat-3.png)
 
 Another way to visualize it is in the plot below, which super-imposes
 the three algos.
@@ -629,17 +632,14 @@ the three algos.
 ``` r
 ggplot()+
   theme_bw()+
+  theme(text=element_text(size=15))+
   geom_tile(aes(
     data_index, change, fill=Algorithm),
     data=both_index)+
   scale_fill_manual(values=algo.colors)+
   scale_x_continuous(
-    breaks=seq(0,max(N_data_vec),by=25))+
-  facet_grid(simulation ~ N_data, label=label_both, scales="free", space="free")
-```
-
-```
-## Warning: Removed 241 rows containing missing values or values outside the scale range (`geom_tile()`).
+    breaks=seq(0,max(N_data_vec),by=50))+
+  facet_grid(Simulation ~ N_data, label=label_both, scales="free", space="free")
 ```
 
 ![plot of chunk candidates-compare](/assets/img/2025-02-25-PELT-vs-FPOP/candidates-compare-1.png)
@@ -650,6 +650,10 @@ number of data).
 
 ## atime comparison
 
+The `atime()` function can be used to perform asymptotic time/memory/etc comparisons. 
+This means that we will increase N, and monitor how fast certain quantities grow with N.
+We begin by defining the data sizes N of interest:
+
 
 ``` r
 base_N <- c(100,200,400,800)
@@ -659,6 +663,10 @@ base_N <- c(100,200,400,800)
 ```
 ##  [1] 1e+02 2e+02 4e+02 8e+02 1e+03 2e+03 4e+03 8e+03 1e+04 2e+04 4e+04 8e+04 1e+05 2e+05 4e+05 8e+05
 ```
+
+The data sizes above are on a log scale between 10 and 1,000,000.
+Next, we define a list that enumerates the different combinations in the experiment.
+
 
 ``` r
 grid_args <- list(
@@ -682,25 +690,114 @@ for(algo in names(algo.prune)){
       max_seg_size=max(diff(c(0,dec$last.i))))
   }, list(prune=prune))
 }
-expr.list <- do.call(atime::atime_grid, grid_args)
-if(!"atime_list" %in% ls()){
-atime_list <- atime::atime(
-  N=all_N,
-  setup={
-    data_list <- list()
-    for(simulation in names(sim_fun_list)){
-      sim_fun <- sim_fun_list[[simulation]]
-      data_mean_vec <- sim_fun(N)
-      set.seed(1)
-      data_list[[simulation]] <- rpois(N, data_mean_vec)
-    }
-  },
-  expr.list=expr.list,
-  seconds.limit=1,
-  result=TRUE)
+(expr.list <- do.call(atime::atime_grid, grid_args))
+```
+
+```
+## $`FPOP simulation=constant_changes`
+## {
+##     pfit <- PeakSegOptimal::UnconstrainedFPOP(data_list[["constant_changes"]], 
+##         penalty = penalty)
+##     data.frame(mean_candidates = mean(pfit$intervals.vec), segments = sum(is.finite(pfit$mean.vec)), 
+##         max_seg_size = max(-diff(pfit$ends.vec)))
+## }
+## 
+## $`FPOP simulation=linear_changes`
+## {
+##     pfit <- PeakSegOptimal::UnconstrainedFPOP(data_list[["linear_changes"]], 
+##         penalty = penalty)
+##     data.frame(mean_candidates = mean(pfit$intervals.vec), segments = sum(is.finite(pfit$mean.vec)), 
+##         max_seg_size = max(-diff(pfit$ends.vec)))
+## }
+## 
+## $`OPART simulation=constant_changes`
+## {
+##     fit <- PELT(data_list[["constant_changes"]], penalty = penalty, 
+##         prune = FALSE)
+##     dec <- decode(fit$change)
+##     data.frame(mean_candidates = mean(fit$candidates), segments = nrow(dec), 
+##         max_seg_size = max(diff(c(0, dec$last.i))))
+## }
+## 
+## $`OPART simulation=linear_changes`
+## {
+##     fit <- PELT(data_list[["linear_changes"]], penalty = penalty, 
+##         prune = FALSE)
+##     dec <- decode(fit$change)
+##     data.frame(mean_candidates = mean(fit$candidates), segments = nrow(dec), 
+##         max_seg_size = max(diff(c(0, dec$last.i))))
+## }
+## 
+## $`PELT simulation=constant_changes`
+## {
+##     fit <- PELT(data_list[["constant_changes"]], penalty = penalty, 
+##         prune = TRUE)
+##     dec <- decode(fit$change)
+##     data.frame(mean_candidates = mean(fit$candidates), segments = nrow(dec), 
+##         max_seg_size = max(diff(c(0, dec$last.i))))
+## }
+## 
+## $`PELT simulation=linear_changes`
+## {
+##     fit <- PELT(data_list[["linear_changes"]], penalty = penalty, 
+##         prune = TRUE)
+##     dec <- decode(fit$change)
+##     data.frame(mean_candidates = mean(fit$candidates), segments = nrow(dec), 
+##         max_seg_size = max(diff(c(0, dec$last.i))))
+## }
+## 
+## attr(,"parameters")
+##                            expr.name expr.grid       simulation
+##                               <char>    <char>           <char>
+## 1:  FPOP simulation=constant_changes      FPOP constant_changes
+## 2:    FPOP simulation=linear_changes      FPOP   linear_changes
+## 3: OPART simulation=constant_changes     OPART constant_changes
+## 4:   OPART simulation=linear_changes     OPART   linear_changes
+## 5:  PELT simulation=constant_changes      PELT constant_changes
+## 6:    PELT simulation=linear_changes      PELT   linear_changes
+```
+
+Above we see a list with 6 expressions to run, and
+a data table with the corresponding number of rows. Note that each expression 
+
+* returns a data frame with one row and three columns that will be used as units to analyze as a function of N.
+* should depend on data size N, which does not appear in the
+  expressions above, but it is used to define `data_list` in the `setup`
+  argument below:
+
+
+``` r
+cache.rds <- "2025-02-25-PELT-vs-FPOP.rds"
+if(file.exists(cache.rds)){
+  atime_list <- readRDS(cache.rds)
+}else{
+  atime_list <- atime::atime(
+    N=all_N,
+    setup={
+      data_list <- list()
+      for(simulation in names(sim_fun_list)){
+        sim_fun <- sim_fun_list[[simulation]]
+        data_mean_vec <- sim_fun(N)
+        set.seed(1)
+        data_list[[simulation]] <- rpois(N, data_mean_vec)
+      }
+    },
+    expr.list=expr.list,
+    seconds.limit=1,
+    result=TRUE)
+  saveRDS(atime_list, cache.rds)
 }
+```
+
+Note in the code above that we run the timing inside `if(file.exists`, which is a caching mechanism.
+The result is time-consuming to compute, so the first time it is computed, it is saved to disk as an RDS file, and then subsequently read from disk, to save time.
+Finally, we plot the different units as a function of data size N, in the figure below.
+
+
+``` r
 refs_list <- atime::references_best(atime_list)
 ggplot()+
+  theme(text=element_text(size=12))+
   directlabels::geom_dl(aes(
     N, empirical, color=expr.grid, label=expr.grid),
     data=refs_list$measurements,
@@ -751,75 +848,78 @@ refs_list$meas[, let(
 ```
 
 ```
-##              unit                         expr.name fun.name fun.latex expr.grid       simulation     N         min
-##            <char>                            <char>   <char>    <char>    <char>           <char> <num>       <num>
-##   1:    kilobytes  FPOP simulation=constant_changes        N         N      FPOP constant_changes 1e+02 0.000228890
-##   2:    kilobytes    FPOP simulation=linear_changes        N         N      FPOP   linear_changes 1e+02 0.000226757
-##   3:    kilobytes OPART simulation=constant_changes      N^2       N^2     OPART constant_changes 1e+02 0.001375973
-##   4:    kilobytes   OPART simulation=linear_changes      N^2       N^2     OPART   linear_changes 1e+02 0.001286126
-##   5:    kilobytes  PELT simulation=constant_changes      N^2       N^2      PELT constant_changes 1e+02 0.001245672
-##  ---                                                                                                               
-## 351: max_seg_size  FPOP simulation=constant_changes        N         N      FPOP constant_changes 2e+05 0.498597682
-## 352: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 2e+05 0.280206123
-## 353: max_seg_size  FPOP simulation=constant_changes        N         N      FPOP constant_changes 4e+05 1.033321623
-## 354: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 4e+05 0.562845602
-## 355: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 8e+05 1.108992063
-##            median      itr/sec     gc/sec n_itr  n_gc            result
-##             <num>        <num>      <num> <int> <num>            <list>
-##   1: 0.0002442510 3886.5622792  0.0000000    10     0 <data.frame[1x3]>
-##   2: 0.0002404525 3906.2431709  0.0000000    10     0 <data.frame[1x3]>
-##   3: 0.0014278645  690.4081700  0.0000000    10     0 <data.frame[1x3]>
-##   4: 0.0014285415  669.6252241 74.4028027     9     1 <data.frame[1x3]>
-##   5: 0.0012933711  770.4979413  0.0000000    10     0 <data.frame[1x3]>
-##  ---                                                                   
-## 351: 0.5080637165    1.9674663  0.2186074     9     1 <data.frame[1x3]>
-## 352: 0.2879930011    3.4726913  0.3858546     9     1 <data.frame[1x3]>
-## 353: 1.0600295700    0.9483627  0.4064412     7     3 <data.frame[1x3]>
-## 354: 0.5670203970    1.7640343  0.4410086     8     2 <data.frame[1x3]>
-## 355: 1.1337732555    0.8863467  0.3798629     7     3 <data.frame[1x3]>
-##                                                    time             gc   kilobytes         q25          q75         max
-##                                                  <list>         <list>       <num>       <num>        <num>       <num>
-##   1:            381µs,274µs,244µs,248µs,246µs,236µs,... <tbl_df[10x3]>    35.90625 0.000236438 0.0002475735 0.000381302
-##   2:            396µs,270µs,242µs,246µs,241µs,233µs,... <tbl_df[10x3]>    12.60156 0.000233528 0.0002451821 0.000395967
-##   3:      1.67ms,1.48ms,1.45ms,1.42ms,1.42ms,1.43ms,... <tbl_df[10x3]>   632.10938 0.001411331 0.0014472857 0.001665360
-##   4:  1.42ms, 1.38ms, 1.33ms, 1.29ms, 1.34ms,11.4ms,... <tbl_df[10x3]>   632.10938 0.001346087 0.0016941013 0.011402038
-##   5:       1.35ms,1.3ms,1.29ms,1.25ms,1.25ms,1.34ms,... <tbl_df[10x3]>   189.08594 0.001261441 0.0013316099 0.001372761
-##  ---                                                                                                                   
-## 351:            499ms,507ms,516ms,523ms,504ms,499ms,... <tbl_df[10x3]> 22657.52344 0.504088189 0.5145824773 0.522971641
-## 352:            294ms,292ms,291ms,290ms,290ms,284ms,... <tbl_df[10x3]> 22657.52344 0.284406827 0.2909213536 0.293901273
-## 353:            1.08s,1.07s,1.07s,1.13s,1.07s,1.04s,... <tbl_df[10x3]> 45313.77344 1.040687301 1.0728907857 1.127821702
-## 354:            566ms,566ms,572ms,568ms,568ms,570ms,... <tbl_df[10x3]> 45313.77344 0.566087211 0.5691641897 0.577478892
-## 355:            1.14s,1.12s,1.56s,1.11s,1.12s,1.13s,... <tbl_df[10x3]> 90627.24219 1.122917551 1.1463516978 1.557002941
-##              mean           sd mean_candidates segments max_seg_size                             expr.class
-##             <num>        <num>           <num>    <int>        <num>                                 <char>
-##   1: 0.0002572968 4.532303e-05        3.620000        4           26    FPOP simulation=constant_changes\nN
-##   2: 0.0002560004 5.057961e-05        3.620000        4           26      FPOP simulation=linear_changes\nN
-##   3: 0.0014484185 8.176589e-05       50.500000        4           25 OPART simulation=constant_changes\nN^2
-##   4: 0.0024842392 3.139745e-03       50.500000        4           25   OPART simulation=linear_changes\nN^2
-##   5: 0.0012978620 4.394552e-05       14.360000        4           25  PELT simulation=constant_changes\nN^2
-##  ---                                                                                                       
-## 351: 0.5089731898 7.783630e-03       10.506720        4        50003    FPOP simulation=constant_changes\nN
-## 352: 0.2877275290 4.459831e-03        4.306425     8000           33     FPOP simulation=linear_changes\nNA
-## 353: 1.0627876137 2.825429e-02       11.443157        4       100002    FPOP simulation=constant_changes\nN
-## 354: 0.5680639525 4.144857e-03        4.320775    16000           33     FPOP simulation=linear_changes\nNA
-## 355: 1.1740220110 1.353026e-01        4.323669    32002           33     FPOP simulation=linear_changes\nNA
-##                                       expr.latex    empirical        Simulation Algorithm
-##                                           <char>        <num>            <char>    <fctr>
-##   1:    FPOP simulation=constant_changes\n$O(N)$     35.90625 constant\nchanges      FPOP
-##   2:      FPOP simulation=linear_changes\n$O(N)$     12.60156   linear\nchanges      FPOP
-##   3: OPART simulation=constant_changes\n$O(N^2)$    632.10938 constant\nchanges     OPART
-##   4:   OPART simulation=linear_changes\n$O(N^2)$    632.10938   linear\nchanges     OPART
-##   5:  PELT simulation=constant_changes\n$O(N^2)$    189.08594 constant\nchanges      PELT
-##  ---                                                                                     
-## 351:    FPOP simulation=constant_changes\n$O(N)$  50003.00000 constant\nchanges      FPOP
-## 352:     FPOP simulation=linear_changes\n$O(NA)$     33.00000   linear\nchanges      FPOP
-## 353:    FPOP simulation=constant_changes\n$O(N)$ 100002.00000 constant\nchanges      FPOP
-## 354:     FPOP simulation=linear_changes\n$O(NA)$     33.00000   linear\nchanges      FPOP
-## 355:     FPOP simulation=linear_changes\n$O(NA)$     33.00000   linear\nchanges      FPOP
+##              unit                         expr.name fun.name fun.latex expr.grid       simulation     N          min
+##            <char>                            <char>   <char>    <char>    <char>           <char> <num>        <num>
+##   1:    kilobytes  FPOP simulation=constant_changes        N         N      FPOP constant_changes 1e+02 0.0002316179
+##   2:    kilobytes    FPOP simulation=linear_changes        N         N      FPOP   linear_changes 1e+02 0.0002302140
+##   3:    kilobytes OPART simulation=constant_changes      N^2       N^2     OPART constant_changes 1e+02 0.0017665051
+##   4:    kilobytes   OPART simulation=linear_changes      N^2       N^2     OPART   linear_changes 1e+02 0.0016728539
+##   5:    kilobytes  PELT simulation=constant_changes      N^2       N^2      PELT constant_changes 1e+02 0.0015523479
+##  ---                                                                                                                
+## 341: max_seg_size  FPOP simulation=constant_changes        N         N      FPOP constant_changes 2e+05 0.4901819581
+## 342: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 2e+05 0.2828991731
+## 343: max_seg_size  FPOP simulation=constant_changes        N         N      FPOP constant_changes 4e+05 1.0259534011
+## 344: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 4e+05 0.5639357400
+## 345: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 8e+05 1.1226613900
+##            median      itr/sec     gc/sec n_itr  n_gc            result                                          time
+##             <num>        <num>      <num> <int> <num>            <list>                                        <list>
+##   1: 0.0002442150 3574.5331805  0.0000000    10     0 <data.frame[1x3]>       470µs,368µs,257µs,266µs,241µs,240µs,...
+##   2: 0.0002421311 3926.2117915  0.0000000    10     0 <data.frame[1x3]>       367µs,261µs,252µs,240µs,250µs,230µs,...
+##   3: 0.0018940541  520.7369060 57.8596562     9     1 <data.frame[1x3]> 2.05ms,1.91ms,1.85ms,1.83ms,1.82ms,1.96ms,...
+##   4: 0.0017234740  560.3588067  0.0000000    10     0 <data.frame[1x3]>  2.05ms,1.93ms,1.9ms,1.76ms,1.73ms,1.72ms,...
+##   5: 0.0015820405  620.1694706  0.0000000    10     0 <data.frame[1x3]> 1.72ms,1.69ms,1.66ms,1.62ms,1.57ms,1.55ms,...
+##  ---                                                                                                                 
+## 341: 0.4939388145    2.0151479  0.2239053     9     1 <data.frame[1x3]>       501ms,519ms,496ms,496ms,499ms,491ms,...
+## 342: 0.2836681501    3.5201557  0.0000000    10     0 <data.frame[1x3]>       284ms,289ms,283ms,284ms,284ms,283ms,...
+## 343: 1.0293976846    0.9718521  0.1079836     9     1 <data.frame[1x3]>       1.03s,1.03s,1.03s,1.03s,1.03s,1.03s,...
+## 344: 0.5655546531    1.7680311  0.4420078     8     2 <data.frame[1x3]>       570ms,566ms,565ms,570ms,566ms,564ms,...
+## 345: 1.1287645885    0.8806040  0.3774017     7     3 <data.frame[1x3]>       1.12s,1.13s,1.12s,1.13s,1.14s,1.16s,...
+##                  gc   kilobytes          q25          q75          max         mean           sd mean_candidates
+##              <list>       <num>        <num>        <num>        <num>        <num>        <num>           <num>
+##   1: <tbl_df[10x3]>    35.90625 0.0002398966 0.0002642278 0.0004700619 0.0002797568 7.787649e-05        3.620000
+##   2: <tbl_df[10x3]>    12.60156 0.0002335893 0.0002519581 0.0003666921 0.0002546984 4.061837e-05        3.620000
+##   3: <tbl_df[10x3]>   885.89062 0.0018383883 0.0020245181 0.0074834061 0.0024766606 1.764018e-03       50.500000
+##   4: <tbl_df[10x3]>   885.89062 0.0016983075 0.0018617817 0.0020506069 0.0017845709 1.289868e-04       50.500000
+##   5: <tbl_df[10x3]>   214.77344 0.0015705522 0.0016500467 0.0017230110 0.0016124625 5.942568e-05       14.360000
+##  ---                                                                                                            
+## 341: <tbl_df[10x3]> 22657.52344 0.4908575067 0.4983258765 0.5188986610 0.4965229103 8.702945e-03       10.506720
+## 342: <tbl_df[10x3]> 22657.52344 0.2834965774 0.2837788898 0.2887644571 0.2840783453 1.674366e-03        4.306425
+## 343: <tbl_df[10x3]> 45314.74219 1.0275195075 1.0305302114 1.0334158142 1.0293166748 2.486430e-03       11.443157
+## 344: <tbl_df[10x3]> 45313.77344 0.5645482798 0.5677078616 0.5698938600 0.5662693475 2.230345e-03        4.320775
+## 345: <tbl_df[10x3]> 90626.27344 1.1242019855 1.1568015352 1.3523598550 1.1572877460 7.026321e-02        4.323669
+##      segments max_seg_size                             expr.class                                  expr.latex
+##         <int>        <num>                                 <char>                                      <char>
+##   1:        4           26    FPOP simulation=constant_changes\nN    FPOP simulation=constant_changes\n$O(N)$
+##   2:        4           26      FPOP simulation=linear_changes\nN      FPOP simulation=linear_changes\n$O(N)$
+##   3:        4           25 OPART simulation=constant_changes\nN^2 OPART simulation=constant_changes\n$O(N^2)$
+##   4:        4           25   OPART simulation=linear_changes\nN^2   OPART simulation=linear_changes\n$O(N^2)$
+##   5:        4           25  PELT simulation=constant_changes\nN^2  PELT simulation=constant_changes\n$O(N^2)$
+##  ---                                                                                                         
+## 341:        4        50003    FPOP simulation=constant_changes\nN    FPOP simulation=constant_changes\n$O(N)$
+## 342:     8000           33     FPOP simulation=linear_changes\nNA     FPOP simulation=linear_changes\n$O(NA)$
+## 343:        4       100002    FPOP simulation=constant_changes\nN    FPOP simulation=constant_changes\n$O(N)$
+## 344:    16000           33     FPOP simulation=linear_changes\nNA     FPOP simulation=linear_changes\n$O(NA)$
+## 345:    32002           33     FPOP simulation=linear_changes\nNA     FPOP simulation=linear_changes\n$O(NA)$
+##         empirical        Simulation Algorithm
+##             <num>            <char>    <fctr>
+##   1:     35.90625 constant\nchanges      FPOP
+##   2:     12.60156   linear\nchanges      FPOP
+##   3:    885.89062 constant\nchanges     OPART
+##   4:    885.89062   linear\nchanges     OPART
+##   5:    214.77344 constant\nchanges      PELT
+##  ---                                         
+## 341:  50003.00000 constant\nchanges      FPOP
+## 342:     33.00000   linear\nchanges      FPOP
+## 343: 100002.00000 constant\nchanges      FPOP
+## 344:     33.00000   linear\nchanges      FPOP
+## 345:     33.00000   linear\nchanges      FPOP
 ```
 
 ``` r
 ggplot()+
+  theme(
+    legend.position="none",
+    text=element_text(size=12))+
   directlabels::geom_dl(aes(
     N, empirical, color=Simulation, label=Simulation),
     data=refs_list$measurements,
@@ -832,8 +932,7 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,6),
     limits=c(NA, 1e7))+
-  scale_y_log10("")+
-  theme(legend.position="none")
+  scale_y_log10("")
 ```
 
 ![plot of chunk compare-sims](/assets/img/2025-02-25-PELT-vs-FPOP/compare-sims-1.png)
@@ -859,6 +958,10 @@ plot(refs_list)+
   theme(panel.spacing=grid::unit(1,"lines"))
 ```
 
+```
+## Warning in (function (..., deparse.level = 1) : number of rows of result is not a multiple of vector length (arg 2)
+```
+
 ![plot of chunk plot-refs](/assets/img/2025-02-25-PELT-vs-FPOP/plot-refs-1.png)
 
 The plot above is an empirical verification of our earlier complexity claims.
@@ -878,17 +981,19 @@ The code/plot below shows the speedups in this case.
 ``` r
 pred_list <- predict(refs_list)
 ggplot()+
+  theme_bw()+
+  theme(text=element_text(size=20))+
   geom_line(aes(
     N, empirical, color=expr.grid),
     data=pred_list$measurements[unit=="seconds"])+
   directlabels::geom_dl(aes(
     N, unit.value, color=expr.grid, label=sprintf(
-      "%s\n%s\nN=%d",
+      "%s\n%s\nN=%s",
       expr.grid,
       ifelse(expr.grid=="FPOP", "C++", "R"),
-      as.integer(N))),
+      format(round(N), big.mark=",", scientific=FALSE, trim=TRUE))),
     data=pred_list$prediction,
-    method="top.polygons")+
+    method=list(cex=1.5,"top.polygons"))+
   scale_color_manual(
     "algorithm",
     guide="none",
@@ -898,7 +1003,10 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,5),
     limits=c(NA, 1e6))+
-  scale_y_log10("Computation time (seconds)")
+  scale_y_log10(
+    "Computation time (seconds)",
+    breaks=10^seq(-3,0),
+    limits=10^c(-4,1))
 ```
 
 ![plot of chunk pred-seconds](/assets/img/2025-02-25-PELT-vs-FPOP/pred-seconds-1.png)
@@ -918,13 +1026,15 @@ by each algorithm.
 ``` r
 cand_dt <- pred_list$measurements[unit=="mean_candidates"]
 ggplot()+
+  theme_bw()+
+  theme(text=element_text(size=20))+
   geom_line(aes(
     N, empirical, color=expr.grid),
     data=cand_dt)+
   directlabels::geom_dl(aes(
     N, empirical, color=expr.grid, label=expr.grid),
     data=cand_dt,
-    method="right.polygons")+
+    method=list(cex=2, "right.polygons"))+
   scale_color_manual(
     "algorithm",
     guide="none",
@@ -934,7 +1044,7 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,6),
     limits=c(NA, 1e7))+
-  scale_y_log10("Mean number of candidate change-points considered")
+  scale_y_log10("Mean number of candidate change-points")
 ```
 
 ![plot of chunk pred-candidates](/assets/img/2025-02-25-PELT-vs-FPOP/pred-candidates-1.png)
@@ -1002,7 +1112,7 @@ sessionInfo()
 ## [13] scales_1.3.0             quadprog_1.5-8           grid_4.4.3               munsell_0.5.1           
 ## [17] evaluate_1.0.3           tibble_3.2.1             profmem_0.6.0            lifecycle_1.0.4         
 ## [21] compiler_4.4.3           dplyr_1.1.4              pkgconfig_2.0.3          PeakSegOptimal_2025.3.31
-## [25] atime_2025.1.21          lattice_0.22-6           farver_2.1.2             R6_2.6.1                
+## [25] atime_2025.4.1           lattice_0.22-6           farver_2.1.2             R6_2.6.1                
 ## [29] tidyselect_1.2.1         pillar_1.10.1            magrittr_2.0.3           tools_4.4.3             
 ## [33] withr_3.0.2              gtable_0.3.6
 ```

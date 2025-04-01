@@ -105,7 +105,8 @@ for(N_data in N_data_vec){
       N_data, simulation, end)
   }
 }
-(sim_changes <- rbindlist(sim_changes_list))
+addSim <- function(DT)DT[, Simulation := paste0("\n", simulation)][]
+(sim_changes <- addSim(rbindlist(sim_changes_list)))
 ```
 
 Above we see the table of simulated change-points. 
@@ -117,10 +118,11 @@ Above we see the table of simulated change-points.
 Below we visualize the simulated data.
 
 ```{r sim-data}
-(sim_data <- rbindlist(sim_data_list))
+(sim_data <- addSim(rbindlist(sim_data_list)))
 library(ggplot2)
 ggplot()+
   theme_bw()+
+  theme(text=element_text(size=14))+
   geom_vline(aes(
     xintercept=end+0.5),
     data=sim_changes)+
@@ -128,9 +130,9 @@ ggplot()+
     data_index, data_value),
     color="grey50",
     data=sim_data)+
-  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
   scale_x_continuous(
-    breaks=seq(0,max(N_data_vec),by=25))
+    breaks=seq(0,max(N_data_vec),by=50))
 ```
 
 We see in the figure above that the data are the same in the two
@@ -224,8 +226,8 @@ for(N_data in N_data_vec){
     }
   }
 }
-(pelt_info <- rbindlist(pelt_info_list))
-(pelt_segs <- rbindlist(pelt_segs_list))
+(pelt_info <- addSim(rbindlist(pelt_info_list)))
+(pelt_segs <- addSim(rbindlist(pelt_segs_list)))
 ```
 
 We see in the result tables above that the segmentations are the same,
@@ -239,6 +241,9 @@ algo.colors <- c(
   PELT="red")
 ggplot()+
   theme_bw()+
+  theme(
+    panel.spacing=grid::unit(1,"lines"),
+    text=element_text(size=15))+
   geom_vline(aes(
     xintercept=end+0.5),
     data=sim_changes)+
@@ -246,9 +251,9 @@ ggplot()+
   geom_point(aes(
     data_index, candidates, color=algo),
     data=pelt_info)+
-  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
   scale_x_continuous(
-    breaks=seq(0,max(N_data_vec),by=25))
+    breaks=seq(0,max(N_data_vec),by=50))
 ```
 
 We can see in the figure above that PELT considers a much smaller
@@ -299,11 +304,14 @@ for(N_data in N_data_vec){
       N_data,simulation,start,end)
   }
 }
-(fpop_info <- rbindlist(fpop_info_list))
+(fpop_info <- addSim(rbindlist(fpop_info_list)))
 (fpop_segs <- rbindlist(fpop_segs_list))
 both_info <- rbind(pelt_info, fpop_info)
 ggplot()+
   theme_bw()+
+  theme(
+    panel.spacing=grid::unit(1,"lines"),
+    text=element_text(size=15))+
   geom_vline(aes(
     xintercept=end+0.5),
     data=sim_changes)+
@@ -311,9 +319,9 @@ ggplot()+
   geom_point(aes(
     data_index, candidates, color=algo),
     data=both_info)+
-  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
   scale_x_continuous(
-    breaks=seq(0,max(N_data_vec),by=25))
+    breaks=seq(0,max(N_data_vec),by=50))
 ```
 
 In the figure above, we can see the advantage of FPOP: the number of
@@ -330,20 +338,21 @@ change-point considered, as in the heat map below.
 
 ```{r cost-heat}
 algo.levs <- c("OPART","PELT","FPOP")
-(both_index <- rbindlist(both_index_list)[
-, Algorithm := factor(algo, algo.levs)
-][])
+(both_index <- addSim(rbindlist(both_index_list))[, let(
+  Algorithm = factor(algo, algo.levs)
+)][])
 both_index[data_index==2 & N_data==400 & simulation=="constant_changes"]
 for(a in algo.levs){
   gg <- ggplot()+
     ggtitle(a)+
     theme_bw()+
+    theme(text=element_text(size=20))+
     coord_equal()+
     geom_tile(aes(
       data_index, change, fill=cost),
       data=both_index[Algorithm==a])+
     scale_fill_gradient(low="black", high="red")+
-    facet_grid(simulation ~ N_data, label=label_both)
+    facet_grid(Simulation ~ N_data, label=label_both)
   print(gg)
 }
 ```
@@ -354,13 +363,14 @@ the three algos.
 ```{r candidates-compare}
 ggplot()+
   theme_bw()+
+  theme(text=element_text(size=15))+
   geom_tile(aes(
     data_index, change, fill=Algorithm),
     data=both_index)+
   scale_fill_manual(values=algo.colors)+
   scale_x_continuous(
-    breaks=seq(0,max(N_data_vec),by=25))+
-  facet_grid(simulation ~ N_data, label=label_both, scales="free", space="free")
+    breaks=seq(0,max(N_data_vec),by=50))+
+  facet_grid(Simulation ~ N_data, label=label_both, scales="free", space="free")
 ```
 
 It is clear that FPOP prunes much more than PELT, especially in the
@@ -369,9 +379,19 @@ number of data).
 
 ## atime comparison
 
-```{r atime}
+The `atime()` function can be used to perform asymptotic time/memory/etc comparisons. 
+This means that we will increase N, and monitor how fast certain quantities grow with N.
+We begin by defining the data sizes N of interest:
+
+```{r}
 base_N <- c(100,200,400,800)
 (all_N <- unlist(lapply(10^seq(0,3), function(x)x*base_N)))
+```
+
+The data sizes above are on a log scale between 10 and 1,000,000.
+Next, we define a list that enumerates the different combinations in the experiment.
+
+```{r}
 grid_args <- list(
   list(simulation=names(sim_fun_list)),
   FPOP=quote({
@@ -393,25 +413,48 @@ for(algo in names(algo.prune)){
       max_seg_size=max(diff(c(0,dec$last.i))))
   }, list(prune=prune))
 }
-expr.list <- do.call(atime::atime_grid, grid_args)
-if(!"atime_list" %in% ls()){
-atime_list <- atime::atime(
-  N=all_N,
-  setup={
-    data_list <- list()
-    for(simulation in names(sim_fun_list)){
-      sim_fun <- sim_fun_list[[simulation]]
-      data_mean_vec <- sim_fun(N)
-      set.seed(1)
-      data_list[[simulation]] <- rpois(N, data_mean_vec)
-    }
-  },
-  expr.list=expr.list,
-  seconds.limit=1,
-  result=TRUE)
+(expr.list <- do.call(atime::atime_grid, grid_args))
+```
+
+Above we see a list with `r length(expr.list)` expressions to run, and
+a data table with the corresponding number of rows. Note that each expression 
+
+* returns a data frame with one row and three columns that will be used as units to analyze as a function of N.
+* should depend on data size N, which does not appear in the
+  expressions above, but it is used to define `data_list` in the `setup`
+  argument below:
+
+```{r}
+cache.rds <- "2025-02-25-PELT-vs-FPOP.rds"
+if(file.exists(cache.rds)){
+  atime_list <- readRDS(cache.rds)
+}else{
+  atime_list <- atime::atime(
+    N=all_N,
+    setup={
+      data_list <- list()
+      for(simulation in names(sim_fun_list)){
+        sim_fun <- sim_fun_list[[simulation]]
+        data_mean_vec <- sim_fun(N)
+        set.seed(1)
+        data_list[[simulation]] <- rpois(N, data_mean_vec)
+      }
+    },
+    expr.list=expr.list,
+    seconds.limit=1,
+    result=TRUE)
+  saveRDS(atime_list, cache.rds)
 }
+```
+
+Note in the code above that we run the timing inside `if(file.exists`, which is a caching mechanism.
+The result is time-consuming to compute, so the first time it is computed, it is saved to disk as an RDS file, and then subsequently read from disk, to save time.
+Finally, we plot the different units as a function of data size N, in the figure below.
+
+```{r atime, fig.height=7}
 refs_list <- atime::references_best(atime_list)
 ggplot()+
+  theme(text=element_text(size=12))+
   directlabels::geom_dl(aes(
     N, empirical, color=expr.grid, label=expr.grid),
     data=refs_list$measurements,
@@ -428,8 +471,7 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,6),
     limits=c(NA, 1e7))+
-  scale_y_log10("")+
-  theme(text=element_text(size=20))
+  scale_y_log10("")
 ```
 
 Above the figure shows a different curve for each algorithm, and a
@@ -452,12 +494,15 @@ different panel for each simulation and measurement unit. We can observe that
 Below we plot the same data in a different way, that facilitates
 comparisons across the type of simulation:
 
-```{r compare-sims}
+```{r compare-sims, fig.height=7}
 refs_list$meas[, let(
   Simulation = sub("_","\n",simulation),
   Algorithm = factor(expr.grid, algo.levs)
 )][]
 ggplot()+
+  theme(
+    legend.position="none",
+    text=element_text(size=12))+
   directlabels::geom_dl(aes(
     N, empirical, color=Simulation, label=Simulation),
     data=refs_list$measurements,
@@ -470,10 +515,7 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,6),
     limits=c(NA, 1e7))+
-  scale_y_log10("")+
-  theme(
-    legend.position="none",
-    text=element_text(size=20))
+  scale_y_log10("")
 ```
 
 The plot above makes it easier to notice some interesting trends in
@@ -512,17 +554,19 @@ The code/plot below shows the speedups in this case.
 ```{r pred-seconds}
 pred_list <- predict(refs_list)
 ggplot()+
+  theme_bw()+
+  theme(text=element_text(size=20))+
   geom_line(aes(
     N, empirical, color=expr.grid),
     data=pred_list$measurements[unit=="seconds"])+
   directlabels::geom_dl(aes(
     N, unit.value, color=expr.grid, label=sprintf(
-      "%s\n%s\nN=%d",
+      "%s\n%s\nN=%s",
       expr.grid,
       ifelse(expr.grid=="FPOP", "C++", "R"),
-      as.integer(N))),
+      format(round(N), big.mark=",", scientific=FALSE, trim=TRUE))),
     data=pred_list$prediction,
-    method="top.polygons")+
+    method=list(cex=1.5,"top.polygons"))+
   scale_color_manual(
     "algorithm",
     guide="none",
@@ -532,7 +576,10 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,5),
     limits=c(NA, 1e6))+
-  scale_y_log10("Computation time (seconds)")
+  scale_y_log10(
+    "Computation time (seconds)",
+    breaks=10^seq(-3,0),
+    limits=10^c(-4,1))
 ```
 
 The figure above shows the throughput (data size N) which is possible
@@ -549,13 +596,15 @@ by each algorithm.
 ```{r pred-candidates}
 cand_dt <- pred_list$measurements[unit=="mean_candidates"]
 ggplot()+
+  theme_bw()+
+  theme(text=element_text(size=20))+
   geom_line(aes(
     N, empirical, color=expr.grid),
     data=cand_dt)+
   directlabels::geom_dl(aes(
     N, empirical, color=expr.grid, label=expr.grid),
     data=cand_dt,
-    method="right.polygons")+
+    method=list(cex=2, "right.polygons"))+
   scale_color_manual(
     "algorithm",
     guide="none",
@@ -565,7 +614,7 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,6),
     limits=c(NA, 1e7))+
-  scale_y_log10("Mean number of candidate change-points considered")
+  scale_y_log10("Mean number of candidate change-points")
 ```
 
 The figure above shows that 
@@ -593,169 +642,6 @@ We have explored three algorithms for optimal change-point detection.
   quadratic time complexity as OPART.
 * The FPOP algorithm is fast (linear or log-linear) in both of the
   scenarios we examined.
-  
-## Verification of PELT with linear changes
-
-```{r}
-library(data.table)
-N_data_vec <- c(c(1,2,4,8)*1e3,c(1,2,4,8)*1e4)
-sim_data_list <- list()
-sim_changes_list <- list()
-for(N_data in N_data_vec){
-  for(simulation in names(sim_fun_list)){
-    sim_fun <- sim_fun_list[[simulation]]
-    data_mean_vec <- sim_fun(N_data)
-    end <- which(diff(data_mean_vec) != 0)
-    set.seed(1)
-    data_value <- rpois(N_data, data_mean_vec)
-    sim_data_list[[paste(N_data, simulation)]] <- data.table(
-      N_data, simulation, data_index=seq_along(data_value), data_value)
-    sim_changes_list[[paste(N_data, simulation)]] <- data.table(
-      N_data, simulation, end)
-  }
-}
-(sim_changes <- rbindlist(sim_changes_list))
-(sim_data <- rbindlist(sim_data_list))
-library(ggplot2)
-ggplot()+
-  theme_bw()+
-  geom_vline(aes(
-    xintercept=end+0.5),
-    data=sim_changes)+
-  geom_point(aes(
-    data_index, data_value),
-    color="grey50",
-    data=sim_data)+
-  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
-  scale_x_continuous(
-    limits=c(0,400),
-    breaks=seq(0,max(N_data_vec),by=25))
-
-PELT <- function(sim.mat, penalty, prune=TRUE, verbose=FALSE){
-  if(!is.matrix(sim.mat))sim.mat <- cbind(sim.mat)
-  print(cum.data <- rbind(0, apply(sim.mat, 2, cumsum)))
-  sum_trick <- function(m, start, end)m[end+1,,drop=FALSE]-m[start,,drop=FALSE]
-  cost_trick <- function(start, end){
-    sum_vec <- sum_trick(cum.data, start, end)
-    N <- end+1-start
-    mean_vec <- sum_vec/N
-    ifelse(sum_vec==0, 0, sum_vec*(1-log(mean_vec)))
-  }
-  N.data <- nrow(sim.mat)
-  pelt.change.vec <- rep(NA_integer_, N.data)
-  pelt.cost.vec <- rep(NA_real_, N.data+1)
-  pelt.cost.vec[1] <- -penalty
-  pelt.candidates.vec <- rep(NA_integer_, N.data)
-  candidate.vec <- 1L
-  if(verbose)index_dt_list <- list()
-  for(up.to in 1:N.data){
-    N.cand <- length(candidate.vec)
-    pelt.candidates.vec[up.to] <- N.cand
-    last.seg.cost <- rowSums(cost_trick(candidate.vec, rep(up.to, N.cand)))
-    prev.cost <- pelt.cost.vec[candidate.vec]
-    cost.no.penalty <- prev.cost+last.seg.cost
-    total.cost <- cost.no.penalty+penalty
-    if(verbose)index_dt_list[[up.to]] <- data.table(
-      data_index=up.to, change=candidate.vec, cost=total.cost/up.to)
-    best.i <- which.min(total.cost)
-    pelt.change.vec[up.to] <- candidate.vec[best.i]
-    total.cost.best <- total.cost[best.i]
-    pelt.cost.vec[up.to+1] <- total.cost.best
-    keep <- if(isTRUE(prune))cost.no.penalty < total.cost.best else TRUE
-    browser(expr=any(is.na(keep)))
-    candidate.vec <- c(candidate.vec[keep], up.to+1L)
-  }
-  list(
-    change=pelt.change.vec,
-    cost=pelt.cost.vec,
-    candidates=pelt.candidates.vec,
-    index_dt=if(verbose)rbindlist(index_dt_list))
-}
-decode <- function(best.change){
-  seg.dt.list <- list()
-  last.i <- length(best.change)
-  while(last.i>0){
-    first.i <- best.change[last.i]
-    seg.dt.list[[paste(last.i)]] <- data.table(
-      first.i, last.i)
-    last.i <- first.i-1L
-  }
-  rbindlist(seg.dt.list)[seq(.N,1)]
-}
-pelt_info_list <- list()
-pelt_segs_list <- list()
-both_index_list <- list()
-penalty <- 10
-algo.prune <- c(
-  ##OPART=FALSE,
-  PELT=TRUE)
-for(N_data in N_data_vec){
-  for(simulation in "linear_changes"){
-    N_sim <- paste(N_data, simulation)
-    data_value <- sim_data_list[[N_sim]]$data_value
-    for(algo in names(algo.prune)){
-      prune <- algo.prune[[algo]]
-      fit <- PELT(data_value, penalty=penalty, prune=prune, verbose = TRUE)
-      both_index_list[[paste(N_data, simulation, algo)]] <- data.table(
-        N_data, simulation, algo, fit$index_dt)
-      fit_seg_dt <- decode(fit$change)
-      pelt_info_list[[paste(N_data,simulation,algo)]] <- data.table(
-        N_data,simulation,algo,
-        candidates=fit$candidates,data_index=seq_along(data_value))
-      pelt_segs_list[[paste(N_data,simulation,algo)]] <- data.table(
-        N_data,simulation,algo,
-        fit_seg_dt)
-    }
-  }
-}
-(pelt_info <- rbindlist(pelt_info_list))
-(pelt_segs <- rbindlist(pelt_segs_list))
-algo.colors <- c(
-  FPOP="blue",
-  OPART="grey50",
-  PELT="red")
-
-ggplot()+
-  theme_bw()+
-  scale_color_manual(values=algo.colors)+
-  geom_line(aes(
-    data_index, candidates, color=algo),
-    data=pelt_info)+
-  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
-  scale_x_log10(
-    breaks=seq(0,max(N_data_vec),by=25))
-pelt_info[, .(mean.candidates=mean(candidates)), by=.(N_data,simulation)]
-
-pelt_info[, to_end := max(data_index)-data_index, by=N_data]
-ggplot()+
-  theme_bw()+
-  scale_color_manual(values=algo.colors)+
-  geom_line(aes(
-    to_end, candidates, color=algo),
-    data=pelt_info)+
-  facet_grid(simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
-  scale_x_continuous(
-    limits=c(0,500),
-    breaks=seq(0,max(N_data_vec),by=25))
-
-algo.levs <- c("OPART","PELT","FPOP")
-(both_index <- rbindlist(both_index_list)[
-, Algorithm := factor(algo, algo.levs)
-][
-, to_end := max(data_index)-data_index, by=N_data
-][])
-ggplot()+
-  theme_bw()+
-  geom_tile(aes(
-    to_end, change, fill=cost),
-    data=both_index[N_data==80000 & to_end<500])+
-  scale_fill_gradient(low="black", high="red")+
-  facet_grid(simulation ~ N_data, label=label_both)
-
-
-```
-
-
 
 ## Session info
 
