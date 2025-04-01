@@ -376,13 +376,190 @@ fwrite(subset_mat, "2025-03-21-unbalanced.csv")
 system("head 2025-03-21-unbalanced.csv")
 ```
 
+## Putting it all together
+
+What if we wanted to do the same thing on several data sets?
+Or for several different random seeds?
+See code below.
+
+
+``` r
+library(data.table)
+data_Classif <- "~/projects/cv-same-other-paper/data_Classif/"
+for(data.name in c("EMNIST", "FashionMNIST", "MNIST")){
+  data.csv <- paste0(
+    data_Classif,
+    data.name,
+    ".csv")
+  MNIST_dt <- fread(data.csv)
+  seed_mat_list <- list()
+  for(seed in 1:2){
+    set.seed(seed)
+    rand_ord <- MNIST_dt[, sample(.N)]
+    prop_ord <- data.table(y=MNIST_dt$y[rand_ord])[
+    , prop_y := seq(0,1,l=.N), by=y
+    ][, order(prop_y)]
+    ord_list <- list(
+      random=rand_ord,
+      proportional=rand_ord[prop_ord])
+    (binary_counts <- MNIST_dt[
+    , odd := y %% 2
+    ][, .(
+      count=.N,
+      prop=.N/nrow(MNIST_dt)
+    ), by=odd][order(-prop, -odd)])
+    larger_N <- binary_counts$count[1]/2
+    target_prop <- c(0.5, 0.1, 0.05, 0.01, 0.005, 0.001)
+    (smaller_dt <- data.table(
+      target_prop,
+      count=as.integer(target_prop*larger_N/(1-target_prop))
+    )[
+    , prop := count/(count+larger_N)
+    ][])
+    (unb_small_dt <- data.table(
+      subset="unbalanced",
+      binary_counts[2,.(odd)],
+      smaller_dt[-1]))
+    subset_mat <- matrix(
+      NA, nrow(MNIST_dt), nrow(unb_small_dt),
+      dimnames=list(
+        NULL,
+        target_prop=paste0(
+          "seed",
+          seed,
+          "_prop",
+          unb_small_dt$target_prop)))
+    emp_y_list <- list()
+    emp_props_list <- list()
+    MNIST_ord <- MNIST_dt[, .(odd, .I)][ord_list$proportional]
+    for(unb_i in 1:nrow(unb_small_dt)){
+      unb_row <- unb_small_dt[unb_i]
+      unb_count_dt <- rbind(
+        data.table(subset="balanced", binary_counts[,.(odd)], smaller_dt[1]),
+        data.table(subset="unbalanced", binary_counts[1,.(odd)], smaller_dt[1]),
+        unb_row)
+      MNIST_ord[, subset := NA_character_]
+      for(o in c(1,0)){
+        o_dt <- unb_count_dt[odd==o]
+        sub_vals <- o_dt[, rep(subset, count)]
+        o_idx <- which(MNIST_ord$odd==o)
+        some_idx <- o_idx[1:length(sub_vals)]
+        MNIST_ord[some_idx, subset := sub_vals]
+      }
+      subset_mat[MNIST_ord$I, unb_i] <- MNIST_ord$subset
+      ## Check to make unbalanced is a subset of the previous larger one.
+      if(unb_i>1)stopifnot(all(which(
+        subset_mat[,unb_i]=="unbalanced"
+      ) %in% which(
+        subset_mat[,unb_i-1]=="unbalanced"
+      )))
+      ## Check to make sure balanced is the same as previous.
+      if(unb_i>1)stopifnot(identical(
+        which(subset_mat[,unb_i]=="balanced"),
+        which(subset_mat[,unb_i-1]=="balanced")
+      ))
+      (unb_MNIST <- data.table(
+        target_prop=unb_row$target_prop,
+        subset=subset_mat[,unb_i],
+        odd=MNIST_dt$odd,
+        y=MNIST_dt$y)[, idx := .I][!is.na(subset)])
+      emp_y_list[[unb_i]] <- unb_MNIST[, .(
+        count=.N
+      ), by=.(target_prop,subset,y)]
+      emp_props_list[[unb_i]] <- unb_MNIST[, .(
+        count=.N,
+        first=idx[1], 
+        last=idx[.N]
+      ), keyby=.(target_prop,subset,odd)
+      ][
+      , prop_in_subset := count/sum(count)
+      , by=subset
+      ][]
+    }
+    emp_y <- rbindlist(emp_y_list)
+    (emp_props <- rbindlist(emp_props_list))
+    seed_mat_list[[seed]] <- subset_mat
+  }
+  print(data.name)
+  print(dcast(emp_y, subset + target_prop ~ y, value.var="count"))
+  (seed_dt <- do.call(data.table, seed_mat_list))
+  (out.csv <- sub("data_Classif", "data_Classif_unbalanced", data.csv))
+  dir.create(dirname(out.csv), showWarnings = FALSE, recursive = FALSE)
+  fwrite(seed_dt, out.csv)
+}
+```
+
+```
+## [1] "EMNIST"
+## Key: <subset, target_prop>
+##         subset target_prop     0     1     2     3     4     5     6     7     8     9
+##         <char>       <num> <int> <int> <int> <int> <int> <int> <int> <int> <int> <int>
+##  1:   balanced       0.001  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  2:   balanced       0.005  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  3:   balanced       0.010  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  4:   balanced       0.050  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  5:   balanced       0.100  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  6: unbalanced       0.001     4  3500     3  3500     3  3500     3  3500     4  3500
+##  7: unbalanced       0.005    18  3500    17  3500    17  3500    17  3500    18  3500
+##  8: unbalanced       0.010    36  3500    35  3500    35  3500    35  3500    35  3500
+##  9: unbalanced       0.050   185  3500   184  3500   184  3500   184  3500   184  3500
+## 10: unbalanced       0.100   389  3500   388  3500   389  3500   389  3500   389  3500
+## [1] "FashionMNIST"
+## Key: <subset, target_prop>
+##         subset target_prop     0     1     2     3     4     5     6     7     8     9
+##         <char>       <num> <int> <int> <int> <int> <int> <int> <int> <int> <int> <int>
+##  1:   balanced       0.001  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  2:   balanced       0.005  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  3:   balanced       0.010  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  4:   balanced       0.050  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  5:   balanced       0.100  3500  3500  3500  3500  3500  3500  3500  3500  3500  3500
+##  6: unbalanced       0.001     3  3500     3  3500     4  3500     4  3500     3  3500
+##  7: unbalanced       0.005    17  3500    17  3500    18  3500    18  3500    17  3500
+##  8: unbalanced       0.010    35  3500    35  3500    36  3500    35  3500    35  3500
+##  9: unbalanced       0.050   184  3500   184  3500   185  3500   184  3500   184  3500
+## 10: unbalanced       0.100   389  3500   389  3500   389  3500   389  3500   388  3500
+## [1] "MNIST"
+## Key: <subset, target_prop>
+##         subset target_prop     0     1     2     3     4     5     6     7     8     9
+##         <char>       <num> <int> <int> <int> <int> <int> <int> <int> <int> <int> <int>
+##  1:   balanced       0.001  3568  3939  3613  3570  3528  3157  3554  3646  3528  3479
+##  2:   balanced       0.005  3568  3939  3613  3570  3528  3157  3554  3646  3528  3479
+##  3:   balanced       0.010  3568  3939  3613  3570  3528  3157  3554  3646  3528  3479
+##  4:   balanced       0.050  3568  3939  3613  3570  3528  3157  3554  3646  3528  3479
+##  5:   balanced       0.100  3568  3939  3613  3570  3528  3157  3554  3646  3528  3479
+##  6: unbalanced       0.001     3  3938     4  3571     3  3156     4  3647     3  3479
+##  7: unbalanced       0.005    18  3938    18  3571    17  3156    18  3647    18  3479
+##  8: unbalanced       0.010    36  3938    37  3571    35  3156    36  3647    35  3479
+##  9: unbalanced       0.050   188  3938   190  3571   185  3156   187  3647   186  3479
+## 10: unbalanced       0.100   397  3938   401  3571   391  3156   395  3647   392  3479
+```
+
+``` r
+system(paste("head", file.path(dirname(out.csv), "*")))
+```
+
+Note in the output above that the minority class is the same in each
+data set (even=0 minority, odd=1 majority).
+
 ## Conclusions
 
-This tutorial showed how to create unbalanced data sets, and check
-that they obey certain constraints:
+This tutorial showed how to create unbalanced data sets. Each
+unbalanced data set is represented as a new column (with the same
+number of rows as the original data file), with two values: balanced
+and imbalanced, that can be efficiently saved to a new CSV file
+(without having to copy or modify the original data CSV). We checked
+that the new data obey certain constraints:
 
 * balanced subsets are the same for different imbalance ratios,
 * imbalanced subsets are nested (smaller one is strict subset of larger one).
+
+Each column in the resulting CSV files can be used to create a
+different mlr3 Task (each with a different definition of subset), so
+our recently proposed [SOAK
+algorithm](https://arxiv.org/abs/2410.08643) can be used to determine
+if a learning algorithm is able to generalize between data subsets
+with different proportions of labels (50% minority class versus 1%,
+etc).
 
 ## Session info
 
