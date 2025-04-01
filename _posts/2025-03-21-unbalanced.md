@@ -1,31 +1,12 @@
 ---
 layout: post
 title: Creating imbalanced data benchmarks
-description: And using AUM in mlr3torch
+description: Tutorial with MNIST
 ---
 
-```{r Ropts, echo=FALSE, results='hide'}
-repo.dir <- normalizePath("..")
-post.id <- "2025-03-21-mlr3torch-aum"
-fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
-dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
-knitr::opts_chunk$set(
-  dpi=100,
-  fig.path=fig.path,
-  fig.width=10, ## TODO python figures wider? look at prev issue.
-  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
-in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
-in_knit <- isTRUE(getOption('knitr.in.progress'))
-options(width=120)
-if(FALSE){
-  knitr::knit(paste0(post.id, ".Rmd"))
-}
-```
 
-The goal of this post is to show how to use our recently proposed AUM
-loss (useful for unbalanced classification problems), with the
-mlr3torch package in R. We will create unbalanced classification data
+
+The goal of this post is to show how to create unbalanced classification data
 sets for use with our recently proposed [SOAK
 algorithm](https://arxiv.org/abs/2410.08643), which will be able to
 tell us if we can train on imbalanced data, and get accurate
@@ -35,7 +16,8 @@ predictions on balanced data (and vice versa).
 
 We begin by reading the MNIST data,
 
-```{r}
+
+``` r
 library(data.table)
 MNIST_dt <- fread("~/projects/cv-same-other-paper/data_Classif/MNIST.csv")
 data.table(
@@ -44,15 +26,47 @@ data.table(
   last_row=unlist(MNIST_dt[.N]))
 ```
 
+```
+##                name first_row last_row
+##              <char>    <char>   <char>
+##   1: predefined.set     train     test
+##   2:              y         5        6
+##   3:              0         0        0
+##   4:              1         0        0
+##   5:              2         0        0
+##  ---                                  
+## 782:            779         0        0
+## 783:            780         0        0
+## 784:            781         0        0
+## 785:            782         0        0
+## 786:            783         0        0
+```
+
 We see that these MNIST data have a `predefined.set` column, which we
 will ignore (use all data from train and test). The class distribution
 is as follows:
 
-```{r}
+
+``` r
 (multi_counts <- MNIST_dt[, .(
   count=.N,
   prop=.N/nrow(MNIST_dt)
 ), by=y][order(-prop)])
+```
+
+```
+##         y count       prop
+##     <int> <int>      <num>
+##  1:     1  7877 0.11252857
+##  2:     7  7293 0.10418571
+##  3:     3  7141 0.10201429
+##  4:     2  6990 0.09985714
+##  5:     9  6958 0.09940000
+##  6:     0  6903 0.09861429
+##  7:     6  6876 0.09822857
+##  8:     8  6825 0.09750000
+##  9:     4  6824 0.09748571
+## 10:     5  6313 0.09018571
 ```
 
 We see in the table above that there are about an equal amount of data
@@ -62,7 +76,8 @@ take a random order of the data (in case the original file had some
 special structure), and then we assign a new proportional ordering
 based on the label value.
 
-```{r}
+
+``` r
 my.seed <- 1
 set.seed(my.seed)
 rand_ord <- MNIST_dt[, sample(.N)]
@@ -90,6 +105,26 @@ ord_prop_dt <- rbindlist(ord_prop_dt_list)
 dcast(ord_prop_dt, ord_name + prop_data ~ y, value.var="prop_y")
 ```
 
+```
+## Key: <ord_name, prop_data>
+##        ord_name prop_data          0         1          2          3          4          5          6         7
+##          <char>     <num>      <num>     <num>      <num>      <num>      <num>      <num>      <num>     <num>
+## 1: proportional      0.01 0.09857143 0.1128571 0.10000000 0.10142857 0.09714286 0.09000000 0.09857143 0.1042857
+## 2: proportional      0.10 0.09857143 0.1125714 0.09985714 0.10200000 0.09742857 0.09014286 0.09828571 0.1041429
+## 3: proportional      1.00 0.09861429 0.1125286 0.09985714 0.10201429 0.09748571 0.09018571 0.09822857 0.1041857
+## 4:       random      0.01 0.10142857 0.1028571 0.11285714 0.08571429 0.09142857 0.12142857 0.08571429 0.1171429
+## 5:       random      0.10 0.10114286 0.1117143 0.10114286 0.10285714 0.08985714 0.09685714 0.10000000 0.1040000
+## 6:       random      1.00 0.09861429 0.1125286 0.09985714 0.10201429 0.09748571 0.09018571 0.09822857 0.1041857
+##             8          9
+##         <num>      <num>
+## 1: 0.09714286 0.10000000
+## 2: 0.09757143 0.09942857
+## 3: 0.09750000 0.09940000
+## 4: 0.11285714 0.06857143
+## 5: 0.09914286 0.09328571
+## 6: 0.09750000 0.09940000
+```
+
 The output above shows that the proportional ordering is much more
 stable than the random ordering, which has lots of variations in each
 column, between the different rows (values of prop_data).
@@ -100,13 +135,21 @@ To convert the data to a binary problem, we can create a new column
 that indicates if the `y` label is odd=1 or even=0 (this will be used as
 the label in supervised binary classification).
 
-```{r}
+
+``` r
 (binary_counts <- MNIST_dt[
 , odd := y %% 2
 ][, .(
   count=.N,
   prop=.N/nrow(MNIST_dt)
 ), by=odd][order(-prop)])
+```
+
+```
+##      odd count      prop
+##    <num> <int>     <num>
+## 1:     1 35582 0.5083143
+## 2:     0 34418 0.4916857
 ```
 
 Above we see that each of the two classes is about equally prevalent.
@@ -122,7 +165,8 @@ We will create different versions of MNIST, each version having two subsets:
 To do that, we use the following code to compute the number of samples
 we would need:
 
-```{r}
+
+``` r
 larger_N <- binary_counts$count[1]/2
 target_prop <- c(0.5, 0.1, 0.05, 0.01, 0.005, 0.001)
 (smaller_dt <- data.table(
@@ -131,6 +175,17 @@ target_prop <- c(0.5, 0.1, 0.05, 0.01, 0.005, 0.001)
 )[
 , prop := count/(count+larger_N)
 ][])
+```
+
+```
+##    target_prop count         prop
+##          <num> <int>        <num>
+## 1:       0.500 17791 0.5000000000
+## 2:       0.100  1976 0.0999645874
+## 3:       0.050   936 0.0499813104
+## 4:       0.010   179 0.0099610462
+## 5:       0.005    89 0.0049776286
+## 6:       0.001    17 0.0009546271
 ```
 
 Above we see 
@@ -143,11 +198,22 @@ It is clear from the table above that the empirical proportions are
 consistent with the target proportions. To create the different unbalanced data
 sets, we first create a table with one row for each target proportion in the unbalanced subset:
 
-```{r}
+
+``` r
 (unb_small_dt <- data.table(
   subset="unbalanced",
   binary_counts[2,.(odd)],
   smaller_dt[-1]))
+```
+
+```
+##        subset   odd target_prop count         prop
+##        <char> <num>       <num> <int>        <num>
+## 1: unbalanced     0       0.100  1976 0.0999645874
+## 2: unbalanced     0       0.050   936 0.0499813104
+## 3: unbalanced     0       0.010   179 0.0099610462
+## 4: unbalanced     0       0.005    89 0.0049776286
+## 5: unbalanced     0       0.001    17 0.0009546271
 ```
 
 The table above has one row for each unbalanced variant (from 10% to
@@ -156,7 +222,8 @@ use a for loop over the rows of this table, to assign rows to each
 subset of each unbalanced variant (each corresponding to a column of
 `subset_mat`).
 
-```{r}
+
+``` r
 subset_mat <- matrix(
   NA, nrow(MNIST_dt), nrow(unb_small_dt),
   dimnames=list(
@@ -217,6 +284,32 @@ emp_y <- rbindlist(emp_y_list)
 (emp_props <- rbindlist(emp_props_list))
 ```
 
+```
+##     target_prop     subset   odd count first  last prop_in_subset
+##           <num>     <char> <num> <int> <int> <int>          <num>
+##  1:       0.100   balanced     1 17791     1 69997   0.5000000000
+##  2:       0.100   balanced     0 17791     2 70000   0.5000000000
+##  3:       0.100 unbalanced     1 17791     4 69999   0.9000354126
+##  4:       0.100 unbalanced     0  1976    19 69990   0.0999645874
+##  5:       0.050   balanced     1 17791     1 69997   0.5000000000
+##  6:       0.050   balanced     0 17791     2 70000   0.5000000000
+##  7:       0.050 unbalanced     1 17791     4 69999   0.9500186896
+##  8:       0.050 unbalanced     0   936   198 69973   0.0499813104
+##  9:       0.010   balanced     1 17791     1 69997   0.5000000000
+## 10:       0.010   balanced     0 17791     2 70000   0.5000000000
+## 11:       0.010 unbalanced     1 17791     4 69999   0.9900389538
+## 12:       0.010 unbalanced     0   179   198 69888   0.0099610462
+## 13:       0.005   balanced     1 17791     1 69997   0.5000000000
+## 14:       0.005   balanced     0 17791     2 70000   0.5000000000
+## 15:       0.005 unbalanced     1 17791     4 69999   0.9950223714
+## 16:       0.005 unbalanced     0    89   770 69828   0.0049776286
+## 17:       0.001   balanced     1 17791     1 69997   0.5000000000
+## 18:       0.001   balanced     0 17791     2 70000   0.5000000000
+## 19:       0.001 unbalanced     1 17791     4 69999   0.9990453729
+## 20:       0.001 unbalanced     0    17  2715 66154   0.0009546271
+##     target_prop     subset   odd count first  last prop_in_subset
+```
+
 The table above can be used to verify that the subset assignments are
 consistent with the target label proportions. It has one row for each
 unique combination of target proportion, subset, and label (odd). For
@@ -234,8 +327,25 @@ each value of target proportion,
 To verify that the underlying multi-class proportion is consistent in
 the down-sampled subsets, we use the code below:
 
-```{r}
+
+``` r
 dcast(emp_y, subset + target_prop ~ y, value.var="count")
+```
+
+```
+## Key: <subset, target_prop>
+##         subset target_prop     0     1     2     3     4     5     6     7     8     9
+##         <char>       <num> <int> <int> <int> <int> <int> <int> <int> <int> <int> <int>
+##  1:   balanced       0.001  3568  3939  3613  3571  3528  3156  3554  3646  3528  3479
+##  2:   balanced       0.005  3568  3939  3613  3571  3528  3156  3554  3646  3528  3479
+##  3:   balanced       0.010  3568  3939  3613  3571  3528  3156  3554  3646  3528  3479
+##  4:   balanced       0.050  3568  3939  3613  3571  3528  3156  3554  3646  3528  3479
+##  5:   balanced       0.100  3568  3939  3613  3571  3528  3156  3554  3646  3528  3479
+##  6: unbalanced       0.001     3  3938     4  3570     3  3157     4  3647     3  3479
+##  7: unbalanced       0.005    18  3938    18  3570    17  3157    18  3647    18  3479
+##  8: unbalanced       0.010    36  3938    37  3570    35  3157    36  3647    35  3479
+##  9: unbalanced       0.050   188  3938   190  3570   185  3157   187  3647   186  3479
+## 10: unbalanced       0.100   397  3938   401  3570   391  3157   395  3647   392  3479
 ```
 
 The table above has one row per subset, and one column per class
@@ -253,111 +363,57 @@ The table above has one row per subset, and one column per class
 
 Finally, we create new columns for each subset.
 
-```{r}
-fwrite(subset_mat, "2025-03-21-mlr3torch-unbalanced.Rmd")
+
+``` r
+fwrite(subset_mat, "2025-03-21-unbalanced.csv")
 ```
 
-## Custom loss function
-
-From `?mlr3torch::TorchLoss` I got
-
-```{r}
-torch_loss = mlr3torch::TorchLoss$new(
-  torch_loss = torch::nn_mse_loss,
-  task_types = "regr")
+```
+## conversion automatique de classe pour x : matrix vers data.table
 ```
 
-which implies that I need to make my own version of
-`torch::nn_mse_loss`. Its definition is in
-[nn-loss.R](https://github.com/mlverse/torch/blob/main/R/nn-loss.R),
-
-```{r}
-my_mse_loss <- torch::nn_module(
-  "my_mse_loss",
-  inherit = torch:::nn_loss,
-  initialize = function(reduction = "mean") {
-    super$initialize(reduction = reduction)
-  },
-  forward = function(input, target) {
-    torch::nnf_mse_loss(input, target, reduction = self$reduction)
-  }
-)
+``` r
+system("head 2025-03-21-unbalanced.csv")
 ```
 
-Note that we have to use triple colon syntax above, `torch:::nn_loss`.
-A work-around is below,
+## Conclusions
 
-```{r}
-my_mse_loss <- torch::nn_module(
-  "my_mse_loss",
-  inherit = torch::nn_mse_loss,
-  initialize = function(reduction = "mean") {
-    super$initialize(reduction = reduction)
-  },
-  forward = function(input, target) {
-    torch::nnf_mse_loss(input, target, reduction = self$reduction)
-  }
-)
-lfun <- my_mse_loss()
-lfun(torch::torch_tensor(2), torch::torch_tensor(-3))
+This tutorial showed how to create unbalanced data sets, and check
+that they obey certain constraints:
+
+* balanced subsets are the same for different imbalance ratios,
+* imbalanced subsets are nested (smaller one is strict subset of larger one).
+
+## Session info
+
+
+``` r
+sessionInfo()
 ```
 
-So our custom AUM loss can be defined as below:
-
-```{r}
-ROC_curve <- function(pred_tensor, label_tensor){
-  is_positive = label_tensor == 1
-  is_negative = label_tensor != 1
-  fn_diff = torch::torch_where(is_positive, -1, 0)
-  fp_diff = torch::torch_where(is_positive, 0, 1)
-  thresh_tensor = -pred_tensor$flatten()
-  sorted_indices = torch::torch_argsort(thresh_tensor)
-  fp_denom = torch::torch_sum(is_negative) #or 1 for AUM based on count instead of rate
-  fn_denom = torch::torch_sum(is_positive) #or 1 for AUM based on count instead of rate
-  sorted_fp_cum = fp_diff[sorted_indices]$cumsum(dim=1)/fp_denom
-  sorted_fn_cum = -fn_diff[sorted_indices]$flip(1)$cumsum(dim=1)$flip(1)/fn_denom
-  sorted_thresh = thresh_tensor[sorted_indices]
-  sorted_is_diff = sorted_thresh$diff() != 0
-  sorted_fp_end = torch::torch_cat(c(sorted_is_diff, torch::torch_tensor(TRUE)))
-  sorted_fn_end = torch::torch_cat(c(torch::torch_tensor(TRUE), sorted_is_diff))
-  uniq_thresh = sorted_thresh[sorted_fp_end]
-  uniq_fp_after = sorted_fp_cum[sorted_fp_end]
-  uniq_fn_before = sorted_fn_cum[sorted_fn_end]
-  FPR = torch::torch_cat(c(torch::torch_tensor(0.0), uniq_fp_after))
-  FNR = torch::torch_cat(c(uniq_fn_before, torch::torch_tensor(0.0)))
-  list(
-    FPR=FPR,
-    FNR=FNR,
-    TPR=1 - FNR,
-    "min(FPR,FNR)"=torch::torch_minimum(FPR, FNR),
-    min_constant=torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh)),
-    max_constant=torch::torch_cat(c(uniq_thresh, torch::torch_tensor(Inf))))
-}
-Proposed_AUM <- function(pred_tensor, label_tensor){
-  roc = ROC_curve(pred_tensor, label_tensor)
-  min_FPR_FNR = roc[["min(FPR,FNR)"]][2:-2]
-  constant_diff = roc$min_constant[2:N]$diff()
-  torch::torch_sum(min_FPR_FNR * constant_diff)
-}
-nn_AUM_loss <- torch::nn_module(
-  "nn_AUM_loss",
-  inherit = torch::nn_mse_loss,
-  initialize = function() {
-    super$initialize()
-  },
-  forward = function(input, target) {
-    Proposed_AUM(input, target)
-  }
-)
-afun <- nn_AUM_loss()
-afun(torch::torch_tensor(c(5,-5)), torch::torch_tensor(c(0,1)))
 ```
-
-So below is the mlr3torch version,
-
-```{r}
-mlr3torch_AUM_loss = mlr3torch::TorchLoss$new(
-  torch_loss = nn_AUM_loss,
-  task_types = "classif")
-po_AUM <- mlr3pipelines::po("torch_loss", mlr3torch_AUM_loss)
+## R version 4.4.3 (2025-02-28)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 24.04.2 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0
+## 
+## locale:
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: Europe/Paris
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] data.table_1.17.99
+## 
+## loaded via a namespace (and not attached):
+## [1] compiler_4.4.3 tools_4.4.3    knitr_1.50     xfun_0.51      evaluate_1.0.3
 ```
