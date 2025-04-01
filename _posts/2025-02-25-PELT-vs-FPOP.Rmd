@@ -625,7 +625,7 @@ The figure above shows that
 * PELT considers a sub-linear number of candidates (fast), when the
   number of changes is linear.
 * FPOP always considers sub-linear number of candidates (fast), which
-  is either constant for a linear nuber of changes, or logarithmic for
+  is either constant for a linear number of changes, or logarithmic for
   a constant number of changes.
 
 ## Conclusions
