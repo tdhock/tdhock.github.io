@@ -1,0 +1,188 @@
+---
+layout: post
+title: Torch learning with binary classification
+description: Implementing AUM loss in mlr3torch
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-03-21-mlr3torch-aum"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to show how to use our recently proposed AUM
+loss (useful for unbalanced classification problems), with the
+mlr3torch package in R. TODO
+
+## Intro
+
+TODO
+
+```{r}
+remotes::install_github("tdhock/mlr3torch@69d4adda7a71c05403d561bf3bb1ffb279978d0d")
+task_sonar <- mlr3::tsk("sonar")
+
+
+measure_list <- mlr3::msrs(c("classif.auc", "classif.acc"))
+po_list <- list(
+  mlr3torch::PipeOpTorchIngressNumeric$new(),
+  mlr3torch::nn("head"),
+  mlr3pipelines::po(
+    "torch_loss",
+    torch::nn_cross_entropy_loss),
+  mlr3pipelines::po(
+    "torch_optimizer",
+    mlr3torch::t_opt("sgd", lr=0.1)),
+  mlr3pipelines::po(
+    "torch_callbacks",
+    mlr3torch::t_clbk("history")),
+  mlr3pipelines::po(
+    "torch_model_classif",
+    measures_train=measure_list,
+    predict_type="prob",
+    batch_size = 5,
+    epochs=10))
+graph_obj <- Reduce(mlr3pipelines::concat_graphs, po_list)
+learner.obj <- mlr3::as_learner(graph_obj)
+learner.obj$train(task_sonar)
+pred <- learner.obj$predict(task_sonar)
+learner.obj$base_learner()$model$callbacks$history
+
+
+
+nn_bce_loss3 = torch::nn_module(c("nn_bce_with_logits_loss3", "nn_loss"),
+  initialize = function(weight = NULL, reduction = "mean", pos_weight = NULL) {
+    self$loss = torch::nn_bce_with_logits_loss(weight, reduction, pos_weight)
+  },
+  forward = function(input, target) {
+    self$loss(input$reshape(-1), target$to(dtype = torch::torch_float())-1)
+  }
+)
+measure_list <- mlr3::msrs(c("classif.auc", "classif.acc"))
+po_list <- list(
+  mlr3torch::PipeOpTorchIngressNumeric$new(),
+  mlr3torch::nn("linear", out_features=1),
+  mlr3pipelines::po(
+    "torch_loss",
+    nn_bce_loss3),
+  mlr3pipelines::po(
+    "torch_optimizer",
+    mlr3torch::t_opt("sgd", lr=0.1)),
+  mlr3pipelines::po(
+    "torch_callbacks",
+    mlr3torch::t_clbk("history")),
+  mlr3pipelines::po(
+    "torch_model_classif",
+    measures_train=measure_list,
+    predict_type="prob",
+    batch_size = 5,
+    epochs=10))
+graph_obj <- Reduce(mlr3pipelines::concat_graphs, po_list)
+learner.obj <- mlr3::as_learner(graph_obj)
+learner.obj$train(task_sonar)
+pred <- learner.obj$predict(task_sonar)
+learner.obj$base_learner()$model$callbacks$history
+pred$score(mlr3::msr("classif.auc"))
+
+
+
+
+n.epochs <- 100
+po_list <- list(
+  mlr3torch::PipeOpTorchIngressNumeric$new(),
+  mlr3torch::nn("linear", out_features=1),
+  mlr3pipelines::po(
+    "torch_loss",
+    nn_bce_loss3),
+  mlr3pipelines::po(
+    "torch_optimizer",
+    mlr3torch::t_opt("sgd", lr=0.1)),
+  mlr3pipelines::po(
+    "torch_callbacks",
+    mlr3torch::t_clbk("history")),
+  mlr3pipelines::po(
+    "torch_model_classif",
+    measures_train=measure_list,
+    measures_valid=measure_list,
+    predict_type="prob",
+    batch_size = 10,
+    patience=n.epochs,
+    epochs=paradox::to_tune(upper = n.epochs, internal = TRUE)))
+graph_obj <- Reduce(mlr3pipelines::concat_graphs, po_list)
+learner.to.tune <- mlr3::as_learner(graph_obj)
+learner_auto = mlr3tuning::auto_tuner(
+  learner = learner.to.tune,
+  tuner = mlr3tuning::tnr("internal"),
+  resampling = mlr3::rsmp("insample"),
+  measure = mlr3::msr("internal_valid_score", minimize = TRUE),
+  term_evals = 1,
+  id="linear_bce",
+  store_models = TRUE)
+mlr3::set_validate(learner_auto, validate = 0.5)
+learner_auto$train(task_sonar)
+melt_history <- function(DT)nc::capture_melt_single(
+  DT,
+  set=nc::alevels(valid="validation", train="subtrain"),
+  ".classif.",
+  measure=nc::alevels(acc="accuracy", ce="error_prop", auc="AUC", "logloss"))
+
+measure_long <- melt_history(
+  learner_auto$archive$learners(1)[[1]]$model$torch_model_classif$model$callbacks$history)
+(selected_row <- as.data.table(
+  learner_auto$tuning_result$internal_tuned_values[[1]]))
+(max_dt <- measure_long[, .SD[c(which.max(value),which.min(value))], by=.(set, measure)])
+library(ggplot2)
+ggplot()+
+  facet_grid(measure ~ ., scales="free")+
+  geom_vline(aes(
+    xintercept=torch_model_classif.epochs),
+    data=selected_row)+
+  geom_line(aes(
+    epoch, value, color=set),
+    data=measure_long)+
+  geom_point(aes(
+    epoch, value, color=set),
+    shape=21,
+    fill="white",
+    data=max_dt)
+
+
+
+MeasureClassifAUM = R6::R6Class(
+  "MeasureClassifAUM",
+  inherit = mlr3::MeasureClassif,
+  public = list(
+    initialize = function() { 
+      super$initialize(
+        id = "AUM", # unique ID
+        packages = character(), # no package dependencies
+        properties = character(), # no special properties
+        predict_type = "prob",
+        range = c(0, Inf),
+        minimize = TRUE # larger values are better
+      )
+    }
+  ),
+  private = list(
+    .score = function(prediction, ...) {
+      browser()
+      threshold_acc(prediction$truth, prediction$response)
+    }
+  )
+)
+mAUM <- MeasureClassifAUM$new()
+
+```
