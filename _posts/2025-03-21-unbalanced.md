@@ -589,7 +589,7 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] data.table_1.17.99
+## [1] data.table_1.17.0
 ## 
 ## loaded via a namespace (and not attached):
 ## [1] compiler_4.4.3 tools_4.4.3    knitr_1.50     xfun_0.51      evaluate_1.0.3

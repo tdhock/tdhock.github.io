@@ -83,6 +83,10 @@ Topics without links below are on my TODO list.
 - Data manipulation with data.table, [LatinR Oct'23 slide source](https://github.com/tdhock/2023-10-LatinR-data.table?tab=readme-ov-file#english), [updated slides](https://docs.google.com/presentation/d/1mHTFR6Eg7OdKi6yJcAvMk5_B8hjtMmsczs8Ewxt2xT8/edit?usp=sharing).
 - Interactive data visualization with the grammar of graphics
 - git/github 
+
+## Sherbrooke students mentored
+
+* [Félix Chabot](https://github.com/chabam), CS master, Spring 2025-present. Co-advisor: Richard Fournier.
   
 ## NAU students mentored
 
@@ -98,6 +102,7 @@ For the students below, my role is primary advisor, unless another primary advis
 * [Bilal Aslam](https://github.com/bilalaslam45), Inf PHD, Fall 2022 - present. Primary advisor: Kevin Gurney.
 * [Karl Harshe](https://github.com/harsheka), MechE PHD, Fall 2022 - present. Primary advisor: Zach Lerner.
 * [Daniel Agyapong](https://github.com/EngineerDanny), Informatics and Computing PHD, Fall 2022 - present. 
+* [Tianyi (Bruce) Chen](https://github.com/TyBruceChen), CS undergrad, 2023 - 2024, then went to UCSB for master in communication, control, and signal processing.
 * [Cameron Bodine](https://github.com/CameronBodine), Informatics and Computing PHD, Spring 2020 - Spring 2024, then did postdoc at University of Delaware. Primary advisor: Dan Buscombe.
 * [Trevor Silverstein](https://github.com/trevb11), Inf PHD, Fall 2023, then went back to teach school.
 * [Jadon Fowler](https://github.com/phase), CS master, Fall 2022 - Spring 2023, working as software developer at [Lunar Client](https://www.lunarclient.com/).
