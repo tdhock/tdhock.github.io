@@ -49,7 +49,8 @@ Students should expect to do the following:
   chronologically (most recent at the top), with an entry for every
   day doing research. Write what you did, links to code you
   created/used, result figures/tables, what problems you encountered,
-  and specific ideas for next steps.
+  and specific ideas for next steps. Please read my guide about
+  [organizing computational research projects](/blog/2025/computational-research-organization).
 - have a one-on-one weekly meeting with me, to discuss progress and
   next steps (using the lab notebook to help explain). You should work
   an appropriate amount of time each week in order to make progress
