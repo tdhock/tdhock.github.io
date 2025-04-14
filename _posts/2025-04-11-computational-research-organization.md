@@ -11,9 +11,23 @@ projects and communications.
 
 First, I create a git repo for each project. 
 Typically each repo will have several different code files.
-There are two kinds of code files.
+What files should be added to the git repo?
 
-### Intermediate results
+- Code.
+- Figures.
+- Intermediate result data files (if they are not too large).
+
+What files should be added to `.gitignore`, and not added to the git repo?
+
+- Raw data files (typically too large).
+
+Note that we do not want to put large files in a git repo, which is
+designed for managing lots of small files (mostly code). Instead, put
+your raw data files on a web hosting service, or a reproducibility
+service (Zenodo/similar), and then write some code that downloads the
+data files from that public source.
+
+### Code to compute intermediate results
 
 These code files compute some results and store them in intermediate
 data files (CSV, RData, etc). 
@@ -24,11 +38,10 @@ data files (CSV, RData, etc).
   already, and if not, download it.
 - Then read the data and compute some result (time-consuming).
 - Then create a file named something.csv as output.
-- 
 
-### Figure files
+### Code to make figures
 
-These code files compute some figure based on the intermediate data
+These code files make figures based on the intermediate data
 files. It is important to separate these two steps, so that visual
 properties in the figures can be quickly modified, without having to
 re-compute the results (time-consuming).
@@ -84,13 +97,13 @@ same repo. If there are enough figures in this repo to prove the
 points that you want to make in your paper, then stop working in this
 repo, and start a new repo for another paper.
 
-### Minimal Reproducible Examples
+## Minimal Reproducible Examples
 
 When you do computational research, you will inevitably encounter
 problems that prevent you from advancing / finishing your paper.
 How do you get help, when you have an error/issue that is blocking you?
 You should ask for help, but to do that, you should first create a
-Minimal Reproducible Example (MRE) that that can be used to precise
+Minimal Reproducible Example (MRE) that that can be used to precisely
 communicate your issue to someone else.
 
 Typically the first reflex would be to send your whole git repo a
@@ -110,10 +123,10 @@ Keep going smaller until you can't any more! That is Minimal (necessary details 
 Try smaller column/variable names too.
 
 At this point, you have probably figured out a solution to your
-problem already, 90% of the time. The other 10% you should post an
-issue
+problem already, 90% of the time. The other 10% of the time, you should post an
+issue:
 
-- on your github repo if you are not sure if it is your problem, or
+- on your github repo, if you are not sure if it is your problem, or
   the problem with somebody else's code.
 - on another github repo, if you are pretty sure that somebody else's
   code is responsible for the issue.
@@ -121,7 +134,7 @@ issue
   issue (your mentor/advisor/collaborator, or maintainer of the
   software you are using).
 
-### Writing issues
+## Writing issues
 
 First of all, why do we write issues instead of emails?  Emails are
 great for private communications.  But most research and open-source
@@ -130,10 +143,18 @@ be able to benefit from what you learn at the end of your discussion.
 Also, github issues provide code highlighting, which can be useful for
 readers of your code.
 
-When writing an issue, begin by explaining your goal. What were you
+If you are writing an issue on someone else's repo, begin by @tagging
+a maintainer who seems to be recently active, and thank them for
+maintaining the software that you are using. Free/open-source software
+maintainers are often unpaid volunteers, who appreciate praise! From
+the perspective of the maintainer, issues are like a TODO list that
+somebody else writes for you. So when you write an issue on someone
+else's repo, please be polite and thankful for their time.
+
+Next, explain your goal in general terms (big picture). What were you
 trying to compute when you ran into the issue?
 
-Next, given details about what code you ran, inside a triple-backticks
+Next, give details about what code you ran, inside a triple-backticks
 block.
 
 ````
@@ -169,4 +190,12 @@ example, is this a bug? I expected that the function should work
 without error, but I observed an error on my system. Do you think the
 error is normal in this case?
 
+Here are some examples of issues I have posted on other people's
+repositories.
 
+- https://github.com/mlr-org/mlr3torch/issues/373
+- https://github.com/mlr-org/mlr3torch/issues/374
+- https://github.com/r-lib/pak/issues/760
+- https://github.com/r-lib/bench/issues/145
+- https://github.com/pgadmin-org/pgadmin4/issues/8120
+- https://github.com/therneau/survival/issues/270
