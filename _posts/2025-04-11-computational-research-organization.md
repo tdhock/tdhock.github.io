@@ -193,9 +193,9 @@ error is normal in this case?
 Here are some examples of issues I have posted on other people's
 repositories.
 
-- https://github.com/mlr-org/mlr3torch/issues/373
-- https://github.com/mlr-org/mlr3torch/issues/374
-- https://github.com/r-lib/pak/issues/760
-- https://github.com/r-lib/bench/issues/145
-- https://github.com/pgadmin-org/pgadmin4/issues/8120
-- https://github.com/therneau/survival/issues/270
+- <https://github.com/mlr-org/mlr3torch/issues/373>
+- <https://github.com/mlr-org/mlr3torch/issues/374>
+- <https://github.com/r-lib/pak/issues/760>
+- <https://github.com/r-lib/bench/issues/145>
+- <https://github.com/pgadmin-org/pgadmin4/issues/8120>
+- <https://github.com/therneau/survival/issues/270>
