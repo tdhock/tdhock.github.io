@@ -78,6 +78,16 @@ Below we use both functions with a three different data sizes.
 
 ``` r
 library(data.table)
+```
+
+```
+## data.table 1.17.0 utilise 7 threads (voir ?getDTthreads).  Dernières actualités : r-datatable.com
+## **********
+## Running data.table in English; package support is available in English only. When searching for online help, be sure to also check for the English error message. This can be obtained by looking at the po/R-<locale>.po and po/<locale>.po files in the package source, where the native language and English error messages can be found side-by-side. You can also try calling Sys.setLanguage('en') prior to reproducing the error message.
+## **********
+```
+
+``` r
 N_data_vec <- c(100,200,400)
 sim_data_list <- list()
 sim_changes_list <- list()
@@ -169,6 +179,13 @@ Below we visualize the simulated data.
 
 ``` r
 library(ggplot2)
+```
+
+```
+## Use suppressPackageStartupMessages() to eliminate package startup messages
+```
+
+``` r
 ggplot()+
   theme_bw()+
   theme(text=element_text(size=14))+
@@ -863,58 +880,71 @@ refs_list$meas[, let(
 ## 343: max_seg_size  FPOP simulation=constant_changes        N         N      FPOP constant_changes 4e+05 1.0259534011
 ## 344: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 4e+05 0.5639357400
 ## 345: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 8e+05 1.1226613900
-##            median      itr/sec     gc/sec n_itr  n_gc            result                                          time
-##             <num>        <num>      <num> <int> <num>            <list>                                        <list>
-##   1: 0.0002442150 3574.5331805  0.0000000    10     0 <data.frame[1x3]>       470µs,368µs,257µs,266µs,241µs,240µs,...
-##   2: 0.0002421311 3926.2117915  0.0000000    10     0 <data.frame[1x3]>       367µs,261µs,252µs,240µs,250µs,230µs,...
-##   3: 0.0018940541  520.7369060 57.8596562     9     1 <data.frame[1x3]> 2.05ms,1.91ms,1.85ms,1.83ms,1.82ms,1.96ms,...
-##   4: 0.0017234740  560.3588067  0.0000000    10     0 <data.frame[1x3]>  2.05ms,1.93ms,1.9ms,1.76ms,1.73ms,1.72ms,...
-##   5: 0.0015820405  620.1694706  0.0000000    10     0 <data.frame[1x3]> 1.72ms,1.69ms,1.66ms,1.62ms,1.57ms,1.55ms,...
-##  ---                                                                                                                 
-## 341: 0.4939388145    2.0151479  0.2239053     9     1 <data.frame[1x3]>       501ms,519ms,496ms,496ms,499ms,491ms,...
-## 342: 0.2836681501    3.5201557  0.0000000    10     0 <data.frame[1x3]>       284ms,289ms,283ms,284ms,284ms,283ms,...
-## 343: 1.0293976846    0.9718521  0.1079836     9     1 <data.frame[1x3]>       1.03s,1.03s,1.03s,1.03s,1.03s,1.03s,...
-## 344: 0.5655546531    1.7680311  0.4420078     8     2 <data.frame[1x3]>       570ms,566ms,565ms,570ms,566ms,564ms,...
-## 345: 1.1287645885    0.8806040  0.3774017     7     3 <data.frame[1x3]>       1.12s,1.13s,1.12s,1.13s,1.14s,1.16s,...
-##                  gc   kilobytes          q25          q75          max         mean           sd mean_candidates
-##              <list>       <num>        <num>        <num>        <num>        <num>        <num>           <num>
-##   1: <tbl_df[10x3]>    35.90625 0.0002398966 0.0002642278 0.0004700619 0.0002797568 7.787649e-05        3.620000
-##   2: <tbl_df[10x3]>    12.60156 0.0002335893 0.0002519581 0.0003666921 0.0002546984 4.061837e-05        3.620000
-##   3: <tbl_df[10x3]>   885.89062 0.0018383883 0.0020245181 0.0074834061 0.0024766606 1.764018e-03       50.500000
-##   4: <tbl_df[10x3]>   885.89062 0.0016983075 0.0018617817 0.0020506069 0.0017845709 1.289868e-04       50.500000
-##   5: <tbl_df[10x3]>   214.77344 0.0015705522 0.0016500467 0.0017230110 0.0016124625 5.942568e-05       14.360000
-##  ---                                                                                                            
-## 341: <tbl_df[10x3]> 22657.52344 0.4908575067 0.4983258765 0.5188986610 0.4965229103 8.702945e-03       10.506720
-## 342: <tbl_df[10x3]> 22657.52344 0.2834965774 0.2837788898 0.2887644571 0.2840783453 1.674366e-03        4.306425
-## 343: <tbl_df[10x3]> 45314.74219 1.0275195075 1.0305302114 1.0334158142 1.0293166748 2.486430e-03       11.443157
-## 344: <tbl_df[10x3]> 45313.77344 0.5645482798 0.5677078616 0.5698938600 0.5662693475 2.230345e-03        4.320775
-## 345: <tbl_df[10x3]> 90626.27344 1.1242019855 1.1568015352 1.3523598550 1.1572877460 7.026321e-02        4.323669
-##      segments max_seg_size                             expr.class                                  expr.latex
-##         <int>        <num>                                 <char>                                      <char>
-##   1:        4           26    FPOP simulation=constant_changes\nN    FPOP simulation=constant_changes\n$O(N)$
-##   2:        4           26      FPOP simulation=linear_changes\nN      FPOP simulation=linear_changes\n$O(N)$
-##   3:        4           25 OPART simulation=constant_changes\nN^2 OPART simulation=constant_changes\n$O(N^2)$
-##   4:        4           25   OPART simulation=linear_changes\nN^2   OPART simulation=linear_changes\n$O(N^2)$
-##   5:        4           25  PELT simulation=constant_changes\nN^2  PELT simulation=constant_changes\n$O(N^2)$
-##  ---                                                                                                         
-## 341:        4        50003    FPOP simulation=constant_changes\nN    FPOP simulation=constant_changes\n$O(N)$
-## 342:     8000           33     FPOP simulation=linear_changes\nNA     FPOP simulation=linear_changes\n$O(NA)$
-## 343:        4       100002    FPOP simulation=constant_changes\nN    FPOP simulation=constant_changes\n$O(N)$
-## 344:    16000           33     FPOP simulation=linear_changes\nNA     FPOP simulation=linear_changes\n$O(NA)$
-## 345:    32002           33     FPOP simulation=linear_changes\nNA     FPOP simulation=linear_changes\n$O(NA)$
-##         empirical        Simulation Algorithm
-##             <num>            <char>    <fctr>
-##   1:     35.90625 constant\nchanges      FPOP
-##   2:     12.60156   linear\nchanges      FPOP
-##   3:    885.89062 constant\nchanges     OPART
-##   4:    885.89062   linear\nchanges     OPART
-##   5:    214.77344 constant\nchanges      PELT
-##  ---                                         
-## 341:  50003.00000 constant\nchanges      FPOP
-## 342:     33.00000   linear\nchanges      FPOP
-## 343: 100002.00000 constant\nchanges      FPOP
-## 344:     33.00000   linear\nchanges      FPOP
-## 345:     33.00000   linear\nchanges      FPOP
+##            median      itr/sec     gc/sec n_itr  n_gc            result
+##             <num>        <num>      <num> <int> <num>            <list>
+##   1: 0.0002442150 3574.5331805  0.0000000    10     0 <data.frame[1x3]>
+##   2: 0.0002421311 3926.2117915  0.0000000    10     0 <data.frame[1x3]>
+##   3: 0.0018940541  520.7369060 57.8596562     9     1 <data.frame[1x3]>
+##   4: 0.0017234740  560.3588067  0.0000000    10     0 <data.frame[1x3]>
+##   5: 0.0015820405  620.1694706  0.0000000    10     0 <data.frame[1x3]>
+##  ---                                                                   
+## 341: 0.4939388145    2.0151479  0.2239053     9     1 <data.frame[1x3]>
+## 342: 0.2836681501    3.5201557  0.0000000    10     0 <data.frame[1x3]>
+## 343: 1.0293976846    0.9718521  0.1079836     9     1 <data.frame[1x3]>
+## 344: 0.5655546531    1.7680311  0.4420078     8     2 <data.frame[1x3]>
+## 345: 1.1287645885    0.8806040  0.3774017     7     3 <data.frame[1x3]>
+##                                                                                   time             gc   kilobytes
+##                                                                                 <list>         <list>       <num>
+##   1: 0.0004700619,0.0003677000,0.0002574680,0.0002664811,0.0002409180,0.0002395561,... <tbl_df[10x3]>    35.90625
+##   2: 0.0003666921,0.0002608220,0.0002524981,0.0002404720,0.0002503380,0.0002302140,... <tbl_df[10x3]>    12.60156
+##   3:       0.002046861,0.001906524,0.001849303,0.001834750,0.001822574,0.001957489,... <tbl_df[10x3]>   885.89062
+##   4:       0.002050607,0.001932904,0.001896779,0.001756790,0.001730951,0.001715997,... <tbl_df[10x3]>   885.89062
+##   5:       0.001723011,0.001693199,0.001660900,0.001617487,0.001568507,0.001552348,... <tbl_df[10x3]>   214.77344
+##  ---                                                                                                             
+## 341:                   0.5005521,0.5188987,0.4959155,0.4961366,0.4990556,0.4908397,... <tbl_df[10x3]> 22657.52344
+## 342:                   0.2835047,0.2887645,0.2834939,0.2837157,0.2836991,0.2832676,... <tbl_df[10x3]> 22657.52344
+## 343:                         1.029605,1.029867,1.033416,1.026192,1.025953,1.030751,... <tbl_df[10x3]> 45314.74219
+## 344:                   0.5698939,0.5663721,0.5653220,0.5697331,0.5657873,0.5639357,... <tbl_df[10x3]> 45313.77344
+## 345:                         1.123157,1.129997,1.123258,1.127035,1.141432,1.163521,... <tbl_df[10x3]> 90626.27344
+##               q25          q75          max         mean           sd mean_candidates segments max_seg_size
+##             <num>        <num>        <num>        <num>        <num>           <num>    <int>        <num>
+##   1: 0.0002398966 0.0002642278 0.0004700619 0.0002797568 7.787649e-05        3.620000        4           26
+##   2: 0.0002335893 0.0002519581 0.0003666921 0.0002546984 4.061837e-05        3.620000        4           26
+##   3: 0.0018383883 0.0020245181 0.0074834061 0.0024766606 1.764018e-03       50.500000        4           25
+##   4: 0.0016983075 0.0018617817 0.0020506069 0.0017845709 1.289868e-04       50.500000        4           25
+##   5: 0.0015705522 0.0016500467 0.0017230110 0.0016124625 5.942568e-05       14.360000        4           25
+##  ---                                                                                                       
+## 341: 0.4908575067 0.4983258765 0.5188986610 0.4965229103 8.702945e-03       10.506720        4        50003
+## 342: 0.2834965774 0.2837788898 0.2887644571 0.2840783453 1.674366e-03        4.306425     8000           33
+## 343: 1.0275195075 1.0305302114 1.0334158142 1.0293166748 2.486430e-03       11.443157        4       100002
+## 344: 0.5645482798 0.5677078616 0.5698938600 0.5662693475 2.230345e-03        4.320775    16000           33
+## 345: 1.1242019855 1.1568015352 1.3523598550 1.1572877460 7.026321e-02        4.323669    32002           33
+##                                  expr.class                                  expr.latex    empirical        Simulation
+##                                      <char>                                      <char>        <num>            <char>
+##   1:    FPOP simulation=constant_changes\nN    FPOP simulation=constant_changes\n$O(N)$     35.90625 constant\nchanges
+##   2:      FPOP simulation=linear_changes\nN      FPOP simulation=linear_changes\n$O(N)$     12.60156   linear\nchanges
+##   3: OPART simulation=constant_changes\nN^2 OPART simulation=constant_changes\n$O(N^2)$    885.89062 constant\nchanges
+##   4:   OPART simulation=linear_changes\nN^2   OPART simulation=linear_changes\n$O(N^2)$    885.89062   linear\nchanges
+##   5:  PELT simulation=constant_changes\nN^2  PELT simulation=constant_changes\n$O(N^2)$    214.77344 constant\nchanges
+##  ---                                                                                                                  
+## 341:    FPOP simulation=constant_changes\nN    FPOP simulation=constant_changes\n$O(N)$  50003.00000 constant\nchanges
+## 342:     FPOP simulation=linear_changes\nNA     FPOP simulation=linear_changes\n$O(NA)$     33.00000   linear\nchanges
+## 343:    FPOP simulation=constant_changes\nN    FPOP simulation=constant_changes\n$O(N)$ 100002.00000 constant\nchanges
+## 344:     FPOP simulation=linear_changes\nNA     FPOP simulation=linear_changes\n$O(NA)$     33.00000   linear\nchanges
+## 345:     FPOP simulation=linear_changes\nNA     FPOP simulation=linear_changes\n$O(NA)$     33.00000   linear\nchanges
+##      Algorithm
+##         <fctr>
+##   1:      FPOP
+##   2:      FPOP
+##   3:     OPART
+##   4:     OPART
+##   5:      PELT
+##  ---          
+## 341:      FPOP
+## 342:      FPOP
+## 343:      FPOP
+## 344:      FPOP
+## 345:      FPOP
 ```
 
 ``` r
@@ -1076,6 +1106,15 @@ We have explored three algorithms for optimal change-point detection.
   quadratic time complexity as OPART.
 * The FPOP algorithm is fast (linear or log-linear) in both of the
   scenarios we examined.
+  
+We performed the comparison for count data (Poisson loss), but we
+could do something similar for real data (square loss), by modifying
+one of these implementations of dynamic programming:
+
+- [jewellsean/FastLZeroSpikeInference](https://github.com/jewellsean/FastLZeroSpikeInference/blob/master/src/ARFPOP.cpp)
+- [vrunge/gfpop](https://github.com/vrunge/gfpop)
+- [vrunge/dust](https://github.com/vrunge/dust)
+- [fpop R package in opfp repo on R-Forge](https://r-forge.r-project.org/scm/?group_id=1851)
 
 ## Session info
 
@@ -1085,13 +1124,13 @@ sessionInfo()
 ```
 
 ```
-## R version 4.4.3 (2025-02-28)
+## R version 4.5.0 (2025-04-11)
 ## Platform: x86_64-pc-linux-gnu
 ## Running under: Ubuntu 24.04.2 LTS
 ## 
 ## Matrix products: default
 ## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
 ## 
 ## locale:
 ##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
@@ -1105,16 +1144,15 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_3.5.1      data.table_1.17.99
+## [1] ggplot2_3.5.1     data.table_1.17.0
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] directlabels_2024.1.21   vctrs_0.6.5              cli_3.6.4                knitr_1.50              
-##  [5] rlang_1.1.5              xfun_0.51                penaltyLearning_2024.9.3 bench_1.1.4             
-##  [9] generics_0.1.3           glue_1.8.0               labeling_0.4.3           colorspace_2.1-1        
-## [13] scales_1.3.0             quadprog_1.5-8           grid_4.4.3               munsell_0.5.1           
-## [17] evaluate_1.0.3           tibble_3.2.1             profmem_0.6.0            lifecycle_1.0.4         
-## [21] compiler_4.4.3           dplyr_1.1.4              pkgconfig_2.0.3          PeakSegOptimal_2025.3.31
-## [25] atime_2025.4.1           lattice_0.22-6           farver_2.1.2             R6_2.6.1                
-## [29] tidyselect_1.2.1         pillar_1.10.1            magrittr_2.0.3           tools_4.4.3             
-## [33] withr_3.0.2              gtable_0.3.6
+##  [5] rlang_1.1.5              xfun_0.51                penaltyLearning_2024.9.3 generics_0.1.3          
+##  [9] glue_1.8.0               labeling_0.4.3           colorspace_2.1-1         scales_1.3.0            
+## [13] quadprog_1.5-8           grid_4.5.0               munsell_0.5.1            evaluate_1.0.3          
+## [17] tibble_3.2.1             lifecycle_1.0.4          compiler_4.5.0           dplyr_1.1.4             
+## [21] pkgconfig_2.0.3          PeakSegOptimal_2025.3.31 atime_2025.4.1           lattice_0.22-6          
+## [25] farver_2.1.2             R6_2.6.1                 tidyselect_1.2.1         pillar_1.10.1           
+## [29] magrittr_2.0.3           tools_4.5.0              withr_3.0.2              gtable_0.3.6
 ```

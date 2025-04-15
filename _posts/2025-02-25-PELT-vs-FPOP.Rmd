@@ -644,6 +644,15 @@ We have explored three algorithms for optimal change-point detection.
   quadratic time complexity as OPART.
 * The FPOP algorithm is fast (linear or log-linear) in both of the
   scenarios we examined.
+  
+We performed the comparison for count data (Poisson loss), but we
+could do something similar for real data (square loss), by modifying
+one of these implementations of dynamic programming:
+
+- [jewellsean/FastLZeroSpikeInference](https://github.com/jewellsean/FastLZeroSpikeInference/blob/master/src/ARFPOP.cpp)
+- [vrunge/gfpop](https://github.com/vrunge/gfpop)
+- [vrunge/dust](https://github.com/vrunge/dust)
+- [fpop R package in opfp repo on R-Forge](https://r-forge.r-project.org/scm/?group_id=1851)
 
 ## Session info
 
