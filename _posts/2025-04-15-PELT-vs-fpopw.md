@@ -670,11 +670,12 @@ We begin by defining the data sizes N of interest:
 
 ``` r
 base_N <- c(100,200,400,800)
-(all_N <- unlist(lapply(10^seq(0,3), function(x)x*base_N)))
+(all_N <- unlist(lapply(10^seq(0,4), function(x)x*base_N)))
 ```
 
 ```
-##  [1] 1e+02 2e+02 4e+02 8e+02 1e+03 2e+03 4e+03 8e+03 1e+04 2e+04 4e+04 8e+04 1e+05 2e+05 4e+05 8e+05
+##  [1] 1e+02 2e+02 4e+02 8e+02 1e+03 2e+03 4e+03 8e+03 1e+04 2e+04 4e+04 8e+04 1e+05 2e+05 4e+05 8e+05 1e+06 2e+06 4e+06
+## [20] 8e+06
 ```
 
 The data sizes above are on a log scale between 10 and 1,000,000.
@@ -867,69 +868,69 @@ refs_list$meas[, let(
 ```
 ##              unit                         expr.name fun.name fun.latex expr.grid       simulation     N         min
 ##            <char>                            <char>   <char>    <char>    <char>           <char> <num>       <num>
-##   1:    kilobytes  FPOP simulation=constant_changes  N log N N \\log N      FPOP constant_changes 1e+02 0.001923004
-##   2:    kilobytes    FPOP simulation=linear_changes        N         N      FPOP   linear_changes 1e+02 0.001408322
-##   3:    kilobytes OPART simulation=constant_changes      N^2       N^2     OPART constant_changes 1e+02 0.001260418
-##   4:    kilobytes   OPART simulation=linear_changes      N^2       N^2     OPART   linear_changes 1e+02 0.001512533
-##   5:    kilobytes  PELT simulation=constant_changes      N^2       N^2      PELT constant_changes 1e+02 0.001140889
+##   1:    kilobytes  FPOP simulation=constant_changes  N log N N \\log N      FPOP constant_changes 1e+02 0.001564928
+##   2:    kilobytes    FPOP simulation=linear_changes        N         N      FPOP   linear_changes 1e+02 0.001527009
+##   3:    kilobytes OPART simulation=constant_changes      N^2       N^2     OPART constant_changes 1e+02 0.001286157
+##   4:    kilobytes   OPART simulation=linear_changes      N^2       N^2     OPART   linear_changes 1e+02 0.001544462
+##   5:    kilobytes  PELT simulation=constant_changes      N^2       N^2      PELT constant_changes 1e+02 0.001195799
 ##  ---                                                                                                               
-## 351: max_seg_size  FPOP simulation=constant_changes        N         N      FPOP constant_changes 2e+05 0.623123770
-## 352: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 2e+05 0.233184754
-## 353: max_seg_size  FPOP simulation=constant_changes        N         N      FPOP constant_changes 4e+05 1.290217895
-## 354: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 4e+05 0.443653082
-## 355: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 8e+05 0.885131756
+## 356: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 2e+05 0.237176569
+## 357: max_seg_size  FPOP simulation=constant_changes        N         N      FPOP constant_changes 4e+05 1.298433751
+## 358: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 4e+05 0.459924442
+## 359: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 8e+05 0.902141028
+## 360: max_seg_size    FPOP simulation=linear_changes     <NA>      <NA>      FPOP   linear_changes 1e+06 1.104044839
 ##           median     itr/sec    gc/sec n_itr  n_gc            result
 ##            <num>       <num>     <num> <int> <num>            <list>
-##   1: 0.002858013 365.6938245  0.000000    10     0 <data.frame[1x3]>
-##   2: 0.001530828 533.7141430  0.000000    10     0 <data.frame[1x3]>
-##   3: 0.001293144 738.3972616 82.044140     9     1 <data.frame[1x3]>
-##   4: 0.001558449 611.1312545  0.000000    10     0 <data.frame[1x3]>
-##   5: 0.001166694 851.7461725  0.000000    10     0 <data.frame[1x3]>
+##   1: 0.001826628 402.7124136  0.000000    10     0 <data.frame[1x3]>
+##   2: 0.001654804 493.2075327  0.000000    10     0 <data.frame[1x3]>
+##   3: 0.001348201 683.3834232  0.000000    10     0 <data.frame[1x3]>
+##   4: 0.001613689 604.0483072 67.116479     9     1 <data.frame[1x3]>
+##   5: 0.001243209 778.2184256  0.000000    10     0 <data.frame[1x3]>
 ##  ---                                                                
-## 351: 0.641284690   1.5820949  4.218920     3     8 <data.frame[1x3]>
-## 352: 0.244886809   4.1251651  1.767928     7     3 <data.frame[1x3]>
-## 353: 1.375813736   0.7245143  2.173543     3     9 <data.frame[1x3]>
-## 354: 0.456961145   2.1281262  2.128126     5     5 <data.frame[1x3]>
-## 355: 0.920766190   1.0998402  2.199680     4     8 <data.frame[1x3]>
-##                                                                             time             gc    kilobytes
-##                                                                           <list>         <list>        <num>
-##   1: 0.003070066,0.001923004,0.003146542,0.003012140,0.002854351,0.002861676,... <tbl_df[10x3]>     70.02344
-##   2: 0.002941428,0.002967761,0.001904799,0.001537999,0.001408322,0.002046934,... <tbl_df[10x3]>     67.84375
-##   3: 0.001540256,0.001308101,0.001289717,0.001285471,0.001260418,0.001270360,... <tbl_df[10x3]>    591.29688
-##   4: 0.002236664,0.001681142,0.001622356,0.001579869,0.001556465,0.001548693,... <tbl_df[10x3]>    688.04688
-##   5: 0.001226953,0.001175218,0.001158938,0.001140889,0.001169771,0.001188534,... <tbl_df[10x3]>    184.71094
-##  ---                                                                                                        
-## 351:             0.6956099,0.6400762,0.6635544,0.6434154,0.6335402,0.6296808,... <tbl_df[10x3]> 105870.07031
-## 352:             0.2463387,0.2373003,0.2477549,0.2419929,0.2331848,0.2486809,... <tbl_df[10x3]>  44508.32031
-## 353:                   1.395968,1.415357,1.298186,1.440683,1.377810,1.358431,... <tbl_df[10x3]> 225719.64062
-## 354:             0.4529089,0.4571245,0.4816742,0.4477365,0.4436531,0.4750724,... <tbl_df[10x3]>  88591.41406
-## 355:             0.9838015,0.8875762,0.9541982,0.9208012,0.8851318,0.9082240,... <tbl_df[10x3]> 176501.08594
-##              q25         q75         max        mean           sd mean_candidates segments max_seg_size
-##            <num>       <num>       <num>       <num>        <num>           <num>    <int>        <num>
-##   1: 0.002764960 0.002977869 0.003146542 0.002734528 4.167095e-04        3.370000        4           25
-##   2: 0.001481299 0.002011400 0.002967761 0.001873662 6.068937e-04        2.910000       10           10
-##   3: 0.001277248 0.001482217 0.014063603 0.002625216 4.021341e-03       50.500000        4           25
-##   4: 0.001540108 0.001611734 0.002236664 0.001636310 2.166810e-04       50.500000       10           10
-##   5: 0.001151836 0.001185205 0.001226953 0.001174059 3.062441e-05       14.270000        4           25
-##  ---                                                                                                   
-## 351: 0.634362322 0.658519632 0.695609916 0.647364185 2.162043e-02       10.477825        4        50000
-## 352: 0.240113910 0.248449421 0.255162677 0.244747063 7.069087e-03        3.426640    20000           13
-## 353: 1.360555145 1.396592802 1.440682719 1.371419802 4.733699e-02       11.201395        4       100000
-## 354: 0.453699607 0.480023766 0.492920949 0.465406193 1.793952e-02        3.442537    40000           13
-## 355: 0.892738178 0.954015948 0.983801528 0.925884297 3.484566e-02        3.442912    80000           13
+## 356: 0.248827390   4.0309684  1.007742     8     2 <data.frame[1x3]>
+## 357: 1.330081226   0.7370255  8.107280     1    11 <data.frame[1x3]>
+## 358: 0.477735782   2.1284564  2.128456     5     5 <data.frame[1x3]>
+## 359: 0.936223030   1.1026502 12.129153     1    11 <data.frame[1x3]>
+## 360: 1.203440131   0.8292047  1.575489    10    19 <data.frame[1x3]>
+##                                                          time             gc    kilobytes         q25         q75
+##                                                        <list>         <list>        <num>       <num>       <num>
+##   1:             5.54ms,4.03ms,2.68ms,2.52ms,1.8ms,1.85ms,... <tbl_df[10x3]>     93.32031 0.001607192 0.002641524
+##   2:              1.7ms,1.61ms,1.59ms,1.53ms,1.55ms,1.7ms,... <tbl_df[10x3]>     75.10938 0.001568620 0.002484471
+##   3:             2.56ms,1.41ms,1.33ms,1.34ms,1.3ms,1.37ms,... <tbl_df[10x3]>    591.29688 0.001313606 0.001373302
+##   4:             1.6ms,1.73ms,1.63ms,1.69ms,8.38ms,2.02ms,... <tbl_df[10x3]>    688.04688 0.001564211 0.001719290
+##   5:              1.34ms,1.24ms,1.25ms,1.24ms,1.4ms,1.2ms,... <tbl_df[10x3]>    184.71094 0.001237503 0.001366346
+##  ---                                                                                                             
+## 356:                  249ms,257ms,256ms,251ms,248ms,250ms,... <tbl_df[10x3]>  44508.32031 0.245521652 0.250610559
+## 357:                   1.36s,1.31s,1.32s,1.33s,1.36s,1.4s,... <tbl_df[10x3]> 223776.32812 1.320581112 1.358846329
+## 358:                  469ms,465ms,476ms,480ms,485ms,460ms,... <tbl_df[10x3]>  88595.04688 0.466033021 0.485552854
+## 359: 902.89ms,935.98ms,930.08ms,972.82ms,  1.01s,975.62ms,... <tbl_df[10x3]> 176499.87500 0.912699753 0.974921501
+## 360:                    1.3s,1.22s,1.21s,1.32s,1.2s,1.15s,... <tbl_df[10x3]> 220805.92969 1.166255503 1.218121110
+##              max        mean           sd mean_candidates segments max_seg_size
+##            <num>       <num>        <num>           <num>    <int>        <num>
+##   1: 0.005545402 0.002483162 1.325116e-03        3.370000        4           25
+##   2: 0.003259974 0.002027544 6.930330e-04        2.910000       10           10
+##   3: 0.002559659 0.001463307 3.869984e-04       50.500000        4           25
+##   4: 0.008376459 0.002327593 2.130038e-03       50.500000       10           10
+##   5: 0.001401057 0.001284986 7.968007e-05       14.270000        4           25
+##  ---                                                                           
+## 356: 0.257091103 0.248581495 5.800837e-03        3.426640    20000           13
+## 357: 1.448767743 1.347575289 4.686918e-02       11.201395        4       100000
+## 358: 0.520933725 0.479964080 1.800418e-02        3.442537    40000           13
+## 359: 1.026951207 0.949789770 4.423560e-02        3.442912    80000           13
+## 360: 1.324852903 1.205974769 6.614078e-02        3.444736   100000           14
 ##                                     expr.class                                       expr.latex    empirical
 ##                                         <char>                                           <char>        <num>
-##   1: FPOP simulation=constant_changes\nN log N FPOP simulation=constant_changes\n$O(N \\log N)$     70.02344
-##   2:         FPOP simulation=linear_changes\nN           FPOP simulation=linear_changes\n$O(N)$     67.84375
+##   1: FPOP simulation=constant_changes\nN log N FPOP simulation=constant_changes\n$O(N \\log N)$     93.32031
+##   2:         FPOP simulation=linear_changes\nN           FPOP simulation=linear_changes\n$O(N)$     75.10938
 ##   3:    OPART simulation=constant_changes\nN^2      OPART simulation=constant_changes\n$O(N^2)$    591.29688
 ##   4:      OPART simulation=linear_changes\nN^2        OPART simulation=linear_changes\n$O(N^2)$    688.04688
 ##   5:     PELT simulation=constant_changes\nN^2       PELT simulation=constant_changes\n$O(N^2)$    184.71094
 ##  ---                                                                                                        
-## 351:       FPOP simulation=constant_changes\nN         FPOP simulation=constant_changes\n$O(N)$  50000.00000
-## 352:        FPOP simulation=linear_changes\nNA          FPOP simulation=linear_changes\n$O(NA)$     13.00000
-## 353:       FPOP simulation=constant_changes\nN         FPOP simulation=constant_changes\n$O(N)$ 100000.00000
-## 354:        FPOP simulation=linear_changes\nNA          FPOP simulation=linear_changes\n$O(NA)$     13.00000
-## 355:        FPOP simulation=linear_changes\nNA          FPOP simulation=linear_changes\n$O(NA)$     13.00000
+## 356:        FPOP simulation=linear_changes\nNA          FPOP simulation=linear_changes\n$O(NA)$     13.00000
+## 357:       FPOP simulation=constant_changes\nN         FPOP simulation=constant_changes\n$O(N)$ 100000.00000
+## 358:        FPOP simulation=linear_changes\nNA          FPOP simulation=linear_changes\n$O(NA)$     13.00000
+## 359:        FPOP simulation=linear_changes\nNA          FPOP simulation=linear_changes\n$O(NA)$     13.00000
+## 360:        FPOP simulation=linear_changes\nNA          FPOP simulation=linear_changes\n$O(NA)$     14.00000
 ##             Simulation Algorithm
 ##                 <char>    <fctr>
 ##   1: constant\nchanges      FPOP
@@ -938,11 +939,11 @@ refs_list$meas[, let(
 ##   4:   linear\nchanges     OPART
 ##   5: constant\nchanges      PELT
 ##  ---                            
-## 351: constant\nchanges      FPOP
-## 352:   linear\nchanges      FPOP
-## 353: constant\nchanges      FPOP
-## 354:   linear\nchanges      FPOP
-## 355:   linear\nchanges      FPOP
+## 356:   linear\nchanges      FPOP
+## 357: constant\nchanges      FPOP
+## 358:   linear\nchanges      FPOP
+## 359:   linear\nchanges      FPOP
+## 360:   linear\nchanges      FPOP
 ```
 
 ``` r
@@ -1027,12 +1028,12 @@ ggplot()+
   facet_grid(. ~ simulation, scales="free", labeller=label_both)+
   scale_x_log10(
     "N = number of data in sequence",
-    breaks=10^seq(2,5),
-    limits=c(NA, 1e6))+
+    breaks=10^seq(2,6),
+    limits=c(NA, 5e6))+
   scale_y_log10(
     "Computation time (seconds)",
     breaks=10^seq(-3,0),
-    limits=10^c(-4,1))
+    limits=10^c(-3,1))
 ```
 
 ![plot of chunk pred-seconds](/assets/img/2025-04-15-PELT-vs-fpopw/pred-seconds-1.png)
@@ -1070,7 +1071,9 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,6),
     limits=c(NA, 1e7))+
-  scale_y_log10("Mean number of candidate change-points")
+  scale_y_log10(
+    "Mean number of candidate change-points",
+    limits=10^c(0, 4))
 ```
 
 ![plot of chunk pred-candidates](/assets/img/2025-04-15-PELT-vs-fpopw/pred-candidates-1.png)
@@ -1133,10 +1136,10 @@ sessionInfo()
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] crayon_1.5.3           directlabels_2024.1.21 vctrs_0.6.5            cli_3.6.4              knitr_1.50            
-##  [6] rlang_1.1.5            xfun_0.51              generics_0.1.3         glue_1.8.0             labeling_0.4.3        
-## [11] colorspace_2.1-1       scales_1.3.0           fpopw_1.1              quadprog_1.5-8         grid_4.5.0            
-## [16] munsell_0.5.1          evaluate_1.0.3         tibble_3.2.1           lifecycle_1.0.4        compiler_4.5.0        
-## [21] dplyr_1.1.4            pkgconfig_2.0.3        atime_2025.4.1         farver_2.1.2           lattice_0.22-6        
-## [26] R6_2.6.1               tidyselect_1.2.1       pillar_1.10.1          magrittr_2.0.3         tools_4.5.0           
-## [31] withr_3.0.2            gtable_0.3.6
+##  [6] rlang_1.1.5            xfun_0.51              bench_1.1.4            generics_0.1.3         glue_1.8.0            
+## [11] labeling_0.4.3         colorspace_2.1-1       scales_1.3.0           fpopw_1.1              quadprog_1.5-8        
+## [16] grid_4.5.0             munsell_0.5.1          evaluate_1.0.3         tibble_3.2.1           profmem_0.6.0         
+## [21] lifecycle_1.0.4        compiler_4.5.0         dplyr_1.1.4            pkgconfig_2.0.3        atime_2025.4.1        
+## [26] farver_2.1.2           lattice_0.22-6         R6_2.6.1               tidyselect_1.2.1       pillar_1.10.1         
+## [31] magrittr_2.0.3         tools_4.5.0            withr_3.0.2            gtable_0.3.6
 ```

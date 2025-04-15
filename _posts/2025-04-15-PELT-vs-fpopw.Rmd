@@ -442,7 +442,7 @@ We begin by defining the data sizes N of interest:
 
 ```{r}
 base_N <- c(100,200,400,800)
-(all_N <- unlist(lapply(10^seq(0,3), function(x)x*base_N)))
+(all_N <- unlist(lapply(10^seq(0,4), function(x)x*base_N)))
 ```
 
 The data sizes above are on a log scale between 10 and 1,000,000.
@@ -633,12 +633,12 @@ ggplot()+
   facet_grid(. ~ simulation, scales="free", labeller=label_both)+
   scale_x_log10(
     "N = number of data in sequence",
-    breaks=10^seq(2,5),
-    limits=c(NA, 1e6))+
+    breaks=10^seq(2,6),
+    limits=c(NA, 5e6))+
   scale_y_log10(
     "Computation time (seconds)",
     breaks=10^seq(-3,0),
-    limits=10^c(-4,1))
+    limits=10^c(-3,1))
 ```
 
 The figure above shows the throughput (data size N) which is possible
@@ -673,7 +673,9 @@ ggplot()+
     "N = number of data in sequence",
     breaks=10^seq(2,6),
     limits=c(NA, 1e7))+
-  scale_y_log10("Mean number of candidate change-points")
+  scale_y_log10(
+    "Mean number of candidate change-points",
+    limits=10^c(0, 4))
 ```
 
 The figure above shows that 
