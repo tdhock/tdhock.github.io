@@ -189,9 +189,9 @@ compare.wide[log10.p_other < -20, log10.p_other := -Inf][]
 tlab <- function(x, y, label){
   data.table(x, y, label)
 }
-text.y <- -6.5
+text.y <- -6
 text.dt <- rbind(
-  tlab(6, -1, "p<0.05"),
+  tlab(7, -1.7, "p<0.05"),
   tlab(-2, text.y, "Beneficial\nto combine"),
   tlab(8, text.y, "Detrimental\nto combine"))
 set.seed(2)# for ggrepel.
@@ -208,7 +208,6 @@ ggplot()+
   geom_vline(xintercept=0,color="grey")+
   geom_text(aes(
     x, y, label=label, color=NULL),
-    vjust=0,
     color="grey50",
     data=text.dt)+
   geom_segment(aes(
@@ -260,14 +259,18 @@ To make a volcano plot, we need to invert the Y axis, and remove the
 segments.
 
 ```{r soak-volcano, fig.height=8}
+text.y <- -6.5
+text.dt <- rbind(
+  tlab(7, -1.4, "p<0.05"),
+  tlab(-2, text.y, "Beneficial\nto combine"),
+  tlab(8, text.y, "Detrimental\nto combine"))
 ggplot()+
   theme_bw()+
-  theme(legend.position=c(0.9,0.2))+
-  geom_hline(yintercept=log10(0.05),color="grey")+
+  theme(legend.position=c(0.9,0.1))+
+  geom_hline(yintercept=-log10(0.05),color="grey")+
   geom_vline(xintercept=0,color="grey")+
   geom_text(aes(
-    x, y, label=label, color=NULL),
-    vjust=0,
+    x, -y, label=label, color=NULL),
     color="grey50",
     data=text.dt)+
   geom_point(aes(
@@ -287,7 +290,7 @@ ggplot()+
   scale_color_discrete(guide="none")+
   scale_y_continuous(
     "-log10(p-value)\n<- not significant --- highly significant ->",
-    breaks=seq(-100,0,by=2))+
+    breaks=seq(-100,100,by=2))+
   scale_x_continuous(
     "Percent test error difference (all-same)",
     breaks=seq(-100,10,by=2))+

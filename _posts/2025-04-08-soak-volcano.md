@@ -478,9 +478,9 @@ compare.wide[log10.p_other < -20, log10.p_other := -Inf][]
 tlab <- function(x, y, label){
   data.table(x, y, label)
 }
-text.y <- -6.5
+text.y <- -6
 text.dt <- rbind(
-  tlab(6, -1, "p<0.05"),
+  tlab(7, -1.7, "p<0.05"),
   tlab(-2, text.y, "Beneficial\nto combine"),
   tlab(8, text.y, "Detrimental\nto combine"))
 set.seed(2)# for ggrepel.
@@ -497,7 +497,6 @@ ggplot()+
   geom_vline(xintercept=0,color="grey")+
   geom_text(aes(
     x, y, label=label, color=NULL),
-    vjust=0,
     color="grey50",
     data=text.dt)+
   geom_segment(aes(
@@ -660,14 +659,18 @@ segments.
 
 
 ``` r
+text.y <- -6.5
+text.dt <- rbind(
+  tlab(7, -1.4, "p<0.05"),
+  tlab(-2, text.y, "Beneficial\nto combine"),
+  tlab(8, text.y, "Detrimental\nto combine"))
 ggplot()+
   theme_bw()+
-  theme(legend.position=c(0.9,0.2))+
-  geom_hline(yintercept=log10(0.05),color="grey")+
+  theme(legend.position=c(0.9,0.1))+
+  geom_hline(yintercept=-log10(0.05),color="grey")+
   geom_vline(xintercept=0,color="grey")+
   geom_text(aes(
-    x, y, label=label, color=NULL),
-    vjust=0,
+    x, -y, label=label, color=NULL),
     color="grey50",
     data=text.dt)+
   geom_point(aes(
@@ -687,7 +690,7 @@ ggplot()+
   scale_color_discrete(guide="none")+
   scale_y_continuous(
     "-log10(p-value)\n<- not significant --- highly significant ->",
-    breaks=seq(-100,0,by=2))+
+    breaks=seq(-100,100,by=2))+
   scale_x_continuous(
     "Percent test error difference (all-same)",
     breaks=seq(-100,10,by=2))+
@@ -741,9 +744,10 @@ sessionInfo()
 ## [1] ggplot2_3.5.1     data.table_1.17.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] crayon_1.5.3     vctrs_0.6.5      cli_3.6.4        knitr_1.50       rlang_1.1.5      xfun_0.51       
-##  [7] ggrepel_0.9.6    generics_0.1.3   glue_1.8.0       nc_2025.3.24     colorspace_2.1-1 scales_1.3.0    
-## [13] grid_4.5.0       munsell_0.5.1    evaluate_1.0.3   tibble_3.2.1     lifecycle_1.0.4  compiler_4.5.0  
-## [19] dplyr_1.1.4      Rcpp_1.0.14      pkgconfig_2.0.3  farver_2.1.2     R6_2.6.1         tidyselect_1.2.1
-## [25] pillar_1.10.1    magrittr_2.0.3   tools_4.5.0      withr_3.0.2      gtable_0.3.6
+##  [1] crayon_1.5.3     vctrs_0.6.5      cli_3.6.4        knitr_1.50       xfun_0.51        rlang_1.1.5     
+##  [7] ggrepel_0.9.6    bench_1.1.4      generics_0.1.3   glue_1.8.0       labeling_0.4.3   nc_2025.3.24    
+## [13] colorspace_2.1-1 scales_1.3.0     fpopw_1.1        grid_4.5.0       evaluate_1.0.3   munsell_0.5.1   
+## [19] tibble_3.2.1     profmem_0.6.0    lifecycle_1.0.4  compiler_4.5.0   dplyr_1.1.4      Rcpp_1.0.14     
+## [25] pkgconfig_2.0.3  atime_2025.4.1   farver_2.1.2     lattice_0.22-6   R6_2.6.1         tidyselect_1.2.1
+## [31] pillar_1.10.1    magrittr_2.0.3   tools_4.5.0      withr_3.0.2      gtable_0.3.6
 ```
