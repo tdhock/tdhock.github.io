@@ -1,0 +1,709 @@
+---
+layout: post
+title: Comparing change-point pruning methods using square loss
+description: Pruned Exact Linear Time (PELT) and Functional Pruning Optimal Partitioning (FPOP)
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-04-15-PELT-vs-fpopw"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=11, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+conda.env <- "2023-08-deep-learning"
+conda.env <- "torch-aum"
+RETICULATE_PYTHON <- sprintf(if(.Platform$OS.type=="unix")
+  ##"/home/tdhock/.local/share/r-miniconda/envs/%s/bin/python"
+  "/home/tdhock/miniconda3/envs/%s/bin/python"
+  else "~/AppData/Local/Miniconda3/envs/%s/python.exe", conda.env)
+Sys.setenv(RETICULATE_PYTHON=RETICULATE_PYTHON)
+##reticulate::use_condaenv(dirname(RETICULATE_PYTHON), required=TRUE)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to compare two pruning methods for speeding
+up the optimal partitioning algorithm, similar to [my previous post
+using the Poisson
+loss](https://tdhock.github.io/blog/2025/PELT-vs-FPOP/).
+
+* We assume that we want to find change-points in a sequence of `N` data.
+* All algorithms discussed are instances of dynamic programming, which
+  has a for loop over all `N` data. In each iteration, the algorithm
+  considers a certain number of candidate change-points `C` (on
+  average). The algorithm is overall `O(NC)` time.
+* Optimal partitioning (OPART) computes the best segmentation for a
+  given loss function, data sequence, and non-negative penalty
+  value. Each iteration considers the loss for each previous candidate
+  change-point, `C=O(N)` linear time per iteration, which implies
+  quadratic `O(N^2)` time overall.
+* Pruned Exact Linear Time (PELT) reduces the number of candidate
+  change-points that must be considered at each iteration, from the
+  whole data sequence size `N`, to the size of a segment `S`, so
+  `C=O(S)`. This gives an algorithm which is `O(NS)` time overall.
+  * If the number of change-points grows linearly with the data size
+    `N`, then the segment size is constant, `S=O(1)` with respect to
+    number of data `N`, and the PELT algorithm is indeed linear time
+    overall, `O(N)`.
+  * However in the case of a constant number of change-points, with
+    segment sizes that grow with the data sequence, `S=O(N)` implies
+    quadratic time overall, `O(N^2)`.
+* Functional Pruning Optimal Partitioning (FPOP) reduces the number of
+  candidate change-points to a number which is always less than the
+  number considered by PELT (see Maidstone 2017 paper for detailed
+  proof). The goal of this post is to show that it prunes more than
+  PELT in both cases:
+  * If the number of change-points grows linearly with the data size
+    `N`, then both PELT and FPOP are `O(N)` overall.
+  * If the number of change-points is constant with respect to data
+    size `N`, then FPOP considers only `S=O(log N)` change-points
+    (empirically), which gives an algorithm that is `O(N log N)`,
+    log-linear time overall.
+
+# Simulate data sequences
+
+We simulate data in two scenarios: linear and constant number of changes.
+
+```{r}
+mean_vec <- c(10,20,5,25)
+sim_fun_list <- list(
+  constant_changes=function(N){
+    rep(mean_vec, each=N/4)
+  },
+  linear_changes=function(N){
+    rep(rep(mean_vec, each=10), l=N)
+  })
+lapply(sim_fun_list, function(f)f(40))
+```
+
+As can be seen above, both functions return a vector of values that
+represent the true segment mean.
+Below we use both functions with a three different data sizes.
+
+```{r}
+library(data.table)
+N_data_vec <- c(40, 400)
+sim_data_list <- list()
+sim_changes_list <- list()
+for(N_data in N_data_vec){
+  for(simulation in names(sim_fun_list)){
+    sim_fun <- sim_fun_list[[simulation]]
+    data_mean_vec <- sim_fun(N_data)
+    end <- which(diff(data_mean_vec) != 0)
+    set.seed(1)
+    data_value <- rnorm(N_data, data_mean_vec, 2)
+    sim_data_list[[paste(N_data, simulation)]] <- data.table(
+      N_data, simulation, data_i=seq_along(data_value), data_value)
+    sim_changes_list[[paste(N_data, simulation)]] <- data.table(
+      N_data, simulation, end)
+  }
+}
+addSim <- function(DT)DT[, Simulation := paste0("\n", simulation)][]
+(sim_changes <- addSim(rbindlist(sim_changes_list)))
+```
+
+Above we see the table of simulated change-points. 
+
+* For `constant_changes` simulation, there are always 3 change-points.
+* For `linear_changes` simulation, there are more change-points when
+  there are more data.
+  
+Below we visualize the simulated data.
+
+```{r sim-data}
+(sim_data <- addSim(rbindlist(sim_data_list)))
+library(ggplot2)
+ggplot()+
+  theme_bw()+
+  theme(text=element_text(size=14))+
+  geom_vline(aes(
+    xintercept=end+0.5),
+    data=sim_changes)+
+  geom_point(aes(
+    data_i, data_value),
+    color="grey50",
+    data=sim_data)+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  scale_x_continuous(
+    breaks=seq(0,max(N_data_vec),by=20))
+```
+
+We see in the figure above that the data are the same in the two
+simulations, when there are only 40 data points. However, when there
+are 80 or 160 data, we see a difference:
+
+* For the `constant_changes` simulation, the number of change-points
+  is still three (change-point every quarter of the data).
+* For the `linear_changes` simulation, the number of change-points has
+  increased from 3 to 7 to 15 (change-point every 25 data points).
+  
+## PELT
+
+Below we define a function which implements PELT for the Poisson loss,
+because we used a count data simulation above.
+
+```{r}
+PELT <- function(sim.mat, penalty, prune=TRUE, verbose=FALSE){
+  if(!is.matrix(sim.mat))sim.mat <- cbind(sim.mat)
+  cum.data <- rbind(0, apply(sim.mat, 2, cumsum))
+  sum_trick <- function(m, start, end)m[end+1,,drop=FALSE]-m[start,,drop=FALSE]
+  cost_trick <- function(start, end){
+    sum_vec <- sum_trick(cum.data, start, end)
+    N <- end+1-start
+    -sum_vec^2/N
+  }
+  N.data <- nrow(sim.mat)
+  pelt.change.vec <- rep(NA_integer_, N.data)
+  pelt.cost.vec <- rep(NA_real_, N.data+1)
+  pelt.cost.vec[1] <- -penalty
+  pelt.candidates.vec <- rep(NA_integer_, N.data)
+  candidate.vec <- 1L
+  if(verbose)index_dt_list <- list()
+  for(up.to in 1:N.data){
+    N.cand <- length(candidate.vec)
+    pelt.candidates.vec[up.to] <- N.cand
+    last.seg.cost <- rowSums(cost_trick(candidate.vec, rep(up.to, N.cand)))
+    prev.cost <- pelt.cost.vec[candidate.vec]
+    cost.no.penalty <- prev.cost+last.seg.cost
+    total.cost <- cost.no.penalty+penalty
+    if(verbose)index_dt_list[[up.to]] <- data.table(
+      data_i=up.to, change_i=candidate.vec, cost=total.cost/up.to)
+    best.i <- which.min(total.cost)
+    pelt.change.vec[up.to] <- candidate.vec[best.i]
+    total.cost.best <- total.cost[best.i]
+    pelt.cost.vec[up.to+1] <- total.cost.best
+    keep <- if(isTRUE(prune))cost.no.penalty < total.cost.best else TRUE
+    candidate.vec <- c(candidate.vec[keep], up.to+1L)
+  }
+  list(
+    change=pelt.change.vec,
+    cost=pelt.cost.vec,
+    candidates=pelt.candidates.vec,
+    index_dt=if(verbose)rbindlist(index_dt_list))
+}
+decode <- function(best.change){
+  seg.dt.list <- list()
+  last.i <- length(best.change)
+  while(last.i>0){
+    first.i <- best.change[last.i]
+    seg.dt.list[[paste(last.i)]] <- data.table(
+      first.i, last.i)
+    last.i <- first.i-1L
+  }
+  rbindlist(seg.dt.list)[seq(.N,1)]
+}
+pelt_info_list <- list()
+pelt_segs_list <- list()
+both_index_list <- list()
+penalty <- 100
+algo.prune <- c(
+  OPART=FALSE,
+  PELT=TRUE)
+for(N_data in N_data_vec){
+  for(simulation in names(sim_fun_list)){
+    N_sim <- paste(N_data, simulation)
+    data_value <- sim_data_list[[N_sim]]$data_value
+    for(algo in names(algo.prune)){
+      prune <- algo.prune[[algo]]
+      fit <- PELT(data_value, penalty=penalty, prune=prune, verbose = TRUE)
+      both_index_list[[paste(N_data, simulation, algo)]] <- data.table(
+        N_data, simulation, algo, fit$index_dt)
+      fit_seg_dt <- decode(fit$change)
+      pelt_info_list[[paste(N_data,simulation,algo)]] <- data.table(
+        N_data,simulation,algo,
+        candidates=fit$candidates,
+        cost=fit$cost[-1],
+        data_i=seq_along(data_value))
+      pelt_segs_list[[paste(N_data,simulation,algo)]] <- data.table(
+        N_data,simulation,algo,
+        fit_seg_dt)
+    }
+  }
+}
+(pelt_info <- addSim(rbindlist(pelt_info_list)))
+(pelt_segs <- addSim(rbindlist(pelt_segs_list)))
+```
+
+We see in the result tables above that the segmentations are the same,
+using pruning and no pruning. Below we visualize the number of
+candidates considered.
+
+```{r pelt-prune}
+algo.colors <- c(
+  OPART="grey50",
+  PELT="red",
+  FPOP="blue")
+ggplot()+
+  theme_bw()+
+  theme(
+    legend.position=c(0.8, 0.2),
+    panel.spacing=grid::unit(1,"lines"),
+    text=element_text(size=15))+
+  geom_vline(aes(
+    xintercept=end+0.5),
+    data=sim_changes)+
+  scale_color_manual(
+    breaks=names(algo.colors),
+    values=algo.colors)+
+  geom_point(aes(
+    data_i, candidates, color=algo),
+    data=pelt_info)+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  scale_x_continuous(
+    breaks=seq(0,max(N_data_vec),by=20))+
+  scale_y_continuous(
+    breaks=c(10, 100, 400))+
+  theme(panel.grid.minor=element_blank())+
+  coord_cartesian(expand=FALSE)
+```
+
+We can see in the figure above that PELT considers a much smaller
+number of change-points, that tends to reset near zero, for each
+change-point detected. 
+
+* In the bottom simulation with linear changes, the number of
+  change-point candidates considered by PELT is constant (does not
+  depend on number of data), so PELT is linear time, whereas OPART is
+  quadratic, in the number of data.
+* In the top simulation with constant changes, the number of
+  change-point candidates considered by PELT is linear in the number
+  of data, so both OPART and PELT are quadratic time in the number of
+  data.
+
+## FPOP
+
+Now we run FPOP, which is another pruning method, which is more
+complex to implement efficiently, so we use C++ code
+in the R package fpopw.
+
+```{r fpop-prune}
+if(FALSE){
+  remotes::install_github("TODO")
+}
+fpop_info_list <- list()
+fpop_segs_list <- list()
+for(N_data in N_data_vec){
+  for(simulation in names(sim_fun_list)){
+    N_sim <- paste(N_data, simulation)
+    data_value <- sim_data_list[[N_sim]]$data_value
+    pfit <- fpopw::Fpop(
+      data_value, penalty, verbose_file=tempfile())
+    both_index_list[[paste(N_data, simulation, "FPOP")]] <- data.table(
+      N_data, simulation, algo="FPOP", pfit$model
+    )[, let(
+      data_i=data_i+1L,
+      change_i=ifelse(change_i == -10, 0, change_i)+1
+    )][]
+    end <- pfit$t.est
+    start <- c(1, end[-length(end)]+1)
+    count_dt <- pfit$model[, .(
+      intervals=.N,
+      cost=min(cost)
+    ), by=data_i]
+    fpop_info_list[[paste(N_data,simulation)]] <- data.table(
+      N_data,simulation,
+      algo="FPOP",
+      candidates=count_dt$intervals,
+      cost=count_dt$cost,
+      data_i=seq_along(data_value))
+    fpop_segs_list[[paste(N_data,simulation)]] <- data.table(
+      N_data,simulation,start,end)
+  }
+}
+(fpop_info <- addSim(rbindlist(fpop_info_list)))
+(fpop_segs <- rbindlist(fpop_segs_list))
+both_info <- rbind(pelt_info, fpop_info)
+ggplot()+
+  theme_bw()+
+  theme(
+    legend.position=c(0.8, 0.2),
+    panel.spacing=grid::unit(1,"lines"),
+    text=element_text(size=15))+
+  geom_vline(aes(
+    xintercept=end+0.5),
+    data=sim_changes)+
+  scale_color_manual(
+    breaks=names(algo.colors),
+    values=algo.colors)+
+  geom_point(aes(
+    data_i, candidates, color=algo),
+    data=both_info)+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  scale_x_continuous(
+    breaks=seq(0,max(N_data_vec),by=20))+
+  scale_y_continuous(
+    breaks=c(10, 100, 400))+
+  theme(panel.grid.minor=element_blank())+
+  coord_cartesian(expand=FALSE)
+```
+
+In the figure above, we can see the advantage of FPOP: the number of
+change-points considered does not increase with the number of data,
+even with constant number of changes (larger segments).
+
+* In the top simulation with constant changes, the number of
+  change-points candidates considered is linear in the number of data,
+  so both OPART and PELT are quadratic time in the number of data,
+  whereas FPOP is sub-quadratic (empirically linear or log-linear).
+  
+The table below compares the cost and number of candidates for the last data point.
+
+```{r}
+both_info[data_i==max(data_i)][order(simulation, algo)]
+```
+
+We see above that in both simulations, all three algos compute the same cost. 
+We also see that the number of candidates is smallest for FPOP in both simulations.
+PELT has substantial pruning (10 candidates) for the case of linear changes, 
+but not much pruning (100 candidates) for the case of constant changes.
+
+## Heat maps
+  
+Another way to view this is by looking at the cost of each candidate
+change-point considered, as in the heat map below.
+
+```{r cost-heat}
+algo.levs <- c("OPART","PELT","FPOP")
+(both_index <- addSim(rbindlist(both_index_list, use.names=TRUE))[, let(
+  Algorithm = factor(algo, algo.levs)
+)][])
+for(a in algo.levs){
+  gg <- ggplot()+
+    ggtitle(a)+
+    theme_bw()+
+    theme(
+      text=element_text(size=20))+
+    coord_equal()+
+    geom_tile(aes(
+      data_i, change_i, fill=cost),
+      data=both_index[Algorithm==a])+
+    scale_fill_gradient(low="black", high="red")+
+    facet_grid(Simulation ~ N_data, label=label_both)
+  print(gg)
+}
+```
+
+Another way to visualize it is in the plot below, which super-imposes
+the three algos.
+
+```{r candidates-compare, fig.width=11, fig.height=12}
+ggplot()+
+  theme_bw()+
+  theme(
+    legend.position=c(0.8, 0.2),
+    text=element_text(size=15))+
+  geom_tile(aes(
+    data_i, change_i, fill=Algorithm),
+    data=both_index)+
+  scale_fill_manual(values=algo.colors)+
+  scale_x_continuous(
+    breaks=seq(0,max(N_data_vec),by=20))+
+  facet_grid(Simulation ~ N_data, label=label_both, scales="free", space="free")
+```
+
+It is clear that FPOP prunes much more than PELT, especially in the
+case of constant changes (segments that get larger with the overall
+number of data).
+
+## Double check FPOP for constant changes
+
+Before running a simulation on varying data sizes, here we check that
+the penalty value results in the right number of change-points, for a
+larger data set.
+
+```{r}
+N_data <- 1e5
+sim_fun <- sim_fun_list$constant_changes
+data_mean_vec <- sim_fun(N_data)
+set.seed(1)
+data_value <- rnorm(N_data, data_mean_vec, 2)
+pfit <- fpopw::Fpop(data_value, penalty)
+pfit$t.est
+```
+
+The result above shows that there are four segments detected (three
+change-points), which is the expected number in our "constant changes"
+simulation.
+  
+## atime comparison
+
+The `atime()` function can be used to perform asymptotic time/memory/etc comparisons. 
+This means that we will increase N, and monitor how fast certain quantities grow with N.
+We begin by defining the data sizes N of interest:
+
+```{r}
+base_N <- c(100,200,400,800)
+(all_N <- unlist(lapply(10^seq(0,3), function(x)x*base_N)))
+```
+
+The data sizes above are on a log scale between 10 and 1,000,000.
+Next, we define a list that enumerates the different combinations in the experiment.
+
+```{r}
+grid_args <- list(
+  list(simulation=names(sim_fun_list)),
+  FPOP=quote({
+    pfit <- fpopw::Fpop(
+      data_list[[simulation]], penalty, verbose_file=tempfile())
+    count_dt <- pfit$model[, .(intervals=.N), by=data_i]
+    data.frame(
+      mean_candidates=mean(count_dt$intervals),
+      segments=length(pfit$t.est),
+      max_seg_size=max(diff(c(0,pfit$t.est))))
+  }))
+for(algo in names(algo.prune)){
+  prune <- algo.prune[[algo]]
+  grid_args[[algo]] <- substitute({
+    data_value <- data_list[[simulation]]
+    fit <- PELT(data_value, penalty, prune=prune)
+    dec <- decode(fit$change)
+    data.frame(
+      mean_candidates=mean(fit$candidates),
+      segments=nrow(dec),
+      max_seg_size=max(diff(c(0,dec$last.i))))
+  }, list(prune=prune))
+}
+(expr.list <- do.call(atime::atime_grid, grid_args))
+```
+
+Above we see a list with `r length(expr.list)` expressions to run, and
+a data table with the corresponding number of rows. Note that each expression 
+
+* returns a data frame with one row and three columns that will be used as units to analyze as a function of N.
+* should depend on data size N, which does not appear in the
+  expressions above, but it is used to define `data_list` in the `setup`
+  argument below:
+
+```{r}
+cache.rds <- "2025-04-15-PELT-vs-fpopw.rds"
+if(file.exists(cache.rds)){
+  atime_list <- readRDS(cache.rds)
+}else{
+  atime_list <- atime::atime(
+    N=all_N,
+    setup={
+      data_list <- list()
+      for(simulation in names(sim_fun_list)){
+        sim_fun <- sim_fun_list[[simulation]]
+        data_mean_vec <- sim_fun(N)
+        set.seed(1)
+        data_list[[simulation]] <- rnorm(N, data_mean_vec, 2)
+      }
+    },
+    expr.list=expr.list,
+    seconds.limit=1,
+    result=TRUE)
+  saveRDS(atime_list, cache.rds)
+}
+```
+
+Note in the code above that we run the timing inside `if(file.exists`, which is a caching mechanism.
+The result is time-consuming to compute, so the first time it is computed, it is saved to disk as an RDS file, and then subsequently read from disk, to save time.
+Finally, we plot the different units as a function of data size N, in the figure below.
+
+```{r atime, fig.height=7}
+refs_list <- atime::references_best(atime_list)
+ggplot()+
+  theme(text=element_text(size=12))+
+  directlabels::geom_dl(aes(
+    N, empirical, color=expr.grid, label=expr.grid),
+    data=refs_list$measurements,
+    method="right.polygons")+
+  geom_line(aes(
+    N, empirical, color=expr.grid),
+    data=refs_list$measurements)+
+  scale_color_manual(
+    "algorithm",
+    guide="none",
+    values=algo.colors)+
+  facet_grid(unit ~ simulation, scales="free")+
+  scale_x_log10(
+    "N = number of data in sequence",
+    breaks=10^seq(2,6),
+    limits=c(NA, 1e7))+
+  scale_y_log10("")
+```
+
+Above the figure shows a different curve for each algorithm, and a
+different panel for each simulation and measurement unit. We can observe that
+
+* PELT memory usage in kilobytes has a larger slope for constant
+  changes, than for linear changes. This implies a larger asymptotic complexity class.
+* The maximum segment size, `max_seg_size`, is the same for all algos,
+  indicating that the penalty was chosen appropriately, and the
+  algorithms are computing the same optimal solution.
+* Similarly, the mean number of candidates considered by the PELT
+  algorithm has a larger slope for constant changes (same as
+  OPART/linear in N), than for linear changes (relatively constant).
+* For PELT seconds, we see a slightly larger slope for seconds in
+  constant changes, compared to linear changes.
+* As expected, number of `segments` is constant for a constant number
+  of changes (left), and increasing for a linear number of changes
+  (right).
+  
+Below we plot the same data in a different way, that facilitates
+comparisons across the type of simulation:
+
+```{r compare-sims, fig.height=7}
+refs_list$meas[, let(
+  Simulation = sub("_","\n",simulation),
+  Algorithm = factor(expr.grid, algo.levs)
+)][]
+ggplot()+
+  theme(
+    legend.position="none",
+    text=element_text(size=12))+
+  directlabels::geom_dl(aes(
+    N, empirical, color=Simulation, label=Simulation),
+    data=refs_list$measurements,
+    method="right.polygons")+
+  geom_line(aes(
+    N, empirical, color=Simulation),
+    data=refs_list$measurements)+
+  facet_grid(unit ~ Algorithm, scales="free")+
+  scale_x_log10(
+    "N = number of data in sequence",
+    breaks=10^seq(2,6),
+    limits=c(NA, 1e7))+
+  scale_y_log10("")
+```
+
+The plot above makes it easier to notice some interesting trends in
+the mean number of candidates:
+
+* For PELT and FPOP the mean number of candidates is increases for a
+  constant number of changes, but at different rates (FPOP much slower
+  than PELT).
+
+```{r plot-refs, fig.width=12, fig.height=7}
+expr.levs <- CJ(
+  algo=algo.levs,
+  simulation=names(sim_fun_list)
+)[algo.levs, paste0(algo,"\n",simulation), on="algo"]
+edit_expr <- function(DT)DT[
+, expr.name := factor(sub(" simulation=", "\n", expr.name), expr.levs)]
+edit_expr(refs_list$meas)
+edit_expr(refs_list$plot.ref)
+plot(refs_list)+
+  theme(panel.spacing=grid::unit(1.5,"lines"))
+```
+
+The plot above is an empirical verification of our earlier complexity claims.
+
+* OPART `mean_candidates` is linear, `O(N)`, and time and memory are
+  quadratic, `O(N^2)`.
+* PELT with constant changes has linear `mean_candidates`, `O(N)`, and
+  quadratic time and memory, `O(N^2)` (same as OPART, no asymptotic speedup).
+* PELT with linear changes has sub-linear `mean_candidates` (constant
+  or log), and linear or log-linear time/memory.
+* FPOP always has sub-linear `mean_candidates` (constant or log), and
+  linear or log-linear time/memory.
+  
+The code/plot below shows the speedups in this case.
+
+```{r pred-seconds}
+pred_list <- predict(refs_list)
+ggplot()+
+  theme_bw()+
+  theme(text=element_text(size=20))+
+  geom_line(aes(
+    N, empirical, color=expr.grid),
+    data=pred_list$measurements[unit=="seconds"])+
+  directlabels::geom_dl(aes(
+    N, unit.value, color=expr.grid, label=sprintf(
+      "%s\n%s\nN=%s",
+      expr.grid,
+      ifelse(expr.grid=="FPOP", "C++", "R"),
+      format(round(N), big.mark=",", scientific=FALSE, trim=TRUE))),
+    data=pred_list$prediction,
+    method=list(cex=1.5,"top.polygons"))+
+  scale_color_manual(
+    "algorithm",
+    guide="none",
+    values=algo.colors)+
+  facet_grid(. ~ simulation, scales="free", labeller=label_both)+
+  scale_x_log10(
+    "N = number of data in sequence",
+    breaks=10^seq(2,5),
+    limits=c(NA, 1e6))+
+  scale_y_log10(
+    "Computation time (seconds)",
+    breaks=10^seq(-3,0),
+    limits=10^c(-4,1))
+```
+
+The figure above shows the throughput (data size N) which is possible
+to compute in 1 second using each algorithm. We see that FPOP is
+10-100x faster than OPART/PELT. Part of the difference is that
+OPART/PELT were coded in R, whereas FPOP was coded in C++
+(faster). Another difference is that FPOP is asymptotically faster
+with constant changes, as can be seen by a smaller slope for FPOP,
+compared to OPART/PELT.
+
+Below we zoom in on the number of candidate change-points considered
+by each algorithm.
+
+```{r pred-candidates}
+cand_dt <- pred_list$measurements[unit=="mean_candidates"]
+ggplot()+
+  theme_bw()+
+  theme(text=element_text(size=20))+
+  geom_line(aes(
+    N, empirical, color=expr.grid),
+    data=cand_dt)+
+  directlabels::geom_dl(aes(
+    N, empirical, color=expr.grid, label=expr.grid),
+    data=cand_dt,
+    method=list(cex=2, "right.polygons"))+
+  scale_color_manual(
+    "algorithm",
+    guide="none",
+    values=algo.colors)+
+  facet_grid(. ~ simulation, scales="free", labeller=label_both)+
+  scale_x_log10(
+    "N = number of data in sequence",
+    breaks=10^seq(2,6),
+    limits=c(NA, 1e7))+
+  scale_y_log10("Mean number of candidate change-points")
+```
+
+The figure above shows that 
+
+* OPART always considers a linear number of candidates (slow).
+* PELT also considers a linear number of candidates (slow), when the number
+  of changes is constant.
+* PELT considers a sub-linear number of candidates (fast), when the
+  number of changes is linear.
+* FPOP always considers sub-linear number of candidates (fast), which
+  is either constant for a linear number of changes, or logarithmic for
+  a constant number of changes.
+
+## Conclusions
+
+We have explored three algorithms for optimal change-point detection.
+
+* The classic OPART algorithm is always quadratic time in the number of data to segment.
+* The Pruned Exact Linear Time (PELT) algorithm can indeed be linear
+  time in the number of data to segment, but only when the number of
+  change-points grows with the number of data points. When the number
+  of change-points is constant, there are ever-increasing segments,
+  and the PELT algorithm must compute a cost for each candidate on
+  these large segments; in this situation, PELT suffers from the same
+  quadratic time complexity as OPART.
+* The FPOP algorithm is fast (linear or log-linear) in both of the
+  scenarios we examined.
+  
+## Session info
+
+```{r}
+sessionInfo()
+```
