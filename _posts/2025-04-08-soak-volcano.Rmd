@@ -1,0 +1,311 @@
+---
+layout: post
+title: Volcano plots
+description: Redesign of SOAK paper results
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-04-08-soak-volcano"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to describe a similarity between volcano
+plots and the SOAK summary plots that appear in our recent paper,
+SOAK: Same/Other/All K-fold cross-validation for estimating similarity
+of patterns in data subsets,
+[arXiv:2410.08643](https://arxiv.org/abs/2410.08643).
+
+## Volcano plot
+
+Volcano plots are a classic representation of effect size and
+statistical significance, when doing differential expression analysis
+in genomic data. For example, the
+[sanssouci](https://github.com/sanssouci-org/sanssouci?tab=readme-ov-file#output-3---volcano-plots)
+github repo has the volcano plot below:
+
+![volcano plot](/assets/img/2025-04-08-soak-volcano/README-volcano-plot-1.png)
+
+Each dot in the volcano plot represents a different gene. The genes
+which appear at the bottom center have little difference between
+groups. The genes which appear in the upper left or right have
+significant differences between groups.
+
+## SOAK plot
+
+The [slides](https://github.com/tdhock/cv-same-other-paper/blob/main/slides/HOCKING-cv-same-other-slides.pdf) for presenting my SOAK paper have the plot below:
+
+![SOAK talk figure](/assets/img/2025-04-08-soak-volcano/data_Classif_batchmark_registry_scatter_all_segments.png) 
+
+Each dot in the plot above represents one of twenty data sets that we
+analyzed using SOAK. The line segments represent the range of
+differences and p-values observed across the 2-4 data subsets. The
+typical V shape is not apparent because:
+
+- The Y axis in inverted with respect to the volcano plot, and
+- The line segments are useful to summarize each data set, but hide the details about the value of each data subset.
+
+## Re-making the SOAK plot like a volcano plot
+
+```{r}
+data.list <- list()
+local.csv.vec <- c("data-meta.csv", "data_Classif_batchmark_registry.csv")
+prefix <- "https://raw.githubusercontent.com/tdhock/cv-same-other-paper/refs/heads/main/"
+for(local.csv in local.csv.vec){
+  if(!file.exists(local.csv)){
+    u <- paste0(prefix, local.csv)
+    download.file(u, local.csv)
+  }
+  data.list[[local.csv]] <- fread(local.csv)
+}
+library(data.table)
+(score.atomic <- data.list$data_Class[, .(
+  data.name, 
+  test_subset = test.group,
+  train_subsets = train.groups,
+  test.fold, task_id, algorithm, percent.error
+)])
+```
+
+The table above contains the results of running SOAK with two
+algorithms (`cv_glmnet` and `featureless`) on 20 classification data
+sets. The `percent.error` column contains the test error for
+predicting on `test_subset`, after training on `train_subsets`.
+
+```{r}
+Data <- function(data.name, Data){
+  data.table(data.name, Data)
+}
+disp.dt <- rbind(
+  Data("CanadaFires_all","CanadaFiresA"),
+  Data("CanadaFires_downSampled","CanadaFiresD"),
+  Data("MNIST_EMNIST", "IPair_E"),
+  Data("MNIST_EMNIST_rot", "IPair_E_rot"),
+  Data("MNIST_FashionMNIST","IPair_Fashion"))
+meta.raw <- data.list[["data-meta.csv"]][
+  grepl("train|test",group.small.name), `:=`(
+    test=ifelse(group.small.name=="test", group.small.N, group.large.N),
+    train=ifelse(group.small.name=="train", group.small.N, group.large.N)
+  )
+][
+, `test%` := as.integer(100*test/rows)
+][
+, subset_type := fcase(
+  grepl("MNIST_", data.name), "ImagePair",
+  !is.na(test), "train/test",
+  default="time/space")
+][]
+meta.dt <- disp.dt[
+  meta.raw, on="data.name"
+][is.na(Data), Data := data.name][]
+meta.dt[order(subset_type,data.name), .(subset_type, data.name, group.tab)]
+```
+
+The table above contains meta-data, one row for each of the twenty
+data sets analyzed using SOAK. Next, we compute a wide table of percent error values:
+
+```{r}
+group.meta <- meta.dt[, nc::capture_all_str(
+  group.tab,
+  test_subset="[^;]+",
+  "=",
+  subset_rows="[0-9]+", as.integer
+), by=data.name]
+score.join <- meta.dt[score.atomic, on="data.name"]
+(tab.wide <- dcast(
+  score.join[algorithm=="cv_glmnet"],
+  subset_type + Data + test_subset + test.fold ~ train_subsets,
+  value.var="percent.error"))
+```
+
+The table above has one row for each combination of (`Data` set,
+`test.fold`, `test_subset`), and one column for each value of
+`train_subsets` (all, other, same). We convert to long form below:
+
+```{r}
+(tab.long.raw <- melt(
+  tab.wide,
+  measure=c("other","all"),
+  variable.name="compare_name",
+  value.name="compare_error"))
+```
+
+The long form above lets us compare same with other and all, using the
+P-value computation below:
+
+```{r}
+computeP <- function(...){
+  by.vec <- c(...)
+  tab.long.raw[, {
+    test.res <- t.test(compare_error, same, paired=TRUE)
+    log.signed.p <- function(signed.p){
+      sign(signed.p)*abs(log10(abs(signed.p)))
+    }
+    with(test.res, data.table(
+      estimate,
+      p.value,
+      compare_mean=mean(compare_error,na.rm=TRUE),
+      same_mean=mean(same,na.rm=TRUE),
+      log10.p=log10(p.value),
+      sign.log.p=log.signed.p(p.value*sign(estimate)),
+      N=.N))
+  }, by=by.vec]
+}
+p.each.group <- computeP("subset_type","Data","compare_name","test_subset")
+compare.wide.groups <- dcast(
+  p.each.group,
+  subset_type + Data ~ compare_name,
+  list(min, max, mean),
+  value.var=c("estimate","log10.p"))
+tab.long <- computeP("subset_type","Data","compare_name")
+(compare.wide <- dcast(
+  tab.long,
+  subset_type + Data ~ compare_name,
+  value.var=c("estimate","log10.p")
+)[compare.wide.groups, on=.(subset_type,Data)])
+```
+
+The table above has one row per data set, and columns for different
+statistics (min, max, mean) of P-value (log10.p) and test error
+difference (estimate).
+The code below reproduces the SOAK figure.
+
+```{r soak-segments}
+compare.wide[log10.p_all < -12, log10.p_all := -Inf][]
+compare.wide[log10.p_other < -20, log10.p_other := -Inf][]
+tlab <- function(x, y, label){
+  data.table(x, y, label)
+}
+text.y <- -6.5
+text.dt <- rbind(
+  tlab(6, -1, "p<0.05"),
+  tlab(-2, text.y, "Beneficial\nto combine"),
+  tlab(8, text.y, "Detrimental\nto combine"))
+set.seed(2)# for ggrepel.
+type.colors <- c(
+  ImagePair="black",
+  "time/space"="white",
+  "train/test"="red")
+library(ggplot2)
+ggplot()+
+  ggtitle("Is it beneficial to combine subsets?")+
+  theme_bw()+
+  theme(legend.position=c(0.9,0.9))+
+  geom_hline(yintercept=log10(0.05),color="grey")+
+  geom_vline(xintercept=0,color="grey")+
+  geom_text(aes(
+    x, y, label=label, color=NULL),
+    vjust=0,
+    color="grey50",
+    data=text.dt)+
+  geom_segment(aes(
+    estimate_min_all, log10.p_mean_all,
+    xend=estimate_max_all, yend=log10.p_mean_all,
+    color=Data),
+    data=compare.wide)+
+  geom_segment(aes(
+    estimate_mean_all, log10.p_min_all,
+    xend=estimate_mean_all, yend=log10.p_max_all,
+    color=Data),
+    data=compare.wide)+
+  geom_point(aes(
+    estimate_mean_all, log10.p_mean_all,
+    color=Data,
+    fill=subset_type),
+    shape=21,
+    data=compare.wide)+
+  ggrepel::geom_label_repel(aes(
+    estimate_mean_all, log10.p_mean_all, color=Data,
+    label=Data),
+    alpha=0.75,
+    size=2.8,
+    data=compare.wide)+
+  scale_fill_manual(
+    "Subset type", values=type.colors)+
+  scale_color_discrete(guide="none")+
+  scale_y_continuous(
+    "log10(p-value)\n<- highly significant --- not significant ->",
+    breaks=seq(-100,0,by=2))+
+  scale_x_continuous(
+    "Percent test error difference (all-same)",
+    breaks=seq(-100,10,by=2))+
+  coord_cartesian(
+    xlim=c(-4,10),
+    ylim=c(-7,0))
+```
+
+The SOAK figure above has one dot per data set, and segments which
+depict the range of P-values and test error differences, across the
+2-4 data subsets. The values for each subset are in the table below:
+
+```{r}
+(p.all <- p.each.group[compare_name=="all"])
+```
+
+The table above has one row per subset in each of the data sets.
+To make a volcano plot, we need to invert the Y axis, and remove the
+segments.
+
+```{r soak-volcano, fig.height=8}
+ggplot()+
+  theme_bw()+
+  theme(legend.position=c(0.9,0.2))+
+  geom_hline(yintercept=log10(0.05),color="grey")+
+  geom_vline(xintercept=0,color="grey")+
+  geom_text(aes(
+    x, y, label=label, color=NULL),
+    vjust=0,
+    color="grey50",
+    data=text.dt)+
+  geom_point(aes(
+    estimate, -log10.p,
+    color=Data,
+    fill=subset_type),
+    shape=21,
+    data=p.all)+
+  ggrepel::geom_label_repel(aes(
+    estimate, -log10.p, color=Data,
+    label=sprintf("%s\n%s",Data,test_subset)),
+    alpha=0.75,
+    size=2.8,
+    data=p.all)+
+  scale_fill_manual(
+    "Subset type", values=type.colors)+
+  scale_color_discrete(guide="none")+
+  scale_y_continuous(
+    "-log10(p-value)\n<- not significant --- highly significant ->",
+    breaks=seq(-100,0,by=2))+
+  scale_x_continuous(
+    "Percent test error difference (all-same)",
+    breaks=seq(-100,10,by=2))+
+  coord_cartesian(
+    xlim=c(-4,10),
+    ylim=c(0,7))
+```
+
+The result above has one dot (and label) for each data subset. The
+dots appear to have a distribution which is somewhat similar to the
+characteristic V pattern in volcano plots.
+
+## Conclusions
+
+We have shown how to make volcano plots using SOAK subset data.
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
