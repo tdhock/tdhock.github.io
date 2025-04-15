@@ -262,7 +262,7 @@ about data reshaping using regular expressions, we created the
 efficient and fully-featured implementation of data reshaping, [we
 contributed C code and the new measure
 function](https://github.com/Rdatatable/data.table/pull/4731) to the
-data.table package (since version 1.14.1 in 2021).
+data.table package (since version 1.14.1 in 2021). [Tutorial videos](https://www.youtube.com/playlist?list=PLwc48KSH3D1P8R7470s0lgcUObJLEXSSO)!
 
 ### Python pandas str.extractall method for regular expressions
 
@@ -275,7 +275,10 @@ To support my NSF POSE funded project (2023-2025) about expanding the
 open-source community around R
 [data.table](https://github.com/Rdatatable/data.table), I provided
 several important contributions, such as the `measure()` function, and
-was recognized as co-author (committer).
+was recognized as co-author (committer). Videos:
+
+- [Madrid R User Group, Feb 2025](https://vimeo.com/1061999204).
+- [PyData Global, Dec 2024](https://www.youtube.com/watch?v=l_7FXnppu-g).
 
 ### atime: Asymptotic Time and Memory Complexity
 
