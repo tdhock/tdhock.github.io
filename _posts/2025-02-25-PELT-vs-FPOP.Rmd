@@ -236,9 +236,10 @@ candidates considered.
 
 ```{r pelt-prune}
 algo.colors <- c(
-  FPOP="blue",
   OPART="grey50",
-  PELT="red")
+  PELT="red",
+  DUST="deepskyblue",
+  FPOP="blue")
 ggplot()+
   theme_bw()+
   theme(
@@ -247,7 +248,9 @@ ggplot()+
   geom_vline(aes(
     xintercept=end+0.5),
     data=sim_changes)+
-  scale_color_manual(values=algo.colors)+
+  scale_color_manual(
+    breaks=names(algo.colors),
+    values=algo.colors)+
   geom_point(aes(
     data_index, candidates, color=algo),
     data=pelt_info)+
@@ -287,12 +290,12 @@ for(N_data in N_data_vec){
     data_value <- sim_data_list[[N_sim]]$data_value
     pfit <- PeakSegOptimal::UnconstrainedFPOP(
       data_value, penalty=penalty, verbose_file=tempfile())
-    both_index_list[[paste(N_data, simulation, "FPOP")]] <- data.table(
+    both_index_list[[paste(N_data, simulation, "FPOP")]] <- unique(data.table(
       N_data, simulation, algo="FPOP", pfit$index_dt
     )[, let(
       data_index=data_index+1L,
       change=change+2L
-    )][]
+    )])
     start <- rev(with(pfit, ends.vec[ends.vec>=0])+1L)
     end <- c(start[-1]-1L,length(data_value))
     fpop_info_list[[paste(N_data,simulation)]] <- data.table(
@@ -315,7 +318,9 @@ ggplot()+
   geom_vline(aes(
     xintercept=end+0.5),
     data=sim_changes)+
-  scale_color_manual(values=algo.colors)+
+  scale_color_manual(
+    breaks=names(algo.colors),
+    values=algo.colors)+
   geom_point(aes(
     data_index, candidates, color=algo),
     data=both_info)+
@@ -332,6 +337,90 @@ even with constant number of changes (larger segments).
   change-points candidates considered is linear in the number of data,
   so both OPART and PELT are quadratic time in the number of data,
   whereas FPOP is sub-quadratic (empirically linear or log-linear).
+
+## DuST
+
+DuST is a new pruning technique based on Lagrange duality, proposed by
+[Truong and Runge, Stat,
+2024](https://onlinelibrary.wiley.com/doi/full/10.1002/sta4.70012).
+
+```{r}
+if(FALSE){
+  remotes::install_github("vrunge/dust@910f8c67f99354fdb5ff7740e6436eb487d9efa6")
+}
+set.seed(1)
+ex_data <- rpois(7,100)
+ex_penalty <- 1
+dfit <- dust::dust.1D(ex_data,ex_penalty,"poisson")
+rbind(
+  PELT=PELT(ex_data,ex_penalty)$cost[-1]/seq_along(ex_data),
+  FPOP=PeakSegOptimal::UnconstrainedFPOP(ex_data,penalty=ex_penalty)$cost,
+  DUST=dfit$costQ/seq_along(ex_data))
+```
+
+The code above verifies that we compute the cost in the same way for
+each algorithm. In particular, PELT and DUST return the total cost, so
+we need to divide by the number of data points to get the average
+cost, which is returned by FPOP.
+Below we compute the candidates considered by DUST, for each of the two simulations, and a variety of data sizes.
+
+```{r dust-prune}
+dust_info_list <- list()
+dust_segs_list <- list()
+for(N_data in N_data_vec){
+  for(simulation in names(sim_fun_list)){
+    N_sim <- paste(N_data, simulation)
+    data_value <- sim_data_list[[N_sim]]$data_value
+    dfit <- dust::dust.object.1D("poisson")
+    candidates <- rep(NA_integer_, N_data)
+    for(data_index in seq_along(data_value)){
+      dfit$append_c(data_value[[data_index]], penalty)
+      dfit$update_partition()
+      pinfo <- dfit$get_partition()
+      change <- pinfo$lastIndexSet[-1]+1L
+      candidates[[data_index]] <- length(change)
+      mean_cost <- pinfo$costQ/seq_along(pinfo$costQ)
+      both_index_list[[paste(
+        N_data, simulation, "DUST", data_index
+      )]] <- data.table(
+        N_data, simulation, algo="DUST", data_index,
+        change, cost=mean_cost[change])
+    }
+    end <- pinfo$changepoints
+    start <- c(1, end[-length(end)]+1)
+    dust_info_list[[paste(N_data,simulation)]] <- data.table(
+      N_data,simulation,
+      algo="DUST",
+      candidates,
+      data_index=seq_along(data_value))
+    dust_segs_list[[paste(N_data,simulation)]] <- data.table(
+      N_data,simulation,start,end)
+  }
+}
+(dust_info <- addSim(rbindlist(dust_info_list)))
+(dust_segs <- rbindlist(dust_segs_list))
+three_info <- rbind(pelt_info, fpop_info, dust_info)
+ggplot()+
+  theme_bw()+
+  theme(
+    panel.spacing=grid::unit(1,"lines"),
+    text=element_text(size=15))+
+  geom_vline(aes(
+    xintercept=end+0.5),
+    data=sim_changes)+
+  scale_color_manual(
+    breaks=names(algo.colors),
+    values=algo.colors)+
+  geom_point(aes(
+    data_index, candidates, color=algo),
+    data=three_info)+
+  facet_grid(Simulation ~ N_data, labeller=label_both, scales="free_x", space="free")+
+  scale_x_continuous(
+    breaks=seq(0,max(N_data_vec),by=50))
+```
+
+The figure above shows that DUST pruned much more than PELT, nearly
+the same amount as FPOP.
   
 ## Heat maps
   
@@ -340,6 +429,7 @@ change-point considered, as in the heat map below.
 
 ```{r cost-heat}
 algo.levs <- c("OPART","PELT","FPOP")
+algo.levs <- names(algo.colors)
 (both_index <- addSim(rbindlist(both_index_list))[, let(
   Algorithm = factor(algo, algo.levs)
 )][])
@@ -377,7 +467,8 @@ ggplot()+
 
 It is clear that FPOP prunes much more than PELT, especially in the
 case of constant changes (segments that get larger with the overall
-number of data).
+number of data). It is also clear that DUST considers nearly the same
+change-points as FPOP.
 
 ## atime comparison
 
@@ -387,7 +478,7 @@ We begin by defining the data sizes N of interest:
 
 ```{r}
 base_N <- c(100,200,400,800)
-(all_N <- unlist(lapply(10^seq(0,3), function(x)x*base_N)))
+(all_N <- unlist(lapply(10^seq(0,4), function(x)x*base_N)))
 ```
 
 The data sizes above are on a log scale between 10 and 1,000,000.
@@ -396,6 +487,13 @@ Next, we define a list that enumerates the different combinations in the experim
 ```{r}
 grid_args <- list(
   list(simulation=names(sim_fun_list)),
+  DUST=quote({
+    dfit <- dust::dust.1D(data_list[[simulation]], penalty, "poisson")
+    with(dfit, data.frame(
+      mean_candidates=mean(nb),
+      segments=length(changepoints),
+      max_seg_size=max(diff(c(0,changepoints)))))
+  }),
   FPOP=quote({
     pfit <- PeakSegOptimal::UnconstrainedFPOP(
       data_list[[simulation]], penalty=penalty)
@@ -456,7 +554,9 @@ Finally, we plot the different units as a function of data size N, in the figure
 ```{r atime, fig.height=7}
 refs_list <- atime::references_best(atime_list)
 ggplot()+
-  theme(text=element_text(size=12))+
+  theme(
+    axis.text.x=element_text(size=12,angle=30,hjust=1),
+    text=element_text(size=12))+
   directlabels::geom_dl(aes(
     N, empirical, color=expr.grid, label=expr.grid),
     data=refs_list$measurements,
@@ -471,8 +571,8 @@ ggplot()+
   facet_grid(unit ~ simulation, scales="free")+
   scale_x_log10(
     "N = number of data in sequence",
-    breaks=10^seq(2,6),
-    limits=c(NA, 1e7))+
+    breaks=10^seq(2,7),
+    limits=c(NA, 1e8))+
   scale_y_log10("")
 ```
 
@@ -496,13 +596,14 @@ different panel for each simulation and measurement unit. We can observe that
 Below we plot the same data in a different way, that facilitates
 comparisons across the type of simulation:
 
-```{r compare-sims, fig.height=7}
+```{r compare-sims, fig.height=7, fig.width=13}
 refs_list$meas[, let(
   Simulation = sub("_","\n",simulation),
   Algorithm = factor(expr.grid, algo.levs)
 )][]
 ggplot()+
   theme(
+    axis.text.x=element_text(size=12,angle=30,hjust=1),
     legend.position="none",
     text=element_text(size=12))+
   directlabels::geom_dl(aes(
@@ -515,8 +616,8 @@ ggplot()+
   facet_grid(unit ~ Algorithm, scales="free")+
   scale_x_log10(
     "N = number of data in sequence",
-    breaks=10^seq(2,6),
-    limits=c(NA, 1e7))+
+    breaks=10^seq(2,7),
+    limits=c(NA, 1e8))+
   scale_y_log10("")
 ```
 
@@ -537,7 +638,9 @@ edit_expr <- function(DT)DT[
 edit_expr(refs_list$meas)
 edit_expr(refs_list$plot.ref)
 plot(refs_list)+
-  theme(panel.spacing=grid::unit(1.5,"lines"))
+  theme(
+    axis.text.x=element_text(angle=30,hjust=1),
+    panel.spacing=grid::unit(1,"lines"))
 ```
 
 The plot above is an empirical verification of our earlier complexity claims.
@@ -557,7 +660,8 @@ The code/plot below shows the speedups in this case.
 pred_list <- predict(refs_list)
 ggplot()+
   theme_bw()+
-  theme(text=element_text(size=20))+
+  theme(
+    text=element_text(size=20))+
   geom_line(aes(
     N, empirical, color=expr.grid),
     data=pred_list$measurements[unit=="seconds"])+
@@ -565,7 +669,7 @@ ggplot()+
     N, unit.value, color=expr.grid, label=sprintf(
       "%s\n%s\nN=%s",
       expr.grid,
-      ifelse(expr.grid=="FPOP", "C++", "R"),
+      ifelse(expr.grid %in% c("FPOP","DUST"), "C++", "R"),
       format(round(N), big.mark=",", scientific=FALSE, trim=TRUE))),
     data=pred_list$prediction,
     method=list(cex=1.5,"top.polygons"))+
@@ -576,8 +680,8 @@ ggplot()+
   facet_grid(. ~ simulation, scales="free", labeller=label_both)+
   scale_x_log10(
     "N = number of data in sequence",
-    breaks=10^seq(2,5),
-    limits=c(NA, 1e6))+
+    breaks=10^seq(2,7),
+    limits=c(NA, 1e8))+
   scale_y_log10(
     "Computation time (seconds)",
     breaks=10^seq(-3,0),
@@ -599,7 +703,9 @@ by each algorithm.
 cand_dt <- pred_list$measurements[unit=="mean_candidates"]
 ggplot()+
   theme_bw()+
-  theme(text=element_text(size=20))+
+  theme(
+    axis.text.x=element_text(size=20,angle=30,hjust=1),
+    text=element_text(size=20))+
   geom_line(aes(
     N, empirical, color=expr.grid),
     data=cand_dt)+
@@ -614,8 +720,8 @@ ggplot()+
   facet_grid(. ~ simulation, scales="free", labeller=label_both)+
   scale_x_log10(
     "N = number of data in sequence",
-    breaks=10^seq(2,6),
-    limits=c(NA, 1e7))+
+    breaks=10^seq(2,7,by=1),
+    limits=c(NA, 5e8))+
   scale_y_log10("Mean number of candidate change-points")
 ```
 

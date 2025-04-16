@@ -63,18 +63,21 @@ up the optimal partitioning algorithm, similar to my previous posts:
   
 ## PELT
 
-Below we define a function which implements PELT for the Poisson loss.
+Below we define a function which implements PELT for the Poisson loss,
+with a weight value for each data point.
 
 ```{r}
-PELT <- function(sim.mat, penalty, prune=TRUE, verbose=FALSE){
+PELT <- function(sim.mat, weight.mat=NULL, penalty, prune=TRUE, verbose=FALSE){
   if(!is.matrix(sim.mat))sim.mat <- cbind(sim.mat)
-  cum.data <- rbind(0, apply(sim.mat, 2, cumsum))
+  if(is.null(weight.mat))weight.mat <- matrix(1, nrow(sim.mat), ncol(sim.mat))
+  if(!is.matrix(weight.mat))weight.mat <- cbind(weight.mat)
+  cum.weight <- rbind(0, apply(weight.mat, 2, cumsum))
+  cum.weighted.data <- rbind(0, apply(sim.mat*weight.mat, 2, cumsum))
   sum_trick <- function(m, start, end)m[end+1,,drop=FALSE]-m[start,,drop=FALSE]
   cost_trick <- function(start, end){
-    sum_vec <- sum_trick(cum.data, start, end)
-    N <- end+1-start
-    mean_vec <- sum_vec/N
-    ifelse(sum_vec==0, 0, sum_vec*(1-log(mean_vec)))
+    S <- sum_trick(cum.weighted.data, start, end)
+    W <- sum_trick(cum.weight, start, end)
+    ifelse(S==0, 0, S*(1-log(S/W)))
   }
   N.data <- nrow(sim.mat)
   pelt.change.vec <- rep(NA_integer_, N.data)
@@ -116,6 +119,12 @@ decode <- function(best.change){
   }
   rbindlist(seg.dt.list)[seq(.N,1)]
 }
+ex_counts <- 9:7
+ex_penalty <- 10
+ex_weight <- 2:4
+pfit <- PELT(ex_counts, ex_weight, penalty=ex_penalty)
+ufit <- PeakSegOptimal::UnconstrainedFPOP(ex_counts, ex_weight, penalty=ex_penalty)
+rbind(PELT=pfit$cost[-1]/cumsum(ex_weight), FPOP=ufit$cost.vec)
 ```
 
 # Previous worst case demonstration
@@ -126,11 +135,12 @@ vignette](https://cloud.r-project.org/web/packages/PeakSegDisk/vignettes/Worst_c
 
 ```{r}
 cache.rds <- "2025-04-17-PELT-vs-FPOP-poisson-worst.rds"
+library(data.table)
 if(file.exists(cache.rds)){
   atime_list <- readRDS(cache.rds)
 }else{
   data(Mono27ac, package="PeakSegDisk", envir=environment())
-  library(data.table)
+  Mono27ac$coverage[, weight := chromEnd-chromStart]
   make_data <- function(some.cov)list(
     real=some.cov,
     constant=data.table(some.cov)[, count := rpois(.N, 100)],
@@ -140,24 +150,26 @@ if(file.exists(cache.rds)){
     penalty=c(0.01, 1e6),
     data_type=names(make_data(Mono27ac$coverage))),
     FPOP={
-      df <- data.list[[data_type]]
-      ufit <- PeakSegOptimal::UnconstrainedFPOP(df$count, penalty=penalty)
+      dt <- data.list[[data_type]]
+      ufit <- with(dt, PeakSegOptimal::UnconstrainedFPOP(count, weight, penalty=penalty))
       with(ufit, data.table(
+        mean_cost=cost.vec[length(cost.vec)],
         segments=sum(is.finite(mean.vec)),
-        mean.intervals=mean(intervals.vec)))
+        mean_candidates=mean(intervals.vec)))
     },
     PELT={
-      df <- data.list[[data_type]]
-      pfit <- PELT(df$count, penalty)
+      dt <- data.list[[data_type]]
+      pfit <- with(dt, PELT(count, weight, penalty=penalty))
       seg_dt <- decode(pfit$change)
       data.table(
+        mean_cost=pfit$cost[length(pfit$cost)]/sum(dt$weight),
         segments=nrow(seg_dt),
-        mean.intervals=mean(pfit$candidates))
+        mean_candidates=mean(pfit$candidates))
     },
     PeakSeg={
-      df <- data.list[[data_type]]
-      fit <- PeakSegDisk::PeakSegFPOP_df(df, penalty)
-      fit$loss[, .(segments, mean.intervals)]
+      dt <- data.list[[data_type]]
+      fit <- PeakSegDisk::PeakSegFPOP_df(dt[,.(chrom,chromStart,chromEnd,count)], penalty)
+      fit$loss[, .(mean_cost=mean.pen.cost, segments, mean_candidates=mean.intervals)]
     })
   set.seed(1)
   atime_list <- atime::atime(
@@ -173,6 +185,11 @@ if(file.exists(cache.rds)){
 ```
 
 ```{r}
+atime_list$measurements[
+, norm_cost := mean_cost-min(mean_cost)
+][norm_cost<1e2, norm_cost := 0]
+atime_list$unit.col.vec <- c(
+  "kilobytes", seconds = "median", "norm_cost", "segments", "mean_candidates")
 atime_refs <- atime::references_best(atime_list)
 algo.colors <- c(
   OPART="grey50",
@@ -534,7 +551,7 @@ for(algo in names(algo.prune)){
   prune <- algo.prune[[algo]]
   grid_args[[algo]] <- substitute({
     data_value <- data_list[[simulation]]
-    fit <- PELT(data_value, penalty, prune=prune)
+    fit <- PELT(data_value, penalty=penalty, prune=prune)
     dec <- decode(fit$change)
     data.frame(
       mean_candidates=mean(fit$candidates),

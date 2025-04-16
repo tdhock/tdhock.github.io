@@ -25,164 +25,107 @@ if(FALSE){
 
 The goal of this post is to show how to use our recently proposed AUM
 loss (useful for unbalanced classification problems), with the
-mlr3torch package in R.
+mlr3torch package in R.  This post explains [the code I
+used](https://github.com/tdhock/2023-res-baz-az/blob/main/HOCKING-slides-TRUG.R)
+to prepare slides for a talk last week for Toulouse R User Group.
 
-## Intro
+## Intro/issue
 
-TODO
+While preparing the talk, I ran into an
+[issue](https://github.com/mlr-org/mlr3torch/issues/374), which can be
+understood using the simple example code below,
 
-```{r}
-remotes::install_github("tdhock/mlr3torch@69d4adda7a71c05403d561bf3bb1ffb279978d0d")
-task_sonar <- mlr3::tsk("sonar")
-
-
-measure_list <- mlr3::msrs(c("classif.auc", "classif.acc"))
-po_list <- list(
-  mlr3torch::PipeOpTorchIngressNumeric$new(),
-  mlr3torch::nn("head"),
-  mlr3pipelines::po(
-    "torch_loss",
-    torch::nn_cross_entropy_loss),
-  mlr3pipelines::po(
-    "torch_optimizer",
-    mlr3torch::t_opt("sgd", lr=0.1)),
-  mlr3pipelines::po(
-    "torch_callbacks",
-    mlr3torch::t_clbk("history")),
-  mlr3pipelines::po(
-    "torch_model_classif",
-    measures_train=measure_list,
-    predict_type="prob",
-    batch_size = 5,
-    epochs=10))
-graph_obj <- Reduce(mlr3pipelines::concat_graphs, po_list)
-learner.obj <- mlr3::as_learner(graph_obj)
-learner.obj$train(task_sonar)
-pred <- learner.obj$predict(task_sonar)
-learner.obj$base_learner()$model$callbacks$history
-
-
-
-nn_bce_loss3 = torch::nn_module(c("nn_bce_with_logits_loss3", "nn_loss"),
+```r
+library(mlr3torch)
+nn_bce_loss3 = nn_module(c("nn_bce_with_logits_loss3", "nn_loss"),
   initialize = function(weight = NULL, reduction = "mean", pos_weight = NULL) {
-    self$loss = torch::nn_bce_with_logits_loss(weight, reduction, pos_weight)
+    self$loss = nn_bce_with_logits_loss(weight, reduction, pos_weight)
   },
   forward = function(input, target) {
-    self$loss(input$reshape(-1), target$to(dtype = torch::torch_float())-1)
+    self$loss(input$reshape(-1), target$to(dtype = torch_float())-1)
   }
 )
-measure_list <- mlr3::msrs(c("classif.auc", "classif.acc"))
-po_list <- list(
-  mlr3torch::PipeOpTorchIngressNumeric$new(),
-  mlr3torch::nn("linear", out_features=1),
-  mlr3pipelines::po(
-    "torch_loss",
-    nn_bce_loss3),
-  mlr3pipelines::po(
-    "torch_optimizer",
-    mlr3torch::t_opt("sgd", lr=0.1)),
-  mlr3pipelines::po(
-    "torch_callbacks",
-    mlr3torch::t_clbk("history")),
-  mlr3pipelines::po(
-    "torch_model_classif",
-    measures_train=measure_list,
-    predict_type="prob",
-    batch_size = 5,
-    epochs=10))
-graph_obj <- Reduce(mlr3pipelines::concat_graphs, po_list)
-learner.obj <- mlr3::as_learner(graph_obj)
-learner.obj$train(task_sonar)
-pred <- learner.obj$predict(task_sonar)
-learner.obj$base_learner()$model$callbacks$history
-pred$score(mlr3::msr("classif.auc"))
+loss = nn_bce_loss3()
+loss(torch_randn(10, 1), torch_randint(0, 1, 10))
+task = tsk("sonar")
+graph = po("torch_ingress_num") %>>%
+  nn("linear", out_features = 1) %>>%
+  po("torch_loss", loss = nn_bce_loss3) %>>%
+  po("torch_optimizer") %>>%
+  po("torch_model_classif",
+     epochs = 1,
+     batch_size = 32,
+     predict_type="prob")
+glrn = as_learner(graph)
+glrn$train(task)
+glrn$predict(task)
+```
 
+The code above has `predict_type="prob"` and `out_features=1` so I got
+the following error, using what was mlr3torch main branch at the time,
 
+```r
+if(FALSE){#broke
+  remotes::install_github("mlr-org/mlr3torch@6e99e02908788275622a7b723d211f357081699a")
+  glrn$predict(task)
+  ## Erreur dans dimnames(x) <- dn : 
+  ##   la longueur de 'dimnames' [2] n'est pas égale à l'étendue du tableau
+  ## This happened PipeOp torch_model_classif's $predict()
+}
+```
 
+The error happens because the torch model outputs only one column, but some later code assumes there are two.
 
-n.epochs <- 100
-po_list <- list(
-  mlr3torch::PipeOpTorchIngressNumeric$new(),
-  mlr3torch::nn("linear", out_features=1),
-  mlr3pipelines::po(
-    "torch_loss",
-    nn_bce_loss3),
-  mlr3pipelines::po(
-    "torch_optimizer",
-    mlr3torch::t_opt("sgd", lr=0.1)),
-  mlr3pipelines::po(
-    "torch_callbacks",
-    mlr3torch::t_clbk("history")),
-  mlr3pipelines::po(
-    "torch_model_classif",
-    measures_train=measure_list,
-    measures_valid=measure_list,
-    predict_type="prob",
-    batch_size = 10,
-    patience=n.epochs,
-    epochs=paradox::to_tune(upper = n.epochs, internal = TRUE)))
-graph_obj <- Reduce(mlr3pipelines::concat_graphs, po_list)
-learner.to.tune <- mlr3::as_learner(graph_obj)
-learner_auto = mlr3tuning::auto_tuner(
-  learner = learner.to.tune,
-  tuner = mlr3tuning::tnr("internal"),
-  resampling = mlr3::rsmp("insample"),
-  measure = mlr3::msr("internal_valid_score", minimize = TRUE),
-  term_evals = 1,
-  id="linear_bce",
-  store_models = TRUE)
-mlr3::set_validate(learner_auto, validate = 0.5)
-learner_auto$train(task_sonar)
-melt_history <- function(DT)nc::capture_melt_single(
-  DT,
-  set=nc::alevels(valid="validation", train="subtrain"),
-  ".classif.",
-  measure=nc::alevels(acc="accuracy", ce="error_prop", auc="AUC", "logloss"))
+## My PR
 
-measure_long <- melt_history(
-  learner_auto$archive$learners(1)[[1]]$model$torch_model_classif$model$callbacks$history)
-(selected_row <- as.data.table(
-  learner_auto$tuning_result$internal_tuned_values[[1]]))
-(max_dt <- measure_long[, .SD[c(which.max(value),which.min(value))], by=.(set, measure)])
-library(ggplot2)
-ggplot()+
-  facet_grid(measure ~ ., scales="free")+
-  geom_vline(aes(
-    xintercept=torch_model_classif.epochs),
-    data=selected_row)+
-  geom_line(aes(
-    epoch, value, color=set),
-    data=measure_long)+
-  geom_point(aes(
-    epoch, value, color=set),
-    shape=21,
-    fill="white",
-    data=max_dt)
+I hacked a solution that fixes this (see below), and I filed a [PR](https://github.com/mlr-org/mlr3torch/pull/375).
 
+```r
+if(FALSE){#fix
+  remotes::install_github("tdhock/mlr3torch@69d4adda7a71c05403d561bf3bb1ffb279978d0d")
+  glrn$predict(task)
+  ## <PredictionClassif> for 208 observations:
+  ##  row_ids truth response
+  ##        1     R        M
+  ##        2     R        M
+  ##        3     R        M
+  ##      ---   ---      ---
+  ##      206     M        M
+  ##      207     M        M
+  ##      208     M        M
+}
+```
 
+## Newer PR
 
-MeasureClassifAUM = R6::R6Class(
-  "MeasureClassifAUM",
-  inherit = mlr3::MeasureClassif,
-  public = list(
-    initialize = function() { 
-      super$initialize(
-        id = "AUM", # unique ID
-        packages = character(), # no package dependencies
-        properties = character(), # no special properties
-        predict_type = "prob",
-        range = c(0, Inf),
-        minimize = TRUE # larger values are better
-      )
-    }
-  ),
-  private = list(
-    .score = function(prediction, ...) {
-      browser()
-      threshold_acc(prediction$truth, prediction$response)
-    }
-  )
+My PR was not generic enough, so Seb Fischer proposed another
+[PR](https://github.com/mlr-org/mlr3torch/pull/385).
+
+```{r}
+if(FALSE){#fix
+  remotes::install_github("mlr-org/mlr3torch@c03d61a18e9785e2dbb5b20e2b6dada74a9b58b8")
+}
+nn_bce_loss3 = nn_module(c("nn_bce_with_logits_loss3", "nn_loss"),
+  initialize = function(weight = NULL, reduction = "mean", pos_weight = NULL) {
+    self$loss = nn_bce_with_logits_loss(weight, reduction, pos_weight)
+  },
+  forward = function(input, target) {
+    print(target)
+    self$loss(input$reshape(-1), target$to(dtype = torch_float())-1)
+  }
 )
-mAUM <- MeasureClassifAUM$new()
-
+loss = nn_bce_loss3()
+loss(torch_randn(10, 1), torch_randint(0, 1, 10))
+task = tsk("sonar")
+graph = po("torch_ingress_num") %>>%
+  nn("linear", out_features = 1) %>>%
+  po("torch_loss", loss = nn_bce_loss3) %>>%
+  po("torch_optimizer") %>>%
+  po("torch_model_classif",
+     epochs = 1,
+     batch_size = 32,
+     predict_type="prob")
+glrn = as_learner(graph)
+glrn$train(task)
+glrn$predict(task)
 ```
