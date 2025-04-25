@@ -26,7 +26,7 @@ if(FALSE){
 The goal of this post is to show how to use our recently proposed AUM
 loss (useful for unbalanced classification problems), with the
 mlr3torch package in R.  This post explains [the code I
-used](https://github.com/tdhock/2023-res-baz-az/blob/main/HOCKING-slides-TRUG.R)
+used](https://github.com/tdhock/2023-res-baz-az?tab=readme-ov-file#april-2025-talk-at-toulouse-rug)
 to prepare slides for a talk last week for Toulouse R User Group.
 
 ## Intro/issue
@@ -217,6 +217,13 @@ factor level, which gets converted to the float value 0.
 The mlr3torch now supports binary classification, with neural networks
 that output a scalar value (larger for more likely to be positive
 class).
+
+## Exercise for the reader
+
+Now that you know how implement a custom loss function for binary
+classification, you can implement a `benchmark_grid` with a list of
+learners, some of which have `Proposed_AUM` loss, others with classic
+`torch::nn_bce_with_logits_loss`, right? 
 
 ## Session Info
 

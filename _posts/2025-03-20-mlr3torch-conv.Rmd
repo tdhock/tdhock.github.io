@@ -1,149 +1,252 @@
-## torch convolutional neural network
+---
+layout: post
+title: Comparing neural network architectures using mlr3torch
+description: Convolutional network versus linear model
+---
 
-Below we define a convolutional network.
-
-```{r}
-torch::torch_manual_seed(1)
-out_channels <- 20
-conv_kernel_size <- 3
-pool_kernel_size <- 2
-seq2flat <- torch::nn_sequential(
-  torch::nn_conv2d(
-    in_channels = 1,
-    out_channels = out_channels,
-    kernel_size = conv_kernel_size),
-  torch::nn_relu(),
-  torch::nn_max_pool2d(
-    kernel_size = pool_kernel_size),
-  torch::nn_flatten())
-two.flat <- seq2flat(two.X.tensor)
-n.flat <- ncol(two.flat)
-n.hidden.units <- 20
-seq_conv_model <- torch::nn_sequential(
-  seq2flat,
-  torch::nn_linear(n.flat, n.hidden.units),
-  torch::nn_relu(),
-  torch::nn_linear(n.hidden.units, n.classes))
-(seq_conv_model_pred <- seq_conv_model(two.X.tensor))
-seq_conv_model$parameters[[2]]$grad
-(seq_conv_model_loss = celoss(seq_conv_model_pred, two.y.tensor))
-seq_conv_model_loss$backward()
-seq_conv_model$parameters[[2]]$grad
-```
-
-The output above indicates a gradient has been computed for the
-convolutional network. Below we do the learning loop,
-
-```{r}
-optimizer <- torch::optim_sgd(seq_conv_model$parameters, lr=step_size)
-conv_loss_dt_list <- list()
-for(epoch in 1:n.epochs){
-  cat(sprintf("%4d / %4d epochs\n", epoch, n.epochs))
-  set_loss_list <- list()
-  for(set_name in set_names){
-    is_set <- set_vec==set_name
-    set_pred <- seq_conv_model(ex.X.tensor[is_set,,,])
-    set_y <- ex.y.tensor[is_set]
-    is_error <- set_y != set_pred$argmax(dim=2)
-    if(set_name=="subtrain"){
-      batch_size <- length(ex.y.tensor)
-    }
-    N_errors <- torch::as_array(is_error$sum())
-    set_loss_list[[set_name]] <- celoss(set_pred, set_y)
-    conv_loss_dt_list[[paste(epoch, set_name)]] <- data.table(
-      epoch, set_name=factor(set_name, set_names),
-      variable=c("error_percent","loss"),
-      value=c(
-        100*N_errors/length(is_error),
-        torch::as_array(set_loss_list[[set_name]])))
-  }
-  optimizer$zero_grad()
-  set_loss_list$subtrain$backward()
-  optimizer$step()
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-03-20-compare-torch-models"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
 }
-(conv_loss_dt <- rbindlist(conv_loss_dt_list))
-(conv_min_dt <- conv_loss_dt[, .SD[which.min(value)], by=.(variable,set_name)])
-ggplot()+
-  geom_line(aes(
-    epoch, value, color=set_name),
-    data=conv_loss_dt)+
-  geom_point(aes(
-    epoch, value, color=set_name),
-    shape=21,
-    fill="white",
-    data=conv_min_dt)+
-  facet_grid(variable ~ ., scales="free")
 ```
 
-### Define neural network in mlr3torch
+The goal of this blog is to demonstrate improvements in prediction
+accuracy using neural networks, compared to linear models, for image
+classification tasks, using mlr3torch in R.
 
-I understand from `?mlr3torch::PipeOpTorchIngressNumeric` that we need
-`po("torch_ingress_num")` to convert regular R features to torch
-tensors. And we need `nn_head` pipeop at the end of the network,
-before `torch_loss`?
+## Introduction
+
+A major advantage of the mlr3torch framework in R, is that it is
+relatively simple to compare different learning algorithms, on
+different data sets, in terms of prediction accuracy in
+cross-validation. For example, [in a previous
+post](https://tdhock.github.io/blog/2024/mlr3torch/), we showed that a
+torch linear model with early stopping regularization is slightly but
+significantly more accurate than an L1-regularized linear model, for
+image classification.
+
+The goal here is to reproduce the results similar to [figures in my
+Two New Algos
+slides](https://github.com/tdhock/cv-same-other-paper?tab=readme-ov-file#27-mar-2025),
+which show that convolutional neural networks are more accurate than
+linear models in image classification.
+
+## Read MNIST data
+
+We begin by reading the MNIST data,
 
 ```{r}
-po_list <- list(
-  mlr3pipelines::po(
-    "select",
-    selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
-  mlr3torch::PipeOpTorchIngressNumeric$new(),
-  mlr3pipelines::po(
-    "nn_reshape",
-    shape=c(-1,1,n.pixels,n.pixels)),
-  mlr3pipelines::po(
-    "nn_conv2d_1",
-    out_channels = out_channels,
-    kernel_size = conv_kernel_size),
-  mlr3pipelines::po("nn_relu_1", inplace = TRUE),
-  mlr3pipelines::po(
-    "nn_max_pool2d_1",
-    kernel_size = pool_kernel_size),
-  mlr3pipelines::po("nn_flatten"),
-  mlr3pipelines::po(
-    "nn_linear",
-    out_features = n.hidden.units),
-  mlr3pipelines::po("nn_head"),
-  mlr3pipelines::po(
-    "torch_loss",
-    mlr3torch::t_loss("cross_entropy")),
-  mlr3pipelines::po(
-    "torch_optimizer",
-    mlr3torch::t_opt("sgd", lr=step_size)),
-  mlr3pipelines::po(
-    "torch_model_classif",
-    batch_size = 32,
-    epochs = n.epochs))
-graph <- Reduce(mlr3pipelines::concat_graphs, po_list)
-(glearner <- mlr3::as_learner(graph))
-glearner$base_learner()
+library(data.table)
+MNIST_dt <- fread("~/projects/cv-same-other-paper/data_Classif/MNIST.csv")
+dim(MNIST_dt)
+data.table(
+  name=names(MNIST_dt),
+  first_row=unlist(MNIST_dt[1]),
+  last_row=unlist(MNIST_dt[.N]))
 ```
 
-To use the configure method of the `glearner` object above, we need to
-load the mlr3tuning package:
+We then create a `label` factor column, and a task:
+
+```{r}
+MNIST_dt[, label := factor(y)]
+mtask <- mlr3::TaskClassif$new(
+  "MNIST", MNIST_dt, target="label")
+mtask$col_roles$stratum <- "label"
+mtask$col_roles$feature <- grep("^[0-9]+$", names(MNIST_dt), value=TRUE)
+mtask
+```
+
+The Task above is the mlr3 representation of the MNIST data set with
+the meta-data about which columns should be used for
+input/output/stratum/etc.
+
+## Defining neural network architecture
+
+We can use the function below to define neural networks with the same
+learning rate, step size, etc, but different architecture (number of
+hidden layers/units).
 
 ```{r}
 measure_list <- mlr3::msrs(c("classif.logloss", "classif.ce"))
-glearner$validate <- 0.5
-glearner$predict_type <- "prob"
-bl <- glearner$base_learner()
-bl$callbacks <- list(mlr3torch::t_clbk("history"))
-bl$param_set$values$measures_train <- measure_list
-bl$param_set$values$measures_valid <- measure_list
-glearner$base_learner()
-
-## glearner$configure( #https://github.com/mlr-org/mlr3torch-course/issues/3
-##   validate = 0.5,
-##   callbacks = mlr3torch::t_clbk("history"),
-##   predict_type = "prob",
-##   measures_valid = measure_list,
-##   measures_train = measure_list)
-
+n.epochs <- 200
+make_torch_learner <- function(id,...){
+  po_list <- c(
+    list(
+      mlr3pipelines::po(
+        "select",
+        selector = mlr3pipelines::selector_type(c("numeric", "integer"))),
+      mlr3torch::PipeOpTorchIngressNumeric$new()),
+    list(...),
+    list(
+      mlr3pipelines::po("nn_head"),
+      mlr3pipelines::po(
+        "torch_loss",
+        mlr3torch::t_loss("cross_entropy")),
+      mlr3pipelines::po(
+        "torch_optimizer",
+        mlr3torch::t_opt("sgd", lr=0.1)),
+      mlr3pipelines::po(
+        "torch_callbacks",
+        mlr3torch::t_clbk("history")),
+      mlr3pipelines::po(
+        "torch_model_classif",
+        batch_size = 100,
+        patience=n.epochs,
+        measures_valid=measure_list,
+        measures_train=measure_list,
+        predict_type="prob",
+        epochs = paradox::to_tune(upper = n.epochs, internal = TRUE)))
+    )
+    graph <- Reduce(mlr3pipelines::concat_graphs, po_list)
+    glearner <- mlr3::as_learner(graph)
+    mlr3::set_validate(glearner, validate = 0.5)
+    mlr3tuning::auto_tuner(
+      learner = glearner,
+      tuner = mlr3tuning::tnr("internal"),
+      resampling = mlr3::rsmp("insample"),
+      measure = mlr3::msr("internal_valid_score", minimize = TRUE),
+      term_evals = 1,
+      id=id,
+      store_models = TRUE)
+}
 ```
 
-[`TaskClassif_mnist.R`](https://github.com/mlr-org/mlr3torch/blob/main/R/TaskClassif_mnist.R) says that image should be a lazy list column?
+The function above has a variable number of inputs:
 
-Figure 5 from that paper shows that
+* the first argument is a `learner_id` to display in the results.
+* the other arguments are used to define the neural network
+  architecture, after torch ingress numeric, and before `nn_head`,
+  which is mlr3torch terminology for the last layer of the neural
+  network (output size determined by the task).
+  
+The code below defines a list of learners:
 
-https://cran.r-project.org/web/packages/mlr3torch/readme/README.html
+```{r}
+n.pixels <- 28
+learner.list <- list(
+  make_torch_learner("torch_linear"),
+  make_torch_learner(
+    "torch_dense_50",
+    mlr3pipelines::po(
+      "nn_linear",
+      out_features = 50),
+    mlr3pipelines::po("nn_relu_1", inplace = TRUE)
+  ),
+  make_torch_learner(
+    "torch_conv",
+    mlr3pipelines::po(
+      "nn_reshape",
+      shape=c(-1,1,n.pixels,n.pixels)),
+    mlr3pipelines::po(
+      "nn_conv2d_1",
+      out_channels = 20,
+      kernel_size = 6),
+    mlr3pipelines::po("nn_relu_1", inplace = TRUE),
+    mlr3pipelines::po(
+      "nn_max_pool2d_1",
+      kernel_size = 4),
+    mlr3pipelines::po("nn_flatten"),
+    mlr3pipelines::po(
+      "nn_linear",
+      out_features = 50),
+    mlr3pipelines::po("nn_relu_2", inplace = TRUE)
+  ),
+  mlr3::LearnerClassifFeatureless$new()$configure(id="featureless"),
+  mlr3learners::LearnerClassifCVGlmnet$new()$configure(id="cv_glmnet")
+)
+```
 
+The code above uses `make_torch_learner` three times:
+
+* `torch_linear` creates a linear model (one layer of parameters to
+  learn). Even with no architecture arguments, the `nn_head` generates
+  a linear layer which is compatible with the inputs and outputs.
+* `torch_dense_50` creates a neural network with one hidden layer, of
+  50 hidden units, followed by ReLU activation (two layers of
+  parameters to learn).
+* `torch_conv` creates a neural network with a 2D convolution,
+  followed by ReLU activation, followed by 2D max pooling, followed by
+  a flatten operation and a linear layer, then a final ReLU (three
+  layers of parameters to learn).
+  
+## Defining and computing a benchmark grid
+
+The code below combines the task, learners, and a resampling method
+(3-fold cross-validation), in a benchmark grid:
+
+```{r}
+kfoldcv <- mlr3::rsmp("cv")
+kfoldcv$param_set$values$folds <- 3
+(bench.grid <- mlr3::benchmark_grid(
+  mtask,
+  learner.list,
+  kfoldcv))
+```
+
+The code below does the computation.
+
+```{r}
+reg.dir <- "2025-03-20-20-mlr3torch-conv"
+cache.RData <- paste0(reg.dir,".RData")
+if(file.exists(cache.RData)){
+  load(cache.RData)
+}else{
+  if(FALSE){#code below only works on the cluster.
+    unlink(reg.dir, recursive=TRUE)
+    reg = batchtools::makeExperimentRegistry(
+      file.dir = reg.dir,
+      seed = 1,
+      packages = "mlr3verse"
+    )
+    mlr3batchmark::batchmark(
+      bench.grid, store_models = TRUE, reg=reg)
+    job.table <- batchtools::getJobTable(reg=reg)
+    chunks <- data.frame(job.table, chunk=1)
+    batchtools::submitJobs(chunks, resources=list(
+      walltime = 60*60,#seconds
+      memory = 2000,#megabytes per cpu
+      ncpus=1,  #>1 for multicore/parallel jobs.
+      ntasks=1, #>1 for MPI jobs.
+      chunks.as.arrayjobs=TRUE), reg=reg)
+    batchtools::getStatus(reg=reg)
+    jobs.after <- batchtools::getJobTable(reg=reg)
+    table(jobs.after$error)
+    ids <- jobs.after[is.na(error), job.id]
+    bench.result <- mlr3batchmark::reduceResultsBatchmark(ids, reg = reg)
+  }else{
+    ## In the code below, we declare a multisession future plan to
+    ## compute each benchmark iteration in parallel on this computer
+    ## (data set, learning algorithm, cross-validation fold). For a
+    ## few dozen iterations, using the multisession backend is
+    ## probably sufficient (I have 12 CPUs on my work PC).
+    if(require(future))plan("multisession")
+    bench.result <- mlr3::benchmark(bench.grid, store_models = TRUE)
+  }
+  save(bench.result, file=cache.RData)
+}
+```
+
+## Results
+
+## Conclusions
+
+TODO
+
+## Session info
+
+```{r}
+sessionInfo()
+```

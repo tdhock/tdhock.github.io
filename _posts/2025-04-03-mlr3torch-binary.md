@@ -9,7 +9,7 @@ description: Implementing AUM loss in mlr3torch
 The goal of this post is to show how to use our recently proposed AUM
 loss (useful for unbalanced classification problems), with the
 mlr3torch package in R.  This post explains [the code I
-used](https://github.com/tdhock/2023-res-baz-az/blob/main/HOCKING-slides-TRUG.R)
+used](https://github.com/tdhock/2023-res-baz-az?tab=readme-ov-file#april-2025-talk-at-toulouse-rug)
 to prepare slides for a talk last week for Toulouse R User Group.
 
 ## Intro/issue
@@ -121,13 +121,13 @@ glrn$predict(stask)
 ```
 ## <PredictionClassif> for 208 observations:
 ##  row_ids truth response    prob.M    prob.R
-##        1     R        R 0.4804875 0.5195125
-##        2     R        R 0.4401275 0.5598725
-##        3     R        R 0.4467701 0.5532299
+##        1     R        M 0.5362849 0.4637151
+##        2     R        M 0.5319837 0.4680163
+##        3     R        M 0.5488220 0.4511780
 ##      ---   ---      ---       ---       ---
-##      206     M        R 0.4735614 0.5264386
-##      207     M        R 0.4552953 0.5447047
-##      208     M        R 0.4528149 0.5471851
+##      206     M        M 0.5179592 0.4820408
+##      207     M        M 0.5232298 0.4767702
+##      208     M        M 0.5309298 0.4690702
 ```
 
 It looks like this PR improves the mlr3torch support for binary classification!
@@ -221,11 +221,11 @@ glrn$train(stask)
 
 ```
 ## torch_tensor
-## -0.4830
-## -0.4993
-## -0.5074
-## -0.5193
-## -0.5348
+## -0.3983
+## -0.2437
+## -0.2986
+## -0.3088
+## -0.4530
 ## ... [the output was truncated (use n=-1 to disable)]
 ## [ CPUFloatType{208,1} ][ grad_fn = <AddmmBackward0> ]
 ## torch_tensor
@@ -268,6 +268,13 @@ The mlr3torch now supports binary classification, with neural networks
 that output a scalar value (larger for more likely to be positive
 class).
 
+## Exercise for the reader
+
+Now that you know how implement a custom loss function for binary
+classification, you can implement a `benchmark_grid` with a list of
+learners, some of which have `Proposed_AUM` loss, others with classic
+`torch::nn_bce_with_logits_loss`, right? 
+
 ## Session Info
 
 
@@ -295,13 +302,16 @@ sessionInfo()
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
+## other attached packages:
+## [1] data.table_1.17.0
+## 
 ## loaded via a namespace (and not attached):
 ##  [1] crayon_1.5.3         knitr_1.50           cli_3.6.4            xfun_0.51            rlang_1.1.5         
-##  [6] processx_3.8.6       torch_0.14.2         coro_1.1.0           data.table_1.17.0    bit_4.6.0           
-## [11] mlr3pipelines_0.7.2  listenv_0.9.1        backports_1.5.0      ps_1.9.0             paradox_1.0.1       
-## [16] mlr3misc_0.16.0      evaluate_1.0.3       mlr3_0.23.0          palmerpenguins_0.1.1 mlr3torch_0.2.1-9000
-## [21] compiler_4.5.0       codetools_0.2-20     Rcpp_1.0.14          future_1.34.0        digest_0.6.37       
-## [26] R6_2.6.1             curl_6.2.2           parallelly_1.43.0    parallel_4.5.0       magrittr_2.0.3      
-## [31] callr_3.7.6          checkmate_2.3.2      uuid_1.2-1           tools_4.5.0          withr_3.0.2         
-## [36] bit64_4.6.0-1        globals_0.16.3       lgr_0.4.4            remotes_2.5.0
+##  [6] processx_3.8.6       torch_0.14.2         coro_1.1.0           bit_4.6.0            mlr3pipelines_0.7.2 
+## [11] listenv_0.9.1        backports_1.5.0      ps_1.9.0             paradox_1.0.1        mlr3misc_0.16.0     
+## [16] evaluate_1.0.3       mlr3_0.23.0          palmerpenguins_0.1.1 mlr3torch_0.2.1-9000 compiler_4.5.0      
+## [21] codetools_0.2-20     Rcpp_1.0.14          mlr3tuning_1.3.0     bbotk_1.5.0          future_1.34.0       
+## [26] digest_0.6.37        R6_2.6.1             curl_6.2.2           parallelly_1.43.0    parallel_4.5.0      
+## [31] callr_3.7.6          magrittr_2.0.3       checkmate_2.3.2      uuid_1.2-1           tools_4.5.0         
+## [36] withr_3.0.2          bit64_4.6.0-1        globals_0.16.3       lgr_0.4.4            remotes_2.5.0
 ```

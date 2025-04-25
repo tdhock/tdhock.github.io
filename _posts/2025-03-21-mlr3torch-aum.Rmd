@@ -97,7 +97,9 @@ Before defining a task, we need to load mlr3resampling, which defines the `subse
 task.list <- list()
 task_dt <- data.table(subset_dt, MNIST_dt)[, odd := factor(y %% 2)]
 feature.names <- grep("^[0-9]+$", names(task_dt), value=TRUE)
-for(subset.name in c("seed1_prop0.1","seed1_prop0.01")){
+subset.name.vec <- c("seed1_prop0.1","seed1_prop0.01")
+subset.name.vec <- "seed1_prop0.01"
+for(subset.name in subset.name.vec){
   subset_vec <- task_dt[[subset.name]]
   itask <- mlr3::TaskClassif$new(
     subset.name, task_dt[subset_vec != ""], target="odd")
@@ -169,7 +171,8 @@ overhead/) explained how to implement our AUM loss, as
 below.
 
 ```{r}
-ROC_curve <- function(pred_tensor, label_tensor){
+Proposed_AUM <- function(pred_tensor, label_2d_tensor){
+  label_tensor <- label_2d_tensor$flatten()
   is_positive = label_tensor == 1
   is_negative = label_tensor != 1
   fn_diff = torch::torch_where(is_positive, -1, 0)
@@ -189,16 +192,13 @@ ROC_curve <- function(pred_tensor, label_tensor){
   uniq_fn_before = sorted_fn_cum[sorted_fn_end]
   FPR = torch::torch_cat(c(torch::torch_tensor(0.0), uniq_fp_after))
   FNR = torch::torch_cat(c(uniq_fn_before, torch::torch_tensor(0.0)))
-  list(
+  roc <- list(
     FPR=FPR,
     FNR=FNR,
     TPR=1 - FNR,
     "min(FPR,FNR)"=torch::torch_minimum(FPR, FNR),
     min_constant=torch::torch_cat(c(torch::torch_tensor(-Inf), uniq_thresh)),
     max_constant=torch::torch_cat(c(uniq_thresh, torch::torch_tensor(Inf))))
-}
-Proposed_AUM <- function(pred_tensor, label_tensor){
-  roc = ROC_curve(pred_tensor, label_tensor)
   min_FPR_FNR = roc[["min(FPR,FNR)"]][2:-2]
   constant_diff = roc$min_constant[2:N]$diff()
   torch::torch_sum(min_FPR_FNR * constant_diff)
@@ -228,15 +228,13 @@ gradients (cross entropy and AUM).
 
 ```{r}
 mlr3torch_loss_list <- list(
-  AUM=mlr3torch::TorchLoss$new(
-    torch_loss = nn_AUM_loss,
-    task_types = "classif"),
+  AUM=nn_AUM_loss,
   cross_entropy=mlr3torch::t_loss("cross_entropy"))
 measure_list <- mlr3::msrs(c("classif.auc", "classif.acc"))
-n.epochs <- 200
+n.epochs <- 10
 learner_list <- list(
-  mlr3learners::LearnerClassifCVGlmnet$new(),
-  mlr3::LearnerClassifFeatureless$new())
+  cv_glmnet=mlr3learners::LearnerClassifCVGlmnet$new(),
+  featureless=mlr3::LearnerClassifFeatureless$new())
 for(train_loss in names(mlr3torch_loss_list)){
   mt_loss <- mlr3torch_loss_list[[train_loss]]
   po_list_linear_ce <- list(
@@ -256,7 +254,7 @@ for(train_loss in names(mlr3torch_loss_list)){
       mlr3torch::t_clbk("history")),
     mlr3pipelines::po(
       "torch_model_classif",
-      batch_size = 500,
+      batch_size = 100000,
       patience=n.epochs,
       measures_valid=measure_list,
       measures_train=measure_list,
@@ -277,6 +275,20 @@ for(train_loss in names(mlr3torch_loss_list)){
 ```
 
 The code above defines four learners.
+The code below ensures that each has `predict_type="prob"` so that evaluation metrics such as AUC can be computed.
+
+```{r}
+sapply(learner_list, "[[", "predict_type")
+sapply(learner_list, "[[", "id")
+for(learner_name in names(learner_list)){
+  learner_list[[learner_name]]$predict_type <- "prob"
+  learner_list[[learner_name]]$id <- learner_name
+}
+sapply(learner_list, "[[", "predict_type")
+sapply(learner_list, "[[", "id")
+```
+
+We see above that the learner IDs have also been simplified.
 The code below defines a benchmark grid.
 
 ```{r}
@@ -292,9 +304,9 @@ The code below does the computation.
 cache.RData <- "2025-03-21-mlr3torch-aum.RData"
 if(file.exists(cache.RData)){
   load(cache.RData)
-}else{#code below should be run interactively.
-  if(on.cluster){
-    reg.dir <- "2024-10-30-mlr3torch-benchmark"
+}else{
+  if(FALSE){#code below only works on the cluster.
+    reg.dir <- "2025-03-21-mlr3torch-aum""
     unlink(reg.dir, recursive=TRUE)
     reg = batchtools::makeExperimentRegistry(
       file.dir = reg.dir,
@@ -329,4 +341,12 @@ if(file.exists(cache.RData)){
 }
 ```
 
+## Visualization of results
 
+## Conclusions
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
