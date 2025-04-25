@@ -4,24 +4,7 @@ title: Torch learning with binary classification
 description: Implementing AUM loss in mlr3torch
 ---
 
-```{r Ropts, echo=FALSE, results='hide'}
-repo.dir <- normalizePath("..")
-post.id <- "2025-04-03-mlr3torch-binary"
-fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
-dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
-knitr::opts_chunk$set(
-  dpi=100,
-  fig.path=fig.path,
-  fig.width=10, ## TODO python figures wider? look at prev issue.
-  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=4)
-in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
-in_knit <- isTRUE(getOption('knitr.in.progress'))
-options(width=120)
-if(FALSE){
-  knitr::knit(paste0(post.id, ".Rmd"))
-}
-```
+
 
 The goal of this post is to show how to use our recently proposed AUM
 loss (useful for unbalanced classification problems), with the
@@ -101,8 +84,21 @@ if(FALSE){#fix
 My PR was not generic enough, so Seb Fischer proposed another
 [PR](https://github.com/mlr-org/mlr3torch/pull/385).
 
-```{r}
+
+``` r
 remotes::install_github("mlr-org/mlr3torch@c03d61a18e9785e2dbb5b20e2b6dada74a9b58b8")
+```
+
+```
+## Using github PAT from envvar GITHUB_PAT. Use `gitcreds::gitcreds_set()` and unset GITHUB_PAT in .Renviron (or elsewhere) if you want to use the more secure git credential store instead.
+```
+
+```
+## Skipping install of 'mlr3torch' from a github remote, the SHA1 (c03d61a1) has not changed since last install.
+##   Use `force = TRUE` to force installation
+```
+
+``` r
 stask <- mlr3::tsk("sonar")
 po_list <- list(
   mlr3torch::PipeOpTorchIngressNumeric$new(),
@@ -122,6 +118,18 @@ glrn$train(stask)
 glrn$predict(stask)
 ```
 
+```
+## <PredictionClassif> for 208 observations:
+##  row_ids truth response    prob.M    prob.R
+##        1     R        R 0.4804875 0.5195125
+##        2     R        R 0.4401275 0.5598725
+##        3     R        R 0.4467701 0.5532299
+##      ---   ---      ---       ---       ---
+##      206     M        R 0.4735614 0.5264386
+##      207     M        R 0.4552953 0.5447047
+##      208     M        R 0.4528149 0.5471851
+```
+
 It looks like this PR improves the mlr3torch support for binary classification!
 It is important to note a few things about the implementation.
 
@@ -130,14 +138,24 @@ It is important to note a few things about the implementation.
 First, at the R level, binary labels are represented as a factor with two levels.
 In the case of the sonar data, the two levels are R and M:
 
-```{r}
+
+``` r
 (Class <- stask$data()$Class)
+```
+
+```
+##   [1] R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R
+##  [58] R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R M M M M M M M M M M M M M M M M M
+## [115] M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M
+## [172] M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M M
+## Levels: M R
 ```
 
 The mlr3torch package converts this representation into a torch float tensor. 
 We can see that by defining a custom loss function, for example my proposed AUM loss for ROC curve optimization.
 
-```{r}
+
+``` r
 Proposed_AUM <- function(pred_tensor, label_2d_tensor){
   label_tensor <- label_2d_tensor$flatten()
   is_positive = label_tensor == 1
@@ -199,7 +217,39 @@ graph <- Reduce(mlr3pipelines::concat_graphs, po_list)
 glrn <- mlr3::as_learner(graph)
 set.seed(2)#controls order of batches.
 glrn$train(stask)
+```
+
+```
+## torch_tensor
+## -0.4830
+## -0.4993
+## -0.5074
+## -0.5193
+## -0.5348
+## ... [the output was truncated (use n=-1 to disable)]
+## [ CPUFloatType{208,1} ][ grad_fn = <AddmmBackward0> ]
+## torch_tensor
+##  0
+##  1
+##  1
+##  0
+##  1
+## ... [the output was truncated (use n=-1 to disable)]
+## [ CPUFloatType{208,1} ]
+## 
+##   0   1 
+##  97 111
+```
+
+``` r
 table(Class, as.integer(Class))
+```
+
+```
+##      
+## Class   1   2
+##     M 111   0
+##     R   0  97
 ```
 
 We see in the table above that we have the following correspondence:
@@ -220,6 +270,38 @@ class).
 
 ## Session Info
 
-```{r}
+
+``` r
 sessionInfo()
+```
+
+```
+## R version 4.5.0 (2025-04-11)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 24.04.2 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
+## 
+## locale:
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: Europe/Paris
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] crayon_1.5.3         knitr_1.50           cli_3.6.4            xfun_0.51            rlang_1.1.5         
+##  [6] processx_3.8.6       torch_0.14.2         coro_1.1.0           data.table_1.17.0    bit_4.6.0           
+## [11] mlr3pipelines_0.7.2  listenv_0.9.1        backports_1.5.0      ps_1.9.0             paradox_1.0.1       
+## [16] mlr3misc_0.16.0      evaluate_1.0.3       mlr3_0.23.0          palmerpenguins_0.1.1 mlr3torch_0.2.1-9000
+## [21] compiler_4.5.0       codetools_0.2-20     Rcpp_1.0.14          future_1.34.0        digest_0.6.37       
+## [26] R6_2.6.1             curl_6.2.2           parallelly_1.43.0    parallel_4.5.0       magrittr_2.0.3      
+## [31] callr_3.7.6          checkmate_2.3.2      uuid_1.2-1           tools_4.5.0          withr_3.0.2         
+## [36] bit64_4.6.0-1        globals_0.16.3       lgr_0.4.4            remotes_2.5.0
 ```
