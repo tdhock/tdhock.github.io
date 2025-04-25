@@ -1,0 +1,37 @@
+---
+layout: post
+title: Exploring lazy tensors in mlr3torch
+description: Computational advantages
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-03-20-compare-torch-models"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+TODO
+
+## Introduction
+
+TODO
+
+[`TaskClassif_mnist.R`](https://github.com/mlr-org/mlr3torch/blob/main/R/TaskClassif_mnist.R) says that image should be a lazy list column?
+
+Figure 5 from that paper shows that
+
+https://cran.r-project.org/web/packages/mlr3torch/readme/README.html
+

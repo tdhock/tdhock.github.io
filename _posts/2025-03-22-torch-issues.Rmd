@@ -1,0 +1,118 @@
+## Beluga
+
+```
+R version 4.4.0 (2024-04-24) -- "Puppy Cup"
+```
+
+### CRAN
+
+This combination works!
+
+```
+> install.packages("torch")
+ Installing package into '/home/thocking/R/x86_64-pc-linux-gnu-library/4.4'
+ (as 'lib' is unspecified)
+ trying URL 'http://cloud.r-project.org/src/contrib/torch_0.14.2.tar.gz'
+ Content type 'application/x-gzip' length 1913459 bytes (1.8 MB)
+ 
+using C++ compiler: 'g++ (Gentoo 12.3.1_p20230526 p2) 12.3.1 20230526'
+
+g++ -std=gnu++17 -I"/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-6\
+ 4-v4/Compiler/gcccore/r/4.4.0/lib64/R/include" -DNDEBUG -I../inst/include/ -DR\
+ CPP_NO_UNWIND_PROTECT -I'/home/thocking/R/x86_64-pc-linux-gnu-library/4.4/Rcpp\
+ /include' -I/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Cor\
+ e/java/17.0.6/include -I/cvmfs/soft.computecanada.ca/easybuild/software/2023/x\
+ 86-64-v3/Core/flexiblascore/3.3.1/include -I/cvmfs/soft.computecanada.ca/easyb\
+ uild/software/2023/x86-64-v3/Core/flexiblascore/3.3.1/include/flexiblas    -fp\
+ ic  -O2 -ftree-vectorize -march=x86-64-v4 -fno-math-errno   -c RcppExports.cpp\
+  -o RcppExports.o
+
+ g++ -std=gnu++17 -shared -L/cvmfs/soft.computecanada.ca/easybuild/software/202\
+ 3/x86-64-v4/Compiler/gcccore/r/4.4.0/lib64/R/lib -o torch.so RcppExports.o amp\
+ .o autograd.o backends.o codegen.o contrib.o cuda.o device.o dimname_list.o dt\
+ ype.o gen-namespace.o generator.o ignite.o indexing.o ivalue.o jit-compile.o j\
+ it-execute.o lantern.o layout.o memory_format.o nn_utils_rnn.o qscheme.o quant\
+ ization.o reduction.o save.o scalar.o script_module.o stack.o storage.o tensor\
+ .o tensor_list.o torch_api.o torch_exports.o trace.o utils.o variable_list.o x\
+ ptr.o -L/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v4/Compile\
+ r/gcccore/r/4.4.0/lib64/R/lib -lR
+ *** Renaming torch lib to torchpkg
+ "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v4/Compiler/gccco\
+ re/r/4.4.0/lib64/R/bin/Rscript" "../tools/renamelib.R"
+ 
+ * DONE (torch)
+
+ The downloaded source packages are in
+         '/tmp/RtmpCbOXyO/downloaded_packages'
+
+> torch::torch_tensor(pi)
+ i Additional software needs to be downloaded and installed for torch to work c\
+ orrectly.
+!Do you want to continue? (Yes/no/cancel) 
+ trying URL 'https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-share\
+ d-with-deps-2.5.1%2Bcpu.zip'
+ Content type 'application/zip' length 169497630 bytes (161.6 MB)
+ ==================================================
+ downloaded 161.6 MB
+
+ trying URL 'https://torch-cdn.mlverse.org/binaries/refs/heads/cran/v0.14.2/lat\
+ est/lantern-0.14.2+cpu+x86_64-Linux.zip'
+ Content type 'application/zip' length 5835388 bytes (5.6 MB)
+ ==================================================
+ downloaded 5.6 MB
+
+ torch_tensor
+  3.1416
+ [ CPUFloatType{1} ]
+ ...
+CPULongType{1000} ]
+ torch_tensor
+ -0.1745  0.1314 -0.4476 -0.6590 -0.7359 -0.0889  0.6471  0.2814 -0.0880 -0.364\
+ 9
+  0.1117  0.1763 -0.1807 -0.1092 -0.3902 -0.8008  0.3241  0.4483 -0.0729 -0.206\
+ 6
+ [ CPUFloatType{2,10} ][ grad_fn = <AddmmBackward0> ]
+ Sourced file ~/torch_test.R
+
+> R.home()
+ [1] "/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v4/Compiler/g\
+ cccore/r/4.4.0/lib64/R"
+
+```
+
+### CDN
+
+This combination does not work.
+
+## Mammouth
+
+```
+R version 4.4.3 (2025-02-28) -- "Trophy Case"
+```
+
+### CRAN
+
+```
+> install.packages("torch")                                                 trying URL 'http://cloud.r-project.org/src/contrib/torch_0.14.2.tar.gz'
+ Content type 'application/x-gzip' length 1913459 bytes (1.8 MB)
+
+using C++ compiler: 'g++ (GCC) 9.3.0'
+
+ g++ -std=gnu++17 -I"/home/thocking/lib64/R/include" -DNDEBUG -I../inst/include/ -DRCPP_NO_UNWIND_P\
+ ROTECT -I'/home/thocking/lib64/R/library/Rcpp/include' -I/usr/local/include    -fpic  -g -O2   -c \
+ RcppExports.cpp -o RcppExports.o
+
+g++ -std=gnu++17 -shared -L/home/thocking/lib64/R/lib -L/usr/local/lib64 -o torch.so RcppExports.o\
+  amp.o autograd.o backends.o codegen.o contrib.o cuda.o device.o dimname_list.o dtype.o gen-namesp\
+ ace.o generator.o ignite.o indexing.o ivalue.o jit-compile.o jit-execute.o lantern.o layout.o memo\
+ ry_format.o nn_utils_rnn.o qscheme.o quantization.o reduction.o save.o scalar.o script_module.o st\
+ ack.o storage.o tensor.o tensor_list.o torch_api.o torch_exports.o trace.o utils.o variable_list.o\
+  xptr.o -L/home/thocking/lib64/R/lib -lR
+ /cvmfs/soft.computecanada.ca/gentoo/2020/usr/x86_64-pc-linux-gnu/binutils-bin/2.33.1/ld.gold: erro\
+ r: cannot find -lR
+ collect2: error: ld returned 1 exit status
+
+```
+
+### CDN
+
