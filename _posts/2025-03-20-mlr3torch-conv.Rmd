@@ -6,7 +6,7 @@ description: Convolutional network versus linear model
 
 ```{r Ropts, echo=FALSE, results='hide'}
 repo.dir <- normalizePath("..")
-post.id <- "2025-03-20-compare-torch-models"
+post.id <- "2025-03-20-mlr3torch-conv"
 fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
 dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
 knitr::opts_chunk$set(
@@ -199,7 +199,7 @@ kfoldcv$param_set$values$folds <- 3
 The code below does the computation.
 
 ```{r}
-reg.dir <- "2025-03-20-20-mlr3torch-conv"
+reg.dir <- "2025-03-20-mlr3torch-conv"
 cache.RData <- paste0(reg.dir,".RData")
 if(file.exists(cache.RData)){
   load(cache.RData)
@@ -239,11 +239,282 @@ if(file.exists(cache.RData)){
 }
 ```
 
-## Results
+The code above took several hours on my 14-core laptop.
+
+## Test error results
+
+First, we use `score()` to compute test error rates:
+
+```{r}
+score_dt <- bench.result$score()
+(score_some <- score_dt[order(classif.ce), .(
+  learner_id=factor(learner_id, unique(learner_id)),
+  iteration,
+  percent_error=100*classif.ce)])
+```
+
+The table above has one row for each learning algorithm, and each
+train/test split in 3-fold CV (iteration). It is sorted by error rate,
+so it is easy to see that the convolutional network is most accurate,
+and all algorihtms have smaller test error rates than featureless.
+Below we visualize these test error rates in a figure:
+
+```{r percent-err-all, fig.height=2}
+library(ggplot2)
+ggplot()+
+  geom_point(aes(
+    percent_error, learner_id),
+    shape=1,
+    data=score_some)+
+  scale_x_continuous(
+    breaks=seq(0,100,by=10),
+    limits=c(0,90))
+```
+
+The figure above shows a dot for each learning algorithm and
+train/test split.  The algorithms on the Y axis are sorted by error
+rate, so it is easy to see that `torch_conv` has the smallest error
+rate, the `torch_dense_50` has slightly larger error rate,
+etc. Interestingly, the `torch_linear` model (early stopping
+regularization) has a slightly smaller error rate than `cv_glmnet`
+(linear model with L1 regularization).
+
+Below we compute mean and standard deviation for each learning
+algorithm, across the three cross-validation splits:
+
+```{r}
+(score_stats <- dcast(
+  score_some,
+  learner_id ~ .,
+  list(mean, sd),
+  value.var="percent_error"))
+```
+
+The table above has one row for each learning algorithm, and columns
+for mean and standard deviation of the error rate. We visualize these
+numbers in the figure below:
+
+```{r percent-err-mean-sd, fig.height=2}
+score_show <- score_stats[learner_id!="featureless"]
+ggplot()+
+  geom_point(aes(
+    percent_error_mean, learner_id),
+    shape=1,
+    data=score_show)+
+  geom_segment(aes(
+    percent_error_mean+percent_error_sd, learner_id,
+    xend=percent_error_mean-percent_error_sd, yend=learner_id),
+    data=score_show)+
+  geom_text(aes(
+    percent_error_mean, learner_id,
+    label=sprintf("%.2f±%.2f", percent_error_mean, percent_error_sd)),
+    vjust=-0.5,
+    data=score_show)+
+  coord_cartesian(xlim=c(0,10))+
+  scale_x_continuous(
+    "Percent error on test set (mean ± SD over 3 folds in CV)",
+    breaks=seq(0,10,by=2))
+```
+
+The figure above omits featureless, to emphasize the subtle
+differences between the non-trivial learning algorithms. To compute
+p-values for differences, we can do the following.
+
+```{r}
+(levs <- levels(score_some$learner_id))
+(pval_dt <- data.table(comparison_i=1:3)[, {
+  two_levs <- levs[comparison_i+c(0,1)]
+  lev2rank <- structure(c("lo","hi"), names=two_levs)
+  i_long <- score_some[
+    learner_id %in% two_levs
+  ][
+  , rank := lev2rank[paste(learner_id)]
+  ][]
+  i_wide <- dcast(i_long, iteration ~ rank, value.var="percent_error")
+  paired <- with(i_wide, t.test(lo, hi, alternative = "l", paired=TRUE))
+  unpaired <- with(i_wide, t.test(lo, hi, alternative = "l", paired=FALSE))
+  data.table(
+    learner.lo=factor(two_levs[1],levs),
+    learner.hi=factor(two_levs[2],levs),
+    p.paired=paired$p.value,
+    p.unpaired=unpaired$p.value,
+    mean.diff=paired$est,
+    mean.lo=unpaired$est[1],
+    mean.hi=unpaired$est[2])
+}, by=comparison_i])
+```
+
+The table above has one row for each comparison, with columns for mean
+error rates and P-values (in paired and unpaired T-tests).
+These P-values are shown in the figure below.
+
+```{r pval, fig.height=2}
+ggplot()+
+  geom_segment(aes(
+    mean.lo, learner.lo,
+    xend=mean.hi, yend=learner.lo),
+    data=pval_dt,
+    size=2,
+    color="red")+
+  geom_text(aes(
+    x=(mean.lo+mean.hi)/2, learner.lo,
+    label=sprintf("P=%.4f", p.paired)),
+    data=pval_dt,
+    vjust=1.5,
+    color="red")+
+  geom_point(aes(
+    percent_error_mean, learner_id),
+    shape=1,
+    data=score_show)+
+  geom_segment(aes(
+    percent_error_mean+percent_error_sd, learner_id,
+    xend=percent_error_mean-percent_error_sd, yend=learner_id),
+    size=1,
+    data=score_show)+
+  geom_text(aes(
+    percent_error_mean, learner_id,
+    label=sprintf("%.2f±%.2f", percent_error_mean, percent_error_sd)),
+    vjust=-0.5,
+    data=score_show)+
+  coord_cartesian(xlim=c(0,10))+
+  scale_y_discrete("algorithm")+
+  scale_x_continuous(
+    "Percent error on test set (mean ± SD over 3 folds in CV)",
+    breaks=seq(0,10,by=2))
+```
+
+The plot above contains P-values in red, which show that 
+
+* the dense neural network has a significantly larger error rate than the convolutional neural network,
+* the torch linear model has a significantly larger error rate than the dense neural network,
+* the `cv_glmnet` linear model has slightly larger error rate than the
+  torch linear model, but this difference is not statistically
+  significant (at least using the classic threshold of P=0.05).
+
+## Checking subtrain/validation loss curves
+
+Next, we can check if we have used enough epochs for the early
+stopping regularization in torch. If we have used enough, we should
+see the min validation loss at an intermediate value, not at the
+smallest number of epochs (underfitting), nor at the largest number of
+epochs (overfitting). First, we extract the number of epochs that was
+used by mlr3 auto-tuner, for the torch learners:
+
+```{r subtrain-valid-logloss}
+(score_torch <- score_dt[
+  grepl("torch",learner_id)
+][
+, best_epoch := sapply(
+  learner, function(L)unlist(L$tuning_result$internal_tuned_values))
+][])
+```
+
+The table above has a `best_epoch` column which shows the number of epochs that was chosen by the mlr3 auto-tuner. 
+Next, we extract the history that was used to select the best epoch:
+
+```{r}
+(history_torch <- score_torch[, {
+  L <- learner[[1]]
+  M <- L$archive$learners(1)[[1]]$model
+  M$torch_model_classif$model$callbacks$history
+}, by=.(learner_id, iteration)])
+```
+
+The table above has one row for each learner, iteration, and epoch of training. 
+There are columns named train/valid logloss/ce, which we convert from wide to long format below:
+
+```{r}
+(history_long <- nc::capture_melt_single(
+  history_torch,
+  set=nc::alevels(valid="validation", train="subtrain"),
+  ".classif.",
+  measure=nc::alevels("logloss", ce="prop_error")))
+```
+
+The table above has a `set` column that is consistent with the Deep Learning book of Goodfellow:
+
+* The full data set is split into train and test sets,
+* and then the train set is split into subtrain and validation sets.
+
+The code below can be used to visualize the logistic loss for each epoch:
+
+```{r}
+ggplot()+
+  theme_bw()+
+  theme(legend.position=c(0.9, 0.15))+
+  geom_vline(aes(
+    xintercept=best_epoch),
+    data=score_torch)+
+  geom_text(aes(
+    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
+    vjust=1.5, hjust=0,
+    data=score_torch)+
+  geom_line(aes(
+    epoch, value, color=set),
+    data=history_long[measure=="logloss"])+
+  facet_grid(iteration ~ learner_id, labeller=label_both)+
+  scale_y_log10("logistic loss")+
+  scale_x_continuous("epoch")
+```
+
+The figure above shows 
+
+* panels from left to right for different learning algorithms (neural network architectures),
+* panels from top to bottom for different train/test splits in cross-validation (iteration in mlr3 terms),
+* Y axis on the log scale to emphasize subtle differences. For example
+  it is clear that the subtrain loss gets much smaller for the
+  convolutional model, than for the dense/linear models.
+* a vertical black line in each panel to indicate the best epoch used by the mlr3 auto-tuner. It is clear that this is the min of the validation loss.
+
+The code below considers only the first train/test split in cross-validation, and shows the classification error in addition to the log loss:
+
+```{r subtrain-valid-both}
+history_fold1 <- history_long[iteration==1]
+score_fold1 <- score_torch[iteration==1]
+min_fold1 <- history_fold1[
+, .SD[value==min(value)]
+, by=.(learner_id, measure, set)
+][, point := "min"]
+ggplot()+
+  theme_bw()+
+  theme(legend.position=c(0.9, 0.2))+
+  geom_vline(aes(
+    xintercept=best_epoch),
+    data=score_fold1)+
+  geom_text(aes(
+    best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
+    vjust=1.5, hjust=0,
+    data=score_fold1)+
+  geom_line(aes(
+    epoch, value, color=set),
+    data=history_fold1)+
+  geom_point(aes(
+    epoch, value, color=set, fill=point),
+    shape=21,
+    data=min_fold1)+
+  scale_fill_manual(values=c(min="black"))+
+  facet_grid(measure ~ learner_id, labeller=label_both, scales="free")+
+  scale_x_continuous("epoch")+
+  scale_y_log10("")
+```
+
+The figure above additionally has black dots to emphasize the minima of each curve.
+It is clear that the vertical black line (best number of epochs from mlr3 auto-tuner) 
+agrees with the min validation loss (black dot computed using min of each history curve).
+Finally, we see that the neural networks overfit with perfect classification accuracy on the subtrain set (black dots at bottom of panel), whereas the linear model subtrain error rate never goes below 1%. 
 
 ## Conclusions
 
-TODO
+We have explained how to use mlr3torch to compare various neural
+network architectures for image classification, on the MNIST data set.
+We showed how to code figures that compare test error rates, and allow
+to check if the max number of epochs was selected appropriately.  We
+saw that a convolutional neural network with three layers of weights
+was more accurate than a dense neural network with two layers of
+weights, which was in turn more accurate than a linear model with only
+one layer of weights.  Using a learning rate of 0.1 and a batch size
+of 100, we saw that 200 epochs was sufficient to observe overfitting,
+and also to avoid underfitting.
 
 ## Session info
 
