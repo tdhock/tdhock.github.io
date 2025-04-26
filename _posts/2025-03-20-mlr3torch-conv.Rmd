@@ -256,7 +256,7 @@ score_dt <- bench.result$score()
 The table above has one row for each learning algorithm, and each
 train/test split in 3-fold CV (iteration). It is sorted by error rate,
 so it is easy to see that the convolutional network is most accurate,
-and all algorihtms have smaller test error rates than featureless.
+and all algorithms have smaller test error rates than featureless.
 Below we visualize these test error rates in a figure:
 
 ```{r percent-err-all, fig.height=2}
@@ -469,9 +469,10 @@ The figure above shows
 The code below considers only the first train/test split in cross-validation, and shows the classification error in addition to the log loss:
 
 ```{r subtrain-valid-both}
-history_fold1 <- history_long[iteration==1]
-score_fold1 <- score_torch[iteration==1]
-min_fold1 <- history_fold1[
+get_fold <- function(DT,it=1)DT[iteration==it]
+history_fold <- get_fold(history_long)
+score_fold <- get_fold(score_torch)
+min_fold <- history_fold[
 , .SD[value==min(value)]
 , by=.(learner_id, measure, set)
 ][, point := "min"]
@@ -480,18 +481,18 @@ ggplot()+
   theme(legend.position=c(0.9, 0.2))+
   geom_vline(aes(
     xintercept=best_epoch),
-    data=score_fold1)+
+    data=score_fold)+
   geom_text(aes(
     best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
     vjust=1.5, hjust=0,
-    data=score_fold1)+
+    data=score_fold)+
   geom_line(aes(
     epoch, value, color=set),
-    data=history_fold1)+
+    data=history_fold)+
   geom_point(aes(
     epoch, value, color=set, fill=point),
     shape=21,
-    data=min_fold1)+
+    data=min_fold)+
   scale_fill_manual(values=c(min="black"))+
   facet_grid(measure ~ learner_id, labeller=label_both, scales="free")+
   scale_x_continuous("epoch")+

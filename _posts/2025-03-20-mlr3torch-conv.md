@@ -34,6 +34,16 @@ We begin by reading the MNIST data,
 
 ``` r
 library(data.table)
+```
+
+```
+## data.table 1.17.0 utilise 7 threads (voir ?getDTthreads).  Dernières actualités : r-datatable.com
+## **********
+## Running data.table in English; package support is available in English only. When searching for online help, be sure to also check for the English error message. This can be obtained by looking at the po/R-<locale>.po and po/<locale>.po files in the package source, where the native language and English error messages can be found side-by-side. You can also try calling Sys.setLanguage('en') prior to reproducing the error message.
+## **********
+```
+
+``` r
 MNIST_dt <- fread("~/projects/cv-same-other-paper/data_Classif/MNIST.csv")
 dim(MNIST_dt)
 ```
@@ -312,7 +322,7 @@ score_dt <- bench.result$score()
 The table above has one row for each learning algorithm, and each
 train/test split in 3-fold CV (iteration). It is sorted by error rate,
 so it is easy to see that the convolutional network is most accurate,
-and all algorihtms have smaller test error rates than featureless.
+and all algorithms have smaller test error rates than featureless.
 Below we visualize these test error rates in a figure:
 
 
@@ -474,6 +484,13 @@ ggplot()+
     breaks=seq(0,10,by=2))
 ```
 
+```
+## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
+```
+
 ![plot of chunk pval](/assets/img/2025-03-20-mlr3torch-conv/pval-1.png)
 
 The plot above contains P-values in red, which show that 
@@ -601,6 +618,13 @@ ggplot()+
   scale_x_continuous("epoch")
 ```
 
+```
+## Warning: A numeric `legend.position` argument in `theme()` was deprecated in ggplot2 3.5.0.
+## ℹ Please use the `legend.position.inside` argument of `theme()` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
+```
+
 ![plot of chunk unnamed-chunk-12](/assets/img/2025-03-20-mlr3torch-conv/unnamed-chunk-12-1.png)
 
 The figure above shows 
@@ -616,9 +640,10 @@ The code below considers only the first train/test split in cross-validation, an
 
 
 ``` r
-history_fold1 <- history_long[iteration==1]
-score_fold1 <- score_torch[iteration==1]
-min_fold1 <- history_fold1[
+get_fold <- function(DT,it=1)DT[iteration==it]
+history_fold <- get_fold(history_long)
+score_fold <- get_fold(score_torch)
+min_fold <- history_fold[
 , .SD[value==min(value)]
 , by=.(learner_id, measure, set)
 ][, point := "min"]
@@ -627,18 +652,18 @@ ggplot()+
   theme(legend.position=c(0.9, 0.2))+
   geom_vline(aes(
     xintercept=best_epoch),
-    data=score_fold1)+
+    data=score_fold)+
   geom_text(aes(
     best_epoch, Inf, label=paste0(" best epoch=", best_epoch)),
     vjust=1.5, hjust=0,
-    data=score_fold1)+
+    data=score_fold)+
   geom_line(aes(
     epoch, value, color=set),
-    data=history_fold1)+
+    data=history_fold)+
   geom_point(aes(
     epoch, value, color=set, fill=point),
     shape=21,
-    data=min_fold1)+
+    data=min_fold)+
   scale_fill_manual(values=c(min="black"))+
   facet_grid(measure ~ learner_id, labeller=label_both, scales="free")+
   scale_x_continuous("epoch")+
@@ -701,16 +726,16 @@ sessionInfo()
 ## [1] ggplot2_3.5.1     data.table_1.17.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] future_1.34.0        generics_0.1.3       lattice_0.22-6       listenv_0.9.1        digest_0.6.37       
-##  [6] magrittr_2.0.3       evaluate_1.0.3       grid_4.5.0           processx_3.8.6       backports_1.5.0     
-## [11] mlr3learners_0.10.0  torch_0.14.2         ps_1.9.0             scales_1.3.0         coro_1.1.0          
-## [16] mlr3_0.23.0          mlr3tuning_1.3.0     codetools_0.2-20     mlr3measures_1.0.0   palmerpenguins_0.1.1
-## [21] cli_3.6.5            rlang_1.1.6          crayon_1.5.3         atime_2025.4.26      parallelly_1.43.0   
-## [26] bit64_4.6.0-1        munsell_0.5.1        withr_3.0.2          nc_2025.3.24         mlr3pipelines_0.7.2 
-## [31] tools_4.5.0          parallel_4.5.0       uuid_1.2-1           checkmate_2.3.2      dplyr_1.1.4         
-## [36] colorspace_2.1-1     globals_0.16.3       bbotk_1.5.0          vctrs_0.6.5          R6_2.6.1            
-## [41] lifecycle_1.0.4      bit_4.6.0            mlr3misc_0.16.0      pkgconfig_2.0.3      callr_3.7.6         
-## [46] pillar_1.10.2        gtable_0.3.6         glue_1.8.0           Rcpp_1.0.14          lgr_0.4.4           
-## [51] paradox_1.0.1        xfun_0.51            tibble_3.2.1         tidyselect_1.2.1     knitr_1.50          
-## [56] farver_2.1.2         labeling_0.4.3       compiler_4.5.0       mlr3torch_0.2.1-9000
+##  [1] future_1.34.0        generics_0.1.3       listenv_0.9.1        digest_0.6.37        magrittr_2.0.3      
+##  [6] evaluate_1.0.3       grid_4.5.0           processx_3.8.6       backports_1.5.0      mlr3learners_0.10.0 
+## [11] torch_0.14.2         ps_1.9.0             scales_1.3.0         coro_1.1.0           mlr3_0.23.0         
+## [16] mlr3tuning_1.3.0     codetools_0.2-20     mlr3measures_1.0.0   palmerpenguins_0.1.1 cli_3.6.5           
+## [21] rlang_1.1.6          crayon_1.5.3         parallelly_1.43.0    bit64_4.6.0-1        munsell_0.5.1       
+## [26] withr_3.0.2          nc_2025.3.24         mlr3pipelines_0.7.2  tools_4.5.0          parallel_4.5.0      
+## [31] uuid_1.2-1           checkmate_2.3.2      dplyr_1.1.4          colorspace_2.1-1     globals_0.16.3      
+## [36] bbotk_1.5.0          vctrs_0.6.5          R6_2.6.1             lifecycle_1.0.4      bit_4.6.0           
+## [41] mlr3misc_0.16.0      pkgconfig_2.0.3      callr_3.7.6          pillar_1.10.2        gtable_0.3.6        
+## [46] glue_1.8.0           Rcpp_1.0.14          lgr_0.4.4            paradox_1.0.1        xfun_0.51           
+## [51] tibble_3.2.1         tidyselect_1.2.1     knitr_1.50           farver_2.1.2         labeling_0.4.3      
+## [56] compiler_4.5.0       mlr3torch_0.2.1-9000
 ```
