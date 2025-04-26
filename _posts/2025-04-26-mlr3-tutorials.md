@@ -29,11 +29,11 @@ simplest to most complex.
   learners](https://tdhock.github.io/blog/2024/mlr3torch/) explains
   how to compare linear models in torch with other learners from
   outside torch like `glmnet`.
+* [Comparing neural network architectures using mlr3torch](https://tdhock.github.io/blog/2025/mlr3torch-conv/) explains how to implement different neural network architectures, and make figures to compare their subtrain/validation/test error rates.
 * [Torch learning with binary
   classification](https://tdhock.github.io/blog/2025/mlr3torch-binary/)
-  explains how to implemnent a custom loss function for binary
+  explains how to implement a custom loss function for binary
   classification in mlr3torch.
-* TODO conv net blog.
 * TODO [lazy tensor](https://mlr3torch.mlr-org.com/articles/lazy_tensor.html) blog, show memory advantages. 
 * [Toulouse RUG
   slides](https://github.com/tdhock/2023-res-baz-az/tree/main?tab=readme-ov-file#april-2025-talk-at-toulouse-rug)
