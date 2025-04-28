@@ -25,9 +25,14 @@ if(FALSE){
 
 To login to mammouth, you need an account with the Digital Research
 Alliance of Canada. If you do not have one, then go to
-[CCDB](https://ccdb.alliancecan.ca/security/login) and register. When
+[CCDB](https://ccdb.alliancecan.ca/security/login) and register by following these [application instructions](https://alliancecan.ca/en/services/advanced-research-computing/account-management/apply-account). When
 you register, make sure to indicate your PI/professor/boss as your
-sponsor, so your compute time can be billed to their account. As a
+sponsor, so your compute time can be billed to their account. For me that is:
+
+* userid: thocking
+* account/project: def-thocking
+
+As a
 part of registration, you need to setup two-factor authentication,
 which probably means downloading the Duo Mobile app on your telephone.
 

@@ -11,9 +11,14 @@ Mammouth, the UdeS super-computer.
 
 To login to mammouth, you need an account with the Digital Research
 Alliance of Canada. If you do not have one, then go to
-[CCDB](https://ccdb.alliancecan.ca/security/login) and register. When
+[CCDB](https://ccdb.alliancecan.ca/security/login) and register by following these [application instructions](https://alliancecan.ca/en/services/advanced-research-computing/account-management/apply-account). When
 you register, make sure to indicate your PI/professor/boss as your
-sponsor, so your compute time can be billed to their account. As a
+sponsor, so your compute time can be billed to their account. For me that is:
+
+* userid: thocking
+* account/project: def-thocking
+
+As a
 part of registration, you need to setup two-factor authentication,
 which probably means downloading the Duo Mobile app on your telephone.
 
@@ -392,7 +397,7 @@ is 168 hours (seven days)." and under [Node characteristics](https://docs.allian
 it says there are three node types.
 
 
-```r
+``` r
 node.type.txt <- "Quantity	Cores	Available Memory	CPU Type	Storage	GPU Type
 1588	24	31 GB or 31744 MB	12 cores/socket, 2 sockets/node. AMD Opteron Processor 6172 @ 2.1 GHz	1TB SATA disk.	-
 20	48	251 GB or 257024 MB	12 cores/socket, 4 sockets/node. AMD Opteron Processor 6174 @ 2.2 GHz	1TB SATA disk.	-
@@ -562,6 +567,14 @@ srun: error: Unable to allocate resources: Requested time limit is invalid (miss
 Note the output above indicates that 4h time limit is invalid for the interactive job, but 2h time limit works fine. Admins told me the max time limit for interactive jobs is 3h, but they also said that limits could be changed on Mammouth if necessary.
 
 ## Q&A
+
+### Does torch work?
+
+torch in R does not seem to work on Mammouth. I got floating point
+exceptions when installing from CRAN, and link errors when installing
+binaries from a CDN. However I got torch in R to work on
+[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga) by installing
+from CRAN.
 
 ### Which partition to use?
 
