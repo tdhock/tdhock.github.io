@@ -99,14 +99,14 @@ DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
 
 For the students below, my role is primary advisor, unless another primary advisor is mentioned.
 
-* [Tung Lam Nguyen](https://github.com/lamtung16), Inf PHD, Spring 2024 - present.
-* [Doris Amoakohene](https://github.com/DorisAmoakohene), Inf master, Fall 2023 - present.
-* [Bilal Aslam](https://github.com/bilalaslam45), Inf PHD, Fall 2022 - present. Primary advisor: Kevin Gurney.
-* [Karl Harshe](https://github.com/harsheka), MechE PHD, Fall 2022 - present. Primary advisor: Zach Lerner.
+* [Tung Lam Nguyen](https://github.com/lamtung16), Informatics and Computing PHD, Spring 2024 - present.
+* [Bilal Aslam](https://github.com/bilalaslam45), Informatics and Computing PHD, Fall 2022 - present. Primary advisor: Kevin Gurney.
 * [Daniel Agyapong](https://github.com/EngineerDanny), Informatics and Computing PHD, Fall 2022 - present. 
+* [Karl Harshe](https://github.com/harsheka), MechE PHD, Fall 2022 - Spring 2024. Primary advisor: Zach Lerner.
+* [Doris Amoakohene](https://github.com/DorisAmoakohene), Inf master, Fall 2023 - Spring 2025.
 * [Tianyi (Bruce) Chen](https://github.com/TyBruceChen), CS undergrad, 2023 - 2024, then went to UCSB for master in communication, control, and signal processing.
 * [Cameron Bodine](https://github.com/CameronBodine), Informatics and Computing PHD, Spring 2020 - Spring 2024, then did postdoc at University of Delaware. Primary advisor: Dan Buscombe.
-* [Trevor Silverstein](https://github.com/trevb11), Inf PHD, Fall 2023, then went back to teach school.
+* [Trevor Silverstein](https://github.com/trevb11), Informatics and Computing PHD, Fall 2023, then went back to teach school.
 * [Jadon Fowler](https://github.com/phase), CS master, Fall 2022 - Spring 2023, working as software developer at [Lunar Client](https://www.lunarclient.com/).
 * [Austin Malmin](https://github.com/austinmalmin), CS master, Spring 2023, now Salesforce developer at [Microchip](https://www.microchip.com).
 * [Kyle Rust](https://github.com/rustky), CS master, Fall 2021 - Fall 2022, working as data scientist at [CHS](https://www.chsinc.com/).
