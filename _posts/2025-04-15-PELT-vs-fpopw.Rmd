@@ -282,12 +282,15 @@ change-point detected.
 ## FPOP
 
 Now we run FPOP, which is another pruning method, which is more
-complex to implement efficiently, so we use C++ code
-in the R package fpopw.
+complex to implement efficiently, so we use C++ code in the R package
+fpopw. In fact, the current CRAN version of fpopw (1.1) does not
+include the code which is used to write the candidate change-points
+considered at each iteration of dynamic programming, so we need to
+install my version from GitHub.
 
 ```{r fpop-prune}
 if(FALSE){
-  remotes::install_github("TODO")
+  remotes::install_github("tdhock/fpopw")
 }
 fpop_info_list <- list()
 fpop_segs_list <- list()

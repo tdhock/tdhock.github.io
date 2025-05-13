@@ -78,6 +78,16 @@ Below we use both functions with a three different data sizes.
 
 ``` r
 library(data.table)
+```
+
+```
+## data.table 1.17.99 EN DEVELOPPEMENT build 2025-04-28 04:18:03 UTC; root utilisant 7 threads (voir ?getDTthreads).  Dernières actualités : r-datatable.com
+## **********
+## Running data.table in English; package support is available in English only. When searching for online help, be sure to also check for the English error message. This can be obtained by looking at the po/R-<locale>.po and po/<locale>.po files in the package source, where the native language and English error messages can be found side-by-side. You can also try calling Sys.setLanguage('en') prior to reproducing the error message.
+## **********
+```
+
+``` r
 N_data_vec <- c(40, 400)
 sim_data_list <- list()
 sim_changes_list <- list()
@@ -150,6 +160,7 @@ addSim <- function(DT)DT[, Simulation := paste0("\n", simulation)][]
 ## 47:    400   linear_changes   380   \nlinear_changes
 ## 48:    400   linear_changes   390   \nlinear_changes
 ##     N_data       simulation   end         Simulation
+##      <num>           <char> <int>             <char>
 ```
 
 Above we see the table of simulated change-points. 
@@ -366,6 +377,15 @@ ggplot()+
   coord_cartesian(expand=FALSE)
 ```
 
+```
+## Warning: A numeric `legend.position` argument in `theme()` was deprecated in ggplot2
+## 3.5.0.
+## ℹ Please use the `legend.position.inside` argument of `theme()` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.
+```
+
 ![plot of chunk pelt-prune](/assets/img/2025-04-15-PELT-vs-fpopw/pelt-prune-1.png)
 
 We can see in the figure above that PELT considers a much smaller
@@ -384,13 +404,16 @@ change-point detected.
 ## FPOP
 
 Now we run FPOP, which is another pruning method, which is more
-complex to implement efficiently, so we use C++ code
-in the R package fpopw.
+complex to implement efficiently, so we use C++ code in the R package
+fpopw. In fact, the current CRAN version of fpopw (1.1) does not
+include the code which is used to write the candidate change-points
+considered at each iteration of dynamic programming, so we need to
+install my version from GitHub.
 
 
 ``` r
 if(FALSE){
-  remotes::install_github("TODO")
+  remotes::install_github("tdhock/fpopw")
 }
 fpop_info_list <- list()
 fpop_segs_list <- list()
@@ -501,6 +524,7 @@ for(N_data in N_data_vec){
 ## 51:    400   linear_changes   381   390
 ## 52:    400   linear_changes   391   400
 ##     N_data       simulation start   end
+##      <num>           <char> <num> <int>
 ```
 
 ``` r
@@ -892,32 +916,32 @@ refs_list$meas[, let(
 ## 358: 0.477735782   2.1284564  2.128456     5     5 <data.frame[1x3]>
 ## 359: 0.936223030   1.1026502 12.129153     1    11 <data.frame[1x3]>
 ## 360: 1.203440131   0.8292047  1.575489    10    19 <data.frame[1x3]>
-##                                                          time             gc    kilobytes         q25         q75
-##                                                        <list>         <list>        <num>       <num>       <num>
-##   1:             5.54ms,4.03ms,2.68ms,2.52ms,1.8ms,1.85ms,... <tbl_df[10x3]>     93.32031 0.001607192 0.002641524
-##   2:              1.7ms,1.61ms,1.59ms,1.53ms,1.55ms,1.7ms,... <tbl_df[10x3]>     75.10938 0.001568620 0.002484471
-##   3:             2.56ms,1.41ms,1.33ms,1.34ms,1.3ms,1.37ms,... <tbl_df[10x3]>    591.29688 0.001313606 0.001373302
-##   4:             1.6ms,1.73ms,1.63ms,1.69ms,8.38ms,2.02ms,... <tbl_df[10x3]>    688.04688 0.001564211 0.001719290
-##   5:              1.34ms,1.24ms,1.25ms,1.24ms,1.4ms,1.2ms,... <tbl_df[10x3]>    184.71094 0.001237503 0.001366346
-##  ---                                                                                                             
-## 356:                  249ms,257ms,256ms,251ms,248ms,250ms,... <tbl_df[10x3]>  44508.32031 0.245521652 0.250610559
-## 357:                   1.36s,1.31s,1.32s,1.33s,1.36s,1.4s,... <tbl_df[10x3]> 223776.32812 1.320581112 1.358846329
-## 358:                  469ms,465ms,476ms,480ms,485ms,460ms,... <tbl_df[10x3]>  88595.04688 0.466033021 0.485552854
-## 359: 902.89ms,935.98ms,930.08ms,972.82ms,  1.01s,975.62ms,... <tbl_df[10x3]> 176499.87500 0.912699753 0.974921501
-## 360:                    1.3s,1.22s,1.21s,1.32s,1.2s,1.15s,... <tbl_df[10x3]> 220805.92969 1.166255503 1.218121110
-##              max        mean           sd mean_candidates segments max_seg_size
-##            <num>       <num>        <num>           <num>    <int>        <num>
-##   1: 0.005545402 0.002483162 1.325116e-03        3.370000        4           25
-##   2: 0.003259974 0.002027544 6.930330e-04        2.910000       10           10
-##   3: 0.002559659 0.001463307 3.869984e-04       50.500000        4           25
-##   4: 0.008376459 0.002327593 2.130038e-03       50.500000       10           10
-##   5: 0.001401057 0.001284986 7.968007e-05       14.270000        4           25
-##  ---                                                                           
-## 356: 0.257091103 0.248581495 5.800837e-03        3.426640    20000           13
-## 357: 1.448767743 1.347575289 4.686918e-02       11.201395        4       100000
-## 358: 0.520933725 0.479964080 1.800418e-02        3.442537    40000           13
-## 359: 1.026951207 0.949789770 4.423560e-02        3.442912    80000           13
-## 360: 1.324852903 1.205974769 6.614078e-02        3.444736   100000           14
+##                                                                             time             gc    kilobytes
+##                                                                           <list>         <list>        <num>
+##   1: 0.005545402,0.004030369,0.002680323,0.002525126,0.001797987,0.001855270,... <tbl_df[10x3]>     93.32031
+##   2: 0.001697345,0.001613152,0.001586723,0.001527009,0.001552956,0.001696455,... <tbl_df[10x3]>     75.10938
+##   3: 0.002559659,0.001406851,0.001332304,0.001336327,0.001301534,0.001367585,... <tbl_df[10x3]>    591.29688
+##   4: 0.001596638,0.001728261,0.001630741,0.001692375,0.008376459,0.002016813,... <tbl_df[10x3]>    688.04688
+##   5: 0.001344149,0.001237954,0.001248464,0.001237455,0.001401057,0.001196567,... <tbl_df[10x3]>    184.71094
+##  ---                                                                                                        
+## 356:             0.2494982,0.2570911,0.2563410,0.2508619,0.2481566,0.2498564,... <tbl_df[10x3]>  44508.32031
+## 357:                   1.356805,1.305843,1.319844,1.327388,1.359527,1.403578,... <tbl_df[10x3]> 223776.32812
+## 358:             0.4685203,0.4651510,0.4757308,0.4797408,0.4847044,0.4599244,... <tbl_df[10x3]>  88595.04688
+## 359:             0.9028877,0.9359783,0.9300813,0.9728148,1.0080459,0.9756237,... <tbl_df[10x3]> 176499.87500
+## 360:                   1.298740,1.216388,1.211475,1.324853,1.195405,1.149941,... <tbl_df[10x3]> 220805.92969
+##              q25         q75         max        mean           sd mean_candidates segments max_seg_size
+##            <num>       <num>       <num>       <num>        <num>           <num>    <int>        <num>
+##   1: 0.001607192 0.002641524 0.005545402 0.002483162 1.325116e-03        3.370000        4           25
+##   2: 0.001568620 0.002484471 0.003259974 0.002027544 6.930330e-04        2.910000       10           10
+##   3: 0.001313606 0.001373302 0.002559659 0.001463307 3.869984e-04       50.500000        4           25
+##   4: 0.001564211 0.001719290 0.008376459 0.002327593 2.130038e-03       50.500000       10           10
+##   5: 0.001237503 0.001366346 0.001401057 0.001284986 7.968007e-05       14.270000        4           25
+##  ---                                                                                                   
+## 356: 0.245521652 0.250610559 0.257091103 0.248581495 5.800837e-03        3.426640    20000           13
+## 357: 1.320581112 1.358846329 1.448767743 1.347575289 4.686918e-02       11.201395        4       100000
+## 358: 0.466033021 0.485552854 0.520933725 0.479964080 1.800418e-02        3.442537    40000           13
+## 359: 0.912699753 0.974921501 1.026951207 0.949789770 4.423560e-02        3.442912    80000           13
+## 360: 1.166255503 1.218121110 1.324852903 1.205974769 6.614078e-02        3.444736   100000           14
 ##                                     expr.class                                       expr.latex    empirical
 ##                                         <char>                                           <char>        <num>
 ##   1: FPOP simulation=constant_changes\nN log N FPOP simulation=constant_changes\n$O(N \\log N)$     93.32031
@@ -1132,14 +1156,14 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_3.5.1     data.table_1.17.0
+## [1] ggplot2_3.5.1      data.table_1.17.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] crayon_1.5.3           directlabels_2024.1.21 vctrs_0.6.5            cli_3.6.4              knitr_1.50            
-##  [6] rlang_1.1.5            xfun_0.51              bench_1.1.4            generics_0.1.3         glue_1.8.0            
-## [11] labeling_0.4.3         colorspace_2.1-1       scales_1.3.0           fpopw_1.1              quadprog_1.5-8        
-## [16] grid_4.5.0             munsell_0.5.1          evaluate_1.0.3         tibble_3.2.1           profmem_0.6.0         
-## [21] lifecycle_1.0.4        compiler_4.5.0         dplyr_1.1.4            pkgconfig_2.0.3        atime_2025.4.1        
-## [26] farver_2.1.2           lattice_0.22-6         R6_2.6.1               tidyselect_1.2.1       pillar_1.10.1         
-## [31] magrittr_2.0.3         tools_4.5.0            withr_3.0.2            gtable_0.3.6
+##  [1] directlabels_2024.1.21 crayon_1.5.3           vctrs_0.6.5            cli_3.6.5              knitr_1.50            
+##  [6] rlang_1.1.6            xfun_0.51              generics_0.1.3         glue_1.8.0             labeling_0.4.3        
+## [11] colorspace_2.1-1       scales_1.3.0           fpopw_1.2              quadprog_1.5-8         grid_4.5.0            
+## [16] munsell_0.5.1          evaluate_1.0.3         tibble_3.2.1           lifecycle_1.0.4        compiler_4.5.0        
+## [21] dplyr_1.1.4            pkgconfig_2.0.3        atime_2025.4.26        lattice_0.22-6         farver_2.1.2          
+## [26] R6_2.6.1               tidyselect_1.2.1       pillar_1.10.2          magrittr_2.0.3         tools_4.5.0           
+## [31] withr_3.0.2            gtable_0.3.6
 ```
