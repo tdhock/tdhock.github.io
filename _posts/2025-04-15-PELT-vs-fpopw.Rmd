@@ -290,7 +290,7 @@ install my version from GitHub.
 
 ```{r fpop-prune}
 if(FALSE){
-  remotes::install_github("tdhock/fpopw")
+  remotes::install_github("tdhock/fpopw/fpopw")
 }
 fpop_info_list <- list()
 fpop_segs_list <- list()
