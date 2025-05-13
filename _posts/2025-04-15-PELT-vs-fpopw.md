@@ -78,16 +78,6 @@ Below we use both functions with a three different data sizes.
 
 ``` r
 library(data.table)
-```
-
-```
-## data.table 1.17.99 EN DEVELOPPEMENT build 2025-04-28 04:18:03 UTC; root utilisant 7 threads (voir ?getDTthreads).  Dernières actualités : r-datatable.com
-## **********
-## Running data.table in English; package support is available in English only. When searching for online help, be sure to also check for the English error message. This can be obtained by looking at the po/R-<locale>.po and po/<locale>.po files in the package source, where the native language and English error messages can be found side-by-side. You can also try calling Sys.setLanguage('en') prior to reproducing the error message.
-## **********
-```
-
-``` r
 N_data_vec <- c(40, 400)
 sim_data_list <- list()
 sim_changes_list <- list()
@@ -375,15 +365,6 @@ ggplot()+
     breaks=c(10, 100, 400))+
   theme(panel.grid.minor=element_blank())+
   coord_cartesian(expand=FALSE)
-```
-
-```
-## Warning: A numeric `legend.position` argument in `theme()` was deprecated in ggplot2
-## 3.5.0.
-## ℹ Please use the `legend.position.inside` argument of `theme()` instead.
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-## generated.
 ```
 
 ![plot of chunk pelt-prune](/assets/img/2025-04-15-PELT-vs-fpopw/pelt-prune-1.png)
@@ -1160,10 +1141,11 @@ sessionInfo()
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] directlabels_2024.1.21 crayon_1.5.3           vctrs_0.6.5            cli_3.6.5              knitr_1.50            
-##  [6] rlang_1.1.6            xfun_0.51              generics_0.1.3         glue_1.8.0             labeling_0.4.3        
-## [11] colorspace_2.1-1       scales_1.3.0           fpopw_1.2              quadprog_1.5-8         grid_4.5.0            
-## [16] munsell_0.5.1          evaluate_1.0.3         tibble_3.2.1           lifecycle_1.0.4        compiler_4.5.0        
-## [21] dplyr_1.1.4            pkgconfig_2.0.3        atime_2025.4.26        lattice_0.22-6         farver_2.1.2          
-## [26] R6_2.6.1               tidyselect_1.2.1       pillar_1.10.2          magrittr_2.0.3         tools_4.5.0           
-## [31] withr_3.0.2            gtable_0.3.6
+##  [6] rlang_1.1.6            xfun_0.51              processx_3.8.6         generics_0.1.3         glue_1.8.0            
+## [11] labeling_0.4.3         colorspace_2.1-1       ps_1.9.0               pkgbuild_1.4.7         scales_1.3.0          
+## [16] fpopw_1.2              quadprog_1.5-8         grid_4.5.0             munsell_0.5.1          evaluate_1.0.3        
+## [21] tibble_3.2.1           lifecycle_1.0.4        compiler_4.5.0         dplyr_1.1.4            pkgconfig_2.0.3       
+## [26] atime_2025.4.26        lattice_0.22-6         farver_2.1.2           R6_2.6.1               tidyselect_1.2.1      
+## [31] curl_6.2.2             pillar_1.10.2          callr_3.7.6            magrittr_2.0.3         tools_4.5.0           
+## [36] withr_3.0.2            gtable_0.3.6           desc_1.4.3             remotes_2.5.0
 ```
