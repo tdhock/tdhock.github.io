@@ -1,0 +1,288 @@
+---
+layout: post
+title: Centralized vs de-centralized parallelization
+description: Exploring rush
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-05-15-rush-change-point"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+I recently wrote about [New parallel computing frameworks in
+R](https://tdhock.github.io/blog/2025/rush/), including the
+[rush](https://github.com/mlr-org/rush) package by Marc Becker, who I
+met in a visit to Bernd Bischl's lab in Munich this week.  The goal of
+this blog is to explore different ways rush can be used for parallel
+computation of change-point models.
+
+## Genomic data
+
+In the PeakSegDisk package, we have the Mono27ac data set, which
+represents part of a genomic profile, with several peaks that
+represent active regions.
+
+```{r}
+data(Mono27ac, package="PeakSegDisk")
+library(data.table)
+Mono27ac$coverage
+```
+
+These data can be visualized via the code below.
+
+```{r data}
+library(ggplot2)
+ggplot()+
+  theme_bw()+
+  geom_step(aes(
+    chromStart/1e3, count),
+    color="grey50",
+    data=Mono27ac$coverage)
+```
+
+## Computing a peak model
+
+We may like to compute a sequence of change-point models for these
+data.  In the PeakSegDisk package, you can use the
+`sequentialSearch_dir` function to compute a model with a given number
+of peaks. You first must save the data to disk, as in the code below.
+
+```{r}
+data.dir <- file.path(
+  tempfile(),
+  "H3K27ac-H3K4me3_TDHAM_BP",
+  "samples",
+  "Mono1_H3K27ac",
+  "S001YW_NCMLS",
+  "problems",
+  "chr11-60000-580000")
+dir.create(data.dir, recursive=TRUE, showWarnings=FALSE)
+write.table(
+  Mono27ac$coverage, file.path(data.dir, "coverage.bedGraph"),
+  col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
+```
+
+After that, you can run the sequential search algorithm, in parallel
+if you declare a future plan as in the code below.
+
+```{r}
+future::plan("multisession")
+fit10 <- PeakSegDisk::sequentialSearch_dir(data.dir, 10L, verbose=1)
+```
+
+The code uses a penalized solver, which means a non-negative penalty
+value must be specified as the model complexity hyper-parameter, and
+we do not know in advance how many change-points (and peaks) that will
+give. The sequential search algorithm evaluates a bunch of different
+penalty values until it finds the desired number of peaks (10 in this
+case). This model is shown below,
+
+```{r peaks-10}
+plot(fit10)+
+  geom_step(aes(
+    chromStart, count),
+    color="grey50",
+    data=Mono27ac$coverage)
+```
+
+The plot above shows that the model change-points are a reasonable fit
+to the data, but we may want to examine other model sizes (say from 5
+to 15 peaks). To do that, we could implement a parallel computation of
+the penalty values.  `Next` output above shows the penalties that were
+evaluated in the search. We see that the first two penalties are `0`
+and `Inf`, which give the largest/smallest change-point models (3199
+and 0 peaks in this case). Those are the only two that are evaluated
+in parallel. Next, we show how we could evaluate several penalties in
+parallel.
+
+## Computing a range of models
+
+Computing a range of change-point model sizes can be implemented using
+the CROCS algorithm, described in [our BMC Bioinformatics 2021 paper,
+with Arnaud Liehrmann and Guillem
+Rigaill](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-021-04221-5).
+To do that, we first compute the most extreme models.
+
+```{r}
+pen.vec <- c(0,Inf)
+loss.dt.list <- list()
+for(pen in pen.vec){
+  fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
+  loss.dt.list[[paste(pen)]] <- fit$loss[, .(penalty, peaks, total.loss)]
+}
+(loss.dt <- rbindlist(loss.dt.list))
+```
+
+The table above shows the number of peaks and Poisson loss values for
+the two models. The optimization objective is the cost plus the
+penalty times the number of peaks. Therefore, the number of peaks
+selected for a given penalty is the argmin of a finite number of
+linear functions. Each linear function has slope equal to number of
+peaks, and intercept equal to total Poisson loss.
+We can visualize these functions via the plot below,
+
+```{r model-sel}
+get_selection <- function(loss){
+  selection.df <- penaltyLearning::modelSelection(loss.dt, "total.loss", "peaks")
+  with(selection.df, data.table(
+    total.loss,
+    min.lambda,
+    penalty,
+    max.lambda,
+    peaks_after=c(peaks[-1],NA),
+    peaks
+  ))[
+  , helpful := peaks_after<15 & peaks>5 & peaks_after+1 < peaks & !max.lambda %in% names(loss.dt.list)
+  ][]
+}
+(selection.dt <- get_selection(loss.dt))
+get_gg <- function(){
+  dot.dt <- rbind(
+    data.table(loss.dt[, .(penalty, peaks, total.loss, helpful=FALSE)], dot="evaluated"),
+    data.table(selection.dt[-.N, .(penalty=max.lambda, peaks, total.loss, helpful)], dot="candidate"))
+  ggplot()+
+    geom_abline(aes(
+      slope=peaks,
+      intercept=total.loss),
+      data=loss.dt)+
+    geom_point(aes(
+      penalty,
+      total.loss+ifelse(peaks==0, 0, penalty*peaks),
+      color=helpful),
+      size=5,
+      data=dot.dt)+
+    geom_point(aes(
+      penalty,
+      total.loss+ifelse(peaks==0, 0, penalty*peaks),
+      color=helpful,
+      fill=dot),
+      shape=21,
+      size=4,
+      data=dot.dt)+
+    geom_label(aes(
+      penalty,
+      total.loss+ifelse(peaks==0, 0, penalty*peaks),
+      hjust=ifelse(penalty==Inf, 1, 0.5),
+      label=peaks),
+      vjust=1.5,
+      alpha=0.5,
+      data=dot.dt[dot=="evaluated"])+
+    scale_fill_manual(values=c(evaluated="white", candidate="black"))+
+    scale_color_manual(values=c("TRUE"="red", "FALSE"="black"))+
+    scale_y_continuous("Cost = Loss + penalty * peaks")
+}
+get_gg()
+```
+
+We see in the plot above that there is an intersection of these
+functions a little after penalty=150. Since these functions are for
+3199 and 0 peaks, and our target numbers of peaks is between (5 to
+15), we are guaranteed to make progress if we compute a new penalty at
+the intersection point. We do that in the code below,
+
+```{r}
+pen <- selection.dt$max.lambda[1]
+fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
+loss.dt.list[[paste(pen)]] <- fit$loss[, .(penalty, peaks, total.loss)]
+(loss.dt <- rbindlist(loss.dt.list))
+```
+
+We see in the new loss table that there is an intermediate number of
+peaks, 224.  This results in two intersection point candidates (the
+first two rows of the table below).
+
+```{r model-sel-3}
+(selection.dt <- get_selection(loss.dt))
+get_gg()
+```
+
+Let's keep going until we have more than one interesting/helpful candidate.
+
+```{r}
+while(sum(selection.dt$helpful)==1){
+  pen <- selection.dt[helpful==TRUE, max.lambda]
+  fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
+  loss.dt.list[[paste(pen)]] <- fit$loss[, .(penalty, peaks, total.loss)]
+  loss.dt <- rbindlist(loss.dt.list)
+  print(selection.dt <- get_selection(loss.dt))
+}
+```
+
+The output above shows that there are now two helpful candidates. The
+code below visualizes them.
+
+```{r model-sel-6}
+get_gg()
+```
+
+Above we see that there are 5 candidate penalties, but only 2 helpful
+penalties that would definitely make progress toward computing all
+models between 5 and 15 peaks.
+At this point we may think of how to parallelize.
+
+## sequential
+
+```{r pit-1}
+pen.list <- list()
+seq_it <- function(){
+  pen.vec <- selection.dt[helpful==TRUE, max.lambda]
+  pen.list[[length(pen.list)+1]] <<- pen.vec
+  loss.dt.list[paste(pen.vec)] <<- future.apply::future_lapply(pen.vec, function(pen){
+    fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
+    fit$loss[, .(penalty, peaks, total.loss)]
+  })
+  loss.dt <<- rbindlist(loss.dt.list)
+  selection.dt <<- get_selection(loss.dt)
+  get_gg()
+}
+seq_it()
+```
+
+After the first parallel iteration above, we see four helpful candidates.
+
+```{r pit-2}
+seq_it()
+```
+
+Let's keep going.
+
+```{r pit-3}
+while(any(selection.dt$helpful)){
+  gg <- seq_it()
+}
+gg
+selection.dt
+```
+
+We see in the table above that there are 16 iterations total.
+Overall the algo looks like below.
+
+```{r}
+pen.vec <- c(0,Inf)
+pen.list <- list(pen.vec)
+loss.dt.list <- list()
+for(pen in pen.vec){
+  fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
+  loss.dt.list[[paste(pen)]] <- fit$loss[, .(penalty, peaks, total.loss)]
+}
+loss.dt <- rbindlist(loss.dt.list)
+selection.dt <- get_selection(loss.dt)
+while(any(selection.dt$helpful)){
+  seq_it()
+}
+data.table(pen.list)
+```
