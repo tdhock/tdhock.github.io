@@ -101,7 +101,14 @@ plot(fit10)+
 
 The plot above shows that the model change-points are a reasonable fit
 to the data, but we may want to examine other model sizes (say from 5
-to 15 peaks). To do that, we could implement a parallel computation of
+to 15 peaks). 
+
+```{r}
+target.min.peaks <- 5
+target.max.peaks <- 15
+```
+
+To do that, we could implement a parallel computation of
 the penalty values.  `Next` output above shows the penalties that were
 evaluated in the search. We see that the first two penalties are `0`
 and `Inf`, which give the largest/smallest change-point models (3199
@@ -132,12 +139,13 @@ the two models. The optimization objective is the cost plus the
 penalty times the number of peaks. Therefore, the number of peaks
 selected for a given penalty is the argmin of a finite number of
 linear functions. Each linear function has slope equal to number of
-peaks, and intercept equal to total Poisson loss.
-We can visualize these functions via the plot below,
+peaks, and intercept equal to total Poisson loss.  We can compute an
+estimate of a model selection function, which maps penalty/lambda
+values to model sizes (in peaks) via the code below.
 
-```{r model-sel}
+```{r}
 get_selection <- function(loss){
-  selection.df <- penaltyLearning::modelSelection(loss.dt, "total.loss", "peaks")
+  selection.df <- penaltyLearning::modelSelection(loss, "total.loss", "peaks")
   with(selection.df, data.table(
     total.loss,
     min.lambda,
@@ -146,14 +154,24 @@ get_selection <- function(loss){
     peaks_after=c(peaks[-1],NA),
     peaks
   ))[
-  , helpful := peaks_after<15 & peaks>5 & peaks_after+1 < peaks & !max.lambda %in% names(loss.dt.list)
+  , helpful := peaks_after<target.max.peaks & peaks>target.min.peaks &
+      peaks_after+1 < peaks & !max.lambda %in% names(loss.dt.list)
   ][]
 }
 (selection.dt <- get_selection(loss.dt))
+```
+
+The table above has columns for `min.lambda` and `max.lambda`, which
+indicate a range of penalties for which we have evidence that `peaks`
+may be selected. We can visualize these functions via the plot below,
+
+```{r model-sel}
 get_gg <- function(){
   dot.dt <- rbind(
-    data.table(loss.dt[, .(penalty, peaks, total.loss, helpful=FALSE)], dot="evaluated"),
-    data.table(selection.dt[-.N, .(penalty=max.lambda, peaks, total.loss, helpful)], dot="candidate"))
+    data.table(loss.dt[, .(
+      penalty, peaks, total.loss, helpful=FALSE)], dot="evaluated"),
+    data.table(selection.dt[-.N, .(
+      penalty=max.lambda, peaks, total.loss, helpful)], dot="candidate"))
   ggplot()+
     geom_abline(aes(
       slope=peaks,
@@ -186,40 +204,43 @@ get_gg <- function(){
     scale_y_continuous("Cost = Loss + penalty * peaks")
 }
 get_gg()
+pen <- selection.dt$max.lambda[1]
 ```
 
 We see in the plot above that there is an intersection of these
-functions a little after penalty=150. Since these functions are for
+functions at penalty=`r pen`. Since these functions are for
 3199 and 0 peaks, and our target numbers of peaks is between (5 to
 15), we are guaranteed to make progress if we compute a new penalty at
 the intersection point. We do that in the code below,
 
 ```{r}
-pen <- selection.dt$max.lambda[1]
 fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
 loss.dt.list[[paste(pen)]] <- fit$loss[, .(penalty, peaks, total.loss)]
 (loss.dt <- rbindlist(loss.dt.list))
 ```
 
 We see in the new loss table that there is an intermediate number of
-peaks, 224.  This results in two intersection point candidates (the
-first two rows of the table below).
+peaks, `r loss.dt[.N, peaks]`.  This results in two intersection point
+candidates (the first two rows of the table below).
 
 ```{r model-sel-3}
 (selection.dt <- get_selection(loss.dt))
 get_gg()
 ```
 
+We see in the figure above that only one of the two candidates is helpful toward our goal of computing models between 5 and 15 peaks.
+We can evaluate the penalty at that candidate in order to make progress.
 Let's keep going until we have more than one interesting/helpful candidate.
 
 ```{r}
 while(sum(selection.dt$helpful)==1){
   pen <- selection.dt[helpful==TRUE, max.lambda]
   fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
-  loss.dt.list[[paste(pen)]] <- fit$loss[, .(penalty, peaks, total.loss)]
+  print(loss.dt.list[[paste(pen)]] <- fit$loss[, .(penalty, peaks, total.loss)])
   loss.dt <- rbindlist(loss.dt.list)
-  print(selection.dt <- get_selection(loss.dt))
+  selection.dt <- get_selection(loss.dt)
 }
+selection.dt
 ```
 
 The output above shows that there are now two helpful candidates. The
@@ -230,11 +251,15 @@ get_gg()
 ```
 
 Above we see that there are 5 candidate penalties, but only 2 helpful
-penalties that would definitely make progress toward computing all
+penalties that would make progress toward computing all
 models between 5 and 15 peaks.
 At this point we may think of how to parallelize.
 
-## sequential
+## Centralized launching, future.apply
+
+One way to do it is by first computing the candidate penalties in a
+central process, then sending those penalties to workers for
+computation. That is implemented in the code below.
 
 ```{r pit-1}
 pen.list <- list()
@@ -269,20 +294,135 @@ selection.dt
 ```
 
 We see in the table above that there are 16 iterations total.
-Overall the algo looks like below.
+
+### Coding a function
+
+Overall the algorithm which uses a central launcher to determine
+candidates can be implemented via the code below.
 
 ```{r}
-pen.vec <- c(0,Inf)
-pen.list <- list(pen.vec)
-loss.dt.list <- list()
-for(pen in pen.vec){
-  fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
-  loss.dt.list[[paste(pen)]] <- fit$loss[, .(penalty, peaks, total.loss)]
+central_launch <- function(target.min.peaks, target.max.peaks){
+  data.dir <- file.path(
+    tempfile(),
+    "H3K27ac-H3K4me3_TDHAM_BP",
+    "samples",
+    "Mono1_H3K27ac",
+    "S001YW_NCMLS",
+    "problems",
+    "chr11-60000-580000")
+  dir.create(data.dir, recursive=TRUE, showWarnings=FALSE)
+  write.table(
+    Mono27ac$coverage, file.path(data.dir, "coverage.bedGraph"),
+    col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
+  pen.vec <- c(0,Inf)
+  loss.dt.list <- list()
+  cand.dt.list <- list()
+  iteration <- 1L
+  while(length(pen.vec)){
+    loss.dt.list[paste(pen.vec)] <- future.apply::future_lapply(
+      pen.vec, function(pen){
+        start.time <- Sys.time()
+        fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
+        fit$loss[, .(
+          penalty, peaks, total.loss, iteration,
+          process=factor(Sys.getpid()), start.time, end.time=Sys.time())]
+      }
+    )
+    start.time <- Sys.time()
+    loss.dt <- rbindlist(loss.dt.list)
+    selection.df <- penaltyLearning::modelSelection(loss.dt, "total.loss", "peaks")
+    selection.dt <- with(selection.df, data.table(
+      total.loss,
+      min.lambda,
+      penalty,
+      max.lambda,
+      peaks_after=c(peaks[-1],NA),
+      peaks
+    ))[
+    , helpful := peaks_after<target.max.peaks & peaks>target.min.peaks &
+        peaks_after+1 < peaks & !max.lambda %in% names(loss.dt.list)
+    ][]
+    pen.vec <- selection.dt[helpful==TRUE, max.lambda]
+    cand.dt.list[[length(cand.dt.list)+1]] <- data.table(
+      iteration,
+      process=factor("central"), start.time, end.time=Sys.time())
+    iteration <- iteration+1L
+  }
+  list(loss=loss.dt, candidates=rbindlist(cand.dt.list))
 }
-loss.dt <- rbindlist(loss.dt.list)
-selection.dt <- get_selection(loss.dt)
-while(any(selection.dt$helpful)){
-  seq_it()
+(loss_5_15 <- central_launch(5,15))
+```
+
+The result is a list of two tables:
+
+* `loss` has one row per penalty value computed.
+* `candidates` has one row per computation of new candidates.
+
+```{r central-5-15}
+viz_workers <- function(L){
+  min.time <- min(L$loss$start.time)
+  for(N in names(L)){
+    L[[N]] <- data.table(L[[N]], computation=N)
+    for(pos in c("start", "end")){
+      time.vec <- L[[N]][[paste0(pos,".time")]]
+      set(L[[N]], j=paste0(pos,".seconds"), value=time.vec-min.time)
+    }
+  }
+  ##L$cand$process <- L$loss[, .(count=.N), by=process][order(-count)][1, process]
+  biggest.diff <- L$loss[,as.numeric(diff(c(min(start.seconds),max(end.seconds))))]
+  n.proc <- length(unique(L$loss$process))
+  best.seconds <- n.proc*biggest.diff
+  total.seconds <- L$loss[,sum(end.seconds-start.seconds)]
+  efficiency <- total.seconds/best.seconds
+  seg.dt <- rbind(L$cand,L$loss[,names(L$cand),with=FALSE])
+  text.dt <- L$loss[,.(
+    mid.seconds=as.POSIXct((as.numeric(min(start.seconds))+as.numeric(max(end.seconds)))/2),
+    label=paste(peaks,collapse=",")
+  ),by=.(process,iteration)]
+  it.dt <- seg.dt[, .(min.seconds=min(start.seconds), max.seconds=max(end.seconds)), by=iteration]
+  ggplot()+
+    theme_bw()+
+    ggtitle(sprintf("Worker efficiency = %.1f%%", 100*total.seconds/best.seconds))+
+    geom_rect(aes(
+      xmin=min.seconds, xmax=max.seconds,
+      ymin=-Inf, ymax=Inf),
+      fill="grey",
+      data=it.dt)+
+    geom_text(aes(
+      (min.seconds+max.seconds)/2, Inf,
+      label=iteration),
+      data=it.dt,
+      vjust=1)+
+    geom_segment(aes(
+      start.seconds, process,
+      color=computation,
+      xend=end.seconds, yend=process),
+      data=seg.dt)+
+    geom_point(aes(
+      start.seconds, process,
+      color=computation),
+      shape=1,
+      data=seg.dt)+
+    geom_text(aes(
+      mid.seconds, process, label=label),
+      vjust=1.5,
+      data=text.dt)+
+    scale_color_manual(values=c(
+      loss="black",
+      candidates="red"))+
+    scale_y_discrete("process")+
+    scale_x_continuous("time (seconds)")
 }
-data.table(pen.list)
+viz_workers(loss_5_15)
+```
+
+The figure above shows how the computation proceeds over time (X axis)
+in the different parallel processes (Y axis). Iterations are shown in
+grey rectangles, with iteration numbers at the top of the plot. In
+each iteration, There are at most four parallel workers (black) at any
+given time.
+
+```{r central-1-100}
+(loss_1_100 <- central_launch(1,100))
+viz_workers(loss_1_100)
 ```
