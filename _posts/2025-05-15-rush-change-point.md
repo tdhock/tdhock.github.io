@@ -485,39 +485,39 @@ central_launch <- function(target.min.peaks, target.max.peaks){
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##  1:     0.0000  3199 -130227.291         1  197162 2025-05-18 09:28:32 2025-05-18 09:28:32
-##  2:        Inf     0  375197.873         1  197166 2025-05-18 09:28:32 2025-05-18 09:28:32
-##  3:   157.9947   224  -62199.931         2  197162 2025-05-18 09:28:33 2025-05-18 09:28:33
-##  4:  1952.6688    17    2640.128         3  197162 2025-05-18 09:28:33 2025-05-18 09:28:33
-##  5: 21915.1615     4   89739.642         4  197162 2025-05-18 09:28:33 2025-05-18 09:28:33
-##  6:  6699.9627     8   36282.919         5  197162 2025-05-18 09:28:33 2025-05-18 09:28:34
-##  7:  3738.0879    11   19258.189         6  197162 2025-05-18 09:28:34 2025-05-18 09:28:34
-##  8: 13364.1808     6   55084.654         6  197166 2025-05-18 09:28:34 2025-05-18 09:28:34
-##  9:  2769.6768    13   13373.281         7  197162 2025-05-18 09:28:34 2025-05-18 09:28:34
-## 10:  5674.9101    10   24108.390         7  197166 2025-05-18 09:28:34 2025-05-18 09:28:34
-## 11:  9400.8673     7   43845.255         7  197165 2025-05-18 09:28:34 2025-05-18 09:28:34
-## 12: 17327.4943     5   70694.172         7  197158 2025-05-18 09:28:35 2025-05-18 09:28:35
-## 13:  2683.2884    16    5152.375         8  197162 2025-05-18 09:28:35 2025-05-18 09:28:35
-## 14:  2942.4538    12   16241.816         8  197166 2025-05-18 09:28:35 2025-05-18 09:28:35
-## 15:  6087.2647     9   30064.892         8  197165 2025-05-18 09:28:35 2025-05-18 09:28:35
-## 16:  2740.3022    14   10611.733         9  197162 2025-05-18 09:28:35 2025-05-18 09:28:36
-## 17:  2729.6793    16    5152.375        10  197162 2025-05-18 09:28:36 2025-05-18 09:28:36
-## 18:  2729.6793    16    5152.375        11  197162 2025-05-18 09:28:36 2025-05-18 09:28:36
+##  1:     0.0000  3199 -130227.291         1  201562 2025-05-18 10:28:25 2025-05-18 10:28:25
+##  2:        Inf     0  375197.873         1  201558 2025-05-18 10:28:25 2025-05-18 10:28:25
+##  3:   157.9947   224  -62199.931         2  201562 2025-05-18 10:28:26 2025-05-18 10:28:26
+##  4:  1952.6688    17    2640.128         3  201562 2025-05-18 10:28:26 2025-05-18 10:28:26
+##  5: 21915.1615     4   89739.642         4  201562 2025-05-18 10:28:26 2025-05-18 10:28:27
+##  6:  6699.9627     8   36282.919         5  201562 2025-05-18 10:28:27 2025-05-18 10:28:27
+##  7:  3738.0879    11   19258.189         6  201562 2025-05-18 10:28:27 2025-05-18 10:28:27
+##  8: 13364.1808     6   55084.654         6  201558 2025-05-18 10:28:27 2025-05-18 10:28:27
+##  9:  2769.6768    13   13373.281         7  201562 2025-05-18 10:28:28 2025-05-18 10:28:28
+## 10:  5674.9101    10   24108.390         7  201558 2025-05-18 10:28:28 2025-05-18 10:28:28
+## 11:  9400.8673     7   43845.255         7  201565 2025-05-18 10:28:28 2025-05-18 10:28:28
+## 12: 17327.4943     5   70694.172         7  201557 2025-05-18 10:28:28 2025-05-18 10:28:28
+## 13:  2683.2884    16    5152.375         8  201562 2025-05-18 10:28:28 2025-05-18 10:28:28
+## 14:  2942.4538    12   16241.816         8  201558 2025-05-18 10:28:28 2025-05-18 10:28:29
+## 15:  6087.2647     9   30064.892         8  201565 2025-05-18 10:28:29 2025-05-18 10:28:29
+## 16:  2740.3022    14   10611.733         9  201562 2025-05-18 10:28:29 2025-05-18 10:28:29
+## 17:  2729.6793    16    5152.375        10  201562 2025-05-18 10:28:29 2025-05-18 10:28:29
+## 18:  2729.6793    16    5152.375        11  201562 2025-05-18 10:28:29 2025-05-18 10:28:30
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1 central 2025-05-18 09:28:32 2025-05-18 09:28:32
-##  2:         2 central 2025-05-18 09:28:33 2025-05-18 09:28:33
-##  3:         3 central 2025-05-18 09:28:33 2025-05-18 09:28:33
-##  4:         4 central 2025-05-18 09:28:33 2025-05-18 09:28:33
-##  5:         5 central 2025-05-18 09:28:34 2025-05-18 09:28:34
-##  6:         6 central 2025-05-18 09:28:34 2025-05-18 09:28:34
-##  7:         7 central 2025-05-18 09:28:35 2025-05-18 09:28:35
-##  8:         8 central 2025-05-18 09:28:35 2025-05-18 09:28:35
-##  9:         9 central 2025-05-18 09:28:36 2025-05-18 09:28:36
-## 10:        10 central 2025-05-18 09:28:36 2025-05-18 09:28:36
-## 11:        11 central 2025-05-18 09:28:36 2025-05-18 09:28:36
+##  1:         1 central 2025-05-18 10:28:25 2025-05-18 10:28:25
+##  2:         2 central 2025-05-18 10:28:26 2025-05-18 10:28:26
+##  3:         3 central 2025-05-18 10:28:26 2025-05-18 10:28:26
+##  4:         4 central 2025-05-18 10:28:27 2025-05-18 10:28:27
+##  5:         5 central 2025-05-18 10:28:27 2025-05-18 10:28:27
+##  6:         6 central 2025-05-18 10:28:27 2025-05-18 10:28:27
+##  7:         7 central 2025-05-18 10:28:28 2025-05-18 10:28:28
+##  8:         8 central 2025-05-18 10:28:29 2025-05-18 10:28:29
+##  9:         9 central 2025-05-18 10:28:29 2025-05-18 10:28:29
+## 10:        10 central 2025-05-18 10:28:29 2025-05-18 10:28:29
+## 11:        11 central 2025-05-18 10:28:30 2025-05-18 10:28:30
 ```
 
 The result is a list of two tables:
@@ -555,6 +555,7 @@ viz_workers <- function(L){
       xmin=min.seconds, xmax=max.seconds,
       ymin=-Inf, ymax=Inf),
       fill="grey",
+      alpha=0.5,
       data=it.dt)+
     geom_text(aes(
       x=(min.seconds+max.seconds)/2, Inf,
@@ -562,6 +563,12 @@ viz_workers <- function(L){
       label=paste0(ifelse(iteration==1, "it=", ""), iteration)),
       data=it.dt,
       vjust=1)+
+    directlabels::geom_dl(aes(
+      start.seconds, process,
+      label.group=paste(iteration, process),
+      label=peaks),
+      data=L$loss,
+      method=polygon.mine("bottom", offset.cm=0.2, custom.colors=list(box.color="white")))+
     geom_segment(aes(
       start.seconds, process,
       color=computation,
@@ -572,15 +579,104 @@ viz_workers <- function(L){
       color=computation),
       shape=1,
       data=seg.dt)+
-    geom_text(aes(
-      mid.seconds, process, label=label),
-      vjust=1.5,
-      data=text.dt)+
+    ## geom_text(aes(
+    ##   mid.seconds, process, label=label),
+    ##   vjust=1.5,
+    ##   data=text.dt)+
     scale_color_manual(values=c(
       loss="black",
       candidates="red"))+
     scale_y_discrete("process")+
     scale_x_continuous("time (seconds)")
+}
+polygon.mine <- function
+### Make a Positioning Method that places non-overlapping speech
+### polygons at the first or last points.
+(top.bottom.left.right,
+### Character string indicating what side of the plot to label.
+  offset.cm=0.1,
+### Offset from the polygon to the most extreme data point.
+  padding.cm=0.05,
+### Padding inside the polygon.
+  custom.colors=NULL
+### Positioning method applied just before draw.polygons, can set
+### box.color and text.color for custom colors.
+){
+  if(is.null(custom.colors)){
+    custom.colors <- directlabels::gapply.fun({
+      rgb.mat <- col2rgb(d[["colour"]])
+      d$text.color <- with(data.frame(t(rgb.mat)), {
+        gray <- 0.3*red + 0.59*green + 0.11*blue
+        ifelse(gray/255 < 0.5, "white", "black")
+      })
+      d
+    })
+  }
+  opposite.side <- c(
+    left="right",
+    right="left",
+    top="bottom",
+    bottom="top")[[top.bottom.left.right]]
+  direction <- if(
+    top.bottom.left.right %in% c("bottom", "left")
+  ) -1 else 1
+  min.or.max <- if(
+    top.bottom.left.right %in% c("top", "right")
+  ) max else min
+  if(top.bottom.left.right %in% c("left", "right")){
+    min.or.max.xy <- "x"
+    qp.target <- "y"
+    qp.max <- "top"
+    qp.min <- "bottom"
+    padding.h.factor <- 2
+    padding.w.factor <- 1
+    limits.fun <- ylimits
+    reduce.method <- "reduce.cex.lr"
+  }else{
+    min.or.max.xy <- "y"
+    qp.target <- "x"
+    qp.max <- "right"
+    qp.min <- "left"
+    padding.h.factor <- 1
+    padding.w.factor <- 2
+    limits.fun <- directlabels::xlimits
+    reduce.method <- "reduce.cex.tb"
+  }
+  list(
+    hjust=0.5, vjust=1,
+    function(d,...){
+      ## set the end of the speech polygon to the original data point.
+      for(xy in c("x", "y")){
+        extra.coord <- sprintf(# e.g. left.x
+          "%s.%s", opposite.side, xy)
+        d[[extra.coord]] <- d[[xy]]
+      }
+      ## offset positions but do NOT set the speech polygon position
+      ## to the min or max.
+      d[[min.or.max.xy]] <- d[[min.or.max.xy]] + offset.cm*direction
+      d
+    },
+    "calc.boxes",
+    reduce.method,
+    function(d, ...){
+      d$h <- d$h + padding.cm * padding.h.factor
+      d$w <- d$w + padding.cm * padding.w.factor
+      d
+    },
+    "calc.borders",
+    function(d,...){
+      do.call(rbind, lapply(split(d, d$y), function(d){
+        directlabels::apply.method(directlabels::qp.labels(
+          qp.target,
+          qp.min,
+          qp.max,
+          directlabels::make.tiebreaker(min.or.max.xy, qp.target),
+          limits.fun), d)
+      }))
+    },
+    "calc.borders",
+    custom.colors,
+    "draw.polygons")
 }
 viz_workers(loss_5_15)
 ```
@@ -591,7 +687,25 @@ The figure above shows how the computation proceeds over time (X axis)
 in the different parallel processes (Y axis). Iterations are shown in
 grey rectangles, with iteration numbers at the top of the plot. In
 each iteration, There are at most four parallel workers (black) at any
-given time.
+given time. We see that before starting a new iteration, all workers
+must complete, and wait for the central process to compute new
+candidates. The worker efficiency reported at the top of the plot is
+the amount of time taken computing models (black segments), divided by
+the max time that could be taken by that number of workers (if black
+line segments were from start to end of the plot for each
+worker). There are two sources of inefficiency:
+
+* The overhead for starting a new future job is about 0.2 seconds, and
+  this overhead could be reduced by using mirai package instead. But
+  for long running computations (big data or complex models), this
+  overhead is not the important bottleneck.
+* Because of the centralized method for computing new candidates, the
+  first process that finishes in an iteration must wait for the last
+  process, before it starts working again. This can be fixed by using
+  rush package instead (as we show in the next section).
+
+To see these patterns more clearly, below we run the central launch
+algorithm with a larger number of models:
 
 
 ``` r
@@ -602,35 +716,35 @@ given time.
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##   1:    0.0000  3199 -130227.291         1  197162 2025-05-18 09:28:37 2025-05-18 09:28:37
-##   2:       Inf     0  375197.873         1  197166 2025-05-18 09:28:37 2025-05-18 09:28:37
-##   3:  157.9947   224  -62199.931         2  197162 2025-05-18 09:28:37 2025-05-18 09:28:37
-##   4: 1952.6688    17    2640.128         3  197162 2025-05-18 09:28:37 2025-05-18 09:28:37
-##   5:  313.2370    74  -31865.715         4  197162 2025-05-18 09:28:37 2025-05-18 09:28:38
+##   1:    0.0000  3199 -130227.291         1  201562 2025-05-18 10:28:30 2025-05-18 10:28:30
+##   2:       Inf     0  375197.873         1  201558 2025-05-18 10:28:30 2025-05-18 10:28:30
+##   3:  157.9947   224  -62199.931         2  201562 2025-05-18 10:28:31 2025-05-18 10:28:31
+##   4: 1952.6688    17    2640.128         3  201562 2025-05-18 10:28:31 2025-05-18 10:28:31
+##   5:  313.2370    74  -31865.715         4  201562 2025-05-18 10:28:31 2025-05-18 10:28:31
 ##  ---                                                                                      
-## 112:  314.0074    74  -31865.715        13  197158 2025-05-18 09:28:52 2025-05-18 09:28:52
-## 113:  327.0344    62  -28011.480        13  197161 2025-05-18 09:28:52 2025-05-18 09:28:52
-## 114:  247.0699    95  -37499.236        14  197162 2025-05-18 09:28:53 2025-05-18 09:28:53
-## 115:  247.5600    95  -37499.236        14  197166 2025-05-18 09:28:53 2025-05-18 09:28:53
-## 116:  327.0344    62  -28011.480        14  197165 2025-05-18 09:28:53 2025-05-18 09:28:53
+## 112:  314.0074    74  -31865.715        13  201557 2025-05-18 10:28:44 2025-05-18 10:28:45
+## 113:  327.0344    62  -28011.480        13  201560 2025-05-18 10:28:45 2025-05-18 10:28:45
+## 114:  247.0699    95  -37499.236        14  201562 2025-05-18 10:28:45 2025-05-18 10:28:45
+## 115:  247.5600    95  -37499.236        14  201558 2025-05-18 10:28:45 2025-05-18 10:28:45
+## 116:  327.0344    62  -28011.480        14  201565 2025-05-18 10:28:45 2025-05-18 10:28:45
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1 central 2025-05-18 09:28:37 2025-05-18 09:28:37
-##  2:         2 central 2025-05-18 09:28:37 2025-05-18 09:28:37
-##  3:         3 central 2025-05-18 09:28:37 2025-05-18 09:28:37
-##  4:         4 central 2025-05-18 09:28:38 2025-05-18 09:28:38
-##  5:         5 central 2025-05-18 09:28:39 2025-05-18 09:28:39
-##  6:         6 central 2025-05-18 09:28:40 2025-05-18 09:28:40
-##  7:         7 central 2025-05-18 09:28:41 2025-05-18 09:28:41
-##  8:         8 central 2025-05-18 09:28:43 2025-05-18 09:28:43
-##  9:         9 central 2025-05-18 09:28:46 2025-05-18 09:28:46
-## 10:        10 central 2025-05-18 09:28:48 2025-05-18 09:28:48
-## 11:        11 central 2025-05-18 09:28:50 2025-05-18 09:28:50
-## 12:        12 central 2025-05-18 09:28:51 2025-05-18 09:28:51
-## 13:        13 central 2025-05-18 09:28:52 2025-05-18 09:28:52
-## 14:        14 central 2025-05-18 09:28:53 2025-05-18 09:28:53
+##  1:         1 central 2025-05-18 10:28:30 2025-05-18 10:28:30
+##  2:         2 central 2025-05-18 10:28:31 2025-05-18 10:28:31
+##  3:         3 central 2025-05-18 10:28:31 2025-05-18 10:28:31
+##  4:         4 central 2025-05-18 10:28:31 2025-05-18 10:28:31
+##  5:         5 central 2025-05-18 10:28:32 2025-05-18 10:28:32
+##  6:         6 central 2025-05-18 10:28:33 2025-05-18 10:28:33
+##  7:         7 central 2025-05-18 10:28:35 2025-05-18 10:28:35
+##  8:         8 central 2025-05-18 10:28:36 2025-05-18 10:28:36
+##  9:         9 central 2025-05-18 10:28:39 2025-05-18 10:28:39
+## 10:        10 central 2025-05-18 10:28:41 2025-05-18 10:28:41
+## 11:        11 central 2025-05-18 10:28:43 2025-05-18 10:28:43
+## 12:        12 central 2025-05-18 10:28:44 2025-05-18 10:28:44
+## 13:        13 central 2025-05-18 10:28:45 2025-05-18 10:28:45
+## 14:        14 central 2025-05-18 10:28:45 2025-05-18 10:28:45
 ```
 
 ``` r
@@ -638,3 +752,13 @@ viz_workers(loss_1_100)
 ```
 
 ![plot of chunk central-1-100](/assets/img/2025-05-15-rush-change-point/central-1-100-1.png)
+
+The figure above shows more iterations and more processes. In some
+iterations (9-11), the number of candidates is greater than 14, which
+is the number of CPUs on my machine (and the max number of future
+workers). In those iterations, we see calculation of either 1 or 2
+models in each worker process.
+
+## De-centralized candidate computation, rush
+
+TODO

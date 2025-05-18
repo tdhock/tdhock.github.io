@@ -387,6 +387,7 @@ viz_workers <- function(L){
       xmin=min.seconds, xmax=max.seconds,
       ymin=-Inf, ymax=Inf),
       fill="grey",
+      alpha=0.5,
       data=it.dt)+
     geom_text(aes(
       x=(min.seconds+max.seconds)/2, Inf,
@@ -394,6 +395,12 @@ viz_workers <- function(L){
       label=paste0(ifelse(iteration==1, "it=", ""), iteration)),
       data=it.dt,
       vjust=1)+
+    directlabels::geom_dl(aes(
+      start.seconds, process,
+      label.group=paste(iteration, process),
+      label=peaks),
+      data=L$loss,
+      method=polygon.mine("bottom", offset.cm=0.2, custom.colors=list(box.color="white")))+
     geom_segment(aes(
       start.seconds, process,
       color=computation,
@@ -404,15 +411,104 @@ viz_workers <- function(L){
       color=computation),
       shape=1,
       data=seg.dt)+
-    geom_text(aes(
-      mid.seconds, process, label=label),
-      vjust=1.5,
-      data=text.dt)+
+    ## geom_text(aes(
+    ##   mid.seconds, process, label=label),
+    ##   vjust=1.5,
+    ##   data=text.dt)+
     scale_color_manual(values=c(
       loss="black",
       candidates="red"))+
     scale_y_discrete("process")+
     scale_x_continuous("time (seconds)")
+}
+polygon.mine <- function
+### Make a Positioning Method that places non-overlapping speech
+### polygons at the first or last points.
+(top.bottom.left.right,
+### Character string indicating what side of the plot to label.
+  offset.cm=0.1,
+### Offset from the polygon to the most extreme data point.
+  padding.cm=0.05,
+### Padding inside the polygon.
+  custom.colors=NULL
+### Positioning method applied just before draw.polygons, can set
+### box.color and text.color for custom colors.
+){
+  if(is.null(custom.colors)){
+    custom.colors <- directlabels::gapply.fun({
+      rgb.mat <- col2rgb(d[["colour"]])
+      d$text.color <- with(data.frame(t(rgb.mat)), {
+        gray <- 0.3*red + 0.59*green + 0.11*blue
+        ifelse(gray/255 < 0.5, "white", "black")
+      })
+      d
+    })
+  }
+  opposite.side <- c(
+    left="right",
+    right="left",
+    top="bottom",
+    bottom="top")[[top.bottom.left.right]]
+  direction <- if(
+    top.bottom.left.right %in% c("bottom", "left")
+  ) -1 else 1
+  min.or.max <- if(
+    top.bottom.left.right %in% c("top", "right")
+  ) max else min
+  if(top.bottom.left.right %in% c("left", "right")){
+    min.or.max.xy <- "x"
+    qp.target <- "y"
+    qp.max <- "top"
+    qp.min <- "bottom"
+    padding.h.factor <- 2
+    padding.w.factor <- 1
+    limits.fun <- ylimits
+    reduce.method <- "reduce.cex.lr"
+  }else{
+    min.or.max.xy <- "y"
+    qp.target <- "x"
+    qp.max <- "right"
+    qp.min <- "left"
+    padding.h.factor <- 1
+    padding.w.factor <- 2
+    limits.fun <- directlabels::xlimits
+    reduce.method <- "reduce.cex.tb"
+  }
+  list(
+    hjust=0.5, vjust=1,
+    function(d,...){
+      ## set the end of the speech polygon to the original data point.
+      for(xy in c("x", "y")){
+        extra.coord <- sprintf(# e.g. left.x
+          "%s.%s", opposite.side, xy)
+        d[[extra.coord]] <- d[[xy]]
+      }
+      ## offset positions but do NOT set the speech polygon position
+      ## to the min or max.
+      d[[min.or.max.xy]] <- d[[min.or.max.xy]] + offset.cm*direction
+      d
+    },
+    "calc.boxes",
+    reduce.method,
+    function(d, ...){
+      d$h <- d$h + padding.cm * padding.h.factor
+      d$w <- d$w + padding.cm * padding.w.factor
+      d
+    },
+    "calc.borders",
+    function(d,...){
+      do.call(rbind, lapply(split(d, d$y), function(d){
+        directlabels::apply.method(directlabels::qp.labels(
+          qp.target,
+          qp.min,
+          qp.max,
+          directlabels::make.tiebreaker(min.or.max.xy, qp.target),
+          limits.fun), d)
+      }))
+    },
+    "calc.borders",
+    custom.colors,
+    "draw.polygons")
 }
 viz_workers(loss_5_15)
 ```
@@ -421,9 +517,37 @@ The figure above shows how the computation proceeds over time (X axis)
 in the different parallel processes (Y axis). Iterations are shown in
 grey rectangles, with iteration numbers at the top of the plot. In
 each iteration, There are at most four parallel workers (black) at any
-given time.
+given time. We see that before starting a new iteration, all workers
+must complete, and wait for the central process to compute new
+candidates. The worker efficiency reported at the top of the plot is
+the amount of time taken computing models (black segments), divided by
+the max time that could be taken by that number of workers (if black
+line segments were from start to end of the plot for each
+worker). There are two sources of inefficiency:
+
+* The overhead for starting a new future job is about 0.2 seconds, and
+  this overhead could be reduced by using mirai package instead. But
+  for long running computations (big data or complex models), this
+  overhead is not the important bottleneck.
+* Because of the centralized method for computing new candidates, the
+  first process that finishes in an iteration must wait for the last
+  process, before it starts working again. This can be fixed by using
+  rush package instead (as we show in the next section).
+
+To see these patterns more clearly, below we run the central launch
+algorithm with a larger number of models:
 
 ```{r central-1-100}
 (loss_1_100 <- central_launch(1,100))
 viz_workers(loss_1_100)
 ```
+
+The figure above shows more iterations and more processes. In some
+iterations (9-11), the number of candidates is greater than 14, which
+is the number of CPUs on my machine (and the max number of future
+workers). In those iterations, we see calculation of either 1 or 2
+models in each worker process.
+
+## De-centralized candidate computation, rush
+
+TODO
