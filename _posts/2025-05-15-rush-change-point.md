@@ -429,7 +429,7 @@ candidates can be implemented via the code below.
 
 
 ``` r
-central_launch <- function(target.min.peaks, target.max.peaks){
+central_launch <- function(target.min.peaks, target.max.peaks, LAPPLY=future.apply::future_lapply){
   data.dir <- file.path(
     tempfile(),
     "H3K27ac-H3K4me3_TDHAM_BP",
@@ -447,7 +447,7 @@ central_launch <- function(target.min.peaks, target.max.peaks){
   cand.dt.list <- list()
   iteration <- 1L
   while(length(pen.vec)){
-    loss.dt.list[paste(pen.vec)] <- future.apply::future_lapply(
+    loss.dt.list[paste(pen.vec)] <- LAPPLY(
       pen.vec, function(pen){
         start.time <- Sys.time()
         fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
@@ -473,7 +473,7 @@ central_launch <- function(target.min.peaks, target.max.peaks){
     pen.vec <- selection.dt[helpful==TRUE, max.lambda]
     cand.dt.list[[length(cand.dt.list)+1]] <- data.table(
       iteration,
-      process=factor("central"), start.time, end.time=Sys.time())
+      process=factor(Sys.getpid()), start.time, end.time=Sys.time())
     iteration <- iteration+1L
   }
   list(loss=loss.dt, candidates=rbindlist(cand.dt.list))
@@ -485,45 +485,47 @@ central_launch <- function(target.min.peaks, target.max.peaks){
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##  1:     0.0000  3199 -130227.291         1  201562 2025-05-18 10:28:25 2025-05-18 10:28:25
-##  2:        Inf     0  375197.873         1  201558 2025-05-18 10:28:25 2025-05-18 10:28:25
-##  3:   157.9947   224  -62199.931         2  201562 2025-05-18 10:28:26 2025-05-18 10:28:26
-##  4:  1952.6688    17    2640.128         3  201562 2025-05-18 10:28:26 2025-05-18 10:28:26
-##  5: 21915.1615     4   89739.642         4  201562 2025-05-18 10:28:26 2025-05-18 10:28:27
-##  6:  6699.9627     8   36282.919         5  201562 2025-05-18 10:28:27 2025-05-18 10:28:27
-##  7:  3738.0879    11   19258.189         6  201562 2025-05-18 10:28:27 2025-05-18 10:28:27
-##  8: 13364.1808     6   55084.654         6  201558 2025-05-18 10:28:27 2025-05-18 10:28:27
-##  9:  2769.6768    13   13373.281         7  201562 2025-05-18 10:28:28 2025-05-18 10:28:28
-## 10:  5674.9101    10   24108.390         7  201558 2025-05-18 10:28:28 2025-05-18 10:28:28
-## 11:  9400.8673     7   43845.255         7  201565 2025-05-18 10:28:28 2025-05-18 10:28:28
-## 12: 17327.4943     5   70694.172         7  201557 2025-05-18 10:28:28 2025-05-18 10:28:28
-## 13:  2683.2884    16    5152.375         8  201562 2025-05-18 10:28:28 2025-05-18 10:28:28
-## 14:  2942.4538    12   16241.816         8  201558 2025-05-18 10:28:28 2025-05-18 10:28:29
-## 15:  6087.2647     9   30064.892         8  201565 2025-05-18 10:28:29 2025-05-18 10:28:29
-## 16:  2740.3022    14   10611.733         9  201562 2025-05-18 10:28:29 2025-05-18 10:28:29
-## 17:  2729.6793    16    5152.375        10  201562 2025-05-18 10:28:29 2025-05-18 10:28:29
-## 18:  2729.6793    16    5152.375        11  201562 2025-05-18 10:28:29 2025-05-18 10:28:30
+##  1:     0.0000  3199 -130227.291         1  267491 2025-05-19 08:14:36 2025-05-19 08:14:37
+##  2:        Inf     0  375197.873         1  267483 2025-05-19 08:14:37 2025-05-19 08:14:37
+##  3:   157.9947   224  -62199.931         2  267491 2025-05-19 08:14:37 2025-05-19 08:14:37
+##  4:  1952.6688    17    2640.128         3  267491 2025-05-19 08:14:38 2025-05-19 08:14:38
+##  5: 21915.1615     4   89739.642         4  267491 2025-05-19 08:14:38 2025-05-19 08:14:39
+##  6:  6699.9627     8   36282.919         5  267491 2025-05-19 08:14:39 2025-05-19 08:14:39
+##  7:  3738.0879    11   19258.189         6  267491 2025-05-19 08:14:39 2025-05-19 08:14:40
+##  8: 13364.1808     6   55084.654         6  267483 2025-05-19 08:14:40 2025-05-19 08:14:40
+##  9:  2769.6768    13   13373.281         7  267491 2025-05-19 08:14:40 2025-05-19 08:14:41
+## 10:  5674.9101    10   24108.390         7  267483 2025-05-19 08:14:41 2025-05-19 08:14:41
+## 11:  9400.8673     7   43845.255         7  267485 2025-05-19 08:14:41 2025-05-19 08:14:41
+## 12: 17327.4943     5   70694.172         7  267481 2025-05-19 08:14:41 2025-05-19 08:14:41
+## 13:  2683.2884    16    5152.375         8  267491 2025-05-19 08:14:42 2025-05-19 08:14:42
+## 14:  2942.4538    12   16241.816         8  267483 2025-05-19 08:14:42 2025-05-19 08:14:42
+## 15:  6087.2647     9   30064.892         8  267485 2025-05-19 08:14:42 2025-05-19 08:14:42
+## 16:  2740.3022    14   10611.733         9  267491 2025-05-19 08:14:43 2025-05-19 08:14:43
+## 17:  2729.6793    16    5152.375        10  267491 2025-05-19 08:14:43 2025-05-19 08:14:43
+## 18:  2729.6793    16    5152.375        11  267491 2025-05-19 08:14:44 2025-05-19 08:14:44
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1 central 2025-05-18 10:28:25 2025-05-18 10:28:25
-##  2:         2 central 2025-05-18 10:28:26 2025-05-18 10:28:26
-##  3:         3 central 2025-05-18 10:28:26 2025-05-18 10:28:26
-##  4:         4 central 2025-05-18 10:28:27 2025-05-18 10:28:27
-##  5:         5 central 2025-05-18 10:28:27 2025-05-18 10:28:27
-##  6:         6 central 2025-05-18 10:28:27 2025-05-18 10:28:27
-##  7:         7 central 2025-05-18 10:28:28 2025-05-18 10:28:28
-##  8:         8 central 2025-05-18 10:28:29 2025-05-18 10:28:29
-##  9:         9 central 2025-05-18 10:28:29 2025-05-18 10:28:29
-## 10:        10 central 2025-05-18 10:28:29 2025-05-18 10:28:29
-## 11:        11 central 2025-05-18 10:28:30 2025-05-18 10:28:30
+##  1:         1  266755 2025-05-19 08:14:37 2025-05-19 08:14:37
+##  2:         2  266755 2025-05-19 08:14:37 2025-05-19 08:14:37
+##  3:         3  266755 2025-05-19 08:14:38 2025-05-19 08:14:38
+##  4:         4  266755 2025-05-19 08:14:39 2025-05-19 08:14:39
+##  5:         5  266755 2025-05-19 08:14:39 2025-05-19 08:14:39
+##  6:         6  266755 2025-05-19 08:14:40 2025-05-19 08:14:40
+##  7:         7  266755 2025-05-19 08:14:41 2025-05-19 08:14:41
+##  8:         8  266755 2025-05-19 08:14:42 2025-05-19 08:14:42
+##  9:         9  266755 2025-05-19 08:14:43 2025-05-19 08:14:43
+## 10:        10  266755 2025-05-19 08:14:43 2025-05-19 08:14:44
+## 11:        11  266755 2025-05-19 08:14:44 2025-05-19 08:14:44
 ```
 
 The result is a list of two tables:
 
 * `loss` has one row per penalty value computed.
 * `candidates` has one row per computation of new candidates.
+
+To visualize these results, I coded a special Positioning Method for `directlabels::geom_dl` below.
 
 
 ``` r
@@ -543,11 +545,15 @@ viz_workers <- function(L){
   total.seconds <- L$loss[,sum(end.seconds-start.seconds)]
   efficiency <- total.seconds/best.seconds
   seg.dt <- rbind(L$cand,L$loss[,names(L$cand),with=FALSE])
+  proc.levs <- unique(c(levels(L$cand$process), levels(L$loss$process)))
   text.dt <- L$loss[,.(
     mid.seconds=as.POSIXct((as.numeric(min(start.seconds))+as.numeric(max(end.seconds)))/2),
     label=paste(peaks,collapse=",")
   ),by=.(process,iteration)]
   it.dt <- seg.dt[, .(min.seconds=min(start.seconds), max.seconds=max(end.seconds)), by=iteration]
+  comp.colors <- c(
+    loss="black",
+    candidates="red")
   ggplot()+
     theme_bw()+
     ggtitle(sprintf("Worker efficiency = %.1f%%", 100*total.seconds/best.seconds))+
@@ -555,6 +561,7 @@ viz_workers <- function(L){
       xmin=min.seconds, xmax=max.seconds,
       ymin=-Inf, ymax=Inf),
       fill="grey",
+      color="white",
       alpha=0.5,
       data=it.dt)+
     geom_text(aes(
@@ -583,10 +590,12 @@ viz_workers <- function(L){
     ##   mid.seconds, process, label=label),
     ##   vjust=1.5,
     ##   data=text.dt)+
-    scale_color_manual(values=c(
-      loss="black",
-      candidates="red"))+
-    scale_y_discrete("process")+
+    scale_color_manual(
+      values=comp.colors,
+      limits=names(comp.colors))+
+    scale_y_discrete(
+      limits=proc.levs, # necessary for red dot on bottom.
+      name="process")+
     scale_x_continuous("time (seconds)")
 }
 polygon.mine <- function
@@ -709,49 +718,50 @@ algorithm with a larger number of models:
 
 
 ``` r
-(loss_1_100 <- central_launch(1,100))
+results_1_100 <- list()
+(results_1_100$future_lapply <- central_launch(1,100))
 ```
 
 ```
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##   1:    0.0000  3199 -130227.291         1  201562 2025-05-18 10:28:30 2025-05-18 10:28:30
-##   2:       Inf     0  375197.873         1  201558 2025-05-18 10:28:30 2025-05-18 10:28:30
-##   3:  157.9947   224  -62199.931         2  201562 2025-05-18 10:28:31 2025-05-18 10:28:31
-##   4: 1952.6688    17    2640.128         3  201562 2025-05-18 10:28:31 2025-05-18 10:28:31
-##   5:  313.2370    74  -31865.715         4  201562 2025-05-18 10:28:31 2025-05-18 10:28:31
+##   1:    0.0000  3199 -130227.291         1  267491 2025-05-19 08:14:46 2025-05-19 08:14:46
+##   2:       Inf     0  375197.873         1  267483 2025-05-19 08:14:46 2025-05-19 08:14:46
+##   3:  157.9947   224  -62199.931         2  267491 2025-05-19 08:14:46 2025-05-19 08:14:46
+##   4: 1952.6688    17    2640.128         3  267491 2025-05-19 08:14:47 2025-05-19 08:14:47
+##   5:  313.2370    74  -31865.715         4  267491 2025-05-19 08:14:47 2025-05-19 08:14:48
 ##  ---                                                                                      
-## 112:  314.0074    74  -31865.715        13  201557 2025-05-18 10:28:44 2025-05-18 10:28:45
-## 113:  327.0344    62  -28011.480        13  201560 2025-05-18 10:28:45 2025-05-18 10:28:45
-## 114:  247.0699    95  -37499.236        14  201562 2025-05-18 10:28:45 2025-05-18 10:28:45
-## 115:  247.5600    95  -37499.236        14  201558 2025-05-18 10:28:45 2025-05-18 10:28:45
-## 116:  327.0344    62  -28011.480        14  201565 2025-05-18 10:28:45 2025-05-18 10:28:45
+## 112:  314.0074    74  -31865.715        13  267481 2025-05-19 08:15:11 2025-05-19 08:15:11
+## 113:  327.0344    62  -28011.480        13  267488 2025-05-19 08:15:11 2025-05-19 08:15:12
+## 114:  247.0699    95  -37499.236        14  267491 2025-05-19 08:15:12 2025-05-19 08:15:12
+## 115:  247.5600    95  -37499.236        14  267483 2025-05-19 08:15:12 2025-05-19 08:15:13
+## 116:  327.0344    62  -28011.480        14  267485 2025-05-19 08:15:13 2025-05-19 08:15:13
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1 central 2025-05-18 10:28:30 2025-05-18 10:28:30
-##  2:         2 central 2025-05-18 10:28:31 2025-05-18 10:28:31
-##  3:         3 central 2025-05-18 10:28:31 2025-05-18 10:28:31
-##  4:         4 central 2025-05-18 10:28:31 2025-05-18 10:28:31
-##  5:         5 central 2025-05-18 10:28:32 2025-05-18 10:28:32
-##  6:         6 central 2025-05-18 10:28:33 2025-05-18 10:28:33
-##  7:         7 central 2025-05-18 10:28:35 2025-05-18 10:28:35
-##  8:         8 central 2025-05-18 10:28:36 2025-05-18 10:28:36
-##  9:         9 central 2025-05-18 10:28:39 2025-05-18 10:28:39
-## 10:        10 central 2025-05-18 10:28:41 2025-05-18 10:28:41
-## 11:        11 central 2025-05-18 10:28:43 2025-05-18 10:28:43
-## 12:        12 central 2025-05-18 10:28:44 2025-05-18 10:28:44
-## 13:        13 central 2025-05-18 10:28:45 2025-05-18 10:28:45
-## 14:        14 central 2025-05-18 10:28:45 2025-05-18 10:28:45
+##  1:         1  266755 2025-05-19 08:14:46 2025-05-19 08:14:46
+##  2:         2  266755 2025-05-19 08:14:46 2025-05-19 08:14:46
+##  3:         3  266755 2025-05-19 08:14:47 2025-05-19 08:14:47
+##  4:         4  266755 2025-05-19 08:14:48 2025-05-19 08:14:48
+##  5:         5  266755 2025-05-19 08:14:49 2025-05-19 08:14:49
+##  6:         6  266755 2025-05-19 08:14:51 2025-05-19 08:14:51
+##  7:         7  266755 2025-05-19 08:14:54 2025-05-19 08:14:54
+##  8:         8  266755 2025-05-19 08:14:57 2025-05-19 08:14:57
+##  9:         9  266755 2025-05-19 08:15:01 2025-05-19 08:15:01
+## 10:        10  266755 2025-05-19 08:15:04 2025-05-19 08:15:04
+## 11:        11  266755 2025-05-19 08:15:08 2025-05-19 08:15:08
+## 12:        12  266755 2025-05-19 08:15:10 2025-05-19 08:15:10
+## 13:        13  266755 2025-05-19 08:15:12 2025-05-19 08:15:12
+## 14:        14  266755 2025-05-19 08:15:13 2025-05-19 08:15:13
 ```
 
 ``` r
-viz_workers(loss_1_100)
+viz_workers(results_1_100$future_lapply)
 ```
 
-![plot of chunk central-1-100](/assets/img/2025-05-15-rush-change-point/central-1-100-1.png)
+![plot of chunk central-1-100-future_lapply](/assets/img/2025-05-15-rush-change-point/central-1-100-future_lapply-1.png)
 
 The figure above shows more iterations and more processes. In some
 iterations (9-11), the number of candidates is greater than 14, which
@@ -759,6 +769,345 @@ is the number of CPUs on my machine (and the max number of future
 workers). In those iterations, we see calculation of either 1 or 2
 models in each worker process.
 
+## Centralized launching, no parallelization
+
+A baseline to compare is no parallel computation (everything in one
+process), as coded below.
+
+
+``` r
+results_1_100$lapply <- central_launch(1,100,lapply)
+viz_workers(results_1_100$lapply)
+```
+
+```
+## Warning in (function (..., deparse.level = 1) : number of rows of result is not a multiple of vector length (arg 1)
+```
+
+![plot of chunk central-1-100-lapply](/assets/img/2025-05-15-rush-change-point/central-1-100-lapply-1.png)
+
+The result above is almost 100% efficient (because only one CPU is
+used instead of 14), but it takes longer overall.
+
+## Centralized launching, mirai
+
+Another comparison is mirai, which offers lower overhead than `future`.
+
+
+``` r
+if(mirai::daemons()$connections==0){
+  mirai::daemons(future::availableCores())
+}
+```
+
+```
+## [1] 14
+```
+
+``` r
+results_1_100$mirai_map <- central_launch(1,100,function(...){
+  mirai::mirai_map(...)[]
+})
+viz_workers(results_1_100$mirai_map)
+```
+
+![plot of chunk central-1-100-mirai_map](/assets/img/2025-05-15-rush-change-point/central-1-100-mirai_map-1.png)
+
+The figure above shows that there is very little overhead for
+launching mirai parallel tasks. In each iteration, we can see that all
+14 processes start almost at the same time.
+This results in a shorter overall comptutation time.
+
+## Comparison
+
+In the code below, we combine the results from the three methods in the previous sections.
+
+
+``` r
+loss_1_100_list <- list()
+fun_levs <- c("lapply", "future_lapply", "mirai_map")
+for(fun in names(results_1_100)){
+  loss_fun <- results_1_100[[fun]]$loss
+  min.time <- min(loss_fun$start.time)
+  loss_1_100_list[[fun]] <- data.table(fun=factor(fun, fun_levs), loss_fun)[, let(
+    start.time=start.time-min.time,
+    end.time=end.time-min.time)]
+}
+(loss_1_100 <- rbindlist(loss_1_100_list))
+```
+
+```
+##                fun   penalty peaks  total.loss iteration process     start.time       end.time
+##             <fctr>     <num> <int>       <num>     <int>  <fctr>     <difftime>     <difftime>
+##   1: future_lapply    0.0000  3199 -130227.291         1  267491 0.0000000 secs 0.2189183 secs
+##   2: future_lapply       Inf     0  375197.873         1  267483 0.1814265 secs 0.2558122 secs
+##   3: future_lapply  157.9947   224  -62199.931         2  267491 0.5419364 secs 0.7944977 secs
+##   4: future_lapply 1952.6688    17    2640.128         3  267491 1.0942256 secs 1.3592741 secs
+##   5: future_lapply  313.2370    74  -31865.715         4  267491 1.6529596 secs 1.9214509 secs
+##  ---                                                                                          
+## 344:     mirai_map  314.0074    74  -31865.715        13  268226 5.3989632 secs 5.6431861 secs
+## 345:     mirai_map  327.0344    62  -28011.480        13  268232 5.3990593 secs 5.7106867 secs
+## 346:     mirai_map  247.0699    95  -37499.236        14  268216 5.7275386 secs 5.9835937 secs
+## 347:     mirai_map  247.5600    95  -37499.236        14  268251 5.7281096 secs 5.9794848 secs
+## 348:     mirai_map  327.0344    62  -28011.480        14  268218 5.7289467 secs 5.9829257 secs
+```
+
+``` r
+ggplot()+
+  geom_segment(aes(
+    start.time, process,
+    xend=end.time, yend=process),
+    data=loss_1_100)+
+  geom_point(aes(
+    start.time, process),
+    shape=1,
+    data=loss_1_100)+
+  facet_grid(fun ~ ., scales="free", labeller=label_both)+
+  scale_x_continuous("Time from start of computation (seconds)")
+```
+
+![plot of chunk compare-times](/assets/img/2025-05-15-rush-change-point/compare-times-1.png)
+
+In the figure above, we can see that `lapply` takes the most time
+(over 40 seconds), whereas `future_lapply` is a bit faster (under 30
+seconds), and `mirai_map` is faster still (about 5 seconds). This is
+an example when `mirai_map` is particularly advantageous:
+
+* centralized process does not take much time to assign new tasks.
+* computation time of each task is relatively small, so overhead of `future_lapply` launching is relevant.
+
+For longer running computations, for example several minutes or
+seconds, there should be smaller differences between `future_lapply`
+and `mirai_map`.
+
 ## De-centralized candidate computation, rush
 
-TODO
+TODO, this is not working, but I asked for help https://github.com/mlr-org/rush/issues/44
+
+
+``` r
+data.rush <- file.path(
+  tempfile(),
+  "H3K27ac-H3K4me3_TDHAM_BP",
+  "samples",
+  "Mono1_H3K27ac",
+  "S001YW_NCMLS",
+  "problems",
+  "chr11-60000-580000")
+dir.create(data.rush, recursive=TRUE, showWarnings=FALSE)
+data(Mono27ac,package="PeakSegDisk")
+write.table(
+  Mono27ac$coverage, file.path(data.rush, "coverage.bedGraph"),
+  col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
+
+## rush = rush::RushWorker$new(network_id = "test", config=config, remote=FALSE)
+## key = rush$push_running_tasks(list(list(penalty=0)))
+## rush$fetch_tasks()
+## rush$push_results(key, list(list(peaks=5L, total.loss=5.3)))
+## rush$fetch_tasks()
+run_penalty <- function(rush){
+  target.max.peaks <- 15
+  target.min.peaks <- 5
+  get_tasks <- function(){
+    task_dt <- rush$fetch_tasks()
+    if(is.null(task_dt$penalty)){
+      task_dt$penalty <- NA_real_
+    }
+    if(is.null(task_dt$peaks)){
+      task_dt$peaks <- NA_integer_
+    }
+    task_dt
+  }
+  task_dt <- get_tasks()
+  start.time.cand <- Sys.time()
+  first_pen_cand <- c(0, Inf)
+  done <- first_pen_cand %in% task_dt$penalty
+  pen <- if(any(!done)){
+    first_pen_cand[!done][1]
+  }else{
+    print(task_dt)
+    while(nrow(task_dt[!is.na(peaks)])<2){
+      task_dt <- get_tasks()
+    }
+    print(task_dt)
+    selection.df <- penaltyLearning::modelSelection(task_dt, "total.loss", "peaks")
+    selection.dt <- with(selection.df, data.table(
+      total.loss,
+      min.lambda,
+      penalty,
+      max.lambda,
+      peaks_after=c(peaks[-1],NA),
+      peaks
+    ))[
+      peaks_after<target.max.peaks & peaks>target.min.peaks &
+        peaks_after+1 < peaks & !max.lambda %in% task_dt$penalty
+    ]
+    if(nrow(selection.dt)){
+      selection.dt[1, max.lambda]
+    }
+  }
+  if(is.numeric(pen)){
+    key = rush$push_running_tasks(xss=list(list(
+      penalty=pen,
+      start.time.cand=start.time.cand,
+      end.time.cand=Sys.time())))
+    start.time.model <- Sys.time()
+    fit <- PeakSegDisk::PeakSegFPOP_dir(data.rush, pen)
+    rush$push_results(key, yss=list(list(
+      peaks=fit$loss$peaks,
+      total.loss=fit$loss$total.loss,
+      start.time.model=start.time.model,
+      end.time.model=Sys.time())))
+    pen
+  }
+}
+wl_penalty <- function(rush){
+  done <- FALSE
+  while(!done){
+    pen <- run_penalty(rush)
+    done <- is.null(pen)
+  }
+}
+
+if(FALSE){
+  redux::hiredis()$pipeline("FLUSHDB")
+  config = redux::redis_config()
+  rush = rush::Rush$new(network_id = "test", config=config)
+  wl_penalty(rush)
+}
+devtools::install_github("mlr-org/rush@mirai")
+```
+
+```
+## Using github PAT from envvar GITHUB_PAT. Use `gitcreds::gitcreds_set()` and unset GITHUB_PAT in .Renviron (or elsewhere) if you want to use the more secure git credential store instead.
+```
+
+```
+## Error: Failed to install 'rush' from GitHub:
+##   SSL peer certificate or SSH remote key was not OK [api.github.com]: SSL: certificate subject name (*.moveon-hotelbb.com) does not match target host name 'api.github.com'
+```
+
+``` r
+wl_random_search = function(rush) {
+  # stop optimization after 100 tasks
+  while(rush$n_finished_tasks < 100) {
+    # draw new task
+    xs = list(x1 = runif(1, -5, 10), x2 = runif(1, 0, 15))
+    # mark task as running
+    key = rush$push_running_tasks(xss = list(xs))
+    # evaluate task
+    ys = list(y = branin(xs$x1, xs$x2))
+    # push result
+    rush$push_results(key, yss = list(ys))
+  }
+}
+branin = function(x1, x2) {
+  (x2 - 5.1 / (4 * pi^2) * x1^2 + 5 / pi * x1 - 6)^2 + 10 * (1 - 1 / (8 * pi)) * cos(x1) + 10
+}
+
+
+library(data.table)
+
+redux::hiredis()$pipeline("FLUSHDB")
+```
+
+```
+## [[1]]
+## [Redis: OK]
+```
+
+``` r
+config = redux::redis_config()
+rush = rush::Rush$new(network_id = "test", config=config)
+rush$fetch_tasks()
+```
+
+```
+## Null data.table (0 rows and 0 cols)
+```
+
+``` r
+rush$start_local_workers(
+  worker_loop = wl_random_search,
+  n_workers = 4,
+  globals = "branin")
+```
+
+```
+## INFO  [08:16:11.764] [rush] Starting 4 worker(s)
+```
+
+``` r
+rush
+```
+
+```
+## <Rush>
+## * Running Workers: 0
+## * Queued Tasks: 0
+## * Queued Priority Tasks: 0
+## * Running Tasks: 0
+## * Finished Tasks: 0
+## * Failed Tasks: 0
+```
+
+``` r
+rush$fetch_tasks()
+```
+
+```
+## Null data.table (0 rows and 0 cols)
+```
+
+``` r
+redux::hiredis()$pipeline("FLUSHDB")
+```
+
+```
+## [[1]]
+## [Redis: OK]
+```
+
+``` r
+config = redux::redis_config()
+rush = rush::Rush$new(network_id = "test", config=config)
+rush$fetch_tasks()
+```
+
+```
+## Null data.table (0 rows and 0 cols)
+```
+
+``` r
+rush$start_local_workers(
+  worker_loop = wl_penalty,
+  n_workers = 4,
+  globals = c("run_penalty","data.rush"))
+```
+
+```
+## INFO  [08:16:12.078] [rush] Starting 4 worker(s)
+```
+
+``` r
+rush
+```
+
+```
+## <Rush>
+## * Running Workers: 0
+## * Queued Tasks: 0
+## * Queued Priority Tasks: 0
+## * Running Tasks: 0
+## * Finished Tasks: 0
+## * Failed Tasks: 0
+```
+
+``` r
+task_dt <- rush$fetch_tasks()
+task_dt[order(peaks)]
+```
+
+```
+## Error in .checkTypos(e, names_x): Objet 'peaks' non trouvé parmi []
+```

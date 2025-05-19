@@ -301,7 +301,7 @@ Overall the algorithm which uses a central launcher to determine
 candidates can be implemented via the code below.
 
 ```{r}
-central_launch <- function(target.min.peaks, target.max.peaks){
+central_launch <- function(target.min.peaks, target.max.peaks, LAPPLY=future.apply::future_lapply){
   data.dir <- file.path(
     tempfile(),
     "H3K27ac-H3K4me3_TDHAM_BP",
@@ -319,7 +319,7 @@ central_launch <- function(target.min.peaks, target.max.peaks){
   cand.dt.list <- list()
   iteration <- 1L
   while(length(pen.vec)){
-    loss.dt.list[paste(pen.vec)] <- future.apply::future_lapply(
+    loss.dt.list[paste(pen.vec)] <- LAPPLY(
       pen.vec, function(pen){
         start.time <- Sys.time()
         fit <- PeakSegDisk::PeakSegFPOP_dir(data.dir, pen)
@@ -345,7 +345,7 @@ central_launch <- function(target.min.peaks, target.max.peaks){
     pen.vec <- selection.dt[helpful==TRUE, max.lambda]
     cand.dt.list[[length(cand.dt.list)+1]] <- data.table(
       iteration,
-      process=factor("central"), start.time, end.time=Sys.time())
+      process=factor(Sys.getpid()), start.time, end.time=Sys.time())
     iteration <- iteration+1L
   }
   list(loss=loss.dt, candidates=rbindlist(cand.dt.list))
@@ -357,6 +357,8 @@ The result is a list of two tables:
 
 * `loss` has one row per penalty value computed.
 * `candidates` has one row per computation of new candidates.
+
+To visualize these results, I coded a special Positioning Method for `directlabels::geom_dl` below.
 
 ```{r central-5-15}
 viz_workers <- function(L){
@@ -375,11 +377,15 @@ viz_workers <- function(L){
   total.seconds <- L$loss[,sum(end.seconds-start.seconds)]
   efficiency <- total.seconds/best.seconds
   seg.dt <- rbind(L$cand,L$loss[,names(L$cand),with=FALSE])
+  proc.levs <- unique(c(levels(L$cand$process), levels(L$loss$process)))
   text.dt <- L$loss[,.(
     mid.seconds=as.POSIXct((as.numeric(min(start.seconds))+as.numeric(max(end.seconds)))/2),
     label=paste(peaks,collapse=",")
   ),by=.(process,iteration)]
   it.dt <- seg.dt[, .(min.seconds=min(start.seconds), max.seconds=max(end.seconds)), by=iteration]
+  comp.colors <- c(
+    loss="black",
+    candidates="red")
   ggplot()+
     theme_bw()+
     ggtitle(sprintf("Worker efficiency = %.1f%%", 100*total.seconds/best.seconds))+
@@ -387,6 +393,7 @@ viz_workers <- function(L){
       xmin=min.seconds, xmax=max.seconds,
       ymin=-Inf, ymax=Inf),
       fill="grey",
+      color="white",
       alpha=0.5,
       data=it.dt)+
     geom_text(aes(
@@ -415,10 +422,12 @@ viz_workers <- function(L){
     ##   mid.seconds, process, label=label),
     ##   vjust=1.5,
     ##   data=text.dt)+
-    scale_color_manual(values=c(
-      loss="black",
-      candidates="red"))+
-    scale_y_discrete("process")+
+    scale_color_manual(
+      values=comp.colors,
+      limits=names(comp.colors))+
+    scale_y_discrete(
+      limits=proc.levs, # necessary for red dot on bottom.
+      name="process")+
     scale_x_continuous("time (seconds)")
 }
 polygon.mine <- function
@@ -537,9 +546,10 @@ worker). There are two sources of inefficiency:
 To see these patterns more clearly, below we run the central launch
 algorithm with a larger number of models:
 
-```{r central-1-100}
-(loss_1_100 <- central_launch(1,100))
-viz_workers(loss_1_100)
+```{r central-1-100-future_lapply}
+results_1_100 <- list()
+(results_1_100$future_lapply <- central_launch(1,100))
+viz_workers(results_1_100$future_lapply)
 ```
 
 The figure above shows more iterations and more processes. In some
@@ -548,6 +558,215 @@ is the number of CPUs on my machine (and the max number of future
 workers). In those iterations, we see calculation of either 1 or 2
 models in each worker process.
 
+## Centralized launching, no parallelization
+
+A baseline to compare is no parallel computation (everything in one
+process), as coded below.
+
+```{r central-1-100-lapply}
+results_1_100$lapply <- central_launch(1,100,lapply)
+viz_workers(results_1_100$lapply)
+```
+
+The result above is almost 100% efficient (because only one CPU is
+used instead of 14), but it takes longer overall.
+
+## Centralized launching, mirai
+
+Another comparison is mirai, which offers lower overhead than `future`.
+
+```{r central-1-100-mirai_map}
+if(mirai::daemons()$connections==0){
+  mirai::daemons(future::availableCores())
+}
+results_1_100$mirai_map <- central_launch(1,100,function(...){
+  mirai::mirai_map(...)[]
+})
+viz_workers(results_1_100$mirai_map)
+```
+
+The figure above shows that there is very little overhead for
+launching mirai parallel tasks. In each iteration, we can see that all
+14 processes start almost at the same time.
+This results in a shorter overall comptutation time.
+
+## Comparison
+
+In the code below, we combine the results from the three methods in the previous sections.
+
+```{r compare-times}
+loss_1_100_list <- list()
+fun_levs <- c("lapply", "future_lapply", "mirai_map")
+for(fun in names(results_1_100)){
+  loss_fun <- results_1_100[[fun]]$loss
+  min.time <- min(loss_fun$start.time)
+  loss_1_100_list[[fun]] <- data.table(fun=factor(fun, fun_levs), loss_fun)[, let(
+    start.time=start.time-min.time,
+    end.time=end.time-min.time)]
+}
+(loss_1_100 <- rbindlist(loss_1_100_list))
+ggplot()+
+  geom_segment(aes(
+    start.time, process,
+    xend=end.time, yend=process),
+    data=loss_1_100)+
+  geom_point(aes(
+    start.time, process),
+    shape=1,
+    data=loss_1_100)+
+  facet_grid(fun ~ ., scales="free", labeller=label_both)+
+  scale_x_continuous("Time from start of computation (seconds)")
+```
+
+In the figure above, we can see that `lapply` takes the most time
+(over 40 seconds), whereas `future_lapply` is a bit faster (under 30
+seconds), and `mirai_map` is faster still (about 5 seconds). This is
+an example when `mirai_map` is particularly advantageous:
+
+* centralized process does not take much time to assign new tasks.
+* computation time of each task is relatively small, so overhead of `future_lapply` launching is relevant.
+
+For longer running computations, for example several minutes or
+seconds, there should be smaller differences between `future_lapply`
+and `mirai_map`.
+
 ## De-centralized candidate computation, rush
 
-TODO
+TODO, this is not working, but I asked for help https://github.com/mlr-org/rush/issues/44
+
+```{r}
+data.rush <- file.path(
+  tempfile(),
+  "H3K27ac-H3K4me3_TDHAM_BP",
+  "samples",
+  "Mono1_H3K27ac",
+  "S001YW_NCMLS",
+  "problems",
+  "chr11-60000-580000")
+dir.create(data.rush, recursive=TRUE, showWarnings=FALSE)
+data(Mono27ac,package="PeakSegDisk")
+write.table(
+  Mono27ac$coverage, file.path(data.rush, "coverage.bedGraph"),
+  col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
+
+## rush = rush::RushWorker$new(network_id = "test", config=config, remote=FALSE)
+## key = rush$push_running_tasks(list(list(penalty=0)))
+## rush$fetch_tasks()
+## rush$push_results(key, list(list(peaks=5L, total.loss=5.3)))
+## rush$fetch_tasks()
+run_penalty <- function(rush){
+  target.max.peaks <- 15
+  target.min.peaks <- 5
+  get_tasks <- function(){
+    task_dt <- rush$fetch_tasks()
+    if(is.null(task_dt$penalty)){
+      task_dt$penalty <- NA_real_
+    }
+    if(is.null(task_dt$peaks)){
+      task_dt$peaks <- NA_integer_
+    }
+    task_dt
+  }
+  task_dt <- get_tasks()
+  start.time.cand <- Sys.time()
+  first_pen_cand <- c(0, Inf)
+  done <- first_pen_cand %in% task_dt$penalty
+  pen <- if(any(!done)){
+    first_pen_cand[!done][1]
+  }else{
+    print(task_dt)
+    while(nrow(task_dt[!is.na(peaks)])<2){
+      task_dt <- get_tasks()
+    }
+    print(task_dt)
+    selection.df <- penaltyLearning::modelSelection(task_dt, "total.loss", "peaks")
+    selection.dt <- with(selection.df, data.table(
+      total.loss,
+      min.lambda,
+      penalty,
+      max.lambda,
+      peaks_after=c(peaks[-1],NA),
+      peaks
+    ))[
+      peaks_after<target.max.peaks & peaks>target.min.peaks &
+        peaks_after+1 < peaks & !max.lambda %in% task_dt$penalty
+    ]
+    if(nrow(selection.dt)){
+      selection.dt[1, max.lambda]
+    }
+  }
+  if(is.numeric(pen)){
+    key = rush$push_running_tasks(xss=list(list(
+      penalty=pen,
+      start.time.cand=start.time.cand,
+      end.time.cand=Sys.time())))
+    start.time.model <- Sys.time()
+    fit <- PeakSegDisk::PeakSegFPOP_dir(data.rush, pen)
+    rush$push_results(key, yss=list(list(
+      peaks=fit$loss$peaks,
+      total.loss=fit$loss$total.loss,
+      start.time.model=start.time.model,
+      end.time.model=Sys.time())))
+    pen
+  }
+}
+wl_penalty <- function(rush){
+  done <- FALSE
+  while(!done){
+    pen <- run_penalty(rush)
+    done <- is.null(pen)
+  }
+}
+
+if(FALSE){
+  redux::hiredis()$pipeline("FLUSHDB")
+  config = redux::redis_config()
+  rush = rush::Rush$new(network_id = "test", config=config)
+  wl_penalty(rush)
+}
+devtools::install_github("mlr-org/rush@mirai")
+
+
+wl_random_search = function(rush) {
+  # stop optimization after 100 tasks
+  while(rush$n_finished_tasks < 100) {
+    # draw new task
+    xs = list(x1 = runif(1, -5, 10), x2 = runif(1, 0, 15))
+    # mark task as running
+    key = rush$push_running_tasks(xss = list(xs))
+    # evaluate task
+    ys = list(y = branin(xs$x1, xs$x2))
+    # push result
+    rush$push_results(key, yss = list(ys))
+  }
+}
+branin = function(x1, x2) {
+  (x2 - 5.1 / (4 * pi^2) * x1^2 + 5 / pi * x1 - 6)^2 + 10 * (1 - 1 / (8 * pi)) * cos(x1) + 10
+}
+
+
+library(data.table)
+
+redux::hiredis()$pipeline("FLUSHDB")
+config = redux::redis_config()
+rush = rush::Rush$new(network_id = "test", config=config)
+rush$fetch_tasks()
+rush$start_local_workers(
+  worker_loop = wl_random_search,
+  n_workers = 4,
+  globals = "branin")
+rush
+rush$fetch_tasks()
+
+redux::hiredis()$pipeline("FLUSHDB")
+config = redux::redis_config()
+rush = rush::Rush$new(network_id = "test", config=config)
+rush$fetch_tasks()
+rush$start_local_workers(
+  worker_loop = wl_penalty,
+  n_workers = 4,
+  globals = c("run_penalty","data.rush"))
+rush
+task_dt <- rush$fetch_tasks()
+task_dt[order(peaks)]
+```
