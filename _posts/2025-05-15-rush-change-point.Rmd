@@ -587,8 +587,14 @@ viz_workers(results_1_100$mirai_map)
 
 The figure above shows that there is very little overhead for
 launching mirai parallel tasks. In each iteration, we can see that all
-14 processes start almost at the same time.
-This results in a shorter overall comptutation time.
+14 processes start almost at the same time. This results in a shorter
+overall comptutation time. However, we can see still some
+overhead/inefficiency that comes from the centralized computation of
+target penalties. That is, at each iteration, some processes are
+short, and must wait until the longest process in the iteration
+finishes, before receiving a new penalty to compute. This observation
+motivates the de-centralized parallelized model that should be
+possible using rush.
 
 ## Comparison
 
@@ -632,7 +638,7 @@ and `mirai_map`.
 
 ## De-centralized candidate computation, rush
 
-TODO, this is not working, but I asked for help https://github.com/mlr-org/rush/issues/44
+TODO, this is not working, but I asked for help <https://github.com/mlr-org/rush/issues/44>
 
 ```{r}
 data.rush <- file.path(
@@ -769,4 +775,27 @@ rush$start_local_workers(
 rush
 task_dt <- rush$fetch_tasks()
 task_dt[order(peaks)]
+```
+
+## Conclusions
+
+We have discussed how to implement Change-points for a Range Of
+ComplexitieS (CROCS), an algorithm that returns a range of peak
+models. We used a real genomic data set, and computed models with from
+1 to 100 peaks. We observed the differences between several computation methods:
+
+* `lapply` sequential computation is relatively slow.
+* `future.apply::future_lapply` results in somewhat faster computation
+  using 14 CPUs on my laptop. The computation time of each job was on
+  the same order of magnitude as the overhead of launching parallel
+  jobs (about 0.2 seconds). For much longer jobs, this overhead is not
+  significant, but for these small jobs, it does result in noticeable
+  slow-downs.
+* `mirai::mirai_map` results in even faster computation, because its
+  overhead is much smaller.
+
+## Session Info
+
+```{r}
+sessionInfo()
 ```

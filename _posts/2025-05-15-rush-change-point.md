@@ -23,6 +23,16 @@ represent active regions.
 ``` r
 data(Mono27ac, package="PeakSegDisk")
 library(data.table)
+```
+
+```
+## data.table 1.17.2 utilise 1 threads (voir ?getDTthreads).  Dernières actualités : r-datatable.com
+## **********
+## Running data.table in English; package support is available in English only. When searching for online help, be sure to also check for the English error message. This can be obtained by looking at the po/R-<locale>.po and po/<locale>.po files in the package source, where the native language and English error messages can be found side-by-side. You can also try calling Sys.setLanguage('en') prior to reproducing the error message.
+## **********
+```
+
+``` r
 Mono27ac$coverage
 ```
 
@@ -87,6 +97,10 @@ if you declare a future plan as in the code below.
 ``` r
 future::plan("multisession")
 fit10 <- PeakSegDisk::sequentialSearch_dir(data.dir, 10L, verbose=1)
+```
+
+```
+## Le chargement a nécessité le package : future.apply
 ```
 
 ```
@@ -485,39 +499,39 @@ central_launch <- function(target.min.peaks, target.max.peaks, LAPPLY=future.app
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##  1:     0.0000  3199 -130227.291         1  267491 2025-05-19 08:14:36 2025-05-19 08:14:37
-##  2:        Inf     0  375197.873         1  267483 2025-05-19 08:14:37 2025-05-19 08:14:37
-##  3:   157.9947   224  -62199.931         2  267491 2025-05-19 08:14:37 2025-05-19 08:14:37
-##  4:  1952.6688    17    2640.128         3  267491 2025-05-19 08:14:38 2025-05-19 08:14:38
-##  5: 21915.1615     4   89739.642         4  267491 2025-05-19 08:14:38 2025-05-19 08:14:39
-##  6:  6699.9627     8   36282.919         5  267491 2025-05-19 08:14:39 2025-05-19 08:14:39
-##  7:  3738.0879    11   19258.189         6  267491 2025-05-19 08:14:39 2025-05-19 08:14:40
-##  8: 13364.1808     6   55084.654         6  267483 2025-05-19 08:14:40 2025-05-19 08:14:40
-##  9:  2769.6768    13   13373.281         7  267491 2025-05-19 08:14:40 2025-05-19 08:14:41
-## 10:  5674.9101    10   24108.390         7  267483 2025-05-19 08:14:41 2025-05-19 08:14:41
-## 11:  9400.8673     7   43845.255         7  267485 2025-05-19 08:14:41 2025-05-19 08:14:41
-## 12: 17327.4943     5   70694.172         7  267481 2025-05-19 08:14:41 2025-05-19 08:14:41
-## 13:  2683.2884    16    5152.375         8  267491 2025-05-19 08:14:42 2025-05-19 08:14:42
-## 14:  2942.4538    12   16241.816         8  267483 2025-05-19 08:14:42 2025-05-19 08:14:42
-## 15:  6087.2647     9   30064.892         8  267485 2025-05-19 08:14:42 2025-05-19 08:14:42
-## 16:  2740.3022    14   10611.733         9  267491 2025-05-19 08:14:43 2025-05-19 08:14:43
-## 17:  2729.6793    16    5152.375        10  267491 2025-05-19 08:14:43 2025-05-19 08:14:43
-## 18:  2729.6793    16    5152.375        11  267491 2025-05-19 08:14:44 2025-05-19 08:14:44
+##  1:     0.0000  3199 -130227.291         1  280065 2025-05-20 09:46:18 2025-05-20 09:46:18
+##  2:        Inf     0  375197.873         1  280055 2025-05-20 09:46:18 2025-05-20 09:46:18
+##  3:   157.9947   224  -62199.931         2  280065 2025-05-20 09:46:18 2025-05-20 09:46:19
+##  4:  1952.6688    17    2640.128         3  280065 2025-05-20 09:46:19 2025-05-20 09:46:19
+##  5: 21915.1615     4   89739.642         4  280065 2025-05-20 09:46:20 2025-05-20 09:46:20
+##  6:  6699.9627     8   36282.919         5  280065 2025-05-20 09:46:20 2025-05-20 09:46:20
+##  7:  3738.0879    11   19258.189         6  280065 2025-05-20 09:46:21 2025-05-20 09:46:21
+##  8: 13364.1808     6   55084.654         6  280055 2025-05-20 09:46:21 2025-05-20 09:46:21
+##  9:  2769.6768    13   13373.281         7  280065 2025-05-20 09:46:21 2025-05-20 09:46:22
+## 10:  5674.9101    10   24108.390         7  280055 2025-05-20 09:46:22 2025-05-20 09:46:22
+## 11:  9400.8673     7   43845.255         7  280061 2025-05-20 09:46:22 2025-05-20 09:46:22
+## 12: 17327.4943     5   70694.172         7  280058 2025-05-20 09:46:22 2025-05-20 09:46:22
+## 13:  2683.2884    16    5152.375         8  280065 2025-05-20 09:46:23 2025-05-20 09:46:23
+## 14:  2942.4538    12   16241.816         8  280055 2025-05-20 09:46:23 2025-05-20 09:46:23
+## 15:  6087.2647     9   30064.892         8  280061 2025-05-20 09:46:23 2025-05-20 09:46:24
+## 16:  2740.3022    14   10611.733         9  280065 2025-05-20 09:46:24 2025-05-20 09:46:24
+## 17:  2729.6793    16    5152.375        10  280065 2025-05-20 09:46:25 2025-05-20 09:46:25
+## 18:  2729.6793    16    5152.375        11  280065 2025-05-20 09:46:25 2025-05-20 09:46:25
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1  266755 2025-05-19 08:14:37 2025-05-19 08:14:37
-##  2:         2  266755 2025-05-19 08:14:37 2025-05-19 08:14:37
-##  3:         3  266755 2025-05-19 08:14:38 2025-05-19 08:14:38
-##  4:         4  266755 2025-05-19 08:14:39 2025-05-19 08:14:39
-##  5:         5  266755 2025-05-19 08:14:39 2025-05-19 08:14:39
-##  6:         6  266755 2025-05-19 08:14:40 2025-05-19 08:14:40
-##  7:         7  266755 2025-05-19 08:14:41 2025-05-19 08:14:41
-##  8:         8  266755 2025-05-19 08:14:42 2025-05-19 08:14:42
-##  9:         9  266755 2025-05-19 08:14:43 2025-05-19 08:14:43
-## 10:        10  266755 2025-05-19 08:14:43 2025-05-19 08:14:44
-## 11:        11  266755 2025-05-19 08:14:44 2025-05-19 08:14:44
+##  1:         1  278933 2025-05-20 09:46:18 2025-05-20 09:46:18
+##  2:         2  278933 2025-05-20 09:46:19 2025-05-20 09:46:19
+##  3:         3  278933 2025-05-20 09:46:19 2025-05-20 09:46:19
+##  4:         4  278933 2025-05-20 09:46:20 2025-05-20 09:46:20
+##  5:         5  278933 2025-05-20 09:46:20 2025-05-20 09:46:20
+##  6:         6  278933 2025-05-20 09:46:21 2025-05-20 09:46:21
+##  7:         7  278933 2025-05-20 09:46:22 2025-05-20 09:46:22
+##  8:         8  278933 2025-05-20 09:46:24 2025-05-20 09:46:24
+##  9:         9  278933 2025-05-20 09:46:24 2025-05-20 09:46:24
+## 10:        10  278933 2025-05-20 09:46:25 2025-05-20 09:46:25
+## 11:        11  278933 2025-05-20 09:46:25 2025-05-20 09:46:25
 ```
 
 The result is a list of two tables:
@@ -726,35 +740,35 @@ results_1_100 <- list()
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##   1:    0.0000  3199 -130227.291         1  267491 2025-05-19 08:14:46 2025-05-19 08:14:46
-##   2:       Inf     0  375197.873         1  267483 2025-05-19 08:14:46 2025-05-19 08:14:46
-##   3:  157.9947   224  -62199.931         2  267491 2025-05-19 08:14:46 2025-05-19 08:14:46
-##   4: 1952.6688    17    2640.128         3  267491 2025-05-19 08:14:47 2025-05-19 08:14:47
-##   5:  313.2370    74  -31865.715         4  267491 2025-05-19 08:14:47 2025-05-19 08:14:48
+##   1:    0.0000  3199 -130227.291         1  280065 2025-05-20 09:46:27 2025-05-20 09:46:28
+##   2:       Inf     0  375197.873         1  280055 2025-05-20 09:46:28 2025-05-20 09:46:28
+##   3:  157.9947   224  -62199.931         2  280065 2025-05-20 09:46:28 2025-05-20 09:46:28
+##   4: 1952.6688    17    2640.128         3  280065 2025-05-20 09:46:29 2025-05-20 09:46:29
+##   5:  313.2370    74  -31865.715         4  280065 2025-05-20 09:46:29 2025-05-20 09:46:30
 ##  ---                                                                                      
-## 112:  314.0074    74  -31865.715        13  267481 2025-05-19 08:15:11 2025-05-19 08:15:11
-## 113:  327.0344    62  -28011.480        13  267488 2025-05-19 08:15:11 2025-05-19 08:15:12
-## 114:  247.0699    95  -37499.236        14  267491 2025-05-19 08:15:12 2025-05-19 08:15:12
-## 115:  247.5600    95  -37499.236        14  267483 2025-05-19 08:15:12 2025-05-19 08:15:13
-## 116:  327.0344    62  -28011.480        14  267485 2025-05-19 08:15:13 2025-05-19 08:15:13
+## 112:  314.0074    74  -31865.715        13  280058 2025-05-20 09:46:52 2025-05-20 09:46:52
+## 113:  327.0344    62  -28011.480        13  280060 2025-05-20 09:46:52 2025-05-20 09:46:52
+## 114:  247.0699    95  -37499.236        14  280065 2025-05-20 09:46:53 2025-05-20 09:46:53
+## 115:  247.5600    95  -37499.236        14  280055 2025-05-20 09:46:53 2025-05-20 09:46:53
+## 116:  327.0344    62  -28011.480        14  280061 2025-05-20 09:46:53 2025-05-20 09:46:53
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1  266755 2025-05-19 08:14:46 2025-05-19 08:14:46
-##  2:         2  266755 2025-05-19 08:14:46 2025-05-19 08:14:46
-##  3:         3  266755 2025-05-19 08:14:47 2025-05-19 08:14:47
-##  4:         4  266755 2025-05-19 08:14:48 2025-05-19 08:14:48
-##  5:         5  266755 2025-05-19 08:14:49 2025-05-19 08:14:49
-##  6:         6  266755 2025-05-19 08:14:51 2025-05-19 08:14:51
-##  7:         7  266755 2025-05-19 08:14:54 2025-05-19 08:14:54
-##  8:         8  266755 2025-05-19 08:14:57 2025-05-19 08:14:57
-##  9:         9  266755 2025-05-19 08:15:01 2025-05-19 08:15:01
-## 10:        10  266755 2025-05-19 08:15:04 2025-05-19 08:15:04
-## 11:        11  266755 2025-05-19 08:15:08 2025-05-19 08:15:08
-## 12:        12  266755 2025-05-19 08:15:10 2025-05-19 08:15:10
-## 13:        13  266755 2025-05-19 08:15:12 2025-05-19 08:15:12
-## 14:        14  266755 2025-05-19 08:15:13 2025-05-19 08:15:13
+##  1:         1  278933 2025-05-20 09:46:28 2025-05-20 09:46:28
+##  2:         2  278933 2025-05-20 09:46:28 2025-05-20 09:46:28
+##  3:         3  278933 2025-05-20 09:46:29 2025-05-20 09:46:29
+##  4:         4  278933 2025-05-20 09:46:30 2025-05-20 09:46:30
+##  5:         5  278933 2025-05-20 09:46:31 2025-05-20 09:46:31
+##  6:         6  278933 2025-05-20 09:46:33 2025-05-20 09:46:33
+##  7:         7  278933 2025-05-20 09:46:36 2025-05-20 09:46:36
+##  8:         8  278933 2025-05-20 09:46:39 2025-05-20 09:46:39
+##  9:         9  278933 2025-05-20 09:46:43 2025-05-20 09:46:43
+## 10:        10  278933 2025-05-20 09:46:46 2025-05-20 09:46:46
+## 11:        11  278933 2025-05-20 09:46:49 2025-05-20 09:46:49
+## 12:        12  278933 2025-05-20 09:46:51 2025-05-20 09:46:51
+## 13:        13  278933 2025-05-20 09:46:52 2025-05-20 09:46:52
+## 14:        14  278933 2025-05-20 09:46:53 2025-05-20 09:46:53
 ```
 
 ``` r
@@ -815,8 +829,14 @@ viz_workers(results_1_100$mirai_map)
 
 The figure above shows that there is very little overhead for
 launching mirai parallel tasks. In each iteration, we can see that all
-14 processes start almost at the same time.
-This results in a shorter overall comptutation time.
+14 processes start almost at the same time. This results in a shorter
+overall comptutation time. However, we can see still some
+overhead/inefficiency that comes from the centralized computation of
+target penalties. That is, at each iteration, some processes are
+short, and must wait until the longest process in the iteration
+finishes, before receiving a new penalty to compute. This observation
+motivates the de-centralized parallelized model that should be
+possible using rush.
 
 ## Comparison
 
@@ -839,17 +859,17 @@ for(fun in names(results_1_100)){
 ```
 ##                fun   penalty peaks  total.loss iteration process     start.time       end.time
 ##             <fctr>     <num> <int>       <num>     <int>  <fctr>     <difftime>     <difftime>
-##   1: future_lapply    0.0000  3199 -130227.291         1  267491 0.0000000 secs 0.2189183 secs
-##   2: future_lapply       Inf     0  375197.873         1  267483 0.1814265 secs 0.2558122 secs
-##   3: future_lapply  157.9947   224  -62199.931         2  267491 0.5419364 secs 0.7944977 secs
-##   4: future_lapply 1952.6688    17    2640.128         3  267491 1.0942256 secs 1.3592741 secs
-##   5: future_lapply  313.2370    74  -31865.715         4  267491 1.6529596 secs 1.9214509 secs
+##   1: future_lapply    0.0000  3199 -130227.291         1  280065 0.0000000 secs 0.2196681 secs
+##   2: future_lapply       Inf     0  375197.873         1  280055 0.3315060 secs 0.4009218 secs
+##   3: future_lapply  157.9947   224  -62199.931         2  280065 0.6831439 secs 0.9577212 secs
+##   4: future_lapply 1952.6688    17    2640.128         3  280065 1.2603507 secs 1.5407634 secs
+##   5: future_lapply  313.2370    74  -31865.715         4  280065 1.9878511 secs 2.2635896 secs
 ##  ---                                                                                          
-## 344:     mirai_map  314.0074    74  -31865.715        13  268226 5.3989632 secs 5.6431861 secs
-## 345:     mirai_map  327.0344    62  -28011.480        13  268232 5.3990593 secs 5.7106867 secs
-## 346:     mirai_map  247.0699    95  -37499.236        14  268216 5.7275386 secs 5.9835937 secs
-## 347:     mirai_map  247.5600    95  -37499.236        14  268251 5.7281096 secs 5.9794848 secs
-## 348:     mirai_map  327.0344    62  -28011.480        14  268218 5.7289467 secs 5.9829257 secs
+## 344:     mirai_map  314.0074    74  -31865.715        13  280815 5.2951856 secs 5.5109689 secs
+## 345:     mirai_map  327.0344    62  -28011.480        13  280878 5.2958674 secs 5.5052207 secs
+## 346:     mirai_map  247.0699    95  -37499.236        14  280795 5.5658138 secs 5.7251492 secs
+## 347:     mirai_map  247.5600    95  -37499.236        14  280803 5.5663011 secs 5.7757649 secs
+## 348:     mirai_map  327.0344    62  -28011.480        14  280800 5.5670576 secs 5.8384726 secs
 ```
 
 ``` r
@@ -882,7 +902,7 @@ and `mirai_map`.
 
 ## De-centralized candidate computation, rush
 
-TODO, this is not working, but I asked for help https://github.com/mlr-org/rush/issues/44
+TODO, this is not working, but I asked for help <https://github.com/mlr-org/rush/issues/44>
 
 
 ``` r
@@ -983,8 +1003,8 @@ devtools::install_github("mlr-org/rush@mirai")
 ```
 
 ```
-## Error: Failed to install 'rush' from GitHub:
-##   SSL peer certificate or SSH remote key was not OK [api.github.com]: SSL: certificate subject name (*.moveon-hotelbb.com) does not match target host name 'api.github.com'
+## Skipping install of 'rush' from a github remote, the SHA1 (11a8008e) has not changed since last install.
+##   Use `force = TRUE` to force installation
 ```
 
 ``` r
@@ -1034,7 +1054,7 @@ rush$start_local_workers(
 ```
 
 ```
-## INFO  [08:16:11.764] [rush] Starting 4 worker(s)
+## INFO  [09:47:53.483] [rush] Starting 4 worker(s)
 ```
 
 ``` r
@@ -1086,7 +1106,7 @@ rush$start_local_workers(
 ```
 
 ```
-## INFO  [08:16:12.078] [rush] Starting 4 worker(s)
+## INFO  [09:47:53.776] [rush] Starting 4 worker(s)
 ```
 
 ``` r
@@ -1110,4 +1130,74 @@ task_dt[order(peaks)]
 
 ```
 ## Error in .checkTypos(e, names_x): Objet 'peaks' non trouvé parmi []
+```
+
+## Conclusions
+
+We have discussed how to implement Change-points for a Range Of
+ComplexitieS (CROCS), an algorithm that returns a range of peak
+models. We used a real genomic data set, and computed models with from
+1 to 100 peaks. We observed the differences between several computation methods:
+
+* `lapply` sequential computation is relatively slow.
+* `future.apply::future_lapply` results in somewhat faster computation
+  using 14 CPUs on my laptop. The computation time of each job was on
+  the same order of magnitude as the overhead of launching parallel
+  jobs (about 0.2 seconds). For much longer jobs, this overhead is not
+  significant, but for these small jobs, it does result in noticeable
+  slow-downs.
+* `mirai::mirai_map` results in even faster computation, because its
+  overhead is much smaller.
+
+## Session Info
+
+
+``` r
+sessionInfo()
+```
+
+```
+## R version 4.5.0 (2025-04-11)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 24.04.2 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
+## 
+## locale:
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: Europe/Paris
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] ggplot2_3.5.1     data.table_1.17.2
+## 
+## loaded via a namespace (and not attached):
+##  [1] gtable_0.3.6             xfun_0.51                htmlwidgets_1.6.4        devtools_2.4.5          
+##  [5] remotes_2.5.0            processx_3.8.6           ps_1.9.1                 quadprog_1.5-8          
+##  [9] vctrs_0.6.5              tools_4.5.0              generics_0.1.3           curl_6.2.2              
+## [13] parallel_4.5.0           tibble_3.2.1             pkgconfig_2.0.3          mirai_2.2.0             
+## [17] checkmate_2.3.2          PeakSegDisk_2024.10.1    uuid_1.2-1               lifecycle_1.0.4         
+## [21] compiler_4.5.0           farver_2.1.2             ids_1.0.1                penaltyLearning_2024.9.3
+## [25] munsell_0.5.1            codetools_0.2-20         httpuv_1.6.15            htmltools_0.5.8.1       
+## [29] usethis_3.1.0            crayon_1.5.3             later_1.4.1              pillar_1.10.2           
+## [33] urlchecker_1.0.1         ellipsis_0.3.2           redux_1.1.4              cachem_1.1.0            
+## [37] sessioninfo_1.2.3        mime_0.13                parallelly_1.43.0        tidyselect_1.2.1        
+## [41] digest_0.6.37            future_1.34.0            dplyr_1.1.4              purrr_1.0.4             
+## [45] listenv_0.9.1            labeling_0.4.3           fastmap_1.2.0            grid_4.5.0              
+## [49] colorspace_2.1-1         cli_3.6.5                magrittr_2.0.3           pkgbuild_1.4.7          
+## [53] future.apply_1.11.3      withr_3.0.2              scales_1.3.0             promises_1.3.2          
+## [57] backports_1.5.0          rush_0.1.2.9000          globals_0.16.3           memoise_2.0.1           
+## [61] shiny_1.10.0             evaluate_1.0.3           knitr_1.50               miniUI_0.1.1.1          
+## [65] profvis_0.4.0            mlr3misc_0.17.0          rlang_1.1.6              Rcpp_1.0.14             
+## [69] nanonext_1.5.2           xtable_1.8-4             glue_1.8.0               directlabels_2024.1.21  
+## [73] pkgload_1.4.0            jsonlite_2.0.0           lgr_0.4.4                R6_2.6.1                
+## [77] fs_1.6.5
 ```
