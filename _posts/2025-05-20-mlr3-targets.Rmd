@@ -1,0 +1,273 @@
+---
+layout: post
+title: Parallel machine learning benchmarks
+description: A new approach using targets and crew.cluster
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-05-20-mlr3-targets"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+I recently wrote about [New parallel computing frameworks in
+R](https://tdhock.github.io/blog/2025/rush/). The goal of this blog is
+to explore how these new frameworks may be used for parallelizing
+machine learning benchmark experiments.
+
+## Introduction to machine learning
+
+Typically when we parallelize machine learning benchmark experiments with mlr3, we use the following pipeline:
+
+* `mlr3::benchmark_grid()` creates a grid of tasks, learners, and resampling iterations.
+* `batchtools::makeExperimentRegistry()` creates a registry directory.
+* `mlr3batchmark::batchmark()` save the grid into the registry directory.
+* `batchtools::submitJobs()` launches the jobs on the cluster.
+* `mlr3batchmark::reduceResultsBatchmark()` combines the results into a single file.
+
+This approach is discussed in the following blogs:
+
+* [The importance of hyper-parameter
+  tuning](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/)
+  explains how to use the auto-tuner.
+* [Cross-validation experiments with torch
+  learners](https://tdhock.github.io/blog/2024/mlr3torch/) explains
+  how to compare linear models in torch with other learners from
+  outside torch like `glmnet`.
+* [Torch learning with binary
+  classification](https://tdhock.github.io/blog/2025/mlr3torch-binary/)
+  explains how to implement a custom loss function for binary
+  classification in mlr3torch.
+* [Comparing neural network architectures using mlr3torch](https://tdhock.github.io/blog/2025/mlr3torch-conv/) explains how to implement different neural network architectures, and make figures to compare their subtrain/validation/test error rates.
+
+While this approach is very useful, there are some dis-advantages:
+
+* jobs can have very different times
+* ??
+
+## Simulate data for ML experiment
+
+This example is taken from `?mlr3resampling::pvalue`:
+
+```{r}
+N <- 80
+library(data.table)
+set.seed(1)
+reg.dt <- data.table(
+  x=runif(N, -2, 2),
+  person=factor(rep(c("Alice","Bob"), each=0.5*N)))
+reg.pattern.list <- list(
+  easy=function(x, person)x^2,
+  impossible=function(x, person)(x^2)*(-1)^as.integer(person))
+SOAK <- mlr3resampling::ResamplingSameOtherSizesCV$new()
+viz.dt.list <- list()
+reg.task.list <- list()
+for(pattern in names(reg.pattern.list)){
+  f <- reg.pattern.list[[pattern]]
+  task.dt <- data.table(reg.dt)[
+  , y := f(x,person)+rnorm(N, sd=0.5)
+  ][]
+  task.obj <- mlr3::TaskRegr$new(
+    pattern, task.dt, target="y")
+  task.obj$col_roles$feature <- "x"
+  task.obj$col_roles$stratum <- "person"
+  task.obj$col_roles$subset <- "person"
+  reg.task.list[[pattern]] <- task.obj
+  viz.dt.list[[pattern]] <- data.table(pattern, task.dt)
+}
+(viz.dt <- rbindlist(viz.dt.list))
+```
+
+The data table above represents simulated regression problem, which is visualized using the code below.
+
+```{r sim-data}
+library(ggplot2)
+ggplot()+
+  geom_point(aes(
+    x, y),
+    data=viz.dt)+
+  facet_grid(pattern ~ person, labeller=label_both)
+```
+
+The figure above shows data for two simulated patterns: 
+
+* easy (top) has same pattern in the two people.
+* impossible (bottom) has different patterns in the two people.
+
+## mlr3 benchmark grid
+
+To use mlr3 on these data, we create a benchmark grid with a list of tasks and learners in the code below.
+
+```{r}
+reg.learner.list <- list(
+  mlr3::LearnerRegrFeatureless$new())
+if(requireNamespace("rpart")){
+  reg.learner.list$rpart <- mlr3::LearnerRegrRpart$new()
+}
+(bench.grid <- mlr3::benchmark_grid(
+  reg.task.list,
+  reg.learner.list,
+  SOAK))
+```
+
+The output above indicates that we want to run `same_other_sizes_cv`
+resampling on two different tasks, and two different learners.
+To run that in sequence, we use the typical mlr3 functions in the code below.
+
+```{r}
+bench.result <- mlr3::benchmark(bench.grid)
+bench.score <- mlr3resampling::score(bench.result, mlr3::msr("regr.rmse"))
+bench.score[, .(task_id, algorithm, train.subsets, test.fold, test.subset, regr.rmse)]
+```
+
+The table of scores above shows the root mean squared error for each
+combination of task, algorithm, train subset, test fold, and test
+subset. These error values are summarized in the visualization below.
+
+```{r pvalue}
+bench.plist <- mlr3resampling::pvalue(bench.score)
+plot(bench.plist)
+```
+
+The figure above shows:
+
+* in black, mean plus or minus standard deviation, for each
+  combination of task, test subset, algorithm, and train subsets.
+* in grey, P-values for differences between same/all and same/other
+  (two-sided paired T-test).
+  
+## Porting to targets
+
+To run the same computations using targets, we first loop over the
+benchmark grid, and create a data table with one row per train/test split.
+
+```{r}
+target_dt_list <- list()
+for(bench_row in seq_along(bench.grid$resampling)){
+  cv <- bench.grid$resampling[[bench_row]]
+  cv$instantiate(bench.grid$task[[bench_row]])
+  it_vec <- seq_len(cv$iters)
+  target_dt_list[[bench_row]] <- data.table(bench_row, iteration=it_vec)
+}
+(target_dt <- rbindlist(target_dt_list))
+```
+
+In the output above, `bench_row` is the row number of the benchmark
+grid table, and `iteration` is the row number in the corresponding
+instantiated resampling. To use these data with targets, we first save
+them to a file on disk.
+
+```{r}
+save(target_dt, bench.grid, file="2025-05-20-mlr3-targets-in.RData")
+```
+
+Then we create a tar script which begins by reading the data, and ends
+with a list of targets.
+
+```{r}
+targets::tar_script({
+  load("2025-05-20-mlr3-targets-in.RData")
+  library(data.table)
+  compute <- function(target_num){
+    target_row <- target_dt[target_num]
+    L <- bench.grid$learner[[target_row$bench_row]]
+    this_task <- bench.grid$task[[target_row$bench_row]]
+    set_rows <- list()
+    for(set_name in c("train","test")){
+      attr_name <- paste0(set_name, "_set")
+      set_rows[[set_name]] <- bench.grid[[attr_name]][[target_row$bench_row]][[target_row$iteration]]
+    }
+    L$train(this_task, set_rows$train)
+    pred <- L$predict(this_task, set_rows$test)
+    bench.grid$resampling[[target_row$bench_row]]$instance$iteration.dt[
+      target_row$iteration, .(
+        task_id=this_task$id, algorithm=sub("regr.","",L$id),
+        train.subsets, test.fold, test.subset, 
+        ##groups, seed, n.train.groups,
+        regr.rmse=pred$score(mlr3::msrs("regr.rmse")))]
+  }
+  job_targs <- tarchetypes::tar_map(
+    list(target_num=seq_len(nrow(target_dt))),
+    targets::tar_target(result, compute(target_num)))
+  list(
+    tarchetypes::tar_combine(combine, job_targs, command=rbind(!!!.x)),
+    job_targs)
+})
+```
+
+The trick in the code above is the use of two functions:
+
+* `tar_map()` creates a target for each value of `target_num`, saving the list of targets to `job_targs`.
+* `tar_combine()` creates a target that depends on all of the targets in the `job_targs` list.
+
+The code below computes the results.
+
+```{r}
+if(FALSE){
+  targets::tar_manifest()
+  targets::tar_visnetwork()
+}
+targets::tar_make()
+(tar_score_dt <- targets::tar_read(combine))
+```
+
+The table above shows the test error, and the code below plots it.
+
+```{r tar-pval}
+tar_pval_list <- mlr3resampling::pvalue(tar_score_dt)
+plot(tar_pval_list)
+```
+
+The result figure above is consistent with the result figure that was
+computed with the usual mlr3 benchmark function.
+
+## Dynamic targets
+
+Next, we implement [dynamic
+branching](https://books.ropensci.org/targets/dynamic.html#branching),
+which is apparently faster for lots of branches.
+
+```{r}
+targets::tar_script({
+  load("2025-05-20-mlr3-targets-in.RData")
+  library(data.table)
+  compute <- function(it_i){
+    target_row <- target_dt[it_i]
+    bench_row <- bench.grid[target_row$bench_row]
+    L <- bench_row$learner[[1]]
+    this_task <- bench_row$task[[1]]
+    set_rows <- list()
+    for(set_name in c("train","test")){
+      attr_name <- paste0(set_name, "_set")
+      set_rows[[set_name]] <- bench_row[[attr_name]][[1]][[target_row$iteration]]
+    }
+    L$train(this_task, set_rows$train)
+    L$predict(this_task, set_rows$test)
+  }
+  job_targs <- tarchetypes::tar_map(
+    list(iteration=seq_len(nrow(target_dt))),
+    targets::tar_target(result, compute(iteration)))
+  list(
+    tarchetypes::tar_combine(combine, job_targs, command=rbind(!!!.x)),
+    job_targs)
+})
+if(FALSE){
+  targets::tar_manifest()
+  targets::tar_visnetwork()
+}
+targets::tar_make()
+targets::tar_read(combine)
+```

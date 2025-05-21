@@ -16,6 +16,9 @@ simplest to most complex.
   Frameworks](https://tdhock.github.io/blog/2023/comparing-ml-frameworks/)
   discusses advantages of mlr3 relative to a basic for loop, and the
   more recent tidymodels framework in R.
+* [The importance of hyper-parameter
+  tuning](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/)
+  explains how to use the auto-tuner.
 * [New code for various kinds of
   cross-validation](https://tdhock.github.io/blog/2024/cv-all-same-new/)
   explains how to use `mlr3resampling` to implement
