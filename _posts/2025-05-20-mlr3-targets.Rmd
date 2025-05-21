@@ -167,11 +167,33 @@ for(bench_row in seq_along(bench.grid$resampling)){
 
 In the output above, `bench_row` is the row number of the benchmark
 grid table, and `iteration` is the row number in the corresponding
-instantiated resampling. To use these data with targets, we first save
-them to a file on disk.
+instantiated resampling. To use these data with targets, we first
+define a compute function.
 
 ```{r}
-save(target_dt, bench.grid, file="2025-05-20-mlr3-targets-in.RData")
+compute <- function(target_num){
+  ##library(data.table)
+  target_row <- target_dt[target_num]
+  it.dt <- bench.grid$resampling[[target_row$bench_row]]$instance$iteration.dt
+  L <- bench.grid$learner[[target_row$bench_row]]
+  this_task <- bench.grid$task[[target_row$bench_row]]
+  set_rows <- function(set_name)it.dt[[set_name]][[target_row$iteration]]
+  L$train(this_task, set_rows("train"))
+  pred <- L$predict(this_task, set_rows("test"))
+  it.dt[target_row$iteration, .(
+    task_id=this_task$id, algorithm=sub("regr.","",L$id),
+    train.subsets, test.fold, test.subset, 
+    ##groups, seed, n.train.groups,
+    regr.rmse=pred$score(mlr3::msrs("regr.rmse")))]
+}
+compute(1)
+compute(2)
+```
+
+We then save the data and function to a file on disk.
+
+```{r}
+save(target_dt, bench.grid, compute, file="2025-05-20-mlr3-targets-in.RData")
 ```
 
 Then we create a tar script which begins by reading the data, and ends
@@ -180,32 +202,13 @@ with a list of targets.
 ```{r}
 targets::tar_script({
   load("2025-05-20-mlr3-targets-in.RData")
-  library(data.table)
-  compute <- function(target_num){
-    target_row <- target_dt[target_num]
-    L <- bench.grid$learner[[target_row$bench_row]]
-    this_task <- bench.grid$task[[target_row$bench_row]]
-    set_rows <- list()
-    for(set_name in c("train","test")){
-      attr_name <- paste0(set_name, "_set")
-      set_rows[[set_name]] <- bench.grid[[attr_name]][[target_row$bench_row]][[target_row$iteration]]
-    }
-    L$train(this_task, set_rows$train)
-    pred <- L$predict(this_task, set_rows$test)
-    bench.grid$resampling[[target_row$bench_row]]$instance$iteration.dt[
-      target_row$iteration, .(
-        task_id=this_task$id, algorithm=sub("regr.","",L$id),
-        train.subsets, test.fold, test.subset, 
-        ##groups, seed, n.train.groups,
-        regr.rmse=pred$score(mlr3::msrs("regr.rmse")))]
-  }
   job_targs <- tarchetypes::tar_map(
     list(target_num=seq_len(nrow(target_dt))),
     targets::tar_target(result, compute(target_num)))
   list(
     tarchetypes::tar_combine(combine, job_targs, command=rbind(!!!.x)),
     job_targs)
-})
+}, ask=FALSE)
 ```
 
 The trick in the code above is the use of two functions:
@@ -243,31 +246,50 @@ which is apparently faster for lots of branches.
 ```{r}
 targets::tar_script({
   load("2025-05-20-mlr3-targets-in.RData")
-  library(data.table)
-  compute <- function(it_i){
-    target_row <- target_dt[it_i]
-    bench_row <- bench.grid[target_row$bench_row]
-    L <- bench_row$learner[[1]]
-    this_task <- bench_row$task[[1]]
-    set_rows <- list()
-    for(set_name in c("train","test")){
-      attr_name <- paste0(set_name, "_set")
-      set_rows[[set_name]] <- bench_row[[attr_name]][[1]][[target_row$iteration]]
-    }
-    L$train(this_task, set_rows$train)
-    L$predict(this_task, set_rows$test)
-  }
-  job_targs <- tarchetypes::tar_map(
-    list(iteration=seq_len(nrow(target_dt))),
-    targets::tar_target(result, compute(iteration)))
   list(
-    tarchetypes::tar_combine(combine, job_targs, command=rbind(!!!.x)),
-    job_targs)
-})
-if(FALSE){
-  targets::tar_manifest()
-  targets::tar_visnetwork()
-}
+    targets::tar_target(target_num, seq_len(nrow(target_dt))),
+    targets::tar_target(result, compute(target_num), pattern=map(target_num)))
+}, ask=FALSE)
+```
+
+The code above uses `map(target_num)` to create a different result for
+each value of `target_num`, which is combined together into a single
+result table, computed and shown below.
+
+```{r}
 targets::tar_make()
-targets::tar_read(combine)
+(dyn_score_dt <- targets::tar_read(result))
+```
+
+The table above shows the test error for each train/test split, which
+we can visualize via the code below.
+
+```{r dyn-pval}
+dyn_pval_list <- mlr3resampling::pvalue(dyn_score_dt)
+plot(dyn_pval_list)
+```
+
+The graphics above are consistent with the previous result plots.
+
+## How does it work?
+
+When you run `tar_make()`, files are created:
+
+```{r}
+dir("_targets/objects/")
+```
+
+Each target has a corresponding file.
+
+## Conclusions
+
+We can use `targets` to declare and compute machine learning benchmark
+experiments in parallel. Next steps will be to verify if this approach
+works for larger experiments, with different sized data sets, and
+algorithms with different run-times.
+
+## Session info
+
+```{r}
+sessionInfo()
 ```
