@@ -146,80 +146,80 @@ bench.result <- mlr3::benchmark(bench.grid)
 ```
 
 ```
-## INFO  [09:32:51.021] [mlr3] Running benchmark with 72 resampling iterations
-## INFO  [09:32:51.025] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 1/18)
-## INFO  [09:32:51.031] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 2/18)
-## INFO  [09:32:51.043] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 3/18)
-## INFO  [09:32:51.049] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 4/18)
-## INFO  [09:32:51.055] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 5/18)
-## INFO  [09:32:51.061] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 6/18)
-## INFO  [09:32:51.068] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 7/18)
-## INFO  [09:32:51.073] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 8/18)
-## INFO  [09:32:51.080] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 9/18)
-## INFO  [09:32:51.091] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 10/18)
-## INFO  [09:32:51.098] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 11/18)
-## INFO  [09:32:51.104] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 12/18)
-## INFO  [09:32:51.111] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 13/18)
-## INFO  [09:32:51.117] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 14/18)
-## INFO  [09:32:51.123] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 15/18)
-## INFO  [09:32:51.129] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 16/18)
-## INFO  [09:32:51.135] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 17/18)
-## INFO  [09:32:51.162] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 18/18)
-## INFO  [09:32:51.169] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 1/18)
-## INFO  [09:32:51.178] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 2/18)
-## INFO  [09:32:51.187] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 3/18)
-## INFO  [09:32:51.196] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 4/18)
-## INFO  [09:32:51.204] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 5/18)
-## INFO  [09:32:51.212] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 6/18)
-## INFO  [09:32:51.227] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 7/18)
-## INFO  [09:32:51.236] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 8/18)
-## INFO  [09:32:51.245] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 9/18)
-## INFO  [09:32:51.253] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 10/18)
-## INFO  [09:32:51.262] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 11/18)
-## INFO  [09:32:51.270] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 12/18)
-## INFO  [09:32:51.278] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 13/18)
-## INFO  [09:32:51.293] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 14/18)
-## INFO  [09:32:51.303] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 15/18)
-## INFO  [09:32:51.314] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 16/18)
-## INFO  [09:32:51.323] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 17/18)
-## INFO  [09:32:51.332] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 18/18)
-## INFO  [09:32:51.340] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 1/18)
-## INFO  [09:32:51.346] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 2/18)
-## INFO  [09:32:51.358] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 3/18)
-## INFO  [09:32:51.366] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 4/18)
-## INFO  [09:32:51.372] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 5/18)
-## INFO  [09:32:51.379] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 6/18)
-## INFO  [09:32:51.385] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 7/18)
-## INFO  [09:32:51.391] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 8/18)
-## INFO  [09:32:51.398] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 9/18)
-## INFO  [09:32:51.404] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 10/18)
-## INFO  [09:32:51.414] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 11/18)
-## INFO  [09:32:51.423] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 12/18)
-## INFO  [09:32:51.430] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 13/18)
-## INFO  [09:32:51.436] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 14/18)
-## INFO  [09:32:51.443] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 15/18)
-## INFO  [09:32:51.449] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 16/18)
-## INFO  [09:32:51.456] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 17/18)
-## INFO  [09:32:51.462] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 18/18)
-## INFO  [09:32:51.468] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 1/18)
-## INFO  [09:32:51.483] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 2/18)
-## INFO  [09:32:51.492] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 3/18)
-## INFO  [09:32:51.500] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 4/18)
-## INFO  [09:32:51.509] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 5/18)
-## INFO  [09:32:51.517] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 6/18)
-## INFO  [09:32:51.525] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 7/18)
-## INFO  [09:32:51.537] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 8/18)
-## INFO  [09:32:51.549] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 9/18)
-## INFO  [09:32:51.557] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 10/18)
-## INFO  [09:32:51.566] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 11/18)
-## INFO  [09:32:51.574] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 12/18)
-## INFO  [09:32:51.583] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 13/18)
-## INFO  [09:32:51.591] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 14/18)
-## INFO  [09:32:51.604] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 15/18)
-## INFO  [09:32:51.615] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 16/18)
-## INFO  [09:32:51.624] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 17/18)
-## INFO  [09:32:51.632] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 18/18)
-## INFO  [09:32:51.648] [mlr3] Finished benchmark
+## INFO  [09:45:24.856] [mlr3] Running benchmark with 72 resampling iterations
+## INFO  [09:45:24.860] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 1/18)
+## INFO  [09:45:24.868] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 2/18)
+## INFO  [09:45:24.875] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 3/18)
+## INFO  [09:45:24.882] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 4/18)
+## INFO  [09:45:24.889] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 5/18)
+## INFO  [09:45:24.900] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 6/18)
+## INFO  [09:45:24.907] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 7/18)
+## INFO  [09:45:24.913] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 8/18)
+## INFO  [09:45:24.920] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 9/18)
+## INFO  [09:45:24.926] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 10/18)
+## INFO  [09:45:24.933] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 11/18)
+## INFO  [09:45:24.939] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 12/18)
+## INFO  [09:45:24.945] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 13/18)
+## INFO  [09:45:24.952] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 14/18)
+## INFO  [09:45:24.958] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 15/18)
+## INFO  [09:45:24.964] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 16/18)
+## INFO  [09:45:24.971] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 17/18)
+## INFO  [09:45:24.977] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 18/18)
+## INFO  [09:45:24.984] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 1/18)
+## INFO  [09:45:24.992] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 2/18)
+## INFO  [09:45:25.005] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 3/18)
+## INFO  [09:45:25.014] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 4/18)
+## INFO  [09:45:25.022] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 5/18)
+## INFO  [09:45:25.031] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 6/18)
+## INFO  [09:45:25.039] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 7/18)
+## INFO  [09:45:25.048] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 8/18)
+## INFO  [09:45:25.057] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 9/18)
+## INFO  [09:45:25.065] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 10/18)
+## INFO  [09:45:25.074] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 11/18)
+## INFO  [09:45:25.082] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 12/18)
+## INFO  [09:45:25.091] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 13/18)
+## INFO  [09:45:25.099] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 14/18)
+## INFO  [09:45:25.114] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 15/18)
+## INFO  [09:45:25.124] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 16/18)
+## INFO  [09:45:25.133] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 17/18)
+## INFO  [09:45:25.141] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 18/18)
+## INFO  [09:45:25.150] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 1/18)
+## INFO  [09:45:25.156] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 2/18)
+## INFO  [09:45:25.162] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 3/18)
+## INFO  [09:45:25.169] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 4/18)
+## INFO  [09:45:25.175] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 5/18)
+## INFO  [09:45:25.182] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 6/18)
+## INFO  [09:45:25.188] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 7/18)
+## INFO  [09:45:25.195] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 8/18)
+## INFO  [09:45:25.201] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 9/18)
+## INFO  [09:45:25.208] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 10/18)
+## INFO  [09:45:25.218] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 11/18)
+## INFO  [09:45:25.224] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 12/18)
+## INFO  [09:45:25.231] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 13/18)
+## INFO  [09:45:25.237] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 14/18)
+## INFO  [09:45:25.244] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 15/18)
+## INFO  [09:45:25.250] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 16/18)
+## INFO  [09:45:25.256] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 17/18)
+## INFO  [09:45:25.263] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 18/18)
+## INFO  [09:45:25.269] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 1/18)
+## INFO  [09:45:25.278] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 2/18)
+## INFO  [09:45:25.286] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 3/18)
+## INFO  [09:45:25.294] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 4/18)
+## INFO  [09:45:25.303] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 5/18)
+## INFO  [09:45:25.311] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 6/18)
+## INFO  [09:45:25.324] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 7/18)
+## INFO  [09:45:25.333] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 8/18)
+## INFO  [09:45:25.341] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 9/18)
+## INFO  [09:45:25.350] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 10/18)
+## INFO  [09:45:25.358] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 11/18)
+## INFO  [09:45:25.367] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 12/18)
+## INFO  [09:45:25.375] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 13/18)
+## INFO  [09:45:25.384] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 14/18)
+## INFO  [09:45:25.392] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 15/18)
+## INFO  [09:45:25.400] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 16/18)
+## INFO  [09:45:25.409] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 17/18)
+## INFO  [09:45:25.421] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 18/18)
+## INFO  [09:45:25.437] [mlr3] Finished benchmark
 ```
 
 ``` r
@@ -501,71 +501,71 @@ targets::tar_make()
 
 ```
 ## + result_70 dispatched
-## ✔ result_70 completed [40ms, 283 B]
+## ✔ result_70 completed [46ms, 283 B]
 ## + result_48 dispatched
-## ✔ result_48 completed [142ms, 285 B]
+## ✔ result_48 completed [173ms, 285 B]
 ## + result_71 dispatched
-## ✔ result_71 completed [12ms, 279 B]
+## ✔ result_71 completed [14ms, 279 B]
 ## + result_49 dispatched
 ## ✔ result_49 completed [10ms, 282 B]
 ## + result_72 dispatched
 ## ✔ result_72 completed [13ms, 282 B]
 ## + result_1 dispatched
-## ✔ result_1 completed [12ms, 280 B]
+## ✔ result_1 completed [8ms, 280 B]
 ## + result_10 dispatched
 ## ✔ result_10 completed [8ms, 281 B]
 ## + result_11 dispatched
-## ✔ result_11 completed [9ms, 283 B]
+## ✔ result_11 completed [8ms, 283 B]
 ## + result_12 dispatched
 ## ✔ result_12 completed [9ms, 278 B]
 ## + result_13 dispatched
-## ✔ result_13 completed [9ms, 280 B]
+## ✔ result_13 completed [8ms, 280 B]
 ## + result_14 dispatched
 ## ✔ result_14 completed [9ms, 282 B]
 ## + result_15 dispatched
 ## ✔ result_15 completed [8ms, 280 B]
 ## + result_16 dispatched
-## ✔ result_16 completed [9ms, 279 B]
+## ✔ result_16 completed [13ms, 279 B]
 ## + result_17 dispatched
-## ✔ result_17 completed [9ms, 282 B]
+## ✔ result_17 completed [8ms, 282 B]
 ## + result_18 dispatched
-## ✔ result_18 completed [12ms, 281 B]
+## ✔ result_18 completed [8ms, 281 B]
 ## + result_19 dispatched
-## ✔ result_19 completed [16ms, 277 B]
+## ✔ result_19 completed [10ms, 277 B]
 ## + result_2 dispatched
-## ✔ result_2 completed [9ms, 280 B]
+## ✔ result_2 completed [8ms, 280 B]
 ## + result_20 dispatched
-## ✔ result_20 completed [12ms, 277 B]
+## ✔ result_20 completed [10ms, 277 B]
 ## + result_21 dispatched
-## ✔ result_21 completed [12ms, 278 B]
+## ✔ result_21 completed [10ms, 278 B]
 ## + result_22 dispatched
-## ✔ result_22 completed [10ms, 274 B]
+## ✔ result_22 completed [13ms, 274 B]
 ## + result_23 dispatched
 ## ✔ result_23 completed [11ms, 278 B]
 ## + result_24 dispatched
-## ✔ result_24 completed [11ms, 278 B]
+## ✔ result_24 completed [10ms, 278 B]
 ## + result_25 dispatched
-## ✔ result_25 completed [11ms, 277 B]
+## ✔ result_25 completed [10ms, 277 B]
 ## + result_26 dispatched
-## ✔ result_26 completed [11ms, 280 B]
+## ✔ result_26 completed [10ms, 280 B]
 ## + result_27 dispatched
-## ✔ result_27 completed [11ms, 277 B]
+## ✔ result_27 completed [9ms, 277 B]
 ## + result_28 dispatched
-## ✔ result_28 completed [11ms, 275 B]
+## ✔ result_28 completed [10ms, 275 B]
 ## + result_29 dispatched
-## ✔ result_29 completed [16ms, 276 B]
+## ✔ result_29 completed [15ms, 276 B]
 ## + result_3 dispatched
-## ✔ result_3 completed [9ms, 278 B]
+## ✔ result_3 completed [8ms, 278 B]
 ## + result_30 dispatched
-## ✔ result_30 completed [11ms, 278 B]
+## ✔ result_30 completed [10ms, 278 B]
 ## + result_31 dispatched
-## ✔ result_31 completed [11ms, 275 B]
+## ✔ result_31 completed [10ms, 275 B]
 ## + result_32 dispatched
-## ✔ result_32 completed [13ms, 277 B]
+## ✔ result_32 completed [10ms, 277 B]
 ## + result_33 dispatched
 ## ✔ result_33 completed [10ms, 282 B]
 ## + result_34 dispatched
-## ✔ result_34 completed [11ms, 279 B]
+## ✔ result_34 completed [10ms, 279 B]
 ## + result_35 dispatched
 ## ✔ result_35 completed [14ms, 279 B]
 ## + result_36 dispatched
@@ -577,9 +577,9 @@ targets::tar_make()
 ## + result_39 dispatched
 ## ✔ result_39 completed [8ms, 284 B]
 ## + result_4 dispatched
-## ✔ result_4 completed [9ms, 279 B]
+## ✔ result_4 completed [8ms, 279 B]
 ## + result_40 dispatched
-## ✔ result_40 completed [9ms, 283 B]
+## ✔ result_40 completed [7ms, 283 B]
 ## + result_41 dispatched
 ## ✔ result_41 completed [11ms, 283 B]
 ## + result_42 dispatched
@@ -587,7 +587,7 @@ targets::tar_make()
 ## + result_43 dispatched
 ## ✔ result_43 completed [9ms, 280 B]
 ## + result_44 dispatched
-## ✔ result_44 completed [9ms, 285 B]
+## ✔ result_44 completed [8ms, 285 B]
 ## + result_45 dispatched
 ## ✔ result_45 completed [8ms, 286 B]
 ## + result_46 dispatched
@@ -595,25 +595,25 @@ targets::tar_make()
 ## + result_47 dispatched
 ## ✔ result_47 completed [8ms, 283 B]
 ## + result_5 dispatched
-## ✔ result_5 completed [9ms, 279 B]
+## ✔ result_5 completed [8ms, 279 B]
 ## + result_50 dispatched
 ## ✔ result_50 completed [9ms, 285 B]
 ## + result_51 dispatched
-## ✔ result_51 completed [9ms, 285 B]
+## ✔ result_51 completed [8ms, 285 B]
 ## + result_52 dispatched
-## ✔ result_52 completed [9ms, 287 B]
+## ✔ result_52 completed [8ms, 287 B]
 ## + result_53 dispatched
-## ✔ result_53 completed [9ms, 287 B]
+## ✔ result_53 completed [8ms, 287 B]
 ## + result_54 dispatched
-## ✔ result_54 completed [9ms, 285 B]
+## ✔ result_54 completed [8ms, 285 B]
 ## + result_55 dispatched
-## ✔ result_55 completed [11ms, 279 B]
+## ✔ result_55 completed [10ms, 279 B]
 ## + result_56 dispatched
 ## ✔ result_56 completed [10ms, 278 B]
 ## + result_57 dispatched
-## ✔ result_57 completed [11ms, 278 B]
+## ✔ result_57 completed [13ms, 278 B]
 ## + result_58 dispatched
-## ✔ result_58 completed [11ms, 281 B]
+## ✔ result_58 completed [10ms, 281 B]
 ## + result_59 dispatched
 ## ✔ result_59 completed [10ms, 281 B]
 ## + result_6 dispatched
@@ -621,30 +621,32 @@ targets::tar_make()
 ## + result_60 dispatched
 ## ✔ result_60 completed [10ms, 281 B]
 ## + result_61 dispatched
-## ✔ result_61 completed [11ms, 280 B]
+## ✔ result_61 completed [9ms, 280 B]
 ## + result_62 dispatched
-## ✔ result_62 completed [10ms, 282 B]
+## ✔ result_62 completed [9ms, 282 B]
 ## + result_63 dispatched
 ## ✔ result_63 completed [11ms, 283 B]
 ## + result_64 dispatched
 ## ✔ result_64 completed [10ms, 280 B]
 ## + result_65 dispatched
-## ✔ result_65 completed [11ms, 277 B]
+## ✔ result_65 completed [10ms, 277 B]
 ## + result_66 dispatched
 ## ✔ result_66 completed [10ms, 281 B]
 ## + result_67 dispatched
-## ✔ result_67 completed [11ms, 282 B]
+## ✔ result_67 completed [10ms, 282 B]
 ## + result_68 dispatched
-## ✔ result_68 completed [11ms, 285 B]
+## ✔ result_68 completed [9ms, 285 B]
 ## + result_69 dispatched
-## ✔ result_69 completed [15ms, 282 B]
+## ✔ result_69 completed [14ms, 282 B]
 ## + result_7 dispatched
 ## ✔ result_7 completed [9ms, 282 B]
 ## + result_8 dispatched
-## ✔ result_8 completed [8ms, 281 B]
+## ✔ result_8 completed [9ms, 281 B]
 ## + result_9 dispatched
-## ✔ result_9 completed [8ms, 279 B]
-## ✔ ended pipeline [1.5s, 72 completed, 1 skipped]
+## ✔ result_9 completed [7ms, 279 B]
+## + combine dispatched
+## ✔ combine completed [1ms, 992 B]
+## ✔ ended pipeline [1.5s, 73 completed, 0 skipped]
 ```
 
 ``` r
@@ -769,7 +771,7 @@ targets::tar_make()
 
 ```
 ## + result declared [72 branches]
-## ✔ result completed [838ms, 20.21 kB]
+## ✔ result completed [856ms, 20.21 kB]
 ## ✔ ended pipeline [1.1s, 72 completed, 1 skipped]
 ```
 
@@ -919,12 +921,124 @@ dir("_targets/objects/")
 
 Each target has a corresponding file.
 
+## How to run in parallel?
+
+To run targets in parallel, you can use `tar_option_set(controller=)`
+some crew controller, as explained on the [Distributed computing
+page](https://books.ropensci.org/targets/crew.html). Below we use a
+local crew of 2 workers.
+
+
+``` r
+unlink("_targets", recursive = TRUE)
+targets::tar_script({
+  tar_option_set(controller = crew::crew_controller_local(workers = 2))
+  load("2025-05-20-mlr3-targets-in.RData")
+  list(
+    targets::tar_target(target_num, seq_len(nrow(target_dt))),
+    targets::tar_target(result, compute(target_num), pattern=map(target_num)))
+}, ask=FALSE)
+targets::tar_make()
+```
+
+```
+## + target_num dispatched
+## ✔ target_num completed [4ms, 97 B]
+## + result declared [72 branches]
+## ✔ result completed [1.5s, 20.21 kB]
+## ✔ ended pipeline [3.4s, 73 completed, 0 skipped]
+```
+
+``` r
+targets::tar_read(result)
+```
+
+```
+##        task_id   algorithm train.subsets test.fold test.subset regr.rmse
+##         <char>      <char>        <char>     <int>      <fctr>     <num>
+##  1:       easy featureless           all         1       Alice 0.9907855
+##  2:       easy featureless           all         1         Bob 1.3008678
+##  3:       easy featureless           all         2       Alice 0.9543573
+##  4:       easy featureless           all         2         Bob 1.3303316
+##  5:       easy featureless           all         3       Alice 1.3635807
+##  6:       easy featureless           all         3         Bob 1.2370617
+##  7:       easy featureless         other         1       Alice 0.9914137
+##  8:       easy featureless         other         1         Bob 1.2762933
+##  9:       easy featureless         other         2       Alice 0.9832029
+## 10:       easy featureless         other         2         Bob 1.3212197
+## 11:       easy featureless         other         3       Alice 1.3653704
+## 12:       easy featureless         other         3         Bob 1.2055645
+## 13:       easy featureless          same         1       Alice 1.0329491
+## 14:       easy featureless          same         1         Bob 1.3572628
+## 15:       easy featureless          same         2       Alice 0.9302700
+## 16:       easy featureless          same         2         Bob 1.3432935
+## 17:       easy featureless          same         3       Alice 1.3642008
+## 18:       easy featureless          same         3         Bob 1.2703672
+## 19:       easy       rpart           all         1       Alice 0.4311639
+## 20:       easy       rpart           all         1         Bob 0.6687888
+## 21:       easy       rpart           all         2       Alice 0.8491932
+## 22:       easy       rpart           all         2         Bob 0.5917313
+## 23:       easy       rpart           all         3       Alice 0.5898475
+## 24:       easy       rpart           all         3         Bob 0.4972741
+## 25:       easy       rpart         other         1       Alice 0.8816927
+## 26:       easy       rpart         other         1         Bob 1.0974634
+## 27:       easy       rpart         other         2       Alice 0.8300939
+## 28:       easy       rpart         other         2         Bob 0.9037082
+## 29:       easy       rpart         other         3       Alice 1.1442886
+## 30:       easy       rpart         other         3         Bob 0.6604022
+## 31:       easy       rpart          same         1       Alice 0.8544508
+## 32:       easy       rpart          same         1         Bob 1.1207956
+## 33:       easy       rpart          same         2       Alice 0.6105662
+## 34:       easy       rpart          same         2         Bob 1.3054000
+## 35:       easy       rpart          same         3       Alice 0.9651013
+## 36:       easy       rpart          same         3         Bob 1.0334799
+## 37: impossible featureless           all         1       Alice 1.9454542
+## 38: impossible featureless           all         1         Bob 2.1334055
+## 39: impossible featureless           all         2       Alice 1.7045394
+## 40: impossible featureless           all         2         Bob 1.1520164
+## 41: impossible featureless           all         3       Alice 1.4892815
+## 42: impossible featureless           all         3         Bob 1.5684921
+## 43: impossible featureless         other         1       Alice 2.7995421
+## 44: impossible featureless         other         1         Bob 3.1692606
+## 45: impossible featureless         other         2       Alice 2.9193144
+## 46: impossible featureless         other         2         Bob 2.3225307
+## 47: impossible featureless         other         3       Alice 2.6808761
+## 48: impossible featureless         other         3         Bob 2.6837346
+## 49: impossible featureless          same         1       Alice 1.5196359
+## 50: impossible featureless          same         1         Bob 1.2789725
+## 51: impossible featureless          same         2       Alice 0.9755388
+## 52: impossible featureless          same         2         Bob 0.9608841
+## 53: impossible featureless          same         3       Alice 0.8906583
+## 54: impossible featureless          same         3         Bob 1.1235452
+## 55: impossible       rpart           all         1       Alice 1.6741137
+## 56: impossible       rpart           all         1         Bob 2.3836980
+## 57: impossible       rpart           all         2       Alice 1.8404374
+## 58: impossible       rpart           all         2         Bob 0.8826633
+## 59: impossible       rpart           all         3       Alice 1.6903242
+## 60: impossible       rpart           all         3         Bob 1.7301464
+## 61: impossible       rpart         other         1       Alice 3.0262472
+## 62: impossible       rpart         other         1         Bob 3.3728469
+## 63: impossible       rpart         other         2       Alice 2.9450909
+## 64: impossible       rpart         other         2         Bob 2.4264216
+## 65: impossible       rpart         other         3       Alice 2.7310131
+## 66: impossible       rpart         other         3         Bob 3.1240620
+## 67: impossible       rpart          same         1       Alice 1.2828829
+## 68: impossible       rpart          same         1         Bob 1.1630270
+## 69: impossible       rpart          same         2       Alice 0.7275858
+## 70: impossible       rpart          same         2         Bob 0.4470869
+## 71: impossible       rpart          same         3       Alice 0.9512479
+## 72: impossible       rpart          same         3         Bob 1.0282527
+##        task_id   algorithm train.subsets test.fold test.subset regr.rmse
+```
+
+Above we see that the same result table has been computed in parallel.
+
 ## Conclusions
 
 We can use `targets` to declare and compute machine learning benchmark
 experiments in parallel. Next steps will be to verify if this approach
-works for larger experiments, with different sized data sets, and
-algorithms with different run-times.
+works for larger experiments on the SLURM compute cluster, with
+different sized data sets, and algorithms with different run-times.
 
 ## Session info
 
