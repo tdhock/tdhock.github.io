@@ -178,6 +178,7 @@ graphics, and our [useR2016 tutorial on interactive
 graphics](https://github.com/tdhock/interactive-tutorial), we created
 the [animint](https://github.com/tdhock/animint) R package. The more
 recent version is [animint2](https://github.com/tdhock/animint2).
+[Video in French](https://www.youtube.com/watch?v=Em6AVJi37zo).
 
 ### fpop: functional pruning optimal partitioning
 
