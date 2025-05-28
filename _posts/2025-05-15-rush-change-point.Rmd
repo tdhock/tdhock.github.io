@@ -30,7 +30,7 @@ met in a visit to Bernd Bischl's lab in Munich this week.  The goal of
 this blog is to explore different ways rush can be used for parallel
 computation of change-point models.
 
-## Genomic data
+## Introduction to peak detection in genomic data
 
 In the PeakSegDisk package, we have the Mono27ac data set, which
 represents part of a genomic profile, with several peaks that
@@ -54,7 +54,7 @@ ggplot()+
     data=Mono27ac$coverage)
 ```
 
-## Computing a peak model
+### Computing a peak model
 
 We may like to compute a sequence of change-point models for these
 data.  In the PeakSegDisk package, you can use the
@@ -116,7 +116,7 @@ and 0 peaks in this case). Those are the only two that are evaluated
 in parallel. Next, we show how we could evaluate several penalties in
 parallel.
 
-## Computing a range of models
+### Computing a range of models
 
 Computing a range of change-point model sizes can be implemented using
 the CROCS algorithm, described in [our BMC Bioinformatics 2021 paper,
@@ -255,11 +255,15 @@ penalties that would make progress toward computing all
 models between 5 and 15 peaks.
 At this point we may think of how to parallelize.
 
-## Centralized launching, future.apply
+## Centralized launching
 
-One way to do it is by first computing the candidate penalties in a
+One way to parallelize the computation is by first computing the candidate penalties in a
 central process, then sending those penalties to workers for
-computation. That is implemented in the code below.
+computation. 
+
+### Centralized parallelization via future.apply
+
+We use `future.apply` to implement the central launcher method in the code below.
 
 ```{r pit-1}
 pen.list <- list()
@@ -295,7 +299,7 @@ selection.dt
 
 We see in the table above that there are 16 iterations total.
 
-### Coding a function
+### Coding a cenral launcher function
 
 Overall the algorithm which uses a central launcher to determine
 candidates can be implemented via the code below.
@@ -558,7 +562,7 @@ is the number of CPUs on my machine (and the max number of future
 workers). In those iterations, we see calculation of either 1 or 2
 models in each worker process.
 
-## Centralized launching, no parallelization
+### Centralized launching, no parallelization
 
 A baseline to compare is no parallel computation (everything in one
 process), as coded below.
@@ -571,7 +575,7 @@ viz_workers(results_1_100$lapply)
 The result above is almost 100% efficient (because only one CPU is
 used instead of 14), but it takes longer overall.
 
-## Centralized launching, mirai
+### Centralized launching, mirai
 
 Another comparison is mirai, which offers lower overhead than `future`.
 
@@ -596,7 +600,7 @@ finishes, before receiving a new penalty to compute. This observation
 motivates the de-centralized parallelized model that should be
 possible using rush.
 
-## Comparison
+### Comparison of central launching methods
 
 In the code below, we combine the results from the three methods in the previous sections.
 
@@ -607,27 +611,28 @@ for(fun in names(results_1_100)){
   loss_fun <- results_1_100[[fun]]$loss
   min.time <- min(loss_fun$start.time)
   loss_1_100_list[[fun]] <- data.table(fun=factor(fun, fun_levs), loss_fun)[, let(
+    process_i = as.integer(process),
     start.time=start.time-min.time,
     end.time=end.time-min.time)]
 }
 (loss_1_100 <- rbindlist(loss_1_100_list))
 ggplot()+
   geom_segment(aes(
-    start.time, process,
-    xend=end.time, yend=process),
+    start.time, process_i,
+    xend=end.time, yend=process_i),
     data=loss_1_100)+
   geom_point(aes(
-    start.time, process),
+    start.time, process_i),
     shape=1,
     data=loss_1_100)+
   facet_grid(fun ~ ., scales="free", labeller=label_both)+
+  scale_y_continuous(breaks=seq(1, parallel::detectCores()))+
   scale_x_continuous("Time from start of computation (seconds)")
 ```
 
-In the figure above, we can see that `lapply` takes the most time
-(over 40 seconds), whereas `future_lapply` is a bit faster (under 30
-seconds), and `mirai_map` is faster still (about 5 seconds). This is
-an example when `mirai_map` is particularly advantageous:
+In the figure above, we can see that `lapply` and `future_lapply` take
+the most time, and `mirai_map` is much faster (about 5 seconds). This
+is an example when `mirai_map` is particularly advantageous:
 
 * centralized process does not take much time to assign new tasks.
 * computation time of each task is relatively small, so overhead of `future_lapply` launching is relevant.
@@ -636,7 +641,7 @@ For longer running computations, for example several minutes or
 seconds, there should be smaller differences between `future_lapply`
 and `mirai_map`.
 
-## No central launcher
+## Parallelization without a central launcher
 
 In this section, we explore the speedups that we can get by using a
 de-centralized parallel computation, in which each process decides
@@ -645,9 +650,9 @@ what penalty to compute (there is no central launcher, so one less bottleneck).
 ### Declare some functions
 
 We coordinate the workers using a lock file, in the functions below.
+The function below creates a new data set directory, and returns the path where we can save model info in an RDS file.
 
 ```{r}
-library(data.table)
 new_data_dir <- function(){
   data.dir <- file.path(
     tempfile(),
@@ -664,6 +669,19 @@ new_data_dir <- function(){
     col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
   file.path(data.dir, "summary.rds")
 }
+```
+
+The function below attempts to run one new/helpful penalty, based on the models in the RDS file.
+Note that we use the [filelock](https://github.com/r-lib/filelock) R package to
+manage a lock file that can guarantee only one process reading/writing this RDS file at a time.
+Below we use `lock()` and `unlock()` to protect parts of the code where we need to read from the RDS and then write it again.
+
+* in the first lock/unlock block, we read RDS, decide on a new `pen` value to compute, then add a row with that penalty and `peaks=NA` to the RDS table.
+* at this point, if another process looks at the RDS, it will not decide to compute the same `pen` value, because it already exists in the RDS table.
+* then we compute the model for the new `pen` value via `PeakSegFPOP_dir()`.
+* then in the second lock/unlock block, we read RDS, and save the new `peaks` value to RDS.
+
+```{r}
 run_penalty <- function(){
   library(data.table)
   data.dir <- dirname(summary.rds)
@@ -730,6 +748,15 @@ run_penalty <- function(){
   }
   pen
 }
+```
+
+The code below is the main worker loop of each parallel process. The
+function includes a while loop that repeatedly does `run_penalty()`.
+If that returns numeric (indicating a model was computed for a new
+penalty), then the time is saved. If more than 5 seconds has elapsed
+since the last model was computed, then we are done.
+
+```{r}
 run_penalties <- function(seconds.thresh=5){
   done <- FALSE
   last.time <- Sys.time()
@@ -743,6 +770,11 @@ run_penalties <- function(seconds.thresh=5){
     }
   }
 }
+```
+
+The function below computes a summary table based on the data in the RDS file.
+
+```{r}
 reshape_summary <- function(){
   (summary_dt <- readRDS(summary.rds))
   nc::capture_melt_multiple(
@@ -757,6 +789,11 @@ reshape_summary <- function(){
     end.seconds=end.time-min(start.time)
   )][]
 }
+```
+
+The function below plots the summary table.
+
+```{r}
 gg_summary <- function(summary_long){
   comp.colors <- c(
     model="black",
@@ -791,6 +828,8 @@ gg_summary <- function(summary_long){
 
 ### Function demo
 
+Below we create a new data directory, then run three penalties.
+
 ```{r}
 summary.rds <- new_data_dir()
 run_penalty()
@@ -801,10 +840,12 @@ run_penalty()
 readRDS(summary.rds)
 ```
 
-### file system with lock file, future
+The tables above show that each call to `run_penalty()` adds a row with a new penalty value to the RDS file.
+The idea is to repeated call this function in many parallel processes.
 
-The [filelock](https://github.com/r-lib/filelock) R package can
-manage lock files.
+### De-centralized parallelization, lock file, future
+
+Below we use `future_lapply()` to implement the de-centralized parallel computation.
 
 ```{r filelock-future}
 future::plan("multisession")
@@ -814,7 +855,24 @@ summary_future <- reshape_summary()
 gg_summary(summary_future)
 ```
 
-### File system with lock file, mirai
+The plot above shows how the parallel computation proceeds over time using `future_lapply()`.
+
+* The first process starts with 3199 peaks at the bottom.
+* There is a delay of about 0.2 seconds before starting computation in each other process, as can be seen via the stair step pattern going up to the right.
+* With the previous centralized launcher result, when a process
+  finished, it had to wait for the other processes to finish. Then the
+  launcher would assign new work, at which case the process could
+  resume work. Here we see a different pattern: when a computation
+  finishes, a new computation starts almost immediately, with no
+  visible periods where processes have to wait for each other. This
+  reduction of idle time is the main advantage of the de-centralized
+  method of parallelization.
+* The computation finishes in about 4 seconds, after each process has
+  decided that there is no more work to do.
+
+### De-centralized parallelization, lock file, mirai
+
+Below we use `mirai_map()` to implement the de-centralized parallel computation.
 
 ```{r filelock-mirai}
 if(mirai::daemons()$connections==0){
@@ -832,7 +890,14 @@ summary_mirai <- reshape_summary()
 gg_summary(summary_mirai)
 ```
 
-### Comparison
+The figure above shows similar patterns as the previous section.
+
+* A less pronounced stair step pattern is evident, because there is a smaller delay between creation of processes.
+* There is a somewhat large gap in the bottom left, which is due to the lack of obviously helpful penalties to explore in the beginning of the algorithm.
+
+### Comparing de-centralized parallelization packages
+
+The figure below compares the two R functions that we used for de-centralized parallelization.
 
 ```{r filelock-compare}
 summary_compare <- rbind(
@@ -860,9 +925,15 @@ ggplot()+
   facet_grid(fun ~ ., labeller=label_both, scales="free", space="free")
 ```
 
+The figure above shows that `mirai_map()` is actually a bit slower
+than `future_lapply()` in this case, although the difference is not
+large (about 1 second).
+
 ### Compare everything
 
-```{r all-compare, fig.height=7}
+The code below combines all timings into a single visualization.
+
+```{r all-compare, fig.height=8}
 loss_1_100[, let(
   start.seconds=start.time-min(start.time),
   end.seconds=end.time-min(start.time)
@@ -873,18 +944,25 @@ all_compare <- rbind(
   data.table(design="centralized", loss_1_100[, ..common.names])
 )[, Fun := factor(fun, fun_levs)][]
 ggplot()+
+  theme_bw()+
   geom_segment(aes(
-    start.seconds, process,
+    start.seconds, process_i,
     color=design,
-    xend=end.seconds, yend=process),
+    xend=end.seconds, yend=process_i),
     data=all_compare)+
   geom_point(aes(
-    start.seconds, process, color=design),
+    start.seconds, process_i, color=design),
     shape=1,
     data=all_compare)+
   facet_grid(Fun + design ~ ., scales="free", labeller=label_both)+
+  scale_y_continuous(breaks=seq(1, parallel::detectCores()))+
   scale_x_continuous("Time from start of computation (seconds)")
 ```
+
+The figure above compares the different parallelization methods we have explored.
+
+* The two methods using `mirai_map` are fast because the delay for launch new processes is very small.
+* The two methods using de-centralized parallelization are fast because there is no need to wait for a central launcher to assign work. This difference is especially evident when comparing the two `future_lapply` methods.
 
 ## Conclusions
 
@@ -902,6 +980,9 @@ models. We used a real genomic data set, and computed models with from
   slow-downs.
 * `mirai::mirai_map` results in even faster computation, because its
   overhead is much smaller.
+* Both functions can be used with de-centralized parallelization,
+  which greatly reduces computation time using `future_lapply` in this
+  case.
 
 ## Session Info
 
@@ -910,6 +991,8 @@ sessionInfo()
 ```
 
 ## Not working yet
+
+For future work, it would be interesting to compare with these other frameworks.
 
 ### De-centralized candidate computation, rush
 
@@ -1054,102 +1137,13 @@ task_dt[order(peaks)]
 
 ### redis list
 
-TODO code based on redux? and
+TODO code based on redux and
 [transactions](https://redis.io/docs/latest/develop/interact/transactions/)
+or [locks](https://redis.io/docs/latest/develop/use/patterns/distributed-locks/)?
 
 ```{r}
 r <- redux::hiredis()
 r$FLUSHDB()
 r$LPUSH()
-data.dir <- file.path(
-  tempfile(),
-  "H3K27ac-H3K4me3_TDHAM_BP",
-  "samples",
-  "Mono1_H3K27ac",
-  "S001YW_NCMLS",
-  "problems",
-  "chr11-60000-580000")
-dir.create(data.dir, recursive=TRUE, showWarnings=FALSE)
-write.table(
-  Mono27ac$coverage, file.path(data.dir, "coverage.bedGraph"),
-  col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
-summary.csv <- file.path(data.dir, "summary.csv")
-lock.file <- paste0(summary.csv, ".LOCK")
-
-run_penalty <- function(){
-  while({
-    if(!file.exists(lock.file)){
-      TRUE
-    }else{
-      fread(lock.file)$pid != Sys.getpid()
-    }
-  }){
-    if(!file.exists(lock.file)){
-      fwrite(data.table(pid=Sys.getpid()), lock.file)
-    }
-  }
-  target.max.peaks <- 15
-  target.min.peaks <- 5
-  get_tasks <- function(){
-    task_dt <- rush$fetch_tasks()
-    if(is.null(task_dt$penalty)){
-      task_dt$penalty <- NA_real_
-    }
-    if(is.null(task_dt$peaks)){
-      task_dt$peaks <- NA_integer_
-    }
-    task_dt
-  }
-  task_dt <- get_tasks()
-  start.time.cand <- Sys.time()
-  first_pen_cand <- c(0, Inf)
-  done <- first_pen_cand %in% task_dt$penalty
-  pen <- if(any(!done)){
-    first_pen_cand[!done][1]
-  }else{
-    print(task_dt)
-    while(nrow(task_dt[!is.na(peaks)])<2){
-      task_dt <- get_tasks()
-    }
-    print(task_dt)
-    selection.df <- penaltyLearning::modelSelection(task_dt, "total.loss", "peaks")
-    selection.dt <- with(selection.df, data.table(
-      total.loss,
-      min.lambda,
-      penalty,
-      max.lambda,
-      peaks_after=c(peaks[-1],NA),
-      peaks
-    ))[
-      peaks_after<target.max.peaks & peaks>target.min.peaks &
-        peaks_after+1 < peaks & !max.lambda %in% task_dt$penalty
-    ]
-    if(nrow(selection.dt)){
-      selection.dt[1, max.lambda]
-    }
-  }
-  if(is.numeric(pen)){
-    key = rush$push_running_tasks(xss=list(list(
-      penalty=pen,
-      start.time.cand=start.time.cand,
-      end.time.cand=Sys.time())))
-    start.time.model <- Sys.time()
-    fit <- PeakSegDisk::PeakSegFPOP_dir(data.rush, pen)
-    rush$push_results(key, yss=list(list(
-      peaks=fit$loss$peaks,
-      total.loss=fit$loss$total.loss,
-      start.time.model=start.time.model,
-      end.time.model=Sys.time())))
-    pen
-  }
-}
-wl_penalty <- function(rush){
-  done <- FALSE
-  while(!done){
-    pen <- run_penalty(rush)
-    done <- is.null(pen)
-  }
-}
-
 ```
 

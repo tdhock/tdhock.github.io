@@ -13,7 +13,7 @@ met in a visit to Bernd Bischl's lab in Munich this week.  The goal of
 this blog is to explore different ways rush can be used for parallel
 computation of change-point models.
 
-## Genomic data
+## Introduction to peak detection in genomic data
 
 In the PeakSegDisk package, we have the Mono27ac data set, which
 represents part of a genomic profile, with several peaks that
@@ -57,7 +57,7 @@ ggplot()+
 
 ![plot of chunk data](/assets/img/2025-05-15-rush-change-point/data-1.png)
 
-## Computing a peak model
+### Computing a peak model
 
 We may like to compute a sequence of change-point models for these
 data.  In the PeakSegDisk package, you can use the
@@ -135,7 +135,7 @@ and 0 peaks in this case). Those are the only two that are evaluated
 in parallel. Next, we show how we could evaluate several penalties in
 parallel.
 
-## Computing a range of models
+### Computing a range of models
 
 Computing a range of change-point model sizes can be implemented using
 the CROCS algorithm, described in [our BMC Bioinformatics 2021 paper,
@@ -349,11 +349,15 @@ penalties that would make progress toward computing all
 models between 5 and 15 peaks.
 At this point we may think of how to parallelize.
 
-## Centralized launching, future.apply
+## Centralized launching
 
-One way to do it is by first computing the candidate penalties in a
+One way to parallelize the computation is by first computing the candidate penalties in a
 central process, then sending those penalties to workers for
-computation. That is implemented in the code below.
+computation. 
+
+### Centralized parallelization via future.apply
+
+We use `future.apply` to implement the central launcher method in the code below.
 
 
 ``` r
@@ -422,7 +426,7 @@ selection.dt
 
 We see in the table above that there are 16 iterations total.
 
-### Coding a function
+### Coding a cenral launcher function
 
 Overall the algorithm which uses a central launcher to determine
 candidates can be implemented via the code below.
@@ -485,39 +489,39 @@ central_launch <- function(target.min.peaks, target.max.peaks, LAPPLY=future.app
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##  1:     0.0000  3199 -130227.291         1 1498942 2025-05-28 18:45:54 2025-05-28 18:45:54
-##  2:        Inf     0  375197.873         1 1512614 2025-05-28 18:45:54 2025-05-28 18:45:54
-##  3:   157.9947   224  -62199.931         2 1498942 2025-05-28 18:45:55 2025-05-28 18:45:55
-##  4:  1952.6688    17    2640.128         3 1498942 2025-05-28 18:45:56 2025-05-28 18:45:56
-##  5: 21915.1615     4   89739.642         4 1498942 2025-05-28 18:45:57 2025-05-28 18:45:57
-##  6:  6699.9627     8   36282.919         5 1498942 2025-05-28 18:45:58 2025-05-28 18:45:58
-##  7:  3738.0879    11   19258.189         6 1498942 2025-05-28 18:45:59 2025-05-28 18:45:59
-##  8: 13364.1808     6   55084.654         6 1512614 2025-05-28 18:45:59 2025-05-28 18:46:00
-##  9:  2769.6768    13   13373.281         7 1498942 2025-05-28 18:46:00 2025-05-28 18:46:00
-## 10:  5674.9101    10   24108.390         7 1512614 2025-05-28 18:46:01 2025-05-28 18:46:01
-## 11:  9400.8673     7   43845.255         7 1511661 2025-05-28 18:46:01 2025-05-28 18:46:02
-## 12: 17327.4943     5   70694.172         7 1511711 2025-05-28 18:46:02 2025-05-28 18:46:02
-## 13:  2683.2884    16    5152.375         8 1498942 2025-05-28 18:46:03 2025-05-28 18:46:03
-## 14:  2942.4538    12   16241.816         8 1512614 2025-05-28 18:46:03 2025-05-28 18:46:03
-## 15:  6087.2647     9   30064.892         8 1511661 2025-05-28 18:46:04 2025-05-28 18:46:04
-## 16:  2740.3022    14   10611.733         9 1498942 2025-05-28 18:46:04 2025-05-28 18:46:05
-## 17:  2729.6793    16    5152.375        10 1498942 2025-05-28 18:46:06 2025-05-28 18:46:06
-## 18:  2729.6793    16    5152.375        11 1498942 2025-05-28 18:46:07 2025-05-28 18:46:07
+##  1:     0.0000  3199 -130227.291         1 1498942 2025-05-29 01:07:04 2025-05-29 01:07:04
+##  2:        Inf     0  375197.873         1 1512614 2025-05-29 01:07:04 2025-05-29 01:07:04
+##  3:   157.9947   224  -62199.931         2 1498942 2025-05-29 01:07:05 2025-05-29 01:07:05
+##  4:  1952.6688    17    2640.128         3 1498942 2025-05-29 01:07:05 2025-05-29 01:07:05
+##  5: 21915.1615     4   89739.642         4 1498942 2025-05-29 01:07:06 2025-05-29 01:07:06
+##  6:  6699.9627     8   36282.919         5 1498942 2025-05-29 01:07:06 2025-05-29 01:07:06
+##  7:  3738.0879    11   19258.189         6 1498942 2025-05-29 01:07:07 2025-05-29 01:07:07
+##  8: 13364.1808     6   55084.654         6 1512614 2025-05-29 01:07:07 2025-05-29 01:07:07
+##  9:  2769.6768    13   13373.281         7 1498942 2025-05-29 01:07:07 2025-05-29 01:07:07
+## 10:  5674.9101    10   24108.390         7 1512614 2025-05-29 01:07:07 2025-05-29 01:07:08
+## 11:  9400.8673     7   43845.255         7 1511661 2025-05-29 01:07:08 2025-05-29 01:07:08
+## 12: 17327.4943     5   70694.172         7 1511711 2025-05-29 01:07:08 2025-05-29 01:07:08
+## 13:  2683.2884    16    5152.375         8 1498942 2025-05-29 01:07:08 2025-05-29 01:07:09
+## 14:  2942.4538    12   16241.816         8 1512614 2025-05-29 01:07:09 2025-05-29 01:07:09
+## 15:  6087.2647     9   30064.892         8 1511661 2025-05-29 01:07:09 2025-05-29 01:07:09
+## 16:  2740.3022    14   10611.733         9 1498942 2025-05-29 01:07:09 2025-05-29 01:07:09
+## 17:  2729.6793    16    5152.375        10 1498942 2025-05-29 01:07:10 2025-05-29 01:07:10
+## 18:  2729.6793    16    5152.375        11 1498942 2025-05-29 01:07:10 2025-05-29 01:07:10
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1 1498876 2025-05-28 18:45:54 2025-05-28 18:45:54
-##  2:         2 1498876 2025-05-28 18:45:55 2025-05-28 18:45:55
-##  3:         3 1498876 2025-05-28 18:45:56 2025-05-28 18:45:56
-##  4:         4 1498876 2025-05-28 18:45:57 2025-05-28 18:45:57
-##  5:         5 1498876 2025-05-28 18:45:58 2025-05-28 18:45:58
-##  6:         6 1498876 2025-05-28 18:46:00 2025-05-28 18:46:00
-##  7:         7 1498876 2025-05-28 18:46:02 2025-05-28 18:46:02
-##  8:         8 1498876 2025-05-28 18:46:04 2025-05-28 18:46:04
-##  9:         9 1498876 2025-05-28 18:46:05 2025-05-28 18:46:05
-## 10:        10 1498876 2025-05-28 18:46:06 2025-05-28 18:46:06
-## 11:        11 1498876 2025-05-28 18:46:07 2025-05-28 18:46:07
+##  1:         1 1498876 2025-05-29 01:07:04 2025-05-29 01:07:04
+##  2:         2 1498876 2025-05-29 01:07:05 2025-05-29 01:07:05
+##  3:         3 1498876 2025-05-29 01:07:05 2025-05-29 01:07:05
+##  4:         4 1498876 2025-05-29 01:07:06 2025-05-29 01:07:06
+##  5:         5 1498876 2025-05-29 01:07:06 2025-05-29 01:07:06
+##  6:         6 1498876 2025-05-29 01:07:07 2025-05-29 01:07:07
+##  7:         7 1498876 2025-05-29 01:07:08 2025-05-29 01:07:08
+##  8:         8 1498876 2025-05-29 01:07:09 2025-05-29 01:07:09
+##  9:         9 1498876 2025-05-29 01:07:09 2025-05-29 01:07:09
+## 10:        10 1498876 2025-05-29 01:07:10 2025-05-29 01:07:10
+## 11:        11 1498876 2025-05-29 01:07:10 2025-05-29 01:07:10
 ```
 
 The result is a list of two tables:
@@ -726,35 +730,35 @@ results_1_100 <- list()
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##   1:    0.0000  3199 -130227.291         1 1498942 2025-05-28 18:46:09 2025-05-28 18:46:09
-##   2:       Inf     0  375197.873         1 1512614 2025-05-28 18:46:09 2025-05-28 18:46:09
-##   3:  157.9947   224  -62199.931         2 1498942 2025-05-28 18:46:10 2025-05-28 18:46:10
-##   4: 1952.6688    17    2640.128         3 1498942 2025-05-28 18:46:11 2025-05-28 18:46:11
-##   5:  313.2370    74  -31865.715         4 1498942 2025-05-28 18:46:12 2025-05-28 18:46:12
+##   1:    0.0000  3199 -130227.291         1 1498942 2025-05-29 01:07:11 2025-05-29 01:07:11
+##   2:       Inf     0  375197.873         1 1512614 2025-05-29 01:07:12 2025-05-29 01:07:12
+##   3:  157.9947   224  -62199.931         2 1498942 2025-05-29 01:07:12 2025-05-29 01:07:12
+##   4: 1952.6688    17    2640.128         3 1498942 2025-05-29 01:07:12 2025-05-29 01:07:12
+##   5:  313.2370    74  -31865.715         4 1498942 2025-05-29 01:07:13 2025-05-29 01:07:13
 ##  ---                                                                                      
-## 112:  314.0074    74  -31865.715        13 1511711 2025-05-28 18:46:48 2025-05-28 18:46:49
-## 113:  327.0344    62  -28011.480        13 1511754 2025-05-28 18:46:49 2025-05-28 18:46:49
-## 114:  247.0699    95  -37499.236        14 1498942 2025-05-28 18:46:49 2025-05-28 18:46:50
-## 115:  247.5600    95  -37499.236        14 1512614 2025-05-28 18:46:50 2025-05-28 18:46:50
-## 116:  327.0344    62  -28011.480        14 1511661 2025-05-28 18:46:50 2025-05-28 18:46:50
+## 112:  314.0074    74  -31865.715        13 1511711 2025-05-29 01:07:33 2025-05-29 01:07:33
+## 113:  327.0344    62  -28011.480        13 1511754 2025-05-29 01:07:33 2025-05-29 01:07:33
+## 114:  247.0699    95  -37499.236        14 1498942 2025-05-29 01:07:33 2025-05-29 01:07:33
+## 115:  247.5600    95  -37499.236        14 1512614 2025-05-29 01:07:33 2025-05-29 01:07:33
+## 116:  327.0344    62  -28011.480        14 1511661 2025-05-29 01:07:34 2025-05-29 01:07:34
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1 1498876 2025-05-28 18:46:09 2025-05-28 18:46:09
-##  2:         2 1498876 2025-05-28 18:46:10 2025-05-28 18:46:10
-##  3:         3 1498876 2025-05-28 18:46:11 2025-05-28 18:46:11
-##  4:         4 1498876 2025-05-28 18:46:13 2025-05-28 18:46:13
-##  5:         5 1498876 2025-05-28 18:46:15 2025-05-28 18:46:15
-##  6:         6 1498876 2025-05-28 18:46:18 2025-05-28 18:46:18
-##  7:         7 1498876 2025-05-28 18:46:22 2025-05-28 18:46:22
-##  8:         8 1498876 2025-05-28 18:46:28 2025-05-28 18:46:28
-##  9:         9 1498876 2025-05-28 18:46:34 2025-05-28 18:46:34
-## 10:        10 1498876 2025-05-28 18:46:40 2025-05-28 18:46:40
-## 11:        11 1498876 2025-05-28 18:46:45 2025-05-28 18:46:45
-## 12:        12 1498876 2025-05-28 18:46:47 2025-05-28 18:46:47
-## 13:        13 1498876 2025-05-28 18:46:49 2025-05-28 18:46:49
-## 14:        14 1498876 2025-05-28 18:46:50 2025-05-28 18:46:50
+##  1:         1 1498876 2025-05-29 01:07:12 2025-05-29 01:07:12
+##  2:         2 1498876 2025-05-29 01:07:12 2025-05-29 01:07:12
+##  3:         3 1498876 2025-05-29 01:07:12 2025-05-29 01:07:12
+##  4:         4 1498876 2025-05-29 01:07:13 2025-05-29 01:07:13
+##  5:         5 1498876 2025-05-29 01:07:14 2025-05-29 01:07:14
+##  6:         6 1498876 2025-05-29 01:07:16 2025-05-29 01:07:16
+##  7:         7 1498876 2025-05-29 01:07:18 2025-05-29 01:07:18
+##  8:         8 1498876 2025-05-29 01:07:20 2025-05-29 01:07:20
+##  9:         9 1498876 2025-05-29 01:07:23 2025-05-29 01:07:23
+## 10:        10 1498876 2025-05-29 01:07:27 2025-05-29 01:07:27
+## 11:        11 1498876 2025-05-29 01:07:30 2025-05-29 01:07:30
+## 12:        12 1498876 2025-05-29 01:07:32 2025-05-29 01:07:32
+## 13:        13 1498876 2025-05-29 01:07:33 2025-05-29 01:07:33
+## 14:        14 1498876 2025-05-29 01:07:34 2025-05-29 01:07:34
 ```
 
 ``` r
@@ -769,7 +773,7 @@ is the number of CPUs on my machine (and the max number of future
 workers). In those iterations, we see calculation of either 1 or 2
 models in each worker process.
 
-## Centralized launching, no parallelization
+### Centralized launching, no parallelization
 
 A baseline to compare is no parallel computation (everything in one
 process), as coded below.
@@ -785,7 +789,7 @@ viz_workers(results_1_100$lapply)
 The result above is almost 100% efficient (because only one CPU is
 used instead of 14), but it takes longer overall.
 
-## Centralized launching, mirai
+### Centralized launching, mirai
 
 Another comparison is mirai, which offers lower overhead than `future`.
 
@@ -813,7 +817,7 @@ finishes, before receiving a new penalty to compute. This observation
 motivates the de-centralized parallelized model that should be
 possible using rush.
 
-## Comparison
+### Comparison of central launching methods
 
 In the code below, we combine the results from the three methods in the previous sections.
 
@@ -825,6 +829,7 @@ for(fun in names(results_1_100)){
   loss_fun <- results_1_100[[fun]]$loss
   min.time <- min(loss_fun$start.time)
   loss_1_100_list[[fun]] <- data.table(fun=factor(fun, fun_levs), loss_fun)[, let(
+    process_i = as.integer(process),
     start.time=start.time-min.time,
     end.time=end.time-min.time)]
 }
@@ -832,41 +837,41 @@ for(fun in names(results_1_100)){
 ```
 
 ```
-##                fun   penalty peaks  total.loss iteration process     start.time       end.time
-##             <fctr>     <num> <int>       <num>     <int>  <fctr>     <difftime>     <difftime>
-##   1: future_lapply    0.0000  3199 -130227.291         1 1498942 0.0000000 secs 0.2710881 secs
-##   2: future_lapply       Inf     0  375197.873         1 1512614 0.2653835 secs 0.3351386 secs
-##   3: future_lapply  157.9947   224  -62199.931         2 1498942 1.0945263 secs 1.4028337 secs
-##   4: future_lapply 1952.6688    17    2640.128         3 1498942 1.9566135 secs 2.2860456 secs
-##   5: future_lapply  313.2370    74  -31865.715         4 1498942 2.8861904 secs 3.0962815 secs
-##  ---                                                                                          
-## 344:     mirai_map  314.0074    74  -31865.715        13 1502198 5.6638207 secs 5.9577982 secs
-## 345:     mirai_map  327.0344    62  -28011.480        13 1502249 5.6643248 secs 5.9522648 secs
-## 346:     mirai_map  247.0699    95  -37499.236        14 1502196 5.9717870 secs 6.1924524 secs
-## 347:     mirai_map  247.5600    95  -37499.236        14 1502192 5.9721677 secs 6.2672265 secs
-## 348:     mirai_map  327.0344    62  -28011.480        14 1502190 5.9726238 secs 6.2862363 secs
+##                fun   penalty peaks  total.loss iteration process     start.time       end.time process_i
+##             <fctr>     <num> <int>       <num>     <int>  <fctr>     <difftime>     <difftime>     <int>
+##   1: future_lapply    0.0000  3199 -130227.291         1 1498942 0.0000000 secs 0.1227062 secs         1
+##   2: future_lapply       Inf     0  375197.873         1 1512614 0.2452595 secs 0.3029881 secs         2
+##   3: future_lapply  157.9947   224  -62199.931         2 1498942 0.5466306 secs 0.6798537 secs         1
+##   4: future_lapply 1952.6688    17    2640.128         3 1498942 0.9123545 secs 1.0548565 secs         1
+##   5: future_lapply  313.2370    74  -31865.715         4 1498942 1.3711696 secs 1.5140948 secs         1
+##  ---                                                                                                    
+## 344:     mirai_map  314.0074    74  -31865.715        13 1502198 3.6799624 secs 3.8465850 secs         4
+## 345:     mirai_map  327.0344    62  -28011.480        13 1502249 3.6805174 secs 3.9034703 secs         5
+## 346:     mirai_map  247.0699    95  -37499.236        14 1502196 3.9088392 secs 4.0976205 secs         1
+## 347:     mirai_map  247.5600    95  -37499.236        14 1502192 3.9092710 secs 4.0532660 secs         2
+## 348:     mirai_map  327.0344    62  -28011.480        14 1502190 3.9099786 secs 4.0505891 secs         3
 ```
 
 ``` r
 ggplot()+
   geom_segment(aes(
-    start.time, process,
-    xend=end.time, yend=process),
+    start.time, process_i,
+    xend=end.time, yend=process_i),
     data=loss_1_100)+
   geom_point(aes(
-    start.time, process),
+    start.time, process_i),
     shape=1,
     data=loss_1_100)+
   facet_grid(fun ~ ., scales="free", labeller=label_both)+
+  scale_y_continuous(breaks=seq(1, parallel::detectCores()))+
   scale_x_continuous("Time from start of computation (seconds)")
 ```
 
 ![plot of chunk compare-times](/assets/img/2025-05-15-rush-change-point/compare-times-1.png)
 
-In the figure above, we can see that `lapply` takes the most time
-(over 40 seconds), whereas `future_lapply` is a bit faster (under 30
-seconds), and `mirai_map` is faster still (about 5 seconds). This is
-an example when `mirai_map` is particularly advantageous:
+In the figure above, we can see that `lapply` and `future_lapply` take
+the most time, and `mirai_map` is much faster (about 5 seconds). This
+is an example when `mirai_map` is particularly advantageous:
 
 * centralized process does not take much time to assign new tasks.
 * computation time of each task is relatively small, so overhead of `future_lapply` launching is relevant.
@@ -875,7 +880,7 @@ For longer running computations, for example several minutes or
 seconds, there should be smaller differences between `future_lapply`
 and `mirai_map`.
 
-## No central launcher
+## Parallelization without a central launcher
 
 In this section, we explore the speedups that we can get by using a
 de-centralized parallel computation, in which each process decides
@@ -884,10 +889,10 @@ what penalty to compute (there is no central launcher, so one less bottleneck).
 ### Declare some functions
 
 We coordinate the workers using a lock file, in the functions below.
+The function below creates a new data set directory, and returns the path where we can save model info in an RDS file.
 
 
 ``` r
-library(data.table)
 new_data_dir <- function(){
   data.dir <- file.path(
     tempfile(),
@@ -904,6 +909,20 @@ new_data_dir <- function(){
     col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
   file.path(data.dir, "summary.rds")
 }
+```
+
+The function below attempts to run one new/helpful penalty, based on the models in the RDS file.
+Note that we use the [filelock](https://github.com/r-lib/filelock) R package to
+manage a lock file that can guarantee only one process reading/writing this RDS file at a time.
+Below we use `lock()` and `unlock()` to protect parts of the code where we need to read from the RDS and then write it again.
+
+* in the first lock/unlock block, we read RDS, decide on a new `pen` value to compute, then add a row with that penalty and `peaks=NA` to the RDS table.
+* at this point, if another process looks at the RDS, it will not decide to compute the same `pen` value, because it already exists in the RDS table.
+* then we compute the model for the new `pen` value via `PeakSegFPOP_dir()`.
+* then in the second lock/unlock block, we read RDS, and save the new `peaks` value to RDS.
+
+
+``` r
 run_penalty <- function(){
   library(data.table)
   data.dir <- dirname(summary.rds)
@@ -970,6 +989,16 @@ run_penalty <- function(){
   }
   pen
 }
+```
+
+The code below is the main worker loop of each parallel process. The
+function includes a while loop that repeatedly does `run_penalty()`.
+If that returns numeric (indicating a model was computed for a new
+penalty), then the time is saved. If more than 5 seconds has elapsed
+since the last model was computed, then we are done.
+
+
+``` r
 run_penalties <- function(seconds.thresh=5){
   done <- FALSE
   last.time <- Sys.time()
@@ -983,6 +1012,12 @@ run_penalties <- function(seconds.thresh=5){
     }
   }
 }
+```
+
+The function below computes a summary table based on the data in the RDS file.
+
+
+``` r
 reshape_summary <- function(){
   (summary_dt <- readRDS(summary.rds))
   nc::capture_melt_multiple(
@@ -997,6 +1032,12 @@ reshape_summary <- function(){
     end.seconds=end.time-min(start.time)
   )][]
 }
+```
+
+The function below plots the summary table.
+
+
+``` r
 gg_summary <- function(summary_long){
   comp.colors <- c(
     model="black",
@@ -1031,6 +1072,8 @@ gg_summary <- function(summary_long){
 
 ### Function demo
 
+Below we create a new data directory, then run three penalties.
+
 
 ``` r
 summary.rds <- new_data_dir()
@@ -1049,7 +1092,7 @@ readRDS(summary.rds)
 ## Indice : <penalty>
 ##    penalty total.loss process peaks start.time.candidates end.time.candidates start.time.model end.time.model
 ##      <num>      <num>  <fctr> <int>                <POSc>              <POSc>            <num>          <num>
-## 1:       0  -130227.3 1498876  3199   2025-05-28 18:47:59 2025-05-28 18:47:59       1748450880     1748450880
+## 1:       0  -130227.3 1498876  3199   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
 ```
 
 ``` r
@@ -1068,8 +1111,8 @@ readRDS(summary.rds)
 ## Indice : <penalty>
 ##    penalty total.loss process peaks start.time.candidates end.time.candidates start.time.model end.time.model
 ##      <num>      <num>  <fctr> <int>                <POSc>              <POSc>            <num>          <num>
-## 1:       0  -130227.3 1498876  3199   2025-05-28 18:47:59 2025-05-28 18:47:59       1748450880     1748450880
-## 2:     Inf   375197.9 1498876     0   2025-05-28 18:47:59 2025-05-28 18:47:59       1748450880     1748450880
+## 1:       0  -130227.3 1498876  3199   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
+## 2:     Inf   375197.9 1498876     0   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
 ```
 
 ``` r
@@ -1088,15 +1131,17 @@ readRDS(summary.rds)
 ## Indice : <penalty>
 ##     penalty total.loss process peaks start.time.candidates end.time.candidates start.time.model end.time.model
 ##       <num>      <num>  <fctr> <int>                <POSc>              <POSc>            <num>          <num>
-## 1:   0.0000 -130227.29 1498876  3199   2025-05-28 18:47:59 2025-05-28 18:47:59       1748450880     1748450880
-## 2:      Inf  375197.87 1498876     0   2025-05-28 18:47:59 2025-05-28 18:47:59       1748450880     1748450880
-## 3: 157.9947  -62199.93 1498876   224   2025-05-28 18:48:00 2025-05-28 18:48:00       1748450880     1748450881
+## 1:   0.0000 -130227.29 1498876  3199   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
+## 2:      Inf  375197.87 1498876     0   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
+## 3: 157.9947  -62199.93 1498876   224   2025-05-29 01:08:12 2025-05-29 01:08:12       1748473692     1748473692
 ```
 
-### file system with lock file, future
+The tables above show that each call to `run_penalty()` adds a row with a new penalty value to the RDS file.
+The idea is to repeated call this function in many parallel processes.
 
-The [filelock](https://github.com/r-lib/filelock) R package can
-manage lock files.
+### De-centralized parallelization, lock file, future
+
+Below we use `future_lapply()` to implement the de-centralized parallel computation.
 
 
 ``` r
@@ -1156,7 +1201,24 @@ gg_summary(summary_future)
 
 ![plot of chunk filelock-future](/assets/img/2025-05-15-rush-change-point/filelock-future-1.png)
 
-### File system with lock file, mirai
+The plot above shows how the parallel computation proceeds over time using `future_lapply()`.
+
+* The first process starts with 3199 peaks at the bottom.
+* There is a delay of about 0.2 seconds before starting computation in each other process, as can be seen via the stair step pattern going up to the right.
+* With the previous centralized launcher result, when a process
+  finished, it had to wait for the other processes to finish. Then the
+  launcher would assign new work, at which case the process could
+  resume work. Here we see a different pattern: when a computation
+  finishes, a new computation starts almost immediately, with no
+  visible periods where processes have to wait for each other. This
+  reduction of idle time is the main advantage of the de-centralized
+  method of parallelization.
+* The computation finishes in about 4 seconds, after each process has
+  decided that there is no more work to do.
+
+### De-centralized parallelization, lock file, mirai
+
+Below we use `mirai_map()` to implement the de-centralized parallel computation.
 
 
 ``` r
@@ -1175,56 +1237,90 @@ mirai::mirai_map(
 
 ```
 ## [[1]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[2]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[3]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[4]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[5]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[6]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[7]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[8]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[9]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[10]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[11]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[12]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[13]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ## 
 ## [[14]]
-## NULL
+## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
+## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
 ```
 
 ``` r
 summary_mirai <- reshape_summary()
+```
+
+```
+## Warning in gzfile(file, "rb"): impossible d'ouvrir le fichier compressé
+## '/tmp/Rtmp8S7FK3/file16defc5a10231f/H3K27ac-H3K4me3_TDHAM_BP/samples/Mono1_H3K27ac/S001YW_NCMLS/problems/chr11-60000-580000/summary.rds',
+## cause probable : 'Aucun fichier ou dossier de ce nom'
+```
+
+```
+## Error in gzfile(file, "rb"): impossible d'ouvrir la connexion
+```
+
+``` r
 gg_summary(summary_mirai)
 ```
 
 ![plot of chunk filelock-mirai](/assets/img/2025-05-15-rush-change-point/filelock-mirai-1.png)
 
-### Comparison
+The figure above shows similar patterns as the previous section.
+
+* A less pronounced stair step pattern is evident, because there is a smaller delay between creation of processes.
+* There is a somewhat large gap in the bottom left, which is due to the lack of obviously helpful penalties to explore in the beginning of the algorithm.
+
+### Comparing de-centralized parallelization packages
+
+The figure below compares the two R functions that we used for de-centralized parallelization.
 
 
 ``` r
@@ -1255,7 +1351,13 @@ ggplot()+
 
 ![plot of chunk filelock-compare](/assets/img/2025-05-15-rush-change-point/filelock-compare-1.png)
 
+The figure above shows that `mirai_map()` is actually a bit slower
+than `future_lapply()` in this case, although the difference is not
+large (about 1 second).
+
 ### Compare everything
+
+The code below combines all timings into a single visualization.
 
 
 ``` r
@@ -1266,32 +1368,32 @@ loss_1_100[, let(
 ```
 
 ```
-##                fun   penalty peaks  total.loss iteration process     start.time       end.time  start.seconds
-##             <fctr>     <num> <int>       <num>     <int>  <fctr>     <difftime>     <difftime>     <difftime>
-##   1: future_lapply    0.0000  3199 -130227.291         1 1498942 0.0000000 secs 0.2710881 secs 0.0000000 secs
-##   2: future_lapply       Inf     0  375197.873         1 1512614 0.2653835 secs 0.3351386 secs 0.2653835 secs
-##   3: future_lapply  157.9947   224  -62199.931         2 1498942 1.0945263 secs 1.4028337 secs 1.0945263 secs
-##   4: future_lapply 1952.6688    17    2640.128         3 1498942 1.9566135 secs 2.2860456 secs 1.9566135 secs
-##   5: future_lapply  313.2370    74  -31865.715         4 1498942 2.8861904 secs 3.0962815 secs 2.8861904 secs
-##  ---                                                                                                         
-## 344:     mirai_map  314.0074    74  -31865.715        13 1502198 5.6638207 secs 5.9577982 secs 5.6638207 secs
-## 345:     mirai_map  327.0344    62  -28011.480        13 1502249 5.6643248 secs 5.9522648 secs 5.6643248 secs
-## 346:     mirai_map  247.0699    95  -37499.236        14 1502196 5.9717870 secs 6.1924524 secs 5.9717870 secs
-## 347:     mirai_map  247.5600    95  -37499.236        14 1502192 5.9721677 secs 6.2672265 secs 5.9721677 secs
-## 348:     mirai_map  327.0344    62  -28011.480        14 1502190 5.9726238 secs 6.2862363 secs 5.9726238 secs
+##                fun   penalty peaks  total.loss iteration process     start.time       end.time process_i  start.seconds
+##             <fctr>     <num> <int>       <num>     <int>  <fctr>     <difftime>     <difftime>     <int>     <difftime>
+##   1: future_lapply    0.0000  3199 -130227.291         1 1498942 0.0000000 secs 0.1227062 secs         1 0.0000000 secs
+##   2: future_lapply       Inf     0  375197.873         1 1512614 0.2452595 secs 0.3029881 secs         2 0.2452595 secs
+##   3: future_lapply  157.9947   224  -62199.931         2 1498942 0.5466306 secs 0.6798537 secs         1 0.5466306 secs
+##   4: future_lapply 1952.6688    17    2640.128         3 1498942 0.9123545 secs 1.0548565 secs         1 0.9123545 secs
+##   5: future_lapply  313.2370    74  -31865.715         4 1498942 1.3711696 secs 1.5140948 secs         1 1.3711696 secs
+##  ---                                                                                                                   
+## 344:     mirai_map  314.0074    74  -31865.715        13 1502198 3.6799624 secs 3.8465850 secs         4 3.6799624 secs
+## 345:     mirai_map  327.0344    62  -28011.480        13 1502249 3.6805174 secs 3.9034703 secs         5 3.6805174 secs
+## 346:     mirai_map  247.0699    95  -37499.236        14 1502196 3.9088392 secs 4.0976205 secs         1 3.9088392 secs
+## 347:     mirai_map  247.5600    95  -37499.236        14 1502192 3.9092710 secs 4.0532660 secs         2 3.9092710 secs
+## 348:     mirai_map  327.0344    62  -28011.480        14 1502190 3.9099786 secs 4.0505891 secs         3 3.9099786 secs
 ##         end.seconds
 ##          <difftime>
-##   1: 0.2710881 secs
-##   2: 0.3351386 secs
-##   3: 1.4028337 secs
-##   4: 2.2860456 secs
-##   5: 3.0962815 secs
+##   1: 0.1227062 secs
+##   2: 0.3029881 secs
+##   3: 0.6798537 secs
+##   4: 1.0548565 secs
+##   5: 1.5140948 secs
 ##  ---               
-## 344: 5.9577982 secs
-## 345: 5.9522648 secs
-## 346: 6.1924524 secs
-## 347: 6.2672265 secs
-## 348: 6.2862363 secs
+## 344: 3.8465850 secs
+## 345: 3.9034703 secs
+## 346: 4.0976205 secs
+## 347: 4.0532660 secs
+## 348: 4.0505891 secs
 ```
 
 ``` r
@@ -1301,20 +1403,27 @@ all_compare <- rbind(
   data.table(design="centralized", loss_1_100[, ..common.names])
 )[, Fun := factor(fun, fun_levs)][]
 ggplot()+
+  theme_bw()+
   geom_segment(aes(
-    start.seconds, process,
+    start.seconds, process_i,
     color=design,
-    xend=end.seconds, yend=process),
+    xend=end.seconds, yend=process_i),
     data=all_compare)+
   geom_point(aes(
-    start.seconds, process, color=design),
+    start.seconds, process_i, color=design),
     shape=1,
     data=all_compare)+
   facet_grid(Fun + design ~ ., scales="free", labeller=label_both)+
+  scale_y_continuous(breaks=seq(1, parallel::detectCores()))+
   scale_x_continuous("Time from start of computation (seconds)")
 ```
 
 ![plot of chunk all-compare](/assets/img/2025-05-15-rush-change-point/all-compare-1.png)
+
+The figure above compares the different parallelization methods we have explored.
+
+* The two methods using `mirai_map` are fast because the delay for launch new processes is very small.
+* The two methods using de-centralized parallelization are fast because there is no need to wait for a central launcher to assign work. This difference is especially evident when comparing the two `future_lapply` methods.
 
 ## Conclusions
 
@@ -1332,6 +1441,9 @@ models. We used a real genomic data set, and computed models with from
   slow-downs.
 * `mirai::mirai_map` results in even faster computation, because its
   overhead is much smaller.
+* Both functions can be used with de-centralized parallelization,
+  which greatly reduces computation time using `future_lapply` in this
+  case.
 
 ## Session Info
 
@@ -1361,33 +1473,35 @@ sessionInfo()
 ## [1] stats     graphics  grDevices datasets  utils     methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_3.5.2     data.table_1.17.2
+## [1] ggplot2_3.5.2      data.table_1.17.99
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] gtable_0.3.6             xfun_0.52                htmlwidgets_1.6.4        devtools_2.4.5          
-##  [5] remotes_2.5.0            processx_3.8.6           bspm_0.5.7               callr_3.7.6             
-##  [9] quadprog_1.5-8           vctrs_0.6.5              tools_4.5.0              ps_1.9.1                
-## [13] generics_0.1.4           curl_6.2.3               parallel_4.5.0           tibble_3.2.1            
-## [17] pkgconfig_2.0.3          checkmate_2.3.2          mirai_2.3.0              RColorBrewer_1.1-3      
-## [21] desc_1.4.3               PeakSegDisk_2024.10.1    uuid_1.2-1               lifecycle_1.0.4         
-## [25] compiler_4.5.0           farver_2.1.2             ids_1.0.1                penaltyLearning_2024.9.3
-## [29] codetools_0.2-20         httpuv_1.6.16            htmltools_0.5.8.1        usethis_3.1.0           
-## [33] crayon_1.5.3             later_1.4.2              pillar_1.10.2            urlchecker_1.0.1        
-## [37] ellipsis_0.3.2           redux_1.1.4              cachem_1.1.0             nc_2025.3.24            
-## [41] sessioninfo_1.2.3        mime_0.13                parallelly_1.44.0        tidyselect_1.2.1        
-## [45] digest_0.6.37            future_1.49.0            dplyr_1.1.4              purrr_1.0.4             
-## [49] listenv_0.9.1            labeling_0.4.3           fastmap_1.2.0            grid_4.5.0              
-## [53] cli_3.6.5                magrittr_2.0.3           dichromat_2.0-0.1        pkgbuild_1.4.7          
-## [57] future.apply_1.11.3      withr_3.0.2              backports_1.5.0          filelock_1.0.3          
-## [61] scales_1.4.0             promises_1.3.2           rush_0.1.2.9000          globals_0.18.0          
-## [65] memoise_2.0.1            shiny_1.10.0             evaluate_1.0.3           knitr_1.50              
-## [69] miniUI_0.1.2             mlr3misc_0.17.0          profvis_0.4.0            rlang_1.1.6             
-## [73] Rcpp_1.0.14              nanonext_1.6.0           xtable_1.8-4             glue_1.8.0              
-## [77] directlabels_2025.5.20   pkgload_1.4.0            jsonlite_2.0.0           lgr_0.4.4               
-## [81] R6_2.6.1                 fs_1.6.6
+##  [5] remotes_2.5.0            processx_3.8.6           lattice_0.22-7           bspm_0.5.7              
+##  [9] callr_3.7.6              quadprog_1.5-8           vctrs_0.6.5              tools_4.5.0             
+## [13] ps_1.9.1                 generics_0.1.4           curl_6.2.3               parallel_4.5.0          
+## [17] tibble_3.2.1             pkgconfig_2.0.3          checkmate_2.3.2          mirai_2.3.0             
+## [21] RColorBrewer_1.1-3       desc_1.4.3               PeakSegDisk_2024.10.1    uuid_1.2-1              
+## [25] lifecycle_1.0.4          compiler_4.5.0           farver_2.1.2             ids_1.0.1               
+## [29] penaltyLearning_2024.9.3 codetools_0.2-20         httpuv_1.6.16            htmltools_0.5.8.1       
+## [33] usethis_3.1.0            atime_2025.5.24          crayon_1.5.3             later_1.4.2             
+## [37] pillar_1.10.2            urlchecker_1.0.1         ellipsis_0.3.2           redux_1.1.4             
+## [41] cachem_1.1.0             nc_2025.3.24             sessioninfo_1.2.3        mime_0.13               
+## [45] parallelly_1.44.0        tidyselect_1.2.1         digest_0.6.37            future_1.49.0           
+## [49] dplyr_1.1.4              purrr_1.0.4              listenv_0.9.1            labeling_0.4.3          
+## [53] fastmap_1.2.0            grid_4.5.0               cli_3.6.5                magrittr_2.0.3          
+## [57] dichromat_2.0-0.1        pkgbuild_1.4.7           future.apply_1.11.3      withr_3.0.2             
+## [61] backports_1.5.0          filelock_1.0.3           scales_1.4.0             promises_1.3.2          
+## [65] rush_0.1.2.9000          globals_0.18.0           memoise_2.0.1            shiny_1.10.0            
+## [69] evaluate_1.0.3           knitr_1.50               miniUI_0.1.2             mlr3misc_0.17.0         
+## [73] profvis_0.4.0            rlang_1.1.6              Rcpp_1.0.14              nanonext_1.6.0          
+## [77] xtable_1.8-4             glue_1.8.0               directlabels_2025.5.20   pkgload_1.4.0           
+## [81] jsonlite_2.0.0           lgr_0.4.4                R6_2.6.1                 fs_1.6.6
 ```
 
 ## Not working yet
+
+For future work, it would be interesting to compare with these other frameworks.
 
 ### De-centralized candidate computation, rush
 
@@ -1533,7 +1647,7 @@ rush$start_local_workers(
 ```
 
 ```
-## INFO  [18:48:39.046] [rush] Starting 4 worker(s)
+## INFO  [01:08:29.764] [rush] Starting 4 worker(s)
 ```
 
 ``` r
@@ -1585,7 +1699,7 @@ rush$start_local_workers(
 ```
 
 ```
-## INFO  [18:48:39.207] [rush] Starting 4 worker(s)
+## INFO  [01:08:29.848] [rush] Starting 4 worker(s)
 ```
 
 ``` r
@@ -1613,8 +1727,9 @@ task_dt[order(peaks)]
 
 ### redis list
 
-TODO code based on redux? and
+TODO code based on redux and
 [transactions](https://redis.io/docs/latest/develop/interact/transactions/)
+or [locks](https://redis.io/docs/latest/develop/use/patterns/distributed-locks/)?
 
 
 ``` r
@@ -1632,97 +1747,5 @@ r$LPUSH()
 
 ```
 ## Error in r$LPUSH(): l'argument "key" est manquant, avec aucune valeur par défaut
-```
-
-``` r
-data.dir <- file.path(
-  tempfile(),
-  "H3K27ac-H3K4me3_TDHAM_BP",
-  "samples",
-  "Mono1_H3K27ac",
-  "S001YW_NCMLS",
-  "problems",
-  "chr11-60000-580000")
-dir.create(data.dir, recursive=TRUE, showWarnings=FALSE)
-write.table(
-  Mono27ac$coverage, file.path(data.dir, "coverage.bedGraph"),
-  col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
-summary.csv <- file.path(data.dir, "summary.csv")
-lock.file <- paste0(summary.csv, ".LOCK")
-
-run_penalty <- function(){
-  while({
-    if(!file.exists(lock.file)){
-      TRUE
-    }else{
-      fread(lock.file)$pid != Sys.getpid()
-    }
-  }){
-    if(!file.exists(lock.file)){
-      fwrite(data.table(pid=Sys.getpid()), lock.file)
-    }
-  }
-  target.max.peaks <- 15
-  target.min.peaks <- 5
-  get_tasks <- function(){
-    task_dt <- rush$fetch_tasks()
-    if(is.null(task_dt$penalty)){
-      task_dt$penalty <- NA_real_
-    }
-    if(is.null(task_dt$peaks)){
-      task_dt$peaks <- NA_integer_
-    }
-    task_dt
-  }
-  task_dt <- get_tasks()
-  start.time.cand <- Sys.time()
-  first_pen_cand <- c(0, Inf)
-  done <- first_pen_cand %in% task_dt$penalty
-  pen <- if(any(!done)){
-    first_pen_cand[!done][1]
-  }else{
-    print(task_dt)
-    while(nrow(task_dt[!is.na(peaks)])<2){
-      task_dt <- get_tasks()
-    }
-    print(task_dt)
-    selection.df <- penaltyLearning::modelSelection(task_dt, "total.loss", "peaks")
-    selection.dt <- with(selection.df, data.table(
-      total.loss,
-      min.lambda,
-      penalty,
-      max.lambda,
-      peaks_after=c(peaks[-1],NA),
-      peaks
-    ))[
-      peaks_after<target.max.peaks & peaks>target.min.peaks &
-        peaks_after+1 < peaks & !max.lambda %in% task_dt$penalty
-    ]
-    if(nrow(selection.dt)){
-      selection.dt[1, max.lambda]
-    }
-  }
-  if(is.numeric(pen)){
-    key = rush$push_running_tasks(xss=list(list(
-      penalty=pen,
-      start.time.cand=start.time.cand,
-      end.time.cand=Sys.time())))
-    start.time.model <- Sys.time()
-    fit <- PeakSegDisk::PeakSegFPOP_dir(data.rush, pen)
-    rush$push_results(key, yss=list(list(
-      peaks=fit$loss$peaks,
-      total.loss=fit$loss$total.loss,
-      start.time.model=start.time.model,
-      end.time.model=Sys.time())))
-    pen
-  }
-}
-wl_penalty <- function(rush){
-  done <- FALSE
-  while(!done){
-    pen <- run_penalty(rush)
-    done <- is.null(pen)
-  }
-}
 ```
 
