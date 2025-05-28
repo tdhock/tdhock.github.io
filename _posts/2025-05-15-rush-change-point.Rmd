@@ -26,13 +26,17 @@ if(FALSE){
 I recently wrote about [New parallel computing frameworks in
 R](https://tdhock.github.io/blog/2025/rush/), including the
 [rush](https://github.com/mlr-org/rush) package by Marc Becker, who I
-met in a visit to Bernd Bischl's lab in Munich this week.  The goal of
-this blog is to explore different ways rush can be used for parallel
-computation of change-point models.
+met in a visit to Bernd Bischl's lab in Munich this week. One of the
+main ideas of rush is de-centralized parallelism, meaning there is no
+central server that assigns tasks to workers. Instead, each worker
+decides what task to work on, which can be much faster in some
+applications. The goal of this blog was to explore one such
+application where these different methods of parallel computation can
+be applied: optimal change-point detection algorithms.
 
 ## Introduction to peak detection in genomic data
 
-In the PeakSegDisk package, we have the Mono27ac data set, which
+In the `PeakSegDisk` package, we have the `Mono27ac` data set, which
 represents part of a genomic profile, with several peaks that
 represent active regions.
 
@@ -259,7 +263,7 @@ At this point we may think of how to parallelize.
 
 One way to parallelize the computation is by first computing the candidate penalties in a
 central process, then sending those penalties to workers for
-computation. 
+computation.
 
 ### Centralized parallelization via future.apply
 
@@ -422,10 +426,6 @@ viz_workers <- function(L){
       color=computation),
       shape=1,
       data=seg.dt)+
-    ## geom_text(aes(
-    ##   mid.seconds, process, label=label),
-    ##   vjust=1.5,
-    ##   data=text.dt)+
     scale_color_manual(
       values=comp.colors,
       limits=names(comp.colors))+
@@ -794,10 +794,10 @@ reshape_summary <- function(){
 The function below plots the summary table.
 
 ```{r}
+comp.colors <- c(
+  model="black",
+  candidates="red")
 gg_summary <- function(summary_long){
-  comp.colors <- c(
-    model="black",
-    candidates="red")
   library(ggplot2)
   ggplot()+
     theme_bw()+
@@ -850,7 +850,7 @@ Below we use `future_lapply()` to implement the de-centralized parallel computat
 ```{r filelock-future}
 future::plan("multisession")
 summary.rds <- new_data_dir()
-future.apply::future_lapply(seq(1, parallel::detectCores()), function(i)run_penalties())
+null.list <- future.apply::future_lapply(seq(1, parallel::detectCores()), function(i)run_penalties())
 summary_future <- reshape_summary()
 gg_summary(summary_future)
 ```
@@ -879,7 +879,7 @@ if(mirai::daemons()$connections==0){
   mirai::daemons(parallel::detectCores())
 }
 summary.rds <- new_data_dir()
-mirai::mirai_map(
+list.of.mirai <- mirai::mirai_map(
   1:parallel::detectCores(),
   function(i)run_penalties(),
   run_penalties=run_penalties,
@@ -937,7 +937,7 @@ The code below combines all timings into a single visualization.
 loss_1_100[, let(
   start.seconds=start.time-min(start.time),
   end.seconds=end.time-min(start.time)
-)][]
+)]
 common.names <- intersect(names(loss_1_100), names(summary_compare))
 all_compare <- rbind(
   data.table(design="de-centralized", summary_compare[, ..common.names]),

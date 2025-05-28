@@ -9,13 +9,17 @@ description: Exploring rush
 I recently wrote about [New parallel computing frameworks in
 R](https://tdhock.github.io/blog/2025/rush/), including the
 [rush](https://github.com/mlr-org/rush) package by Marc Becker, who I
-met in a visit to Bernd Bischl's lab in Munich this week.  The goal of
-this blog is to explore different ways rush can be used for parallel
-computation of change-point models.
+met in a visit to Bernd Bischl's lab in Munich this week. One of the
+main ideas of rush is de-centralized parallelism, meaning there is no
+central server that assigns tasks to workers. Instead, each worker
+decides what task to work on, which can be much faster in some
+applications. The goal of this blog was to explore one such
+application where these different methods of parallel computation can
+be applied: optimal change-point detection algorithms.
 
 ## Introduction to peak detection in genomic data
 
-In the PeakSegDisk package, we have the Mono27ac data set, which
+In the `PeakSegDisk` package, we have the `Mono27ac` data set, which
 represents part of a genomic profile, with several peaks that
 represent active regions.
 
@@ -353,7 +357,7 @@ At this point we may think of how to parallelize.
 
 One way to parallelize the computation is by first computing the candidate penalties in a
 central process, then sending those penalties to workers for
-computation. 
+computation.
 
 ### Centralized parallelization via future.apply
 
@@ -489,39 +493,39 @@ central_launch <- function(target.min.peaks, target.max.peaks, LAPPLY=future.app
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##  1:     0.0000  3199 -130227.291         1 1498942 2025-05-29 01:07:04 2025-05-29 01:07:04
-##  2:        Inf     0  375197.873         1 1512614 2025-05-29 01:07:04 2025-05-29 01:07:04
-##  3:   157.9947   224  -62199.931         2 1498942 2025-05-29 01:07:05 2025-05-29 01:07:05
-##  4:  1952.6688    17    2640.128         3 1498942 2025-05-29 01:07:05 2025-05-29 01:07:05
-##  5: 21915.1615     4   89739.642         4 1498942 2025-05-29 01:07:06 2025-05-29 01:07:06
-##  6:  6699.9627     8   36282.919         5 1498942 2025-05-29 01:07:06 2025-05-29 01:07:06
-##  7:  3738.0879    11   19258.189         6 1498942 2025-05-29 01:07:07 2025-05-29 01:07:07
-##  8: 13364.1808     6   55084.654         6 1512614 2025-05-29 01:07:07 2025-05-29 01:07:07
-##  9:  2769.6768    13   13373.281         7 1498942 2025-05-29 01:07:07 2025-05-29 01:07:07
-## 10:  5674.9101    10   24108.390         7 1512614 2025-05-29 01:07:07 2025-05-29 01:07:08
-## 11:  9400.8673     7   43845.255         7 1511661 2025-05-29 01:07:08 2025-05-29 01:07:08
-## 12: 17327.4943     5   70694.172         7 1511711 2025-05-29 01:07:08 2025-05-29 01:07:08
-## 13:  2683.2884    16    5152.375         8 1498942 2025-05-29 01:07:08 2025-05-29 01:07:09
-## 14:  2942.4538    12   16241.816         8 1512614 2025-05-29 01:07:09 2025-05-29 01:07:09
-## 15:  6087.2647     9   30064.892         8 1511661 2025-05-29 01:07:09 2025-05-29 01:07:09
-## 16:  2740.3022    14   10611.733         9 1498942 2025-05-29 01:07:09 2025-05-29 01:07:09
-## 17:  2729.6793    16    5152.375        10 1498942 2025-05-29 01:07:10 2025-05-29 01:07:10
-## 18:  2729.6793    16    5152.375        11 1498942 2025-05-29 01:07:10 2025-05-29 01:07:10
+##  1:     0.0000  3199 -130227.291         1 1676530 2025-05-29 01:25:20 2025-05-29 01:25:20
+##  2:        Inf     0  375197.873         1 1676527 2025-05-29 01:25:20 2025-05-29 01:25:21
+##  3:   157.9947   224  -62199.931         2 1676530 2025-05-29 01:25:21 2025-05-29 01:25:21
+##  4:  1952.6688    17    2640.128         3 1676530 2025-05-29 01:25:21 2025-05-29 01:25:22
+##  5: 21915.1615     4   89739.642         4 1676530 2025-05-29 01:25:22 2025-05-29 01:25:22
+##  6:  6699.9627     8   36282.919         5 1676530 2025-05-29 01:25:23 2025-05-29 01:25:23
+##  7:  3738.0879    11   19258.189         6 1676530 2025-05-29 01:25:23 2025-05-29 01:25:24
+##  8: 13364.1808     6   55084.654         6 1676527 2025-05-29 01:25:24 2025-05-29 01:25:24
+##  9:  2769.6768    13   13373.281         7 1676530 2025-05-29 01:25:24 2025-05-29 01:25:24
+## 10:  5674.9101    10   24108.390         7 1676527 2025-05-29 01:25:25 2025-05-29 01:25:25
+## 11:  9400.8673     7   43845.255         7 1676521 2025-05-29 01:25:25 2025-05-29 01:25:25
+## 12: 17327.4943     5   70694.172         7 1676524 2025-05-29 01:25:25 2025-05-29 01:25:26
+## 13:  2683.2884    16    5152.375         8 1676530 2025-05-29 01:25:26 2025-05-29 01:25:26
+## 14:  2942.4538    12   16241.816         8 1676527 2025-05-29 01:25:26 2025-05-29 01:25:27
+## 15:  6087.2647     9   30064.892         8 1676521 2025-05-29 01:25:27 2025-05-29 01:25:27
+## 16:  2740.3022    14   10611.733         9 1676530 2025-05-29 01:25:27 2025-05-29 01:25:27
+## 17:  2729.6793    16    5152.375        10 1676530 2025-05-29 01:25:28 2025-05-29 01:25:28
+## 18:  2729.6793    16    5152.375        11 1676530 2025-05-29 01:25:28 2025-05-29 01:25:28
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1 1498876 2025-05-29 01:07:04 2025-05-29 01:07:04
-##  2:         2 1498876 2025-05-29 01:07:05 2025-05-29 01:07:05
-##  3:         3 1498876 2025-05-29 01:07:05 2025-05-29 01:07:05
-##  4:         4 1498876 2025-05-29 01:07:06 2025-05-29 01:07:06
-##  5:         5 1498876 2025-05-29 01:07:06 2025-05-29 01:07:06
-##  6:         6 1498876 2025-05-29 01:07:07 2025-05-29 01:07:07
-##  7:         7 1498876 2025-05-29 01:07:08 2025-05-29 01:07:08
-##  8:         8 1498876 2025-05-29 01:07:09 2025-05-29 01:07:09
-##  9:         9 1498876 2025-05-29 01:07:09 2025-05-29 01:07:09
-## 10:        10 1498876 2025-05-29 01:07:10 2025-05-29 01:07:10
-## 11:        11 1498876 2025-05-29 01:07:10 2025-05-29 01:07:10
+##  1:         1 1675255 2025-05-29 01:25:21 2025-05-29 01:25:21
+##  2:         2 1675255 2025-05-29 01:25:21 2025-05-29 01:25:21
+##  3:         3 1675255 2025-05-29 01:25:22 2025-05-29 01:25:22
+##  4:         4 1675255 2025-05-29 01:25:22 2025-05-29 01:25:22
+##  5:         5 1675255 2025-05-29 01:25:23 2025-05-29 01:25:23
+##  6:         6 1675255 2025-05-29 01:25:24 2025-05-29 01:25:24
+##  7:         7 1675255 2025-05-29 01:25:26 2025-05-29 01:25:26
+##  8:         8 1675255 2025-05-29 01:25:27 2025-05-29 01:25:27
+##  9:         9 1675255 2025-05-29 01:25:27 2025-05-29 01:25:27
+## 10:        10 1675255 2025-05-29 01:25:28 2025-05-29 01:25:28
+## 11:        11 1675255 2025-05-29 01:25:28 2025-05-29 01:25:28
 ```
 
 The result is a list of two tables:
@@ -590,10 +594,6 @@ viz_workers <- function(L){
       color=computation),
       shape=1,
       data=seg.dt)+
-    ## geom_text(aes(
-    ##   mid.seconds, process, label=label),
-    ##   vjust=1.5,
-    ##   data=text.dt)+
     scale_color_manual(
       values=comp.colors,
       limits=names(comp.colors))+
@@ -730,35 +730,35 @@ results_1_100 <- list()
 ## $loss
 ##        penalty peaks  total.loss iteration process          start.time            end.time
 ##          <num> <int>       <num>     <int>  <fctr>              <POSc>              <POSc>
-##   1:    0.0000  3199 -130227.291         1 1498942 2025-05-29 01:07:11 2025-05-29 01:07:11
-##   2:       Inf     0  375197.873         1 1512614 2025-05-29 01:07:12 2025-05-29 01:07:12
-##   3:  157.9947   224  -62199.931         2 1498942 2025-05-29 01:07:12 2025-05-29 01:07:12
-##   4: 1952.6688    17    2640.128         3 1498942 2025-05-29 01:07:12 2025-05-29 01:07:12
-##   5:  313.2370    74  -31865.715         4 1498942 2025-05-29 01:07:13 2025-05-29 01:07:13
+##   1:    0.0000  3199 -130227.291         1 1676530 2025-05-29 01:25:29 2025-05-29 01:25:30
+##   2:       Inf     0  375197.873         1 1676527 2025-05-29 01:25:30 2025-05-29 01:25:30
+##   3:  157.9947   224  -62199.931         2 1676530 2025-05-29 01:25:30 2025-05-29 01:25:30
+##   4: 1952.6688    17    2640.128         3 1676530 2025-05-29 01:25:30 2025-05-29 01:25:31
+##   5:  313.2370    74  -31865.715         4 1676530 2025-05-29 01:25:31 2025-05-29 01:25:31
 ##  ---                                                                                      
-## 112:  314.0074    74  -31865.715        13 1511711 2025-05-29 01:07:33 2025-05-29 01:07:33
-## 113:  327.0344    62  -28011.480        13 1511754 2025-05-29 01:07:33 2025-05-29 01:07:33
-## 114:  247.0699    95  -37499.236        14 1498942 2025-05-29 01:07:33 2025-05-29 01:07:33
-## 115:  247.5600    95  -37499.236        14 1512614 2025-05-29 01:07:33 2025-05-29 01:07:33
-## 116:  327.0344    62  -28011.480        14 1511661 2025-05-29 01:07:34 2025-05-29 01:07:34
+## 112:  314.0074    74  -31865.715        13 1676524 2025-05-29 01:25:53 2025-05-29 01:25:54
+## 113:  327.0344    62  -28011.480        13 1676519 2025-05-29 01:25:54 2025-05-29 01:25:54
+## 114:  247.0699    95  -37499.236        14 1676530 2025-05-29 01:25:54 2025-05-29 01:25:54
+## 115:  247.5600    95  -37499.236        14 1676527 2025-05-29 01:25:54 2025-05-29 01:25:54
+## 116:  327.0344    62  -28011.480        14 1676521 2025-05-29 01:25:54 2025-05-29 01:25:54
 ## 
 ## $candidates
 ##     iteration process          start.time            end.time
 ##         <int>  <fctr>              <POSc>              <POSc>
-##  1:         1 1498876 2025-05-29 01:07:12 2025-05-29 01:07:12
-##  2:         2 1498876 2025-05-29 01:07:12 2025-05-29 01:07:12
-##  3:         3 1498876 2025-05-29 01:07:12 2025-05-29 01:07:12
-##  4:         4 1498876 2025-05-29 01:07:13 2025-05-29 01:07:13
-##  5:         5 1498876 2025-05-29 01:07:14 2025-05-29 01:07:14
-##  6:         6 1498876 2025-05-29 01:07:16 2025-05-29 01:07:16
-##  7:         7 1498876 2025-05-29 01:07:18 2025-05-29 01:07:18
-##  8:         8 1498876 2025-05-29 01:07:20 2025-05-29 01:07:20
-##  9:         9 1498876 2025-05-29 01:07:23 2025-05-29 01:07:23
-## 10:        10 1498876 2025-05-29 01:07:27 2025-05-29 01:07:27
-## 11:        11 1498876 2025-05-29 01:07:30 2025-05-29 01:07:30
-## 12:        12 1498876 2025-05-29 01:07:32 2025-05-29 01:07:32
-## 13:        13 1498876 2025-05-29 01:07:33 2025-05-29 01:07:33
-## 14:        14 1498876 2025-05-29 01:07:34 2025-05-29 01:07:34
+##  1:         1 1675255 2025-05-29 01:25:30 2025-05-29 01:25:30
+##  2:         2 1675255 2025-05-29 01:25:30 2025-05-29 01:25:30
+##  3:         3 1675255 2025-05-29 01:25:31 2025-05-29 01:25:31
+##  4:         4 1675255 2025-05-29 01:25:31 2025-05-29 01:25:31
+##  5:         5 1675255 2025-05-29 01:25:33 2025-05-29 01:25:33
+##  6:         6 1675255 2025-05-29 01:25:36 2025-05-29 01:25:36
+##  7:         7 1675255 2025-05-29 01:25:39 2025-05-29 01:25:39
+##  8:         8 1675255 2025-05-29 01:25:41 2025-05-29 01:25:41
+##  9:         9 1675255 2025-05-29 01:25:44 2025-05-29 01:25:44
+## 10:        10 1675255 2025-05-29 01:25:48 2025-05-29 01:25:48
+## 11:        11 1675255 2025-05-29 01:25:51 2025-05-29 01:25:51
+## 12:        12 1675255 2025-05-29 01:25:53 2025-05-29 01:25:53
+## 13:        13 1675255 2025-05-29 01:25:54 2025-05-29 01:25:54
+## 14:        14 1675255 2025-05-29 01:25:54 2025-05-29 01:25:54
 ```
 
 ``` r
@@ -839,17 +839,17 @@ for(fun in names(results_1_100)){
 ```
 ##                fun   penalty peaks  total.loss iteration process     start.time       end.time process_i
 ##             <fctr>     <num> <int>       <num>     <int>  <fctr>     <difftime>     <difftime>     <int>
-##   1: future_lapply    0.0000  3199 -130227.291         1 1498942 0.0000000 secs 0.1227062 secs         1
-##   2: future_lapply       Inf     0  375197.873         1 1512614 0.2452595 secs 0.3029881 secs         2
-##   3: future_lapply  157.9947   224  -62199.931         2 1498942 0.5466306 secs 0.6798537 secs         1
-##   4: future_lapply 1952.6688    17    2640.128         3 1498942 0.9123545 secs 1.0548565 secs         1
-##   5: future_lapply  313.2370    74  -31865.715         4 1498942 1.3711696 secs 1.5140948 secs         1
+##   1: future_lapply    0.0000  3199 -130227.291         1 1676530 0.0000000 secs 0.1205869 secs         1
+##   2: future_lapply       Inf     0  375197.873         1 1676527 0.2333579 secs 0.2830460 secs         2
+##   3: future_lapply  157.9947   224  -62199.931         2 1676530 0.5841634 secs 0.7144341 secs         1
+##   4: future_lapply 1952.6688    17    2640.128         3 1676530 1.0016994 secs 1.1442356 secs         1
+##   5: future_lapply  313.2370    74  -31865.715         4 1676530 1.4661446 secs 1.6144896 secs         1
 ##  ---                                                                                                    
-## 344:     mirai_map  314.0074    74  -31865.715        13 1502198 3.6799624 secs 3.8465850 secs         4
-## 345:     mirai_map  327.0344    62  -28011.480        13 1502249 3.6805174 secs 3.9034703 secs         5
-## 346:     mirai_map  247.0699    95  -37499.236        14 1502196 3.9088392 secs 4.0976205 secs         1
-## 347:     mirai_map  247.5600    95  -37499.236        14 1502192 3.9092710 secs 4.0532660 secs         2
-## 348:     mirai_map  327.0344    62  -28011.480        14 1502190 3.9099786 secs 4.0505891 secs         3
+## 344:     mirai_map  314.0074    74  -31865.715        13 1677668 3.6330976 secs 3.8556333 secs         4
+## 345:     mirai_map  327.0344    62  -28011.480        13 1677665 3.6331344 secs 3.8390346 secs         5
+## 346:     mirai_map  247.0699    95  -37499.236        14 1677671 3.8607688 secs 4.0074320 secs         1
+## 347:     mirai_map  247.5600    95  -37499.236        14 1677703 3.8609686 secs 4.0533295 secs         2
+## 348:     mirai_map  327.0344    62  -28011.480        14 1677663 3.8609855 secs 3.9962416 secs         3
 ```
 
 ``` r
@@ -1038,10 +1038,10 @@ The function below plots the summary table.
 
 
 ``` r
+comp.colors <- c(
+  model="black",
+  candidates="red")
 gg_summary <- function(summary_long){
-  comp.colors <- c(
-    model="black",
-    candidates="red")
   library(ggplot2)
   ggplot()+
     theme_bw()+
@@ -1092,7 +1092,7 @@ readRDS(summary.rds)
 ## Indice : <penalty>
 ##    penalty total.loss process peaks start.time.candidates end.time.candidates start.time.model end.time.model
 ##      <num>      <num>  <fctr> <int>                <POSc>              <POSc>            <num>          <num>
-## 1:       0  -130227.3 1498876  3199   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
+## 1:       0  -130227.3 1675255  3199   2025-05-29 01:26:25 2025-05-29 01:26:25       1748474785     1748474785
 ```
 
 ``` r
@@ -1111,8 +1111,8 @@ readRDS(summary.rds)
 ## Indice : <penalty>
 ##    penalty total.loss process peaks start.time.candidates end.time.candidates start.time.model end.time.model
 ##      <num>      <num>  <fctr> <int>                <POSc>              <POSc>            <num>          <num>
-## 1:       0  -130227.3 1498876  3199   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
-## 2:     Inf   375197.9 1498876     0   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
+## 1:       0  -130227.3 1675255  3199   2025-05-29 01:26:25 2025-05-29 01:26:25       1748474785     1748474785
+## 2:     Inf   375197.9 1675255     0   2025-05-29 01:26:25 2025-05-29 01:26:25       1748474785     1748474786
 ```
 
 ``` r
@@ -1131,9 +1131,9 @@ readRDS(summary.rds)
 ## Indice : <penalty>
 ##     penalty total.loss process peaks start.time.candidates end.time.candidates start.time.model end.time.model
 ##       <num>      <num>  <fctr> <int>                <POSc>              <POSc>            <num>          <num>
-## 1:   0.0000 -130227.29 1498876  3199   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
-## 2:      Inf  375197.87 1498876     0   2025-05-29 01:08:11 2025-05-29 01:08:11       1748473692     1748473692
-## 3: 157.9947  -62199.93 1498876   224   2025-05-29 01:08:12 2025-05-29 01:08:12       1748473692     1748473692
+## 1:   0.0000 -130227.29 1675255  3199   2025-05-29 01:26:25 2025-05-29 01:26:25       1748474785     1748474785
+## 2:      Inf  375197.87 1675255     0   2025-05-29 01:26:25 2025-05-29 01:26:25       1748474785     1748474786
+## 3: 157.9947  -62199.93 1675255   224   2025-05-29 01:26:25 2025-05-29 01:26:25       1748474786     1748474786
 ```
 
 The tables above show that each call to `run_penalty()` adds a row with a new penalty value to the RDS file.
@@ -1147,54 +1147,7 @@ Below we use `future_lapply()` to implement the de-centralized parallel computat
 ``` r
 future::plan("multisession")
 summary.rds <- new_data_dir()
-future.apply::future_lapply(seq(1, parallel::detectCores()), function(i)run_penalties())
-```
-
-```
-## [[1]]
-## NULL
-## 
-## [[2]]
-## NULL
-## 
-## [[3]]
-## NULL
-## 
-## [[4]]
-## NULL
-## 
-## [[5]]
-## NULL
-## 
-## [[6]]
-## NULL
-## 
-## [[7]]
-## NULL
-## 
-## [[8]]
-## NULL
-## 
-## [[9]]
-## NULL
-## 
-## [[10]]
-## NULL
-## 
-## [[11]]
-## NULL
-## 
-## [[12]]
-## NULL
-## 
-## [[13]]
-## NULL
-## 
-## [[14]]
-## NULL
-```
-
-``` r
+null.list <- future.apply::future_lapply(seq(1, parallel::detectCores()), function(i)run_penalties())
 summary_future <- reshape_summary()
 gg_summary(summary_future)
 ```
@@ -1226,88 +1179,14 @@ if(mirai::daemons()$connections==0){
   mirai::daemons(parallel::detectCores())
 }
 summary.rds <- new_data_dir()
-mirai::mirai_map(
+list.of.mirai <- mirai::mirai_map(
   1:parallel::detectCores(),
   function(i)run_penalties(),
   run_penalties=run_penalties,
   run_penalty=run_penalty,
   summary.rds=summary.rds
 )[]
-```
-
-```
-## [[1]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[2]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[3]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[4]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[5]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[6]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[7]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[8]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[9]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[10]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[11]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[12]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[13]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-## 
-## [[14]]
-## 'miraiError' chr Error in value[[3]](cond): Le package ‘data.table’ version 1.17.2 ne peut pas être chargé :
-## Error in unloadNamespace(package) : l'espace de noms ‘data.table’ est importé par ‘PeakSegDisk’, ‘penaltyLearning’ et ne peut, donc, pas être déchargé
-```
-
-``` r
 summary_mirai <- reshape_summary()
-```
-
-```
-## Warning in gzfile(file, "rb"): impossible d'ouvrir le fichier compressé
-## '/tmp/Rtmp8S7FK3/file16defc5a10231f/H3K27ac-H3K4me3_TDHAM_BP/samples/Mono1_H3K27ac/S001YW_NCMLS/problems/chr11-60000-580000/summary.rds',
-## cause probable : 'Aucun fichier ou dossier de ce nom'
-```
-
-```
-## Error in gzfile(file, "rb"): impossible d'ouvrir la connexion
-```
-
-``` r
 gg_summary(summary_mirai)
 ```
 
@@ -1364,39 +1243,7 @@ The code below combines all timings into a single visualization.
 loss_1_100[, let(
   start.seconds=start.time-min(start.time),
   end.seconds=end.time-min(start.time)
-)][]
-```
-
-```
-##                fun   penalty peaks  total.loss iteration process     start.time       end.time process_i  start.seconds
-##             <fctr>     <num> <int>       <num>     <int>  <fctr>     <difftime>     <difftime>     <int>     <difftime>
-##   1: future_lapply    0.0000  3199 -130227.291         1 1498942 0.0000000 secs 0.1227062 secs         1 0.0000000 secs
-##   2: future_lapply       Inf     0  375197.873         1 1512614 0.2452595 secs 0.3029881 secs         2 0.2452595 secs
-##   3: future_lapply  157.9947   224  -62199.931         2 1498942 0.5466306 secs 0.6798537 secs         1 0.5466306 secs
-##   4: future_lapply 1952.6688    17    2640.128         3 1498942 0.9123545 secs 1.0548565 secs         1 0.9123545 secs
-##   5: future_lapply  313.2370    74  -31865.715         4 1498942 1.3711696 secs 1.5140948 secs         1 1.3711696 secs
-##  ---                                                                                                                   
-## 344:     mirai_map  314.0074    74  -31865.715        13 1502198 3.6799624 secs 3.8465850 secs         4 3.6799624 secs
-## 345:     mirai_map  327.0344    62  -28011.480        13 1502249 3.6805174 secs 3.9034703 secs         5 3.6805174 secs
-## 346:     mirai_map  247.0699    95  -37499.236        14 1502196 3.9088392 secs 4.0976205 secs         1 3.9088392 secs
-## 347:     mirai_map  247.5600    95  -37499.236        14 1502192 3.9092710 secs 4.0532660 secs         2 3.9092710 secs
-## 348:     mirai_map  327.0344    62  -28011.480        14 1502190 3.9099786 secs 4.0505891 secs         3 3.9099786 secs
-##         end.seconds
-##          <difftime>
-##   1: 0.1227062 secs
-##   2: 0.3029881 secs
-##   3: 0.6798537 secs
-##   4: 1.0548565 secs
-##   5: 1.5140948 secs
-##  ---               
-## 344: 3.8465850 secs
-## 345: 3.9034703 secs
-## 346: 4.0976205 secs
-## 347: 4.0532660 secs
-## 348: 4.0505891 secs
-```
-
-``` r
+)]
 common.names <- intersect(names(loss_1_100), names(summary_compare))
 all_compare <- rbind(
   data.table(design="de-centralized", summary_compare[, ..common.names]),
@@ -1476,27 +1323,20 @@ sessionInfo()
 ## [1] ggplot2_3.5.2      data.table_1.17.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] gtable_0.3.6             xfun_0.52                htmlwidgets_1.6.4        devtools_2.4.5          
-##  [5] remotes_2.5.0            processx_3.8.6           lattice_0.22-7           bspm_0.5.7              
-##  [9] callr_3.7.6              quadprog_1.5-8           vctrs_0.6.5              tools_4.5.0             
-## [13] ps_1.9.1                 generics_0.1.4           curl_6.2.3               parallel_4.5.0          
-## [17] tibble_3.2.1             pkgconfig_2.0.3          checkmate_2.3.2          mirai_2.3.0             
-## [21] RColorBrewer_1.1-3       desc_1.4.3               PeakSegDisk_2024.10.1    uuid_1.2-1              
-## [25] lifecycle_1.0.4          compiler_4.5.0           farver_2.1.2             ids_1.0.1               
-## [29] penaltyLearning_2024.9.3 codetools_0.2-20         httpuv_1.6.16            htmltools_0.5.8.1       
-## [33] usethis_3.1.0            atime_2025.5.24          crayon_1.5.3             later_1.4.2             
-## [37] pillar_1.10.2            urlchecker_1.0.1         ellipsis_0.3.2           redux_1.1.4             
-## [41] cachem_1.1.0             nc_2025.3.24             sessioninfo_1.2.3        mime_0.13               
-## [45] parallelly_1.44.0        tidyselect_1.2.1         digest_0.6.37            future_1.49.0           
-## [49] dplyr_1.1.4              purrr_1.0.4              listenv_0.9.1            labeling_0.4.3          
-## [53] fastmap_1.2.0            grid_4.5.0               cli_3.6.5                magrittr_2.0.3          
-## [57] dichromat_2.0-0.1        pkgbuild_1.4.7           future.apply_1.11.3      withr_3.0.2             
-## [61] backports_1.5.0          filelock_1.0.3           scales_1.4.0             promises_1.3.2          
-## [65] rush_0.1.2.9000          globals_0.18.0           memoise_2.0.1            shiny_1.10.0            
-## [69] evaluate_1.0.3           knitr_1.50               miniUI_0.1.2             mlr3misc_0.17.0         
-## [73] profvis_0.4.0            rlang_1.1.6              Rcpp_1.0.14              nanonext_1.6.0          
-## [77] xtable_1.8-4             glue_1.8.0               directlabels_2025.5.20   pkgload_1.4.0           
-## [81] jsonlite_2.0.0           lgr_0.4.4                R6_2.6.1                 fs_1.6.6
+##  [1] jsonlite_2.0.0           gtable_0.3.6             future.apply_1.11.3      crayon_1.5.3            
+##  [5] dplyr_1.1.4              compiler_4.5.0           filelock_1.0.3           rush_0.1.2.9000         
+##  [9] tidyselect_1.2.1         bspm_0.5.7               parallel_4.5.0           dichromat_2.0-0.1       
+## [13] globals_0.18.0           scales_1.4.0             directlabels_2025.5.20   uuid_1.2-1              
+## [17] R6_2.6.1                 labeling_0.4.3           generics_0.1.4           penaltyLearning_2024.9.3
+## [21] nanonext_1.6.0           knitr_1.50               backports_1.5.0          redux_1.1.4             
+## [25] checkmate_2.3.2          future_1.49.0            tibble_3.2.1             mirai_2.3.0             
+## [29] pillar_1.10.2            RColorBrewer_1.1-3       rlang_1.1.6              lgr_0.4.4               
+## [33] xfun_0.52                mlr3misc_0.17.0          quadprog_1.5-8           cli_3.6.5               
+## [37] withr_3.0.2              magrittr_2.0.3           ps_1.9.1                 processx_3.8.6          
+## [41] digest_0.6.37            grid_4.5.0               nc_2025.3.24             PeakSegDisk_2024.10.1   
+## [45] lifecycle_1.0.4          vctrs_0.6.5              evaluate_1.0.3           glue_1.8.0              
+## [49] farver_2.1.2             listenv_0.9.1            ids_1.0.1                codetools_0.2-20        
+## [53] parallelly_1.44.0        tools_4.5.0              pkgconfig_2.0.3
 ```
 
 ## Not working yet
@@ -1647,7 +1487,7 @@ rush$start_local_workers(
 ```
 
 ```
-## INFO  [01:08:29.764] [rush] Starting 4 worker(s)
+## INFO  [01:26:52.207] [rush] Starting 4 worker(s)
 ```
 
 ``` r
@@ -1699,7 +1539,7 @@ rush$start_local_workers(
 ```
 
 ```
-## INFO  [01:08:29.848] [rush] Starting 4 worker(s)
+## INFO  [01:26:52.307] [rush] Starting 4 worker(s)
 ```
 
 ``` r
