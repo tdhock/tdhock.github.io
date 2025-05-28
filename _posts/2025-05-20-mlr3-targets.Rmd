@@ -55,8 +55,8 @@ This approach is discussed in the following blogs:
 
 While this approach is very useful, there are some dis-advantages:
 
-* jobs can have very different times
-* ??
+* jobs can have very different times, which induces an inefficient use of the scheduler (which requires specifying a single max time/memory for all heterogeneous tasks within a single job/experiment).
+* the data must be serialized to the network file system, which can be slow.
 
 ## Simulate data for ML experiment
 

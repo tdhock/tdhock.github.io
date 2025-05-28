@@ -777,6 +777,200 @@ task_dt <- rush$fetch_tasks()
 task_dt[order(peaks)]
 ```
 
+## file system with lock file
+
+```{r}
+data.dir <- file.path(
+  tempfile(),
+  "H3K27ac-H3K4me3_TDHAM_BP",
+  "samples",
+  "Mono1_H3K27ac",
+  "S001YW_NCMLS",
+  "problems",
+  "chr11-60000-580000")
+dir.create(data.dir, recursive=TRUE, showWarnings=FALSE)
+write.table(
+  Mono27ac$coverage, file.path(data.dir, "coverage.bedGraph"),
+  col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
+summary.csv <- file.path(data.dir, "summary.csv")
+lock.file <- paste0(summary.csv, ".LOCK")
+
+run_penalty <- function(){
+  while({
+    if(!file.exists(lock.file)){
+      TRUE
+    }else{
+      fread(lock.file)$pid != Sys.getpid()
+    }
+  }){
+    if(!file.exists(lock.file)){
+      fwrite(data.table(pid=Sys.getpid()), lock.file)
+    }
+  }
+  target.max.peaks <- 15
+  target.min.peaks <- 5
+  get_tasks <- function(){
+    task_dt <- rush$fetch_tasks()
+    if(is.null(task_dt$penalty)){
+      task_dt$penalty <- NA_real_
+    }
+    if(is.null(task_dt$peaks)){
+      task_dt$peaks <- NA_integer_
+    }
+    task_dt
+  }
+  task_dt <- get_tasks()
+  start.time.cand <- Sys.time()
+  first_pen_cand <- c(0, Inf)
+  done <- first_pen_cand %in% task_dt$penalty
+  pen <- if(any(!done)){
+    first_pen_cand[!done][1]
+  }else{
+    print(task_dt)
+    while(nrow(task_dt[!is.na(peaks)])<2){
+      task_dt <- get_tasks()
+    }
+    print(task_dt)
+    selection.df <- penaltyLearning::modelSelection(task_dt, "total.loss", "peaks")
+    selection.dt <- with(selection.df, data.table(
+      total.loss,
+      min.lambda,
+      penalty,
+      max.lambda,
+      peaks_after=c(peaks[-1],NA),
+      peaks
+    ))[
+      peaks_after<target.max.peaks & peaks>target.min.peaks &
+        peaks_after+1 < peaks & !max.lambda %in% task_dt$penalty
+    ]
+    if(nrow(selection.dt)){
+      selection.dt[1, max.lambda]
+    }
+  }
+  if(is.numeric(pen)){
+    key = rush$push_running_tasks(xss=list(list(
+      penalty=pen,
+      start.time.cand=start.time.cand,
+      end.time.cand=Sys.time())))
+    start.time.model <- Sys.time()
+    fit <- PeakSegDisk::PeakSegFPOP_dir(data.rush, pen)
+    rush$push_results(key, yss=list(list(
+      peaks=fit$loss$peaks,
+      total.loss=fit$loss$total.loss,
+      start.time.model=start.time.model,
+      end.time.model=Sys.time())))
+    pen
+  }
+}
+wl_penalty <- function(rush){
+  done <- FALSE
+  while(!done){
+    pen <- run_penalty(rush)
+    done <- is.null(pen)
+  }
+}
+```
+
+## redis list
+
+TODO code based on redux?
+
+```{r}
+r <- redux::hiredis()
+r$FLUSHDB()
+r$LPUSH()
+data.dir <- file.path(
+  tempfile(),
+  "H3K27ac-H3K4me3_TDHAM_BP",
+  "samples",
+  "Mono1_H3K27ac",
+  "S001YW_NCMLS",
+  "problems",
+  "chr11-60000-580000")
+dir.create(data.dir, recursive=TRUE, showWarnings=FALSE)
+write.table(
+  Mono27ac$coverage, file.path(data.dir, "coverage.bedGraph"),
+  col.names=FALSE, row.names=FALSE, quote=FALSE, sep="\t")
+summary.csv <- file.path(data.dir, "summary.csv")
+lock.file <- paste0(summary.csv, ".LOCK")
+
+run_penalty <- function(){
+  while({
+    if(!file.exists(lock.file)){
+      TRUE
+    }else{
+      fread(lock.file)$pid != Sys.getpid()
+    }
+  }){
+    if(!file.exists(lock.file)){
+      fwrite(data.table(pid=Sys.getpid()), lock.file)
+    }
+  }
+  target.max.peaks <- 15
+  target.min.peaks <- 5
+  get_tasks <- function(){
+    task_dt <- rush$fetch_tasks()
+    if(is.null(task_dt$penalty)){
+      task_dt$penalty <- NA_real_
+    }
+    if(is.null(task_dt$peaks)){
+      task_dt$peaks <- NA_integer_
+    }
+    task_dt
+  }
+  task_dt <- get_tasks()
+  start.time.cand <- Sys.time()
+  first_pen_cand <- c(0, Inf)
+  done <- first_pen_cand %in% task_dt$penalty
+  pen <- if(any(!done)){
+    first_pen_cand[!done][1]
+  }else{
+    print(task_dt)
+    while(nrow(task_dt[!is.na(peaks)])<2){
+      task_dt <- get_tasks()
+    }
+    print(task_dt)
+    selection.df <- penaltyLearning::modelSelection(task_dt, "total.loss", "peaks")
+    selection.dt <- with(selection.df, data.table(
+      total.loss,
+      min.lambda,
+      penalty,
+      max.lambda,
+      peaks_after=c(peaks[-1],NA),
+      peaks
+    ))[
+      peaks_after<target.max.peaks & peaks>target.min.peaks &
+        peaks_after+1 < peaks & !max.lambda %in% task_dt$penalty
+    ]
+    if(nrow(selection.dt)){
+      selection.dt[1, max.lambda]
+    }
+  }
+  if(is.numeric(pen)){
+    key = rush$push_running_tasks(xss=list(list(
+      penalty=pen,
+      start.time.cand=start.time.cand,
+      end.time.cand=Sys.time())))
+    start.time.model <- Sys.time()
+    fit <- PeakSegDisk::PeakSegFPOP_dir(data.rush, pen)
+    rush$push_results(key, yss=list(list(
+      peaks=fit$loss$peaks,
+      total.loss=fit$loss$total.loss,
+      start.time.model=start.time.model,
+      end.time.model=Sys.time())))
+    pen
+  }
+}
+wl_penalty <- function(rush){
+  done <- FALSE
+  while(!done){
+    pen <- run_penalty(rush)
+    done <- is.null(pen)
+  }
+}
+
+```
+
 ## Conclusions
 
 We have discussed how to implement Change-points for a Range Of
