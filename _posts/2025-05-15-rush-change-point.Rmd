@@ -925,9 +925,25 @@ ggplot()+
   facet_grid(fun ~ ., labeller=label_both, scales="free", space="free")
 ```
 
-The figure above shows that `mirai_map()` is actually a bit slower
+The figure above shows timings on my laptop: `mirai_map()` is actually a bit slower
 than `future_lapply()` in this case, although the difference is not
 large (about 1 second).
+
+Figures below are the same analysis on two Alliance Canada Clusters.
+
+![mammouth-projects](/assets/img/2025-05-15-rush-change-point/mammouth-projects.png)
+
+![beluga-scratch](/assets/img/2025-05-15-rush-change-point/beluga-scratch.png)
+
+The results above show that:
+
+* the file lock mechanism works on both file systems (/projects and /scratch).
+* mirai is much faster than future on
+  mammouth. `parallel::detectCores()` returns 24 on the login node,
+  and this is the number of CPUs used by mirai, but not future.
+* future is slightly faster than mirai on
+  beluga. `paralllel::detectCores()` returns 40 on the login node, but
+  both frameworks only use 6 CPUs.
 
 ### Compare everything
 
