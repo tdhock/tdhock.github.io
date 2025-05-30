@@ -1,0 +1,406 @@
+---
+layout: post
+title: Load-balanced parallel machine learning benchmarks
+description: A new approach using filelock and batchtools
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-05-20-mlr3-filelock"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+I recently wrote about [Centralized vs de-centralized
+parallelization](https://tdhock.github.io/blog/2025/rush-change-point/).
+The goal of this blog is to explore how these new frameworks may be
+used for parallelizing machine learning benchmark experiments.
+
+## Introduction to machine learning
+
+Typically when we parallelize machine learning benchmark experiments with mlr3, we use the following pipeline:
+
+* `mlr3::benchmark_grid()` creates a grid of tasks, learners, and resampling iterations.
+* `batchtools::makeExperimentRegistry()` creates a registry directory.
+* `mlr3batchmark::batchmark()` save the grid into the registry directory.
+* `batchtools::submitJobs()` launches the jobs on the cluster.
+* `mlr3batchmark::reduceResultsBatchmark()` combines the results into a single file.
+
+This approach is discussed in the following blogs:
+
+* [The importance of hyper-parameter
+  tuning](https://tdhock.github.io/blog/2024/hyper-parameter-tuning/)
+  explains how to use the auto-tuner.
+* [Cross-validation experiments with torch
+  learners](https://tdhock.github.io/blog/2024/mlr3torch/) explains
+  how to compare linear models in torch with other learners from
+  outside torch like `glmnet`.
+* [Torch learning with binary
+  classification](https://tdhock.github.io/blog/2025/mlr3torch-binary/)
+  explains how to implement a custom loss function for binary
+  classification in mlr3torch.
+* [Comparing neural network architectures using mlr3torch](https://tdhock.github.io/blog/2025/mlr3torch-conv/) explains how to implement different neural network architectures, and make figures to compare their subtrain/validation/test error rates.
+
+While this approach is very useful, it assumes that `submitJobs()` can
+efficiently run all the jobs in parallel, which is not always the case:
+
+* Each ML job involves using a single learner on a single task, with a
+  single train/test split.
+* ML jobs can have very different times, which induces an inefficient use of the scheduler (which requires specifying a single max time/memory for all heterogeneous tasks within a single job/experiment).
+* Some clusters like Alliance Canada allow a max of 1000 SLURM jobs
+  per user at a time (or 1 SLURM job array with 1000 tasks). This
+  includes all entries in the queue, which is problematic for some
+  large-scale experiments. For example, our [SOAK
+  paper](https://arxiv.org/abs/2410.08643) involved computing 1200+
+  jobs on the NAU Monsoon cluster, which did not impose the 1000 SLURM
+  job limit.
+
+In this blog, we investigate a method for overcoming this limitation:
+
+* We create a certain number of SLURM jobs using batchtools.
+* Each of these jobs looks for work to do in a central CSV table (one row per ML job), and saves the result to disk.
+* A column in that table indicates state of job: not run yet, running, done.
+* A lock file is used to ensure that only one SLURM job at a time can access and modify that table. 
+* When there are no more ML jobs with state "not run yet" then each worker process can exit.
+
+## Simulate data for ML experiment
+
+This example is taken from `?mlr3resampling::pvalue`:
+
+```{r}
+N <- 80
+library(data.table)
+set.seed(1)
+reg.dt <- data.table(
+  x=runif(N, -2, 2),
+  person=factor(rep(c("Alice","Bob"), each=0.5*N)))
+reg.pattern.list <- list(
+  easy=function(x, person)x^2,
+  impossible=function(x, person)(x^2)*(-1)^as.integer(person))
+SOAK <- mlr3resampling::ResamplingSameOtherSizesCV$new()
+viz.dt.list <- list()
+reg.task.list <- list()
+for(pattern in names(reg.pattern.list)){
+  f <- reg.pattern.list[[pattern]]
+  task.dt <- data.table(reg.dt)[
+  , y := f(x,person)+rnorm(N, sd=0.5)
+  ][]
+  task.obj <- mlr3::TaskRegr$new(
+    pattern, task.dt, target="y")
+  task.obj$col_roles$feature <- "x"
+  task.obj$col_roles$stratum <- "person"
+  task.obj$col_roles$subset <- "person"
+  reg.task.list[[pattern]] <- task.obj
+  viz.dt.list[[pattern]] <- data.table(pattern, task.dt)
+}
+(viz.dt <- rbindlist(viz.dt.list))
+```
+
+The data table above represents simulated regression problem, which is visualized using the code below.
+
+```{r sim-data}
+library(ggplot2)
+ggplot()+
+  geom_point(aes(
+    x, y),
+    data=viz.dt)+
+  facet_grid(pattern ~ person, labeller=label_both)
+```
+
+The figure above shows data for two simulated patterns: 
+
+* easy (top) has same pattern in the two people.
+* impossible (bottom) has different patterns in the two people.
+
+## mlr3 benchmark grid
+
+To use mlr3 on these data, we create a benchmark grid with a list of tasks and learners in the code below.
+
+```{r}
+reg.learner.list <- list(
+  featureless=mlr3::LearnerRegrFeatureless$new())
+if(requireNamespace("rpart")){
+  reg.learner.list$rpart <- mlr3::LearnerRegrRpart$new()
+}
+(bench.grid <- mlr3::benchmark_grid(
+  reg.task.list,
+  reg.learner.list,
+  SOAK))
+```
+
+The output above indicates that we want to run `same_other_sizes_cv`
+resampling on two different tasks, and two different learners.
+To run that in sequence, we use the typical mlr3 functions in the code below.
+
+```{r}
+bench.result <- mlr3::benchmark(bench.grid)
+bench.score <- mlr3resampling::score(bench.result, mlr3::msr("regr.rmse"))
+bench.score[, .(task_id, algorithm, train.subsets, test.fold, test.subset, regr.rmse)]
+```
+
+The table of scores above shows the root mean squared error for each
+combination of task, algorithm, train subset, test fold, and test
+subset. These error values are summarized in the visualization below.
+
+```{r pvalue}
+bench.plist <- mlr3resampling::pvalue(bench.score)
+plot(bench.plist)
+```
+
+The figure above shows:
+
+* in black, mean plus or minus standard deviation, for each
+  combination of task, test subset, algorithm, and train subsets.
+* in grey, P-values for differences between same/all and same/other
+  (two-sided paired T-test).
+  
+## My method for expanding the ML grid
+
+To run the same computations using our method, we first loop over the
+tasks and resampling iterations, to create a data table with one row
+per train/test split.
+
+```{r}
+my.grid <- list(
+  task_list=reg.task.list,
+  learner_list=reg.learner.list,
+  resampling=SOAK)
+my.proj.dir <- tempfile()
+dir.create(my.proj.dir)
+saveRDS(my.grid, file.path(my.proj.dir, "grid.rds"))
+```
+
+```{r}
+proj_grid_jobs <- function(proj.dir){
+  grid.rds <- file.path(proj.dir, "grid.rds")
+  proj.grid <- readRDS(grid.rds)
+  ml_job_dt_list <- list()
+  for(task.name in names(proj.grid$task_list)){
+    task.obj <- proj.grid$task_list[[task.name]]
+    proj.grid$resampling$instantiate(task.obj)
+    for(learner.name in names(proj.grid$learner_list)){
+      ml_job_dt_list[[paste(task.name, learner.name)]] <- data.table(
+        task.name, learner.name, iteration=seq_len(proj.grid$resampling$iters), status="not started")
+    }
+  }
+  ml_job_dt <- rbindlist(ml_job_dt_list)
+  grid_jobs.csv <- file.path(proj.dir, "grid_jobs.csv")
+  fwrite(ml_job_dt, grid_jobs.csv)
+  ml_job_dt
+}
+proj_grid_jobs(my.proj.dir)
+```
+
+In the output above, there is one row per train/test split (ML
+job). After saving these data to disk above, we can compute one result
+using the function below.
+
+```{r}
+proj_compute <- function(proj.dir){
+  library(data.table)
+  grid_jobs.csv <- file.path(proj.dir, "grid_jobs.csv")
+  grid_jobs.csv.lock <- paste0(grid_jobs.csv, ".lock")
+  before.lock <- filelock::lock(grid_jobs.csv.lock)
+  grid_jobs_dt <- fread(grid_jobs.csv)
+  not.started <- grid_jobs_dt$status == "not started"
+  grid_job_i <- NULL
+  if(any(not.started)){
+    grid_job_i <- which(not.started)[1]
+    grid_jobs_dt[grid_job_i, status := "started"]
+    fwrite(grid_jobs_dt, grid_jobs.csv)
+  }
+  filelock::unlock(before.lock)
+  if(!is.null(grid_job_i)){
+    grid_job_row <- grid_jobs_dt[grid_job_i]
+    grid.rds <- file.path(proj.dir, "grid.rds")
+    proj.grid <- readRDS(grid.rds)
+    this.task <- proj.grid$task_list[[grid_job_row$task.name]]
+    this.learner <- proj.grid$learner_list[[grid_job_row$learner.name]]
+    proj.grid$resampling$instantiate(this.task)
+    set_rows <- function(train_or_test){
+      train_or_test_set <- paste0(train_or_test, "_set")
+      set_fun <- proj.grid$resampling[[train_or_test_set]]
+      set_fun(grid_job_row$iteration)
+    }
+    this.learner$train(this.task, set_rows("train"))
+    pred <- this.learner$predict(this.task, set_rows("test"))
+    result.row <- data.table(
+      grid_job_row,
+      learner=list(this.learner),
+      pred=list(pred))
+    result.rds <- file.path(proj.dir, "grid_jobs", paste0(grid_job_i, ".rds"))
+    dir.create(dirname(result.rds), showWarnings = FALSE)
+    saveRDS(result.row, result.rds)
+    result.row
+  }
+}
+proj_compute(my.proj.dir)
+proj_compute(my.proj.dir)
+```
+
+```{r}
+proj_compute_until_done <- function(proj.dir){
+  done <- FALSE
+  while(!done){
+    result <- compute(proj.dir)
+    if(is.null(result))done <- TRUE
+  }
+}
+proj_compute_until_done(my.proj.dir)
+```
+
+```{r}
+proj_results <- function(proj.dir){
+  rbindlist(lapply(Sys.glob(file.path(proj.dir, "grid_jobs", "*.rds")), readRDS))
+}
+proj_results(my.proj.dir)
+```
+
+We then setup a new project with a batchtools registry:
+
+```{r}
+my.proj.dir <- tempfile()
+dir.create(my.proj.dir)
+saveRDS(my.grid, file.path(my.proj.dir, "grid.rds"))
+proj_grid_jobs(my.proj.dir)
+reg.dir <- file.path(my.proj.dir, "registry")
+reg <- batchtools::makeRegistry(reg.dir)
+reg$cluster.functions <- batchtools::makeClusterFunctionsMulticore()
+bm.jobs <- batchtools::batchMap(
+  function(i)proj_compute_until_done(my.proj.dir),
+  seq(1, parallel::detectCores()))
+batchtools::submitJobs(bm.jobs)
+proj_results(my.proj.dir)
+```
+
+Then we create a tar script which begins by reading the data, and ends
+with a list of targets.
+
+```{r}
+targets::tar_script({
+  load("2025-05-20-mlr3-targets-in.RData")
+  job_targs <- tarchetypes::tar_map(
+    list(ml_job_num=seq_len(nrow(ml_job_dt))),
+    targets::tar_target(result, compute(ml_job_num)))
+  list(
+    tarchetypes::tar_combine(combine, job_targs, command=rbind(!!!.x)),
+    job_targs)
+}, ask=FALSE)
+```
+
+The trick in the code above is the use of two functions:
+
+* `tar_map()` creates a target for each value of `ml_job_num`, saving the list of targets to `job_targs`.
+* `tar_combine()` creates a target that depends on all of the targets in the `job_targs` list.
+
+The code below computes the results.
+
+```{r}
+if(FALSE){
+  targets::tar_manifest()
+  targets::tar_visnetwork()
+}
+targets::tar_make()
+(tar_score_dt <- targets::tar_read(combine))
+```
+
+The table above shows the test error, and the code below plots it.
+
+```{r tar-pval}
+tar_pval_list <- mlr3resampling::pvalue(tar_score_dt)
+plot(tar_pval_list)
+```
+
+The result figure above is consistent with the result figure that was
+computed with the usual mlr3 benchmark function.
+
+## Dynamic targets
+
+Next, we implement [dynamic
+branching](https://books.ropensci.org/targets/dynamic.html#branching),
+which is apparently faster for lots of branches.
+
+```{r}
+targets::tar_script({
+  load("2025-05-20-mlr3-targets-in.RData")
+  list(
+    targets::tar_target(ml_job_num, seq_len(nrow(ml_job_dt))),
+    targets::tar_target(result, compute(ml_job_num), pattern=map(ml_job_num)))
+}, ask=FALSE)
+```
+
+The code above uses `map(ml_job_num)` to create a different result for
+each value of `ml_job_num`, which is combined together into a single
+result table, computed and shown below.
+
+```{r}
+targets::tar_make()
+(dyn_score_dt <- targets::tar_read(result))
+```
+
+The table above shows the test error for each train/test split, which
+we can visualize via the code below.
+
+```{r dyn-pval}
+dyn_pval_list <- mlr3resampling::pvalue(dyn_score_dt)
+plot(dyn_pval_list)
+```
+
+The graphics above are consistent with the previous result plots.
+
+## How does it work?
+
+When you run `tar_make()`, files are created:
+
+```{r}
+dir("_targets/objects/")
+```
+
+Each target has a corresponding file.
+
+## How to run in parallel?
+
+To run targets in parallel, you can use `tar_option_set(controller=)`
+some crew controller, as explained on the [Distributed computing
+page](https://books.ropensci.org/targets/crew.html). Below we use a
+local crew of 2 workers.
+
+```{r}
+unlink("_targets", recursive = TRUE)
+targets::tar_script({
+  tar_option_set(controller = crew::crew_controller_local(workers = 2))
+  load("2025-05-20-mlr3-targets-in.RData")
+  list(
+    targets::tar_target(ml_job_num, seq_len(nrow(ml_job_dt))),
+    targets::tar_target(result, compute(ml_job_num), pattern=map(ml_job_num)))
+}, ask=FALSE)
+targets::tar_make()
+targets::tar_read(result)
+```
+
+Above we see that the same result table has been computed in parallel.
+
+## Conclusions
+
+We can use `targets` to declare and compute machine learning benchmark
+experiments in parallel. Next steps will be to verify if this approach
+works for larger experiments on the SLURM compute cluster, with
+different sized data sets, and algorithms with different run-times.
+
+## Session info
+
+```{r}
+sessionInfo()
+```
