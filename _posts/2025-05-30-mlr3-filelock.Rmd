@@ -6,7 +6,7 @@ description: A new approach using filelock and batchtools
 
 ```{r Ropts, echo=FALSE, results='hide'}
 repo.dir <- normalizePath("..")
-post.id <- "2025-05-20-mlr3-filelock"
+post.id <- "2025-05-30-mlr3-filelock"
 fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
 dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
 knitr::opts_chunk$set(
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   fig.path=fig.path,
   fig.width=10, ## TODO python figures wider? look at prev issue.
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=6)
+  fig.height=2)
 in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
 in_knit <- isTRUE(getOption('knitr.in.progress'))
 options(width=120)
@@ -118,7 +118,7 @@ for(pattern in names(reg.pattern.list)){
 
 The data table above represents simulated regression problem, which is visualized using the code below.
 
-```{r sim-data}
+```{r sim-data, fig.height=6}
 library(ggplot2)
 ggplot()+
   geom_point(aes(
@@ -153,6 +153,7 @@ resampling on two different tasks, and two different learners.
 To run that in sequence, we use the typical mlr3 functions in the code below.
 
 ```{r}
+lgr::get_logger("mlr3")$set_threshold("warn")
 bench.result <- mlr3::benchmark(bench.grid)
 bench.score <- mlr3resampling::score(bench.result, mlr3::msr("regr.rmse"))
 bench.score[, .(task_id, algorithm, train.subsets, test.fold, test.subset, regr.rmse)]
@@ -162,7 +163,7 @@ The table of scores above shows the root mean squared error for each
 combination of task, algorithm, train subset, test fold, and test
 subset. These error values are summarized in the visualization below.
 
-```{r pvalue}
+```{r pvalue, fig.height=6}
 bench.plist <- mlr3resampling::pvalue(bench.score)
 plot(bench.plist)
 ```
@@ -174,21 +175,30 @@ The figure above shows:
 * in grey, P-values for differences between same/all and same/other
   (two-sided paired T-test).
   
-## My method for expanding the ML grid
+Exercise for the reader: use the code above to do the computation in
+parallel on your laptop, by first declaring `future::plan("multisession")`.
+  
+## Proposed method for expanding the ML grid
 
-To run the same computations using our method, we first loop over the
-tasks and resampling iterations, to create a data table with one row
-per train/test split.
+To run the same computations in parallel, we will create a data table
+with one row per train/test split, then compute these split results in
+parallel.
 
 ```{r}
 my.grid <- list(
   task_list=reg.task.list,
   learner_list=reg.learner.list,
   resampling=SOAK)
-my.proj.dir <- tempfile()
-dir.create(my.proj.dir)
-saveRDS(my.grid, file.path(my.proj.dir, "grid.rds"))
+seq.proj.dir <- tempfile()
+dir.create(seq.proj.dir)
+saveRDS(my.grid, file.path(seq.proj.dir, "grid.rds"))
 ```
+
+The code above saves a grid of tasks, learners, and a resampling to
+the `grid.rds` file, in a project directory called `seq.proj.dir`
+(because this first demonstration will be computation in sequence, not
+parallel). Next, we create the table with one row per split to
+compute,
 
 ```{r}
 proj_grid_jobs <- function(proj.dir){
@@ -208,12 +218,13 @@ proj_grid_jobs <- function(proj.dir){
   fwrite(ml_job_dt, grid_jobs.csv)
   ml_job_dt
 }
-proj_grid_jobs(my.proj.dir)
+proj_grid_jobs(seq.proj.dir)
 ```
 
 In the output above, there is one row per train/test split (ML
-job). After saving these data to disk above, we can compute one result
-using the function below.
+job). It includes every combination of task, learner, and
+cross-validation iteration. After saving these data to disk above, we
+can compute one result using the function below.
 
 ```{r}
 proj_compute <- function(proj.dir){
@@ -256,9 +267,25 @@ proj_compute <- function(proj.dir){
     result.row
   }
 }
-proj_compute(my.proj.dir)
-proj_compute(my.proj.dir)
+proj_compute(seq.proj.dir)
+proj_compute(seq.proj.dir)
 ```
+
+The output above show the results for two iterations. Each call to
+`proj_compute` does the following:
+
+* looks in the project directory and gets a lock on the `grid_jobs.csv` file,
+* checks if there are any splits that have not yet started,
+* if any have not yet started, we select the next index, `grid_job_i`, to compute next.
+* we look in `grid.rds` for the correspond task, learner, and split,
+* after calling `train()` and `predict()`, we save the results to a RDS file.
+* Importantly, each call to `proj_compute()` only specifies the
+  directory to look in, not the particular split to compute. So at
+  first, each process does not know what work to do, nor if there is
+  any work to do at all! It looks at the file system to determine what
+  work to do, if any.
+  
+Next, we use a while loop in the function below to keep going until there is no more work to do.
 
 ```{r}
 proj_compute_until_done <- function(proj.dir){
@@ -268,96 +295,136 @@ proj_compute_until_done <- function(proj.dir){
     if(is.null(result))done <- TRUE
   }
 }
-proj_compute_until_done(my.proj.dir)
+proj_compute_until_done(seq.proj.dir)
 ```
+
+Next, we look at the file system and combine the result files.
 
 ```{r}
 proj_results <- function(proj.dir){
   rbindlist(lapply(Sys.glob(file.path(proj.dir, "grid_jobs", "*.rds")), readRDS))
 }
-proj_results(my.proj.dir)
+proj_results(seq.proj.dir)
 ```
 
-We then setup a new project with a batchtools registry:
+Finally, we visualize the results.
 
-```{r}
-my.proj.dir <- tempfile()
-dir.create(my.proj.dir)
-saveRDS(my.grid, file.path(my.proj.dir, "grid.rds"))
-proj_grid_jobs(my.proj.dir)
-reg.dir <- file.path(my.proj.dir, "registry")
-reg <- batchtools::makeRegistry(reg.dir)
-reg$cluster.functions <- batchtools::makeClusterFunctionsMulticore()
-n.workers <- 2
-bm.jobs <- batchtools::batchMap(
-  function(i)proj_compute_until_done(my.proj.dir),
-  seq(1, n.workers))
-batchtools::submitJobs(bm.jobs)
-batchtools::waitForJobs()
+```{r times-seq}
 norm_times <- function(DT)DT[, let(
   start.seconds=start.time-min(start.time),
   end.seconds=end.time-min(start.time),
   Process=factor(process)
 )][]
 result.list <- list()
-result.list$laptop_multicore <- norm_times(proj_results(my.proj.dir))
-ggplot()+
-  geom_segment(aes(
-    start.seconds, Process,
-    xend=end.seconds, yend=Process),
-    data=result.list$laptop_multicore)+
-  geom_point(aes(
-    start.seconds, Process),
-    shape=1,
-    data=result.list$laptop_multicore)+
-  scale_x_continuous("Seconds from start of computation")
+process_viz <- function(name){
+  DT <- result.list[[name]]
+  ggplot()+
+    ggtitle(name)+
+    geom_segment(aes(
+      start.seconds, Process,
+      xend=end.seconds, yend=Process),
+      data=DT)+
+    geom_point(aes(
+      start.seconds, Process),
+      shape=1,
+      data=DT)+
+    scale_x_continuous("Seconds from start of computation")
+}
+result.list$laptop_sequential <- norm_times(proj_results(seq.proj.dir))
+process_viz("laptop_sequential")
 ```
 
-## Using my package locally
+The output above shows each split as a dot (for start time) and line
+segment (which goes until the end time). It is clear that there was
+one process used to compute all of the results.
+
+## Laptop in parallel using batchtools
+
+To compute in parallel, we can use `batchtools`.
+We first setup a new project with a registry:
 
 ```{r}
-my.proj.dir <- '2025-05-30-mlr3-filelock'
-unlink(my.proj.dir, recursive=TRUE)
+multi.proj.dir <- tempfile()
+dir.create(multi.proj.dir)
+saveRDS(my.grid, file.path(multi.proj.dir, "grid.rds"))
+multi.job.dt <- proj_grid_jobs(multi.proj.dir)
+reg.dir <- file.path(multi.proj.dir, "registry")
+reg <- batchtools::makeRegistry(reg.dir)
+```
+
+Note in the output above that we are using Multicore cluster
+functions, because we have the following code in the user-specific
+config file:
+
+```{r}
+cat(readLines("~/.batchtools.conf.R"), sep="\n")
+```
+
+The code below launches the parallel computation in 2 worker processes.
+
+```{r times-multi}
+n.workers <- 2
+bm.jobs <- batchtools::batchMap(
+  function(i)proj_compute_until_done(multi.proj.dir),
+  seq(1, n.workers))
+batchtools::submitJobs(bm.jobs)
+batchtools::waitForJobs()
+```
+
+The code below visualizes the result.
+
+```{r}
+result.list$laptop_multicore <- norm_times(proj_results(multi.proj.dir))
+process_viz("laptop_multicore")
+```
+
+The output above shows that there are two processes working in
+parallel on the computation.  After each process finishes a given
+split, it looks for a new split to work on, and starts right away (it
+does not have to wait for the other process to finish any work).
+
+## Using package functions
+
+Based on the ideas in the functions above, I wrote some analogous functions in my `mlr3resampling` R package. 
+These functions allow runnning these kind of parallel ML experiments either locally, or on a SLURM compute cluster.
+Below, we show how the local multi-core computation works.
+
+```{r times-multi-pkg}
+pkg.proj.dir <- '2025-05-30-mlr3-filelock'
+unlink(pkg.proj.dir, recursive=TRUE)
 mlr3resampling::proj_grid(
-  my.proj.dir,
+  pkg.proj.dir,
   reg.task.list,
   reg.learner.list,
   SOAK,
   order_jobs = function(DT)DT[,order(test.subset)],
   score_args=mlr3::msrs(c("regr.rmse", "regr.mae")))
-mlr3resampling::proj_submit(my.proj.dir)
-batchtools::waitForJobs()
-
-result.list$laptop_multicore_pkg <- norm_times(fread(file.path(my.proj.dir,"results.csv")))
-ggplot()+
-  geom_segment(aes(
-    start.seconds, Process,
-    xend=end.seconds, yend=Process),
-    data=result.list$laptop_multicore_pkg)+
-  geom_point(aes(
-    start.seconds, Process),
-    shape=1,
-    data=result.list$laptop_multicore_pkg)+
-  scale_x_continuous("Seconds from start of computation")
 ```
 
+Above we create a new project based on the same grid as in previous sections.
+Other arguments include `order_jobs`, which returns an integer vector that specifies the priority/order of execution of the different ML experiments. This could be useful for the situation where you run out of time on SLURM, in which case only the entries at the top of the table will have results on the file system. In that case, you can also use the `order_jobs` argument to resume work from where you left off (only provide the indices of arguments that have not yet completed).
+
 ```{r}
-result.list$cluster_slurm <- norm_times(fread("2025-05-30-mlr3-filelock-mammouth/results.csv"))
-ggplot()+
-  geom_segment(aes(
-    start.seconds, Process,
-    xend=end.seconds, yend=Process),
-    data=result.list$cluster_slurm)+
-  geom_point(aes(
-    start.seconds, Process),
-    shape=1,
-    data=result.list$cluster_slurm)+
-  scale_x_continuous("Seconds from start of computation")
+mlr3resampling::proj_submit(pkg.proj.dir)
+batchtools::waitForJobs()
+
+result.list$laptop_pkg <- norm_times(fread(file.path(pkg.proj.dir,"results.csv")))
+process_viz("laptop_pkg")
+```
+
+```{r times-mammouth}
+result.list$mammouth_slurm <- norm_times(fread("2025-05-30-mlr3-filelock-mammouth/results.csv"))
+process_viz("mammouth_slurm")
+```
+
+```{r times-beluga}
+result.list$beluga_slurm <- norm_times(fread("2025-05-30-mlr3-filelock-beluga/results.csv"))
+process_viz("beluga_slurm")
 ```
 
 ## Compare them all
 
-```{r}
+```{r times-compare, fig.height=6}
 common.names <- Reduce(intersect, sapply(result.list, names))
 compare_results_list <- list()
 for(computer in names(result.list)){
