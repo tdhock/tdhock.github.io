@@ -75,6 +75,14 @@ In this blog, we investigate a method for overcoming this limitation:
 * A lock file is used to ensure that only one SLURM job at a time can access and modify that table. 
 * When there are no more ML jobs with state "not run yet" then each worker process can exit.
 
+## First install dev mlr3resampling
+
+Some code below requires a development version of mlr3resampling, so we install it first:
+
+```{r}
+devtools::install_github("tdhock/mlr3resampling@proj")
+```
+
 ## Simulate data for ML experiment
 
 This example is taken from `?mlr3resampling::pvalue`:
@@ -223,6 +231,7 @@ proj_compute <- function(proj.dir){
   }
   filelock::unlock(before.lock)
   if(!is.null(grid_job_i)){
+    start.time <- Sys.time()
     grid_job_row <- grid_jobs_dt[grid_job_i]
     grid.rds <- file.path(proj.dir, "grid.rds")
     proj.grid <- readRDS(grid.rds)
@@ -238,6 +247,7 @@ proj_compute <- function(proj.dir){
     pred <- this.learner$predict(this.task, set_rows("test"))
     result.row <- data.table(
       grid_job_row,
+      start.time, end.time=Sys.time(), process=Sys.getpid(),
       learner=list(this.learner),
       pred=list(pred))
     result.rds <- file.path(proj.dir, "grid_jobs", paste0(grid_job_i, ".rds"))
@@ -254,7 +264,7 @@ proj_compute(my.proj.dir)
 proj_compute_until_done <- function(proj.dir){
   done <- FALSE
   while(!done){
-    result <- compute(proj.dir)
+    result <- proj_compute(proj.dir)
     if(is.null(result))done <- TRUE
   }
 }
@@ -278,126 +288,100 @@ proj_grid_jobs(my.proj.dir)
 reg.dir <- file.path(my.proj.dir, "registry")
 reg <- batchtools::makeRegistry(reg.dir)
 reg$cluster.functions <- batchtools::makeClusterFunctionsMulticore()
+n.workers <- 2
 bm.jobs <- batchtools::batchMap(
   function(i)proj_compute_until_done(my.proj.dir),
-  seq(1, parallel::detectCores()))
+  seq(1, n.workers))
 batchtools::submitJobs(bm.jobs)
-proj_results(my.proj.dir)
+batchtools::waitForJobs()
+norm_times <- function(DT)DT[, let(
+  start.seconds=start.time-min(start.time),
+  end.seconds=end.time-min(start.time),
+  Process=factor(process)
+)][]
+result.list <- list()
+result.list$laptop_multicore <- norm_times(proj_results(my.proj.dir))
+ggplot()+
+  geom_segment(aes(
+    start.seconds, Process,
+    xend=end.seconds, yend=Process),
+    data=result.list$laptop_multicore)+
+  geom_point(aes(
+    start.seconds, Process),
+    shape=1,
+    data=result.list$laptop_multicore)+
+  scale_x_continuous("Seconds from start of computation")
 ```
 
-Then we create a tar script which begins by reading the data, and ends
-with a list of targets.
+## Using my package locally
 
 ```{r}
-targets::tar_script({
-  load("2025-05-20-mlr3-targets-in.RData")
-  job_targs <- tarchetypes::tar_map(
-    list(ml_job_num=seq_len(nrow(ml_job_dt))),
-    targets::tar_target(result, compute(ml_job_num)))
-  list(
-    tarchetypes::tar_combine(combine, job_targs, command=rbind(!!!.x)),
-    job_targs)
-}, ask=FALSE)
+my.proj.dir <- '2025-05-30-mlr3-filelock'
+unlink(my.proj.dir, recursive=TRUE)
+mlr3resampling::proj_grid(
+  my.proj.dir,
+  reg.task.list,
+  reg.learner.list,
+  SOAK,
+  order_jobs = function(DT)DT[,order(test.subset)],
+  score_args=mlr3::msrs(c("regr.rmse", "regr.mae")))
+mlr3resampling::proj_submit(my.proj.dir)
+batchtools::waitForJobs()
+
+result.list$laptop_multicore_pkg <- norm_times(fread(file.path(my.proj.dir,"results.csv")))
+ggplot()+
+  geom_segment(aes(
+    start.seconds, Process,
+    xend=end.seconds, yend=Process),
+    data=result.list$laptop_multicore_pkg)+
+  geom_point(aes(
+    start.seconds, Process),
+    shape=1,
+    data=result.list$laptop_multicore_pkg)+
+  scale_x_continuous("Seconds from start of computation")
 ```
 
-The trick in the code above is the use of two functions:
+```{r}
+result.list$cluster_slurm <- norm_times(fread("2025-05-30-mlr3-filelock-mammouth/results.csv"))
+ggplot()+
+  geom_segment(aes(
+    start.seconds, Process,
+    xend=end.seconds, yend=Process),
+    data=result.list$cluster_slurm)+
+  geom_point(aes(
+    start.seconds, Process),
+    shape=1,
+    data=result.list$cluster_slurm)+
+  scale_x_continuous("Seconds from start of computation")
+```
 
-* `tar_map()` creates a target for each value of `ml_job_num`, saving the list of targets to `job_targs`.
-* `tar_combine()` creates a target that depends on all of the targets in the `job_targs` list.
-
-The code below computes the results.
+## Compare them all
 
 ```{r}
-if(FALSE){
-  targets::tar_manifest()
-  targets::tar_visnetwork()
+common.names <- Reduce(intersect, sapply(result.list, names))
+compare_results_list <- list()
+for(computer in names(result.list)){
+  compare_results_list[[computer]] <- data.table(
+    computer,
+    result.list[[computer]][, common.names, with=FALSE])
 }
-targets::tar_make()
-(tar_score_dt <- targets::tar_read(combine))
+(compare_results <- rbindlist(compare_results_list))
+ggplot()+
+  geom_segment(aes(
+    start.seconds, Process,
+    xend=end.seconds, yend=Process),
+    data=compare_results)+
+  geom_point(aes(
+    start.seconds, Process),
+    shape=1,
+    data=compare_results)+
+  scale_x_continuous("Seconds from start of computation")+
+  facet_grid(computer ~ ., scales="free")
 ```
-
-The table above shows the test error, and the code below plots it.
-
-```{r tar-pval}
-tar_pval_list <- mlr3resampling::pvalue(tar_score_dt)
-plot(tar_pval_list)
-```
-
-The result figure above is consistent with the result figure that was
-computed with the usual mlr3 benchmark function.
-
-## Dynamic targets
-
-Next, we implement [dynamic
-branching](https://books.ropensci.org/targets/dynamic.html#branching),
-which is apparently faster for lots of branches.
-
-```{r}
-targets::tar_script({
-  load("2025-05-20-mlr3-targets-in.RData")
-  list(
-    targets::tar_target(ml_job_num, seq_len(nrow(ml_job_dt))),
-    targets::tar_target(result, compute(ml_job_num), pattern=map(ml_job_num)))
-}, ask=FALSE)
-```
-
-The code above uses `map(ml_job_num)` to create a different result for
-each value of `ml_job_num`, which is combined together into a single
-result table, computed and shown below.
-
-```{r}
-targets::tar_make()
-(dyn_score_dt <- targets::tar_read(result))
-```
-
-The table above shows the test error for each train/test split, which
-we can visualize via the code below.
-
-```{r dyn-pval}
-dyn_pval_list <- mlr3resampling::pvalue(dyn_score_dt)
-plot(dyn_pval_list)
-```
-
-The graphics above are consistent with the previous result plots.
-
-## How does it work?
-
-When you run `tar_make()`, files are created:
-
-```{r}
-dir("_targets/objects/")
-```
-
-Each target has a corresponding file.
-
-## How to run in parallel?
-
-To run targets in parallel, you can use `tar_option_set(controller=)`
-some crew controller, as explained on the [Distributed computing
-page](https://books.ropensci.org/targets/crew.html). Below we use a
-local crew of 2 workers.
-
-```{r}
-unlink("_targets", recursive = TRUE)
-targets::tar_script({
-  tar_option_set(controller = crew::crew_controller_local(workers = 2))
-  load("2025-05-20-mlr3-targets-in.RData")
-  list(
-    targets::tar_target(ml_job_num, seq_len(nrow(ml_job_dt))),
-    targets::tar_target(result, compute(ml_job_num), pattern=map(ml_job_num)))
-}, ask=FALSE)
-targets::tar_make()
-targets::tar_read(result)
-```
-
-Above we see that the same result table has been computed in parallel.
 
 ## Conclusions
 
-We can use `targets` to declare and compute machine learning benchmark
-experiments in parallel. Next steps will be to verify if this approach
-works for larger experiments on the SLURM compute cluster, with
-different sized data sets, and algorithms with different run-times.
+TODO
 
 ## Session info
 
