@@ -72,7 +72,7 @@ devtools::install_github("tdhock/mlr3resampling@proj")
 ```
 
 ```
-## Skipping install of 'mlr3resampling' from a github remote, the SHA1 (13753fc1) has not changed since last install.
+## Skipping install of 'mlr3resampling' from a github remote, the SHA1 (a7dc90cc) has not changed since last install.
 ##   Use `force = TRUE` to force installation
 ```
 
@@ -177,87 +177,8 @@ To run that in sequence, we use the typical mlr3 functions in the code below.
 
 
 ``` r
+lgr::get_logger("mlr3")$set_threshold("warn")
 bench.result <- mlr3::benchmark(bench.grid)
-```
-
-```
-## INFO  [13:17:40.328] [mlr3] Running benchmark with 72 resampling iterations
-## INFO  [13:17:40.333] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 1/18)
-## INFO  [13:17:40.341] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 2/18)
-## INFO  [13:17:40.348] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 3/18)
-## INFO  [13:17:40.355] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 4/18)
-## INFO  [13:17:40.362] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 5/18)
-## INFO  [13:17:40.369] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 6/18)
-## INFO  [13:17:40.376] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 7/18)
-## INFO  [13:17:40.384] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 8/18)
-## INFO  [13:17:40.391] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 9/18)
-## INFO  [13:17:40.398] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 10/18)
-## INFO  [13:17:40.414] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 11/18)
-## INFO  [13:17:40.424] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 12/18)
-## INFO  [13:17:40.433] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 13/18)
-## INFO  [13:17:40.443] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 14/18)
-## INFO  [13:17:40.452] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 15/18)
-## INFO  [13:17:40.460] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 16/18)
-## INFO  [13:17:40.469] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 17/18)
-## INFO  [13:17:40.476] [mlr3] Applying learner 'regr.featureless' on task 'easy' (iter 18/18)
-## INFO  [13:17:40.483] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 1/18)
-## INFO  [13:17:40.493] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 2/18)
-## INFO  [13:17:40.502] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 3/18)
-## INFO  [13:17:40.511] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 4/18)
-## INFO  [13:17:40.519] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 5/18)
-## INFO  [13:17:40.528] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 6/18)
-## INFO  [13:17:40.537] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 7/18)
-## INFO  [13:17:40.553] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 8/18)
-## INFO  [13:17:40.567] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 9/18)
-## INFO  [13:17:40.579] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 10/18)
-## INFO  [13:17:40.592] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 11/18)
-## INFO  [13:17:40.604] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 12/18)
-## INFO  [13:17:40.615] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 13/18)
-## INFO  [13:17:40.624] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 14/18)
-## INFO  [13:17:40.633] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 15/18)
-## INFO  [13:17:40.642] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 16/18)
-## INFO  [13:17:40.651] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 17/18)
-## INFO  [13:17:40.661] [mlr3] Applying learner 'regr.rpart' on task 'easy' (iter 18/18)
-## INFO  [13:17:40.669] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 1/18)
-## INFO  [13:17:40.676] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 2/18)
-## INFO  [13:17:40.683] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 3/18)
-## INFO  [13:17:40.697] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 4/18)
-## INFO  [13:17:40.707] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 5/18)
-## INFO  [13:17:40.717] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 6/18)
-## INFO  [13:17:40.726] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 7/18)
-## INFO  [13:17:40.736] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 8/18)
-## INFO  [13:17:40.745] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 9/18)
-## INFO  [13:17:40.754] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 10/18)
-## INFO  [13:17:40.762] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 11/18)
-## INFO  [13:17:40.771] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 12/18)
-## INFO  [13:17:40.780] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 13/18)
-## INFO  [13:17:40.788] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 14/18)
-## INFO  [13:17:40.795] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 15/18)
-## INFO  [13:17:40.802] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 16/18)
-## INFO  [13:17:40.809] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 17/18)
-## INFO  [13:17:40.816] [mlr3] Applying learner 'regr.featureless' on task 'impossible' (iter 18/18)
-## INFO  [13:17:40.823] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 1/18)
-## INFO  [13:17:40.832] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 2/18)
-## INFO  [13:17:40.850] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 3/18)
-## INFO  [13:17:40.863] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 4/18)
-## INFO  [13:17:40.875] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 5/18)
-## INFO  [13:17:40.888] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 6/18)
-## INFO  [13:17:40.899] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 7/18)
-## INFO  [13:17:40.910] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 8/18)
-## INFO  [13:17:40.919] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 9/18)
-## INFO  [13:17:40.928] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 10/18)
-## INFO  [13:17:40.937] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 11/18)
-## INFO  [13:17:40.946] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 12/18)
-## INFO  [13:17:40.955] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 13/18)
-## INFO  [13:17:40.964] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 14/18)
-## INFO  [13:17:40.973] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 15/18)
-## INFO  [13:17:40.989] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 16/18)
-## INFO  [13:17:41.002] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 17/18)
-## INFO  [13:17:41.014] [mlr3] Applying learner 'regr.rpart' on task 'impossible' (iter 18/18)
-## INFO  [13:17:41.038] [mlr3] Finished benchmark
-```
-
-``` r
 bench.score <- mlr3resampling::score(bench.result, mlr3::msr("regr.rmse"))
 bench.score[, .(task_id, algorithm, train.subsets, test.fold, test.subset, regr.rmse)]
 ```
@@ -360,11 +281,14 @@ The figure above shows:
 * in grey, P-values for differences between same/all and same/other
   (two-sided paired T-test).
   
-## My method for expanding the ML grid
+Exercise for the reader: use the code above to do the computation in
+parallel on your laptop, by first declaring `future::plan("multisession")`.
+  
+## Proposed method for expanding the ML grid
 
-To run the same computations using our method, we first loop over the
-tasks and resampling iterations, to create a data table with one row
-per train/test split.
+To run the same computations in parallel, we will create a data table
+with one row per train/test split, then compute these split results in
+parallel.
 
 
 ``` r
@@ -376,6 +300,12 @@ seq.proj.dir <- tempfile()
 dir.create(seq.proj.dir)
 saveRDS(my.grid, file.path(seq.proj.dir, "grid.rds"))
 ```
+
+The code above saves a grid of tasks, learners, and a resampling to
+the `grid.rds` file, in a project directory called `seq.proj.dir`
+(because this first demonstration will be computation in sequence, not
+parallel). Next, we create the table with one row per split to
+compute,
 
 
 ``` r
@@ -479,8 +409,9 @@ proj_grid_jobs(seq.proj.dir)
 ```
 
 In the output above, there is one row per train/test split (ML
-job). After saving these data to disk above, we can compute one result
-using the function below.
+job). It includes every combination of task, learner, and
+cross-validation iteration. After saving these data to disk above, we
+can compute one result using the function below.
 
 
 ``` r
@@ -530,7 +461,7 @@ proj_compute(seq.proj.dir)
 ```
 ##    task.name learner.name iteration  status          start.time            end.time process
 ##       <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
-## 1:      easy  featureless         1 started 2025-05-31 13:17:41 2025-05-31 13:17:41 2297279
+## 1:      easy  featureless         1 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
 ##                                      learner             pred
 ##                                       <list>           <list>
 ## 1: <LearnerRegrFeatureless:regr.featureless> <PredictionRegr>
@@ -543,11 +474,27 @@ proj_compute(seq.proj.dir)
 ```
 ##    task.name learner.name iteration  status          start.time            end.time process
 ##       <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
-## 1:      easy  featureless         2 started 2025-05-31 13:17:41 2025-05-31 13:17:42 2297279
+## 1:      easy  featureless         2 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
 ##                                      learner             pred
 ##                                       <list>           <list>
 ## 1: <LearnerRegrFeatureless:regr.featureless> <PredictionRegr>
 ```
+
+The output above show the results for two iterations. Each call to
+`proj_compute` does the following:
+
+* looks in the project directory and gets a lock on the `grid_jobs.csv` file,
+* checks if there are any splits that have not yet started,
+* if any have not yet started, we select the next index, `grid_job_i`, to compute next.
+* we look in `grid.rds` for the correspond task, learner, and split,
+* after calling `train()` and `predict()`, we save the results to a RDS file.
+* Importantly, each call to `proj_compute()` only specifies the
+  directory to look in, not the particular split to compute. So at
+  first, each process does not know what work to do, nor if there is
+  any work to do at all! It looks at the file system to determine what
+  work to do, if any.
+  
+Next, we use a while loop in the function below to keep going until there is no more work to do.
 
 
 ``` r
@@ -561,6 +508,8 @@ proj_compute_until_done <- function(proj.dir){
 proj_compute_until_done(seq.proj.dir)
 ```
 
+Next, we look at the file system and combine the result files.
+
 
 ``` r
 proj_results <- function(proj.dir){
@@ -572,78 +521,78 @@ proj_results(seq.proj.dir)
 ```
 ##      task.name learner.name iteration  status          start.time            end.time process
 ##         <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
-##  1:       easy  featureless        10 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-##  2:       easy  featureless        11 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-##  3:       easy  featureless        12 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-##  4:       easy  featureless        13 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-##  5:       easy  featureless        14 started 2025-05-31 13:17:42 2025-05-31 13:17:43 2297279
-##  6:       easy  featureless        15 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-##  7:       easy  featureless        16 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-##  8:       easy  featureless        17 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-##  9:       easy  featureless        18 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-## 10:       easy        rpart         1 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-## 11:       easy  featureless         1 started 2025-05-31 13:17:41 2025-05-31 13:17:41 2297279
-## 12:       easy        rpart         2 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-## 13:       easy        rpart         3 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-## 14:       easy        rpart         4 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-## 15:       easy        rpart         5 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-## 16:       easy        rpart         6 started 2025-05-31 13:17:43 2025-05-31 13:17:43 2297279
-## 17:       easy        rpart         7 started 2025-05-31 13:17:43 2025-05-31 13:17:44 2297279
-## 18:       easy        rpart         8 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 19:       easy        rpart         9 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 20:       easy        rpart        10 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 21:       easy        rpart        11 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 22:       easy  featureless         2 started 2025-05-31 13:17:41 2025-05-31 13:17:42 2297279
-## 23:       easy        rpart        12 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 24:       easy        rpart        13 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 25:       easy        rpart        14 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 26:       easy        rpart        15 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 27:       easy        rpart        16 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 28:       easy        rpart        17 started 2025-05-31 13:17:44 2025-05-31 13:17:44 2297279
-## 29:       easy        rpart        18 started 2025-05-31 13:17:44 2025-05-31 13:17:45 2297279
-## 30: impossible  featureless         1 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 31: impossible  featureless         2 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 32: impossible  featureless         3 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 33:       easy  featureless         3 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-## 34: impossible  featureless         4 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 35: impossible  featureless         5 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 36: impossible  featureless         6 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 37: impossible  featureless         7 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 38: impossible  featureless         8 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 39: impossible  featureless         9 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 40: impossible  featureless        10 started 2025-05-31 13:17:45 2025-05-31 13:17:45 2297279
-## 41: impossible  featureless        11 started 2025-05-31 13:17:45 2025-05-31 13:17:46 2297279
-## 42: impossible  featureless        12 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 43: impossible  featureless        13 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 44:       easy  featureless         4 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-## 45: impossible  featureless        14 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 46: impossible  featureless        15 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 47: impossible  featureless        16 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 48: impossible  featureless        17 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 49: impossible  featureless        18 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 50: impossible        rpart         1 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 51: impossible        rpart         2 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 52: impossible        rpart         3 started 2025-05-31 13:17:46 2025-05-31 13:17:46 2297279
-## 53: impossible        rpart         4 started 2025-05-31 13:17:46 2025-05-31 13:17:47 2297279
-## 54: impossible        rpart         5 started 2025-05-31 13:17:47 2025-05-31 13:17:47 2297279
-## 55:       easy  featureless         5 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-## 56: impossible        rpart         6 started 2025-05-31 13:17:47 2025-05-31 13:17:47 2297279
-## 57: impossible        rpart         7 started 2025-05-31 13:17:47 2025-05-31 13:17:47 2297279
-## 58: impossible        rpart         8 started 2025-05-31 13:17:47 2025-05-31 13:17:47 2297279
-## 59: impossible        rpart         9 started 2025-05-31 13:17:47 2025-05-31 13:17:47 2297279
-## 60: impossible        rpart        10 started 2025-05-31 13:17:47 2025-05-31 13:17:47 2297279
-## 61: impossible        rpart        11 started 2025-05-31 13:17:47 2025-05-31 13:17:47 2297279
-## 62: impossible        rpart        12 started 2025-05-31 13:17:47 2025-05-31 13:17:47 2297279
-## 63: impossible        rpart        13 started 2025-05-31 13:17:47 2025-05-31 13:17:47 2297279
-## 64: impossible        rpart        14 started 2025-05-31 13:17:47 2025-05-31 13:17:48 2297279
-## 65: impossible        rpart        15 started 2025-05-31 13:17:48 2025-05-31 13:17:48 2297279
-## 66:       easy  featureless         6 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-## 67: impossible        rpart        16 started 2025-05-31 13:17:48 2025-05-31 13:17:48 2297279
-## 68: impossible        rpart        17 started 2025-05-31 13:17:48 2025-05-31 13:17:48 2297279
-## 69: impossible        rpart        18 started 2025-05-31 13:17:48 2025-05-31 13:17:48 2297279
-## 70:       easy  featureless         7 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-## 71:       easy  featureless         8 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
-## 72:       easy  featureless         9 started 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279
+##  1:       easy  featureless        10 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+##  2:       easy  featureless        11 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+##  3:       easy  featureless        12 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+##  4:       easy  featureless        13 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+##  5:       easy  featureless        14 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+##  6:       easy  featureless        15 started 2025-06-01 11:06:18 2025-06-01 11:06:19 2911045
+##  7:       easy  featureless        16 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+##  8:       easy  featureless        17 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+##  9:       easy  featureless        18 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+## 10:       easy        rpart         1 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+## 11:       easy  featureless         1 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
+## 12:       easy        rpart         2 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+## 13:       easy        rpart         3 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+## 14:       easy        rpart         4 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+## 15:       easy        rpart         5 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+## 16:       easy        rpart         6 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+## 17:       easy        rpart         7 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
+## 18:       easy        rpart         8 started 2025-06-01 11:06:19 2025-06-01 11:06:20 2911045
+## 19:       easy        rpart         9 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 20:       easy        rpart        10 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 21:       easy        rpart        11 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 22:       easy  featureless         2 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
+## 23:       easy        rpart        12 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 24:       easy        rpart        13 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 25:       easy        rpart        14 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 26:       easy        rpart        15 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 27:       easy        rpart        16 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 28:       easy        rpart        17 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 29:       easy        rpart        18 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
+## 30: impossible  featureless         1 started 2025-06-01 11:06:20 2025-06-01 11:06:21 2911045
+## 31: impossible  featureless         2 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 32: impossible  featureless         3 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 33:       easy  featureless         3 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
+## 34: impossible  featureless         4 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 35: impossible  featureless         5 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 36: impossible  featureless         6 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 37: impossible  featureless         7 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 38: impossible  featureless         8 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 39: impossible  featureless         9 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 40: impossible  featureless        10 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 41: impossible  featureless        11 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
+## 42: impossible  featureless        12 started 2025-06-01 11:06:21 2025-06-01 11:06:22 2911045
+## 43: impossible  featureless        13 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 44:       easy  featureless         4 started 2025-06-01 11:06:17 2025-06-01 11:06:18 2911045
+## 45: impossible  featureless        14 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 46: impossible  featureless        15 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 47: impossible  featureless        16 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 48: impossible  featureless        17 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 49: impossible  featureless        18 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 50: impossible        rpart         1 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 51: impossible        rpart         2 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 52: impossible        rpart         3 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 53: impossible        rpart         4 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
+## 54: impossible        rpart         5 started 2025-06-01 11:06:22 2025-06-01 11:06:23 2911045
+## 55:       easy  featureless         5 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+## 56: impossible        rpart         6 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
+## 57: impossible        rpart         7 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
+## 58: impossible        rpart         8 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
+## 59: impossible        rpart         9 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
+## 60: impossible        rpart        10 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
+## 61: impossible        rpart        11 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
+## 62: impossible        rpart        12 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
+## 63: impossible        rpart        13 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
+## 64: impossible        rpart        14 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
+## 65: impossible        rpart        15 started 2025-06-01 11:06:23 2025-06-01 11:06:24 2911045
+## 66:       easy  featureless         6 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+## 67: impossible        rpart        16 started 2025-06-01 11:06:24 2025-06-01 11:06:24 2911045
+## 68: impossible        rpart        17 started 2025-06-01 11:06:24 2025-06-01 11:06:24 2911045
+## 69: impossible        rpart        18 started 2025-06-01 11:06:24 2025-06-01 11:06:24 2911045
+## 70:       easy  featureless         7 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+## 71:       easy  featureless         8 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+## 72:       easy  featureless         9 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
 ##      task.name learner.name iteration  status          start.time            end.time process
 ##         <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
 ##                                       learner             pred
@@ -724,6 +673,8 @@ proj_results(seq.proj.dir)
 ##                                        <list>           <list>
 ```
 
+Finally, we visualize the results.
+
 
 ``` r
 norm_times <- function(DT)DT[, let(
@@ -741,7 +692,7 @@ process_viz <- function(name){
       xend=end.seconds, yend=Process),
       data=DT)+
     geom_point(aes(
-      start.seconds, Process),
+      end.seconds, Process),
       shape=1,
       data=DT)+
     scale_x_continuous("Seconds from start of computation")
@@ -752,96 +703,21 @@ process_viz("laptop_sequential")
 
 ![plot of chunk times-seq](/assets/img/2025-05-30-mlr3-filelock/times-seq-1.png)
 
-We then setup a new project with a batchtools registry:
+The output above shows each split as a dot (for end time) and line
+segment (which goes until the start time). It is clear that there was
+one process used to compute all of the results.
+
+## Laptop in parallel using batchtools
+
+To compute in parallel, we can use `batchtools`.
+We first setup a new project with a registry:
 
 
 ``` r
 multi.proj.dir <- tempfile()
 dir.create(multi.proj.dir)
 saveRDS(my.grid, file.path(multi.proj.dir, "grid.rds"))
-proj_grid_jobs(multi.proj.dir)
-```
-
-```
-##      task.name learner.name iteration      status
-##         <char>       <char>     <int>      <char>
-##  1:       easy  featureless         1 not started
-##  2:       easy  featureless         2 not started
-##  3:       easy  featureless         3 not started
-##  4:       easy  featureless         4 not started
-##  5:       easy  featureless         5 not started
-##  6:       easy  featureless         6 not started
-##  7:       easy  featureless         7 not started
-##  8:       easy  featureless         8 not started
-##  9:       easy  featureless         9 not started
-## 10:       easy  featureless        10 not started
-## 11:       easy  featureless        11 not started
-## 12:       easy  featureless        12 not started
-## 13:       easy  featureless        13 not started
-## 14:       easy  featureless        14 not started
-## 15:       easy  featureless        15 not started
-## 16:       easy  featureless        16 not started
-## 17:       easy  featureless        17 not started
-## 18:       easy  featureless        18 not started
-## 19:       easy        rpart         1 not started
-## 20:       easy        rpart         2 not started
-## 21:       easy        rpart         3 not started
-## 22:       easy        rpart         4 not started
-## 23:       easy        rpart         5 not started
-## 24:       easy        rpart         6 not started
-## 25:       easy        rpart         7 not started
-## 26:       easy        rpart         8 not started
-## 27:       easy        rpart         9 not started
-## 28:       easy        rpart        10 not started
-## 29:       easy        rpart        11 not started
-## 30:       easy        rpart        12 not started
-## 31:       easy        rpart        13 not started
-## 32:       easy        rpart        14 not started
-## 33:       easy        rpart        15 not started
-## 34:       easy        rpart        16 not started
-## 35:       easy        rpart        17 not started
-## 36:       easy        rpart        18 not started
-## 37: impossible  featureless         1 not started
-## 38: impossible  featureless         2 not started
-## 39: impossible  featureless         3 not started
-## 40: impossible  featureless         4 not started
-## 41: impossible  featureless         5 not started
-## 42: impossible  featureless         6 not started
-## 43: impossible  featureless         7 not started
-## 44: impossible  featureless         8 not started
-## 45: impossible  featureless         9 not started
-## 46: impossible  featureless        10 not started
-## 47: impossible  featureless        11 not started
-## 48: impossible  featureless        12 not started
-## 49: impossible  featureless        13 not started
-## 50: impossible  featureless        14 not started
-## 51: impossible  featureless        15 not started
-## 52: impossible  featureless        16 not started
-## 53: impossible  featureless        17 not started
-## 54: impossible  featureless        18 not started
-## 55: impossible        rpart         1 not started
-## 56: impossible        rpart         2 not started
-## 57: impossible        rpart         3 not started
-## 58: impossible        rpart         4 not started
-## 59: impossible        rpart         5 not started
-## 60: impossible        rpart         6 not started
-## 61: impossible        rpart         7 not started
-## 62: impossible        rpart         8 not started
-## 63: impossible        rpart         9 not started
-## 64: impossible        rpart        10 not started
-## 65: impossible        rpart        11 not started
-## 66: impossible        rpart        12 not started
-## 67: impossible        rpart        13 not started
-## 68: impossible        rpart        14 not started
-## 69: impossible        rpart        15 not started
-## 70: impossible        rpart        16 not started
-## 71: impossible        rpart        17 not started
-## 72: impossible        rpart        18 not started
-##      task.name learner.name iteration      status
-##         <char>       <char>     <int>      <char>
-```
-
-``` r
+multi.job.dt <- proj_grid_jobs(multi.proj.dir)
 reg.dir <- file.path(multi.proj.dir, "registry")
 reg <- batchtools::makeRegistry(reg.dir)
 ```
@@ -851,20 +727,28 @@ reg <- batchtools::makeRegistry(reg.dir)
 ```
 
 ```
-## Auto-detected 14 CPUs
+## Created registry in '/tmp/Rtmpuob5MM/file2c6b4582c2f69/registry' using cluster functions 'Slurm'
 ```
 
-```
-## Created registry in '/tmp/RtmpTXComL/file230dbf236e72fe/registry' using cluster functions 'Multicore'
-```
+Note in the output above that we are using Multicore cluster
+functions, because we have the following code in the user-specific
+config file:
+
 
 ``` r
-reg$cluster.functions <- batchtools::makeClusterFunctionsMulticore()
+cat(readLines("~/.batchtools.conf.R"), sep="\n")
 ```
 
 ```
-## Auto-detected 14 CPUs
+## ##cluster.functions = makeClusterFunctionsMulticore()
+## (slurm.tmpl <- normalizePath(
+##   "~/slurm-afterok.tmpl",
+##   mustWork=TRUE))
+## cluster.functions = makeClusterFunctionsSlurm(slurm.tmpl)
 ```
+
+The code below launches the parallel computation in 2 worker processes.
+
 
 ``` r
 n.workers <- 2
@@ -882,7 +766,11 @@ batchtools::submitJobs(bm.jobs)
 ```
 
 ```
-## Submitting 2 jobs in 2 chunks using cluster functions 'Multicore' ...
+## Submitting 2 jobs in 2 chunks using cluster functions 'Slurm' ...
+```
+
+```
+## Error: Fatal error occurred: 101. Command 'sbatch' produced exit code 255. Output: 'sbatch: error: Invalid --time specification'
 ```
 
 ``` r
@@ -890,25 +778,42 @@ batchtools::waitForJobs()
 ```
 
 ```
-## 
-```
-
-```
-## Waiting (Q::queued R::running D::done E::error ?::expired) [===========================================] 100% eta: 0s
-```
-
-```
 ## [1] TRUE
 ```
 
+The code below visualizes the result.
+
+
 ``` r
 result.list$laptop_multicore <- norm_times(proj_results(multi.proj.dir))
+```
+
+```
+## Error in eval(jsub, SDenv, parent.frame()): objet 'start.time' introuvable
+```
+
+``` r
 process_viz("laptop_multicore")
 ```
 
-![plot of chunk times-multi](/assets/img/2025-05-30-mlr3-filelock/times-multi-1.png)
+```
+## Error in `geom_segment()`:
+## ! Problem while computing aesthetics.
+## ℹ Error occurred in the 1st layer.
+## Caused by error:
+## ! objet 'start.seconds' introuvable
+```
 
-## Using my package locally
+The output above shows that there are two processes working in
+parallel on the computation.  After each process finishes a given
+split, it looks for a new split to work on, and starts right away (it
+does not have to wait for the other process to finish any work).
+
+## Using package functions
+
+Based on the ideas in the functions above, I wrote some analogous functions in my `mlr3resampling` R package. 
+These functions allow runnning these kind of parallel ML experiments either locally, or on a SLURM compute cluster.
+Below, we show how the local multi-core computation works.
 
 
 ``` r
@@ -1078,6 +983,10 @@ mlr3resampling::proj_grid(
 ##         <int>                <list>                <list> <int>          <int>     <int>
 ```
 
+Above we create a new project based on the same grid as in previous sections.
+Other arguments include `order_jobs`, which returns an integer vector that specifies the priority/order of execution of the different ML experiments. This could be useful for the situation where you run out of time on SLURM, in which case only the entries at the top of the table will have results on the file system. In that case, you can also use the `order_jobs` argument to resume work from where you left off (only provide the indices of arguments that have not yet completed).
+
+
 ``` r
 mlr3resampling::proj_submit(pkg.proj.dir)
 ```
@@ -1087,11 +996,7 @@ mlr3resampling::proj_submit(pkg.proj.dir)
 ```
 
 ```
-## Auto-detected 14 CPUs
-```
-
-```
-## Created registry in '/home/local/USHERBROOKE/hoct2726/tdhock.github.io/_posts/2025-05-30-mlr3-filelock/registry' using cluster functions 'Multicore'
+## Created registry in '/home/local/USHERBROOKE/hoct2726/tdhock.github.io/_posts/2025-05-30-mlr3-filelock/registry' using cluster functions 'Slurm'
 ```
 
 ```
@@ -1099,7 +1004,17 @@ mlr3resampling::proj_submit(pkg.proj.dir)
 ```
 
 ```
-## Submitting 2 jobs in 2 chunks using cluster functions 'Multicore' ...
+## Submitting 2 jobs in 1 chunks using cluster functions 'Slurm' ...
+```
+
+```
+## Job Registry
+##   Backend  : Slurm
+##   File dir : /home/local/USHERBROOKE/hoct2726/tdhock.github.io/_posts/2025-05-30-mlr3-filelock/registry
+##   Work dir : /home/local/USHERBROOKE/hoct2726/tdhock.github.io/_posts
+##   Jobs     : 2
+##   Seed     : 31826
+##   Writeable: TRUE
 ```
 
 ``` r
@@ -1111,7 +1026,8 @@ batchtools::waitForJobs()
 ```
 
 ```
-## Waiting (Q::queued R::running D::done E::error ?::expired) [===========================================] 100% eta: 0s
+## Waiting (Q:0 R:2 D:0 E:0 ?:0) [------------------------------------------------------------------------] 0% eta:
+## ?sWaiting (Q::queued R::running D::done E::error ?::expired) [===========================================] 100% eta: 0s
 ```
 
 ```
@@ -1124,6 +1040,9 @@ process_viz("laptop_pkg")
 ```
 
 ![plot of chunk times-multi-pkg](/assets/img/2025-05-30-mlr3-filelock/times-multi-pkg-1.png)
+
+Above we see the result on my laptop.
+Below we see the results when using two SLURM clusters.
 
 
 ``` r
@@ -1143,6 +1062,8 @@ process_viz("beluga_slurm")
 
 ## Compare them all
 
+Here we compare the results for the different tests on the same plot.
+
 
 ``` r
 common.names <- Reduce(intersect, sapply(result.list, names))
@@ -1158,17 +1079,17 @@ for(computer in names(result.list)){
 ```
 ##               computer iteration          start.time            end.time process  start.seconds    end.seconds Process
 ##                 <char>     <int>              <POSc>              <POSc>   <int>     <difftime>     <difftime>  <fctr>
-##   1: laptop_sequential        10 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279 0.8010590 secs 0.8925178 secs 2297279
-##   2: laptop_sequential        11 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279 0.8960788 secs 0.9684055 secs 2297279
-##   3: laptop_sequential        12 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279 0.9718001 secs 1.0642815 secs 2297279
-##   4: laptop_sequential        13 2025-05-31 13:17:42 2025-05-31 13:17:42 2297279 1.0677202 secs 1.1358955 secs 2297279
-##   5: laptop_sequential        14 2025-05-31 13:17:42 2025-05-31 13:17:43 2297279 1.1391964 secs 1.2310021 secs 2297279
+##   1: laptop_sequential        10 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 0.8018618 secs 0.9095688 secs 2911045
+##   2: laptop_sequential        11 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 0.9136102 secs 0.9989982 secs 2911045
+##   3: laptop_sequential        12 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 1.0030725 secs 1.0843859 secs 2911045
+##   4: laptop_sequential        13 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 1.0880680 secs 1.1745236 secs 2911045
+##   5: laptop_sequential        14 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 1.1781964 secs 1.2538698 secs 2911045
 ##  ---                                                                                                                  
-## 356:      beluga_slurm        10 2025-05-31 12:51:12 2025-05-31 12:51:12       2 9.3785510 secs 9.5612240 secs       2
-## 357:      beluga_slurm        12 2025-05-31 12:51:12 2025-05-31 12:51:12       1 9.4658461 secs 9.6455581 secs       1
-## 358:      beluga_slurm        14 2025-05-31 12:51:12 2025-05-31 12:51:12       2 9.5708041 secs 9.7502091 secs       2
-## 359:      beluga_slurm        16 2025-05-31 12:51:12 2025-05-31 12:51:12       1 9.6548691 secs 9.8320482 secs       1
-## 360:      beluga_slurm        18 2025-05-31 12:51:12 2025-05-31 12:51:13       2 9.7764421 secs 9.9576142 secs       2
+## 284:      beluga_slurm        10 2025-05-31 12:51:12 2025-05-31 12:51:12       2 9.3785510 secs 9.5612240 secs       2
+## 285:      beluga_slurm        12 2025-05-31 12:51:12 2025-05-31 12:51:12       1 9.4658461 secs 9.6455581 secs       1
+## 286:      beluga_slurm        14 2025-05-31 12:51:12 2025-05-31 12:51:12       2 9.5708041 secs 9.7502091 secs       2
+## 287:      beluga_slurm        16 2025-05-31 12:51:12 2025-05-31 12:51:12       1 9.6548691 secs 9.8320482 secs       1
+## 288:      beluga_slurm        18 2025-05-31 12:51:12 2025-05-31 12:51:13       2 9.7764421 secs 9.9576142 secs       2
 ```
 
 ``` r
@@ -1178,7 +1099,7 @@ ggplot()+
     xend=end.seconds, yend=Process),
     data=compare_results)+
   geom_point(aes(
-    start.seconds, Process),
+    end.seconds, Process),
     shape=1,
     data=compare_results)+
   scale_x_continuous("Seconds from start of computation")+
@@ -1187,9 +1108,266 @@ ggplot()+
 
 ![plot of chunk times-compare](/assets/img/2025-05-30-mlr3-filelock/times-compare-1.png)
 
+The figure above shows that the different computers have different timings.
+In particular, Mammouth seems to be quite a bit slower than the other methods (but it may be easier to get time on it).
+
+## A larger experiment
+
+In typical machine learning experiments, the train and predict times
+are much larger, because there are larger data sets, and more complex
+learning algorithms. Below we analyze an experiment similar to the one
+described in [Comparing neural network architectures using
+mlr3torch](https://tdhock.github.io/blog/2025/mlr3torch-conv/). It is
+an [analysis of a convolutional neural
+network](https://github.com/tdhock/cv-same-other-paper?tab=readme-ov-file#27-mar-2025),
+for the `EMNIST_rot` image pair data set, described in the [SOAK
+paper](https://arxiv.org/abs/2410.08643).
+Below we read the result file.
+
+
+``` r
+old_dt <- fread("2025-05-30-mlr3-filelock-beluga-large-old.csv")
+first <- min(old_dt$submitted)
+hours <- function(x)difftime(x, first, units="hours")
+old_dt[, let(
+  Process=.I,
+  submit.hours=hours(submitted),
+  start.hours=hours(started),
+  end.hours=hours(done)
+)][]
+```
+
+```
+##      job.id           submitted             started                done  error mem.used     batch.id
+##       <int>              <POSc>              <POSc>              <POSc> <lgcl>   <lgcl>       <char>
+##   1:      1 2025-03-25 12:04:45 2025-03-25 12:43:21 2025-03-25 21:20:00     NA       NA   54778789_1
+##   2:      2 2025-03-25 12:04:45 2025-03-25 12:43:21 2025-03-25 21:30:57     NA       NA   54778789_2
+##   3:      3 2025-03-25 12:04:45 2025-03-25 12:43:21 2025-03-25 21:13:02     NA       NA   54778789_3
+##   4:      4 2025-03-25 12:04:45 2025-03-25 12:43:21 2025-03-25 21:01:17     NA       NA   54778789_4
+##   5:      5 2025-03-25 12:04:45 2025-03-25 12:43:21 2025-03-25 21:30:58     NA       NA   54778789_5
+##  ---                                                                                                
+## 296:    296 2025-03-25 12:04:45 2025-03-25 14:24:46 2025-03-26 01:51:37     NA       NA 54778789_296
+## 297:    297 2025-03-25 12:04:45 2025-03-25 14:24:24 2025-03-25 17:45:49     NA       NA 54778789_297
+## 298:    298 2025-03-25 12:04:45 2025-03-25 14:24:04 2025-03-25 22:50:49     NA       NA 54778789_298
+## 299:    299 2025-03-25 12:04:45 2025-03-25 14:24:24 2025-03-25 20:19:39     NA       NA 54778789_299
+## 300:    300 2025-03-25 12:04:45 2025-03-25 14:24:24 2025-03-25 23:25:47     NA       NA 54778789_300
+##                                         log.file                            job.hash
+##                                           <char>                              <char>
+##   1:   job77ad22aa390c5e2ebde0905bd77bffd1.log_1 job77ad22aa390c5e2ebde0905bd77bffd1
+##   2:   job77ad22aa390c5e2ebde0905bd77bffd1.log_2 job77ad22aa390c5e2ebde0905bd77bffd1
+##   3:   job77ad22aa390c5e2ebde0905bd77bffd1.log_3 job77ad22aa390c5e2ebde0905bd77bffd1
+##   4:   job77ad22aa390c5e2ebde0905bd77bffd1.log_4 job77ad22aa390c5e2ebde0905bd77bffd1
+##   5:   job77ad22aa390c5e2ebde0905bd77bffd1.log_5 job77ad22aa390c5e2ebde0905bd77bffd1
+##  ---                                                                                
+## 296: job77ad22aa390c5e2ebde0905bd77bffd1.log_296 job77ad22aa390c5e2ebde0905bd77bffd1
+## 297: job77ad22aa390c5e2ebde0905bd77bffd1.log_297 job77ad22aa390c5e2ebde0905bd77bffd1
+## 298: job77ad22aa390c5e2ebde0905bd77bffd1.log_298 job77ad22aa390c5e2ebde0905bd77bffd1
+## 299: job77ad22aa390c5e2ebde0905bd77bffd1.log_299 job77ad22aa390c5e2ebde0905bd77bffd1
+## 300: job77ad22aa390c5e2ebde0905bd77bffd1.log_300 job77ad22aa390c5e2ebde0905bd77bffd1
+##                                  job.name  repl time.queued time.running          problem   algorithm   tags
+##                                    <char> <int>       <num>        <num>           <char>      <char> <lgcl>
+##   1: 0f4f5711-194b-4ba2-bd7e-59de9097a907     1    2315.938     30999.48 ce2f347d4dd7afc8 run_learner     NA
+##   2: 0f4f5711-194b-4ba2-bd7e-59de9097a907     2    2315.931     31656.00 ce2f347d4dd7afc8 run_learner     NA
+##   3: 0f4f5711-194b-4ba2-bd7e-59de9097a907     3    2315.931     30580.57 ce2f347d4dd7afc8 run_learner     NA
+##   4: 0f4f5711-194b-4ba2-bd7e-59de9097a907     4    2315.930     29876.11 ce2f347d4dd7afc8 run_learner     NA
+##   5: 0f4f5711-194b-4ba2-bd7e-59de9097a907     5    2315.930     31657.44 ce2f347d4dd7afc8 run_learner     NA
+##  ---                                                                                                        
+## 296: 968f2e00-601c-4ed8-9377-e5b65bb502ca    56    8400.745     41211.20 ce2f347d4dd7afc8 run_learner     NA
+## 297: 968f2e00-601c-4ed8-9377-e5b65bb502ca    57    8379.287     12084.78 ce2f347d4dd7afc8 run_learner     NA
+## 298: 968f2e00-601c-4ed8-9377-e5b65bb502ca    58    8359.098     30404.99 ce2f347d4dd7afc8 run_learner     NA
+## 299: 968f2e00-601c-4ed8-9377-e5b65bb502ca    59    8379.310     21315.10 ce2f347d4dd7afc8 run_learner     NA
+## 300: 968f2e00-601c-4ed8-9377-e5b65bb502ca    60    8379.294     32482.85 ce2f347d4dd7afc8 run_learner     NA
+##               algo             task     start.hours       end.hours Process submit.hours
+##             <char>           <char>      <difftime>      <difftime>   <int>   <difftime>
+##   1:    torch_conv MNIST_EMNIST_rot 0.6433160 hours  9.254283 hours       1      0 hours
+##   2:    torch_conv MNIST_EMNIST_rot 0.6433142 hours  9.436647 hours       2      0 hours
+##   3:    torch_conv MNIST_EMNIST_rot 0.6433142 hours  9.137916 hours       3      0 hours
+##   4:    torch_conv MNIST_EMNIST_rot 0.6433140 hours  8.942234 hours       4      0 hours
+##   5:    torch_conv MNIST_EMNIST_rot 0.6433140 hours  9.437047 hours       5      0 hours
+##  ---                                                                                    
+## 296: cv_glmnet_min MNIST_EMNIST_rot 2.3335402 hours 13.781095 hours     296      0 hours
+## 297: cv_glmnet_min MNIST_EMNIST_rot 2.3275798 hours  5.684464 hours     297      0 hours
+## 298: cv_glmnet_min MNIST_EMNIST_rot 2.3219716 hours 10.767801 hours     298      0 hours
+## 299: cv_glmnet_min MNIST_EMNIST_rot 2.3275862 hours  8.248448 hours     299      0 hours
+## 300: cv_glmnet_min MNIST_EMNIST_rot 2.3275817 hours 11.350597 hours     300      0 hours
+```
+
+The data table above came from `batchtools::getJobTable()`, with a few
+columns added for visualization of the parallel processing, which we do below.
+
+
+``` r
+old.not.na <- old_dt[!is.na(started)]
+ggplot()+
+  ggtitle("mlr3batchmark::batchmark() etc")+
+  theme_bw()+
+  geom_segment(aes(
+    start.hours, Process,
+    color=algo,
+    xend=end.hours, yend=Process),
+    data=old.not.na)+
+  geom_point(aes(
+    end.hours, Process,
+    color=algo),
+    shape=1,
+    data=old.not.na)+
+  scale_x_continuous(
+    "Hours from submit time",
+    breaks=seq(-100, 100, by=2),
+    limits=c(0,16))
+```
+
+![plot of chunk old-time](/assets/img/2025-05-30-mlr3-filelock/old-time-1.png)
+
+Above we see each train/test split as a line segment, with a dot at
+the end. We see there is only one line segment per Y/process value
+(300 total). Interestingly, we can see that the bottom third in each
+algo takes longer, because that corresponds to the All subset in SOAK
+(which has more rows than Same/Other).
+
+Below we read in results of an attempt to use the
+`mlr3resampling::proj_*()` functions to re-do this experiment.
+
+
+``` r
+large_dt <- fread("2025-05-30-mlr3-filelock-beluga-large.csv")
+first <- min(large_dt$start.time)
+hours <- function(x)difftime(x, first, units="hours")
+large_dt[, let(
+  start.hours=hours(start.time),
+  end.hours=hours(end.time),
+  Process=as.integer(factor(process))
+)][]
+```
+
+```
+##      task.i learner.i resampling.i iteration          start.time            end.time process          task.id
+##       <int>     <int>        <int>     <int>              <POSc>              <POSc>   <int>           <char>
+##   1:      1         1            1         1 2025-05-31 17:29:27 2025-05-31 17:29:35 2035134 MNIST_EMNIST_rot
+##   2:      1         1            1         2 2025-05-31 17:31:36 2025-05-31 17:31:44 2035134 MNIST_EMNIST_rot
+##   3:      1         1            1         3 2025-05-31 18:09:28 2025-05-31 18:09:44      58 MNIST_EMNIST_rot
+##   4:      1         1            1         4 2025-05-31 18:09:28 2025-05-31 18:09:44      18 MNIST_EMNIST_rot
+##   5:      1         1            1         5 2025-05-31 18:09:28 2025-05-31 18:09:44      85 MNIST_EMNIST_rot
+##  ---                                                                                                         
+## 257:      1         5            1        49 2025-06-01 00:52:50 2025-06-01 03:13:30      67 MNIST_EMNIST_rot
+## 258:      1         5            1        51 2025-06-01 00:54:24 2025-06-01 02:52:42      83 MNIST_EMNIST_rot
+## 259:      1         5            1        53 2025-06-01 00:57:42 2025-06-01 06:39:08      61 MNIST_EMNIST_rot
+## 260:      1         5            1        55 2025-06-01 01:10:00 2025-06-01 04:30:16      65 MNIST_EMNIST_rot
+## 261:      1         5            1        59 2025-06-01 01:58:26 2025-06-01 05:05:41      84 MNIST_EMNIST_rot
+##         learner.id       resampling.id test.subset train.subsets groups test.fold  seed n.train.groups     start.hours
+##             <char>              <char>      <char>        <char>  <int>     <int> <int>          <int>      <difftime>
+##   1:   featureless same_other_sizes_cv  EMNIST_rot           all 126000         1     1         126000 0.0000000 hours
+##   2:   featureless same_other_sizes_cv       MNIST           all 126000         1     1         126000 0.0357750 hours
+##   3:   featureless same_other_sizes_cv  EMNIST_rot           all 126000         2     1         126000 0.6668174 hours
+##   4:   featureless same_other_sizes_cv       MNIST           all 126000         2     1         126000 0.6668216 hours
+##   5:   featureless same_other_sizes_cv  EMNIST_rot           all 126000         3     1         126000 0.6668672 hours
+##  ---                                                                                                                  
+## 257: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000         5     1          63000 7.3897442 hours
+## 258: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000         6     1          63000 7.4158998 hours
+## 259: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000         7     1          63000 7.4707331 hours
+## 260: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000         8     1          63000 7.6757311 hours
+## 261: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000        10     1          63000 8.4829044 hours
+##               end.hours Process
+##              <difftime>   <int>
+##   1:  0.002151894 hours      96
+##   2:  0.037924524 hours      96
+##   3:  0.671318384 hours      55
+##   4:  0.671368879 hours      16
+##   5:  0.671334282 hours      81
+##  ---                           
+## 257:  9.734221932 hours      63
+## 258:  9.387569066 hours      79
+## 259: 13.161299344 hours      58
+## 260: 11.013491167 hours      62
+## 261: 11.603760343 hours      80
+```
+
+Above we see the result table, which is visualized along the time dimension below.
+
+
+``` r
+ggplot()+
+  ggtitle("mlr3resampling::proj_grid() etc")+
+  theme_bw()+
+  geom_segment(aes(
+    start.hours, Process,
+    color=learner.id,
+    xend=end.hours, yend=Process),
+    data=large_dt)+
+  geom_point(aes(
+    end.hours, Process,
+    color=learner.id),
+    shape=1,
+    data=large_dt)+
+  scale_x_continuous(
+    "Hours from submit time",
+    breaks=seq(-100, 100, by=2),
+    limits=c(0,14))
+```
+
+![plot of chunk new-time](/assets/img/2025-05-30-mlr3-filelock/new-time-1.png)
+
+Above we see a different trend: there are multiple results computed in
+a single process.
+
+Below we combine the results in the same plot.
+
+
+``` r
+(large_combined <- rbind(
+  data.table(old.not.na[, .(
+    pkg="mlr3batchmark", start.hours, end.hours, Process, learner.id=algo)]),
+  data.table(large_dt[, .(
+    pkg="mlr3resampling", start.hours, end.hours, Process, learner.id)])))
+```
+
+```
+##                 pkg     start.hours       end.hours Process    learner.id
+##              <char>      <difftime>      <difftime>   <int>        <char>
+##   1:  mlr3batchmark 0.6433160 hours  9.254283 hours       1    torch_conv
+##   2:  mlr3batchmark 0.6433142 hours  9.436647 hours       2    torch_conv
+##   3:  mlr3batchmark 0.6433142 hours  9.137916 hours       3    torch_conv
+##   4:  mlr3batchmark 0.6433140 hours  8.942234 hours       4    torch_conv
+##   5:  mlr3batchmark 0.6433140 hours  9.437047 hours       5    torch_conv
+##  ---                                                                     
+## 537: mlr3resampling 7.3897442 hours  9.734222 hours      63 cv_glmnet_min
+## 538: mlr3resampling 7.4158998 hours  9.387569 hours      79 cv_glmnet_min
+## 539: mlr3resampling 7.4707331 hours 13.161299 hours      58 cv_glmnet_min
+## 540: mlr3resampling 7.6757311 hours 11.013491 hours      62 cv_glmnet_min
+## 541: mlr3resampling 8.4829044 hours 11.603760 hours      80 cv_glmnet_min
+```
+
+``` r
+ggplot()+
+  theme_bw()+
+  geom_segment(aes(
+    start.hours, Process,
+    color=learner.id,
+    xend=end.hours, yend=Process),
+    data=large_combined)+
+  geom_point(aes(
+    end.hours, Process,
+    color=learner.id),
+    shape=1,
+    data=large_combined)+
+  scale_y_continuous(
+    breaks=seq(0,300, by=50))+
+  scale_x_continuous(
+    "Hours from submit time",
+    breaks=seq(-100, 100, by=2))+
+  facet_grid(pkg ~ ., labeller=label_both, scales="free", space="free")+
+  coord_cartesian(expand=TRUE)
+```
+
+![plot of chunk old-new-time](/assets/img/2025-05-30-mlr3-filelock/old-new-time-1.png)
+
+Above we can see the differences between the two parallelization
+methods more clearly.
+
 ## Conclusions
 
-TODO
+We explored a method of parallelization via a lock file and a shared CSV.
+We saw that this method can more efficiently use cluster resources.
 
 ## Session info
 
@@ -1219,15 +1397,15 @@ sessionInfo()
 ## [1] stats     graphics  grDevices datasets  utils     methods   base     
 ## 
 ## other attached packages:
-## [1] mlr3resampling_2025.5.21 mlr3_0.23.0.9000         future_1.49.0            ggplot2_3.5.2           
+## [1] mlr3resampling_2025.5.31 mlr3_0.23.0.9000         future_1.49.0            ggplot2_3.5.2           
 ## [5] data.table_1.17.99      
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] tidyselect_1.2.1     dplyr_1.1.4          farver_2.1.2         filelock_1.0.3       fastmap_1.2.0       
-##  [6] promises_1.3.2       paradox_1.0.1        digest_0.6.37        rpart_4.1.24         base64url_1.4       
+##  [6] promises_1.3.3       paradox_1.0.1        digest_0.6.37        rpart_4.1.24         base64url_1.4       
 ## [11] mime_0.13            lifecycle_1.0.4      ellipsis_0.3.2       processx_3.8.6       magrittr_2.0.3      
 ## [16] compiler_4.5.0       rlang_1.1.6          progress_1.2.3       tools_4.5.0          knitr_1.50          
-## [21] prettyunits_1.2.0    labeling_0.4.3       brew_1.0-10          htmlwidgets_1.6.4    pkgbuild_1.4.7      
+## [21] prettyunits_1.2.0    labeling_0.4.3       brew_1.0-10          htmlwidgets_1.6.4    pkgbuild_1.4.8      
 ## [26] curl_6.2.3           RColorBrewer_1.1-3   batchtools_0.9.17    pkgload_1.4.0        miniUI_0.1.2        
 ## [31] withr_3.0.2          purrr_1.0.4          mlr3misc_0.18.0      desc_1.4.3           grid_4.5.0          
 ## [36] urlchecker_1.0.1     profvis_0.4.0        mlr3measures_1.0.0   xtable_1.8-4         globals_0.18.0      

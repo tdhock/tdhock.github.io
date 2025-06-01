@@ -325,7 +325,7 @@ process_viz <- function(name){
       xend=end.seconds, yend=Process),
       data=DT)+
     geom_point(aes(
-      start.seconds, Process),
+      end.seconds, Process),
       shape=1,
       data=DT)+
     scale_x_continuous("Seconds from start of computation")
@@ -334,8 +334,8 @@ result.list$laptop_sequential <- norm_times(proj_results(seq.proj.dir))
 process_viz("laptop_sequential")
 ```
 
-The output above shows each split as a dot (for start time) and line
-segment (which goes until the end time). It is clear that there was
+The output above shows each split as a dot (for end time) and line
+segment (which goes until the start time). It is clear that there was
 one process used to compute all of the results.
 
 ## Laptop in parallel using batchtools
@@ -389,7 +389,7 @@ Based on the ideas in the functions above, I wrote some analogous functions in m
 These functions allow runnning these kind of parallel ML experiments either locally, or on a SLURM compute cluster.
 Below, we show how the local multi-core computation works.
 
-```{r times-multi-pkg}
+```{r}
 pkg.proj.dir <- '2025-05-30-mlr3-filelock'
 unlink(pkg.proj.dir, recursive=TRUE)
 mlr3resampling::proj_grid(
@@ -404,13 +404,16 @@ mlr3resampling::proj_grid(
 Above we create a new project based on the same grid as in previous sections.
 Other arguments include `order_jobs`, which returns an integer vector that specifies the priority/order of execution of the different ML experiments. This could be useful for the situation where you run out of time on SLURM, in which case only the entries at the top of the table will have results on the file system. In that case, you can also use the `order_jobs` argument to resume work from where you left off (only provide the indices of arguments that have not yet completed).
 
-```{r}
+```{r times-multi-pkg}
 mlr3resampling::proj_submit(pkg.proj.dir)
 batchtools::waitForJobs()
 
 result.list$laptop_pkg <- norm_times(fread(file.path(pkg.proj.dir,"results.csv")))
 process_viz("laptop_pkg")
 ```
+
+Above we see the result on my laptop.
+Below we see the results when using two SLURM clusters.
 
 ```{r times-mammouth}
 result.list$mammouth_slurm <- norm_times(fread("2025-05-30-mlr3-filelock-mammouth/results.csv"))
@@ -423,6 +426,8 @@ process_viz("beluga_slurm")
 ```
 
 ## Compare them all
+
+Here we compare the results for the different tests on the same plot.
 
 ```{r times-compare, fig.height=6}
 common.names <- Reduce(intersect, sapply(result.list, names))
@@ -439,16 +444,146 @@ ggplot()+
     xend=end.seconds, yend=Process),
     data=compare_results)+
   geom_point(aes(
-    start.seconds, Process),
+    end.seconds, Process),
     shape=1,
     data=compare_results)+
   scale_x_continuous("Seconds from start of computation")+
   facet_grid(computer ~ ., scales="free")
 ```
 
+The figure above shows that the different computers have different timings.
+In particular, Mammouth seems to be quite a bit slower than the other methods (but it may be easier to get time on it).
+
+## A larger experiment
+
+In typical machine learning experiments, the train and predict times
+are much larger, because there are larger data sets, and more complex
+learning algorithms. Below we analyze an experiment similar to the one
+described in [Comparing neural network architectures using
+mlr3torch](https://tdhock.github.io/blog/2025/mlr3torch-conv/). It is
+an [analysis of a convolutional neural
+network](https://github.com/tdhock/cv-same-other-paper?tab=readme-ov-file#27-mar-2025),
+for the `EMNIST_rot` image pair data set, described in the [SOAK
+paper](https://arxiv.org/abs/2410.08643).
+Below we read the result file.
+
+```{r}
+old_dt <- fread("2025-05-30-mlr3-filelock-beluga-large-old.csv")
+first <- min(old_dt$submitted)
+hours <- function(x)difftime(x, first, units="hours")
+old_dt[, let(
+  Process=.I,
+  submit.hours=hours(submitted),
+  start.hours=hours(started),
+  end.hours=hours(done)
+)][]
+```
+
+The data table above came from `batchtools::getJobTable()`, with a few
+columns added for visualization of the parallel processing, which we do below.
+
+```{r old-time, fig.height=6}
+old.not.na <- old_dt[!is.na(started)]
+ggplot()+
+  ggtitle("mlr3batchmark::batchmark() etc")+
+  theme_bw()+
+  geom_segment(aes(
+    start.hours, Process,
+    color=algo,
+    xend=end.hours, yend=Process),
+    data=old.not.na)+
+  geom_point(aes(
+    end.hours, Process,
+    color=algo),
+    shape=1,
+    data=old.not.na)+
+  scale_x_continuous(
+    "Hours from submit time",
+    breaks=seq(-100, 100, by=2),
+    limits=c(0,16))
+```
+
+Above we see each train/test split as a line segment, with a dot at
+the end. We see there is only one line segment per Y/process value
+(300 total). Interestingly, we can see that the bottom third in each
+algo takes longer, because that corresponds to the All subset in SOAK
+(which has more rows than Same/Other).
+
+Below we read in results of an attempt to use the
+`mlr3resampling::proj_*()` functions to re-do this experiment.
+
+```{r}
+large_dt <- fread("2025-05-30-mlr3-filelock-beluga-large.csv")
+first <- min(large_dt$start.time)
+hours <- function(x)difftime(x, first, units="hours")
+large_dt[, let(
+  start.hours=hours(start.time),
+  end.hours=hours(end.time),
+  Process=as.integer(factor(process))
+)][]
+```
+
+Above we see the result table, which is visualized along the time dimension below.
+
+```{r new-time, fig.height=6}
+ggplot()+
+  ggtitle("mlr3resampling::proj_grid() etc")+
+  theme_bw()+
+  geom_segment(aes(
+    start.hours, Process,
+    color=learner.id,
+    xend=end.hours, yend=Process),
+    data=large_dt)+
+  geom_point(aes(
+    end.hours, Process,
+    color=learner.id),
+    shape=1,
+    data=large_dt)+
+  scale_x_continuous(
+    "Hours from submit time",
+    breaks=seq(-100, 100, by=2),
+    limits=c(0,14))
+```
+
+Above we see a different trend: there are multiple results computed in
+a single process.
+
+Below we combine the results in the same plot.
+
+```{r old-new-time, fig.height=7}
+(large_combined <- rbind(
+  data.table(old.not.na[, .(
+    pkg="mlr3batchmark", start.hours, end.hours, Process, learner.id=algo)]),
+  data.table(large_dt[, .(
+    pkg="mlr3resampling", start.hours, end.hours, Process, learner.id)])))
+ggplot()+
+  theme_bw()+
+  geom_segment(aes(
+    start.hours, Process,
+    color=learner.id,
+    xend=end.hours, yend=Process),
+    data=large_combined)+
+  geom_point(aes(
+    end.hours, Process,
+    color=learner.id),
+    shape=1,
+    data=large_combined)+
+  scale_y_continuous(
+    breaks=seq(0,300, by=50))+
+  scale_x_continuous(
+    "Hours from submit time",
+    breaks=seq(-100, 100, by=2))+
+  facet_grid(pkg ~ ., labeller=label_both, scales="free", space="free")+
+  coord_cartesian(expand=TRUE)
+```
+
+Above we can see the differences between the two parallelization
+methods more clearly.
+
 ## Conclusions
 
-TODO
+We explored a method of parallelization via a lock file and a shared CSV.
+We saw that this method can more efficiently use cluster resources.
 
 ## Session info
 
