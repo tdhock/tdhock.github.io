@@ -461,7 +461,7 @@ proj_compute(seq.proj.dir)
 ```
 ##    task.name learner.name iteration  status          start.time            end.time process
 ##       <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
-## 1:      easy  featureless         1 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
+## 1:      easy  featureless         1 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
 ##                                      learner             pred
 ##                                       <list>           <list>
 ## 1: <LearnerRegrFeatureless:regr.featureless> <PredictionRegr>
@@ -474,7 +474,7 @@ proj_compute(seq.proj.dir)
 ```
 ##    task.name learner.name iteration  status          start.time            end.time process
 ##       <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
-## 1:      easy  featureless         2 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
+## 1:      easy  featureless         2 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
 ##                                      learner             pred
 ##                                       <list>           <list>
 ## 1: <LearnerRegrFeatureless:regr.featureless> <PredictionRegr>
@@ -521,78 +521,78 @@ proj_results(seq.proj.dir)
 ```
 ##      task.name learner.name iteration  status          start.time            end.time process
 ##         <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
-##  1:       easy  featureless        10 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
-##  2:       easy  featureless        11 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
-##  3:       easy  featureless        12 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
-##  4:       easy  featureless        13 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
-##  5:       easy  featureless        14 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
-##  6:       easy  featureless        15 started 2025-06-01 11:06:18 2025-06-01 11:06:19 2911045
-##  7:       easy  featureless        16 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-##  8:       easy  featureless        17 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-##  9:       easy  featureless        18 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-## 10:       easy        rpart         1 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-## 11:       easy  featureless         1 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
-## 12:       easy        rpart         2 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-## 13:       easy        rpart         3 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-## 14:       easy        rpart         4 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-## 15:       easy        rpart         5 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-## 16:       easy        rpart         6 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-## 17:       easy        rpart         7 started 2025-06-01 11:06:19 2025-06-01 11:06:19 2911045
-## 18:       easy        rpart         8 started 2025-06-01 11:06:19 2025-06-01 11:06:20 2911045
-## 19:       easy        rpart         9 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 20:       easy        rpart        10 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 21:       easy        rpart        11 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 22:       easy  featureless         2 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
-## 23:       easy        rpart        12 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 24:       easy        rpart        13 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 25:       easy        rpart        14 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 26:       easy        rpart        15 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 27:       easy        rpart        16 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 28:       easy        rpart        17 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 29:       easy        rpart        18 started 2025-06-01 11:06:20 2025-06-01 11:06:20 2911045
-## 30: impossible  featureless         1 started 2025-06-01 11:06:20 2025-06-01 11:06:21 2911045
-## 31: impossible  featureless         2 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 32: impossible  featureless         3 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 33:       easy  featureless         3 started 2025-06-01 11:06:17 2025-06-01 11:06:17 2911045
-## 34: impossible  featureless         4 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 35: impossible  featureless         5 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 36: impossible  featureless         6 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 37: impossible  featureless         7 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 38: impossible  featureless         8 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 39: impossible  featureless         9 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 40: impossible  featureless        10 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 41: impossible  featureless        11 started 2025-06-01 11:06:21 2025-06-01 11:06:21 2911045
-## 42: impossible  featureless        12 started 2025-06-01 11:06:21 2025-06-01 11:06:22 2911045
-## 43: impossible  featureless        13 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 44:       easy  featureless         4 started 2025-06-01 11:06:17 2025-06-01 11:06:18 2911045
-## 45: impossible  featureless        14 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 46: impossible  featureless        15 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 47: impossible  featureless        16 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 48: impossible  featureless        17 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 49: impossible  featureless        18 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 50: impossible        rpart         1 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 51: impossible        rpart         2 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 52: impossible        rpart         3 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 53: impossible        rpart         4 started 2025-06-01 11:06:22 2025-06-01 11:06:22 2911045
-## 54: impossible        rpart         5 started 2025-06-01 11:06:22 2025-06-01 11:06:23 2911045
-## 55:       easy  featureless         5 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
-## 56: impossible        rpart         6 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
-## 57: impossible        rpart         7 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
-## 58: impossible        rpart         8 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
-## 59: impossible        rpart         9 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
-## 60: impossible        rpart        10 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
-## 61: impossible        rpart        11 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
-## 62: impossible        rpart        12 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
-## 63: impossible        rpart        13 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
-## 64: impossible        rpart        14 started 2025-06-01 11:06:23 2025-06-01 11:06:23 2911045
-## 65: impossible        rpart        15 started 2025-06-01 11:06:23 2025-06-01 11:06:24 2911045
-## 66:       easy  featureless         6 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
-## 67: impossible        rpart        16 started 2025-06-01 11:06:24 2025-06-01 11:06:24 2911045
-## 68: impossible        rpart        17 started 2025-06-01 11:06:24 2025-06-01 11:06:24 2911045
-## 69: impossible        rpart        18 started 2025-06-01 11:06:24 2025-06-01 11:06:24 2911045
-## 70:       easy  featureless         7 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
-## 71:       easy  featureless         8 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
-## 72:       easy  featureless         9 started 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045
+##  1:       easy  featureless        10 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
+##  2:       easy  featureless        11 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
+##  3:       easy  featureless        12 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
+##  4:       easy  featureless        13 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
+##  5:       easy  featureless        14 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
+##  6:       easy  featureless        15 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
+##  7:       easy  featureless        16 started 2025-06-02 00:20:50 2025-06-02 00:20:51 2911045
+##  8:       easy  featureless        17 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+##  9:       easy  featureless        18 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 10:       easy        rpart         1 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 11:       easy  featureless         1 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
+## 12:       easy        rpart         2 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 13:       easy        rpart         3 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 14:       easy        rpart         4 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 15:       easy        rpart         5 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 16:       easy        rpart         6 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 17:       easy        rpart         7 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 18:       easy        rpart         8 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 19:       easy        rpart         9 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 20:       easy        rpart        10 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
+## 21:       easy        rpart        11 started 2025-06-02 00:20:51 2025-06-02 00:20:52 2911045
+## 22:       easy  featureless         2 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
+## 23:       easy        rpart        12 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 24:       easy        rpart        13 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 25:       easy        rpart        14 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 26:       easy        rpart        15 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 27:       easy        rpart        16 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 28:       easy        rpart        17 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 29:       easy        rpart        18 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 30: impossible  featureless         1 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 31: impossible  featureless         2 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 32: impossible  featureless         3 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 33:       easy  featureless         3 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
+## 34: impossible  featureless         4 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 35: impossible  featureless         5 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 36: impossible  featureless         6 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
+## 37: impossible  featureless         7 started 2025-06-02 00:20:52 2025-06-02 00:20:53 2911045
+## 38: impossible  featureless         8 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 39: impossible  featureless         9 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 40: impossible  featureless        10 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 41: impossible  featureless        11 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 42: impossible  featureless        12 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 43: impossible  featureless        13 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 44:       easy  featureless         4 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
+## 45: impossible  featureless        14 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 46: impossible  featureless        15 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 47: impossible  featureless        16 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 48: impossible  featureless        17 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 49: impossible  featureless        18 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
+## 50: impossible        rpart         1 started 2025-06-02 00:20:53 2025-06-02 00:20:54 2911045
+## 51: impossible        rpart         2 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 52: impossible        rpart         3 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 53: impossible        rpart         4 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 54: impossible        rpart         5 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 55:       easy  featureless         5 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
+## 56: impossible        rpart         6 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 57: impossible        rpart         7 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 58: impossible        rpart         8 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 59: impossible        rpart         9 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 60: impossible        rpart        10 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 61: impossible        rpart        11 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 62: impossible        rpart        12 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 63: impossible        rpart        13 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
+## 64: impossible        rpart        14 started 2025-06-02 00:20:54 2025-06-02 00:20:55 2911045
+## 65: impossible        rpart        15 started 2025-06-02 00:20:55 2025-06-02 00:20:55 2911045
+## 66:       easy  featureless         6 started 2025-06-02 00:20:49 2025-06-02 00:20:50 2911045
+## 67: impossible        rpart        16 started 2025-06-02 00:20:55 2025-06-02 00:20:55 2911045
+## 68: impossible        rpart        17 started 2025-06-02 00:20:55 2025-06-02 00:20:55 2911045
+## 69: impossible        rpart        18 started 2025-06-02 00:20:55 2025-06-02 00:20:55 2911045
+## 70:       easy  featureless         7 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
+## 71:       easy  featureless         8 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
+## 72:       easy  featureless         9 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
 ##      task.name learner.name iteration  status          start.time            end.time process
 ##         <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
 ##                                       learner             pred
@@ -727,7 +727,7 @@ reg <- batchtools::makeRegistry(reg.dir)
 ```
 
 ```
-## Created registry in '/tmp/Rtmpuob5MM/file2c6b4582c2f69/registry' using cluster functions 'Slurm'
+## Created registry in '/tmp/Rtmpuob5MM/file2c6b4526c91543/registry' using cluster functions 'Slurm'
 ```
 
 Note in the output above that we are using Multicore cluster
@@ -1026,7 +1026,8 @@ batchtools::waitForJobs()
 ```
 
 ```
-## Waiting (Q:0 R:2 D:0 E:0 ?:0) [------------------------------------------------------------------------] 0% eta:
+## Waiting (Q:2 R:0 D:0 E:0 ?:0) [------------------------------------------------------------------------] 0% eta:
+## ?sWaiting (Q:0 R:2 D:0 E:0 ?:0) [------------------------------------------------------------------------] 0% eta:
 ## ?sWaiting (Q::queued R::running D::done E::error ?::expired) [===========================================] 100% eta: 0s
 ```
 
@@ -1079,11 +1080,11 @@ for(computer in names(result.list)){
 ```
 ##               computer iteration          start.time            end.time process  start.seconds    end.seconds Process
 ##                 <char>     <int>              <POSc>              <POSc>   <int>     <difftime>     <difftime>  <fctr>
-##   1: laptop_sequential        10 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 0.8018618 secs 0.9095688 secs 2911045
-##   2: laptop_sequential        11 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 0.9136102 secs 0.9989982 secs 2911045
-##   3: laptop_sequential        12 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 1.0030725 secs 1.0843859 secs 2911045
-##   4: laptop_sequential        13 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 1.0880680 secs 1.1745236 secs 2911045
-##   5: laptop_sequential        14 2025-06-01 11:06:18 2025-06-01 11:06:18 2911045 1.1781964 secs 1.2538698 secs 2911045
+##   1: laptop_sequential        10 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 0.8500752 secs 0.9391413 secs 2911045
+##   2: laptop_sequential        11 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 0.9431872 secs 1.0362859 secs 2911045
+##   3: laptop_sequential        12 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 1.0398619 secs 1.2994919 secs 2911045
+##   4: laptop_sequential        13 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 1.3027387 secs 1.3650990 secs 2911045
+##   5: laptop_sequential        14 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 1.3683965 secs 1.4287214 secs 2911045
 ##  ---                                                                                                                  
 ## 284:      beluga_slurm        10 2025-05-31 12:51:12 2025-05-31 12:51:12       2 9.3785510 secs 9.5612240 secs       2
 ## 285:      beluga_slurm        12 2025-05-31 12:51:12 2025-05-31 12:51:12       1 9.4658461 secs 9.6455581 secs       1
@@ -1199,7 +1200,7 @@ columns added for visualization of the parallel processing, which we do below.
 ``` r
 old.not.na <- old_dt[!is.na(started)]
 ggplot()+
-  ggtitle("mlr3batchmark::batchmark() etc")+
+  ggtitle(paste("mlr3batchmark::batchmark() nrow=", nrow(old.not.na)))+
   theme_bw()+
   geom_segment(aes(
     start.hours, Process,
@@ -1249,11 +1250,11 @@ large_dt[, let(
 ##   4:      1         1            1         4 2025-05-31 18:09:28 2025-05-31 18:09:44      18 MNIST_EMNIST_rot
 ##   5:      1         1            1         5 2025-05-31 18:09:28 2025-05-31 18:09:44      85 MNIST_EMNIST_rot
 ##  ---                                                                                                         
-## 257:      1         5            1        49 2025-06-01 00:52:50 2025-06-01 03:13:30      67 MNIST_EMNIST_rot
-## 258:      1         5            1        51 2025-06-01 00:54:24 2025-06-01 02:52:42      83 MNIST_EMNIST_rot
-## 259:      1         5            1        53 2025-06-01 00:57:42 2025-06-01 06:39:08      61 MNIST_EMNIST_rot
-## 260:      1         5            1        55 2025-06-01 01:10:00 2025-06-01 04:30:16      65 MNIST_EMNIST_rot
-## 261:      1         5            1        59 2025-06-01 01:58:26 2025-06-01 05:05:41      84 MNIST_EMNIST_rot
+## 276:      1         5            1        56 2025-06-01 01:42:22 2025-06-01 12:48:44      99 MNIST_EMNIST_rot
+## 277:      1         5            1        57 2025-06-01 01:44:54 2025-06-01 08:09:45      71 MNIST_EMNIST_rot
+## 278:      1         5            1        58 2025-06-01 01:55:38 2025-06-01 12:33:55      29 MNIST_EMNIST_rot
+## 279:      1         5            1        59 2025-06-01 01:58:26 2025-06-01 05:05:41      84 MNIST_EMNIST_rot
+## 280:      1         5            1        60 2025-06-01 02:06:33 2025-06-01 13:01:36      92 MNIST_EMNIST_rot
 ##         learner.id       resampling.id test.subset train.subsets groups test.fold  seed n.train.groups     start.hours
 ##             <char>              <char>      <char>        <char>  <int>     <int> <int>          <int>      <difftime>
 ##   1:   featureless same_other_sizes_cv  EMNIST_rot           all 126000         1     1         126000 0.0000000 hours
@@ -1262,11 +1263,11 @@ large_dt[, let(
 ##   4:   featureless same_other_sizes_cv       MNIST           all 126000         2     1         126000 0.6668216 hours
 ##   5:   featureless same_other_sizes_cv  EMNIST_rot           all 126000         3     1         126000 0.6668672 hours
 ##  ---                                                                                                                  
-## 257: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000         5     1          63000 7.3897442 hours
-## 258: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000         6     1          63000 7.4158998 hours
-## 259: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000         7     1          63000 7.4707331 hours
-## 260: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000         8     1          63000 7.6757311 hours
-## 261: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000        10     1          63000 8.4829044 hours
+## 276: cv_glmnet_min same_other_sizes_cv       MNIST          same  63000         8     1          63000 8.2153686 hours
+## 277: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000         9     1          63000 8.2574947 hours
+## 278: cv_glmnet_min same_other_sizes_cv       MNIST          same  63000         9     1          63000 8.4364010 hours
+## 279: cv_glmnet_min same_other_sizes_cv  EMNIST_rot          same  63000        10     1          63000 8.4829044 hours
+## 280: cv_glmnet_min same_other_sizes_cv       MNIST          same  63000        10     1          63000 8.6183932 hours
 ##               end.hours Process
 ##              <difftime>   <int>
 ##   1:  0.002151894 hours      96
@@ -1275,11 +1276,11 @@ large_dt[, let(
 ##   4:  0.671368879 hours      16
 ##   5:  0.671334282 hours      81
 ##  ---                           
-## 257:  9.734221932 hours      63
-## 258:  9.387569066 hours      79
-## 259: 13.161299344 hours      58
-## 260: 11.013491167 hours      62
-## 261: 11.603760343 hours      80
+## 276: 19.321430867 hours      94
+## 277: 14.671591418 hours      67
+## 278: 19.074528557 hours      27
+## 279: 11.603760343 hours      80
+## 280: 19.535713733 hours      87
 ```
 
 Above we see the result table, which is visualized along the time dimension below.
@@ -1287,22 +1288,26 @@ Above we see the result table, which is visualized along the time dimension belo
 
 ``` r
 ggplot()+
-  ggtitle("mlr3resampling::proj_grid() etc")+
+  ggtitle(paste("mlr3resampling::proj_grid() nrow=", nrow(large_dt)))+
   theme_bw()+
   geom_segment(aes(
     start.hours, Process,
     color=learner.id,
     xend=end.hours, yend=Process),
     data=large_dt)+
+  scale_fill_manual(values=c(
+    same="white",
+    other="grey",
+    all="black"))+
   geom_point(aes(
     end.hours, Process,
+    fill=train.subsets,
     color=learner.id),
-    shape=1,
+    shape=21,
     data=large_dt)+
   scale_x_continuous(
     "Hours from submit time",
-    breaks=seq(-100, 100, by=2),
-    limits=c(0,14))
+    breaks=seq(-100, 100, by=2))
 ```
 
 ![plot of chunk new-time](/assets/img/2025-05-30-mlr3-filelock/new-time-1.png)
@@ -1330,11 +1335,11 @@ Below we combine the results in the same plot.
 ##   4:  mlr3batchmark 0.6433140 hours  8.942234 hours       4    torch_conv
 ##   5:  mlr3batchmark 0.6433140 hours  9.437047 hours       5    torch_conv
 ##  ---                                                                     
-## 537: mlr3resampling 7.3897442 hours  9.734222 hours      63 cv_glmnet_min
-## 538: mlr3resampling 7.4158998 hours  9.387569 hours      79 cv_glmnet_min
-## 539: mlr3resampling 7.4707331 hours 13.161299 hours      58 cv_glmnet_min
-## 540: mlr3resampling 7.6757311 hours 11.013491 hours      62 cv_glmnet_min
-## 541: mlr3resampling 8.4829044 hours 11.603760 hours      80 cv_glmnet_min
+## 556: mlr3resampling 8.2153686 hours 19.321431 hours      94 cv_glmnet_min
+## 557: mlr3resampling 8.2574947 hours 14.671591 hours      67 cv_glmnet_min
+## 558: mlr3resampling 8.4364010 hours 19.074529 hours      27 cv_glmnet_min
+## 559: mlr3resampling 8.4829044 hours 11.603760 hours      80 cv_glmnet_min
+## 560: mlr3resampling 8.6183932 hours 19.535714 hours      87 cv_glmnet_min
 ```
 
 ``` r

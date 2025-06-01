@@ -485,7 +485,7 @@ columns added for visualization of the parallel processing, which we do below.
 ```{r old-time, fig.height=6}
 old.not.na <- old_dt[!is.na(started)]
 ggplot()+
-  ggtitle("mlr3batchmark::batchmark() etc")+
+  ggtitle(paste("mlr3batchmark::batchmark() nrow=", nrow(old.not.na)))+
   theme_bw()+
   geom_segment(aes(
     start.hours, Process,
@@ -527,22 +527,26 @@ Above we see the result table, which is visualized along the time dimension belo
 
 ```{r new-time, fig.height=6}
 ggplot()+
-  ggtitle("mlr3resampling::proj_grid() etc")+
+  ggtitle(paste("mlr3resampling::proj_grid() nrow=", nrow(large_dt)))+
   theme_bw()+
   geom_segment(aes(
     start.hours, Process,
     color=learner.id,
     xend=end.hours, yend=Process),
     data=large_dt)+
+  scale_fill_manual(values=c(
+    same="white",
+    other="grey",
+    all="black"))+
   geom_point(aes(
     end.hours, Process,
+    fill=train.subsets,
     color=learner.id),
-    shape=1,
+    shape=21,
     data=large_dt)+
   scale_x_continuous(
     "Hours from submit time",
-    breaks=seq(-100, 100, by=2),
-    limits=c(0,14))
+    breaks=seq(-100, 100, by=2))
 ```
 
 Above we see a different trend: there are multiple results computed in
