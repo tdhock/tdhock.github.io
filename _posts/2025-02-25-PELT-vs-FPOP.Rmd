@@ -279,9 +279,7 @@ complex to implement efficiently, so we use C++ code
 in the R package PeakSegOptimal.
 
 ```{r fpop-prune}
-if(FALSE){
-  remotes::install_github("tdhock/PeakSegOptimal@f05834ad4b452070da1818f25412e5ac97454833")
-}
+remotes::install_github("tdhock/PeakSegOptimal@f05834ad4b452070da1818f25412e5ac97454833")
 fpop_info_list <- list()
 fpop_segs_list <- list()
 for(N_data in N_data_vec){
@@ -345,9 +343,7 @@ DuST is a new pruning technique based on Lagrange duality, proposed by
 2024](https://onlinelibrary.wiley.com/doi/full/10.1002/sta4.70012).
 
 ```{r}
-if(FALSE){
-  remotes::install_github("vrunge/dust@910f8c67f99354fdb5ff7740e6436eb487d9efa6")
-}
+remotes::install_github("vrunge/dust@910f8c67f99354fdb5ff7740e6436eb487d9efa6")
 set.seed(1)
 ex_data <- rpois(7,100)
 ex_penalty <- 1
