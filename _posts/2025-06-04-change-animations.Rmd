@@ -1,12 +1,12 @@
 ---
 layout: post
-title: Comparing change-point pruning methods using square loss
-description: Pruned Exact Linear Time (PELT) and Functional Pruning Optimal Partitioning (FPOP)
+title: Comparing change-point detection algorithms
+description: Visualizing change-points and hyper-parameters
 ---
 
 ```{r Ropts, echo=FALSE, results='hide'}
 repo.dir <- normalizePath("..")
-post.id <- "2025-04-15-PELT-vs-fpopw"
+post.id <- "2025-06-04-change-animations"
 fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
 dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
 knitr::opts_chunk$set(
@@ -31,93 +31,28 @@ if(FALSE){
 }
 ```
 
-The goal of this post is to compare two pruning methods for speeding
-up the optimal partitioning algorithm, similar to [my previous post
-using the Poisson
-loss](https://tdhock.github.io/blog/2025/PELT-vs-FPOP/).
-
-* We assume that we want to find change-points in a sequence of `N` data.
-* All algorithms discussed are instances of dynamic programming, which
-  has a for loop over all `N` data. In each iteration, the algorithm
-  considers a certain number of candidate change-points `C` (on
-  average). The algorithm is overall `O(NC)` time.
-* Optimal partitioning (OPART) computes the best segmentation for a
-  given loss function, data sequence, and non-negative penalty
-  value. Each iteration considers the loss for each previous candidate
-  change-point, `C=O(N)` linear time per iteration, which implies
-  quadratic `O(N^2)` time overall.
-* Pruned Exact Linear Time (PELT) reduces the number of candidate
-  change-points that must be considered at each iteration, from the
-  whole data sequence size `N`, to the size of a segment `S`, so
-  `C=O(S)`. This gives an algorithm which is `O(NS)` time overall.
-  * If the number of change-points grows linearly with the data size
-    `N`, then the segment size is constant, `S=O(1)` with respect to
-    number of data `N`, and the PELT algorithm is indeed linear time
-    overall, `O(N)`.
-  * However in the case of a constant number of change-points, with
-    segment sizes that grow with the data sequence, `S=O(N)` implies
-    quadratic time overall, `O(N^2)`.
-* Functional Pruning Optimal Partitioning (FPOP) reduces the number of
-  candidate change-points to a number which is always less than the
-  number considered by PELT (see Maidstone 2017 paper for detailed
-  proof). The goal of this post is to show that it prunes more than
-  PELT in both cases:
-  * If the number of change-points grows linearly with the data size
-    `N`, then both PELT and FPOP are `O(N)` overall.
-  * If the number of change-points is constant with respect to data
-    size `N`, then FPOP considers only `S=O(log N)` change-points
-    (empirically), which gives an algorithm that is `O(N log N)`,
-    log-linear time overall.
+The goal of this post is to compare three regularization methods for change-point detection.
 
 # Simulate data sequences
 
-We simulate data in two scenarios: linear and constant number of changes.
+We simulate data below.
 
 ```{r}
-mean_vec <- c(10,20,5,25)
-sim_fun_list <- list(
-  constant_changes=function(N){
-    rep(mean_vec, each=N/4)
-  },
-  linear_changes=function(N){
-    rep(rep(mean_vec, each=10), l=N)
-  })
-lapply(sim_fun_list, function(f)f(40))
-```
-
-As can be seen above, both functions return a vector of values that
-represent the true segment mean.
-Below we use both functions with a three different data sizes.
-
-```{r}
+mean_vec <- c(10,15,8)
+data_mean_vec <- rep(mean_vec, each=20)
 library(data.table)
 N_data_vec <- c(40, 400)
-sim_data_list <- list()
-sim_changes_list <- list()
-for(N_data in N_data_vec){
-  for(simulation in names(sim_fun_list)){
-    sim_fun <- sim_fun_list[[simulation]]
-    data_mean_vec <- sim_fun(N_data)
-    end <- which(diff(data_mean_vec) != 0)
-    set.seed(1)
-    data_value <- rnorm(N_data, data_mean_vec, 2)
-    sim_data_list[[paste(N_data, simulation)]] <- data.table(
-      N_data, simulation, data_i=seq_along(data_value), data_value)
-    sim_changes_list[[paste(N_data, simulation)]] <- data.table(
-      N_data, simulation, end)
-  }
-}
-addSim <- function(DT)DT[, Simulation := paste0("\n", simulation)][]
-(sim_changes <- addSim(rbindlist(sim_changes_list)))
+N_data <- 60
+end <- which(diff(data_mean_vec) != 0)
+set.seed(3)
+data_value <- rnorm(N_data, data_mean_vec, 2)
+one_sim <- data.table(data_i=seq_along(data_value), data_value)
 ```
 
-Above we see the table of simulated change-points. 
-
-Below we visualize one of the simulated data sets.
+Below we visualize the simulated data set.
 
 ```{r sim-data-one}
-library(ggplot2)
-one_sim <- sim_data_list[["40 constant_changes"]]
+library(animint2)
 gg <- ggplot()+
   theme_bw()+
   theme(text=element_text(size=14))+
@@ -133,24 +68,110 @@ gg
 The figure above shows a simulated data set with 40 points.
 
 ```{r sim-data-model}
-wfit <- fpopw::Fpop(one_sim$data_value, 50)
 cum.vec <- c(0, cumsum(one_sim$data_value))
-end <- wfit$t.est
-start <- c(1, end[-length(end)]+1)
-one_sim_means <- data.table(
-  start.pos=start-0.5, end.pos=end+0.5,
-  mean=(cum.vec[end+1]-cum.vec[start])/(end-start+1))
-gg+
-  geom_vline(aes(
-    xintercept=start.pos),
-    color="green",
-    linetype="dashed",
-    data=one_sim_means[-1])+
-  geom_segment(aes(
-    start.pos, mean,
-    xend=end.pos, yend=mean),
-    color="green",
-    data=one_sim_means)
+(fpop_means <- data.table(penalty=10^seq(0, 3, by=0.2))[, {
+  wfit <- fpopw::Fpop(one_sim$data_value, penalty)
+  end <- wfit$t.est
+  start <- c(1, end[-length(end)]+1)
+  data.table(
+    start.pos=start-0.5, end.pos=end+0.5,
+    mean=(cum.vec[end+1]-cum.vec[start])/(end-start+1))
+}, by=.(log10.penalty=log10(penalty))][])
+fpop_changes <- fpop_means[, {
+  diff.mean <- diff(mean)
+  rbind(
+    data.table(variable="changes", value=sum(diff.mean!=0)),
+    data.table(variable="L1norm", value=sum(abs(diff.mean))))
+}, by=log10.penalty][variable=="changes"]
+animint(
+  data=ggplot()+
+    geom_point(aes(
+      data_i, data_value),
+      data=one_sim)+
+    geom_vline(aes(
+      xintercept=start.pos,
+      key=paste(log10.penalty, start.pos)),
+      color='green',
+      size=1,
+      linetype="dashed",
+      showSelected='log10.penalty',
+      data=fpop_means[1<start.pos])+
+    geom_segment(aes(
+      start.pos, mean,
+      key=paste(log10.penalty, start.pos),
+      xend=end.pos, yend=mean),
+      color='green',
+      size=2,
+      showSelected='log10.penalty',
+      data=fpop_means),
+  overview=ggplot()+
+    scale_y_continuous("changes")+
+    geom_text(aes(
+      log10.penalty, value+0.5, label=value),
+      data=fpop_changes)+
+    geom_point(aes(
+      log10.penalty, value),
+      data=fpop_changes)+
+    make_tallrect(fpop_changes, "log10.penalty"),
+  time=list(
+    variable='log10.penalty',
+    ms=400)
+)
+```
+
+```{r sim-data-model}
+
+Kmax <- 15
+wfit <- fpopw::Fpsn(one_sim$data_value, Kmax)
+(fpsn_means <- data.table(segments=1:Kmax)[,{
+  end <- wfit$t.est[segments, 1:segments]
+  start <- c(1, end[-length(end)]+1)
+  data.table(
+    start.pos=start-0.5, end.pos=end+0.5,
+    mean=(cum.vec[end+1]-cum.vec[start])/(end-start+1))
+}, by=segments][])
+fpsn_changes <- fpsn_means[, {
+  diff.mean <- diff(mean)
+  rbind(
+    data.table(variable="changes", value=sum(diff.mean!=0)),
+    data.table(variable="L1norm", value=sum(abs(diff.mean))))
+}, by=segments][variable=="changes"]
+animint(
+  data=ggplot()+
+    geom_point(aes(
+      data_i, data_value),
+      data=one_sim)+
+    geom_vline(aes(
+      xintercept=start.pos,
+      key=paste(segments, start.pos)),
+      color='green',
+      size=1,
+      linetype="dashed",
+      showSelected='segments',
+      data=fpsn_means[1<start.pos])+
+    geom_segment(aes(
+      start.pos, mean,
+      key=paste(segments, start.pos),
+      xend=end.pos, yend=mean),
+      color='green',
+      size=2,
+      showSelected='segments',
+      data=fpsn_means),
+  overview=ggplot()+
+    scale_y_continuous("changes")+
+    geom_text(aes(
+      segments, value+0.5, label=value),
+      data=fpsn_changes)+
+    geom_point(aes(
+      segments, value),
+      data=fpsn_changes)+
+    make_tallrect(fpsn_changes, "segments"),
+  time=list(
+    variable='segments',
+    ms=400)
+)
+
+
 ```
 
 * For `constant_changes` simulation, there are always 3 change-points.
@@ -158,8 +179,61 @@ gg+
   there are more data.
   
 ```{r sim-data}
-(sim_data <- addSim(rbindlist(sim_data_list)))
-library(ggplot2)
+flsa_mean_dt <- data.table(penalty=10^seq(1, 2, by=0.025))[, data.table(
+  mean=as.numeric(flsa::flsa(one_sim$data_value, lambda2=penalty)),
+  data_i=1:nrow(one_sim)
+), by=.(segments=log10(penalty))]
+flsa_mean_changes <- flsa_mean_dt[, {
+  diff.mean <- diff(mean)
+  rbind(
+    data.table(variable="changes", value=sum(diff.mean!=0)),
+    data.table(variable="L1norm", value=sum(abs(diff.mean))))
+}, by=segments]
+(flsa_segs_dt <- flsa_mean_dt[, {
+  is.diff <- diff(mean)!=0
+  start <- 1+c(0, which(is.diff))
+  end <- c(start[-1]-1, .N)
+  data.table(start.pos=start-0.5,end.pos=end+0.5,mean=mean[start])
+}, by=segments][])
+animint(
+  data=ggplot()+
+    geom_point(aes(
+      data_i, data_value),
+      data=one_sim)+
+    geom_vline(aes(
+      xintercept=start.pos,
+      key=paste(segments, start.pos)),
+      color='green',
+      size=1,
+      linetype="dashed",
+      showSelected='segments',
+      data=flsa_segs_dt[1<start.pos])+
+    geom_segment(aes(
+      start.pos, mean,
+      key=paste(segments, start.pos),
+      xend=end.pos, yend=mean),
+      color='green',
+      size=2,
+      showSelected='segments',
+      data=flsa_segs_dt),
+  overview=ggplot()+
+    theme_animint(width=600)+
+    scale_y_continuous("")+
+    geom_text(aes(
+      segments, value+0.3, label=value),
+      data=flsa_mean_changes[variable=="changes"])+
+    facet_grid(variable ~ ., scales="free")+
+    geom_point(aes(
+      segments, value),
+      data=flsa_mean_changes)+
+    scale_x_continuous(breaks=seq(1, 2, by=0.1))+
+    make_tallrect(flsa_mean_changes, "segments"),
+  time=list(
+    variable='segments',
+    ms=400)
+)
+    
+
 gg <- ggplot()+
   theme_bw()+
   theme(text=element_text(size=14))+
@@ -286,7 +360,7 @@ candidates considered.
 algo.colors <- c(
   OPART="grey50",
   PELT="red",
-  FPOP="blue",
+  FPSN="blue",
   DUST="deepskyblue")
 cat(sprintf("\\definecolor{%s}{HTML}{%s}\n", names(algo.colors), sub("#", "", animint2::toRGB(algo.colors))))
 ggplot()+
@@ -326,27 +400,27 @@ change-point detected.
   of data, so both OPART and PELT are quadratic time in the number of
   data.
 
-## FPOP
+## FPSN
 
-Now we run FPOP, which is another pruning method, which is more
+Now we run FPSN, which is another pruning method, which is more
 complex to implement efficiently, so we use C++ code in the R package
-fpopw. In fact, the current CRAN version of fpopw (1.1) does not
+fpsnw. In fact, the current CRAN version of fpsnw (1.1) does not
 include the code which is used to write the candidate change-points
 considered at each iteration of dynamic programming, so we need to
 install my version from GitHub.
 
-```{r fpop-prune}
-remotes::install_github("tdhock/fpopw/fpopw")
-fpop_info_list <- list()
-fpop_segs_list <- list()
+```{r fpsn-prune}
+remotes::install_github("tdhock/fpsnw/fpsnw")
+fpsn_info_list <- list()
+fpsn_segs_list <- list()
 for(N_data in N_data_vec){
   for(simulation in names(sim_fun_list)){
     N_sim <- paste(N_data, simulation)
     data_value <- sim_data_list[[N_sim]]$data_value
-    pfit <- fpopw::Fpop(
+    pfit <- fpsnw::Fpsn(
       data_value, penalty, verbose_file=tempfile())
-    both_index_list[[paste(N_data, simulation, "FPOP")]] <- data.table(
-      N_data, simulation, algo="FPOP", pfit$model
+    both_index_list[[paste(N_data, simulation, "FPSN")]] <- data.table(
+      N_data, simulation, algo="FPSN", pfit$model
     )[, let(
       data_i=data_i+1L,
       change_i=ifelse(change_i == -10, 0, change_i)+1
@@ -357,19 +431,19 @@ for(N_data in N_data_vec){
       intervals=.N,
       cost=min(cost)
     ), by=data_i]
-    fpop_info_list[[paste(N_data,simulation)]] <- data.table(
+    fpsn_info_list[[paste(N_data,simulation)]] <- data.table(
       N_data,simulation,
-      algo="FPOP",
+      algo="FPSN",
       candidates=count_dt$intervals,
       cost=count_dt$cost,
       data_i=seq_along(data_value))
-    fpop_segs_list[[paste(N_data,simulation)]] <- data.table(
+    fpsn_segs_list[[paste(N_data,simulation)]] <- data.table(
       N_data,simulation,start,end)
   }
 }
-(fpop_info <- addSim(rbindlist(fpop_info_list)))
-(fpop_segs <- rbindlist(fpop_segs_list))
-both_info <- rbind(pelt_info, fpop_info)
+(fpsn_info <- addSim(rbindlist(fpsn_info_list)))
+(fpsn_segs <- rbindlist(fpsn_segs_list))
+both_info <- rbind(pelt_info, fpsn_info)
 ggplot()+
   theme_bw()+
   theme(
@@ -394,14 +468,14 @@ ggplot()+
   coord_cartesian(expand=FALSE)
 ```
 
-In the figure above, we can see the advantage of FPOP: the number of
+In the figure above, we can see the advantage of FPSN: the number of
 change-points considered does not increase with the number of data,
 even with constant number of changes (larger segments).
 
 * In the top simulation with constant changes, the number of
   change-points candidates considered is linear in the number of data,
   so both OPART and PELT are quadratic time in the number of data,
-  whereas FPOP is sub-quadratic (empirically linear or log-linear).
+  whereas FPSN is sub-quadratic (empirically linear or log-linear).
   
 The table below compares the cost and number of candidates for the last data point.
 
@@ -410,7 +484,7 @@ both_info[data_i==max(data_i)][order(simulation, algo)]
 ```
 
 We see above that in both simulations, all three algos compute the same cost. 
-We also see that the number of candidates is smallest for FPOP in both simulations.
+We also see that the number of candidates is smallest for FPSN in both simulations.
 PELT has substantial pruning (10 candidates) for the case of linear changes, 
 but not much pruning (100 candidates) for the case of constant changes.
 
@@ -426,19 +500,19 @@ set.seed(1)
 ex_data <- rnorm(7)
 ex_penalty <- 1
 dfit <- dust::dust.1D(ex_data, ex_penalty)
-wfit <- fpopw::Fpop(ex_data, ex_penalty)
+wfit <- fpsnw::Fpsn(ex_data, ex_penalty)
 pfit <- PELT(ex_data, ex_penalty)
-list(PELT=pfit$change, FPOP=wfit$path, DUST=dfit$changepoints)
+list(PELT=pfit$change, FPSN=wfit$path, DUST=dfit$changepoints)
 rbind(
   PELT=pfit$cost[-1]/seq_along(ex_data),
-  FPOP=(wfit$cost-ex_penalty)/seq_along(ex_data),
+  FPSN=(wfit$cost-ex_penalty)/seq_along(ex_data),
   DUST=2*dfit$costQ/seq_along(ex_data))
 ```
 
 The code above verifies that we compute the cost in the same way for
 each algorithm. In particular, PELT and DUST return the total cost, so
 we need to divide by the number of data points to get the average
-cost, which is returned by FPOP.
+cost, which is returned by FPSN.
 Below we compute the candidates considered by DUST, for each of the two simulations, and a variety of data sizes.
 
 ```{r dust-prune}
@@ -477,7 +551,7 @@ for(N_data in N_data_vec){
 }
 (dust_info <- addSim(rbindlist(dust_info_list)))
 (dust_segs <- rbindlist(dust_segs_list))
-three_info <- rbind(pelt_info, fpop_info, dust_info)
+three_info <- rbind(pelt_info, fpsn_info, dust_info)
 ggplot()+
   theme_bw()+
   theme(
@@ -502,7 +576,7 @@ ggplot()+
 ```
 
 The figure above shows that DUST pruned much more than PELT, nearly
-the same amount as FPOP.
+the same amount as FPSN.
 
 ## Heat maps
   
@@ -510,7 +584,7 @@ Another way to view this is by looking at the cost of each candidate
 change-point considered, as in the heat map below.
 
 ```{r cost-heat}
-algo.levs <- c("OPART","PELT","FPOP","DUST")
+algo.levs <- c("OPART","PELT","FPSN","DUST")
 (both_index <- addSim(rbindlist(both_index_list, use.names=TRUE))[, let(
   Algorithm = factor(algo, algo.levs)
 )][])
@@ -548,11 +622,11 @@ ggplot()+
   facet_grid(Simulation ~ N_data, label=label_both, scales="free", space="free")
 ```
 
-It is clear that FPOP/DUST prune much more than PELT, especially in the
+It is clear that FPSN/DUST prune much more than PELT, especially in the
 case of constant changes (segments that get larger with the overall
 number of data).
 
-## Double check FPOP for constant changes
+## Double check FPSN for constant changes
 
 Before running a simulation on varying data sizes, here we check that
 the penalty value results in the right number of change-points, for a
@@ -564,10 +638,10 @@ sim_fun <- sim_fun_list$constant_changes
 data_mean_vec <- sim_fun(N_data)
 set.seed(1)
 data_value <- rnorm(N_data, data_mean_vec, 2)
-wfit <- fpopw::Fpop(data_value, penalty)
+wfit <- fpsnw::Fpsn(data_value, penalty)
 dfit <- dust::dust.1D(data_value, penalty)
 rbind(
-  FPOP=wfit$t.est,
+  FPSN=wfit$t.est,
   DUST=dfit$changepoints)
 ```
 
@@ -599,8 +673,8 @@ grid_args <- list(
       segments=length(changepoints),
       max_seg_size=max(diff(c(0,changepoints)))))
   }),
-  FPOP=quote({
-    pfit <- fpopw::Fpop(
+  FPSN=quote({
+    pfit <- fpsnw::Fpsn(
       data_list[[simulation]], penalty, verbose_file=tempfile())
     count_dt <- pfit$model[, .(intervals=.N), by=data_i]
     data.frame(
@@ -632,7 +706,7 @@ a data table with the corresponding number of rows. Note that each expression
   argument below:
 
 ```{r}
-cache.rds <- "2025-04-15-PELT-vs-fpopw.rds"
+cache.rds <- "2025-04-15-PELT-vs-fpsnw.rds"
 if(file.exists(cache.rds)){
   atime_list <- readRDS(cache.rds)
 }else{
@@ -728,8 +802,8 @@ ggplot()+
 The plot above makes it easier to notice some interesting trends in
 the mean number of candidates:
 
-* For PELT and FPOP the mean number of candidates is increases for a
-  constant number of changes, but at different rates (FPOP much slower
+* For PELT and FPSN the mean number of candidates is increases for a
+  constant number of changes, but at different rates (FPSN much slower
   than PELT).
 
 ```{r plot-refs, fig.width=12, fig.height=7}
@@ -753,7 +827,7 @@ The plot above is an empirical verification of our earlier complexity claims.
   quadratic time and memory, `O(N^2)` (same as OPART, no asymptotic speedup).
 * PELT with linear changes has sub-linear `mean_candidates` (constant
   or log), and linear or log-linear time/memory.
-* FPOP always has sub-linear `mean_candidates` (constant or log), and
+* FPSN always has sub-linear `mean_candidates` (constant or log), and
   linear or log-linear time/memory.
   
 The code/plot below shows the speedups in this case.
@@ -770,7 +844,7 @@ ggplot()+
     N, unit.value, color=expr.grid, label=sprintf(
       "%s\n%s\nN=%s",
       expr.grid,
-      ifelse(expr.grid %in% c("FPOP","DUST"), "C++", "R"),
+      ifelse(expr.grid %in% c("FPSN","DUST"), "C++", "R"),
       format(round(N), big.mark=",", scientific=FALSE, trim=TRUE))),
     data=pred_list$prediction,
     method=list(cex=1.5,directlabels::polygon.method("top",offset.cm = 0.5)))+
@@ -790,11 +864,11 @@ ggplot()+
 ```
 
 The figure above shows the throughput (data size N) which is possible
-to compute in 1 second using each algorithm. We see that FPOP is
+to compute in 1 second using each algorithm. We see that FPSN is
 10-100x faster than OPART/PELT. Part of the difference is that
-OPART/PELT were coded in R, whereas FPOP was coded in C++
-(faster). Another difference is that FPOP is asymptotically faster
-with constant changes, as can be seen by a smaller slope for FPOP,
+OPART/PELT were coded in R, whereas FPSN was coded in C++
+(faster). Another difference is that FPSN is asymptotically faster
+with constant changes, as can be seen by a smaller slope for FPSN,
 compared to OPART/PELT.
 
 Below we zoom in on the number of candidate change-points considered
@@ -833,7 +907,7 @@ The figure above shows that
   of changes is constant.
 * PELT considers a sub-linear number of candidates (fast), when the
   number of changes is linear.
-* FPOP always considers sub-linear number of candidates (fast), which
+* FPSN always considers sub-linear number of candidates (fast), which
   is either constant for a linear number of changes, or logarithmic for
   a constant number of changes.
 
@@ -849,7 +923,7 @@ We have explored three algorithms for optimal change-point detection.
   and the PELT algorithm must compute a cost for each candidate on
   these large segments; in this situation, PELT suffers from the same
   quadratic time complexity as OPART.
-* The FPOP algorithm is fast (linear or log-linear) in both of the
+* The FPSN algorithm is fast (linear or log-linear) in both of the
   scenarios we examined.
   
 ## Session info
