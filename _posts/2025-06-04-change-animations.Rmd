@@ -96,6 +96,12 @@ animint(
       linetype="dashed",
       showSelected='log10.penalty',
       data=fpop_means[1<start.pos])+
+    geom_text(aes(
+      x=0, y=4, label=sprintf("penalty=%.2f", 10^log10.penalty)),
+      data=fpop_changes,
+      hjust=0,
+      showSelected='log10.penalty',
+      size=15)+
     geom_segment(aes(
       start.pos, mean,
       key=paste(log10.penalty, start.pos),
