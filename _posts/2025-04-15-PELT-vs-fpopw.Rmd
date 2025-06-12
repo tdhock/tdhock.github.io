@@ -94,6 +94,7 @@ library(data.table)
 N_data_vec <- c(40, 400)
 sim_data_list <- list()
 sim_changes_list <- list()
+sim_segs_list <- list()
 for(N_data in N_data_vec){
   for(simulation in names(sim_fun_list)){
     sim_fun <- sim_fun_list[[simulation]]
@@ -101,6 +102,14 @@ for(N_data in N_data_vec){
     end <- which(diff(data_mean_vec) != 0)
     set.seed(1)
     data_value <- rnorm(N_data, data_mean_vec, 2)
+    cum.vec <- c(0, cumsum(data_value))
+    n.segs <- sum(diff(data_mean_vec)!=0)+1
+    wfit <- fpopw::Fpsn(data_value, n.segs)
+    end <- wfit$t.est[n.segs, 1:n.segs]
+    start <- c(1, end[-length(end)]+1)
+    sim_segs_list[[paste(N_data, simulation)]] <- data.table(
+      N_data, simulation, start.pos=start-0.5, end.pos=end+0.5,
+      mean=(cum.vec[end+1]-cum.vec[start])/(end-start+1))
     sim_data_list[[paste(N_data, simulation)]] <- data.table(
       N_data, simulation, data_i=seq_along(data_value), data_value)
     sim_changes_list[[paste(N_data, simulation)]] <- data.table(
@@ -153,6 +162,8 @@ gg+
     data=one_sim_means)
 ```
 
+Below we show all simulations:
+
 * For `constant_changes` simulation, there are always 3 change-points.
 * For `linear_changes` simulation, there are more change-points when
   there are more data.
@@ -182,13 +193,32 @@ are 80 or 160 data, we see a difference:
 * For the `linear_changes` simulation, the number of change-points has
   increased from 3 to 7 to 15 (change-point every 25 data points).
   
-Below we highlight the change-points,
+Below we highlight the true change-points,
 
 ```{r sim-changes}
 gg+
   geom_vline(aes(
     xintercept=end+0.5),
     data=sim_changes)
+```
+
+And below we show the estimated means and change-points:
+
+```{r sim-pred}
+sim_segs <- addSim(rbindlist(sim_segs_list))
+gg+
+  geom_vline(aes(
+    xintercept=start.pos),
+    color="green",
+    linetype="dashed",
+    size=1,
+    data=sim_segs[1<start.pos])+
+  geom_segment(aes(
+    start.pos, mean,
+    xend=end.pos, yend=mean),
+    data=sim_segs,
+    color="green",
+    size=2)
 ```
 
 ## PELT

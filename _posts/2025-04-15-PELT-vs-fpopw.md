@@ -81,6 +81,7 @@ library(data.table)
 N_data_vec <- c(40, 400)
 sim_data_list <- list()
 sim_changes_list <- list()
+sim_segs_list <- list()
 for(N_data in N_data_vec){
   for(simulation in names(sim_fun_list)){
     sim_fun <- sim_fun_list[[simulation]]
@@ -88,6 +89,14 @@ for(N_data in N_data_vec){
     end <- which(diff(data_mean_vec) != 0)
     set.seed(1)
     data_value <- rnorm(N_data, data_mean_vec, 2)
+    cum.vec <- c(0, cumsum(data_value))
+    n.segs <- sum(diff(data_mean_vec)!=0)+1
+    wfit <- fpopw::Fpsn(data_value, n.segs)
+    end <- wfit$t.est[n.segs, 1:n.segs]
+    start <- c(1, end[-length(end)]+1)
+    sim_segs_list[[paste(N_data, simulation)]] <- data.table(
+      N_data, simulation, start.pos=start-0.5, end.pos=end+0.5,
+      mean=(cum.vec[end+1]-cum.vec[start])/(end-start+1))
     sim_data_list[[paste(N_data, simulation)]] <- data.table(
       N_data, simulation, data_i=seq_along(data_value), data_value)
     sim_changes_list[[paste(N_data, simulation)]] <- data.table(
@@ -100,67 +109,117 @@ addSim <- function(DT)DT[, Simulation := paste0("\n", simulation)][]
 
 ```
 ##     N_data       simulation   end         Simulation
-##      <num>           <char> <int>             <char>
+##      <num>           <char> <num>             <char>
 ##  1:     40 constant_changes    10 \nconstant_changes
 ##  2:     40 constant_changes    20 \nconstant_changes
 ##  3:     40 constant_changes    30 \nconstant_changes
-##  4:     40   linear_changes    10   \nlinear_changes
-##  5:     40   linear_changes    20   \nlinear_changes
-##  6:     40   linear_changes    30   \nlinear_changes
-##  7:    400 constant_changes   100 \nconstant_changes
-##  8:    400 constant_changes   200 \nconstant_changes
-##  9:    400 constant_changes   300 \nconstant_changes
-## 10:    400   linear_changes    10   \nlinear_changes
-## 11:    400   linear_changes    20   \nlinear_changes
-## 12:    400   linear_changes    30   \nlinear_changes
-## 13:    400   linear_changes    40   \nlinear_changes
-## 14:    400   linear_changes    50   \nlinear_changes
-## 15:    400   linear_changes    60   \nlinear_changes
-## 16:    400   linear_changes    70   \nlinear_changes
-## 17:    400   linear_changes    80   \nlinear_changes
-## 18:    400   linear_changes    90   \nlinear_changes
-## 19:    400   linear_changes   100   \nlinear_changes
-## 20:    400   linear_changes   110   \nlinear_changes
-## 21:    400   linear_changes   120   \nlinear_changes
-## 22:    400   linear_changes   130   \nlinear_changes
-## 23:    400   linear_changes   140   \nlinear_changes
-## 24:    400   linear_changes   150   \nlinear_changes
-## 25:    400   linear_changes   160   \nlinear_changes
-## 26:    400   linear_changes   170   \nlinear_changes
-## 27:    400   linear_changes   180   \nlinear_changes
-## 28:    400   linear_changes   190   \nlinear_changes
-## 29:    400   linear_changes   200   \nlinear_changes
-## 30:    400   linear_changes   210   \nlinear_changes
-## 31:    400   linear_changes   220   \nlinear_changes
-## 32:    400   linear_changes   230   \nlinear_changes
-## 33:    400   linear_changes   240   \nlinear_changes
-## 34:    400   linear_changes   250   \nlinear_changes
-## 35:    400   linear_changes   260   \nlinear_changes
-## 36:    400   linear_changes   270   \nlinear_changes
-## 37:    400   linear_changes   280   \nlinear_changes
-## 38:    400   linear_changes   290   \nlinear_changes
-## 39:    400   linear_changes   300   \nlinear_changes
-## 40:    400   linear_changes   310   \nlinear_changes
-## 41:    400   linear_changes   320   \nlinear_changes
-## 42:    400   linear_changes   330   \nlinear_changes
-## 43:    400   linear_changes   340   \nlinear_changes
-## 44:    400   linear_changes   350   \nlinear_changes
-## 45:    400   linear_changes   360   \nlinear_changes
-## 46:    400   linear_changes   370   \nlinear_changes
-## 47:    400   linear_changes   380   \nlinear_changes
-## 48:    400   linear_changes   390   \nlinear_changes
+##  4:     40 constant_changes    40 \nconstant_changes
+##  5:     40   linear_changes    10   \nlinear_changes
+##  6:     40   linear_changes    20   \nlinear_changes
+##  7:     40   linear_changes    30   \nlinear_changes
+##  8:     40   linear_changes    40   \nlinear_changes
+##  9:    400 constant_changes   100 \nconstant_changes
+## 10:    400 constant_changes   200 \nconstant_changes
+## 11:    400 constant_changes   300 \nconstant_changes
+## 12:    400 constant_changes   400 \nconstant_changes
+## 13:    400   linear_changes    10   \nlinear_changes
+## 14:    400   linear_changes    20   \nlinear_changes
+## 15:    400   linear_changes    30   \nlinear_changes
+## 16:    400   linear_changes    40   \nlinear_changes
+## 17:    400   linear_changes    50   \nlinear_changes
+## 18:    400   linear_changes    60   \nlinear_changes
+## 19:    400   linear_changes    70   \nlinear_changes
+## 20:    400   linear_changes    80   \nlinear_changes
+## 21:    400   linear_changes    90   \nlinear_changes
+## 22:    400   linear_changes   100   \nlinear_changes
+## 23:    400   linear_changes   110   \nlinear_changes
+## 24:    400   linear_changes   120   \nlinear_changes
+## 25:    400   linear_changes   130   \nlinear_changes
+## 26:    400   linear_changes   140   \nlinear_changes
+## 27:    400   linear_changes   150   \nlinear_changes
+## 28:    400   linear_changes   160   \nlinear_changes
+## 29:    400   linear_changes   170   \nlinear_changes
+## 30:    400   linear_changes   180   \nlinear_changes
+## 31:    400   linear_changes   190   \nlinear_changes
+## 32:    400   linear_changes   200   \nlinear_changes
+## 33:    400   linear_changes   210   \nlinear_changes
+## 34:    400   linear_changes   220   \nlinear_changes
+## 35:    400   linear_changes   230   \nlinear_changes
+## 36:    400   linear_changes   240   \nlinear_changes
+## 37:    400   linear_changes   250   \nlinear_changes
+## 38:    400   linear_changes   260   \nlinear_changes
+## 39:    400   linear_changes   270   \nlinear_changes
+## 40:    400   linear_changes   280   \nlinear_changes
+## 41:    400   linear_changes   290   \nlinear_changes
+## 42:    400   linear_changes   300   \nlinear_changes
+## 43:    400   linear_changes   310   \nlinear_changes
+## 44:    400   linear_changes   320   \nlinear_changes
+## 45:    400   linear_changes   330   \nlinear_changes
+## 46:    400   linear_changes   340   \nlinear_changes
+## 47:    400   linear_changes   350   \nlinear_changes
+## 48:    400   linear_changes   360   \nlinear_changes
+## 49:    400   linear_changes   370   \nlinear_changes
+## 50:    400   linear_changes   380   \nlinear_changes
+## 51:    400   linear_changes   390   \nlinear_changes
+## 52:    400   linear_changes   400   \nlinear_changes
 ##     N_data       simulation   end         Simulation
-##      <num>           <char> <int>             <char>
+##      <num>           <char> <num>             <char>
 ```
 
 Above we see the table of simulated change-points. 
+
+Below we visualize one of the simulated data sets.
+
+
+``` r
+library(ggplot2)
+one_sim <- sim_data_list[["40 constant_changes"]]
+gg <- ggplot()+
+  theme_bw()+
+  theme(text=element_text(size=14))+
+  geom_point(aes(
+    data_i, data_value),
+    color="grey50",
+    data=one_sim)+
+  scale_x_continuous(
+    breaks=seq(0,max(N_data_vec),by=10))
+gg
+```
+
+![plot of chunk sim-data-one](/assets/img/2025-04-15-PELT-vs-fpopw/sim-data-one-1.png)
+
+The figure above shows a simulated data set with 40 points.
+
+
+``` r
+wfit <- fpopw::Fpop(one_sim$data_value, 50)
+cum.vec <- c(0, cumsum(one_sim$data_value))
+end <- wfit$t.est
+start <- c(1, end[-length(end)]+1)
+one_sim_means <- data.table(
+  start.pos=start-0.5, end.pos=end+0.5,
+  mean=(cum.vec[end+1]-cum.vec[start])/(end-start+1))
+gg+
+  geom_vline(aes(
+    xintercept=start.pos),
+    color="green",
+    linetype="dashed",
+    data=one_sim_means[-1])+
+  geom_segment(aes(
+    start.pos, mean,
+    xend=end.pos, yend=mean),
+    color="green",
+    data=one_sim_means)
+```
+
+![plot of chunk sim-data-model](/assets/img/2025-04-15-PELT-vs-fpopw/sim-data-model-1.png)
+
+Below we show all simulations:
 
 * For `constant_changes` simulation, there are always 3 change-points.
 * For `linear_changes` simulation, there are more change-points when
   there are more data.
   
-Below we visualize the simulated data.
-
 
 ``` r
 (sim_data <- addSim(rbindlist(sim_data_list)))
@@ -208,7 +267,7 @@ are 80 or 160 data, we see a difference:
 * For the `linear_changes` simulation, the number of change-points has
   increased from 3 to 7 to 15 (change-point every 25 data points).
   
-Below we highlight the change-points,
+Below we highlight the true change-points,
 
 
 ``` r
@@ -219,6 +278,28 @@ gg+
 ```
 
 ![plot of chunk sim-changes](/assets/img/2025-04-15-PELT-vs-fpopw/sim-changes-1.png)
+
+And below we show the estimated means and change-points:
+
+
+``` r
+sim_segs <- addSim(rbindlist(sim_segs_list))
+gg+
+  geom_vline(aes(
+    xintercept=start.pos),
+    color="green",
+    linetype="dashed",
+    size=1,
+    data=sim_segs[1<start.pos])+
+  geom_segment(aes(
+    start.pos, mean,
+    xend=end.pos, yend=mean),
+    data=sim_segs,
+    color="green",
+    size=2)
+```
+
+![plot of chunk sim-pred](/assets/img/2025-04-15-PELT-vs-fpopw/sim-pred-1.png)
 
 ## PELT
 
@@ -353,7 +434,18 @@ algo.colors <- c(
   OPART="grey50",
   PELT="red",
   FPOP="blue",
-  DUST="deepskyblue")  
+  DUST="deepskyblue")
+cat(sprintf("\\definecolor{%s}{HTML}{%s}\n", names(algo.colors), sub("#", "", animint2::toRGB(algo.colors))))
+```
+
+```
+## \definecolor{OPART}{HTML}{7F7F7F}
+##  \definecolor{PELT}{HTML}{FF0000}
+##  \definecolor{FPOP}{HTML}{0000FF}
+##  \definecolor{DUST}{HTML}{00BFFF}
+```
+
+``` r
 ggplot()+
   theme_bw()+
   theme(
@@ -1401,12 +1493,13 @@ sessionInfo()
 ## [1] ggplot2_3.5.2      data.table_1.17.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] directlabels_2025.5.20 crayon_1.5.3           vctrs_0.6.5            cli_3.6.5              knitr_1.50            
-##  [6] rlang_1.1.6            xfun_0.52              generics_0.1.4         glue_1.8.0             labeling_0.4.3        
-## [11] fpopw_1.2              scales_1.4.0           quadprog_1.5-8         grid_4.5.0             evaluate_1.0.3        
-## [16] tibble_3.2.1           lifecycle_1.0.4        compiler_4.5.0         codetools_0.2-20       dplyr_1.1.4           
-## [21] dust_0.3.0             RColorBrewer_1.1-3     Rcpp_1.0.14            pkgconfig_2.0.3        atime_2025.5.24       
-## [26] lattice_0.22-7         farver_2.1.2           R6_2.6.1               dichromat_2.0-0.1      tidyselect_1.2.1      
-## [31] curl_6.2.3             pillar_1.10.2          magrittr_2.0.3         tools_4.5.0            withr_3.0.2           
-## [36] gtable_0.3.6           bspm_0.5.7             remotes_2.5.0
+##  [1] gtable_0.3.6           dplyr_1.1.4            compiler_4.5.0         crayon_1.5.3           tidyselect_1.2.1      
+##  [6] Rcpp_1.0.14            bspm_0.5.7             dichromat_2.0-0.1      scales_1.4.0           directlabels_2025.5.20
+## [11] lattice_0.22-7         R6_2.6.1               plyr_1.8.9             labeling_0.4.3         generics_0.1.4        
+## [16] curl_6.2.3             knitr_1.50             tibble_3.2.1           atime_2025.5.24        animint2_2025.6.4     
+## [21] pillar_1.10.2          RColorBrewer_1.1-3     rlang_1.1.6            dust_0.3.0             xfun_0.52             
+## [26] quadprog_1.5-8         RJSONIO_2.0.0          cli_3.6.5              withr_3.0.2            magrittr_2.0.3        
+## [31] grid_4.5.0             remotes_2.5.0          fpopw_1.2              lifecycle_1.0.4        vctrs_0.6.5           
+## [36] evaluate_1.0.3         glue_1.8.0             farver_2.1.2           codetools_0.2-20       tools_4.5.0           
+## [41] pkgconfig_2.0.3
 ```
