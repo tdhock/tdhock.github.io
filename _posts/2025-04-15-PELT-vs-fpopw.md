@@ -299,6 +299,13 @@ gg+
     size=2)
 ```
 
+```
+## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
+```
+
 ![plot of chunk sim-pred](/assets/img/2025-04-15-PELT-vs-fpopw/sim-pred-1.png)
 
 ## PELT
@@ -435,7 +442,31 @@ algo.colors <- c(
   PELT="red",
   FPOP="blue",
   DUST="deepskyblue")
-cat(sprintf("\\definecolor{%s}{HTML}{%s}\n", names(algo.colors), sub("#", "", animint2::toRGB(algo.colors))))
+cat(paste0("\\definecolor{", names(algo.colors), "}{HTML}{", sub("#", "", animint2::toRGB(algo.colors)), "}\n"))
+```
+
+```
+## Registered S3 methods overwritten by 'animint2':
+##   method                   from   
+##   [.uneval                 ggplot2
+##   drawDetails.zeroGrob     ggplot2
+##   grid.draw.absoluteGrob   ggplot2
+##   grobHeight.absoluteGrob  ggplot2
+##   grobHeight.zeroGrob      ggplot2
+##   grobWidth.absoluteGrob   ggplot2
+##   grobWidth.zeroGrob       ggplot2
+##   grobX.absoluteGrob       ggplot2
+##   grobY.absoluteGrob       ggplot2
+##   heightDetails.titleGrob  ggplot2
+##   heightDetails.zeroGrob   ggplot2
+##   makeContext.dotstackGrob ggplot2
+##   print.element            ggplot2
+##   print.ggplot2_bins       ggplot2
+##   print.rel                ggplot2
+##   print.theme              ggplot2
+##   print.uneval             ggplot2
+##   widthDetails.titleGrob   ggplot2
+##   widthDetails.zeroGrob    ggplot2
 ```
 
 ```
@@ -468,6 +499,13 @@ ggplot()+
     breaks=c(10, 100, 400))+
   theme(panel.grid.minor=element_blank())+
   coord_cartesian(expand=FALSE)
+```
+
+```
+## Warning: A numeric `legend.position` argument in `theme()` was deprecated in ggplot2 3.5.0.
+## ℹ Please use the `legend.position.inside` argument of `theme()` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 ```
 
 ![plot of chunk pelt-prune](/assets/img/2025-04-15-PELT-vs-fpopw/pelt-prune-1.png)
@@ -504,8 +542,22 @@ remotes::install_github("tdhock/fpopw/fpopw")
 ```
 
 ```
-## Skipping install of 'fpopw' from a github remote, the SHA1 (9d8c9a92) has not changed since last install.
-##   Use `force = TRUE` to force installation
+## Downloading GitHub repo tdhock/fpopw@HEAD
+```
+
+```
+## ── R CMD build ─────────────────────────────────────────────────────────────────────────────────────────────────
+##      checking for file ‘/tmp/Rtmp3bxDpD/remotes1832b711e8f3a8/tdhock-fpopw-9d8c9a9/fpopw/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/Rtmp3bxDpD/remotes1832b711e8f3a8/tdhock-fpopw-9d8c9a9/fpopw/DESCRIPTION’
+##   ─  preparing ‘fpopw’:
+##    checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
+## ─  cleaning src
+##   ─  checking for LF line-endings in source and make files and shell scripts
+##   ─  checking for empty or unneeded directories
+##   ─  building ‘fpopw_1.2.tar.gz’
+##      Avis : valeur uid incorrecte remplacée par celle pour l'utilisateur 'nobody'
+##    Avis : valeur gid incorrecte remplacée par celle pour l'utilisateur 'nobody'
+##      
+## 
 ```
 
 ``` r
@@ -697,8 +749,32 @@ remotes::install_github("vrunge/dust@910f8c67f99354fdb5ff7740e6436eb487d9efa6")
 ```
 
 ```
-## Skipping install of 'dust' from a github remote, the SHA1 (910f8c67) has not changed since last install.
-##   Use `force = TRUE` to force installation
+## Downloading GitHub repo vrunge/dust@910f8c67f99354fdb5ff7740e6436eb487d9efa6
+```
+
+```
+## These packages have more recent versions available.
+## It is recommended to update all of them.
+## Which would you like to update?
+## 
+## 1: All                                       
+## 2: CRAN packages only                        
+## 3: None                                      
+## 4: RcppArmad... (14.4.1-1 -> 14.4.3-1) [CRAN]
+## 
+## ── R CMD build ─────────────────────────────────────────────────────────────────────────────────────────────────
+##      checking for file ‘/tmp/Rtmp3bxDpD/remotes1832b7352b6c2c/vrunge-dust-910f8c6/DESCRIPTION’ ...  ✔  checking for file ‘/tmp/Rtmp3bxDpD/remotes1832b7352b6c2c/vrunge-dust-910f8c6/DESCRIPTION’
+##   ─  preparing ‘dust’:
+##    checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
+## ─  cleaning src
+##   ─  checking for LF line-endings in source and make files and shell scripts
+##   ─  checking for empty or unneeded directories
+##      Omitted ‘LazyData’ from DESCRIPTION
+##   ─  building ‘dust_0.3.0.tar.gz’
+##      Avis : valeur uid incorrecte remplacée par celle pour l'utilisateur 'nobody'
+##    Avis : valeur gid incorrecte remplacée par celle pour l'utilisateur 'nobody'
+##      
+## 
 ```
 
 ``` r
@@ -1470,7 +1546,7 @@ sessionInfo()
 ```
 
 ```
-## R version 4.5.0 (2025-04-11)
+## R Under development (unstable) (2025-05-21 r88220)
 ## Platform: x86_64-pc-linux-gnu
 ## Running under: Ubuntu 24.04.2 LTS
 ## 
@@ -1487,19 +1563,29 @@ sessionInfo()
 ## tzcode source: system (glibc)
 ## 
 ## attached base packages:
-## [1] stats     graphics  grDevices datasets  utils     methods   base     
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_3.5.2      data.table_1.17.99
+## [1] mlr3resampling_2025.6.23 mlr3_1.0.0.9000          future_1.58.0            ggplot2_3.5.1           
+## [5] data.table_1.17.99      
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] gtable_0.3.6           dplyr_1.1.4            compiler_4.5.0         crayon_1.5.3           tidyselect_1.2.1      
-##  [6] Rcpp_1.0.14            bspm_0.5.7             dichromat_2.0-0.1      scales_1.4.0           directlabels_2025.5.20
-## [11] lattice_0.22-7         R6_2.6.1               plyr_1.8.9             labeling_0.4.3         generics_0.1.4        
-## [16] curl_6.2.3             knitr_1.50             tibble_3.2.1           atime_2025.5.24        animint2_2025.6.4     
-## [21] pillar_1.10.2          RColorBrewer_1.1-3     rlang_1.1.6            dust_0.3.0             xfun_0.52             
-## [26] quadprog_1.5-8         RJSONIO_2.0.0          cli_3.6.5              withr_3.0.2            magrittr_2.0.3        
-## [31] grid_4.5.0             remotes_2.5.0          fpopw_1.2              lifecycle_1.0.4        vctrs_0.6.5           
-## [36] evaluate_1.0.3         glue_1.8.0             farver_2.1.2           codetools_0.2-20       tools_4.5.0           
-## [41] pkgconfig_2.0.3
+##  [1] tidyselect_1.2.1       dust_0.3.0             dplyr_1.1.4            farver_2.1.2           filelock_1.0.3        
+##  [6] fastmap_1.2.0          promises_1.3.2         paradox_1.0.1          digest_0.6.37          rpart_4.1.24          
+## [11] base64url_1.4          mime_0.13              lifecycle_1.0.4        ellipsis_0.3.2         processx_3.8.6        
+## [16] magrittr_2.0.3         compiler_4.6.0         rlang_1.1.6            progress_1.2.3         tools_4.6.0           
+## [21] knitr_1.50             prettyunits_1.2.0      labeling_0.4.3         brew_1.0-10            htmlwidgets_1.6.4     
+## [26] pkgbuild_1.4.7         curl_6.2.2             plyr_1.8.9             batchtools_0.9.17      pkgload_1.4.0         
+## [31] miniUI_0.1.1.1         withr_3.0.2            purrr_1.0.4            mlr3misc_0.18.0        desc_1.4.3            
+## [36] grid_4.6.0             urlchecker_1.0.1       profvis_0.4.0          mlr3measures_1.0.0     xtable_1.8-4          
+## [41] colorspace_2.1-1       globals_0.18.0         scales_1.3.0           cli_3.6.5              crayon_1.5.3          
+## [46] generics_0.1.3         remotes_2.5.0          future.apply_1.20.0    directlabels_2025.5.20 sessioninfo_1.2.3     
+## [51] atime_2025.5.24        cachem_1.1.0           parallel_4.6.0         fpopw_1.2              vctrs_0.6.5           
+## [56] devtools_2.4.5         animint2_2025.6.4      callr_3.7.6            hms_1.1.3              listenv_0.9.1         
+## [61] lgr_0.4.4              glue_1.8.0             parallelly_1.45.0      RJSONIO_1.3-1.9        codetools_0.2-20      
+## [66] ps_1.9.1               stringi_1.8.7          gtable_0.3.6           later_1.4.1            quadprog_1.5-8        
+## [71] palmerpenguins_0.1.1   munsell_0.5.1          tibble_3.2.1           pillar_1.10.2          rappdirs_0.3.3        
+## [76] htmltools_0.5.8.1      R6_2.6.1               lattice_0.22-7         evaluate_1.0.3         shiny_1.10.0          
+## [81] backports_1.5.0        memoise_2.0.1          httpuv_1.6.15          Rcpp_1.0.14            uuid_1.2-1            
+## [86] checkmate_2.3.2        xfun_0.51              fs_1.6.6               usethis_3.1.0          pkgconfig_2.0.3
 ```

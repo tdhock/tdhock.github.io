@@ -318,7 +318,7 @@ algo.colors <- c(
   PELT="red",
   FPOP="blue",
   DUST="deepskyblue")
-cat(sprintf("\\definecolor{%s}{HTML}{%s}\n", names(algo.colors), sub("#", "", animint2::toRGB(algo.colors))))
+cat(paste0("\\definecolor{", names(algo.colors), "}{HTML}{", sub("#", "", animint2::toRGB(algo.colors)), "}\n"))
 ggplot()+
   theme_bw()+
   theme(
