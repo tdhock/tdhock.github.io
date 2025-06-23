@@ -463,7 +463,7 @@ paper](https://arxiv.org/abs/2410.08643).
 Below we read the result file.
 
 ```{r}
-old_dt <- fread("2025-05-30-mlr3-filelock-beluga-large-old.csv")
+old_dt <- fread("2025-05-30-mlr3-filelock-beluga/large-old.csv")
 first <- min(old_dt$submitted)
 hours <- function(x)difftime(x, first, units="hours")
 old_dt[, let(
@@ -508,7 +508,7 @@ Below we read in results of an attempt to use the
 `mlr3resampling::proj_*()` functions to re-do this experiment.
 
 ```{r}
-large_dt <- fread("2025-05-30-mlr3-filelock-beluga-large.csv")
+large_dt <- fread("2025-05-30-mlr3-filelock-beluga/large.csv")
 first <- min(large_dt$start.time)
 hours <- function(x)difftime(x, first, units="hours")
 large_dt[, let(
