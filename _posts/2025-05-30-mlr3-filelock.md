@@ -72,7 +72,7 @@ devtools::install_github("tdhock/mlr3resampling@proj")
 ```
 
 ```
-## Skipping install of 'mlr3resampling' from a github remote, the SHA1 (a7dc90cc) has not changed since last install.
+## Skipping install of 'mlr3resampling' from a github remote, the SHA1 (c2220464) has not changed since last install.
 ##   Use `force = TRUE` to force installation
 ```
 
@@ -461,7 +461,7 @@ proj_compute(seq.proj.dir)
 ```
 ##    task.name learner.name iteration  status          start.time            end.time process
 ##       <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
-## 1:      easy  featureless         1 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
+## 1:      easy  featureless         1 started 2025-06-23 11:54:58 2025-06-23 11:54:58 1580148
 ##                                      learner             pred
 ##                                       <list>           <list>
 ## 1: <LearnerRegrFeatureless:regr.featureless> <PredictionRegr>
@@ -474,7 +474,7 @@ proj_compute(seq.proj.dir)
 ```
 ##    task.name learner.name iteration  status          start.time            end.time process
 ##       <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
-## 1:      easy  featureless         2 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
+## 1:      easy  featureless         2 started 2025-06-23 11:54:58 2025-06-23 11:54:58 1580148
 ##                                      learner             pred
 ##                                       <list>           <list>
 ## 1: <LearnerRegrFeatureless:regr.featureless> <PredictionRegr>
@@ -521,78 +521,78 @@ proj_results(seq.proj.dir)
 ```
 ##      task.name learner.name iteration  status          start.time            end.time process
 ##         <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
-##  1:       easy  featureless        10 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
-##  2:       easy  featureless        11 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
-##  3:       easy  featureless        12 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
-##  4:       easy  featureless        13 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
-##  5:       easy  featureless        14 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
-##  6:       easy  featureless        15 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
-##  7:       easy  featureless        16 started 2025-06-02 00:20:50 2025-06-02 00:20:51 2911045
-##  8:       easy  featureless        17 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-##  9:       easy  featureless        18 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 10:       easy        rpart         1 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 11:       easy  featureless         1 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
-## 12:       easy        rpart         2 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 13:       easy        rpart         3 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 14:       easy        rpart         4 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 15:       easy        rpart         5 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 16:       easy        rpart         6 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 17:       easy        rpart         7 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 18:       easy        rpart         8 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 19:       easy        rpart         9 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 20:       easy        rpart        10 started 2025-06-02 00:20:51 2025-06-02 00:20:51 2911045
-## 21:       easy        rpart        11 started 2025-06-02 00:20:51 2025-06-02 00:20:52 2911045
-## 22:       easy  featureless         2 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
-## 23:       easy        rpart        12 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 24:       easy        rpart        13 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 25:       easy        rpart        14 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 26:       easy        rpart        15 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 27:       easy        rpart        16 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 28:       easy        rpart        17 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 29:       easy        rpart        18 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 30: impossible  featureless         1 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 31: impossible  featureless         2 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 32: impossible  featureless         3 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 33:       easy  featureless         3 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
-## 34: impossible  featureless         4 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 35: impossible  featureless         5 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 36: impossible  featureless         6 started 2025-06-02 00:20:52 2025-06-02 00:20:52 2911045
-## 37: impossible  featureless         7 started 2025-06-02 00:20:52 2025-06-02 00:20:53 2911045
-## 38: impossible  featureless         8 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 39: impossible  featureless         9 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 40: impossible  featureless        10 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 41: impossible  featureless        11 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 42: impossible  featureless        12 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 43: impossible  featureless        13 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 44:       easy  featureless         4 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
-## 45: impossible  featureless        14 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 46: impossible  featureless        15 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 47: impossible  featureless        16 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 48: impossible  featureless        17 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 49: impossible  featureless        18 started 2025-06-02 00:20:53 2025-06-02 00:20:53 2911045
-## 50: impossible        rpart         1 started 2025-06-02 00:20:53 2025-06-02 00:20:54 2911045
-## 51: impossible        rpart         2 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 52: impossible        rpart         3 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 53: impossible        rpart         4 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 54: impossible        rpart         5 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 55:       easy  featureless         5 started 2025-06-02 00:20:49 2025-06-02 00:20:49 2911045
-## 56: impossible        rpart         6 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 57: impossible        rpart         7 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 58: impossible        rpart         8 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 59: impossible        rpart         9 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 60: impossible        rpart        10 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 61: impossible        rpart        11 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 62: impossible        rpart        12 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 63: impossible        rpart        13 started 2025-06-02 00:20:54 2025-06-02 00:20:54 2911045
-## 64: impossible        rpart        14 started 2025-06-02 00:20:54 2025-06-02 00:20:55 2911045
-## 65: impossible        rpart        15 started 2025-06-02 00:20:55 2025-06-02 00:20:55 2911045
-## 66:       easy  featureless         6 started 2025-06-02 00:20:49 2025-06-02 00:20:50 2911045
-## 67: impossible        rpart        16 started 2025-06-02 00:20:55 2025-06-02 00:20:55 2911045
-## 68: impossible        rpart        17 started 2025-06-02 00:20:55 2025-06-02 00:20:55 2911045
-## 69: impossible        rpart        18 started 2025-06-02 00:20:55 2025-06-02 00:20:55 2911045
-## 70:       easy  featureless         7 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
-## 71:       easy  featureless         8 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
-## 72:       easy  featureless         9 started 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045
+##  1:       easy  featureless        10 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+##  2:       easy  featureless        11 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+##  3:       easy  featureless        12 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+##  4:       easy  featureless        13 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+##  5:       easy  featureless        14 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+##  6:       easy  featureless        15 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+##  7:       easy  featureless        16 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+##  8:       easy  featureless        17 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+##  9:       easy  featureless        18 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+## 10:       easy        rpart         1 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+## 11:       easy  featureless         1 started 2025-06-23 11:54:58 2025-06-23 11:54:58 1580148
+## 12:       easy        rpart         2 started 2025-06-23 11:54:59 2025-06-23 11:55:00 1580148
+## 13:       easy        rpart         3 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 14:       easy        rpart         4 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 15:       easy        rpart         5 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 16:       easy        rpart         6 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 17:       easy        rpart         7 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 18:       easy        rpart         8 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 19:       easy        rpart         9 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 20:       easy        rpart        10 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 21:       easy        rpart        11 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 22:       easy  featureless         2 started 2025-06-23 11:54:58 2025-06-23 11:54:58 1580148
+## 23:       easy        rpart        12 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 24:       easy        rpart        13 started 2025-06-23 11:55:00 2025-06-23 11:55:00 1580148
+## 25:       easy        rpart        14 started 2025-06-23 11:55:00 2025-06-23 11:55:01 1580148
+## 26:       easy        rpart        15 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 27:       easy        rpart        16 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 28:       easy        rpart        17 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 29:       easy        rpart        18 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 30: impossible  featureless         1 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 31: impossible  featureless         2 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 32: impossible  featureless         3 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 33:       easy  featureless         3 started 2025-06-23 11:54:58 2025-06-23 11:54:58 1580148
+## 34: impossible  featureless         4 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 35: impossible  featureless         5 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 36: impossible  featureless         6 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 37: impossible  featureless         7 started 2025-06-23 11:55:01 2025-06-23 11:55:01 1580148
+## 38: impossible  featureless         8 started 2025-06-23 11:55:01 2025-06-23 11:55:02 1580148
+## 39: impossible  featureless         9 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 40: impossible  featureless        10 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 41: impossible  featureless        11 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 42: impossible  featureless        12 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 43: impossible  featureless        13 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 44:       easy  featureless         4 started 2025-06-23 11:54:58 2025-06-23 11:54:58 1580148
+## 45: impossible  featureless        14 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 46: impossible  featureless        15 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 47: impossible  featureless        16 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 48: impossible  featureless        17 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 49: impossible  featureless        18 started 2025-06-23 11:55:02 2025-06-23 11:55:02 1580148
+## 50: impossible        rpart         1 started 2025-06-23 11:55:02 2025-06-23 11:55:03 1580148
+## 51: impossible        rpart         2 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 52: impossible        rpart         3 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 53: impossible        rpart         4 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 54: impossible        rpart         5 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 55:       easy  featureless         5 started 2025-06-23 11:54:58 2025-06-23 11:54:58 1580148
+## 56: impossible        rpart         6 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 57: impossible        rpart         7 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 58: impossible        rpart         8 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 59: impossible        rpart         9 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 60: impossible        rpart        10 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 61: impossible        rpart        11 started 2025-06-23 11:55:03 2025-06-23 11:55:03 1580148
+## 62: impossible        rpart        12 started 2025-06-23 11:55:03 2025-06-23 11:55:04 1580148
+## 63: impossible        rpart        13 started 2025-06-23 11:55:04 2025-06-23 11:55:04 1580148
+## 64: impossible        rpart        14 started 2025-06-23 11:55:04 2025-06-23 11:55:04 1580148
+## 65: impossible        rpart        15 started 2025-06-23 11:55:04 2025-06-23 11:55:04 1580148
+## 66:       easy  featureless         6 started 2025-06-23 11:54:58 2025-06-23 11:54:58 1580148
+## 67: impossible        rpart        16 started 2025-06-23 11:55:04 2025-06-23 11:55:04 1580148
+## 68: impossible        rpart        17 started 2025-06-23 11:55:04 2025-06-23 11:55:04 1580148
+## 69: impossible        rpart        18 started 2025-06-23 11:55:04 2025-06-23 11:55:04 1580148
+## 70:       easy  featureless         7 started 2025-06-23 11:54:58 2025-06-23 11:54:59 1580148
+## 71:       easy  featureless         8 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
+## 72:       easy  featureless         9 started 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148
 ##      task.name learner.name iteration  status          start.time            end.time process
 ##         <char>       <char>     <int>  <char>              <POSc>              <POSc>   <int>
 ##                                       learner             pred
@@ -727,26 +727,19 @@ reg <- batchtools::makeRegistry(reg.dir)
 ```
 
 ```
-## Created registry in '/tmp/Rtmpuob5MM/file2c6b4526c91543/registry' using cluster functions 'Slurm'
+## Created registry in '/tmp/RtmpmmEmcm/file181c74644c1de9/registry' using cluster functions 'Slurm'
+```
+
+``` r
+reg$cluster.functions <- batchtools::makeClusterFunctionsMulticore()
+```
+
+```
+## Auto-detected 14 CPUs
 ```
 
 Note in the output above that we are using Multicore cluster
-functions, because we have the following code in the user-specific
-config file:
-
-
-``` r
-cat(readLines("~/.batchtools.conf.R"), sep="\n")
-```
-
-```
-## ##cluster.functions = makeClusterFunctionsMulticore()
-## (slurm.tmpl <- normalizePath(
-##   "~/slurm-afterok.tmpl",
-##   mustWork=TRUE))
-## cluster.functions = makeClusterFunctionsSlurm(slurm.tmpl)
-```
-
+functions.
 The code below launches the parallel computation in 2 worker processes.
 
 
@@ -766,15 +759,19 @@ batchtools::submitJobs(bm.jobs)
 ```
 
 ```
-## Submitting 2 jobs in 2 chunks using cluster functions 'Slurm' ...
-```
-
-```
-## Error: Fatal error occurred: 101. Command 'sbatch' produced exit code 255. Output: 'sbatch: error: Invalid --time specification'
+## Submitting 2 jobs in 2 chunks using cluster functions 'Multicore' ...
 ```
 
 ``` r
 batchtools::waitForJobs()
+```
+
+```
+## 
+```
+
+```
+## Waiting (Q::queued R::running D::done E::error ?::expired) [===========================================] 100% eta: 0s
 ```
 
 ```
@@ -786,23 +783,10 @@ The code below visualizes the result.
 
 ``` r
 result.list$laptop_multicore <- norm_times(proj_results(multi.proj.dir))
-```
-
-```
-## Error in eval(jsub, SDenv, parent.frame()): objet 'start.time' introuvable
-```
-
-``` r
 process_viz("laptop_multicore")
 ```
 
-```
-## Error in `geom_segment()`:
-## ! Problem while computing aesthetics.
-## ℹ Error occurred in the 1st layer.
-## Caused by error:
-## ! objet 'start.seconds' introuvable
-```
+![plot of chunk times-multi](/assets/img/2025-05-30-mlr3-filelock/times-multi-1.png)
 
 The output above shows that there are two processes working in
 parallel on the computation.  After each process finishes a given
@@ -829,7 +813,7 @@ mlr3resampling::proj_grid(
 ```
 
 ```
-##     task.i learner.i resampling.i    task.id       learner.id       resampling.id test.subset train.subsets groups
+##     task.i learner.i resampling.i    task_id       learner_id       resampling_id test.subset train.subsets groups
 ##      <int>     <int>        <int>     <char>           <char>              <char>      <fctr>        <char>  <int>
 ##  1:      1         1            1       easy regr.featureless same_other_sizes_cv       Alice           all     52
 ##  2:      1         1            1       easy regr.featureless same_other_sizes_cv       Alice           all     52
@@ -903,7 +887,7 @@ mlr3resampling::proj_grid(
 ## 70:      2         2            1 impossible       regr.rpart same_other_sizes_cv         Bob          same     26
 ## 71:      2         2            1 impossible       regr.rpart same_other_sizes_cv         Bob          same     26
 ## 72:      2         2            1 impossible       regr.rpart same_other_sizes_cv         Bob          same     26
-##     task.i learner.i resampling.i    task.id       learner.id       resampling.id test.subset train.subsets groups
+##     task.i learner.i resampling.i    task_id       learner_id       resampling_id test.subset train.subsets groups
 ##      <int>     <int>        <int>     <char>           <char>              <char>      <fctr>        <char>  <int>
 ##     test.fold                  test                 train  seed n.train.groups iteration
 ##         <int>                <list>                <list> <int>          <int>     <int>
@@ -1080,17 +1064,17 @@ for(computer in names(result.list)){
 ```
 ##               computer iteration          start.time            end.time process  start.seconds    end.seconds Process
 ##                 <char>     <int>              <POSc>              <POSc>   <int>     <difftime>     <difftime>  <fctr>
-##   1: laptop_sequential        10 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 0.8500752 secs 0.9391413 secs 2911045
-##   2: laptop_sequential        11 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 0.9431872 secs 1.0362859 secs 2911045
-##   3: laptop_sequential        12 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 1.0398619 secs 1.2994919 secs 2911045
-##   4: laptop_sequential        13 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 1.3027387 secs 1.3650990 secs 2911045
-##   5: laptop_sequential        14 2025-06-02 00:20:50 2025-06-02 00:20:50 2911045 1.3683965 secs 1.4287214 secs 2911045
+##   1: laptop_sequential        10 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148 0.7186282 secs 0.7850451 secs 1580148
+##   2: laptop_sequential        11 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148 0.7882936 secs 0.8688557 secs 1580148
+##   3: laptop_sequential        12 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148 0.8722880 secs 0.9340611 secs 1580148
+##   4: laptop_sequential        13 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148 0.9372725 secs 1.0171123 secs 1580148
+##   5: laptop_sequential        14 2025-06-23 11:54:59 2025-06-23 11:54:59 1580148 1.0202739 secs 1.0829597 secs 1580148
 ##  ---                                                                                                                  
-## 284:      beluga_slurm        10 2025-05-31 12:51:12 2025-05-31 12:51:12       2 9.3785510 secs 9.5612240 secs       2
-## 285:      beluga_slurm        12 2025-05-31 12:51:12 2025-05-31 12:51:12       1 9.4658461 secs 9.6455581 secs       1
-## 286:      beluga_slurm        14 2025-05-31 12:51:12 2025-05-31 12:51:12       2 9.5708041 secs 9.7502091 secs       2
-## 287:      beluga_slurm        16 2025-05-31 12:51:12 2025-05-31 12:51:12       1 9.6548691 secs 9.8320482 secs       1
-## 288:      beluga_slurm        18 2025-05-31 12:51:12 2025-05-31 12:51:13       2 9.7764421 secs 9.9576142 secs       2
+## 356:      beluga_slurm        10 2025-05-31 12:51:12 2025-05-31 12:51:12       2 9.3785510 secs 9.5612240 secs       2
+## 357:      beluga_slurm        12 2025-05-31 12:51:12 2025-05-31 12:51:12       1 9.4658461 secs 9.6455581 secs       1
+## 358:      beluga_slurm        14 2025-05-31 12:51:12 2025-05-31 12:51:12       2 9.5708041 secs 9.7502091 secs       2
+## 359:      beluga_slurm        16 2025-05-31 12:51:12 2025-05-31 12:51:12       1 9.6548691 secs 9.8320482 secs       1
+## 360:      beluga_slurm        18 2025-05-31 12:51:12 2025-05-31 12:51:13       2 9.7764421 secs 9.9576142 secs       2
 ```
 
 ``` r
@@ -1382,7 +1366,7 @@ sessionInfo()
 ```
 
 ```
-## R version 4.5.0 (2025-04-11)
+## R Under development (unstable) (2025-05-21 r88220)
 ## Platform: x86_64-pc-linux-gnu
 ## Running under: Ubuntu 24.04.2 LTS
 ## 
@@ -1399,28 +1383,28 @@ sessionInfo()
 ## tzcode source: system (glibc)
 ## 
 ## attached base packages:
-## [1] stats     graphics  grDevices datasets  utils     methods   base     
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] mlr3resampling_2025.5.31 mlr3_0.23.0.9000         future_1.49.0            ggplot2_3.5.2           
+## [1] mlr3resampling_2025.6.23 mlr3_1.0.0.9000          future_1.58.0            ggplot2_3.5.1           
 ## [5] data.table_1.17.99      
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] tidyselect_1.2.1     dplyr_1.1.4          farver_2.1.2         filelock_1.0.3       fastmap_1.2.0       
-##  [6] promises_1.3.3       paradox_1.0.1        digest_0.6.37        rpart_4.1.24         base64url_1.4       
-## [11] mime_0.13            lifecycle_1.0.4      ellipsis_0.3.2       processx_3.8.6       magrittr_2.0.3      
-## [16] compiler_4.5.0       rlang_1.1.6          progress_1.2.3       tools_4.5.0          knitr_1.50          
-## [21] prettyunits_1.2.0    labeling_0.4.3       brew_1.0-10          htmlwidgets_1.6.4    pkgbuild_1.4.8      
-## [26] curl_6.2.3           RColorBrewer_1.1-3   batchtools_0.9.17    pkgload_1.4.0        miniUI_0.1.2        
-## [31] withr_3.0.2          purrr_1.0.4          mlr3misc_0.18.0      desc_1.4.3           grid_4.5.0          
-## [36] urlchecker_1.0.1     profvis_0.4.0        mlr3measures_1.0.0   xtable_1.8-4         globals_0.18.0      
-## [41] scales_1.4.0         dichromat_2.0-0.1    cli_3.6.5            crayon_1.5.3         generics_0.1.4      
-## [46] remotes_2.5.0        future.apply_1.11.3  sessioninfo_1.2.3    cachem_1.1.0         parallel_4.5.0      
-## [51] vctrs_0.6.5          devtools_2.4.5       callr_3.7.6          hms_1.1.3            listenv_0.9.1       
-## [56] lgr_0.4.4            glue_1.8.0           parallelly_1.44.0    codetools_0.2-20     ps_1.9.1            
-## [61] stringi_1.8.7        gtable_0.3.6         later_1.4.2          palmerpenguins_0.1.1 tibble_3.2.1        
-## [66] bspm_0.5.7           pillar_1.10.2        rappdirs_0.3.3       htmltools_0.5.8.1    R6_2.6.1            
-## [71] evaluate_1.0.3       shiny_1.10.0         backports_1.5.0      memoise_2.0.1        httpuv_1.6.16       
-## [76] Rcpp_1.0.14          uuid_1.2-1           checkmate_2.3.2      xfun_0.52            fs_1.6.6            
-## [81] usethis_3.1.0        pkgconfig_2.0.3
+##  [1] gtable_0.3.6         xfun_0.51            htmlwidgets_1.6.4    devtools_2.4.5       remotes_2.5.0       
+##  [6] processx_3.8.6       callr_3.7.6          batchtools_0.9.17    vctrs_0.6.5          tools_4.6.0         
+## [11] ps_1.9.1             generics_0.1.3       base64url_1.4        curl_6.2.2           parallel_4.6.0      
+## [16] tibble_3.2.1         pkgconfig_2.0.3      checkmate_2.3.2      desc_1.4.3           uuid_1.2-1          
+## [21] lifecycle_1.0.4      farver_2.1.2         compiler_4.6.0       progress_1.2.3       munsell_0.5.1       
+## [26] codetools_0.2-20     httpuv_1.6.15        htmltools_0.5.8.1    usethis_3.1.0        later_1.4.1         
+## [31] pillar_1.10.2        crayon_1.5.3         urlchecker_1.0.1     ellipsis_0.3.2       cachem_1.1.0        
+## [36] sessioninfo_1.2.3    rpart_4.1.24         mime_0.13            parallelly_1.45.0    brew_1.0-10         
+## [41] tidyselect_1.2.1     digest_0.6.37        stringi_1.8.7        dplyr_1.1.4          purrr_1.0.4         
+## [46] listenv_0.9.1        mlr3measures_1.0.0   labeling_0.4.3       fastmap_1.2.0        grid_4.6.0          
+## [51] colorspace_2.1-1     cli_3.6.5            magrittr_2.0.3       paradox_1.0.1        pkgbuild_1.4.7      
+## [56] future.apply_1.20.0  withr_3.0.2          rappdirs_0.3.3       prettyunits_1.2.0    filelock_1.0.3      
+## [61] scales_1.3.0         promises_1.3.2       backports_1.5.0      globals_0.18.0       hms_1.1.3           
+## [66] memoise_2.0.1        shiny_1.10.0         evaluate_1.0.3       knitr_1.50           miniUI_0.1.1.1      
+## [71] profvis_0.4.0        mlr3misc_0.18.0      rlang_1.1.6          Rcpp_1.0.14          xtable_1.8-4        
+## [76] glue_1.8.0           palmerpenguins_0.1.1 pkgload_1.4.0        lgr_0.4.4            R6_2.6.1            
+## [81] fs_1.6.6
 ```

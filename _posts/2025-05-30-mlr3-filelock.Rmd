@@ -350,19 +350,14 @@ saveRDS(my.grid, file.path(multi.proj.dir, "grid.rds"))
 multi.job.dt <- proj_grid_jobs(multi.proj.dir)
 reg.dir <- file.path(multi.proj.dir, "registry")
 reg <- batchtools::makeRegistry(reg.dir)
+reg$cluster.functions <- batchtools::makeClusterFunctionsMulticore()
 ```
 
 Note in the output above that we are using Multicore cluster
-functions, because we have the following code in the user-specific
-config file:
-
-```{r}
-cat(readLines("~/.batchtools.conf.R"), sep="\n")
-```
-
+functions.
 The code below launches the parallel computation in 2 worker processes.
 
-```{r times-multi}
+```{r}
 n.workers <- 2
 bm.jobs <- batchtools::batchMap(
   function(i)proj_compute_until_done(multi.proj.dir),
@@ -373,7 +368,7 @@ batchtools::waitForJobs()
 
 The code below visualizes the result.
 
-```{r}
+```{r times-multi}
 result.list$laptop_multicore <- norm_times(proj_results(multi.proj.dir))
 process_viz("laptop_multicore")
 ```
