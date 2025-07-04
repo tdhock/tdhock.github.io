@@ -956,9 +956,13 @@ loss_1_100[, let(
 )]
 common.names <- intersect(names(loss_1_100), names(summary_compare))
 all_compare <- rbind(
-  data.table(design="de-centralized", summary_compare[, ..common.names]),
+  data.table(design="de-centralized", summary_compare[computation=="model"][, ..common.names]),
   data.table(design="centralized", loss_1_100[, ..common.names])
 )[, Fun := factor(fun, fun_levs)][]
+if(FALSE){
+  parallelPeaks <- all_compare
+  save(parallelPeaks, file="~/R/animint2/data/parallelPeaks.RData")
+}
 ggplot()+
   theme_bw()+
   geom_segment(aes(
