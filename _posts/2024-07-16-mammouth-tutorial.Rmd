@@ -365,6 +365,43 @@ Before installing R packages, make sure to declare a CRAN mirror in your `~/.Rpr
 options(repos=c(CRAN="http://cloud.r-project.org"))
 ```
 
+## RStudio web connected to cluster
+
+What if you don't want to learn emacs?
+A reasonable alternative is RStudio, which can be run in a web browser, connected to the Alliance Canada clusters.
+
+Start by going to [JupyterHub on
+clusters](https://docs.alliancecan.ca/wiki/JupyterHub#JupyterHub_on_clusters),
+and follow a link to jupyterhub on one of the clusters, for example
+[JHubOnBeluga](https://jupyterhub.beluga.alliancecan.ca/).
+
+* After logging in to that page using your Alliance Canada credentials, you need to specify how much time and memory you want for the compute node job which your RStudio will use for executing R/shell/etc code.
+* Default of 1 hour should be reasonable if you just want to launch a job, or gather results.
+* Try increasing time limit to 8 hours if you want to have a RStudio open on the cluster for a full day of work/testing.
+* You may need to increase memory if you are launching a large experiment, or gathering a lot of results.
+* Before JupyterHub opens, you will have to wait for the cluster to queue and launch your job.
+
+![jhub](/assets/img/2024-07-16-mammouth-tutorial/jhub.png)
+
+The screenshot above shows the jupyterhub window, from which you can launch RStudio.
+
+* First click hexagon/Softwares on left.
+* Then type `rstudio` in the text field above LOADED MODULES, which uses the text you enter to limit the display of AVAILABLE MODULES.
+* Click on grey `Load` button which appears when you hover the pointer over the most recent version of `rstudio-server` (version 4.4 in the screenshot above).
+* Click RStudio (R icon in a blue circle) to open a new tab running RStudio.
+* The RStudio will be running on a compute node, which typically will not have internet access, so `install.packages()` will not work.
+
+To install packages, you should
+
+* open a terminal, and ssh to the same cluster (for example `beluga.calculcanada.ca`), which will get you to a login node (with internet access).
+* then do `module load r/4.4.1` or similar (make sure the version number is consistent with the RStudio version you selected in the web browser).
+* then run `R -e 'install.packages("mlr3")'` or similar to download the data/code you need.
+* you can run `.libPaths()` or `system.file(package="mlr3")` in both versions of R (in terminal/login node, and on web/compute node), to verify that you are installing packages to the same library.
+
+The result should look something like below, which is a screenshot of RStudio in a web browser window (connected to a beluga compute node), and R installing packages from a terminal window (connected to a beluga login node).
+
+![rstudio web](/assets/img/2024-07-16-mammouth-tutorial/rstudio.png)
+
 # Non-working R versions
 
 Other options for adding R modules: 
