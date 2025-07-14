@@ -1,0 +1,426 @@
+---
+layout: post
+title: Creating large imbalanced data benchmarks
+description: Tutorial with OpenML
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-07-14-imbalance-openml"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to show how to create imbalanced classification data
+sets for use with our recently proposed [SOAK
+algorithm](https://arxiv.org/abs/2410.08643), which will be able to
+tell us if we can train on imbalanced data, and get accurate
+predictions on balanced data (and vice versa).
+
+## Read and order OpenML data
+
+OpenML is a web site and repository where we can download machine learning benchmark data sets.
+We begin by reading the list of meta-data,
+
+```{r}
+omlds <- OpenML::listOMLDataSets(limit=1e6)
+library(data.table)
+omldt <- data.table(omlds)[order(-number.of.instances)]
+class_dt <- omldt[is.finite(number.of.classes)][number.of.classes>1]
+unique(class_dt[, .(
+  name, rows=number.of.instances, Nclass=number.of.classes,
+  Nmajor=majority.class.size, Nminor=minority.class.size
+)])[1:100]
+```
+
+The table above shows the 100 largest data sets, in terms of number of instances/rows.
+
+```{r}
+higgs.id <- class_dt[1, data.id]
+if(FALSE){
+  higgs.data <- OpenML::getOMLDataSet(higgs.id)
+}
+higgs_dt <- fread("higgs.csv")
+higgs_dt[1]
+```
+
+We see that these data have a `target` column (output to predict). The class distribution
+is as follows:
+
+```{r}
+(higgs_counts <- higgs_dt[, .(
+  count=.N,
+  prop=.N/nrow(higgs_dt)
+), by=target][order(-prop)])
+```
+
+In the table above, we see the overall `count` (number of rows) for each target.
+We see in the `prop` column above that there are about an equal amount of data
+for each class, from 47% to about 53%.
+We would like to split the rows into two subsets, one balanced, and one imbalanced.
+The balanced subset will have an equal number of positive and negative labels.
+The imbalanced subset should be the same size as the balanced subset, but have imbalance in the labels, with a certain proportion of negative labels, `Pneg`, defined below.
+
+```{r}
+(Tpos <- higgs_counts$count[1])
+(Tneg <- higgs_counts$count[2])
+Pneg <- 0.001
+```
+
+Next, we compute the number of rows in each subset. The formulas below can be derived from assuming:
+
+* `N` is the number of positive (and negative) labels in the balanced subset.
+* `n_pos` and `n_neg` are the numbers of postive/negative labels in the imbalanced subset: `Pneg(n_neg+n_pos)=n_neg`.
+* The subsets are the same size: `n_neg + n_pos= 2*N`.
+* All of the positive labels are used: `Tpos = n_pos + N`.
+
+```{r}
+(N <- as.integer(Tpos/(3-2*Pneg)))
+(n_pos <- Tpos-N)
+(n_neg <- as.integer(Pneg*n_pos/(1-Pneg)))
+```
+
+The code below can be used to check the results.
+
+```{r}
+rbind(n_pos+N, Tpos) # all positive labels are used.
+rbind(n_neg+N, Tneg) # negative labels used is less than total negative labels.
+rbind(2*N, n_pos+n_neg) # imbalanced and balanced subsets are same size.
+```
+
+## Proportional ordering
+
+TODO We would like to preserve these
+proportions when we take subsamples of the data. To do that, we first
+take a random order of the data (in case the original file had some
+special structure), and then we assign a new proportional ordering
+based on the label value.
+
+```{r}
+my.seed <- 1
+set.seed(my.seed)
+rand_ord <- higgs_dt[, sample(.N)]
+prop_ord <- data.table(y=higgs_dt$target[rand_ord])[
+, prop_y := seq(0,1,l=.N), by=y
+][, order(prop_y)]
+ord_list <- list(
+  random=rand_ord,
+  proportional=rand_ord[prop_ord])
+ord_prop_dt_list <- list()
+for(ord_name in names(ord_list)){
+  ord_vec <- ord_list[[ord_name]]
+  y_ord <- higgs_dt$target[ord_vec]
+  for(prop_data in c(0.01, 0.1, 1)){
+    N <- nrow(higgs_dt)*prop_data
+    N_props <- data.table(y=y_ord[1:N])[, .(
+      count=.N,
+      prop_y=.N/N
+    ), by=y][order(-prop_y)]
+    ord_prop_dt_list[[paste(ord_name, prop_data)]] <- data.table(
+      ord_name, prop_data, N_props)
+  }
+}
+ord_prop_dt <- rbindlist(ord_prop_dt_list)
+dcast(ord_prop_dt, ord_name + prop_data ~ y, value.var="prop_y")
+```
+
+The output above shows that the proportional ordering is much more
+stable than the random ordering, which has lots of variations in each
+column, between the different rows (values of prop_data).
+
+## Creating class imbalance
+
+We will create different versions of MNIST, each version having two subsets:
+
+* one which is balanced: 50% positive labels (odd=1), 50% negative labels (odd=0).
+* one which is imbalanced: 50% positive labels (odd=1), and a smaller
+  proportion of negative labels (from 10% to 0.1%).
+
+To do that, we use the following code to compute the number of samples
+we would need:
+
+```{r}
+target_prop <- 10^seq(-1, -5)
+(smaller_dt <- data.table(
+  target_prop,
+  N_pos_neg = as.integer(Tpos/(3-2*target_prop))
+)[
+, n_pos := Tpos-N_pos_neg
+][
+, n_neg := as.integer(target_prop*n_pos/(1-target_prop))
+][, let(
+  check_prop = n_neg/(n_pos+n_neg),
+  check_N_bal = N_pos_neg*2,
+  check_N_im = n_pos+n_neg
+)][])
+```
+
+Above we see 
+
+* `target_prop`, the desired proportion of negative labels in the imbalanced subset,
+* `N_pos_neg`, the number of negative (and positive) labels in the balanced subset,
+* `n_pos` and `n_neg`, the number of positive/negative labels in the imbalanced subset,
+* `check_prop`, the empirical proportion of negative labels in the imbalanced subset, 
+* `check_N_bal` and `check_N_im`, the number of rows in the balanced/imbalanced subsets.
+
+It is clear from the table above that the empirical proportions are
+consistent with the desired proportions. To create the different imbalanced data
+sets, we loop over the rows of this table, to assign rows to each
+subset of each imbalanced variant (each corresponding to a column of
+`subset_mat`).
+
+```{r}
+subset_mat <- matrix(
+  NA, nrow(higgs_dt), nrow(smaller_dt),
+  dimnames=list(
+    NULL,
+    target_prop=paste0(
+      "seed",
+      my.seed,
+      "_prop",
+      smaller_dt$target_prop)))
+emp_y_list <- list()
+emp_props_list <- list()
+MNIST_ord <- MNIST_dt[, .(odd, .I)][ord_list$proportional]
+for(unb_i in 1:nrow(unb_small_dt)){
+  unb_row <- unb_small_dt[unb_i]
+  unb_count_dt <- rbind(
+    data.table(subset="balanced", binary_counts[,.(odd)], smaller_dt[1]),
+    data.table(subset="imbalanced", binary_counts[1,.(odd)], smaller_dt[1]),
+    unb_row)
+  MNIST_ord[, subset := NA_character_]
+  for(o in c(1,0)){
+    o_dt <- unb_count_dt[odd==o]
+    sub_vals <- o_dt[, rep(subset, count)]
+    o_idx <- which(MNIST_ord$odd==o)
+    some_idx <- o_idx[1:length(sub_vals)]
+    MNIST_ord[some_idx, subset := sub_vals]
+  }
+  subset_mat[MNIST_ord$I, unb_i] <- MNIST_ord$subset
+  ## Check to make imbalanced is a subset of the previous larger one.
+  if(unb_i>1)stopifnot(all(which(
+    subset_mat[,unb_i]=="imbalanced"
+  ) %in% which(
+    subset_mat[,unb_i-1]=="imbalanced"
+  )))
+  ## Check to make sure balanced is the same as previous.
+  if(unb_i>1)stopifnot(identical(
+    which(subset_mat[,unb_i]=="balanced"),
+    which(subset_mat[,unb_i-1]=="balanced")
+  ))
+  (unb_MNIST <- data.table(
+    target_prop=unb_row$target_prop,
+    subset=subset_mat[,unb_i],
+    odd=MNIST_dt$odd,
+    y=MNIST_dt$y)[, idx := .I][!is.na(subset)])
+  emp_y_list[[unb_i]] <- unb_MNIST[, .(
+    count=.N
+  ), by=.(target_prop,subset,y)]
+  emp_props_list[[unb_i]] <- unb_MNIST[, .(
+    count=.N,
+    first=idx[1], 
+    last=idx[.N]
+  ), by=.(target_prop,subset,odd)
+  ][
+  , prop_in_subset := count/sum(count)
+  , by=subset
+  ][]
+}
+emp_y <- rbindlist(emp_y_list)
+(emp_props <- rbindlist(emp_props_list))
+```
+
+The table above can be used to verify that the subset assignments are
+consistent with the target label proportions. It has one row for each
+unique combination of target proportion, subset, and label (odd). For
+each value of target proportion, 
+
+* each balanced subset has the same data, as can be seen by examining
+  columns count, first, and last. The `prop_in_subset` column shows
+  that the class labels are balanced (half of each).
+* each imbalanced subset has the same first index values, but
+  different last index values. The smaller
+  imbalanced subsets are strict subsets of the larger imbalanced
+  subsets (for example the 5% imbalanced subset is
+  also a part of the 10% imbalanced subset).
+  
+To verify that the underlying multi-class proportion is consistent in
+the down-sampled subsets, we use the code below:
+
+```{r}
+dcast(emp_y, subset + target_prop ~ y, value.var="count")
+```
+
+The table above has one row per subset, and one column per class
+(there are ten original classes in MNIST, 0-9). It is clear that 
+
+* the balanced subset always has the same number of data, for each
+  value of target proportion.
+* the imbalanced subset number of data depends on the class label:
+  * for odd labels, there are always the same number of samples.
+  * for even labels, the number of samples depends on the target
+    proportion, and is uniform across classes (0 about the same number
+    as 2 for example).
+
+## Write the subset columns to a new CSV file
+
+Finally, we create new columns for each subset.
+
+```{r}
+fwrite(subset_mat, "2025-03-21-imbalanced.csv")
+system("head 2025-03-21-imbalanced.csv")
+```
+
+## Putting it all together
+
+What if we wanted to do the same thing on several data sets?
+Or for several different random seeds?
+See code below.
+
+```{r}
+library(data.table)
+data_Classif <- "~/projects/cv-same-other-paper/data_Classif/"
+for(data.name in c("EMNIST", "FashionMNIST", "MNIST")){
+  data.csv <- paste0(
+    data_Classif,
+    data.name,
+    ".csv")
+  MNIST_dt <- fread(data.csv)
+  seed_mat_list <- list()
+  for(seed in 1:2){
+    set.seed(seed)
+    rand_ord <- MNIST_dt[, sample(.N)]
+    prop_ord <- data.table(y=MNIST_dt$y[rand_ord])[
+    , prop_y := seq(0,1,l=.N), by=y
+    ][, order(prop_y)]
+    ord_list <- list(
+      random=rand_ord,
+      proportional=rand_ord[prop_ord])
+    (binary_counts <- MNIST_dt[
+    , odd := y %% 2
+    ][, .(
+      count=.N,
+      prop=.N/nrow(MNIST_dt)
+    ), by=odd][order(-prop, -odd)])
+    larger_N <- binary_counts$count[1]/2
+    target_prop <- c(0.5, 0.1, 0.05, 0.01, 0.005, 0.001)
+    (smaller_dt <- data.table(
+      target_prop,
+      count=as.integer(target_prop*larger_N/(1-target_prop))
+    )[
+    , prop := count/(count+larger_N)
+    ][])
+    (unb_small_dt <- data.table(
+      subset="imbalanced",
+      binary_counts[2,.(odd)],
+      smaller_dt[-1]))
+    subset_mat <- matrix(
+      NA, nrow(MNIST_dt), nrow(unb_small_dt),
+      dimnames=list(
+        NULL,
+        target_prop=paste0(
+          "seed",
+          seed,
+          "_prop",
+          unb_small_dt$target_prop)))
+    emp_y_list <- list()
+    emp_props_list <- list()
+    MNIST_ord <- MNIST_dt[, .(odd, .I)][ord_list$proportional]
+    for(unb_i in 1:nrow(unb_small_dt)){
+      unb_row <- unb_small_dt[unb_i]
+      unb_count_dt <- rbind(
+        data.table(subset="balanced", binary_counts[,.(odd)], smaller_dt[1]),
+        data.table(subset="imbalanced", binary_counts[1,.(odd)], smaller_dt[1]),
+        unb_row)
+      MNIST_ord[, subset := NA_character_]
+      for(o in c(1,0)){
+        o_dt <- unb_count_dt[odd==o]
+        sub_vals <- o_dt[, rep(subset, count)]
+        o_idx <- which(MNIST_ord$odd==o)
+        some_idx <- o_idx[1:length(sub_vals)]
+        MNIST_ord[some_idx, subset := sub_vals]
+      }
+      subset_mat[MNIST_ord$I, unb_i] <- MNIST_ord$subset
+      ## Check to make imbalanced is a subset of the previous larger one.
+      if(unb_i>1)stopifnot(all(which(
+        subset_mat[,unb_i]=="imbalanced"
+      ) %in% which(
+        subset_mat[,unb_i-1]=="imbalanced"
+      )))
+      ## Check to make sure balanced is the same as previous.
+      if(unb_i>1)stopifnot(identical(
+        which(subset_mat[,unb_i]=="balanced"),
+        which(subset_mat[,unb_i-1]=="balanced")
+      ))
+      (unb_MNIST <- data.table(
+        target_prop=unb_row$target_prop,
+        subset=subset_mat[,unb_i],
+        odd=MNIST_dt$odd,
+        y=MNIST_dt$y)[, idx := .I][!is.na(subset)])
+      emp_y_list[[unb_i]] <- unb_MNIST[, .(
+        count=.N
+      ), by=.(target_prop,subset,y)]
+      emp_props_list[[unb_i]] <- unb_MNIST[, .(
+        count=.N,
+        first=idx[1], 
+        last=idx[.N]
+      ), keyby=.(target_prop,subset,odd)
+      ][
+      , prop_in_subset := count/sum(count)
+      , by=subset
+      ][]
+    }
+    emp_y <- rbindlist(emp_y_list)
+    (emp_props <- rbindlist(emp_props_list))
+    seed_mat_list[[seed]] <- subset_mat
+  }
+  print(data.name)
+  print(dcast(emp_y, subset + target_prop ~ y, value.var="count"))
+  (seed_dt <- do.call(data.table, seed_mat_list))
+  (out.csv <- sub("data_Classif", "data_Classif_imbalanced", data.csv))
+  dir.create(dirname(out.csv), showWarnings = FALSE, recursive = FALSE)
+  fwrite(seed_dt, out.csv)
+}
+system(paste("head", file.path(dirname(out.csv), "*")))
+```
+
+Note in the output above that the minority class is the same in each
+data set (even=0 minority, odd=1 majority).
+
+## Conclusions
+
+This tutorial showed how to create imbalanced data sets. Each
+imbalanced data set is represented as a new column (with the same
+number of rows as the original data file), with two values: balanced
+and imbalanced, that can be efficiently saved to a new CSV file
+(without having to copy or modify the original data CSV). We checked
+that the new data obey certain constraints:
+
+* balanced subsets are the same for different imbalance ratios,
+* imbalanced subsets are nested (smaller one is strict subset of larger one).
+
+Each column in the resulting CSV files can be used to create a
+different mlr3 Task (each with a different definition of subset), so
+our recently proposed [SOAK
+algorithm](https://arxiv.org/abs/2410.08643) can be used to determine
+if a learning algorithm is able to generalize between data subsets
+with different proportions of labels (50% minority class versus 1%,
+etc).
+
+## Session info
+
+```{r}
+sessionInfo()
+```

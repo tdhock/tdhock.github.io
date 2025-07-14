@@ -388,6 +388,10 @@ The result should look something like below, which is a screenshot of RStudio in
 
 ![rstudio web](/assets/img/2024-07-16-mammouth-tutorial/rstudio.png)
 
+## VS Code
+
+Similar to RStudio setup described in the last section, there is support for VS Code, [as described in the docs](https://docs.alliancecan.ca/wiki/JupyterHub#VS_Code).
+
 # Non-working R versions
 
 Other options for adding R modules: 
