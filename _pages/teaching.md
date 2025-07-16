@@ -88,6 +88,8 @@ Topics without links below are on my TODO list.
 
 ## Sherbrooke students mentored
 
+* [Omar Guenoun](https://github.com/OGuenoun), intern, Summer 2025.
+* [Justine Ruch](https://github.com/juruch), intern, Summer 2025.
 * [Félix Chabot](https://github.com/chabam), CS master, Spring 2025-present. Co-advisor: Richard Fournier.
   
 ## NAU students mentored
