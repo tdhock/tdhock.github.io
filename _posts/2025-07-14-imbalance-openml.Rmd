@@ -40,21 +40,134 @@ library(data.table)
 omldt <- data.table(omlds)[order(-number.of.instances)]
 class_dt <- omldt[is.finite(number.of.classes)][number.of.classes>1]
 unique(class_dt[, .(
-  name, rows=number.of.instances, Nclass=number.of.classes,
+  data.id, name, rows=number.of.instances, Nclass=number.of.classes,
   Nmajor=majority.class.size, Nminor=minority.class.size
 )])[1:100]
 ```
 
 The table above shows the 100 largest data sets, in terms of number of instances/rows.
-The code below reads the largest data set, higgs.
+
+## Reading higgs data set
+
+Since we want to create an imbalanced data set, we would like to use a very large data set, so that we can try very small minority class frequencies (1% or smaller).
+The code below attempts to read the largest data set, higgs.
 
 ```{r}
-higgs.id <- class_dt[1, data.id]
+higgs.id <- 45570
 if(FALSE){
   higgs.data <- OpenML::getOMLDataSet(higgs.id)
 }
-higgs_dt <- fread("higgs.csv")
+```
+
+I put the above inside `if(FALSE)` because the data set is very large!
+A better way of doing this would be via a cache:
+
+```{r}
+if(!file.exists("higgs_orig.arff")){
+  download.file("https://api.openml.org/data/download/22116554/dataset", "higgs_orig.arff")
+}
+```
+
+When I tried to read this into R, I got an error message, that [I reported as an OpenML issue](https://github.com/openml/openml-data/issues/71#issue-3228574014):
+
+```r
+> higgs <- farff::readARFF("higgs_orig.arff")
+Parse with reader=readr : C:\Users\hoct2726/Downloads/dataset
+Error in parseHeader(path) : 
+  Invalid column specification line found in ARFF header:
+@ATTRIBUTE "lepton pT" REAL
+Timing stopped at: 0 0 0.03
+```
+
+Since this file is very large, we will do experiments on a smaller version:
+
+```{r}
+sys::exec_wait("head", c("-100", "higgs_orig.arff"), std_out="higgs_head100.arff")
+higgs.head100 <- farff::readARFF("higgs_head100.arff")
+```
+
+We see the same error above.
+We can try to work around it by replacing spaces with underscores in double quotes:
+
+```{r}
+sed.replace <- r'{s/ ([^"]+")/_\1/g}'
+for(i in 1:2){
+  sys::exec_wait("sed", c("-ri", sed.replace, "higgs_head100.arff"))
+}
+sys::exec_wait("grep", c('@ATTRIBUTE', "higgs_head100.arff"), std_out="higgs_attributes.csv")
+higgs.head100 <- farff::readARFF("higgs_head100.arff")
+library(data.table)
+sys::exec_wait("sed", c("s/ [{R].*//", "higgs_attributes.csv"), std_out="higgs_names.csv")
+attr_dt <- fread("higgs_names.csv", header=FALSE, col.names="name", select=2)
+higgs100_dt <- suppressWarnings(fread("higgs_head100.arff", col.names=attr_dt$name))
+```
+
+```{r}
+system.time({
+  higgs_dt <- suppressWarnings(fread("higgs_orig.arff", col.names=attr_dt$name))
+})
 higgs_dt[1]
+```
+
+The output above indicates fread can read 11M rows in about 10 seconds.
+In contrast, the readARFF function can be used via:
+
+```r
+system.time({
+  sys::exec_wait("sed", c("-r", sed.replace, "higgs_orig.arff"), std_out="higgs_underscore.arff")
+  sys::exec_wait("sed", c("-ri", sed.replace, "higgs_underscore.arff"))
+})
+higgs <- farff::readARFF("higgs_orig.arff")
+```
+
+```r
+> system.time({
++ sys::exec_wait("sed", c("-r", sed.replace, "higgs_orig.arff"), std_out="higgs_underscore.arff")
++ sys::exec_wait("sed", c("-ri", sed.replace, "higgs_underscore.arff"))
++ })
+   user  system elapsed 
+   1.72    2.14 1813.55 
+```
+
+The output above indicates that replacing underscores in the header took about 30 minutes.
+The output below shows that reading the arff file into R took about 2 minutes (much slower than the 10 seconds required for data.table::fread).
+
+```r
+> higgs <- farff::readARFF("higgs_orig.arff")
+Parse with reader=readr : C:\Users\hoct2726/Downloads/dataset
+Loading required package: readr
+header: 0.060000; preproc: 53.690000; data: 71.650000; postproc: 0.170000; total: 125.570000
+> str(higgs)
+'data.frame':	11000000 obs. of  29 variables:
+ $ Target                  : Factor w/ 2 levels "0.0","1.0": 2 2 2 1 2 1 2 2 2 2 ...
+ $ lepton_pT               : num  0.869 0.908 0.799 1.344 1.105 ...
+ $ lepton_eta              : num  -0.635 0.329 1.471 -0.877 0.321 ...
+ $ lepton_phi              : num  0.226 0.359 -1.636 0.936 1.522 ...
+ $ missing_energy_magnitude: num  0.327 1.498 0.454 1.992 0.883 ...
+ $ missing_energy_phi      : num  -0.69 -0.313 0.426 0.882 -1.205 ...
+ $ jet_1_pt                : num  0.754 1.096 1.105 1.786 0.681 ...
+ $ jet_1_eta               : num  -0.249 -0.558 1.282 -1.647 -1.07 ...
+ $ jet_1_phi               : num  -1.092 -1.588 1.382 -0.942 -0.922 ...
+ $ jet_1_b-tag             : num  0 2.17 0 0 0 ...
+ $ jet_2_pt                : num  1.375 0.813 0.852 2.423 0.801 ...
+ $ jet_2_eta               : num  -0.654 -0.214 1.541 -0.676 1.021 ...
+ $ jet_2_phi               : num  0.93 1.271 -0.82 0.736 0.971 ...
+ $ jet_2_b-tag             : num  1.11 2.21 2.21 2.21 2.21 ...
+ $ jet_3_pt                : num  1.139 0.5 0.993 1.299 0.597 ...
+ $ jet_3_eta               : num  -1.578 -1.261 0.356 -1.431 -0.35 ...
+ $ jet_3_phi               : num  -1.047 0.732 -0.209 -0.365 0.631 ...
+ $ jet_3_b-tag             : num  0 0 2.55 0 0 ...
+ $ jet_4_pt                : num  0.658 0.399 1.257 0.745 0.48 ...
+ $ jet_4_eta               : num  -0.0105 -1.1389 1.1288 -0.6784 -0.3736 ...
+ $ jet_4_phi               : num  -0.045767 -0.000819 0.900461 -1.360356 0.113041 ...
+ $ jet_4_b-tag             : num  3.1 0 0 0 0 ...
+ $ m_jj                    : num  1.354 0.302 0.91 0.947 0.756 ...
+ $ m_jjj                   : num  0.98 0.833 1.108 1.029 1.361 ...
+ $ m_lv                    : num  0.978 0.986 0.986 0.999 0.987 ...
+ $ m_jlv                   : num  0.92 0.978 0.951 0.728 0.838 ...
+ $ m_bb                    : num  0.722 0.78 0.803 0.869 1.133 ...
+ $ m_wbb                   : num  0.989 0.992 0.866 1.027 0.872 ...
+ $ m_wwbb                  : num  0.877 0.798 0.78 0.958 0.808 ...
 ```
 
 We see that these data have a `target` column (output to predict). The class distribution
@@ -64,7 +177,7 @@ is as follows:
 (higgs_counts <- higgs_dt[, .(
   count=.N,
   prop=.N/nrow(higgs_dt)
-), by=target][order(-prop)])
+), by=Target][order(-prop)])
 ```
 
 In the table above, we see the overall `count` (number of rows) for each target.
@@ -83,7 +196,7 @@ based on the label value.
 my.seed <- 1
 set.seed(my.seed)
 rand_ord <- higgs_dt[, sample(.N)]
-prop_ord <- data.table(y=higgs_dt$target[rand_ord])[
+prop_ord <- data.table(y=higgs_dt$Target[rand_ord])[
 , prop_y := seq(0,1,l=.N), by=y
 ][, order(prop_y)]
 ord_list <- list(
@@ -92,7 +205,7 @@ ord_list <- list(
 ord_prop_dt_list <- list()
 for(ord_name in names(ord_list)){
   ord_vec <- ord_list[[ord_name]]
-  y_ord <- higgs_dt$target[ord_vec]
+  y_ord <- higgs_dt$Target[ord_vec]
   for(prop_data in c(0.01, 0.1, 1)){
     N <- nrow(higgs_dt)*prop_data
     N_props <- data.table(y=y_ord[1:N])[, .(
@@ -156,14 +269,14 @@ To do that, we use the following code to compute the number of samples
 we would need:
 
 ```{r}
-target_prop <- 10^seq(-1, -5)
+Target_prop <- 10^seq(-1, -5)
 (smaller_dt <- data.table(
-  target_prop,
-  N_pos_neg = as.integer(Tpos/(3-2*target_prop))
+  Target_prop,
+  N_pos_neg = as.integer(Tpos/(3-2*Target_prop))
 )[
 , n_pos := Tpos-N_pos_neg
 ][
-, n_neg := as.integer(target_prop*n_pos/(1-target_prop))
+, n_neg := as.integer(Target_prop*n_pos/(1-Target_prop))
 ][
 , check_N_im := n_pos+n_neg
 ][, let(
@@ -174,7 +287,7 @@ target_prop <- 10^seq(-1, -5)
 
 Above we see 
 
-* `target_prop`, the desired proportion of negative labels in the imbalanced subset,
+* `Target_prop`, the desired proportion of negative labels in the imbalanced subset,
 * `N_pos_neg`, the number of negative (and positive) labels in the balanced subset,
 * `n_pos` and `n_neg`, the number of positive/negative labels in the imbalanced subset,
 * `check_prop`, the empirical proportion of negative labels in the imbalanced subset, 
@@ -191,42 +304,42 @@ subset_mat <- matrix(
   NA, nrow(higgs_dt), nrow(smaller_dt),
   dimnames=list(
     NULL,
-    target_prop=paste0(
+    Target_prop=paste0(
       "seed",
       my.seed,
       "_prop",
-      smaller_dt$target_prop)))
+      smaller_dt$Target_prop)))
 emp_y_list <- list()
 emp_props_list <- list()
-higgs_ord <- higgs_dt[, .(target, .I)][ord_list$proportional]
+higgs_ord <- higgs_dt[, .(Target, .I)][ord_list$proportional]
 for(im_i in 1:nrow(smaller_dt)){
   im_row <- smaller_dt[im_i]
   im_count_dt <- im_row[, rbind(
-    data.table(subset="b", target=c(0,1), count=N_pos_neg),
-    data.table(subset="i", target=c(0,1), count=c(n_neg, n_pos))
+    data.table(subset="b", Target=c(0,1), count=N_pos_neg),
+    data.table(subset="i", Target=c(0,1), count=c(n_neg, n_pos))
   )]
   higgs_ord[, subset := NA_character_]
-  for(target_value in c(1,0)){
-    tval_dt <- im_count_dt[target==target_value]
+  for(Target_value in c(1,0)){
+    tval_dt <- im_count_dt[Target==Target_value]
     sub_vals <- tval_dt[, rep(subset, count)]
-    tval_idx <- which(higgs_ord$target==target_value)
+    tval_idx <- which(higgs_ord$Target==Target_value)
     some_idx <- tval_idx[1:length(sub_vals)]
     higgs_ord[some_idx, subset := sub_vals]
   }
   subset_mat[higgs_ord$I, im_i] <- higgs_ord$subset
   (im_higgs <- data.table(
-    target_prop=im_row$target_prop,
+    Target_prop=im_row$Target_prop,
     subset=subset_mat[,im_i],
-    target=higgs_dt$target
+    Target=higgs_dt$Target
   )[, idx := .I][!is.na(subset)])
   emp_y_list[[im_i]] <- im_higgs[, .(
     count=.N
-  ), by=.(target_prop,subset,target)]
+  ), by=.(Target_prop,subset,Target)]
   emp_props_list[[im_i]] <- im_higgs[, .(
     count=.N,
     first=idx[1], 
     last=idx[.N]
-  ), by=.(target_prop,subset,target)
+  ), by=.(Target_prop,subset,Target)
   ][
   , prop_in_subset := count/sum(count)
   , by=subset
@@ -237,14 +350,14 @@ emp_y <- rbindlist(emp_y_list)
 ```
 
 The table above can be used to verify that the subset assignments are
-consistent with the target label proportions. It has one row for each
-unique combination of target proportion, subset, and label (target). For
-each value of `target_prop`, we have `prop_in_subset=0.5` when `subset=b` (balanced).
+consistent with the Target label proportions. It has one row for each
+unique combination of Target proportion, subset, and label (Target). For
+each value of `Target_prop`, we have `prop_in_subset=0.5` when `subset=b` (balanced).
 
-The subset assignment above was based on the idea of using all of the positive targets in each subset.
+The subset assignment above was based on the idea of using all of the positive Targets in each subset.
 There are other constraints we could consider:
 
-* Each smaller target proportion is a strict subset: going to 1% from
+* Each smaller Target proportion is a strict subset: going to 1% from
   10% just involves taking away some samples. For example, with 2000
   samples overall, 10% would look like 500/500 in balanced and 900/100
   imbalanced. Going to 1% would mean 455/455 in balanced (for a total
@@ -263,10 +376,9 @@ Finally, we create new columns for each subset.
 
 ```{r}
 fwrite(subset_mat, "2025-07-14-imbalance-openml.csv")
-mysystem <- function(x)cat(system(x, intern=TRUE), sep="\n")
-mysystem("head 2025-07-14-imbalance-openml.csv")
-mysystem("wc -l 2025-07-14-imbalance-openml.csv")
-mysystem("du -k 2025-07-14-imbalance-openml.csv")
+sys::exec_wait("head","2025-07-14-imbalance-openml.csv")
+sys::exec_wait("wc", c("-l","2025-07-14-imbalance-openml.csv"))
+sys::exec_wait("du",c("-k","2025-07-14-imbalance-openml.csv"))
 ```
 
 ## Conclusions
