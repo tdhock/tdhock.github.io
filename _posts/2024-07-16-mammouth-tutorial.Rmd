@@ -914,10 +914,19 @@ Overall it looks like there are ~1,000s of CPUs idle on the other
 clusters, and ~10,000s of CPUs allocated.
 
 What is the difference between 
+[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga) and
 [Narval](https://docs.alliancecan.ca/wiki/Narval) and
-[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga)?
+[Rorqual](https://docs.alliancecan.ca/wiki/Rorqual/en)?
 
-* Narval is newer, since oct 2021, versus mar 2019 for Beluga.
-* Narval has AMD Rome 7532 CPU, Beluga has Intel Gold 6148 Skylake (both at 2.4GHz).
-* Narval has more nodes (1145 with 64 cores and 249GB mem each), Beluga (579 nodes with 40 cores and 186GB mem each).
+| Characteristic | beluga                  | narval                  | rorqual                   |
+|----------------|-------------------------|-------------------------|---------------------------|
+| Age            | Mar 2019                | Oct 2021                | June 2025                 |
+| main nodes     | 579                     | 1145                    | 670                       |
+| cores per node | 40                      | 64                      | 192                       |
+| avail mem GB   | 186                     | 249                     | 750                       |
+| CPU            | Intel Gold 6148 Skylake | AMD Rome 7532           | AMD EPYC 9654 (Zen 4)     |
+| CPU GHz        | 2.4                     | 2.4                     | 2.4                       |
+| GPU nodes      | 172                     | 159                     | 81                        |
+| GPU type       | 4 x NVidia V100SXM2 16G | 4 x NVidia A100SXM4 40G | 4 x NVidia H100 SXM5 80GB |
+
 
