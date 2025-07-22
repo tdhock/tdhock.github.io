@@ -364,7 +364,7 @@ and follow a link to jupyterhub on one of the clusters, for example
 * After logging in to that page using your Alliance Canada credentials, you need to specify how much time and memory you want for the compute node job which your RStudio will use for executing R/shell/etc code.
 * Default of 1 hour should be reasonable if you just want to launch a job, or gather results.
 * Try increasing time limit to 8 hours if you want to have a RStudio open on the cluster for a full day of work/testing.
-* You may need to increase memory if you are launching a large experiment, or gathering a lot of results.
+* You may need to increase memory if you are launching a large experiment, or gathering a lot of results. Try 8000 MB for MNIST.
 * Before JupyterHub opens, you will have to wait for the cluster to queue and launch your job.
 
 ![jhub](/assets/img/2024-07-16-mammouth-tutorial/jhub.png)
@@ -391,6 +391,23 @@ The result should look something like below, which is a screenshot of RStudio in
 ## VS Code
 
 Similar to RStudio setup described in the last section, there is support for VS Code, [as described in the docs](https://docs.alliancecan.ca/wiki/JupyterHub#VS_Code).
+
+* load module `code-server` and `r/4.3.1`
+
+Microsoft [R for VS Code Docs](https://code.visualstudio.com/docs/languages/r) say to `install.packages("languageserver")` (in a terminal ssh to login node).
+
+To install the R VS Code extension, first use a terminal to ssh to a login node, and download the extension via
+```
+wget https://openvsxorg.blob.core.windows.net/resources/REditorSupport/r/2.8.6/REditorSupport.r-2.8.6.vsix
+```
+
+Extensions icon on left (four squares; upper right one diagonal), `...` button, Install from VSIX -> It should install but I get an error message that the extentions directory is not writable: "Extract: ENOENT: no such file or directory, mkdir '/cvmfs/soft.computecanada.ca/easybuild/software/2023/x86-64-v3/Core/code-server/4.101.2/extensions/.95873ba9-66e2-46f4-a327-874b4aa8eced'".
+
+[Microsoft docs](https://code.visualstudio.com/docs/configure/command-line) for VS `code` command line interface.
+
+[Alliance Canada docs for running VS Code on your computer](https://docs.alliancecan.ca/wiki/Visual_Studio_Code).
+
+https://github.com/microsoft/vscode-docs/pull/8321/files
 
 # Non-working R versions
 
@@ -705,7 +722,9 @@ Exercise for the reader: go to my [blog](https://tdhock.github.io/blog/), search
 
 Exercise 2: run `sinfo` on
 [Narval](https://docs.alliancecan.ca/wiki/Narval) and
-[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga) to see the
+[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga) 
+or other [National Systems](https://docs.alliancecan.ca/wiki/National_systems)
+to see the
 number of allocated/idle nodes. Which cluster has more total nodes?
 More nodes idle?
 

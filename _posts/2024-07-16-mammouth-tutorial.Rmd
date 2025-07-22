@@ -727,7 +727,9 @@ Exercise for the reader: go to my [blog](https://tdhock.github.io/blog/), search
 
 Exercise 2: run `sinfo` on
 [Narval](https://docs.alliancecan.ca/wiki/Narval) and
-[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga) to see the
+[Beluga](https://docs.alliancecan.ca/wiki/B%C3%A9luga) 
+or other [National Systems](https://docs.alliancecan.ca/wiki/National_systems)
+to see the
 number of allocated/idle nodes. Which cluster has more total nodes?
 More nodes idle?
 
