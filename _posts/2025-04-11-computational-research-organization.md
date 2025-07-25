@@ -49,7 +49,7 @@ re-compute the results (time-consuming).
 - Typical name would be figure-something.R to indicate that this is
   the code file for making figure-something.
 - output should typically be a PNG file with decent resolution (text
-  is large enough to read, anddoes not look blurry when viewing figure
+  is large enough to read, and does not look blurry when viewing figure
   in slides).
 - to create a figure in R, use code like below:
 
@@ -80,7 +80,11 @@ For the README overview,
 - The first line should include a short title and description of the project idea.
 - If the paper is published, include a section at the top which
   describes which source code files were used to make Figure 1, Figure
-  2, etc. (TODO add example, FLOPART paper?)
+  2, etc. Examples:
+  - [AUM paper, JMLR 2023](https://github.com/tdhock/max-generalized-auc?tab=readme-ov-file#replication-materials)
+  - [Binary segmentation papers](https://github.com/tdhock/binseg-model-selection?tab=readme-ov-file#paper-comparing-binsegrcpp-with-other-implementations-of-binary-segmentation-for-change-point-detection)
+  - [FLOPART paper, JCGS 2024](https://github.com/jkaufy/Flopart-Paper)
+  - [LOPART paper, Comp Stat 2023](https://github.com/tdhock/LOPART-paper?tab=readme-ov-file#replication-materials)
 - After that you can have a section of TODOs / future work (or link to
   your issue tracker if you prefer).
 - After that, there should be a chronological index of all code and
@@ -173,7 +177,7 @@ sessionInfo()
   out some code that will create `obj`.
 - include the MRE you created using the approach in the previous
   section.
-- end your code block with sessionInfo() 
+- end your code block with sessionInfo() which shows all the versions of R and loaded packages.
   
 After showing a block with just the code by itself, then show the
 output of the code on your system. Use a fresh environment, which
@@ -184,6 +188,7 @@ option. Or in R you can try `reprex::reprex(your code)`.
 
 Write what you expected the code to do, then write the result you
 observed on your system.
+Explain why the result you observed was not expected.
 
 Use a question mark to indicate that you would like a response. For
 example, is this a bug? I expected that the function should work
@@ -199,3 +204,87 @@ repositories.
 - <https://github.com/r-lib/bench/issues/145>
 - <https://github.com/pgadmin-org/pgadmin4/issues/8120>
 - <https://github.com/therneau/survival/issues/270>
+
+## Writing Pull Requests
+
+Sometimes, after you file an issue, you will figure out the solution,
+and it involves modifying some package that you depend on.
+In that case, you should create a Pull Request, to send your fix to the owner of the code.
+If the owner is you, then you don't need to do a Pull Request (you could just commit to the main/master branch), but you may want to make a Pull Request anyway, to make it easier for code review.
+
+What is a Pull Request? It is a web page on GitHub for discussing changes from one branch to another.
+For a good into to git for R, try reading [Happy Git and GitHub for the useR](https://happygitwithr.com/).
+
+### Pull requests with your own repo
+
+In your own repo, you probably have a main branch (or master).
+To make a pull request, first create a new branch:
+
+```shell
+git checkout -b my-fix
+```
+
+The code above will create a new branch named `my-fix`.
+Typically you should name the branch based on what new feature you are adding (add-tool-tips), or what bug you are fixing (fix5209).
+
+Next, edit some files.
+Before committing those edits, please look at the diff, to make sure that the only lines changed are the ones which are relevant for the fix/feature:
+
+```shell
+git diff
+```
+
+If you see any unwanted changes in the diff, please remove them before committing, in order to make code review easier (others will most likely review every line changed).
+
+After that, you should make some commits on that branch:
+
+```shell
+git commit -m 'what I changed' file.R
+```
+
+The code above commits the changes in `file.R`, whereas the code below commits all of the changed files:
+
+```shell
+git commit -am 'more changes'
+```
+
+Next, push these commits to GitHub:
+
+```shell
+git push
+```
+
+The push command sends any new commits to the remote branch on GitHub.
+Finally, create a pull request via the GitHub web interface.
+Go to <https://github.com/USER/REPO/pulls> and click "New pull request" button.
+Another way to do it is by clicking the "recent changes to branch XYZ" button which appears on the main repo page <https://github.com/USER/REPO> within a few minutes of pushing.
+
+### Pull requests in somebody else's repo
+
+If your change is to somebody else's repo, then you probably do not have permission to push to that repo.
+So instead, go to their repo web page on GitHub, and click the Fork button in the upper right.
+Then you get a clone of their repo in which you have permissions to push.
+Repeat the steps in the previous section, and make sure to
+
+* indicate the other repository as base repository.
+* use your fork as the head repository.
+* typically leave base branch as default (main or master),
+* set compare branch the name of the new branch where you made changes on your fork.
+
+### Examples
+
+Here are some simple examples of Pull Requests that I have done.
+Click the "Files Changed" tab to see the diffs, which are relatively small in these examples.
+You want the Files Changed tab to show as few diff lines as possible, so that your code is very easy for others to review.
+
+- [animint hello world example](https://github.com/animint/animint2/pull/184)
+- [animint -Inf bug](https://github.com/animint/animint2/pull/170/files)
+- [nc alevels helper fun](https://github.com/tdhock/nc/pull/30)
+- [nc type.convert arg](https://github.com/tdhock/nc/pull/29/files)
+- [data.table id.vars=patterns()](https://github.com/Rdatatable/data.table/pull/6880>)
+
+Some discussions / code reviews:
+
+- [mlr3batchmark fun arg](https://github.com/mlr-org/mlr3batchmark/pull/29)
+- [mlr3 Resampling get_instance method](https://github.com/mlr-org/mlr3/pull/1313)
+- [animint guided tour](https://github.com/animint/animint2/pull/164)
