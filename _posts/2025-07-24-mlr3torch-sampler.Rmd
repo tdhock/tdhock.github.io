@@ -1,0 +1,237 @@
+---
+layout: post
+title: A custom DataLoader for mlr3torch
+description: Stratified sampling for imbalanced classification
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-07-24-mlr3torch-sampler"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=120)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to show how to use a custom torch sampler with mlr3torch, in order to use stratified sampling, which can ensure that each batch in gradient descent has a minimum number of samples from each class.
+
+## Motivation: imbalanced classification
+
+We consider imbalanced classification problems, which occur frequently in many different areas.
+For example, in a recent project involving predicting childhood autism, we used data from the National Survey of Children's Health (NSCH), which had about 3% autism, and 20K rows.
+
+```{r}
+library(data.table)
+prop.pos <- 0.03
+Nrow <- 20000
+(aut_sim <- data.table(autism=rep(c(1,0), c(prop.pos, 1-prop.pos)*Nrow)))
+```
+
+To learn with these data in torch, we can use stochastic gradient descent.
+To do that, we need to wrap the data table in a `dataset` as below:
+
+```{r}
+ds_gen <- torch::dataset(
+  initialize=function(){},
+  .getbatch=function(i)aut_sim[i]$autism,
+  .length=function()nrow(aut_sim))
+```
+
+After that, we need to attach the `dataset` to a `dataloader` with a
+certain batch size, which we define as 100 below:
+
+```{r}
+ds <- ds_gen()
+batch_size <- 100
+dl <- torch::dataloader(ds, batch_size=batch_size, shuffle=TRUE)
+```
+
+To iterate through the `dataloader` we use a loop, and we count the
+number of each class in each batch:
+
+```{r}
+torch::torch_manual_seed(1)
+count_dt_list <- list()
+coro::loop(for (batch_tensor in dl) {
+  batch_vec <- torch::as_array(batch_tensor)
+  batch_id <- length(count_dt_list) + 1L
+  count_dt_list[[batch_id]] <- data.table(
+    batch_id,
+    num_0=sum(batch_vec==0),
+    num_1=sum(batch_vec==1))
+})
+(count_dt <- rbindlist(count_dt_list))
+count_dt[num_1==0]
+```
+
+We can see above that there are `r nrow(count_dt)` batches that have no positive labels.
+On average there should be 3 positive labels per batch, and in fact that is true:
+
+```{r}
+quantile(count_dt$num_1)
+```
+
+Above we see that the 50% quantile (median) of the number of positive labels per batch is equal to 3, as expected.
+
+With typical loss functions, such as the cross-entropy (logistic) loss, you can still do gradient descent learning with a batch of all negative examples.
+However that is not the case with complex loss functions like Area Under the Minimum (AUM) of False Positives and False Negatives, which we recently proposed for ROC curve optimization, in [Journal of Machine Learning Research 2023](https://jmlr.org/papers/v24/21-0751.html).
+Computing the AUM requires computing a ROC curve, which is not possible without at least one positive and one negative example.
+So in gradient descent learning with a batch of all negative examples, we can not compute the AUM, and we must skip it (waste of time).
+It would be better if we could use stratified sampling, to control the number of minority class samples per batch.
+
+## Stratified sampling
+
+One way to implement stratified sampling is via the code below.
+First we define a minimum number of samples per stratum:
+
+```{r}
+(min_samples_per_stratum <- prop.pos*batch_size)
+```
+
+The output above shows that there will be at least `r min_samples_per_stratum` samples from each stratum in each batch.
+Below we shuffle the data set, and count the number of samples in each stratum:
+
+```{r}
+stratum <- "autism"
+set.seed(1)
+(shuffle_dt <- aut_sim[
+, row.id := 1:.N
+][sample(.N)][
+, i.in.stratum := 1:.N, keyby=stratum
+][])
+```
+
+The output above shows two new columns:
+
+* `row.id` is the row number in the original data table.
+* `i.in.stratum` is the row number of the shuffled data, relative to the stratum (autism).
+
+Next, we count the number of samples per stratum.
+
+```{r}
+(count_dt <- shuffle_dt[, .(max.i=max(i.in.stratum)), by=stratum][order(max.i)])
+(count_min <- count_dt$max.i[1])
+```
+
+Above, we see the smallest stratum has `r count_min` samples.
+Next, we add a column `n.samp` with values between 0 and `r count_min`:
+
+```{r}
+shuffle_dt[
+, n.samp := i.in.stratum/max(i.in.stratum)*count_min, by=stratum
+][]
+```
+
+The idea is that `n.samp` can be used to control the number of samples we take from the smallest stratum.
+If `n.samp <= 1`, then we take 1 sample from the smallest stratum, with a number of samples from other strata that is proportional.
+In other words, we can use `n.samp` to define `batch.i`, a batch number:
+
+```{r}
+shuffle_dt[
+, batch.i := ceiling(n.samp/min_samples_per_stratum)
+][]
+```
+
+We see from the output above that `batch.i` is an integer from 1 to `r max(shuffle_dt$batch.i)`, that indicates in which batch each sample appears.
+Below we see counts of each batch and class label.
+
+```{r}
+dcast(shuffle_dt, batch.i ~ autism, length)
+```
+
+The table above has one row per batch, and one column per class label.
+We see that the class counts are constant across batches, consistent with stratified random sampling.
+
+## Custom sampler
+
+How to use the code above with `mlr3torch`?
+We need to define a sampler class, as in the code below:
+
+```{r}
+hack_sampler_class <- torch::sampler(
+  "HackSampler",
+  initialize = function(data_source) {
+    self$data_source <- data_source
+  },
+  .iter_batch = function(batch_size) {
+    shuffle_dt <- aut_sim[
+    , row.id := 1:.N
+    ][sample(.N)][
+    , i.in.stratum := 1:.N, keyby=stratum
+    ][]
+    count_dt <- shuffle_dt[, .(max.i=max(i.in.stratum)), by=stratum][order(max.i)]
+    count_min <- count_dt$max.i[1]
+    shuffle_dt[
+    , n.samp := i.in.stratum/max(i.in.stratum)*count_min, by=stratum
+    ][
+    , batch.i := ceiling(n.samp/min_samples_per_stratum)
+    ][]
+    batch_list <- split(shuffle_dt, shuffle_dt$batch.i)
+    count <- 0
+    function() {
+      if (count < length(batch_list)) {
+        count <<- count + 1L
+        return(batch_list[[count]]$row.id)
+      }
+      coro::exhausted()
+    }
+  },
+  .length = function() {
+    length(self$data_source)
+  }
+)
+```
+
+I call the code above a "hack" because it takes the same fixed value
+for `min_samples_per_stratum` as defined in a previous code block (TODO: make this a parameter).
+To use the sampler class, we must first instantiate it with a data set:
+
+```{r}
+hack_sampler_instance <- hack_sampler_class(ds)
+```
+
+Then we specify that instance as the sampler argument of the dataloader:
+
+```{r}
+hack_dl <- torch::dataloader(ds, sampler = hack_sampler_instance)
+```
+
+Finally we can loop over batches, to verify that the stratified sampling works.
+
+```{r}
+torch::torch_manual_seed(1)
+count_dt_list <- list()
+coro::loop(for (batch_tensor in hack_dl) {
+  batch_vec <- torch::as_array(batch_tensor)
+  batch_id <- length(count_dt_list) + 1L
+  count_dt_list[[batch_id]] <- data.table(
+    batch_id,
+    num_0=sum(batch_vec==0),
+    num_1=sum(batch_vec==1))
+})
+(count_dt <- rbindlist(count_dt_list))
+```
+
+## Plugging into mlr3torch
+
+TODO
+
+## Conclusions
+
+TODO
+
+## Session info
+
+```{r}
+sessionInfo()
+```
