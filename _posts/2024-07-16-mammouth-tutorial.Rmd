@@ -37,6 +37,13 @@ As a
 part of registration, you need to setup two-factor authentication,
 which probably means downloading the Duo Mobile app on your telephone.
 
+After I approve you on my account, you need to do another step on the
+web page [Access
+Systems](https://ccdb.alliancecan.ca/me/access_systems), if you want
+to access some newer cluster systems, for example Rorqual.  Click the
+cluster name on the left, then click "I request access" and the "I
+accept" buttons below, if there are any.
+
 Now on some cluster systems, you need to be physically at the
 university, or on the VPN, but that is not the case for Mammouth. So
 the next step is to just pull up a terminal and use ssh with your CCDB
@@ -929,4 +936,31 @@ What is the difference between
 | GPU nodes      | 172                     | 159                     | 81                        |
 | GPU type       | 4 x NVidia V100SXM2 16G | 4 x NVidia A100SXM4 40G | 4 x NVidia H100 SXM5 80GB |
 
+What about [Rorqual](https://docs.google.com/presentation/d/1SxqzNI9dtxnVCe8I2otJg6PJpLQwDjeDakNI7yMsuvU/edit)?
 
+![gpu](/assets/img/2024-07-16-mammouth-tutorial/gpu.png)
+
+![gpu fractions](/assets/img/2024-07-16-mammouth-tutorial/gpu-fractions.png)
+
+![rorqual vs beluga narval](/assets/img/2024-07-16-mammouth-tutorial/rorqual-vs-beluga-narval.png)
+
+![rorqual vs fir nibi](/assets/img/2024-07-16-mammouth-tutorial/rorqual-vs-fir-nibi.png)
+
+How to use the file systems efficiently?
+
+La règle d’or, c’est de faire des grosses opérations.
+Éviter d’avoir des millions de petits fichiers, ou des petites écritures/lectures.
+Si vous avez un grand nombre de fichier, voyez les astuces ici: https://docs.alliancecan.ca/wiki/Handling_large_collections_of_files/fr
+Si vous avez des gros fichiers (minimum plusieurs centaines de mega-octets), faites des lectures et écritures d’un seul coup, plutôt que de lire/écrire ligne par ligne.
+
+- /tmp - short term storage (done when job is done)
+- /scratch - 30 day storage (for job IO)
+- /projects - medium term storage (copy results here from scratch)
+- /nearline - 10GB file size min, very slow, useful for long term storage.
+
+How to transfer files to the cluster? Try [globus](https://app.globus.org/file-manager/collections).
+
+How is the quota counted?
+
+For the QC clusters (narval, rorqual) there is automatic compression, and the quota counts the size after compression.
+For the other clusters, quota is counted before compression.
