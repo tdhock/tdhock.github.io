@@ -34,8 +34,8 @@ This page is similar to [another page with an example involving parallel computa
 This code defines the number of CPUs, and number of jobs to compute.
 
 ```{r}
-NCPU <- 11
-workers <- NCPU-1
+workers <- 10
+NCPU <- workers+1
 Njob <- 100
 work.id.vec <- 1:Njob
 ```
@@ -43,7 +43,7 @@ work.id.vec <- 1:Njob
 The code below defines a function which will be run with one job ID, in different parallel computing frameworks.
 
 ```{r}
-my_sleep <- function(work.id){
+job_sleep <- function(work.id){
   library(data.table)
   requireNamespace("pbdMPI") #load to get accurate timing for first job.
   start <- Sys.time()
@@ -56,13 +56,13 @@ my_sleep <- function(work.id){
 ```
 
 The function above will sleep/wait for a variable number of seconds (depending on the job ID), and then return a data table of results (including start/end time and process ID).
-Be careful: if you are running this code interactively, running `my_sleep()` will load `pbdMPI`, which will edit the environment, and then the `pbdMPI` example `system()` call below will no longer work.
+Be careful: if you are running this code interactively, running `job_sleep()` will load `pbdMPI`, which will edit the environment, and then the `pbdMPI` example `system()` call below will no longer work.
 
 Below we save the sleep function and initialize a table of timings.
 To visualize the results, I coded a special Positioning Method for `directlabels::geom_dl`.
 
 ```{r}
-save(work.id.vec, my_sleep, file="my_sleep.RData")
+save(work.id.vec, job_sleep, file="job_sleep.RData")
 timing_tables <- list()
 diff_seconds <- function(...)as.numeric(difftime(..., units="s"))
 polygon.mine <- function
@@ -202,7 +202,7 @@ In R we can use the code below to ask `mirai` to do the scheduling using process
 ```{r mirai}
 mirai::daemons(NULL)
 mirai::daemons(workers)
-make_gg("mirai", mirai::mirai_map(work.id.vec, my_sleep)[])
+make_gg("mirai", mirai::mirai_map(work.id.vec, job_sleep)[])
 ```
 
 We see in the figure above that there are 3 processes (Y axis ticks), and 10 jobs (labels and segments).
@@ -213,7 +213,7 @@ Another way to do it in R is using `future` package for scheduling:
 
 ```{r future}
 future::plan("multisession", workers=workers)
-make_gg("future", future.apply::future_lapply(work.id.vec, my_sleep))
+make_gg("future", future.apply::future_lapply(work.id.vec, job_sleep))
 ```
 
 The figure above shows similar trends, but with a noticeable delay between processes, and some idle time in the first process (static scheduling).
@@ -223,14 +223,22 @@ The figure above shows similar trends, but with a noticeable delay between proce
 Another way to do it in R is via MPI, using the `pbdMPI` package:
 
 ```{r}
-cat('library(data.table)
-load("my_sleep.RData")
-ret_dt_list <- pbdMPI::task.pull(work.id.vec, my_sleep)
+script_sleep <- function(prefix){
+  code <- gsub("SCRIPT", prefix, 'library(data.table)
+load("SCRIPT_sleep.RData")
+ret_dt_list <- pbdMPI::task.pull(work.id.vec, SCRIPT_sleep)
 ret_dt <- rbindlist(ret_dt_list)
-if(pbdMPI::comm.rank() == 0)fwrite(ret_dt, "task_pull.csv")
+if(pbdMPI::comm.rank() == 0)fwrite(ret_dt, "SCRIPT_sleep.csv")
 pbdMPI::finalize()
-', file="task_pull.R")
-cmd <- sprintf("mpiexec -np %d Rscript --vanilla task_pull.R", NCPU)
+')
+  sleep.R <- paste0(prefix, "_sleep.R")
+  cat(code, file=sleep.R)
+  cmd <- sprintf("mpiexec -np %d Rscript --vanilla %s", NCPU, sleep.R)
+  sleep.csv <- paste0(prefix, "_sleep.csv")
+  unlink(sleep.csv)
+  system(cmd)
+  fread(sleep.csv, colClasses=list(factor="proc"))
+}
 ```
 
 Note in the code above we have used `mpiexec` to run `Rscript` with a certain number of CPUs (`-np` argument).
@@ -238,11 +246,7 @@ In the context of a SLURM compute cluster, we can substitute `mpiexec -np 4` wit
 This is the approach we use in [`mlr3resampling::proj_submit()`](https://github.com/tdhock/mlr3resampling/blob/main/R/proj.R#L258).
 
 ```{r pbdMPI}
-unlink("task_pull.csv")
-make_gg("pbdMPI", {
-  system(cmd)
-  fread("task_pull.csv", colClasses=list(factor="proc"))
-})
+make_gg("pbdMPI", script_sleep("job"))
 ```
 
 The figure above shows that the `pbdMPI` scheduling is more efficient than `future`, but also static (nearby jobs are assigned to different processes).
@@ -292,7 +296,7 @@ ggplot()+
     limits=c(0, NA))
 ```
 
-The figure above shows a pretty substantial difference: `future` uses static scheduling (first ten jobs on first processor, etc), and so does `pbdMPI` (first ten jobs are assigned to run first on the ten CPUs, etc), and `mirai` is dynamic (each processor asks for a new job from a queue).
+The figure above shows a pretty substantial difference: `future` uses static scheduling (first ten jobs on first processor, etc), and `pbdMPI` seems to as well (first ten jobs are assigned to run first on the ten CPUs, etc), whereas `mirai` is dynamic (each processor asks for a new job from a queue).
 Although the MPI approach is slightly less efficient than `mirai` in this simple example, it is more easily usable on a SLURM cluster.
 Furthermore, the MPI approach can be used to overcome the limitations of `batchtools`:
 
@@ -303,6 +307,43 @@ Furthermore, the MPI approach can be used to overcome the limitations of `batcht
 ## Similar in python
 
 See [`torc_py`](https://github.com/IBM/torc_py).
+
+## Another `pbdMPI` example
+
+In this example, we sleep based on the process rank, instead of the job ID.
+
+```{r pbdMPI-rank}
+rank_sleep <- function(work.id){
+  library(data.table)
+  requireNamespace("pbdMPI") #load to get accurate timing for first job.
+  start <- Sys.time()
+  my_rank <- pbdMPI::comm.rank()
+  Sys.sleep(my_rank/10)
+  data.table(rank=my_rank, work.id, start, end=Sys.time(), proc=factor(Sys.getpid()))
+}
+save(work.id.vec, rank_sleep, file="rank_sleep.RData")
+rank_dt <- script_sleep("rank")
+ggplot()+
+  theme_bw()+
+  geom_segment(aes(
+    start, rank,
+    xend=end, yend=rank),
+    data=rank_dt)+
+  geom_point(aes(
+    start, rank),
+    shape=1,
+    data=rank_dt)+
+  directlabels::geom_dl(aes(
+    start, rank,
+    label.group=paste(work.id, rank),
+    label=work.id),
+    data=rank_dt,
+    method=my.polygons)+
+  scale_y_continuous(breaks=1:workers, limits=c(1, NCPU))+
+  scale_x_continuous("Time (seconds)")
+```
+
+The figure above shows that the `pbdMPI` scheduling is in fact dynamic -- larger ranks process only a few job IDs, whereas smaller ranks do quite a lot of work.
 
 ## Conclusions
 
