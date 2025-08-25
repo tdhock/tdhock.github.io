@@ -933,13 +933,13 @@ What is the difference between
 
 What about [Rorqual](https://docs.google.com/presentation/d/1SxqzNI9dtxnVCe8I2otJg6PJpLQwDjeDakNI7yMsuvU/edit)?
 
-![gpu](/assets/img/2024-07-16-mammouth-tutorial/gpu.png)
+![gpu](/assets/img/2024-07-16-mammouth-tutorial/gpu.jpg)
 
-![gpu fractions](/assets/img/2024-07-16-mammouth-tutorial/gpu-fractions.png)
+![gpu fractions](/assets/img/2024-07-16-mammouth-tutorial/gpu-fractions.jpg)
 
-![rorqual vs beluga narval](/assets/img/2024-07-16-mammouth-tutorial/rorqual-vs-beluga-narval.png)
+![rorqual vs beluga narval](/assets/img/2024-07-16-mammouth-tutorial/rorqual-vs-beluga-narval.jpg)
 
-![rorqual vs fir nibi](/assets/img/2024-07-16-mammouth-tutorial/rorqual-vs-fir-nibi.png)
+![rorqual vs fir nibi](/assets/img/2024-07-16-mammouth-tutorial/rorqual-vs-fir-nibi.jpg)
 
 How to use the file systems efficiently?
 
