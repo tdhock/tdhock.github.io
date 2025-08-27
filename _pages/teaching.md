@@ -20,7 +20,7 @@ be useful for planning what classes you take.
 - Fall 2023, NAU CS 599, Unsupervised Learning, [my course materials](https://github.com/tdhock/2023-08-unsupervised-learning).
 - Spring 2023, Introduction to Deep Learning in R, a 2 hour lecture
   for [Research Bazaar
-  Arizona](https://researchbazaar.arizona.edu/resbaz/Arizona2023/),
+  Arizona](https://researchbazaar.arizona.edu/resbaz/Arizona2023/) (and mlr3torch lecture for Toulouse R),
   [my course materials](https://github.com/tdhock/2023-res-baz-az).
 - Spring 2023, NAU CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/cs470-570-spring-2023).
 - Fall 2022, NAU CS 499-002 (5893), Deep Learning, [my course
