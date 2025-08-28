@@ -101,6 +101,8 @@ DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
 
 For the students below, my role is primary advisor, unless another primary advisor is mentioned.
 
+* [Justine Ruch](https://github.com/juruch), research intern, Summer 2025.
+* [Omar Guenoun](https://github.com/oguenoun), research intern, Summer 2025.
 * [Tung Lam Nguyen](https://github.com/lamtung16), Informatics and Computing PHD, Spring 2024 - present.
 * [Bilal Aslam](https://github.com/bilalaslam45), Informatics and Computing PHD, Fall 2022 - present. Primary advisor: Kevin Gurney.
 * [Daniel Agyapong](https://github.com/EngineerDanny), Informatics and Computing PHD, Fall 2022 - present. 
@@ -135,6 +137,24 @@ For the students below, my role is primary advisor, unless another primary advis
 * [Atiyeh Fotoohinasab](https://github.com/atiyehftn), Informatics and Computing PHD, Summer 2019 - Spring 2020, then did [University of Arizona Biomedical Engineering PHD program](https://grad.arizona.edu/catalog/programinfo/BMEGPHD).
 * [Anuraag Srivastava](https://github.com/as4378), CS master, Fall 2018 - Spring 2020, then went to Chicago to work as a software engineer for a company.
 * [Brandon Dunn](https://github.com/bd288), EE master, Fall 2018 - Spring 2019, then went to [Raytheon](https://www.rtx.com/).
+
+### Sherbrooke summer interns, Aug 2025
+
+Left to right: Toby, Justine, Omar.
+
+![Sherbrooke summer interns Aug 2025](/assets/img/lab-photos/2025-08-28-interns.jpg)
+
+### Lunch at Université Paris Cité, May 2025
+
+Left to right: Tung, Toby, Dan, Charles.
+
+![Paris Cite May 2025](/assets/img/lab-photos/2025-05-saint-peres.JPG)
+
+### Paris collaborators, Jan 2025
+
+Left to right: Charles, Toby, Guillem, Vincent.
+
+![Paris collaborators Jan 2025](/assets/img/lab-photos/2025-01-paris-appart.JPG)
 
 ### ASU West ML day, Apr 2024
 
