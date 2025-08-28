@@ -88,21 +88,19 @@ Topics without links below are on my TODO list.
 
 ## Sherbrooke students mentored
 
-* [Omar Guenoun](https://github.com/OGuenoun), intern, Summer 2025.
-* [Justine Ruch](https://github.com/juruch), intern, Summer 2025.
+"Science is a cooperative enterprise, spanning the generations.
+It's the passing of a torch from teacher to student to teacher.
+A community of minds reaching back to antiquity and forward to the stars."
+Neil DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
+
+For the students below, my role is primary advisor, unless another primary advisor is mentioned.
+
+* [Omar Guenoun](https://github.com/OGuenoun), research intern, Summer 2025.
+* [Justine Ruch](https://github.com/juruch), research intern, Summer 2025.
 * [Félix Chabot](https://github.com/chabam), CS master, Spring 2025-present. Co-advisor: Richard Fournier.
   
 ## NAU students mentored
 
-"Science is a cooperative enterprise, spanning the generations. It's
-the passing of a torch from teacher to student to teacher. A community
-of minds reaching back to antiquity and forward to the stars." Neil
-DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
-
-For the students below, my role is primary advisor, unless another primary advisor is mentioned.
-
-* [Justine Ruch](https://github.com/juruch), research intern, Summer 2025.
-* [Omar Guenoun](https://github.com/oguenoun), research intern, Summer 2025.
 * [Tung Lam Nguyen](https://github.com/lamtung16), Informatics and Computing PHD, Spring 2024 - present.
 * [Bilal Aslam](https://github.com/bilalaslam45), Informatics and Computing PHD, Fall 2022 - present. Primary advisor: Kevin Gurney.
 * [Daniel Agyapong](https://github.com/EngineerDanny), Informatics and Computing PHD, Fall 2022 - present. 
