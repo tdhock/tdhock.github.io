@@ -224,11 +224,13 @@ coro::loop(for (batch_tensor in hack_dl) {
 
 ## Plugging into mlr3torch
 
-First, note that to get the code below to work, I needed to propose a modification to mlr3torch, which is available in this branch:
+First, note that to get the code below to work, I needed to propose a modification to mlr3torch, which is available in this branch -- [PR](https://github.com/mlr-org/mlr3torch/pull/419) was merged, so should be on main.
+Maybe need [batch_size](https://github.com/mlr-org/mlr3torch/pull/425) check hack to avoid an error?
 
-```{r}
-remotes::install_github("tdhock/mlr3torch@fix-sampler")
-```
+Code to try:
+
+* [batch_sampler](https://github.com/mlr-org/mlr3torch/issues/420#issue-3272006602)
+* [sampler](https://github.com/mlr-org/mlr3torch/issues/420#issue-3272006602)
 
 We can create a simple linear model torch learner in the mlr3 system via
 

@@ -20,7 +20,7 @@ be useful for planning what classes you take.
 - Fall 2023, NAU CS 599, Unsupervised Learning, [my course materials](https://github.com/tdhock/2023-08-unsupervised-learning).
 - Spring 2023, Introduction to Deep Learning in R, a 2 hour lecture
   for [Research Bazaar
-  Arizona](https://researchbazaar.arizona.edu/resbaz/Arizona2023/),
+  Arizona](https://researchbazaar.arizona.edu/resbaz/Arizona2023/) (and mlr3torch lecture for Toulouse R),
   [my course materials](https://github.com/tdhock/2023-res-baz-az).
 - Spring 2023, NAU CS 470, Artificial Intelligence, [my course materials](https://github.com/tdhock/cs470-570-spring-2023).
 - Fall 2022, NAU CS 499-002 (5893), Deep Learning, [my course
@@ -88,18 +88,18 @@ Topics without links below are on my TODO list.
 
 ## Sherbrooke students mentored
 
-* [Omar Guenoun](https://github.com/OGuenoun), intern, Summer 2025.
-* [Justine Ruch](https://github.com/juruch), intern, Summer 2025.
+"Science is a cooperative enterprise, spanning the generations.
+It's the passing of a torch from teacher to student to teacher.
+A community of minds reaching back to antiquity and forward to the stars."
+Neil DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
+
+For the students below, my role is primary advisor, unless another primary advisor is mentioned.
+
+* [Omar Guenoun](https://github.com/OGuenoun), research intern, Summer 2025.
+* [Justine Ruch](https://github.com/juruch), research intern, Summer 2025.
 * [Félix Chabot](https://github.com/chabam), CS master, Spring 2025-present. Co-advisor: Richard Fournier.
   
 ## NAU students mentored
-
-"Science is a cooperative enterprise, spanning the generations. It's
-the passing of a torch from teacher to student to teacher. A community
-of minds reaching back to antiquity and forward to the stars." Neil
-DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
-
-For the students below, my role is primary advisor, unless another primary advisor is mentioned.
 
 * [Tung Lam Nguyen](https://github.com/lamtung16), Informatics and Computing PHD, Spring 2024 - present.
 * [Bilal Aslam](https://github.com/bilalaslam45), Informatics and Computing PHD, Fall 2022 - present. Primary advisor: Kevin Gurney.
@@ -135,6 +135,24 @@ For the students below, my role is primary advisor, unless another primary advis
 * [Atiyeh Fotoohinasab](https://github.com/atiyehftn), Informatics and Computing PHD, Summer 2019 - Spring 2020, then did [University of Arizona Biomedical Engineering PHD program](https://grad.arizona.edu/catalog/programinfo/BMEGPHD).
 * [Anuraag Srivastava](https://github.com/as4378), CS master, Fall 2018 - Spring 2020, then went to Chicago to work as a software engineer for a company.
 * [Brandon Dunn](https://github.com/bd288), EE master, Fall 2018 - Spring 2019, then went to [Raytheon](https://www.rtx.com/).
+
+### Sherbrooke summer interns, Aug 2025
+
+Left to right: Toby, Justine, Omar.
+
+![Sherbrooke summer interns Aug 2025](/assets/img/lab-photos/2025-08-28-interns.jpg)
+
+### Lunch at Université Paris Cité, May 2025
+
+Left to right: Tung, Toby, Dan, Charles.
+
+![Paris Cite May 2025](/assets/img/lab-photos/2025-05-saint-peres.JPG)
+
+### Paris collaborators, Jan 2025
+
+Left to right: Charles, Toby, Guillem, Vincent.
+
+![Paris collaborators Jan 2025](/assets/img/lab-photos/2025-01-paris-appart.JPG)
 
 ### ASU West ML day, Apr 2024
 
@@ -226,7 +244,7 @@ I have mentored the following students in coding free/open-source software.
 - [Sagnik Mandal](https://github.com/criticic), 2025, [performance testing optimization](https://github.com/Anirban166/Autocomment-atime-results/pull/44).
 - [Minh Long Nguyen](https://github.com/edelweiss611428), 2025, [rupturesRcpp package](https://github.com/edelweiss611428/rupturesRcpp/tree/gsoc-2025) for change-point detection in R.
 - [Derrick Richard](https://github.com/DerrickUnleashed), 2025, [improving torchvision](https://medium.com/@derrickrds/final-reflections-on-my-gsoc-journey-with-torchvision-r-a10133990206).
-- [Akanksha Koshti](https://github.com/koshtiakanksha), 2025, [improving torchvision](https://github.com/mlverse/torchvision/issues?q=author%3Akoshtiakanksha).
+- [Akanksha Koshti](https://github.com/koshtiakanksha), 2025, [improving torchvision](https://medium.com/@koshtiakanksha12/gsoc-2025-final-reflections-and-contributions-to-the-r-project-e1b4e319e4ee).
 - [Biplab Sutradhar](https://github.com/biplab-sutradhar), 2025, [improving animint2](https://biplab-sutradhar.github.io/gsoc_journey/).
 - [Suhaani Agarwal](https://github.com/suhaani-agarwal), 2025, [improving animint2](https://suhaani-agarwal.github.io/suhaani-gsoc25/).
 - [Mukul Kumar](https://github.com/Mukulyadav2004), 2025, [improving data.table](https://mukulyadav2004.github.io/Mukul-GSoC-2025/).
