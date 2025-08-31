@@ -224,8 +224,8 @@ Left to right: Joe, Toby, Farnoosh, Atiyeh, Anuraag, Zaoyi.
 I have mentored the following students in coding free/open-source software.
 - [Priyanshu Tiwari](https://github.com/plato-12), 2025, [dirichletprocess improvements](https://github.com/plato-12/dirichletprocess).
 - [Sagnik Mandal](https://github.com/criticic), 2025, [performance testing optimization](https://github.com/Anirban166/Autocomment-atime-results/pull/44).
-- [Minh Long Nguyen](https://github.com/edelweiss611428), 2025, [rupturesRcpp package](https://github.com/edelweiss611428/rupturesRcpp) for change-point detection in R.
-- [Derrick Richard](https://github.com/DerrickUnleashed), 2025, [improving torchvision](https://github.com/mlverse/torchvision/issues?q=author%3ADerrickUnleashed).
+- [Minh Long Nguyen](https://github.com/edelweiss611428), 2025, [rupturesRcpp package](https://github.com/edelweiss611428/rupturesRcpp/tree/gsoc-2025) for change-point detection in R.
+- [Derrick Richard](https://github.com/DerrickUnleashed), 2025, [improving torchvision](https://medium.com/@derrickrds/final-reflections-on-my-gsoc-journey-with-torchvision-r-a10133990206).
 - [Akanksha Koshti](https://github.com/koshtiakanksha), 2025, [improving torchvision](https://github.com/mlverse/torchvision/issues?q=author%3Akoshtiakanksha).
 - [Biplab Sutradhar](https://github.com/biplab-sutradhar), 2025, [improving animint2](https://biplab-sutradhar.github.io/gsoc_journey/).
 - [Suhaani Agarwal](https://github.com/suhaani-agarwal), 2025, [improving animint2](https://suhaani-agarwal.github.io/suhaani-gsoc25/).
