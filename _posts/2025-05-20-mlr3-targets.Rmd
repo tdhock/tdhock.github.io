@@ -309,6 +309,7 @@ We can use `targets` to declare and compute machine learning benchmark
 experiments in parallel. Next steps will be to verify if this approach
 works for larger experiments on the SLURM compute cluster, with
 different sized data sets, and algorithms with different run-times.
+Update: I tried it and got an [error](https://github.com/wlandau/crew.cluster/discussions/56#discussioncomment-13250162).
 
 ## Session info
 

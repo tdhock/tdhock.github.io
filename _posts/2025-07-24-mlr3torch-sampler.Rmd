@@ -297,8 +297,6 @@ mlp_learner$callbacks <- mlr3torch::t_clbk("history")
 mlp_learner$train(sonar_task)
 
 ## why does batch_sampler not work?
-batch_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
-batch_learner$predict_type <- "prob"
 measure_list <- mlr3::msrs(c("classif.auc", "classif.logloss"))
 library(data.table)
 stratified_sampler_class <- torch::sampler(
@@ -344,6 +342,8 @@ stratified_sampler_class <- torch::sampler(
     length(self$data_source)
   }
 )
+batch_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
+batch_learner$predict_type <- "prob"
 batch_learner$param_set$set_values(
   epochs=10,
   batch_size=20,
@@ -407,6 +407,108 @@ mlr3::set_validate(stratified_learner, 0.5)
 stratified_learner$callbacks <- mlr3torch::t_clbk("history")
 stratified_learner$train(sonar_task)
 stratified_learner$model$callbacks$history
+
+
+# 1. Define a simple dataset
+my_dataset <- torch::dataset(
+  name = "MyDataset",
+  initialize = function() {
+    self$data <- torch::torch_tensor(1:5)
+  },
+  .getitem = function(index) {
+    self$data[index]
+  },
+  .length = function() {
+    length(self$data)
+  }
+)
+# 2. Define a custom batch sampler 
+batch_sampler_class <- torch::sampler(
+  "BatchSampler",
+  initialize = function(data_source) {
+    self$data_source <- data_source
+  },
+  .iter = function() {
+    batch_size <- 2
+    indices <- 1:self$.length()
+    batch_vec <- (indices-1) %/% batch_size
+    batch_list <- rev(split(indices, batch_vec))
+    count <- 0L
+    function() {
+      if (count < length(batch_list)) {
+        count <<- count + 1L
+        return(batch_list[[count]])
+      }
+      coro::exhausted()
+    }
+  },
+  .length = function() {
+    length(self$data_source)
+  }
+)
+# 3. Instantiate dataset and sampler
+ds <- my_dataset()
+batch_sampler_instance <- batch_sampler_class(ds)
+# 4. Create dataloader with custom sampler
+dl <- torch::dataloader(ds, batch_sampler = batch_sampler_instance)
+# 5. Iterate through the dataloader
+batches <- list()
+coro::loop(for (batch in dl) {
+  batches[[length(batches) + 1L]] = batch
+})
+batches
+
+sonar_task <- mlr3::tsk("sonar")
+sonar_ingress <- list(feat=mlr3torch::TorchIngressToken(
+  features=sonar_task$col_roles$feature,
+  batchgetter=mlr3torch::batchgetter_num))
+sonar_dataset <- mlr3torch::task_dataset(sonar_task, sonar_ingress)
+inst_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
+inst_learner$param_set$set_values(
+  epochs=10,
+  batch_size=20,
+  batch_sampler=batch_sampler_class)
+inst_learner$train(sonar_task)
+```
+
+```
+> batch_learner$train(sonar_task)
+ [1]  85  78  67  56  13 100  40  30  87   9
+ [1] 39 55 25 51 24 19 96 18 12 15
+ [1] 98 47 28 46 63 29 36 62 58 86
+ [1] 61 88 64 17 52  5  7 34 59 77
+ [1]  94  65  70  69  83  31   4 104  99   3
+ [1] 97 80 71  2 33 27 10  8 43 41
+ [1]  89  22  45  21   1  48 103  75  23  92
+ [1]  81   6  53  82  16 101  38  91  60  73
+ [1] 102  37  79  54  50  84  20  49  44  11
+ [1] 35 32 66 26 74 72 42 76 90 95
+[1] 93 57 14 68
+Error in ctx$batch$y$to(device = ctx$device) : 
+  attempt to apply non-function
+> traceback()
+15: train_loop(ctx, callbacks)
+14: learner_torch_train(self, private, super, task, param_vals)
+13: force(expr)
+12: with_torch_settings(seed = param_vals$seed, num_threads = param_vals$num_threads, 
+        num_interop_threads = param_vals$num_interop_threads, expr = {
+            learner_torch_train(self, private, super, task, param_vals)
+        })
+11: .__LearnerTorch__.train(self = self, private = private, super = super, 
+        task = task)
+10: get_private(learner)$.train(task)
+9: .f(learner = <environment>, task = <environment>)
+8: eval(expr, p)
+7: eval(expr, p)
+6: eval.parent(expr, n = 1L)
+5: invoke(.f, .args = .args, .opts = .opts, .seed = .seed, .timeout = .timeout)
+4: encapsulate(learner$encapsulation["train"], .f = train_wrapper, 
+       .args = list(learner = learner, task = task), .pkgs = learner$packages, 
+       .seed = NA_integer_, .timeout = learner$timeout["train"])
+3: learner_train(learner, task, train_row_ids = train_row_ids, mode = mode)
+2: .__Learner__train(self = self, private = private, super = super, 
+       task = task, row_ids = row_ids)
+1: batch_learner$train(sonar_task)
 ```
 
 ## Conclusions
