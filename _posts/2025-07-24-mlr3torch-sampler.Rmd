@@ -282,7 +282,7 @@ stratified_sampler_class <- torch::sampler(
     }
   },
   .length = function() {
-    length(self$data_source)
+    length(self$data_source) ##TODO change to number of batches.
   }
 )
 mlp_learner$param_set$set_values(
