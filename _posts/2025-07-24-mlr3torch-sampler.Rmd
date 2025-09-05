@@ -28,13 +28,13 @@ The goal of this post is to show how to use a custom torch sampler with mlr3torc
 ## Motivation: imbalanced classification
 
 We consider imbalanced classification problems, which occur frequently in many different areas.
-For example, in a recent project involving predicting childhood autism, we used data from the National Survey of Children's Health (NSCH), which had about 3% autism, and 20K rows.
+For example, in a recent project involving predicting childhood autism, we used data from the National Survey of Children's Health (NSCH), which had about 3% autism, and 20K rows (plus 50 to show how to handle a small batch at the end).
 
 ```{r}
 library(data.table)
 prop.pos <- 0.03
-Nrow <- 20000
-(aut_sim <- data.table(autism=rep(c(1,0), c(prop.pos, 1-prop.pos)*Nrow)))
+Nrow <- 20050
+(aut_sim <- data.table(autism=rep(c(1,0), round(c(prop.pos, 1-prop.pos)*Nrow))))
 ```
 
 To learn with these data in torch, we can use stochastic gradient descent.
@@ -121,14 +121,17 @@ Next, we count the number of samples per stratum.
 ```{r}
 (count_dt <- shuffle_dt[, .(max.i=max(i.in.stratum)), by=stratum][order(max.i)])
 (count_min <- count_dt$max.i[1])
+(num_batches <- count_min %/% min_samples_per_stratum)
+(max_samp <- num_batches * min_samples_per_stratum)
 ```
 
 Above, we see the smallest stratum has `r count_min` samples.
-Next, we add a column `n.samp` with values between 0 and `r count_min`:
+The number of batches is `num_batches` which uses integer division so that we never have fewer than `min_samples_per_stratum` in any batch.
+Next, we add a column `n.samp` with values between 0 and `max_samp`:
 
 ```{r}
 shuffle_dt[
-, n.samp := i.in.stratum/max(i.in.stratum)*count_min, by=stratum
+, n.samp := i.in.stratum/max(i.in.stratum)*max_samp, by=stratum
 ][]
 ```
 
@@ -146,7 +149,8 @@ We see from the output above that `batch.i` is an integer from 1 to `r max(shuff
 Below we see counts of each batch and class label.
 
 ```{r}
-dcast(shuffle_dt, batch.i ~ autism, length)
+(class_counts <- dcast(shuffle_dt, batch.i ~ autism, length))
+class_counts[`1` < min_samples_per_stratum]
 ```
 
 The table above has one row per batch, and one column per class label.
@@ -161,27 +165,30 @@ We need to define a sampler class, as in the code below:
 hack_sampler_class <- torch::sampler(
   "HackSampler",
   initialize = function(data_source) {
-    self$data_source <- data_source
-  },
-  .iter_batch = function(batch_size) {
-    shuffle_dt <- aut_sim[
-    , row.id := 1:.N
+    shuffle_dt <- data.table(
+      row.id = 1:length(data_source)
+    )[
+    , autism := data_source$.getbatch(row.id)
     ][sample(.N)][
     , i.in.stratum := 1:.N, keyby=stratum
     ][]
     count_dt <- shuffle_dt[, .(max.i=max(i.in.stratum)), by=stratum][order(max.i)]
     count_min <- count_dt$max.i[1]
+    num_batches <- count_min %/% min_samples_per_stratum
+    max_samp <- num_batches * min_samples_per_stratum
     shuffle_dt[
-    , n.samp := i.in.stratum/max(i.in.stratum)*count_min, by=stratum
+    , n.samp := i.in.stratum/max(i.in.stratum)*max_samp, by=stratum
     ][
     , batch.i := ceiling(n.samp/min_samples_per_stratum)
     ][]
-    batch_list <- split(shuffle_dt, shuffle_dt$batch.i)
+    self$batch_list <- split(shuffle_dt, shuffle_dt$batch.i)
+  },
+  .iter = function() {
     count <- 0
     function() {
-      if (count < length(batch_list)) {
+      if (count < length(self$batch_list)) {
         count <<- count + 1L
-        return(batch_list[[count]]$row.id)
+        return(self$batch_list[[count]]$row.id)
       }
       coro::exhausted()
     }
@@ -203,7 +210,7 @@ hack_sampler_instance <- hack_sampler_class(ds)
 Then we specify that instance as the sampler argument of the dataloader:
 
 ```{r}
-hack_dl <- torch::dataloader(ds, sampler = hack_sampler_instance)
+hack_dl <- torch::dataloader(ds, batch_sampler = hack_sampler_instance)
 ```
 
 Finally we can loop over batches, to verify that the stratified sampling works.
@@ -224,24 +231,15 @@ coro::loop(for (batch_tensor in hack_dl) {
 
 ## Plugging into mlr3torch
 
-First, note that to get the code below to work, I needed to propose a modification to mlr3torch, which is available in this branch -- [PR](https://github.com/mlr-org/mlr3torch/pull/419) was merged, so should be on main.
-Maybe need [batch_size](https://github.com/mlr-org/mlr3torch/pull/425) check hack to avoid an error?
+First, note that to get the code below to work, I needed to propose a modification to mlr3torch, which is available in this branch -- [PR](https://github.com/mlr-org/mlr3torch/pull/419) was merged, and an update was submitted to CRAN.
+Note in the code below we either need to specify `batch_size` (even though it is un-ncessary), or use the fix in this other [PR](https://github.com/mlr-org/mlr3torch/pull/425).
 
-Code to try:
-
-* [batch_sampler](https://github.com/mlr-org/mlr3torch/issues/420#issue-3272006602)
-* [sampler](https://github.com/mlr-org/mlr3torch/issues/420#issue-3272006602)
-
-We can create a simple linear model torch learner in the mlr3 system via
+We can then create a simple linear model torch learner in the `mlr3torch` system, and apply it to the sonar data set, using the stratified sampling strategy:
 
 ```{r}
 sonar_task <- mlr3::tsk("sonar")
 sonar_task$col_roles$stratum <- "Class"
 measure_list <- mlr3::msrs(c("classif.auc", "classif.logloss"))
-
-mlp_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
-mlp_learner$predict_type <- "prob"
-library(data.table)
 stratified_sampler_class <- torch::sampler(
   "StratifiedSampler",
   initialize = function(data_source) {
@@ -251,8 +249,9 @@ stratified_sampler_class <- torch::sampler(
     self$stratum_dt <- data.table(
       TSK$data(cols=self$stratum),
       row.id=1:TSK$nrow)
+    self$set_batch_list()
   },
-  .iter = function() {
+  set_batch_list = function() {
     ## batch_size is actually min_samples_per_stratum, the number of
     ## samples from the smallest stratum in each batch.
     batch_size <- 10
@@ -263,257 +262,52 @@ stratified_sampler_class <- torch::sampler(
       max.i=max(i.in.stratum)
     ), by=c(self$stratum)][order(max.i)]
     count_min <- count_dt$max.i[1]
+    num_batches <- count_min %/% min_samples_per_stratum
+    max_samp <- num_batches * min_samples_per_stratum
     shuffle_dt[
-    , n.samp := i.in.stratum/max(i.in.stratum)*count_min
+    , n.samp := i.in.stratum/max(i.in.stratum)*max_samp
     , by=c(self$stratum)
     ][
     , batch.i := ceiling(n.samp/batch_size)
     ][]
-    batch_list <- split(shuffle_dt$row.id, shuffle_dt$batch.i)
+    self$batch_list <- split(shuffle_dt$row.id, shuffle_dt$batch.i)
+  },
+  .iter = function() {
     count <- 0
     function() {
-      if (count < length(batch_list)) {
+      if (count < length(self$batch_list)) {
         count <<- count + 1L
-        indices <- batch_list[[count]]
-        print(indices)
+        indices <- self$batch_list[[count]]
+        if (count == length(self$batch_list)) {
+          self$set_batch_list()
+        }
         return(indices)
       }
       coro::exhausted()
     }
   },
   .length = function() {
-    length(self$data_source) ##TODO change to number of batches.
+    length(self$batch_list)
   }
 )
+mlp_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
+mlp_learner$predict_type <- "prob"
 mlp_learner$param_set$set_values(
   epochs=10,
-  ##batch_size=20,
   p=0,
-  sampler=stratified_sampler_class,
+  batch_size=1,
+  batch_sampler=stratified_sampler_class,
   measures_valid=measure_list,
   measures_train=measure_list)
 mlr3::set_validate(mlp_learner, 0.5)
 mlp_learner$callbacks <- mlr3torch::t_clbk("history")
 mlp_learner$train(sonar_task)
-
-## why does batch_sampler not work?
-measure_list <- mlr3::msrs(c("classif.auc", "classif.logloss"))
-library(data.table)
-stratified_sampler_class <- torch::sampler(
-  "StratifiedSampler",
-  initialize = function(data_source) {
-    self$data_source <- data_source
-    TSK <- data_source$task
-    self$stratum <- TSK$col_roles$stratum
-    self$stratum_dt <- data.table(
-      TSK$data(cols=self$stratum),
-      row.id=1:TSK$nrow)
-  },
-  .iter = function() {
-    ## batch_size is actually min_samples_per_stratum, the number of
-    ## samples frmo the smallest stratum in each batch.
-    batch_size <- 10
-    shuffle_dt <- self$stratum_dt[sample(.N)][
-    , i.in.stratum := 1:.N, by=c(self$stratum)
-    ][]
-    count_dt <- shuffle_dt[, .(
-      max.i=max(i.in.stratum)
-    ), by=c(self$stratum)][order(max.i)]
-    count_min <- count_dt$max.i[1]
-    shuffle_dt[
-    , n.samp := i.in.stratum/max(i.in.stratum)*count_min
-    , by=c(self$stratum)
-    ][
-    , batch.i := ceiling(n.samp/batch_size)
-    ][]
-    batch_list <- split(shuffle_dt$row.id, shuffle_dt$batch.i)
-    count <- 0
-    function() {
-      if (count < length(batch_list)) {
-        count <<- count + 1L
-        indices <- batch_list[[count]]
-        print(indices)
-        return(indices)
-      }
-      coro::exhausted()
-    }
-  },
-  .length = function() {
-    length(self$data_source)
-  }
-)
-batch_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
-batch_learner$predict_type <- "prob"
-batch_learner$param_set$set_values(
-  epochs=10,
-  batch_size=20,
-  p=0,
-  batch_sampler=stratified_sampler_class,
-  measures_valid=measure_list,
-  measures_train=measure_list)
-mlr3::set_validate(batch_learner, 0.5)
-batch_learner$callbacks <- mlr3torch::t_clbk("history")
-batch_learner$train(sonar_task)
-
-## positive control
-rev_sampler_class <- torch::sampler(
-  "MySampler",
-  initialize = function(data_source) {
-    print('init')
-    self$data_source <- data_source
-  },
-  .iter = function() {
-    count <<- 0L
-    function() {
-      if (count < length(self$data_source)) {
-        idx <- length(self$data_source)-count
-        count <<- count + 1L
-        return(idx)
-      }
-      coro::exhausted()
-    }
-  },
-  .length = function() {
-    length(self$data_source)
-  }
-)
-rev_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
-rev_learner$predict_type <- "prob"
-rev_learner$param_set$set_values(
-  epochs=10,
-  batch_size=20,
-  p=0,
-  sampler=rev_sampler_class,
-  measures_valid=measure_list,
-  measures_train=measure_list)
-mlr3::set_validate(rev_learner, 0.5)
-rev_learner$callbacks <- mlr3torch::t_clbk("history")
-rev_learner$train(sonar_task)
-
-
 mlp_learner$model$callbacks$history
-stratified_sampler_instance <- stratified_sampler_class(ds)
-stratified_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
-stratified_learner$predict_type <- "prob"
-measure_list <- mlr3::msrs(c("classif.auc", "classif.logloss"))
-stratified_learner$param_set$set_values(
-  epochs=10,
-  batch_size=20,
-  p=0,
-  sampler=stratified_sampler_instance,
-  measures_valid=measure_list,
-  measures_train=measure_list)
-mlr3::set_validate(stratified_learner, 0.5)
-stratified_learner$callbacks <- mlr3torch::t_clbk("history")
-stratified_learner$train(sonar_task)
-stratified_learner$model$callbacks$history
-
-
-# 1. Define a simple dataset
-my_dataset <- torch::dataset(
-  name = "MyDataset",
-  initialize = function() {
-    self$data <- torch::torch_tensor(1:5)
-  },
-  .getitem = function(index) {
-    self$data[index]
-  },
-  .length = function() {
-    length(self$data)
-  }
-)
-# 2. Define a custom batch sampler 
-batch_sampler_class <- torch::sampler(
-  "BatchSampler",
-  initialize = function(data_source) {
-    self$data_source <- data_source
-  },
-  .iter = function() {
-    batch_size <- 2
-    indices <- 1:self$.length()
-    batch_vec <- (indices-1) %/% batch_size
-    batch_list <- rev(split(indices, batch_vec))
-    count <- 0L
-    function() {
-      if (count < length(batch_list)) {
-        count <<- count + 1L
-        return(batch_list[[count]])
-      }
-      coro::exhausted()
-    }
-  },
-  .length = function() {
-    length(self$data_source)
-  }
-)
-# 3. Instantiate dataset and sampler
-ds <- my_dataset()
-batch_sampler_instance <- batch_sampler_class(ds)
-# 4. Create dataloader with custom sampler
-dl <- torch::dataloader(ds, batch_sampler = batch_sampler_instance)
-# 5. Iterate through the dataloader
-batches <- list()
-coro::loop(for (batch in dl) {
-  batches[[length(batches) + 1L]] = batch
-})
-batches
-
-sonar_task <- mlr3::tsk("sonar")
-sonar_ingress <- list(feat=mlr3torch::TorchIngressToken(
-  features=sonar_task$col_roles$feature,
-  batchgetter=mlr3torch::batchgetter_num))
-sonar_dataset <- mlr3torch::task_dataset(sonar_task, sonar_ingress)
-inst_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
-inst_learner$param_set$set_values(
-  epochs=10,
-  batch_size=20,
-  batch_sampler=batch_sampler_class)
-inst_learner$train(sonar_task)
-```
-
-```
-> batch_learner$train(sonar_task)
- [1]  85  78  67  56  13 100  40  30  87   9
- [1] 39 55 25 51 24 19 96 18 12 15
- [1] 98 47 28 46 63 29 36 62 58 86
- [1] 61 88 64 17 52  5  7 34 59 77
- [1]  94  65  70  69  83  31   4 104  99   3
- [1] 97 80 71  2 33 27 10  8 43 41
- [1]  89  22  45  21   1  48 103  75  23  92
- [1]  81   6  53  82  16 101  38  91  60  73
- [1] 102  37  79  54  50  84  20  49  44  11
- [1] 35 32 66 26 74 72 42 76 90 95
-[1] 93 57 14 68
-Error in ctx$batch$y$to(device = ctx$device) : 
-  attempt to apply non-function
-> traceback()
-15: train_loop(ctx, callbacks)
-14: learner_torch_train(self, private, super, task, param_vals)
-13: force(expr)
-12: with_torch_settings(seed = param_vals$seed, num_threads = param_vals$num_threads, 
-        num_interop_threads = param_vals$num_interop_threads, expr = {
-            learner_torch_train(self, private, super, task, param_vals)
-        })
-11: .__LearnerTorch__.train(self = self, private = private, super = super, 
-        task = task)
-10: get_private(learner)$.train(task)
-9: .f(learner = <environment>, task = <environment>)
-8: eval(expr, p)
-7: eval(expr, p)
-6: eval.parent(expr, n = 1L)
-5: invoke(.f, .args = .args, .opts = .opts, .seed = .seed, .timeout = .timeout)
-4: encapsulate(learner$encapsulation["train"], .f = train_wrapper, 
-       .args = list(learner = learner, task = task), .pkgs = learner$packages, 
-       .seed = NA_integer_, .timeout = learner$timeout["train"])
-3: learner_train(learner, task, train_row_ids = train_row_ids, mode = mode)
-2: .__Learner__train(self = self, private = private, super = super, 
-       task = task, row_ids = row_ids)
-1: batch_learner$train(sonar_task)
 ```
 
 ## Conclusions
 
-TODO
+We have explained how to create a custom stratified sampler for use in the `mlr3torch` framework. This will be useful in experiments with loss functions that require a minimal number of samples of each class to get a non-zero gradient.
 
 ## Session info
 
