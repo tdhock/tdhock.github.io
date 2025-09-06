@@ -93,7 +93,7 @@ coro::loop(for (batch_tensor in dl) {
 ```
 
 ``` r
-count_dt[num_1==0]
+(batches_without_positive_labels <- count_dt[num_1==0])
 ```
 
 ```
@@ -110,7 +110,7 @@ count_dt[num_1==0]
 ## 9:      161   100     0
 ```
 
-We can see above that there are 201 batches that have no positive labels.
+We can see above that there are 9 batches that have no positive labels.
 On average there should be 3 positive labels per batch, and in fact that is true:
 
 
@@ -300,6 +300,10 @@ Below we see counts of each batch and class label.
 ## 200:     200    98     4
 ```
 
+The table above has one row per batch, and one column per class label.
+We see that the class counts are mostly constant across batches, consistent with stratified random sampling.
+
+
 ``` r
 class_counts[`1` < min_samples_per_stratum]
 ```
@@ -309,8 +313,7 @@ class_counts[`1` < min_samples_per_stratum]
 ## Empty data.table (0 rows and 3 cols): batch.i,0,1
 ```
 
-The table above has one row per batch, and one column per class label.
-We see that the class counts are constant across batches, consistent with stratified random sampling.
+The output above shows that there are now batches with fewer positive examples than the specified minimum.
 
 ## Custom sampler
 
@@ -379,18 +382,17 @@ Finally we can loop over batches, to verify that the stratified sampling works.
 torch::torch_manual_seed(1)
 count_dt_list <- list()
 coro::loop(for (batch_tensor in hack_dl) {
-  batch_vec <- torch::as_array(batch_tensor)
   batch_id <- length(count_dt_list) + 1L
-  count_dt_list[[batch_id]] <- data.table(
+  batch_dt <- data.table(
     batch_id,
-    num_0=sum(batch_vec==0),
-    num_1=sum(batch_vec==1))
+    class=torch::as_array(batch_tensor))
+  count_dt_list[[batch_id]] <- dcast(batch_dt, batch_id ~ class, length)
 })
 (count_dt <- rbindlist(count_dt_list))
 ```
 
 ```
-##      batch_id num_0 num_1
+##      batch_id     0     1
 ##         <int> <int> <int>
 ##   1:        1    97     3
 ##   2:        2    97     3
@@ -407,16 +409,39 @@ coro::loop(for (batch_tensor in hack_dl) {
 
 ## Plugging into mlr3torch
 
-First, note that to get the code below to work, I needed to propose a modification to mlr3torch, which is available in this branch -- [PR](https://github.com/mlr-org/mlr3torch/pull/419) was merged, and an update was submitted to CRAN.
-Note in the code below we either need to specify `batch_size` (even though it is un-ncessary), or use the fix in this other [PR](https://github.com/mlr-org/mlr3torch/pull/425).
+First, note that this work resulted in a [doc improvement to torch](https://github.com/mlverse/torch/pull/1363) and several modifications to mlr3torch:
 
-We can then create a simple linear model torch learner in the `mlr3torch` system, and apply it to the sonar data set, using the stratified sampling strategy:
+* learner `batch_sampler` and `sampler` params are now set to the class (not instance), [PR](https://github.com/mlr-org/mlr3torch/pull/419). The sampler is instanteiated at the same time as the learner.
+* informative error added when the sampler `.length` is not consistent with the number of times `.iter` can be called before returning `coro::exhausted()`, [PR](https://github.com/mlr-org/mlr3torch/pull/433).
+* in the code below we either need to specify `batch_size` (even though it is un-ncessary), or use the fix in this other [PR](https://github.com/mlr-org/mlr3torch/pull/425), which removes the error for no `batch_size` when `batch_sampler` is specified.
+
+We can then create a simple linear model torch learner in the `mlr3torch` system, and apply it to the sonar data set, using the stratified sampling strategy.
+First we create a sonar task with `stratum`, which will be used for stratification in our custom sampler.
 
 
 ``` r
 sonar_task <- mlr3::tsk("sonar")
 sonar_task$col_roles$stratum <- "Class"
-measure_list <- mlr3::msrs(c("classif.auc", "classif.logloss"))
+```
+
+Then we create a new MLP learner, which by default is a linear model.
+
+
+``` r
+mlp_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
+mlp_learner$predict_type <- "prob"
+```
+
+Then we set several learner parameters in the code below.
+Also note in the `stratified_sampler_class` that
+
+* `initialize` derives the stratification from the `stratum` role defined in the task.
+* `set_batch_list` sets `self$batch_list` which is a list with one element for each batch, each element is an integer vector of indices.
+* Samples are seen in a random order because of `sample(.N)` and this order is different in each epoch because `set_batch_list` is called to set a new `self$batch_list` after each epoch is complete.
+
+
+``` r
+min_samples_per_stratum <- 10
 stratified_sampler_class <- torch::sampler(
   "StratifiedSampler",
   initialize = function(data_source) {
@@ -429,9 +454,6 @@ stratified_sampler_class <- torch::sampler(
     self$set_batch_list()
   },
   set_batch_list = function() {
-    ## batch_size is actually min_samples_per_stratum, the number of
-    ## samples from the smallest stratum in each batch.
-    batch_size <- 10
     shuffle_dt <- self$stratum_dt[sample(.N)][
     , i.in.stratum := 1:.N, by=c(self$stratum)
     ][]
@@ -445,9 +467,17 @@ stratified_sampler_class <- torch::sampler(
     , n.samp := i.in.stratum/max(i.in.stratum)*max_samp
     , by=c(self$stratum)
     ][
-    , batch.i := ceiling(n.samp/batch_size)
+    , batch.i := ceiling(n.samp/min_samples_per_stratum)
     ][]
+    print(dcast(
+      shuffle_dt,
+      batch.i ~ Class,
+      list(length, indices=function(x)paste(x, collapse=",")),
+      value.var="row.id"))
     self$batch_list <- split(shuffle_dt$row.id, shuffle_dt$batch.i)
+    self$batch_sizes <- sapply(self$batch_list, length)
+    self$batch_size_tab <- sort(table(self$batch_sizes))
+    self$batch_size <- as.integer(names(self$batch_size_tab)[length(self$batch_size_tab)])
   },
   .iter = function() {
     count <- 0
@@ -467,35 +497,67 @@ stratified_sampler_class <- torch::sampler(
     length(self$batch_list)
   }
 )
-mlp_learner <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
-mlp_learner$predict_type <- "prob"
 mlp_learner$param_set$set_values(
-  epochs=10,
-  p=0,
-  batch_size=1,
+  epochs=1,
+  p=0, # dropout probability.
+  batch_size=1, # ignored.
   batch_sampler=stratified_sampler_class,
-  measures_valid=measure_list,
-  measures_train=measure_list)
-mlr3::set_validate(mlp_learner, 0.5)
+  measures_train=mlr3::msrs(c("classif.auc", "classif.logloss")))
 mlp_learner$callbacks <- mlr3torch::t_clbk("history")
+```
+
+In the code above we set parameters:
+
+* `epochs=1` for one epoch of learning.
+* `p=0` for no dropout regularization.
+* `batch_size=1` to avoid the error that this parameter is required, but it actually is ignored because we also specify a `batch_sampler`. This a bug which should be fixed by [this PR](https://github.com/mlr-org/mlr3torch/pull/425).
+* measures, `set_validate`, and `callbacks` so that we can get a history table (loss at each epoch).
+
+In the code below we train:
+
+
+``` r
 mlp_learner$train(sonar_task)
+```
+
+```
+## Key: <batch.i>
+##    batch.i row.id_length_M row.id_length_R                                    row.id_indices_M                 row.id_indices_R
+##      <num>           <int>           <int>                                              <char>                           <char>
+## 1:       1              12              10     159,165,195,163,157,158,193,186,202,114,204,191     2,89,65,94,17,83,57,39,84,27
+## 2:       2              12              11      196,177,206,140,98,153,201,149,151,127,203,126  30,66,26,72,5,59,51,71,96,52,56
+## 3:       3              13              11 152,155,190,194,120,106,146,160,172,181,130,171,154   54,60,24,46,6,55,18,1,79,40,58
+## 4:       4              12              11     115,131,145,188,164,109,185,100,192,118,107,147  53,68,95,8,22,73,61,62,77,97,31
+## 5:       5              12              10     112,125,166,133,123,143,141,180,116,189,167,208     78,43,93,11,85,23,9,33,76,70
+## 6:       6              13              11 135,110,178,199,117,128,156,150,101,138,108,168,132  36,80,91,74,28,88,50,41,12,7,35
+## 7:       7              12              11     103,179,137,162,182,173,119,111,136,148,174,139 47,16,32,21,75,20,44,13,82,38,69
+## 8:       8              12              11      104,105,124,175,99,169,200,207,184,122,113,187  87,10,15,49,92,67,37,3,19,63,42
+## 9:       9              13              11 176,161,170,198,183,197,144,129,102,121,134,142,205  90,14,81,25,86,48,45,34,29,4,64
+## Key: <batch.i>
+##    batch.i row.id_length_M row.id_length_R                                    row.id_indices_M                 row.id_indices_R
+##      <num>           <int>           <int>                                              <char>                           <char>
+## 1:       1              12              10     174,118,106,172,196,125,178,103,107,132,199,207     70,16,44,86,40,75,47,6,61,78
+## 2:       2              12              11     123,206,176,113,112,138,147,135,116,192,119,194  27,21,7,29,51,79,31,92,38,12,89
+## 3:       3              13              11  115,162,155,167,146,166,98,202,122,161,195,149,148  90,1,53,30,58,67,52,69,57,45,84
+## 4:       4              12              11     193,184,104,164,114,190,127,203,133,173,189,142  62,88,25,39,49,10,8,19,56,76,83
+## 5:       5              12              10     139,121,201,102,158,204,154,171,170,180,186,137     81,94,9,37,71,68,23,97,73,93
+## 6:       6              13              11 208,181,187,131,182,136,145,101,124,188,144,160,128  43,28,60,32,96,18,65,80,2,85,91
+## 7:       7              12              11      117,99,120,156,126,183,111,197,134,100,191,105 55,41,11,34,26,36,50,77,20,87,82
+## 8:       8              12              11     157,143,108,205,110,179,150,177,168,151,169,141   95,5,63,35,54,4,64,14,15,59,33
+## 9:       9              13              11 153,140,109,200,175,198,130,185,159,129,163,152,165  24,13,48,3,46,22,72,74,17,42,66
+```
+
+The output above is from the print statement inside `set_batch_list`, which shows that there are almost the same number of examples in each batch, between iterations.
+
+
+``` r
 mlp_learner$model$callbacks$history
 ```
 
 ```
-## Key: <epoch>
-##     epoch train.classif.auc train.classif.logloss valid.classif.auc valid.classif.logloss
-##     <num>             <num>                 <num>             <num>                 <num>
-##  1:     1         0.5241815             0.6960188         0.4782931             0.6949892
-##  2:     2         0.5483631             0.6912082         0.5439703             0.6905079
-##  3:     3         0.5796131             0.6873733         0.5862709             0.6882407
-##  4:     4         0.6030506             0.6842948         0.5102041             0.6929740
-##  5:     5         0.6205357             0.6814849         0.4938776             0.6933464
-##  6:     6         0.6432292             0.6791373         0.5202226             0.6922777
-##  7:     7         0.6540179             0.6769112         0.5632653             0.6880635
-##  8:     8         0.6722470             0.6745022         0.4448980             0.6990532
-##  9:     9         0.6837798             0.6724846         0.4244898             0.7006367
-## 10:    10         0.6956845             0.6701525         0.5135436             0.6904479
+##    epoch train.classif.auc train.classif.logloss
+##    <num>             <num>                 <num>
+## 1:     1         0.4693972             0.7226241
 ```
 
 ## Conclusions
@@ -510,33 +572,34 @@ sessionInfo()
 ```
 
 ```
-## R version 4.5.1 (2025-06-13 ucrt)
-## Platform: x86_64-w64-mingw32/x64
-## Running under: Windows 11 x64 (build 26100)
+## R version 4.5.1 (2025-06-13)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 24.04.3 LTS
 ## 
 ## Matrix products: default
-##   LAPACK version 3.12.1
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
 ## 
 ## locale:
-## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
-## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8     LC_MONETARY=fr_FR.UTF-8   
+##  [6] LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                  LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
 ## time zone: America/Toronto
-## tzcode source: internal
+## tzcode source: system (glibc)
 ## 
 ## attached base packages:
-## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## [1] stats     graphics  grDevices datasets  utils     methods   base     
 ## 
 ## other attached packages:
-## [1] data.table_1.17.99
+## [1] data.table_1.17.8
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] crayon_1.5.3         knitr_1.50           cli_3.6.5            xfun_0.53            rlang_1.1.6         
-##  [6] processx_3.8.6       torch_0.16.0         coro_1.1.0           bit_4.6.0            mlr3pipelines_0.9.0 
-## [11] listenv_0.9.1        backports_1.5.0      mlr3measures_1.1.0   ps_1.9.1             paradox_1.0.1       
-## [16] mlr3misc_0.18.0      evaluate_1.0.5       mlr3_1.1.0           palmerpenguins_0.1.1 mlr3torch_0.3.1.9000
-## [21] compiler_4.5.1       codetools_0.2-20     Rcpp_1.1.0           future_1.67.0        digest_0.6.37       
-## [26] R6_2.6.1             parallelly_1.45.1    parallel_4.5.1       magrittr_2.0.3       callr_3.7.6         
-## [31] checkmate_2.3.3      uuid_1.2-1           tools_4.5.1          withr_3.0.2          bit64_4.6.0-1       
-## [36] globals_0.18.0       lgr_0.5.0
+##  [1] crayon_1.5.3         knitr_1.50           cli_3.6.5            xfun_0.53            rlang_1.1.6          processx_3.8.6      
+##  [7] torch_0.16.0         coro_1.1.0           glue_1.8.0           bit_4.6.0            mlr3pipelines_0.9.0  listenv_0.9.1       
+## [13] backports_1.5.0      mlr3measures_1.1.0   ps_1.9.1             paradox_1.0.1        mlr3misc_0.18.0      evaluate_1.0.5      
+## [19] mlr3_0.23.0.9000     palmerpenguins_0.1.1 mlr3torch_0.3.1      compiler_4.5.1       codetools_0.2-20     Rcpp_1.1.0          
+## [25] future_1.67.0        digest_0.6.37        R6_2.6.1             parallelly_1.45.1    parallel_4.5.1       callr_3.7.6         
+## [31] magrittr_2.0.3       checkmate_2.3.3      uuid_1.2-1           tools_4.5.1          withr_3.0.2          bit64_4.6.0-1       
+## [37] globals_0.18.0       bspm_0.5.7           lgr_0.5.0            desc_1.4.3
 ```
