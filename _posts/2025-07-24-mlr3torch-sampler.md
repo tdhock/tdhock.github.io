@@ -501,9 +501,7 @@ mlp_learner$param_set$set_values(
   epochs=1,
   p=0, # dropout probability.
   batch_size=1, # ignored.
-  batch_sampler=stratified_sampler_class,
-  measures_train=mlr3::msrs(c("classif.auc", "classif.logloss")))
-mlp_learner$callbacks <- mlr3torch::t_clbk("history")
+  batch_sampler=stratified_sampler_class)
 ```
 
 In the code above we set parameters:
@@ -511,7 +509,6 @@ In the code above we set parameters:
 * `epochs=1` for one epoch of learning.
 * `p=0` for no dropout regularization.
 * `batch_size=1` to avoid the error that this parameter is required, but it actually is ignored because we also specify a `batch_sampler`. This a bug which should be fixed by [this PR](https://github.com/mlr-org/mlr3torch/pull/425).
-* measures, `set_validate`, and `callbacks` so that we can get a history table (loss at each epoch).
 
 In the code below we train:
 
@@ -547,18 +544,15 @@ mlp_learner$train(sonar_task)
 ## 9:       9              13              11 153,140,109,200,175,198,130,185,159,129,163,152,165  24,13,48,3,46,22,72,74,17,42,66
 ```
 
-The output above is from the print statement inside `set_batch_list`, which shows that there are almost the same number of examples in each batch, between iterations.
+The output above is from the print statement inside `set_batch_list`, which shows 
 
-
-``` r
-mlp_learner$model$callbacks$history
-```
-
-```
-##    epoch train.classif.auc train.classif.logloss
-##    <num>             <num>                 <num>
-## 1:     1         0.4693972             0.7226241
-```
+* there are two tables printed, one for the first epoch, and one for the second (not used).
+* each row represents the a batch.
+* in each table, the `row.id_length_*` columns show the number of positive and negative labels in a batch.
+* the number of minority class samples (R) is always at least 10.
+* the first batch in the first table has the same label counts as the first batch in the second table, etc.
+* the first batch `row.id_indices_M` in the first table are different from the corresponding indices in the second table.
+* so each epoch uses the samples in a different order, but with the same label counts in each batch.
 
 ## Conclusions
 
