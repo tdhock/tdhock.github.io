@@ -1,0 +1,270 @@
+---
+layout: post
+title: A custom DataLoader for mlr3torch
+description: Stratified sampling for imbalanced classification
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-07-24-mlr3torch-sampler"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=150)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to show how to use a custom torch sampler with mlr3torch, in order to use stratified sampling, which can ensure that each batch in gradient descent has a minimum number of samples from each class.
+This is a continuation of [a previous post on the same subject](https://tdhock.github.io/blog/2025/mlr3torch-sampler/).
+
+## Motivation: imbalanced classification
+
+We consider imbalanced classification problems, which occur frequently in many different areas.
+For example, let us consider the sonar data set.
+
+```{r}
+sonar_task <- mlr3::tsk("sonar")
+(count_tab <- table(sonar_task$data(sonar_task$row_ids, "Class")$Class))
+```
+
+The sonar label count table above is relatively balanced.
+Below we compute the frequencies.
+
+```{r}
+count_tab/sum(count_tab)
+```
+
+We typically measure class imbalance by using the minority class proportion, which is 46.6% in this case.
+This is not much imbalance, because perfectly balanced data would be 50% minority class.
+We could consider an even greater imbalance by sub-sampling, which has been discussed in two previous posts:
+
+* [Creating large imbalanced data benchmarks](https://tdhock.github.io/blog/2025/imbalance-openml/), Tutorial with OpenML/higgs data.
+* [Creating imbalanced data benchmarks](https://tdhock.github.io/blog/2025/unbalanced/), Tutorial with MNIST.
+
+With sonar we can do:
+
+```{r}
+sonar_task$filter(208:86)
+(count_tab <- table(sonar_task$data(sonar_task$row_ids, "Class")$Class))
+count_tab/sum(count_tab)
+```
+
+The output above shows 10% minority class, which is substantially more imbalance.
+In `mlr3` the column role `stratum` can be used to ensure that sampling is proportion to the class imbalance, so that each sub-sample also has 10% minority class. To do that we use the code below:
+
+```{r}
+sonar_task$col_roles$stratum <- "Class"
+```
+
+## Custom torch batch sampler
+
+In `mlr3` we have a `task`, and in `torch` the analogous concept is `dataset`.
+We access the `dataset` via a `dataloader`, which is the `torch` concept for dividing subtrain set samples into batches for gradient descent.
+Each batch of samples is used to compute a gradient, and then update the model parameters.
+For certain loss functions, we need at least two classes in the batch to get a non-zero gradient.
+An example is the Area Under the Minimum (AUM) of False Positives and False Negatives, which we recently proposed for ROC curve optimization, in [Journal of Machine Learning Research 2023](https://jmlr.org/papers/v24/21-0751.html).
+We would like to use the `stratum` of the `task` in the context of the `dataloader`.
+To ensure that each batch has at least one of the minority class labels, we can define a batch sampler, as below.
+
+```{r}
+library(data.table)
+batch_sampler_stratified <- function(min_samples_per_stratum, shuffle=TRUE){
+  torch::sampler(
+    "StratifiedSampler",
+    initialize = function(data_source) {
+      self$data_source <- data_source
+      TSK <- data_source$task
+      self$stratum <- TSK$col_roles$stratum
+      if(length(self$stratum)==0)stop(TSK$id, "task missing stratum column role")
+      self$stratum_dt <- data.table(
+        TSK$data(cols=self$stratum),
+        row.id=1:TSK$nrow)
+      self$set_batch_list()
+    },
+    set_batch_list = function() {
+      get_indices <- if(shuffle)sample else identity
+      index_dt <- self$stratum_dt[{
+        get_indices(1:.N)
+      }][
+      , i.in.stratum := 1:.N, by=c(self$stratum)
+      ][]
+      count_dt <- index_dt[, .(
+        max.i=max(i.in.stratum)
+      ), by=c(self$stratum)][order(max.i)]
+      count_min <- count_dt$max.i[1]
+      num_batches <- count_min %/% min_samples_per_stratum
+      max_samp <- num_batches * min_samples_per_stratum
+      index_dt[
+      , n.samp := i.in.stratum/max(i.in.stratum)*max_samp
+      , by=c(self$stratum)
+      ][
+      , batch.i := ceiling(n.samp/min_samples_per_stratum)
+      ][]
+      save_list$count[[paste("epoch", length(save_list$count)+1)]] <<- dcast(
+        index_dt,
+        batch.i ~ Class,
+        list(length, indices=function(x)paste(x, collapse=",")),
+        value.var="row.id")
+      self$batch_list <- split(index_dt$row.id, index_dt$batch.i)
+      self$batch_sizes <- sapply(self$batch_list, length)
+      self$batch_size_tab <- sort(table(self$batch_sizes))
+      self$batch_size <- as.integer(names(self$batch_size_tab)[length(self$batch_size_tab)])
+    },
+    .iter = function() {
+      batch.i <- 0
+      function() {
+        if (batch.i < length(self$batch_list)) {
+          batch.i <<- batch.i + 1L
+          indices <- self$batch_list[[batch.i]]
+          save_list$indices[[length(save_list$indices)+1]] <<- indices
+          if (batch.i == length(self$batch_list)) {
+            self$set_batch_list()
+          }
+          return(indices)
+        }
+        coro::exhausted()
+      }
+    },
+    .length = function() {
+      length(self$batch_list)
+    }
+  )
+}
+```
+
+Note in the definition above that
+
+* `initialize` derives the stratification from the `stratum` role defined in the task.
+* `set_batch_list` sets `self$batch_list` which is a list with one element for each batch, each element is an integer vector of indices.
+* If `shuffle=FALSE`, then samples are seen in a deterministic order that matches the source data set.
+* If `shuffle=TRUE`, then samples are seen in a random order, and this order is different in each epoch because `set_batch_list` is called to set a new `self$batch_list` after each epoch is complete.
+
+We can use the code above to create the `batch_sampler` parameter to our learner.
+
+## Learner
+
+Before defining the learner, we need to define its loss function.
+In binary classification, the typical loss function is the logistic loss, `torch::bce_with_logits_loss`.
+The module below has a special forward method that saves the targets (so we can see if the stratification worked), and then uses that loss function.
+
+```{r}
+nn_bce_with_logits_loss_save <- torch::nn_module(
+  "nn_print_loss",
+  inherit = torch::nn_mse_loss,
+  initialize = function() {
+    super$initialize()
+    self$bce <- torch::nn_bce_with_logits_loss()
+  },
+  forward = function(input, target) {
+    save_list$target[[length(save_list$target)+1]] <<- target
+    self$bce(input, target)
+  }
+)
+```
+
+Then we create a new MLP learner, which by default is a linear model.
+
+```{r}
+mlp_learner <- mlr3torch::LearnerTorchMLP$new(
+  task_type="classif",
+  loss=nn_bce_with_logits_loss_save)
+mlp_learner$predict_type <- "prob"
+```
+
+Then we set several learner parameters in the code below.
+
+```{r}
+mlp_learner$param_set$set_values(
+  epochs=1,
+  p=0, # dropout probability.
+  batch_size=1, # ignored.
+  batch_sampler=batch_sampler_stratified(1))
+```
+
+In the code above we set parameters:
+
+* `epochs=1` for one epoch of learning.
+* `p=0` for no dropout regularization.
+* `batch_size=1` to avoid the error that this parameter is required, but it actually is ignored because we also specify a `batch_sampler`. This a bug which should be fixed by [this PR](https://github.com/mlr-org/mlr3torch/pull/425).
+
+In the code below we first initialize `save_list`, then we train:
+
+```{r}
+save_list <- list()
+mlp_learner$train(sonar_task)
+names(save_list)
+```
+
+The output above indicates that some data were created in `save_list` during training.
+We can look at `count` to see how many labels were in each batch:
+
+```{r}
+save_list$count
+```
+
+```{r}
+sonar_dataset <- mlp_learner$dataset(sonar_task)
+for(batch.i in 1:length(save_list$target)){
+  index_vec <- save_list$indices[[batch.i]]
+  target_tensor <- save_list$target[[batch.i]]
+  target_vec <- torch::as_array(target_tensor)
+  label_vec <- names(count_tab)[ifelse(target_vec==1, 1, 2)]
+  table(label_vec)
+  ##Class_int <- as.integer(batch_sampler_instance$stratum_dt$Class[index_vec])
+  ##stratum_dt=ifelse(Class_int==1, 1, 0)))
+  stopifnot(all.equal(
+    target_tensor$flatten(),
+    sonar_dataset$.getbatch(index_vec)$y$flatten()
+  ))
+}
+```
+
+The output above is from the print statement inside `set_batch_list`, which shows 
+
+* there are two tables printed, one for the first epoch, and one for the second (not used).
+* each row represents the a batch.
+* in each table, the `row.id_length_*` columns show the number of positive and negative labels in a batch.
+* the number of minority class samples (R) is always at least 10.
+* the first batch in the first table has the same label counts as the first batch in the second table, etc.
+* the first batch `row.id_indices_M` in the first table are different from the corresponding indices in the second table.
+* so each epoch uses the samples in a different order, but with the same label counts in each batch.
+
+## TODO
+
+Then we instantiate the class on the data set:
+
+```{r}
+batch_sampler_instance <- batch_sampler_class(sonar_dataset)
+```
+
+Then we create a `dataloader`:
+
+```{r}
+sonar_dl <- torch::dataloader(sonar_dataset, batch_sampler=batch_sampler_class)
+```
+
+```{r}
+sonar_iter <- torch::dataloader_make_iter(sonar_dl)
+torch::dataloader_next(sonar_dl)
+```
+
+
+
+## Conclusions
+
+We have explained how to create a custom stratified sampler for use in the `mlr3torch` framework. This will be useful in experiments with loss functions that require a minimal number of samples of each class to get a non-zero gradient.
+
+## Session info
+
+```{r}
+sessionInfo()
+```
