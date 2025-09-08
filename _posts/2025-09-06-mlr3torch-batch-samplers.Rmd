@@ -1,12 +1,12 @@
 ---
 layout: post
-title: A custom DataLoader for mlr3torch
-description: Stratified sampling for imbalanced classification
+title: Stratified batch sampler for mlr3torch
+description: Demonstrations and verifications of correctness using sonar data
 ---
 
 ```{r Ropts, echo=FALSE, results='hide'}
 repo.dir <- normalizePath("..")
-post.id <- "2025-07-24-mlr3torch-sampler"
+post.id <- "2025-09-06-mlr3torch-batch-samplers"
 fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
 dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
 knitr::opts_chunk$set(
@@ -91,17 +91,21 @@ batch_sampler_stratified <- function(min_samples_per_stratum, shuffle=TRUE){
       self$set_batch_list()
     },
     set_batch_list = function() {
-      get_indices <- if(shuffle)sample else identity
-      index_dt <- self$stratum_dt[{
-        get_indices(1:.N)
-      }][
+      get_indices <- if(shuffle){
+        function(n)torch::as_array(torch::torch_randperm(n))+1L
+      }else{
+        function(n)1:n
+      }
+      index_dt <- self$stratum_dt[
+        get_indices(.N)
+      ][
       , i.in.stratum := 1:.N, by=c(self$stratum)
       ][]
       count_dt <- index_dt[, .(
         max.i=max(i.in.stratum)
       ), by=c(self$stratum)][order(max.i)]
       count_min <- count_dt$max.i[1]
-      num_batches <- count_min %/% min_samples_per_stratum
+      num_batches <- max(1, count_min %/% min_samples_per_stratum)
       max_samp <- num_batches * min_samples_per_stratum
       index_dt[
       , n.samp := i.in.stratum/max(i.in.stratum)*max_samp
@@ -113,7 +117,10 @@ batch_sampler_stratified <- function(min_samples_per_stratum, shuffle=TRUE){
         index_dt,
         batch.i ~ Class,
         list(length, indices=function(x)paste(x, collapse=",")),
-        value.var="row.id")
+        value.var="row.id"
+      )[
+      , labels := index_dt[, paste(Class, collapse=""), by=batch.i][order(batch.i), V1]
+      ]
       self$batch_list <- split(index_dt$row.id, index_dt$batch.i)
       self$batch_sizes <- sapply(self$batch_list, length)
       self$batch_size_tab <- sort(table(self$batch_sizes))
@@ -174,6 +181,7 @@ nn_bce_with_logits_loss_save <- torch::nn_module(
 Then we create a new MLP learner, which by default is a linear model.
 
 ```{r}
+set.seed(4)
 mlp_learner <- mlr3torch::LearnerTorchMLP$new(
   task_type="classif",
   loss=nn_bce_with_logits_loss_save)
@@ -187,7 +195,7 @@ mlp_learner$param_set$set_values(
   epochs=1,
   p=0, # dropout probability.
   batch_size=1, # ignored.
-  batch_sampler=batch_sampler_stratified(1))
+  batch_sampler=batch_sampler_stratified(min_samples_per_stratum = 1))
 ```
 
 In the code above we set parameters:
@@ -195,6 +203,7 @@ In the code above we set parameters:
 * `epochs=1` for one epoch of learning.
 * `p=0` for no dropout regularization.
 * `batch_size=1` to avoid the error that this parameter is required, but it actually is ignored because we also specify a `batch_sampler`. This a bug which should be fixed by [this PR](https://github.com/mlr-org/mlr3torch/pull/425).
+* `batch_sampler` is set to our proposed stratified sampler, with min 1 sample per stratum.
 
 In the code below we first initialize `save_list`, then we train:
 
@@ -211,6 +220,20 @@ We can look at `count` to see how many labels were in each batch:
 save_list$count
 ```
 
+The output above comes from `set_batch_list`, and shows
+
+* there are two tables printed, one for the first epoch, and one for the second (computed but not used yet).
+* each row represents a batch.
+* in each table, the `row.id_length_*` columns show the number of positive and negative labels in a batch.
+* the number of minority class samples (R) is always 1, because we specified `min_samples_per_stratum = 1` in the call to `batch_sampler_stratified` in the code above.
+* the first batch in the first table has the same label counts as the first batch in the second table, etc.
+* the first batch `row.id_indices_M` in the first table are different from the corresponding indices in the second table.
+* so each epoch uses the samples in a different order, but with the same label counts in each batch.
+
+## Double-check correct indices and labels
+
+The code below checks that the targets (=labels) seen by the loss function in each batch are consistent with the indices.
+
 ```{r}
 sonar_dataset <- mlp_learner$dataset(sonar_task)
 for(batch.i in 1:length(save_list$target)){
@@ -218,50 +241,157 @@ for(batch.i in 1:length(save_list$target)){
   target_tensor <- save_list$target[[batch.i]]
   target_vec <- torch::as_array(target_tensor)
   label_vec <- names(count_tab)[ifelse(target_vec==1, 1, 2)]
-  table(label_vec)
-  ##Class_int <- as.integer(batch_sampler_instance$stratum_dt$Class[index_vec])
-  ##stratum_dt=ifelse(Class_int==1, 1, 0)))
+  set(
+    save_list$count[["epoch 1"]],
+    i=batch.i,
+    j="check",
+    value=paste(label_vec, collapse=""))
   stopifnot(all.equal(
     target_tensor$flatten(),
     sonar_dataset$.getbatch(index_vec)$y$flatten()
   ))
 }
+save_list$count[["epoch 1"]]
 ```
 
-The output above is from the print statement inside `set_batch_list`, which shows 
+The output above has a new `check` column which is consistent with the previous `labels` column, as expected.
+Both show the vector of labels in each batch.
 
-* there are two tables printed, one for the first epoch, and one for the second (not used).
-* each row represents the a batch.
-* in each table, the `row.id_length_*` columns show the number of positive and negative labels in a batch.
-* the number of minority class samples (R) is always at least 10.
-* the first batch in the first table has the same label counts as the first batch in the second table, etc.
-* the first batch `row.id_indices_M` in the first table are different from the corresponding indices in the second table.
-* so each epoch uses the samples in a different order, but with the same label counts in each batch.
+## Varying batch size
 
-## TODO
-
-Then we instantiate the class on the data set:
+In our proposed batch sampler, we are not able to directly control batch size.
+The input parameter is `min_samples_per_stratum`, which affects the batch size.
+In the previous section, we enforced min 1 sample per stratum (in each batch), which made batches of size 10 or 11.
+Below we study how this parameter affects batch size.
 
 ```{r}
-batch_sampler_instance <- batch_sampler_class(sonar_dataset)
+label_count_dt_list <- list()
+for(min_samples_per_stratum in c(1:7,20)){
+  mlp_learner$param_set$set_values(
+    epochs=1,
+    p=0, # dropout probability.
+    batch_size=1, # ignored.
+    batch_sampler=batch_sampler_stratified(min_samples_per_stratum = min_samples_per_stratum))
+  save_list <- list()
+  mlp_learner$train(sonar_task)
+  label_count_dt_list[[paste0(
+    "min_samples_per_stratum=", min_samples_per_stratum
+  )]] <- save_list$count[["epoch 1"]][, data.table(
+    batch.i, row.id_length_M, row.id_length_R, batch_size=row.id_length_M+row.id_length_R)]
+}
+label_count_dt_list
 ```
 
-Then we create a `dataloader`:
+The output above shows that the batch size is always about 10x the value of `min_samples_per_stratum`, because the data set had about 10% minority class labels.
+When `min_samples_per_stratum` is 7 or larger, we get a single batch with all samples (same as full gradient method).
+
+## `shuffle` parameter
+
+The `shuffle` argument to `batch_sampler_stratified` controls whether or not the data are seen in a random order in each epoch.
+We can see the effect of this parameter via the code below.
 
 ```{r}
-sonar_dl <- torch::dataloader(sonar_dataset, batch_sampler=batch_sampler_class)
+shuffle_list <- list()
+for(shuffle in c(TRUE, FALSE)){
+  mlp_learner$param_set$set_values(
+    epochs=1,
+    p=0, # dropout probability.
+    batch_size=1, # ignored.
+    batch_sampler=batch_sampler_stratified(min_samples_per_stratum = 1, shuffle = shuffle))
+  save_list <- list()
+  mlp_learner$train(sonar_task)
+  shuffle_list[[paste0("shuffle=", shuffle)]] <- save_list$count
+}
+shuffle_list
 ```
+
+The output above shows that
+
+* when `shuffle=TRUE`, batch 1 has different indices in epoch 1 than in epoch 2 (and similarly for other batches).
+* when `shuffle=FALSE`, batch 1 has same indices in epoch 1 and 2 (and they are the first few indices of each class).
+
+These results indicate that the `shuffle` parameter of the proposed sampler behaves as expected (consistent with standard batching in torch).
+
+## Randomness control, part 1: random weights
+
+A torch model is initialized with random weights.
+This is actually pseudo-randomness which can be controlled by the torch random seed.
+By default `mlr3torch` learners will always use a different random intiailization.
+This can be controlled via the `seed` parameter, as demonstrated by the code below,
 
 ```{r}
-sonar_iter <- torch::dataloader_make_iter(sonar_dl)
-torch::dataloader_next(sonar_dl)
+param_list <- list()
+set.seed(5) # controls what is used as the torch random seed (if param not set).
+for(set_seed in c(0:1)){
+  for(rep_i in 1:2){
+    L <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
+    L$param_set$set_values(epochs=0, batch_size=10)
+    if(set_seed)L$param_set$values$seed <- 1 # torch random seed.
+    L$train(sonar_task)
+    param_list[[sprintf("set_seed=%d rep=%d", set_seed, rep_i)]] <- unlist(lapply(
+      L$model$network$parameters, torch::as_array))
+  }
+}
 ```
 
+The code above uses 0 epochs of training, so the weights simply come from the random initialization.
+The first for loop is over `set_seed` values: 0 means to take the default (torch random seed depends on R random seed), 1 means to set the torch random seed to 1.
+The second for loop is over `rep_i` values, which are simply repetitions, so we can see if we get the same weights after running the code twice.
+Below we see the first few weights using each of the methods:
 
+```{r}
+do.call(rbind, param_list)[, 1:5]
+```
+
+We see above that
+
+* the first two rows have different weight values, which indicates that the default is to use different random weights in each initialization.
+* the last two rows have the same weight values, which indicates that the `seed` parameter controls the random weight initialization.
+
+## Randomness control, part 2: batching
+
+What happens when we run gradient descent?
+By default we go through batches in a random order, which induces another kind of randomness (other than the weight initialization), that is also controlled by the `seed` parameter, as shown by the experiment below.
+
+```{r}
+param_list <- list()
+set.seed(5) # controls what is used as the torch random seed (if param not set).
+for(set_batch_sampler in c(0:1)){
+  for(rep_i in 1:2){
+    L <- mlr3torch::LearnerTorchMLP$new(task_type="classif")
+    L$param_set$set_values(epochs=1, batch_size=10, seed=1)
+    if(set_batch_sampler)L$param_set$values$batch_sampler <- batch_sampler_stratified(1)
+    L$train(sonar_task)
+    param_list[[sprintf("set_batch_sampler=%d rep=%d", set_batch_sampler, rep_i)]] <- unlist(lapply(
+      L$model$network$parameters, torch::as_array))
+  }
+}
+```
+
+The code above replaces `set_seed` (now always 1) with `set_batch_sampler` in the first for loop.
+When the batch sampler is not set, we use the usual batching mechanism, with `batch_size=10`.
+When the batch sampler is set, we use our custom sampler defined above.
+The other difference is that we have change `epochs` from 0 to 1, so that we are using gradient descent to get weight values (in addition to the random initialization).
+
+```{r}
+do.call(rbind, param_list)[, 1:5]
+```
+
+The output above shows that the first two rows are identical, as are the last two rows.
+This result indicates that setting the `seed` parameter is sufficient to control randomness of both initialization and batching (using both the usual sampler, and our proposed sampler).
+Note that this would not have been possible if we used R's randomness in `batch_sampler_stratified` (exercise for the reader: replace `torch::torch_randperm` with `sample` and show that you get different weights between repetitions).
 
 ## Conclusions
 
 We have explained how to create a custom stratified sampler for use in the `mlr3torch` framework. This will be useful in experiments with loss functions that require a minimal number of samples of each class to get a non-zero gradient.
+
+For practical applications of this sampler, rather than using the code on this page (which has un-necessary `save_list` instrumentation), please check out the `batch_sampler` branch of `library(mlr3resampling)` on github, in [this PR](https://github.com/tdhock/mlr3resampling/pull/43).
+The version of the function in the package has the instrumentation removed.
+
+```{r}
+remotes::install_github("tdhock/mlr3resampling@batch_sampler")
+mlr3resampling:::batch_sampler_stratified
+```
 
 ## Session info
 

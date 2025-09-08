@@ -342,7 +342,7 @@ mlp_learner$train(sonar_task)
 The output above is from the print statement inside `set_batch_list`, which shows 
 
 * there are two tables printed, one for the first epoch, and one for the second (not used).
-* each row represents the a batch.
+* each row represents a batch.
 * in each table, the `row.id_length_*` columns show the number of positive and negative labels in a batch.
 * the number of minority class samples (R) is always at least 10.
 * the first batch in the first table has the same label counts as the first batch in the second table, etc.

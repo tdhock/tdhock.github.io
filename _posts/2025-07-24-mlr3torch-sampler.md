@@ -547,7 +547,7 @@ mlp_learner$train(sonar_task)
 The output above is from the print statement inside `set_batch_list`, which shows 
 
 * there are two tables printed, one for the first epoch, and one for the second (not used).
-* each row represents the a batch.
+* each row represents a batch.
 * in each table, the `row.id_length_*` columns show the number of positive and negative labels in a batch.
 * the number of minority class samples (R) is always at least 10.
 * the first batch in the first table has the same label counts as the first batch in the second table, etc.
@@ -590,10 +590,10 @@ sessionInfo()
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] crayon_1.5.3         knitr_1.50           cli_3.6.5            xfun_0.53            rlang_1.1.6          processx_3.8.6      
-##  [7] torch_0.16.0         coro_1.1.0           glue_1.8.0           bit_4.6.0            mlr3pipelines_0.9.0  listenv_0.9.1       
-## [13] backports_1.5.0      mlr3measures_1.1.0   ps_1.9.1             paradox_1.0.1        mlr3misc_0.18.0      evaluate_1.0.5      
-## [19] mlr3_0.23.0.9000     palmerpenguins_0.1.1 mlr3torch_0.3.1      compiler_4.5.1       codetools_0.2-20     Rcpp_1.1.0          
-## [25] future_1.67.0        digest_0.6.37        R6_2.6.1             parallelly_1.45.1    parallel_4.5.1       callr_3.7.6         
-## [31] magrittr_2.0.3       checkmate_2.3.3      uuid_1.2-1           tools_4.5.1          withr_3.0.2          bit64_4.6.0-1       
-## [37] globals_0.18.0       bspm_0.5.7           lgr_0.5.0            desc_1.4.3
+##  [7] torch_0.16.0         coro_1.1.0           bit_4.6.0            mlr3pipelines_0.9.0  listenv_0.9.1        backports_1.5.0     
+## [13] ps_1.9.1             paradox_1.0.1        mlr3misc_0.18.0      evaluate_1.0.5       mlr3_0.23.0.9000     palmerpenguins_0.1.1
+## [19] mlr3torch_0.3.1      compiler_4.5.1       codetools_0.2-20     Rcpp_1.1.0           future_1.67.0        digest_0.6.37       
+## [25] R6_2.6.1             parallelly_1.45.1    parallel_4.5.1       callr_3.7.6          magrittr_2.0.3       checkmate_2.3.3     
+## [31] withr_3.0.2          uuid_1.2-1           tools_4.5.1          bit64_4.6.0-1        globals_0.18.0       bspm_0.5.7          
+## [37] lgr_0.5.0
 ```
