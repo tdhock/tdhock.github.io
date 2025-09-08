@@ -385,12 +385,12 @@ Note that this would not have been possible if we used R's randomness in `batch_
 
 We have explained how to create a custom stratified sampler for use in the `mlr3torch` framework. This will be useful in experiments with loss functions that require a minimal number of samples of each class to get a non-zero gradient.
 
-For practical applications of this sampler, rather than using the code on this page (which has un-necessary `save_list` instrumentation), please check out the `batch_sampler` branch of `library(mlr3resampling)` on github, in [this PR](https://github.com/tdhock/mlr3resampling/pull/43).
+For practical applications of this sampler, rather than using the code on this page (which has un-necessary `save_list` instrumentation), please check out `library(mlr3torchAUM)` on [github](https://github.com/tdhock/mlr3torchAUM).
 The version of the function in the package has the instrumentation removed.
 
 ```{r}
-remotes::install_github("tdhock/mlr3resampling@batch_sampler")
-mlr3resampling:::batch_sampler_stratified
+remotes::install_github("tdhock/mlr3torchAUM")
+mlr3torchAUM::batch_sampler_stratified
 ```
 
 ## Session info

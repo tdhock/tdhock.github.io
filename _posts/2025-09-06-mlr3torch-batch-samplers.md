@@ -632,12 +632,12 @@ Note that this would not have been possible if we used R's randomness in `batch_
 
 We have explained how to create a custom stratified sampler for use in the `mlr3torch` framework. This will be useful in experiments with loss functions that require a minimal number of samples of each class to get a non-zero gradient.
 
-For practical applications of this sampler, rather than using the code on this page (which has un-necessary `save_list` instrumentation), please check out the `batch_sampler` branch of `library(mlr3resampling)` on github, in [this PR](https://github.com/tdhock/mlr3resampling/pull/43).
+For practical applications of this sampler, rather than using the code on this page (which has un-necessary `save_list` instrumentation), please check out `library(mlr3torchAUM)` on [github](https://github.com/tdhock/mlr3torchAUM).
 The version of the function in the package has the instrumentation removed.
 
 
 ``` r
-remotes::install_github("tdhock/mlr3resampling@batch_sampler")
+remotes::install_github("tdhock/mlr3torchAUM")
 ```
 
 ```
@@ -645,12 +645,12 @@ remotes::install_github("tdhock/mlr3resampling@batch_sampler")
 ```
 
 ```
-## Skipping install of 'mlr3resampling' from a github remote, the SHA1 (1cba9566) has not changed since last install.
+## Skipping install of 'mlr3torchAUM' from a github remote, the SHA1 (9aa3447d) has not changed since last install.
 ##   Use `force = TRUE` to force installation
 ```
 
 ``` r
-mlr3resampling:::batch_sampler_stratified
+mlr3torchAUM::batch_sampler_stratified
 ```
 
 ```
@@ -704,8 +704,8 @@ mlr3resampling:::batch_sampler_stratified
 ##         length(self$batch_list)
 ##     })
 ## }
-## <bytecode: 0x5bf5f1d48c00>
-## <environment: namespace:mlr3resampling>
+## <bytecode: 0x5aed17c47ff8>
+## <environment: namespace:mlr3torchAUM>
 ```
 
 ## Session info
@@ -739,13 +739,11 @@ sessionInfo()
 ## [1] data.table_1.17.8
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] crayon_1.5.3             knitr_1.50               cli_3.6.5                xfun_0.53                rlang_1.1.6             
-##  [6] processx_3.8.6           torch_0.16.0             coro_1.1.0               bit_4.6.0                mlr3pipelines_0.9.0     
-## [11] listenv_0.9.1            backports_1.5.0          pkgbuild_1.4.8           ps_1.9.1                 paradox_1.0.1           
-## [16] mlr3misc_0.18.0          evaluate_1.0.5           mlr3_1.1.0               palmerpenguins_0.1.1     mlr3torch_0.3.1         
-## [21] compiler_4.5.1           mlr3resampling_2025.7.30 codetools_0.2-20         Rcpp_1.1.0               future_1.67.0           
-## [26] digest_0.6.37            R6_2.6.1                 curl_7.0.0               parallelly_1.45.1        parallel_4.5.1          
-## [31] magrittr_2.0.3           callr_3.7.6              checkmate_2.3.3          withr_3.0.2              bit64_4.6.0-1           
-## [36] uuid_1.2-1               tools_4.5.1              globals_0.18.0           bspm_0.5.7               lgr_0.5.0               
-## [41] remotes_2.5.0            desc_1.4.3
+##  [1] bit_4.6.0             compiler_4.5.1        crayon_1.5.3          Rcpp_1.1.0            bspm_0.5.7            parallel_4.5.1       
+##  [7] callr_3.7.6           globals_0.18.0        uuid_1.2-1            R6_2.6.1              curl_7.0.0            knitr_1.50           
+## [13] palmerpenguins_0.1.1  backports_1.5.0       checkmate_2.3.3       future_1.67.0         desc_1.4.3            paradox_1.0.1        
+## [19] rlang_1.1.6           mlr3torch_0.3.1       lgr_0.5.0             xfun_0.53             mlr3_1.1.0            mlr3misc_0.18.0      
+## [25] bit64_4.6.0-1         cli_3.6.5             withr_3.0.2           magrittr_2.0.3        ps_1.9.1              digest_0.6.37        
+## [31] processx_3.8.6        remotes_2.5.0         torch_0.16.0          mlr3torchAUM_2025.9.8 mlr3pipelines_0.9.0   coro_1.1.0           
+## [37] evaluate_1.0.5        listenv_0.9.1         codetools_0.2-20      pkgbuild_1.4.8        parallelly_1.45.1     tools_4.5.1
 ```
