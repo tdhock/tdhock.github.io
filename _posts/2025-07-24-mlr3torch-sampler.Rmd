@@ -353,6 +353,8 @@ The output above is from the print statement inside `set_batch_list`, which show
 
 We have explained how to create a custom stratified sampler for use in the `mlr3torch` framework. This will be useful in experiments with loss functions that require a minimal number of samples of each class to get a non-zero gradient.
 
+Read [the next post](https://tdhock.github.io/blog/2025/mlr3torch-batch-samplers/) to see how we extended this method, exploring different `min_samples_per_stratum` values, and verifying its correctness.
+
 ## Session info
 
 ```{r}

@@ -558,6 +558,8 @@ The output above is from the print statement inside `set_batch_list`, which show
 
 We have explained how to create a custom stratified sampler for use in the `mlr3torch` framework. This will be useful in experiments with loss functions that require a minimal number of samples of each class to get a non-zero gradient.
 
+Read [the next post](https://tdhock.github.io/blog/2025/mlr3torch-batch-samplers/) to see how we extended this method, exploring different `min_samples_per_stratum` values, and verifying its correctness.
+
 ## Session info
 
 
@@ -589,11 +591,13 @@ sessionInfo()
 ## [1] data.table_1.17.8
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] crayon_1.5.3         knitr_1.50           cli_3.6.5            xfun_0.53            rlang_1.1.6          processx_3.8.6      
-##  [7] torch_0.16.0         coro_1.1.0           bit_4.6.0            mlr3pipelines_0.9.0  listenv_0.9.1        backports_1.5.0     
-## [13] ps_1.9.1             paradox_1.0.1        mlr3misc_0.18.0      evaluate_1.0.5       mlr3_0.23.0.9000     palmerpenguins_0.1.1
-## [19] mlr3torch_0.3.1      compiler_4.5.1       codetools_0.2-20     Rcpp_1.1.0           future_1.67.0        digest_0.6.37       
-## [25] R6_2.6.1             parallelly_1.45.1    parallel_4.5.1       callr_3.7.6          magrittr_2.0.3       checkmate_2.3.3     
-## [31] withr_3.0.2          uuid_1.2-1           tools_4.5.1          bit64_4.6.0-1        globals_0.18.0       bspm_0.5.7          
-## [37] lgr_0.5.0
+##  [1] crayon_1.5.3             knitr_1.50               cli_3.6.5                xfun_0.53                rlang_1.1.6             
+##  [6] processx_3.8.6           torch_0.16.0             coro_1.1.0               bit_4.6.0                mlr3pipelines_0.9.0     
+## [11] listenv_0.9.1            backports_1.5.0          pkgbuild_1.4.8           ps_1.9.1                 paradox_1.0.1           
+## [16] mlr3misc_0.18.0          evaluate_1.0.5           mlr3_1.1.0               palmerpenguins_0.1.1     mlr3torch_0.3.1         
+## [21] compiler_4.5.1           mlr3resampling_2025.7.30 codetools_0.2-20         Rcpp_1.1.0               future_1.67.0           
+## [26] digest_0.6.37            R6_2.6.1                 curl_7.0.0               parallelly_1.45.1        parallel_4.5.1          
+## [31] magrittr_2.0.3           callr_3.7.6              checkmate_2.3.3          withr_3.0.2              bit64_4.6.0-1           
+## [36] uuid_1.2-1               tools_4.5.1              globals_0.18.0           bspm_0.5.7               lgr_0.5.0               
+## [41] remotes_2.5.0            desc_1.4.3
 ```
