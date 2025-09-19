@@ -63,7 +63,9 @@ which can be used with automatic differentiation. See also my
 explanations of how to code the AUM loss in torch using the ROC curve
 as a sub-routine:
 [python](https://tdhock.github.io/blog/2024/torch-roc-aum/),
-[R](https://tdhock.github.io/blog/2024/auto-grad-overhead/)
+[R](https://tdhock.github.io/blog/2024/auto-grad-overhead/).
+In 2025 ([PR#1310](https://github.com/mlverse/torch/pull/1310)) a version of my AUM loss function was merged into `library(torch)` in R.
+I maintain [another version in `library(mlr3torchAUM)`](https://github.com/tdhock/mlr3torchAUM/blob/numerical-stability/R/MeasureClassifROCAUM.R) which is compatible with the `mlr3torch` framework.
 
 ### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
 
