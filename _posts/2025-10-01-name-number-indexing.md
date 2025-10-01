@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Named versus numbered indexing in R
-description: Exploring speed differences
+title: Speed of named versus numbered indexing in R
+description: Rotated Hi-C data visualization
 ---
 
 
@@ -335,6 +335,9 @@ for(element_name in names(list_of_dt)){
 ```
 
 The code above uses named lookup, which I suspect is responsible for the quadratic time complexity we observed.
+
+### Test for loop
+
 To test this hypothesis, we use the code below.
 
 
@@ -396,6 +399,43 @@ plot(apred)
 
 The figure above shows that the throughput of index-based lookup is about 50x larger than named-based lookup, for the default time limit of 0.01 seconds.
 In the real data, there are 100k groups or more, which can explain the slowdown with the previous quadratic time code.
+
+### Test without for loop
+
+We should be able to see differences without the for loop.
+A single list lookup should be
+
+* linear time with a name,
+* constant time with a number.
+
+The code below runs the corresponding test.
+
+
+``` r
+atime_one <- atime::atime(
+  setup={
+    N_vec <- structure(1:N, names=1:N)
+    N_chr <- as.character(N)
+  },
+  name_1=N_vec[["1"]],
+  name_N=N_vec[[N_chr]],
+  index_N=N_vec[[N]])
+plot(atime_one)
+```
+
+```
+## Warning in ggplot2::scale_y_log10("median line, min/max band"): log-10 transformation introduced infinite values.
+## log-10 transformation introduced infinite values.
+## log-10 transformation introduced infinite values.
+```
+
+![plot of chunk atime-one](/assets/img/2025-10-01-name-number-indexing/atime-one-1.png)
+
+The figure above shows time and memory usage as a function of `N`, the size of the vector.
+
+* `index_N`, index access of the last element, is constant time, `O(1)`.
+* `name_1`, name access of the first element, is constant time, `O(1)`.
+* `name_N`, name access of the last element, is linear time, `O(N)`.
 
 ## Conclusions
 
