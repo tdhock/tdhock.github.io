@@ -23,9 +23,13 @@ if(FALSE){
 }
 ```
 
-The goal of this post is TODO
+The goal of this post is to explain how to compute the classic binary segmentation heuristic algorithm for change-point detection.
 
-```{r results=TRUE}
+# Example data
+
+We begin by loading an example data set.
+
+```{r}
 data(neuroblastoma, package="neuroblastoma")
 library(data.table)
 nb.dt <- data.table(neuroblastoma[["profiles"]])
@@ -33,23 +37,13 @@ one.dt <- nb.dt[profile.id==4 & chromosome==2]
 one.dt
 ```
 
+The output above shows a table with a `logratio` column that we will use as input to binary segmentation.
+We visualize those data below, as a function of row number in the table.
 
-
-```{r results=TRUE}
+```{r neuro-data}
 library(ggplot2)
-ggplot()+
-  scale_y_continuous(
-    "logratio (noisy copy number measurement)")+
-  geom_point(aes(
-    position/1e6, logratio),
-    data=one.dt)
-```
-
-TODO
-
-```{r}
 one.dt[, data.i := .I]
-gg <- ggplot()+
+ggplot()+
   scale_x_continuous(
     limits=c(0, nrow(one.dt)+1))+
   scale_y_continuous(
@@ -57,45 +51,60 @@ gg <- ggplot()+
   geom_point(aes(
     data.i, logratio),
     data=one.dt)
-gg
 ```
 
-TODO
+The figure above shows a black dot for each data point to segment.
+
+# Binary segmentation
+
+We will consider a parametric model: change in mean with constant variance.
+Assuming the normal distribution, maximizing the likelihood is equivalent to minimizing the square loss.
+For an efficient implementation of binary segmentation in this case, we can use the cumulative sum trick.
 
 ```{r}
-cum.dt <- one.dt[, data.table(
+(cum.dt <- one.dt[, data.table(
   data=c(0,cumsum(logratio)),
-  square=c(0,cumsum(logratio^2)))]
+  square=c(0,cumsum(logratio^2)))])
+```
+
+The output above is a table of cumulative sums of the `data` and their `square`.
+This table is useful because it allows constant time computation of the optimal square loss for any given segment, for example the segment (1,N) on all of the data:
+
+```{r}
 square_loss <- function(start, end)cum.dt[
 , square[end+1]-square[start]-(data[end+1]-data[start])^2/(end+1-start)]
+N_data <- nrow(one.dt)
+(loss <- square_loss(1, N_data))
+```
+
+## Binary segmentation via splitting
+
+For a segment with N data, we can compute the loss of each candidate split on that segment in linear `O(N)` time via
+
+```{r}
 get_diff <- function(start, end, change){
   loss_together <- square_loss(start, end)
   loss_apart <- square_loss(start, change)+square_loss(change+1, end)
   data.table(start, end, change, loss_diff=loss_together-loss_apart)
 }
-
-N_data <- nrow(one.dt)
-cluster.dt <- data.table(start=1:N_data, end=1:N_data)
-join.dt.list <- list()
-seg.dt.list <- list()
-while(nrow(cluster.dt)>1){
-  edge.dt <- cluster.dt[, get_diff(start[-.N], end[-1], end[-.N])]
-  best.i <- which.min(edge.dt$loss_diff)
-  best <- edge.dt[best.i]
-  new.cluster <- best[, .(start,end)]
-  others <- cluster.dt[-((0:1)+best.i)]
-  cluster.dt <- rbind(new.cluster, others)
-  setkey(cluster.dt, start)
-  join.dt.list[[paste(nrow(cluster.dt))]] <- data.table(segments=nrow(cluster.dt), best)
-}
-(join.dt <- rbindlist(join.dt.list)[, loss := cumsum(loss_diff)][])
-
-## divisive.
 get_diff_for_seg <- function(start, end){
   get_diff(start, end, seq(start, end-1L))
 }
+(first_candidates <- get_diff_for_seg(1, N_data))
+```
+
+Each row in the table above represents a candidate change-point after splitting the first segment (1,N).
+The `loss_diff` column can be maximized to obtain the best split point.
+
+```{r}
+first_candidates[which.max(loss_diff)]
+```
+
+The output above shows that the best first split is a change after data point 41.
+The code below implements this update rule recursively:
+
+```{r loss-split}
 new.segs <- data.table(start=1L, end=N_data)
-loss <- square_loss(1, N_data)
 split.dt.list <- list()
 cand.segs <- NULL
 for(n_segs in seq(1, N_data)){
@@ -114,23 +123,157 @@ for(n_segs in seq(1, N_data)){
   cand.segs <- cand.segs[-best.i]
 }
 (split.dt <- rbindlist(split.dt.list))
+plot(loss ~ segments, split.dt)
+```
 
-both.dt <- rbind(
-  join.dt[, data.table(algo="join", segments, loss)],
-  split.dt[, data.table(algo="split", segments, loss)])
+The output table above has one row per split in classic divisive binary segmentation, referred to as [Binary segmentation in section 5.2.2 of the Truong review paper](https://arxiv.org/pdf/1801.00718).
+The figure represents the loss as a function of model size, and is often used for model selection using the slope heuristic (choose the model where the loss starts to become flat).
+The R code above is sub-optimal in time and space complexity, because a new `cand.segs` table must be allocated in each iteration (worst case linear time).
+The number of candidates considered changes with the number of segments, as can be seen below.
+
+```{r candidates-split}
+plot(candidates ~ segments, split.dt)
+```
+
+The output above shows that the number of candidates grows to about 50
+in the first 100 segments.  So the algorithm is quadratic time, and
+this could be fixed by moving the code to C++, as in the
+[binsegRcpp](https://cloud.r-project.org/web/packages/binsegRcpp/)
+package, which uses special STL containers (`multiset`,
+`priority_queue`) to achieve best case log-linear time complexity.
+
+## Agglomerative binary segmentation (bottom-up)
+
+Another way to compute change-points is by starting with N separate clusters/segments, and performing N-1 join operations, until we obtain a single cluster/segment.
+Like the classic divisive binary segmentation described in the previous section, this is a hierarchical segmentation method (result is a tree), and it is referred to as [Bottom-up segmentation in section 5.2.3 of the Truong review paper](https://arxiv.org/pdf/1801.00718).
+It is implemented below.
+
+```{r loss-join}
+cluster.dt <- data.table(start=1:N_data, end=1:N_data)
+join.dt.list <- list()
+seg.dt.list <- list()
+while(nrow(cluster.dt)>1){
+  edge.dt <- cluster.dt[, get_diff(start[-.N], end[-1], end[-.N])]
+  best.i <- which.min(edge.dt$loss_diff)
+  best <- edge.dt[best.i]
+  new.cluster <- best[, .(start,end)]
+  others <- cluster.dt[-((0:1)+best.i)]
+  cluster.dt <- rbind(new.cluster, others)
+  setkey(cluster.dt, start)
+  join.dt.list[[paste(nrow(cluster.dt))]] <- data.table(
+    segments=nrow(cluster.dt), best, candidates=nrow(edge.dt))
+}
+(join.dt <- rbindlist(join.dt.list)[, loss := cumsum(loss_diff)][])
+plot(loss ~ segments, join.dt)
+```
+
+The output above is another table, where the `change` column represents the sequence of change-points.
+The loss figure above is similar to the one in the previous section.
+
+## Comparing the change-points for small model sizes
+
+Do the two algorithms yield the same results?
+Sometimes, but not always, as we can see in the three examples below.
+
+
+```{r changes-small-models}
+show.segs <- 2:4
+seg.dt <- data.table(Segments=show.segs)[, {
+  both.dt[segments<Segments, {
+    schange <- sort(change)
+    start <- c(1L, schange+1L)
+    end <- c(schange, N_data)
+    total <- cum.dt[, data[end+1]-data[start] ]
+    data.table(start, end, mean=total/(end+1-start))
+  }, by=algo]
+}, by=Segments]
+loss.text <- both.dt[segments %in% show.segs][, Segments := segments]
+model.color <- "blue"
 ggplot()+
+  scale_x_continuous(
+    limits=c(0, nrow(one.dt)+1))+
+  scale_y_continuous(
+    "logratio (noisy copy number measurement)")+
   geom_point(aes(
-    segments, loss, color=algo),
-    data=both.dt)+
-  scale_x_continuous(limits=c(0,10))
+    data.i, logratio),
+    data=one.dt)+
+  geom_vline(aes(
+    xintercept=start-0.5),
+    data=seg.dt[start>1],
+    size=1,
+    linetype="dashed",
+    color=model.color)+
+  geom_segment(aes(
+    start-0.5, mean,
+    xend=end+0.5, yend=mean),
+    data=seg.dt,
+    size=2,
+    color=model.color)+
+  geom_text(aes(
+    230, -0.5, label=sprintf("loss=%.1f", loss)),
+    data=loss.text,
+    hjust=1,
+    color=model.color)+
+  facet_grid(Segments ~ algo, labeller=label_both)
+```
 
-wide.dt <- dcast(both.dt, segments ~ algo, value.var="loss")[
-, diff := join-split][!is.na(diff)]
+The figure above shows the results for the two algorithms (panels from left to right), and three model sizes (panels from top to bottom).
 
+* For two segments, `algo=split` has a smaller loss value.
+* For three segments, `algo=join` has a smaller loss value.
+* For four segments, both algorithms are the same.
+
+## Comparing all loss values
+
+Another way to compare is by examining the loss values for some small model sizes:
+
+```{r loss-small-models}
+both.dt <- rbind(
+  join.dt[, data.table(algo="join", segments, loss, change)],
+  split.dt[, data.table(algo="split", segments, loss, change)])
+show.max <- 19
 ggplot()+
+  theme_bw()+
+  geom_point(aes(
+    segments, loss, color=algo, size=algo),
+    data=both.dt[segments<=show.max])+
+  scale_size_manual(values=c(
+    join=3,
+    split=2))+
+  scale_x_continuous(breaks=1:show.max)
+```
+
+Above we see that there are large loss differences for two small models (2 and 3 segments), and small differences for larger models.
+
+```{r loss-all-models}
+ggplot()+
+  theme_bw()+
+  scale_size_manual(values=c(
+    join=3,
+    split=2))+
   geom_line(aes(
-    segments, loss, color=algo),
+    segments, loss, color=algo, size=algo),
     data=both.dt)
+```
+
+Above we do not see loss differences very clearly.
+
+```{r}
+my.thresh <- 1e-9
+wide.dt <- dcast(both.dt, segments ~ algo, value.var="loss")[
+, diff := join-split
+][
+  !is.na(diff)
+][, let(diff.show = {
+  ad <- abs(diff)
+  is.small <- ad<my.thresh
+  lad <- log10(ad)
+  to.sub <- min(lad[!is.small])
+  ifelse(is.small, 0, sign(diff)*(lad-to.sub+1))
+}, better = fcase(
+  abs(diff)<my.thresh, "same",
+  join<split, "join", 
+  default="split"))][]
 
 ggplot()+
   scale_y_log10()+
@@ -138,10 +281,17 @@ ggplot()+
     segments, loss, color=algo),
     data=both.dt)
 
-normalize <- function(x)(x-min(x))/(max(x)-min(x))
-log.pos.neg <- function(x)sign(x)*normalize(log10(abs(x)))
 ggplot()+
-  geom_line(aes(
-    segments, log.pos.neg(diff)),
+  geom_point(aes(
+    segments, diff.show),
     data=wide.dt)
+
+ggplot()+
+  geom_point(aes(
+    segments, abs(diff), color=better),
+    data=wide.dt)+
+  scale_y_log10("Loss difference")
 ```
+
+Note that this idea is similar to another classic algorithm: [agglomerative/hierarchical clustering](https://en.wikipedia.org/wiki/Hierarchical_clustering).
+But these two are not the same!
