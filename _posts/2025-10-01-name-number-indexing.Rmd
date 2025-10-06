@@ -1,0 +1,279 @@
+---
+layout: post
+title: Speed of named versus numbered indexing in R
+description: Rotated Hi-C data visualization
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-10-01-name-number-indexing"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=150)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to explore the source of [a recent
+issue](https://github.com/animint/animint2/issues/235) that was fixed
+in `animint2`, my R package for **anim**ated **int**eractive data
+visualization.
+
+## Motivation: Hi-C data
+
+PhD student Elise JORGE from INRAE Touloue is currently visiting my lab at Sherbrooke.
+We are working on methods for clustering, analysis, and visualization of [Hi-C data](https://en.wikipedia.org/wiki/Hi-C_(genomic_analysis_technique)).
+
+### Visualizing example data with tiles
+
+In R, those data can be represented as a pairwise interaction matrix or data table, where each interacting element is a bin in genomic position space.
+
+```{r tile-full}
+library(data.table)
+N_bins <- 5
+bin_vec <- seq(1, N_bins)
+(ij_dt <- CJ(
+  bin_i=bin_vec,
+  bin_j=bin_vec
+)[, label := sprintf("%d,%d", bin_i, bin_j)])
+library(ggplot2)
+ggplot()+
+  coord_equal()+
+  geom_tile(aes(
+    bin_j, bin_i),
+    color="black",
+    fill="white",
+    data=ij_dt)+
+  geom_text(aes(
+    bin_j, bin_i, label=label),
+    data=ij_dt)+
+  scale_y_reverse()
+```
+
+There are integer read counts associated with each bin pair (i,j),
+which are symmetric (same for j,i),
+so we typically visualize only half of the data.
+
+```{r tile-half}
+(ij_half <- ij_dt[bin_i <= bin_j])
+ggplot()+
+  coord_equal()+
+  geom_tile(aes(
+    bin_j, bin_i),
+    color="black",
+    fill="white",
+    data=ij_half)+
+  geom_text(aes(
+    bin_j, bin_i, label=label),
+    data=ij_half)+
+  scale_y_reverse()
+```
+
+Above we see the lower triangle has been removed.
+Furthermore, we typically visualize only close-range interactions.
+
+```{r tile-close}
+(ij_close <- ij_half[bin_j <= bin_i + 2])
+ggplot()+
+  coord_equal()+
+  geom_tile(aes(
+    bin_j, bin_i),
+    color="black",
+    fill="white",
+    data=ij_close)+
+  geom_text(aes(
+    bin_j, bin_i, label=label),
+    data=ij_close)+
+  scale_y_reverse()
+```
+
+Above we see that long-range interactions have been removed (upper right of plot).
+
+### Visualizing using polygons
+
+To visualize these  typically rotate 45 degrees, so that the diagonal of the matrix goes from left to right.
+To do that we first convert i,j coordinates to corners, which we draw using polygons in the code below.
+
+```{r polygon-original}
+(corner_dt <- setkey(ij_close[, data.table(
+  bin_i=rep(bin_i, 4),
+  bin_j=rep(bin_j, 4),
+  label=rep(label, 4),
+  corner_i=c(bin_i-0.5, bin_i-0.5, bin_i+0.5, bin_i+0.5),
+  corner_j=c(bin_j-0.5, bin_j+0.5, bin_j+0.5, bin_j-0.5)
+)], label))
+ggplot()+
+  coord_equal()+
+  geom_polygon(aes(
+    corner_j, corner_i, group=label),
+    color="black",
+    fill="white",
+    data=corner_dt)+
+  geom_text(aes(
+    bin_j, bin_i, label=label),
+    data=ij_close)+
+  scale_y_reverse()
+```
+
+The plot above using polygons is consistent with previous plots that use tiles.
+Next, we compute a rotation matrix which converts ij-coordinates to xy-coordinates.
+
+```{r}
+two.ij <- rbind(
+  c(1,1),
+  c(1,2))
+two.xy <- rbind(
+  c(1,   0),  #i,j=1,1 maps to x,y=1,0
+  c(1.5, 0.5))#i,j=1,2 maps to x,y=1.5,0.5
+(ij2xy_mat <- solve(two.ij) %*% two.xy)
+```
+
+Below we verify that the linear transformation matrix `ij2xy_mat` works as intended, for the two ij-vectors used in the `solve()` (matrix inverse):
+
+```{r}
+corner_dt[, two.ij %*% ij2xy_mat]
+```
+
+The output above is same matrix as `two.xy`, as expected.
+Next, we use the tranformation `ij2xy_mat` on all of the ij coordinates (corners and bins):
+
+```{r}
+setxy <- function(DT, prefix){
+  ij_mat <- as.matrix(DT[, sprintf("%s_%s",prefix,c("i","j")), with=FALSE])
+  DT[, c("x","y") := as.data.table(ij_mat %*% ij2xy_mat)]
+}
+setxy(corner_dt, "corner")[1:8]
+setxy(ij_close, "bin")[1:2]
+```
+
+The output tables above have additional columns with xy-coordinates,
+which are plotted below.
+
+```{r polygon-rotate}
+ggplot()+
+  coord_equal()+
+  geom_polygon(aes(
+    x, y, group=label),
+    fill="white",
+    color="black",
+    data=corner_dt)+
+  geom_text(aes(
+    x, y, label=label),
+    data=ij_close)
+```
+
+Above we see that the polygons have been rotated 45 degrees, such that the diagonal is now at y=0.
+
+## Exploring time complexity
+
+The `animint2` package has a sophisticated compiler, that tries to compress data in each geom, before writing CSV files that will be read by the JavaScript code for visualization.
+For `geom_polygon`, and others which have `aes(group)`, the code loops over each group, looking for common data across subsets.
+The old code split the data table into a list of tables, one per group, as below.
+
+```{r}
+list_of_dt <- split(corner_dt, corner_dt$label)[1:2]
+```
+
+Then there was a loop over names of this list, as below.
+
+```{r}
+for(element_name in names(list_of_dt)){
+  list_of_dt[[element_name]]
+}
+```
+
+The code above uses named lookup, which I suspect is responsible for the quadratic time complexity we observed.
+
+### Test for loop
+
+To test this hypothesis, we use the code below.
+
+```{r atime-result}
+ares <- atime::atime(
+  setup={
+    N_list <- structure(as.list(1:N), names=1:N)
+  },
+  name=for(name in names(N_list))N_list[[name]],
+  index=for(index in seq_along(N_list))N_list[[index]])
+plot(ares)
+```
+
+The plot above shows asymptotic time and memory measurements for looping through a list, using either names or indices.
+We see in the `seconds` panel that the `name` method has a larger slope than the `index` method, which suggests a larger computational complexity class.
+Below we estimate the asymptotic complexity of each method.
+
+```{r atime-references}
+aref <- atime::references_best(ares)
+plot(aref)
+```
+
+Above we see the empirical measurements in black, with asymptotic references in violet.
+
+* `index` is clearly linear, `O(N)`.
+* `name` is clearly quadratic, `O(N^2)`.
+
+These data confirm the hypothesis that the slowdown in the old code was caused by the loop over the groups in which we used lookup by name (not index).
+The different complexity classes are consistent with the performance test case we created in order to ensure that we maintain linear time complexity for this operation in `animint2` ([link to result in PR that added the performance test](https://github.com/animint/animint2/pull/239#issuecomment-3351584324)).
+
+Finally, the code below estimates the throughput for each method.
+
+```{r atime-predict}
+apred <- predict(aref)
+plot(apred)
+```
+
+The figure above shows that the throughput of index-based lookup is about 50x larger than named-based lookup, for the default time limit of 0.01 seconds.
+In the real data, there are 100k groups or more, which can explain the slowdown with the previous quadratic time code.
+
+### Test without for loop
+
+We should be able to see differences without the for loop.
+A single list lookup should be
+
+* linear time with a name,
+* constant time with a number.
+
+The code below runs the corresponding test.
+
+```{r atime-one}
+atime_one <- atime::atime(
+  setup={
+    N_vec <- structure(1:N, names=1:N)
+    N_chr <- as.character(N)
+  },
+  name_1=N_vec[["1"]],
+  name_N=N_vec[[N_chr]],
+  index_N=N_vec[[N]])
+plot(atime_one)
+```
+
+The figure above shows time and memory usage as a function of `N`, the size of the vector.
+
+* `index_N`, index access of the last element, is constant time, `O(1)`.
+* `name_1`, name access of the first element, is constant time, `O(1)`.
+* `name_N`, name access of the last element, is linear time, `O(N)`.
+
+## Conclusions
+
+This post has explored the time complexity of list lookup in R.
+
+* Because name-based list lookup uses a linear scan of names, each lookup is a linear time operation, and a loop over all elements is quadratic time.
+* Each index-based list lookup is constant time, and a loop over all elements is linear time.
+
+This suggests that a simple fix for the issue would have been to use indices rather than names for the list lookup.
+The solution we adopted was porting the code to `data.table` and using `by` instead of a loop, which has the same effect (linear time overall because data are sorted prior to looping over groups).
+
+## Session info
+
+```{r}
+sessionInfo()
+```
