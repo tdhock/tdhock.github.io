@@ -246,46 +246,15 @@ ggplot()+
 Above we see that there are large loss differences for two small models (2 and 3 segments), and small differences for larger models.
 
 ```{r loss-all-models}
-ggplot()+
-  theme_bw()+
-  scale_size_manual(values=c(
-    join=3,
-    split=2))+
-  geom_line(aes(
-    segments, loss, color=algo, size=algo),
-    data=both.dt)
-```
-
-Above we do not see loss differences very clearly.
-
-```{r}
-my.thresh <- 1e-9
 wide.dt <- dcast(both.dt, segments ~ algo, value.var="loss")[
 , diff := join-split
 ][
   !is.na(diff)
-][, let(diff.show = {
-  ad <- abs(diff)
-  is.small <- ad<my.thresh
-  lad <- log10(ad)
-  to.sub <- min(lad[!is.small])
-  ifelse(is.small, 0, sign(diff)*(lad-to.sub+1))
-}, better = fcase(
+][, let(better = fcase(
   abs(diff)<my.thresh, "same",
   join<split, "join", 
-  default="split"))][]
-
-ggplot()+
-  scale_y_log10()+
-  geom_line(aes(
-    segments, loss, color=algo),
-    data=both.dt)
-
-ggplot()+
-  geom_point(aes(
-    segments, diff.show),
-    data=wide.dt)
-
+  default="split"
+))][]
 ggplot()+
   geom_point(aes(
     segments, abs(diff), color=better),
@@ -293,5 +262,161 @@ ggplot()+
   scale_y_log10("Loss difference")
 ```
 
-Note that this idea is similar to another classic algorithm: [agglomerative/hierarchical clustering](https://en.wikipedia.org/wiki/Hierarchical_clustering).
-But these two are not the same!
+Above we see the absolute loss difference as a function of model size. We see that sometimes the two algorithms result in equally good loss values, and sometimes one is better than the other.
+
+# Comparing with hierarchical clustering
+
+Note that the algorithms implemented above are similar to another classic algorithm: [agglomerative/hierarchical clustering](https://en.wikipedia.org/wiki/Hierarchical_clustering), implemented as `hclust()` in R.
+But these are not the same in general! See [my slides on hierarchical clustering](https://github.com/tdhock/2023-08-unsupervised-learning/blob/main/slides/04-hierarhical-clustering.pdf) for details about how it works.
+Briefly, the hierarchical clustering algorithm starts with `N` clusters, one for each data point, and computes pairwise distances, represented in an `NxN` matrix.
+It then searches for the min distance, which takes `O(N^2)` time, and joins the corresponding clusters.
+Repeating this join operation `N` times results in the cluster tree, overall `O(N^3)` time in general.
+There are various ways to speed this up: 
+
+* using a priority queue to compute the min distance can reduce an `N` factor to `log N`.
+* restricting the number of pairwise distances to a neighborhood graph can reduce the `N^2` number of distances to minimize over to `N` (for example on a 2d grid).
+
+```{r}
+data.mat <- as.matrix(one.dt[, c("logratio")])
+data.mat.dt <- data.table(
+  row=as.integer(row(data.mat)),
+  col=as.integer(col(data.mat)),
+  logratio=as.numeric(data.mat))
+nb.dist <- dist(data.mat)
+nb.dist.mat <- as.matrix(nb.dist)
+nb.dist.dt <- data.table(
+  row=as.integer(row(nb.dist.mat)),
+  col=as.integer(col(nb.dist.mat)),
+  dist=as.numeric(nb.dist.mat))
+
+revfac <- function(x){
+  factor(x, sort(unique(x), decreasing = TRUE))
+}
+ggplot()+
+  geom_tile(aes(
+    col, row, fill=dist),
+    data=nb.dist.dt)+
+  scale_fill_gradient(low="white", high="red")+
+  coord_equal()+
+  scale_y_reverse("observation")+
+  scale_x_continuous("observation")
+```
+
+---
+
+# Only need lower triangle (symmetry)
+
+```{r}
+lower.triangle <- nb.dist.dt[col<row]
+ggplot()+
+  geom_tile(aes(
+    col, row, fill=dist),
+    data=lower.triangle)+
+  scale_fill_gradient(low="white", high="red")+
+  coord_equal()+
+  scale_y_reverse("observation")+
+  scale_x_continuous("observation")
+```
+
+```{r}
+diag.band <- nb.dist.dt[col+1==row]
+ggplot()+
+  geom_tile(aes(
+    col, row, fill=dist),
+    data=diag.band)+
+  scale_fill_gradient(low="white", high="red")+
+  coord_equal()+
+  scale_y_reverse("observation")+
+  scale_x_continuous("observation")
+```
+
+---
+
+# Find the closest pairs
+
+```{r}
+diag.band[, min.dist := min(dist)==dist]
+ggplot()+
+  geom_tile(aes(
+    col, row, fill=dist, color=min.dist),
+    size=0.5,
+    data=diag.band)+
+  scale_fill_gradient(low="white", high="red")+
+  scale_color_manual(
+    values=c("TRUE"="black", "FALSE"="transparent"),
+    guide=guide_legend(override.aes = list(fill=NA)))+
+  coord_equal(expand=FALSE)+
+  scale_y_reverse("observation")+
+  scale_x_continuous("observation")
+```
+
+---
+
+# Join one of the closest pairs (iteration 1)
+
+```{r}
+diag.band[, to.join := .I %in% which(min.dist)[1] ]
+color.values <- c("TRUE"="black", "FALSE"="transparent")
+gg.dist <- function(){
+  ggplot()+
+    ggtitle(paste0("min dist=", diag.band[min.dist==TRUE]$dist[1]))+
+    geom_tile(aes(
+      col, row, fill=dist,
+      color=factor(to.join, names(color.values))),
+      size=0.5,
+      data=diag.band)+
+    scale_fill_gradient(low="white", high="red")+
+    scale_color_manual(
+      "To join",
+      values=color.values,
+      breaks=names(color.values),
+      drop=FALSE,
+      guide=guide_legend(override.aes = list(fill=NA)))+
+    coord_equal(expand=TRUE)+
+    scale_y_reverse("cluster")+
+    scale_x_continuous("cluster")
+}
+gg.dist()
+```
+
+---
+
+# iteration 2
+
+```{r}
+do.join <- function(){
+  join.indices <- diag.band[to.join==TRUE, c(row,col)]
+  to.remove <- diag.band[, row %in% join.indices | col %in% join.indices]
+  old.dt <- diag.band[to.remove]
+  old.dt[, other := ifelse(
+    row %in% join.indices, ifelse(
+      col %in% join.indices, NA, col), row)]
+  new.dt <- old.dt[!is.na(other), .(
+    dist=min(dist), N=.N
+  ), by=other]
+  new.dt[, keep := join.indices[1] ]
+  diag.band <<- rbind(
+    diag.band[!to.remove, data.table(row, col, dist)],
+    new.dt[, data.table(
+      row=ifelse(keep<other, other, keep),
+      col=ifelse(keep<other, keep, other),
+      dist)])
+  diag.band[, min.dist := min(dist)==dist]
+  diag.band[, to.join := .I %in% which(min.dist)[1] ]
+  gg.dist()
+}
+do.join()
+```
+
+
+TODO
+
+## Conclusions
+
+TODO
+
+## Session info
+
+```{r}
+sessionInfo()
+```
