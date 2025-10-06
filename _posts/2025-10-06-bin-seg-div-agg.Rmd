@@ -1,0 +1,147 @@
+---
+layout: post
+title: Agglomerative binary segmentation
+description: Clustering using loss or difference
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-10-06-bin-seg-div-agg"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=150)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is TODO
+
+```{r results=TRUE}
+data(neuroblastoma, package="neuroblastoma")
+library(data.table)
+nb.dt <- data.table(neuroblastoma[["profiles"]])
+one.dt <- nb.dt[profile.id==4 & chromosome==2]
+one.dt
+```
+
+
+
+```{r results=TRUE}
+library(ggplot2)
+ggplot()+
+  scale_y_continuous(
+    "logratio (noisy copy number measurement)")+
+  geom_point(aes(
+    position/1e6, logratio),
+    data=one.dt)
+```
+
+TODO
+
+```{r}
+one.dt[, data.i := .I]
+gg <- ggplot()+
+  scale_x_continuous(
+    limits=c(0, nrow(one.dt)+1))+
+  scale_y_continuous(
+    "logratio (noisy copy number measurement)")+
+  geom_point(aes(
+    data.i, logratio),
+    data=one.dt)
+gg
+```
+
+TODO
+
+```{r}
+cum.dt <- one.dt[, data.table(
+  data=c(0,cumsum(logratio)),
+  square=c(0,cumsum(logratio^2)))]
+square_loss <- function(start, end)cum.dt[
+, square[end+1]-square[start]-(data[end+1]-data[start])^2/(end+1-start)]
+get_diff <- function(start, end, change){
+  loss_together <- square_loss(start, end)
+  loss_apart <- square_loss(start, change)+square_loss(change+1, end)
+  data.table(start, end, change, loss_diff=loss_together-loss_apart)
+}
+
+N_data <- nrow(one.dt)
+cluster.dt <- data.table(start=1:N_data, end=1:N_data)
+join.dt.list <- list()
+seg.dt.list <- list()
+while(nrow(cluster.dt)>1){
+  edge.dt <- cluster.dt[, get_diff(start[-.N], end[-1], end[-.N])]
+  best.i <- which.min(edge.dt$loss_diff)
+  best <- edge.dt[best.i]
+  new.cluster <- best[, .(start,end)]
+  others <- cluster.dt[-((0:1)+best.i)]
+  cluster.dt <- rbind(new.cluster, others)
+  setkey(cluster.dt, start)
+  join.dt.list[[paste(nrow(cluster.dt))]] <- data.table(segments=nrow(cluster.dt), best)
+}
+(join.dt <- rbindlist(join.dt.list)[, loss := cumsum(loss_diff)][])
+
+## divisive.
+get_diff_for_seg <- function(start, end){
+  get_diff(start, end, seq(start, end-1L))
+}
+new.segs <- data.table(start=1L, end=N_data)
+loss <- square_loss(1, N_data)
+split.dt.list <- list()
+cand.segs <- NULL
+for(n_segs in seq(1, N_data)){
+  new.loss <- new.segs[
+  , get_diff_for_seg(start, end)[which.max(loss_diff)]
+  , by=.I]
+  cand.segs <- rbind(cand.segs, new.loss)
+  best.i <- which.max(cand.segs$loss_diff)
+  best <- cand.segs[best.i]
+  split.dt.list[[n_segs]] <- data.table(
+    segments=n_segs, candidates=nrow(cand.segs), best, loss)
+  loss <- loss-best$loss_diff
+  new.segs <- best[, rbind(
+    data.table(start, end=change),
+    data.table(start=change+1L, end))]
+  cand.segs <- cand.segs[-best.i]
+}
+(split.dt <- rbindlist(split.dt.list))
+
+both.dt <- rbind(
+  join.dt[, data.table(algo="join", segments, loss)],
+  split.dt[, data.table(algo="split", segments, loss)])
+ggplot()+
+  geom_point(aes(
+    segments, loss, color=algo),
+    data=both.dt)+
+  scale_x_continuous(limits=c(0,10))
+
+wide.dt <- dcast(both.dt, segments ~ algo, value.var="loss")[
+, diff := join-split][!is.na(diff)]
+
+ggplot()+
+  geom_line(aes(
+    segments, loss, color=algo),
+    data=both.dt)
+
+ggplot()+
+  scale_y_log10()+
+  geom_line(aes(
+    segments, loss, color=algo),
+    data=both.dt)
+
+normalize <- function(x)(x-min(x))/(max(x)-min(x))
+log.pos.neg <- function(x)sign(x)*normalize(log10(abs(x)))
+ggplot()+
+  geom_line(aes(
+    segments, log.pos.neg(diff)),
+    data=wide.dt)
+```
