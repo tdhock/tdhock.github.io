@@ -205,7 +205,11 @@ ggplot()+
   facet_grid(variable ~ ., scales="free")
 ```
 
-We see a very different pattern in the figure above: the most candidate
+We see a very different pattern in the figure above: the first iteration has the most items in the minimization, which decreases linearly.
+Using a priority queue in C++ would definitely result in big speed improvements:
+
+* each search for best join would be `O(log N)` instead of `O(N)`,
+* overall the algorithm would be `O(N log N)` instead of `O(N^2)`.
 
 ## Comparing the change-points for small model sizes
 
