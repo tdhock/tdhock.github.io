@@ -7,11 +7,6 @@ description: Course materials and students mentored
 
 ## Course materials
 
-For current and potential CS master students at NAU, [here is a list
-of progression plans with various specialties including machine
-learning](https://github.com/NAU-CS/progression-plans), which should
-be useful for planning what classes you take.
-
 - Summer 2026, UDS [ROP 631](https://www.usherbrooke.ca/admission/fiches-cours/ROP631), Optimisation non linéaire, [my course materials](https://github.com/tdhock/2026-05-nlopt).
 - Spring 2026, UDS IFT 704, Apprentissage Automatique à grand échelle, [my course materials](https://github.com/tdhock/2025-08-aa-grande-echelle).
 - Fall 2024, UDS IFT 187, Éléments de bases de données, [supplementary course materials](https://github.com/tdhock/2024-08-data-bases).
