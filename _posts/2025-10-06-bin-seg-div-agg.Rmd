@@ -407,6 +407,16 @@ agg.edge.list <- list()
 iteration <- 1
 cluster.dt <- data.table(start=1:N_data, end=1:N_data, dist_next=c(diag.band$dist, NA))
 more.dist.list <- list()
+more_dist <- function(side, set.i, out.i, in.i){
+  out.indices <- with(cluster.dt[out.i], start:end)
+  in.indices <- with(cluster.dt[in.i], start:end)
+  out.to.in <- nb.dist.mat[out.indices, in.indices, drop=FALSE]
+  more.dist.list[[paste(iteration, side)]] <<- data.table(
+    iteration,
+    CJ(row=out.indices, col=in.indices),
+    dist=as.numeric(t(out.to.in)))
+  cluster.dt[set.i, dist_next := min(out.to.in, dist_next)]
+}
 while(nrow(cluster.dt)>1){
   agg.edge.list[[paste(nrow(cluster.dt))]] <- data.table(
     iteration,
@@ -418,34 +428,14 @@ while(nrow(cluster.dt)>1){
     n_in_min=nrow(cluster.dt)-1,
     cluster.dt[best.i])
   if(best.i>1){
-    bottom.cluster <- cluster.dt[best.i+1]
-    bottom.indices <- with(bottom.cluster, start:end)
-    bottom.to.prev <- nb.dist.mat[bottom.indices, best.i-1]
-    more.dist.list[[paste(iteration, "bottom")]] <- data.table(
-      iteration,
-      row=bottom.indices,
-      col=best.i-1L,
-      dist=bottom.to.prev)      
-    cluster.dt[best.i-1, dist_next := min(bottom.to.prev, dist_next)]
+    more_dist("bottom", best.i-1, best.i-1, best.i+1)
   }
-  new.cluster <- cluster.dt[, data.table(
-    start=start[best.i],
-    end=end[best.i+1],
-    dist_next=dist_next[best.i+1])]
   if(best.i+1 < nrow(cluster.dt)){
-    top.cluster <- cluster.dt[best.i]
-    top.indices <- with(top.cluster, start:end)
-    top.to.next <- nb.dist.mat[top.indices, best.i+2]
-    more.dist.list[[paste(iteration, "bottom")]] <- data.table(
-      iteration,
-      row=top.indices,
-      col=best.i+2L,
-      dist=top.to.next)
-    new.cluster[, dist_next := min(dist_next, top.to.next)]
+    more_dist("top", best.i+1, best.i+2, best.i)
   }
-  others <- cluster.dt[-c(best.i,best.i+1)]
-  cluster.dt <- rbind(new.cluster, others)
-  setkey(cluster.dt, start)
+  new.start <- cluster.dt$start[best.i]
+  cluster.dt[best.i+1, start := new.start]
+  cluster.dt <- cluster.dt[-best.i]
   iteration <- iteration+1L
 }
 (agg.dt <- rbindlist(agg.dt.list))
@@ -455,14 +445,68 @@ The result table above shows one row per iteration of the clustering algorithm.
 Below we compare with iterations of the previous algorithm.
 
 ```{r}
-data.table(agg.dt[, .(iteration, distance=end)], loss=join.dt$end)
+(agg.changes <- data.table(agg.dt[, .(
+  iteration, segments, distance=end
+)], loss=join.dt$end))
 ```
 
 Above we see a table with one row per iteration of the clustering algorithm.
-The first two rows show that the same join events are chosen for the first two iterations, but in general they are not the same.
-And in fact the last iterations of the algorithm are quite different (distance-based algo joins single data points near the start of the data sequence).
+The first few rows show that the same join events are chosen for the first few iterations, but in general they are not the same.
+And in fact the last iterations of the algorithm are quite different.
 
-Below we visualize the distances involved in the algorithm.
+```{r changes-agg-models}
+show.segs <- 2:4
+agg.seg.dt <- data.table(Segments=show.segs)[, {
+  data.table(minimize=c("distance","loss"))[, {
+    change <- agg.changes[segments<=Segments][[minimize]]
+    schange <- sort(change)
+    start <- c(1L, schange+1L)
+    end <- c(schange, N_data)
+    total <- cum.dt[, data[end+1]-data[start] ]
+    data.table(
+      start,
+      end,
+      mean=total/(end+1-start),
+      square_loss=square_loss(start, end))
+  }, by=minimize]
+}, by=Segments]
+agg.loss.dt <- agg.seg.dt[, .(
+  loss=sum(square_loss)
+), by=.(minimize, Segments)]
+model.color <- "blue"
+ggplot()+
+  scale_x_continuous(
+    limits=c(0, nrow(one.dt)+1))+
+  scale_y_continuous(
+    "logratio (noisy copy number measurement)")+
+  geom_point(aes(
+    data.i, logratio),
+    data=one.dt)+
+  geom_vline(aes(
+    xintercept=start-0.5),
+    data=agg.seg.dt[start>1],
+    linewidth=1,
+    linetype="dashed",
+    color=model.color)+
+  geom_segment(aes(
+    start-0.5, mean,
+    xend=end+0.5, yend=mean),
+    data=agg.seg.dt,
+    linewidth=2,
+    color=model.color)+
+  geom_text(aes(
+    230, -0.5, label=sprintf("loss=%.3f", loss)),
+    data=agg.loss.dt,
+    hjust=1,
+    color=model.color)+
+  facet_grid(Segments ~ minimize, labeller=label_both)
+```
+
+The figure above shows several agglomerative clustering models,
+using either distance or loss minimization.
+We see that the models are the same for three segments,
+but in general they are different.
+Below we visualize the distances computed by the algorithm.
 
 ```{r dist-used}
 more.dist <- rbindlist(more.dist.list)
@@ -479,9 +523,16 @@ ggplot()+
   scale_x_continuous("observation")
 ```
 
-It can be seen that a substantial part of the lower triangle was actually used in the single linkage clustering algorithm.
-Note this is more efficient than the typical multivariate hierarhical distance-based clustering, which uses the entire lower triangle.
-However it is substantially less efficient than the loss-based binary segmentation, which would be log-linear with an efficient C++ implementation.
+It can be seen that all of the lower triangle was used in the single linkage clustering algorithm.
+It is substantially less efficient than the loss-based binary segmentation, which would be log-linear with an efficient C++ implementation.
+Below we visualize the number of distance matrix entries computed in each iteration.
+
+```{r dist-entries-per-iteration}
+count.dist <- used.dist[, .(computed=.N), by=iteration]
+plot(log10(computed) ~ iteration, count.dist)
+```
+
+Above we see the number of distances increases with the number of iterations.
 
 ## Conclusions
 

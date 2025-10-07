@@ -304,7 +304,11 @@ ggplot()+
 
 ![plot of chunk join-computed](/assets/img/2025-10-06-bin-seg-div-agg/join-computed-1.png)
 
-We see a very different pattern in the figure above: the most candidate
+We see a very different pattern in the figure above: the first iteration has the most items in the minimization, which decreases linearly.
+Using a priority queue in C++ would definitely result in big speed improvements:
+
+* each search for best join would be `O(log N)` instead of `O(N)`,
+* overall the algorithm would be `O(N log N)` instead of `O(N^2)`.
 
 ## Comparing the change-points for small model sizes
 
@@ -508,7 +512,7 @@ ggplot()+
 ```
 
 ```
-## Warning in transformation$transform(x): Production de NaN
+## Warning in transformation$transform(x): NaNs produced
 ```
 
 ```
@@ -540,6 +544,16 @@ agg.edge.list <- list()
 iteration <- 1
 cluster.dt <- data.table(start=1:N_data, end=1:N_data, dist_next=c(diag.band$dist, NA))
 more.dist.list <- list()
+more_dist <- function(side, set.i, out.i, in.i){
+  out.indices <- with(cluster.dt[out.i], start:end)
+  in.indices <- with(cluster.dt[in.i], start:end)
+  out.to.in <- nb.dist.mat[out.indices, in.indices, drop=FALSE]
+  more.dist.list[[paste(iteration, side)]] <<- data.table(
+    iteration,
+    CJ(row=out.indices, col=in.indices),
+    dist=as.numeric(t(out.to.in)))
+  cluster.dt[set.i, dist_next := min(out.to.in, dist_next)]
+}
 while(nrow(cluster.dt)>1){
   agg.edge.list[[paste(nrow(cluster.dt))]] <- data.table(
     iteration,
@@ -551,34 +565,14 @@ while(nrow(cluster.dt)>1){
     n_in_min=nrow(cluster.dt)-1,
     cluster.dt[best.i])
   if(best.i>1){
-    bottom.cluster <- cluster.dt[best.i+1]
-    bottom.indices <- with(bottom.cluster, start:end)
-    bottom.to.prev <- nb.dist.mat[bottom.indices, best.i-1]
-    more.dist.list[[paste(iteration, "bottom")]] <- data.table(
-      iteration,
-      row=bottom.indices,
-      col=best.i-1L,
-      dist=bottom.to.prev)      
-    cluster.dt[best.i-1, dist_next := min(bottom.to.prev, dist_next)]
+    more_dist("bottom", best.i-1, best.i-1, best.i+1)
   }
-  new.cluster <- cluster.dt[, data.table(
-    start=start[best.i],
-    end=end[best.i+1],
-    dist_next=dist_next[best.i+1])]
   if(best.i+1 < nrow(cluster.dt)){
-    top.cluster <- cluster.dt[best.i]
-    top.indices <- with(top.cluster, start:end)
-    top.to.next <- nb.dist.mat[top.indices, best.i+2]
-    more.dist.list[[paste(iteration, "bottom")]] <- data.table(
-      iteration,
-      row=top.indices,
-      col=best.i+2L,
-      dist=top.to.next)
-    new.cluster[, dist_next := min(dist_next, top.to.next)]
+    more_dist("top", best.i+1, best.i+2, best.i)
   }
-  others <- cluster.dt[-c(best.i,best.i+1)]
-  cluster.dt <- rbind(new.cluster, others)
-  setkey(cluster.dt, start)
+  new.start <- cluster.dt$start[best.i]
+  cluster.dt[best.i+1, start := new.start]
+  cluster.dt <- cluster.dt[-best.i]
   iteration <- iteration+1L
 }
 (agg.dt <- rbindlist(agg.dt.list))
@@ -589,15 +583,15 @@ while(nrow(cluster.dt)>1){
 ##          <num>    <int>    <num> <int> <int>       <num>
 ##   1:         1      234      233   164   164 0.000000000
 ##   2:         2      233      232   230   230 0.001424884
-##   3:         3      232      231   230   231 0.001424884
-##   4:         4      231      230   230   232 0.000000000
-##   5:         5      230      229   230   233 0.000000000
+##   3:         3      232      231    53    53 0.002562514
+##   4:         4      231      230    64    64 0.002865334
+##   5:         5      230      229     3     3 0.005704614
 ##  ---                                                    
-## 229:       229        6        5     6    42 0.000000000
-## 230:       230        5        4     5     5 0.004579988
-## 231:       231        4        3     3     4 0.001138221
-## 232:       232        3        2     2     2 0.000000000
-## 233:       233        2        1     1     1 0.001063542
+## 229:       229        6        5   115   115 0.006562688
+## 230:       230        5        4   114   114 0.005676185
+## 231:       231        4        3     1   113 0.001545469
+## 232:       232        3        2     1   156 0.133266531
+## 233:       233        2        1     1   157 0.000000000
 ```
 
 The result table above shows one row per iteration of the clustering algorithm.
@@ -605,30 +599,87 @@ Below we compare with iterations of the previous algorithm.
 
 
 ``` r
-data.table(agg.dt[, .(iteration, distance=end)], loss=join.dt$end)
+(agg.changes <- data.table(agg.dt[, .(
+  iteration, segments, distance=end
+)], loss=join.dt$end))
 ```
 
 ```
-##      iteration distance  loss
-##          <num>    <int> <int>
-##   1:         1      164   164
-##   2:         2      230   230
-##   3:         3      231    53
-##   4:         4      232    64
-##   5:         5      233     3
-##  ---                         
-## 229:       229       42   142
-## 230:       230        5   152
-## 231:       231        4    41
-## 232:       232        2   157
-## 233:       233        1   113
+##      iteration segments distance  loss
+##          <num>    <int>    <int> <int>
+##   1:         1      234      164   164
+##   2:         2      233      230   230
+##   3:         3      232       53    53
+##   4:         4      231       64    64
+##   5:         5      230        3     3
+##  ---                                  
+## 229:       229        6      115   142
+## 230:       230        5      114   152
+## 231:       231        4      113    41
+## 232:       232        3      156   157
+## 233:       233        2      157   113
 ```
 
 Above we see a table with one row per iteration of the clustering algorithm.
-The first two rows show that the same join events are chosen for the first two iterations, but in general they are not the same.
-And in fact the last iterations of the algorithm are quite different (distance-based algo joins single data points near the start of the data sequence).
+The first few rows show that the same join events are chosen for the first few iterations, but in general they are not the same.
+And in fact the last iterations of the algorithm are quite different.
 
-Below we visualize the distances involved in the algorithm.
+
+``` r
+show.segs <- 2:4
+agg.seg.dt <- data.table(Segments=show.segs)[, {
+  data.table(minimize=c("distance","loss"))[, {
+    change <- agg.changes[segments<=Segments][[minimize]]
+    schange <- sort(change)
+    start <- c(1L, schange+1L)
+    end <- c(schange, N_data)
+    total <- cum.dt[, data[end+1]-data[start] ]
+    data.table(
+      start,
+      end,
+      mean=total/(end+1-start),
+      square_loss=square_loss(start, end))
+  }, by=minimize]
+}, by=Segments]
+agg.loss.dt <- agg.seg.dt[, .(
+  loss=sum(square_loss)
+), by=.(minimize, Segments)]
+model.color <- "blue"
+ggplot()+
+  scale_x_continuous(
+    limits=c(0, nrow(one.dt)+1))+
+  scale_y_continuous(
+    "logratio (noisy copy number measurement)")+
+  geom_point(aes(
+    data.i, logratio),
+    data=one.dt)+
+  geom_vline(aes(
+    xintercept=start-0.5),
+    data=agg.seg.dt[start>1],
+    linewidth=1,
+    linetype="dashed",
+    color=model.color)+
+  geom_segment(aes(
+    start-0.5, mean,
+    xend=end+0.5, yend=mean),
+    data=agg.seg.dt,
+    linewidth=2,
+    color=model.color)+
+  geom_text(aes(
+    230, -0.5, label=sprintf("loss=%.3f", loss)),
+    data=agg.loss.dt,
+    hjust=1,
+    color=model.color)+
+  facet_grid(Segments ~ minimize, labeller=label_both)
+```
+
+![plot of chunk changes-agg-models](/assets/img/2025-10-06-bin-seg-div-agg/changes-agg-models-1.png)
+
+The figure above shows several agglomerative clustering models,
+using either distance or loss minimization.
+We see that the models are the same for three segments,
+but in general they are different.
+Below we visualize the distances computed by the algorithm.
 
 
 ``` r
@@ -648,9 +699,19 @@ ggplot()+
 
 ![plot of chunk dist-used](/assets/img/2025-10-06-bin-seg-div-agg/dist-used-1.png)
 
-It can be seen that a substantial part of the lower triangle was actually used in the single linkage clustering algorithm.
-Note this is more efficient than the typical multivariate hierarhical distance-based clustering, which uses the entire lower triangle.
-However it is substantially less efficient than the loss-based binary segmentation, which would be log-linear with an efficient C++ implementation.
+It can be seen that all of the lower triangle was used in the single linkage clustering algorithm.
+It is substantially less efficient than the loss-based binary segmentation, which would be log-linear with an efficient C++ implementation.
+Below we visualize the number of distance matrix entries computed in each iteration.
+
+
+``` r
+count.dist <- used.dist[, .(computed=.N), by=iteration]
+plot(log10(computed) ~ iteration, count.dist)
+```
+
+![plot of chunk dist-entries-per-iteration](/assets/img/2025-10-06-bin-seg-div-agg/dist-entries-per-iteration-1.png)
+
+Above we see the number of distances increases with the number of iterations.
 
 ## Conclusions
 
@@ -664,31 +725,29 @@ sessionInfo()
 ```
 
 ```
-## R Under development (unstable) (2025-05-21 r88220)
-## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 24.04.3 LTS
+## R version 4.4.1 (2024-06-14 ucrt)
+## Platform: x86_64-w64-mingw32/x64
+## Running under: Windows 11 x64 (build 26100)
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
+## 
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8     LC_MONETARY=fr_FR.UTF-8   
-##  [6] LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                  LC_ADDRESS=C               LC_TELEPHONE=C            
-## [11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
 ## 
 ## time zone: America/Toronto
-## tzcode source: system (glibc)
+## tzcode source: internal
 ## 
 ## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_3.5.2      data.table_1.17.99
+## [1] ggplot2_4.0.0     data.table_1.17.8
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           xfun_0.53          tidyselect_1.2.1   farver_2.1.2       magrittr_2.0.4    
+##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           tidyselect_1.2.1   xfun_0.53          farver_2.1.2       magrittr_2.0.4    
 ##  [8] gtable_0.3.6       glue_1.8.0         tibble_3.3.0       knitr_1.50         pkgconfig_2.0.3    generics_0.1.4     dplyr_1.1.4       
-## [15] lifecycle_1.0.4    cli_3.6.5          scales_1.4.0       grid_4.6.0         vctrs_0.6.5        withr_3.0.2        compiler_4.6.0    
-## [22] tools_4.6.0        evaluate_1.0.5     pillar_1.11.0      crayon_1.5.3       rlang_1.1.6
+## [15] lifecycle_1.0.4    cli_3.6.5          S7_0.2.0           scales_1.4.0       grid_4.4.1         vctrs_0.6.5        withr_3.0.2       
+## [22] compiler_4.4.1     tools_4.4.1        pillar_1.11.1      evaluate_1.0.5     rlang_1.1.6
 ```
