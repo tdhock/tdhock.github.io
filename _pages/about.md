@@ -36,6 +36,7 @@ instructions](https://tdhock.github.io/blog/2024/application/).
 - 2024-present: Professeur Agrégé / Tenured Associate Professor, 
   [Université de Sherbrooke](https://www.usherbrooke.ca),
   [Département d'informatique](https://www.usherbrooke.ca/informatique/).
+  [MILA Associate Academic Member](https://mila.quebec/en/directory/toby-dylan-hocking), IVADO researcher.
 - 2018-2024: Tenure-Track Assistant Professor,
   [Northern Arizona University](http://nau.edu),
   [School of Informatics, Computing, and Cyber Systems](http://nau.edu/siccs).
