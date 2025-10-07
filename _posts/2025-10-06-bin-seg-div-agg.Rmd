@@ -428,10 +428,10 @@ while(nrow(cluster.dt)>1){
     n_in_min=nrow(cluster.dt)-1,
     cluster.dt[best.i])
   if(best.i>1){
-    more_dist("bottom", best.i-1, best.i-1, best.i+1)
+    more_dist("before", best.i-1, best.i-1, best.i+1)
   }
   if(best.i+1 < nrow(cluster.dt)){
-    more_dist("top", best.i+1, best.i+2, best.i)
+    more_dist("after", best.i+1, best.i+2, best.i)
   }
   new.start <- cluster.dt$start[best.i]
   cluster.dt[best.i+1, start := new.start]

@@ -16,6 +16,17 @@ We begin by loading an example data set.
 ``` r
 data(neuroblastoma, package="neuroblastoma")
 library(data.table)
+```
+
+```
+## Warning: package 'data.table' was built under R version 4.4.3
+```
+
+```
+## data.table 1.17.8 using 3 threads (see ?getDTthreads).  Latest news: r-datatable.com
+```
+
+``` r
 nb.dt <- data.table(neuroblastoma[["profiles"]])
 one.dt <- nb.dt[profile.id==4 & chromosome==2]
 one.dt
@@ -43,6 +54,13 @@ We visualize those data below, as a function of row number in the table.
 
 ``` r
 library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 4.4.3
+```
+
+``` r
 one.dt[, data.i := .I]
 ggplot()+
   scale_x_continuous(
@@ -565,10 +583,10 @@ while(nrow(cluster.dt)>1){
     n_in_min=nrow(cluster.dt)-1,
     cluster.dt[best.i])
   if(best.i>1){
-    more_dist("bottom", best.i-1, best.i-1, best.i+1)
+    more_dist("before", best.i-1, best.i-1, best.i+1)
   }
   if(best.i+1 < nrow(cluster.dt)){
-    more_dist("top", best.i+1, best.i+2, best.i)
+    more_dist("after", best.i+1, best.i+2, best.i)
   }
   new.start <- cluster.dt$start[best.i]
   cluster.dt[best.i+1, start := new.start]
