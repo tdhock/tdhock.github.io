@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Agglomerative binary segmentation
-description: Clustering using loss or difference
+title: Agglomerative hierarhical binary segmentation
+description: Clustering using loss or distance minimization
 ---
 
 ```{r Ropts, echo=FALSE, results='hide'}
@@ -106,6 +106,7 @@ The code below implements this update rule recursively:
 ```{r loss-split}
 new.segs <- data.table(start=1L, end=N_data)
 split.dt.list <- list()
+loss <- square_loss(1, N_data)
 cand.segs <- NULL
 for(n_segs in seq(1, N_data)){
   new.loss <- new.segs[
@@ -115,7 +116,12 @@ for(n_segs in seq(1, N_data)){
   best.i <- which.max(cand.segs$loss_diff)
   best <- cand.segs[best.i]
   split.dt.list[[n_segs]] <- data.table(
-    segments=n_segs, candidates=nrow(cand.segs), best, loss)
+    iteration=n_segs,
+    segments=n_segs,
+    n_in_max=nrow(cand.segs),
+    computed=nrow(new.segs),
+    best,
+    loss)
   loss <- loss-best$loss_diff
   new.segs <- best[, rbind(
     data.table(start, end=change),
@@ -132,7 +138,12 @@ The R code above is sub-optimal in time and space complexity, because a new `can
 The number of candidates considered changes with the number of segments, as can be seen below.
 
 ```{r candidates-split}
-plot(candidates ~ segments, split.dt)
+split.long <- melt(split.dt, measure.vars=c("n_in_max", "computed"))
+ggplot()+
+  geom_point(aes(
+    iteration, value),
+    data=split.long)+
+  facet_grid(variable ~ ., scales="free")
 ```
 
 The output above shows that the number of candidates grows to about 50
@@ -149,26 +160,52 @@ Like the classic divisive binary segmentation described in the previous section,
 It is implemented below.
 
 ```{r loss-join}
-cluster.dt <- data.table(start=1:N_data, end=1:N_data)
 join.dt.list <- list()
-seg.dt.list <- list()
+join.edge.list <- list()
+iteration <- 1
+cluster.dt <- data.table(start=1:N_data, end=1:N_data, loss_diff=NA_real_)
 while(nrow(cluster.dt)>1){
-  edge.dt <- cluster.dt[, get_diff(start[-.N], end[-1], end[-.N])]
-  best.i <- which.min(edge.dt$loss_diff)
-  best <- edge.dt[best.i]
-  new.cluster <- best[, .(start,end)]
-  others <- cluster.dt[-((0:1)+best.i)]
+  todo <- cluster.dt[-.N, which(is.na(loss_diff))]
+  new.edges <- cluster.dt[, get_diff(start[todo], end[todo+1], end[todo])]
+  cluster.dt[todo, loss_diff := new.edges$loss_diff]
+  join.edge.list[[paste(nrow(cluster.dt))]] <- data.table(
+    iteration,
+    cluster.dt[-.N])
+  best.i <- which.min(cluster.dt$loss_diff)
+  join.dt.list[[paste(nrow(cluster.dt))]] <- data.table(
+    iteration,
+    segments=nrow(cluster.dt),
+    n_in_min=nrow(cluster.dt),
+    computed=length(todo),
+    cluster.dt[best.i])
+  new.cluster <- cluster.dt[, data.table(
+    start=start[best.i],
+    end=end[best.i+1],
+    loss_diff=NA_real_)]
+  cluster.dt[best.i-1, loss_diff := NA_real_]
+  others <- cluster.dt[-c(best.i,best.i+1)]
   cluster.dt <- rbind(new.cluster, others)
   setkey(cluster.dt, start)
-  join.dt.list[[paste(nrow(cluster.dt))]] <- data.table(
-    segments=nrow(cluster.dt), best, candidates=nrow(edge.dt))
+  iteration <- iteration+1L
 }
 (join.dt <- rbindlist(join.dt.list)[, loss := cumsum(loss_diff)][])
 plot(loss ~ segments, join.dt)
 ```
 
-The output above is another table, where the `change` column represents the sequence of change-points.
+The output above is another table, where the `end` column represents the sequence of change-points.
 The loss figure above is similar to the one in the previous section.
+Below we plot the number of candidates as a function of number of segments.
+
+```{r join-computed}
+join.long <- melt(join.dt, measure.vars=c("n_in_min", "computed"))
+ggplot()+
+  geom_point(aes(
+    iteration, value),
+    data=join.long)+
+  facet_grid(variable ~ ., scales="free")
+```
+
+We see a very different pattern in the figure above: the most candidate
 
 ## Comparing the change-points for small model sizes
 
@@ -177,9 +214,12 @@ Sometimes, but not always, as we can see in the three examples below.
 
 
 ```{r changes-small-models}
+both.dt <- rbind(
+  join.dt[, data.table(algo="join", segments, loss, change=end)],
+  split.dt[, data.table(algo="split", segments=segments+1, loss, change)])
 show.segs <- 2:4
 seg.dt <- data.table(Segments=show.segs)[, {
-  both.dt[segments<Segments, {
+  both.dt[segments<=Segments, {
     schange <- sort(change)
     start <- c(1L, schange+1L)
     end <- c(schange, N_data)
@@ -200,14 +240,14 @@ ggplot()+
   geom_vline(aes(
     xintercept=start-0.5),
     data=seg.dt[start>1],
-    size=1,
+    linewidth=1,
     linetype="dashed",
     color=model.color)+
   geom_segment(aes(
     start-0.5, mean,
     xend=end+0.5, yend=mean),
     data=seg.dt,
-    size=2,
+    linewidth=2,
     color=model.color)+
   geom_text(aes(
     230, -0.5, label=sprintf("loss=%.1f", loss)),
@@ -228,9 +268,6 @@ The figure above shows the results for the two algorithms (panels from left to r
 Another way to compare is by examining the loss values for some small model sizes:
 
 ```{r loss-small-models}
-both.dt <- rbind(
-  join.dt[, data.table(algo="join", segments, loss, change)],
-  split.dt[, data.table(algo="split", segments, loss, change)])
 show.max <- 19
 ggplot()+
   theme_bw()+
@@ -251,7 +288,7 @@ wide.dt <- dcast(both.dt, segments ~ algo, value.var="loss")[
 ][
   !is.na(diff)
 ][, let(better = fcase(
-  abs(diff)<my.thresh, "same",
+  abs(diff)<1e-9, "same",
   join<split, "join", 
   default="split"
 ))][]
@@ -259,7 +296,9 @@ ggplot()+
   geom_point(aes(
     segments, abs(diff), color=better),
     data=wide.dt)+
-  scale_y_log10("Loss difference")
+  scale_y_log10("Loss difference")+
+  scale_color_discrete(breaks=c("split","join","same"))+
+  theme(legend.position=c(0.5,0.5))
 ```
 
 Above we see the absolute loss difference as a function of model size. We see that sometimes the two algorithms result in equally good loss values, and sometimes one is better than the other.
@@ -276,7 +315,12 @@ There are various ways to speed this up:
 * using a priority queue to compute the min distance can reduce an `N` factor to `log N`.
 * restricting the number of pairwise distances to a neighborhood graph can reduce the `N^2` number of distances to minimize over to `N` (for example on a 2d grid).
 
-```{r}
+## Visualizing pairwise distance matrices
+
+Below we code a simple (inefficient) method in R.
+The first step is to compute the pairwise distance matrix, shown below.
+
+```{r full-dist-mat}
 data.mat <- as.matrix(one.dt[, c("logratio")])
 data.mat.dt <- data.table(
   row=as.integer(row(data.mat)),
@@ -285,13 +329,10 @@ data.mat.dt <- data.table(
 nb.dist <- dist(data.mat)
 nb.dist.mat <- as.matrix(nb.dist)
 nb.dist.dt <- data.table(
+  iteration=0L,
   row=as.integer(row(nb.dist.mat)),
   col=as.integer(col(nb.dist.mat)),
   dist=as.numeric(nb.dist.mat))
-
-revfac <- function(x){
-  factor(x, sort(unique(x), decreasing = TRUE))
-}
 ggplot()+
   geom_tile(aes(
     col, row, fill=dist),
@@ -302,11 +343,10 @@ ggplot()+
   scale_x_continuous("observation")
 ```
 
----
+The figure above shows the pairwise distance matrix as a heatmap.
+Since it is symmetric, we can keep only the lower triangle, without losing information.
 
-# Only need lower triangle (symmetry)
-
-```{r}
+```{r dist-lower}
 lower.triangle <- nb.dist.dt[col<row]
 ggplot()+
   geom_tile(aes(
@@ -318,7 +358,10 @@ ggplot()+
   scale_x_continuous("observation")
 ```
 
-```{r}
+The figure above shows the lower triangle, representing distances that we could potentially use in the clustering algorithm.
+The first iteration of the algorithm uses only the distances in the diagonal band shown below.
+
+```{r dist-band}
 diag.band <- nb.dist.dt[col+1==row]
 ggplot()+
   geom_tile(aes(
@@ -330,90 +373,115 @@ ggplot()+
   scale_x_continuous("observation")
 ```
 
----
+It is difficult to see the band which is one lower than the diagonal in the figure above.
+Because there is only a diagonal band (1d join constraints), we get a linear time initialization (rather than quadratic as in the usual multivariate clustering algorithm).
+Are these the same values as in agglomerative binary segmentation?
 
-# Find the closest pairs
+```{r compare-first-it}
+join.edge <- rbindlist(join.edge.list)
+compare.first.iteration <- data.table(join.edge[iteration==1, .(loss_diff)], diag.band)
+ggplot()+
+  geom_point(aes(
+    loss_diff, dist),
+    shape=1,
+    data=compare.first.iteration)+
+  scale_x_log10()+
+  scale_y_log10()
+```
+
+The figure above shows that for the first iteration of this distance/linkage clustering algorithm, the distances on the Y axis are consistent with the loss difference values from the previous loss minimization binary segment joining algorithm.
+
+## Clustering algorithm
+
+Below we code the iterations of the clustering algorithm.
+Some parts of the code below are similar to the previous algorithm above, but there is a new `dist_next` column (instead of the previous `loss_diff` column).
+Distance updates use the single linkage criterion: distance between two clusters is defined as the min distance between points in clusters.
 
 ```{r}
-diag.band[, min.dist := min(dist)==dist]
+agg.dt.list <- list()
+agg.edge.list <- list()
+iteration <- 1
+cluster.dt <- data.table(start=1:N_data, end=1:N_data, dist_next=c(diag.band$dist, NA))
+more.dist.list <- list()
+while(nrow(cluster.dt)>1){
+  agg.edge.list[[paste(nrow(cluster.dt))]] <- data.table(
+    iteration,
+    cluster.dt[-.N])
+  best.i <- cluster.dt[-.N, which.min(dist_next)]
+  agg.dt.list[[paste(nrow(cluster.dt))]] <- data.table(
+    iteration,
+    segments=nrow(cluster.dt),
+    n_in_min=nrow(cluster.dt)-1,
+    cluster.dt[best.i])
+  if(best.i>1){
+    bottom.cluster <- cluster.dt[best.i+1]
+    bottom.indices <- with(bottom.cluster, start:end)
+    bottom.to.prev <- nb.dist.mat[bottom.indices, best.i-1]
+    more.dist.list[[paste(iteration, "bottom")]] <- data.table(
+      iteration,
+      row=bottom.indices,
+      col=best.i-1L,
+      dist=bottom.to.prev)      
+    cluster.dt[best.i-1, dist_next := min(bottom.to.prev, dist_next)]
+  }
+  new.cluster <- cluster.dt[, data.table(
+    start=start[best.i],
+    end=end[best.i+1],
+    dist_next=dist_next[best.i+1])]
+  if(best.i+1 < nrow(cluster.dt)){
+    top.cluster <- cluster.dt[best.i]
+    top.indices <- with(top.cluster, start:end)
+    top.to.next <- nb.dist.mat[top.indices, best.i+2]
+    more.dist.list[[paste(iteration, "bottom")]] <- data.table(
+      iteration,
+      row=top.indices,
+      col=best.i+2L,
+      dist=top.to.next)
+    new.cluster[, dist_next := min(dist_next, top.to.next)]
+  }
+  others <- cluster.dt[-c(best.i,best.i+1)]
+  cluster.dt <- rbind(new.cluster, others)
+  setkey(cluster.dt, start)
+  iteration <- iteration+1L
+}
+(agg.dt <- rbindlist(agg.dt.list))
+```
+
+The result table above shows one row per iteration of the clustering algorithm.
+Below we compare with iterations of the previous algorithm.
+
+```{r}
+data.table(agg.dt[, .(iteration, distance=end)], loss=join.dt$end)
+```
+
+Above we see a table with one row per iteration of the clustering algorithm.
+The first two rows show that the same join events are chosen for the first two iterations, but in general they are not the same.
+And in fact the last iterations of the algorithm are quite different (distance-based algo joins single data points near the start of the data sequence).
+
+Below we visualize the distances involved in the algorithm.
+
+```{r dist-used}
+more.dist <- rbindlist(more.dist.list)
+used.dist <- rbind(diag.band, more.dist)[, let(
+  pmin = pmin(row,col),
+  pmax = pmax(row,col))][]
 ggplot()+
   geom_tile(aes(
-    col, row, fill=dist, color=min.dist),
-    size=0.5,
-    data=diag.band)+
+    pmin, pmax, fill=dist),
+    data=used.dist)+
   scale_fill_gradient(low="white", high="red")+
-  scale_color_manual(
-    values=c("TRUE"="black", "FALSE"="transparent"),
-    guide=guide_legend(override.aes = list(fill=NA)))+
-  coord_equal(expand=FALSE)+
+  coord_equal()+
   scale_y_reverse("observation")+
   scale_x_continuous("observation")
 ```
 
----
-
-# Join one of the closest pairs (iteration 1)
-
-```{r}
-diag.band[, to.join := .I %in% which(min.dist)[1] ]
-color.values <- c("TRUE"="black", "FALSE"="transparent")
-gg.dist <- function(){
-  ggplot()+
-    ggtitle(paste0("min dist=", diag.band[min.dist==TRUE]$dist[1]))+
-    geom_tile(aes(
-      col, row, fill=dist,
-      color=factor(to.join, names(color.values))),
-      size=0.5,
-      data=diag.band)+
-    scale_fill_gradient(low="white", high="red")+
-    scale_color_manual(
-      "To join",
-      values=color.values,
-      breaks=names(color.values),
-      drop=FALSE,
-      guide=guide_legend(override.aes = list(fill=NA)))+
-    coord_equal(expand=TRUE)+
-    scale_y_reverse("cluster")+
-    scale_x_continuous("cluster")
-}
-gg.dist()
-```
-
----
-
-# iteration 2
-
-```{r}
-do.join <- function(){
-  join.indices <- diag.band[to.join==TRUE, c(row,col)]
-  to.remove <- diag.band[, row %in% join.indices | col %in% join.indices]
-  old.dt <- diag.band[to.remove]
-  old.dt[, other := ifelse(
-    row %in% join.indices, ifelse(
-      col %in% join.indices, NA, col), row)]
-  new.dt <- old.dt[!is.na(other), .(
-    dist=min(dist), N=.N
-  ), by=other]
-  new.dt[, keep := join.indices[1] ]
-  diag.band <<- rbind(
-    diag.band[!to.remove, data.table(row, col, dist)],
-    new.dt[, data.table(
-      row=ifelse(keep<other, other, keep),
-      col=ifelse(keep<other, keep, other),
-      dist)])
-  diag.band[, min.dist := min(dist)==dist]
-  diag.band[, to.join := .I %in% which(min.dist)[1] ]
-  gg.dist()
-}
-do.join()
-```
-
-
-TODO
+It can be seen that a substantial part of the lower triangle was actually used in the single linkage clustering algorithm.
+Note this is more efficient than the typical multivariate hierarhical distance-based clustering, which uses the entire lower triangle.
+However it is substantially less efficient than the loss-based binary segmentation, which would be log-linear with an efficient C++ implementation.
 
 ## Conclusions
 
-TODO
+We have explored different methods for segmentation of data in 1d, using either loss minimization segmentation (divisive or bottom up joining), or distance minimization clustering (joining).
 
 ## Session info
 
