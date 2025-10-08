@@ -51,7 +51,7 @@ field.pattern <- list(
 refs.fields <- refs.dt[, nc::capture_all_str(
   fields, field.pattern),
   by=.(type, ref)]
-suppressPackageStartupMessages(library(data.table))#for dcast
+suppressWarnings(suppressPackageStartupMessages(library(data.table)))#for dcast
 refs.wide <- dcast(
   refs.fields, type + ref ~ variable
 )[
