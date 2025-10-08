@@ -168,23 +168,29 @@ while(nrow(cluster.dt)>1){
   todo <- cluster.dt[-.N, which(is.na(loss_diff))]
   new.edges <- cluster.dt[, get_diff(start[todo], end[todo+1], end[todo])]
   cluster.dt[todo, loss_diff := new.edges$loss_diff]
+  best.i <- which.min(cluster.dt$loss_diff)
   join.edge.list[[paste(nrow(cluster.dt))]] <- data.table(
     iteration,
-    cluster.dt[-.N])
-  best.i <- which.min(cluster.dt$loss_diff)
+    cluster.dt[-.N])[
+    , Loss_Difference := ifelse(loss_diff<1e-9, 0, loss_diff)
+    ][, let(
+      optimal = "no",
+      updated = "no"
+    )][
+      todo, updated := "yes"
+    ][
+      best.i, optimal := "yes"
+    ]
   join.dt.list[[paste(nrow(cluster.dt))]] <- data.table(
     iteration,
     segments=nrow(cluster.dt),
     n_in_min=nrow(cluster.dt),
     computed=length(todo),
     cluster.dt[best.i])
-  new.cluster <- cluster.dt[, data.table(
-    start=start[best.i],
-    end=end[best.i+1],
-    loss_diff=NA_real_)]
   cluster.dt[best.i-1, loss_diff := NA_real_]
-  others <- cluster.dt[-c(best.i,best.i+1)]
-  cluster.dt <- rbind(new.cluster, others)
+  new.start <- cluster.dt$start[best.i]
+  cluster.dt[best.i+1, let(start = new.start, loss_diff = NA_real_)]
+  cluster.dt <- cluster.dt[-best.i]
   setkey(cluster.dt, start)
   iteration <- iteration+1L
 }
@@ -394,6 +400,25 @@ ggplot()+
 ```
 
 The figure above shows that for the first iteration of this distance/linkage clustering algorithm, the distances on the Y axis are consistent with the loss difference values from the previous loss minimization binary segment joining algorithm.
+
+```{r join-edge-iterations, fig.height=6}
+join.show <- join.edge[iteration<3 | iteration>230][
+, panel := paste("iteration", iteration)]
+ggplot()+
+  geom_point(aes(
+    end+0.5, log10(Loss_Difference), fill=optimal, color=updated),
+    shape=21,
+    data=join.show)+
+  scale_color_manual(values=c(
+    yes="black",
+    no="white"))+
+  geom_point(aes(
+    data.i, logratio),
+    shape=1,
+    data=data.table(one.dt, panel="data"))+
+  facet_grid(panel ~ ., scales="free")+
+  scale_x_continuous("Index of data or join position in sequence")
+```
 
 ## Clustering algorithm
 

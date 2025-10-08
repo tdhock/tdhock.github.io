@@ -16,17 +16,6 @@ We begin by loading an example data set.
 ``` r
 data(neuroblastoma, package="neuroblastoma")
 library(data.table)
-```
-
-```
-## Warning: package 'data.table' was built under R version 4.4.3
-```
-
-```
-## data.table 1.17.8 using 3 threads (see ?getDTthreads).  Latest news: r-datatable.com
-```
-
-``` r
 nb.dt <- data.table(neuroblastoma[["profiles"]])
 one.dt <- nb.dt[profile.id==4 & chromosome==2]
 one.dt
@@ -54,13 +43,6 @@ We visualize those data below, as a function of row number in the table.
 
 ``` r
 library(ggplot2)
-```
-
-```
-## Warning: package 'ggplot2' was built under R version 4.4.3
-```
-
-``` r
 one.dt[, data.i := .I]
 ggplot()+
   scale_x_continuous(
@@ -261,23 +243,29 @@ while(nrow(cluster.dt)>1){
   todo <- cluster.dt[-.N, which(is.na(loss_diff))]
   new.edges <- cluster.dt[, get_diff(start[todo], end[todo+1], end[todo])]
   cluster.dt[todo, loss_diff := new.edges$loss_diff]
+  best.i <- which.min(cluster.dt$loss_diff)
   join.edge.list[[paste(nrow(cluster.dt))]] <- data.table(
     iteration,
-    cluster.dt[-.N])
-  best.i <- which.min(cluster.dt$loss_diff)
+    cluster.dt[-.N])[
+    , Loss_Difference := ifelse(loss_diff<1e-9, 0, loss_diff)
+    ][, let(
+      optimal = "no",
+      updated = "no"
+    )][
+      todo, updated := "yes"
+    ][
+      best.i, optimal := "yes"
+    ]
   join.dt.list[[paste(nrow(cluster.dt))]] <- data.table(
     iteration,
     segments=nrow(cluster.dt),
     n_in_min=nrow(cluster.dt),
     computed=length(todo),
     cluster.dt[best.i])
-  new.cluster <- cluster.dt[, data.table(
-    start=start[best.i],
-    end=end[best.i+1],
-    loss_diff=NA_real_)]
   cluster.dt[best.i-1, loss_diff := NA_real_]
-  others <- cluster.dt[-c(best.i,best.i+1)]
-  cluster.dt <- rbind(new.cluster, others)
+  new.start <- cluster.dt$start[best.i]
+  cluster.dt[best.i+1, let(start = new.start, loss_diff = NA_real_)]
+  cluster.dt <- cluster.dt[-best.i]
   setkey(cluster.dt, start)
   iteration <- iteration+1L
 }
@@ -548,6 +536,28 @@ ggplot()+
 ![plot of chunk compare-first-it](/assets/img/2025-10-06-bin-seg-div-agg/compare-first-it-1.png)
 
 The figure above shows that for the first iteration of this distance/linkage clustering algorithm, the distances on the Y axis are consistent with the loss difference values from the previous loss minimization binary segment joining algorithm.
+
+
+``` r
+join.show <- join.edge[iteration<3 | iteration>230][
+, panel := paste("iteration", iteration)]
+ggplot()+
+  geom_point(aes(
+    end+0.5, log10(Loss_Difference), fill=optimal, color=updated),
+    shape=21,
+    data=join.show)+
+  scale_color_manual(values=c(
+    yes="black",
+    no="white"))+
+  geom_point(aes(
+    data.i, logratio),
+    shape=1,
+    data=data.table(one.dt, panel="data"))+
+  facet_grid(panel ~ ., scales="free")+
+  scale_x_continuous("Index of data or join position in sequence")
+```
+
+![plot of chunk join-edge-iterations](/assets/img/2025-10-06-bin-seg-div-agg/join-edge-iterations-1.png)
 
 ## Clustering algorithm
 
