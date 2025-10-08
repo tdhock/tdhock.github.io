@@ -1,0 +1,58 @@
+---
+layout: post
+title: Constrained hierarchical clustering
+description: R and python implementations
+---
+
+```{r Ropts, echo=FALSE, results='hide'}
+repo.dir <- normalizePath("..")
+post.id <- "2025-10-06-bin-seg-div-agg"
+fig.path <- paste0(file.path(repo.dir, "assets", "img", post.id), "/")
+dir.create(fig.path, showWarnings = FALSE, recursive = TRUE)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=fig.path,
+  fig.width=10, ## TODO python figures wider? look at prev issue.
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=4)
+in_render <- !is.null(knitr::opts_knit$get('rmarkdown.pandoc.to'))
+in_knit <- isTRUE(getOption('knitr.in.progress'))
+options(width=150)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The goal of this post is to explore hierarchical clustering with constraints.
+
+## Software
+
+* [rioja::chclust](https://search.r-project.org/CRAN/refmans/rioja/html/chclust.html) implements [CONISS](https://www.sciencedirect.com/science/article/abs/pii/0098300487900227)
+* [adespatial::constr.hclust](https://www.jstatsoft.org/article/view/v103i07) can handle spatial constraints.
+* [ClustGeo::hclustgeo](https://hal.science/hal-01664018/document) uses a convex combination of two distance matrices (always quadratic).
+* [sklearn.cluster.AgglomerativeClustering](https://scikit-learn.org/stable/modules/clustering.html#adding-connectivity-constraints)
+* `wordspace::dist.matrix` can apparently compute sparse dist objects, but can `constr.hclust` use them?
+
+## Is `constr.hclust` fast?
+
+No, because it requires `dist()`!
+
+```{r}
+atime::atime(
+  setup={
+    Ncol <- 2
+    N.data <- Ncol*N
+    m <- matrix(rnorm(N.data), N, Ncol)
+  },
+  dt={
+    CJ(row.i=1:N, col.i=1:Ncol)
+  },
+  as.dist=as.dist(m)
+TODO
+```
+
+## Session info
+
+```{r}
+sessionInfo()
+```
