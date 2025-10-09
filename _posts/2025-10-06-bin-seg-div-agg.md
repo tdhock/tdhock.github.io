@@ -439,7 +439,7 @@ ggplot()+
   geom_point(aes(
     segments, abs(diff), color=better),
     data=wide.dt)+
-  scale_y_log10("Loss difference")+
+  scale_y_log10("Absolute loss difference")+
   scale_color_discrete(breaks=c("split","join","same"))+
   theme(legend.position=c(0.5,0.5))
 ```
@@ -544,7 +544,7 @@ ggplot()+
 ```
 
 ```
-## Warning in transformation$transform(x): NaNs produced
+## Warning in transformation$transform(x): Production de NaN
 ```
 
 ```
@@ -757,29 +757,31 @@ sessionInfo()
 ```
 
 ```
-## R version 4.4.1 (2024-06-14 ucrt)
-## Platform: x86_64-w64-mingw32/x64
-## Running under: Windows 11 x64 (build 26100)
+## R Under development (unstable) (2025-05-21 r88220)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 24.04.3 LTS
 ## 
 ## Matrix products: default
-## 
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
 ## 
 ## locale:
-## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
-## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8     LC_MONETARY=fr_FR.UTF-8   
+##  [6] LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                  LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
 ## time zone: America/Toronto
-## tzcode source: internal
+## tzcode source: system (glibc)
 ## 
 ## attached base packages:
-## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_4.0.0     data.table_1.17.8
+## [1] ggplot2_3.5.2      data.table_1.17.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           tidyselect_1.2.1   xfun_0.53          farver_2.1.2       magrittr_2.0.4    
+##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           xfun_0.53          tidyselect_1.2.1   farver_2.1.2       magrittr_2.0.4    
 ##  [8] gtable_0.3.6       glue_1.8.0         tibble_3.3.0       knitr_1.50         pkgconfig_2.0.3    generics_0.1.4     dplyr_1.1.4       
-## [15] lifecycle_1.0.4    cli_3.6.5          S7_0.2.0           scales_1.4.0       grid_4.4.1         vctrs_0.6.5        withr_3.0.2       
-## [22] compiler_4.4.1     tools_4.4.1        pillar_1.11.1      evaluate_1.0.5     rlang_1.1.6
+## [15] lifecycle_1.0.4    cli_3.6.5          scales_1.4.0       grid_4.6.0         vctrs_0.6.5        withr_3.0.2        compiler_4.6.0    
+## [22] tools_4.6.0        evaluate_1.0.5     pillar_1.11.0      crayon_1.5.3       rlang_1.1.6
 ```
