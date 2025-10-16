@@ -35,3 +35,8 @@ Instead we would have to update cluster means, which we use to compute new dista
 has `compute_ward_dist()` which has two for loops: `size_max` (I guess clusters) and `n_features`.
 
 It is not clear whether or not the cumulative sum trick would be faster than this python code. Maybe not, if the new distance can be computed in constant time given the means, which seems to be the case based on the formula involving the difference of two means from [Hierarchical Clustering, Cluster Linkage](https://en.wikipedia.org/wiki/Hierarchical_clustering#Cluster_Linkage).
+
+## TODOs
+
+* Compute empirical asymptotic time complexity of `ward_tree()`.
+* Show that the three segmentation algos give the same result in 1D (Ward via Lance-Williams, Ward via moments as in python, cumsum trick).
