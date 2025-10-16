@@ -28,15 +28,17 @@ Instead we would have to update cluster means, which we use to compute new dista
 
 [_agglomerative.py](https://github.com/scikit-learn/scikit-learn/blob/c60dae2060/sklearn/cluster/_agglomerative.py) has `ward_tree()` has a recursive merge loop.
 
-* It uses a heap, keeps distances sorted.
+* It uses a heap, keeps distances sorted (log-time insertion, constant time min).
 * It uses moments matrices: `moments_1` is the number of samples (clusters x 1), and `moments_2` is the matrix of sums (clusters x features).
+* It sets `n_nodes` to the number of output nodes in the tree, and initially allocates various arrays of this size (moments, used indicator, parent, etc).
+* `used_node` indicator marks joins which are no longer possible, because the corresponding nodes have already been involved in other joins. There is a `while` loop which keeps going until it finds a join which involves only unused nodes. This is slightly sub-optimal (in C++ this could be reduced from log to constant time using pointers, but this does not matter much).
 
 [_hierarchical_fast.pyx](https://github.com/scikit-learn/scikit-learn/blob/c60dae20604f8b9e585fc18a8fa0e0fb50712179/sklearn/cluster/_hierarchical_fast.pyx)
 has `compute_ward_dist()` which has two for loops: `size_max` (I guess clusters) and `n_features`.
 
-It is not clear whether or not the cumulative sum trick would be faster than this python code. Maybe not, if the new distance can be computed in constant time given the means, which seems to be the case based on the formula involving the difference of two means from [Hierarchical Clustering, Cluster Linkage](https://en.wikipedia.org/wiki/Hierarchical_clustering#Cluster_Linkage).
+Using the cumulative sum trick would be about as fast (same asymptotic complexity class) as this python code, which seems to compute the new distances in constant time given the means, based on the formula involving the difference of two means from [Hierarchical Clustering, Cluster Linkage](https://en.wikipedia.org/wiki/Hierarchical_clustering#Cluster_Linkage).
 
-## TODOs
+## Exercises for the reader
 
 * Compute empirical asymptotic time complexity of `ward_tree()`.
 * Show that the three segmentation algos give the same result in 1D (Ward via Lance-Williams, Ward via moments as in python, cumsum trick).
