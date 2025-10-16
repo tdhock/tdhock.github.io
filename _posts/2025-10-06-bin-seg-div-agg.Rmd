@@ -332,7 +332,7 @@ ggplot()+
     data=wide.dt)+
   scale_y_log10("Absolute loss difference")+
   scale_color_discrete(breaks=c("split","join","same"))+
-  theme(legend.position=c(0.5,0.5))
+  theme(legend.position.inside=c(0.5,0.5))
 ```
 
 Above we see the absolute loss difference as a function of model size. We see that sometimes the two algorithms result in equally good loss values, and sometimes one is better than the other.
@@ -533,8 +533,7 @@ ggplot()+
 
 The figure above shows several agglomerative clustering models,
 using either distance or loss minimization.
-We see that the models are the same for three segments,
-but in general they are different.
+We see that in general they are quite different (min/single linkage used, so Ward linkage should give different results).
 Below we visualize the distances computed by the algorithm.
 
 ```{r dist-used}

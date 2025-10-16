@@ -16,6 +16,19 @@ We begin by loading an example data set.
 ``` r
 data(neuroblastoma, package="neuroblastoma")
 library(data.table)
+```
+
+```
+## data.table 1.17.99 EN DEVELOPPEMENT build 2025-07-18 04:20:25 UTC; root utilisant 1 threads (voir ?getDTthreads).  Dernières actualités : r-datatable.com
+## **********
+## Running data.table in English; package support is available in English only. When searching for online help, be sure to also check for the English error message. This can be obtained by looking at the po/R-<locale>.po and po/<locale>.po files in the package source, where the native language and English error messages can be found side-by-side. You can also try calling Sys.setLanguage('en') prior to reproducing the error message.
+## **********
+## **********
+## Cette version de développement de data.table a été construite il y a plus de 4 semaines. Veuillez mettre à jour : data.table::update_dev_pkg()
+## **********
+```
+
+``` r
 nb.dt <- data.table(neuroblastoma[["profiles"]])
 one.dt <- nb.dt[profile.id==4 & chromosome==2]
 one.dt
@@ -441,7 +454,7 @@ ggplot()+
     data=wide.dt)+
   scale_y_log10("Absolute loss difference")+
   scale_color_discrete(breaks=c("split","join","same"))+
-  theme(legend.position=c(0.5,0.5))
+  theme(legend.position.inside=c(0.5,0.5))
 ```
 
 ![plot of chunk loss-all-models](/assets/img/2025-10-06-bin-seg-div-agg/loss-all-models-1.png)
@@ -556,7 +569,8 @@ ggplot()+
 ```
 
 ```
-## Warning: Removed 1 row containing missing values or values outside the scale range (`geom_point()`).
+## Warning: Removed 1 row containing missing values or values outside the scale range
+## (`geom_point()`).
 ```
 
 ![plot of chunk compare-first-it](/assets/img/2025-10-06-bin-seg-div-agg/compare-first-it-1.png)
@@ -709,8 +723,7 @@ ggplot()+
 
 The figure above shows several agglomerative clustering models,
 using either distance or loss minimization.
-We see that the models are the same for three segments,
-but in general they are different.
+We see that in general they are quite different (min/single linkage used, so Ward linkage should give different results).
 Below we visualize the distances computed by the algorithm.
 
 
@@ -780,8 +793,8 @@ sessionInfo()
 ## [1] ggplot2_3.5.2      data.table_1.17.99
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           xfun_0.53          tidyselect_1.2.1   farver_2.1.2       magrittr_2.0.4    
+##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           tidyselect_1.2.1   xfun_0.53          farver_2.1.2       magrittr_2.0.4    
 ##  [8] gtable_0.3.6       glue_1.8.0         tibble_3.3.0       knitr_1.50         pkgconfig_2.0.3    generics_0.1.4     dplyr_1.1.4       
 ## [15] lifecycle_1.0.4    cli_3.6.5          scales_1.4.0       grid_4.6.0         vctrs_0.6.5        withr_3.0.2        compiler_4.6.0    
-## [22] tools_4.6.0        evaluate_1.0.5     pillar_1.11.0      crayon_1.5.3       rlang_1.1.6
+## [22] tools_4.6.0        pillar_1.11.0      evaluate_1.0.5     rlang_1.1.6
 ```
