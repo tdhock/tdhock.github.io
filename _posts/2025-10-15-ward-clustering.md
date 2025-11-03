@@ -23,6 +23,9 @@ In an application to HiC data, the `N` samples we want to cluster occur on a 2D 
 Assuming 4-connectivity, we can only join with 4 neighbors (not `N-1`), so the algorithm should be faster.
 But we want to avoid computing the `O(N^2)` pairwise distance matrix, so we can no longer use a Lance-Williams update rule.
 Instead we would have to update cluster means, which we use to compute new distances.
+The time complexity of the algorithm depends on how many distances we have to compute at each iteration.
+Best case is constant `O(1)` number of distances to compute in each iteration, for total `O(N log N)` time.
+Worst case is linear `O(N)` number of distance to compute in each iteration, for total `O(N^2)` time.
 
 ## In code
 
@@ -42,3 +45,9 @@ Using the cumulative sum trick would be about as fast (same asymptotic complexit
 
 * Compute empirical asymptotic time complexity of `ward_tree()`.
 * Show that the three segmentation algos give the same result in 1D (Ward via Lance-Williams, Ward via moments as in python, cumsum trick).
+
+## Other software and reading
+
+- Table 6 in [A comprehensive survey of image segmentation: clustering methods, performance parameters, and benchmark datasets](https://pmc.ncbi.nlm.nih.gov/articles/PMC7870780/table/Tab6/) has a nice review of computational complexity (big-O notation) of different 2d image segmentation algorithms.
+- [skimage.segmentation](https://scikit-image.org/docs/0.25.x/api/skimage.segmentation.html) has [slic](https://scikit-image.org/docs/0.25.x/api/skimage.segmentation.html#skimage.segmentation.slic) which is k-means with 2d constraints.
+- [opencv segmentation](https://docs.opencv.org/4.x/d3/d47/group__imgproc__segmentation.html)
