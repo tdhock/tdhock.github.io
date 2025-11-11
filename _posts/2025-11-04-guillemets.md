@@ -125,3 +125,78 @@ So then typing `C-c g` inserts opening and closing guillemets, with appropriate 
   (insert "É"))
 (global-set-key (kbd "C-c E") 'insert-E-aigu)
 ```
+
+## Bonus: Canadian French keyboard
+
+Unlike the AZERTY French keyboard, the QWERTY French Canadian keyboard makes it easy to type programming symbols. There are fewer differences with the USA English keyboard.
+
+![three keyboard layouts](/assets/img/2025-11-04-guillemets/keyboards.png)
+
+* `{}` accolades typed using right Alt (thumb) then left and above Enter key (right little finger).
+* `[]` crochets typed using right Alt (thumb) then their typical keys (right little finger).
+* `<>` chevrons typed using right little finger alone (key above Enter), or with left little finger on left shift key.
+* `'` simple guillemet anglais typed using left little finger shift, then right middle finger comma key.
+* `"` double guillemets anglais typed using right little finger shift, then left ring finger 2 key. This is [section B on this touch typing chart](https://opentextbc.ca/computerstudies/chapter/the-base-position/) which I don't believe is accurate, because it says little fingers are supposed to type the Alt keys (I use thumbs).
+* `?` point d'interrogation typed using right little finger shift then left index on 6 key.
+* `~` tilde typed using right Alt thumb then right little finger ; home position key.
+* `#|\` dièse barre verticale antislash typed using old backtick key (upper left).
+* `±` plus or minus typed using right Alt thumb then 1 key.
+* `@` arobase ou A commercial typed using right Alt thumb then 2 key.
+* `/` slash typed using shift then left middle finger 3 key.
+
+### Accent marks
+
+* `éÉ´` Accent aigu typed using old slash/question key.
+* ``è`à`` Accent grave or backtick typed using key just left of Enter.
+* `ô` Chapeau ou accent circonflex is just above that.
+* `¸` cedilla is just to the right of that (type c after).
+* `¨` tréma is the same key as cedilla but with shift.
+
+### emacs
+
+* in emacs `M-<` goes to start and `M->` goes to end of buffer, which both require shift key under USA English keyboard layout.
+  * go to start no longer requires shift key: left Alt then old backslash key (above return).
+  * go to end is same but with shift key.
+  
+### what is the difference between usual hypen/minus and right Alt period?
+
+```
+             position: 5000 of 5000 (100%), column: 11
+            character: ­ (displayed as ­) (codepoint 173, #o255, #xad)
+              charset: unicode (Unicode (ISO10646))
+code point in charset: 0xAD
+               script: latin
+               syntax: _ 	which means: symbol
+             category: b:Arabic, h:Korean, j:Japanese, l:Latin
+             to input: type "C-x 8 RET ad" or "C-x 8 RET SOFT HYPHEN"
+          buffer code: #xC2 #xAD
+            file code: #xC2 #xAD (encoded by coding system utf-8-dos)
+              display: by this font (glyph code):
+    harfbuzz:-outline-Courier New-regular-normal-normal-mono-15-*-*-*-c-*-iso8859-1 (#x10)
+       hardcoded face: escape-glyph
+
+Character code properties: customize what to show
+  name: SOFT HYPHEN
+  general-category: Cf (Other, Format)
+  decomposition: (173) ('­')
+  
+---------------------------------------
+
+             position: 7602 of 7607 (100%), column: 0
+            character: - (displayed as -) (codepoint 45, #o55, #x2d)
+              charset: ascii (ASCII (ISO646 IRV))
+code point in charset: 0x2D
+               script: latin
+               syntax: _ 	which means: symbol
+             category: .:Base, a:ASCII, l:Latin, r:Roman
+             to input: type "C-x 8 RET 2d" or "C-x 8 RET HYPHEN-MINUS"
+          buffer code: #x2D
+            file code: #x2D (encoded by coding system utf-8-dos)
+              display: by this font (glyph code):
+    gdi:-raster-Courier-regular-normal-normal-mono-16-*-*-*-c-*-iso8859-1 (#x2D)
+
+Character code properties: customize what to show
+  name: HYPHEN-MINUS
+  general-category: Pd (Punctuation, Dash)
+  decomposition: (45) ('-')
+```
