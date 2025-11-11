@@ -102,5 +102,26 @@ After reading [this page](https://josephrjohnson.georgetown.domains/emacs/settin
 (global-set-key (kbd "C-c g") 'insert-guillemets)
 ```
 
-So then typing `C-c g` inserts opening and closing guillemets, with appropriate spacing, and the cursor ends up in the middle of the guillemets! (2 keys for all of that, very efficient)
+So then typing `C-c g` inserts opening and closing guillemets, with appropriate spacing, and the cursor ends up in the middle of the guillemets! (3 keys for all of that, very efficient)
 
+## Bonus: how to type È or É on AZERTY keyboard
+
+### Windows, not emacs
+
+[Ouest France says](https://les-raccourcis-clavier.ouest-france.fr/e-accent-grave-majuscule/)
+
+* Alt 0 2 0 0 or Alt 2 1 2 gives È.
+* Alt 0 2 0 1 or Alt 1 4 4 gives É.
+
+### emacs!
+
+```elisp
+(defun insert-E-grave ()
+  (interactive)
+  (insert "È"))
+(global-set-key (kbd "C-c e") 'insert-E-grave)
+(defun insert-E-aigu ()
+  (interactive)
+  (insert "É"))
+(global-set-key (kbd "C-c E") 'insert-E-aigu)
+```
