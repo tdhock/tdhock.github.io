@@ -132,6 +132,8 @@ Unlike the AZERTY French keyboard, the QWERTY French Canadian keyboard makes it 
 
 ![three keyboard layouts](/assets/img/2025-11-04-guillemets/keyboards.png)
 
+![keyboard photos](/assets/img/2025-11-04-guillemets/photos.png)
+
 * `{}` accolades typed using right Alt (thumb) then left and above Enter key (right little finger).
 * `[]` crochets typed using right Alt (thumb) then their typical keys (right little finger).
 * `<>` chevrons typed using right little finger alone (key above Enter), or with left little finger on left shift key.
