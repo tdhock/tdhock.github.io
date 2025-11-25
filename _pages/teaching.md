@@ -92,9 +92,10 @@ Neil DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
 
 For the students below, my role is primary advisor, unless another primary advisor is mentioned.
 
+* Elise Jorge, research intern, Fall 2025. Primary advisors: Nathalie Vialaneix, Pierre Neuvial, Sylvain Foissac.
 * [Omar Guenoun](https://github.com/OGuenoun), research intern, Summer 2025.
 * [Justine Ruch](https://github.com/juruch), research intern, Summer 2025.
-* [Félix Chabot](https://github.com/chabam), CS master, Spring 2025-present. Co-advisor: Richard Fournier.
+* [Félix Chabot](https://github.com/chabam), CS master, Spring 2025-present. Primary advisor: Richard Fournier.
   
 ## NAU students mentored
 
@@ -132,6 +133,12 @@ For the students below, my role is primary advisor, unless another primary advis
 * [Atiyeh Fotoohinasab](https://github.com/atiyehftn), Informatics and Computing PHD, Summer 2019 - Spring 2020, then did [University of Arizona Biomedical Engineering PHD program](https://grad.arizona.edu/catalog/programinfo/BMEGPHD).
 * [Anuraag Srivastava](https://github.com/as4378), CS master, Fall 2018 - Spring 2020, then went to Chicago to work as a software engineer for a company.
 * [Brandon Dunn](https://github.com/bd288), EE master, Fall 2018 - Spring 2019, then went to [Raytheon](https://www.rtx.com/).
+
+### Sherbrooke coffee break, Nov 2025
+
+Left to right: Wei, Toby, Félix, Elise.
+
+![Sherbrooke coffee break Nov 2025](/assets/img/lab-photos/2025-11-24-coffee.jpg)
 
 ### Sherbrooke summer interns, Aug 2025
 
