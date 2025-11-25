@@ -146,6 +146,15 @@ Unlike the AZERTY French keyboard, the QWERTY French Canadian keyboard makes it 
 * `@` arobase ou A commercial typed using right Alt thumb then 2 key.
 * `/` slash typed using shift then left middle finger 3 key.
 
+Drawbacks of this layout:
+
+* it takes two keystrokes to type a ç
+
+Other French layouts on Windows:
+
+* [bépo](https://bepo.fr/wiki/Pr%C3%A9sentation), the French version of [Dvorak](/assets/img/2025-11-04-guillemets/STedDVzine.pdf).
+* Canadian Multilingual Standard: can type ç with one keystroke.
+
 ### Accent marks
 
 * `éÉ´` Accent aigu typed using old slash/question key.
