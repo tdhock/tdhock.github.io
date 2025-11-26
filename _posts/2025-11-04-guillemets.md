@@ -155,6 +155,17 @@ Other French layouts on Windows:
 * [bépo](https://bepo.fr/wiki/Pr%C3%A9sentation), the French version of [Dvorak](/assets/img/2025-11-04-guillemets/STedDVzine.pdf).
 * Canadian Multilingual Standard: can type ç with one keystroke.
 
+Other French layouts on Ubuntu:
+
+* Français (Dvorak)
+* Français (Canada, Dvorak)
+* French (BEPO)
+* French (BEPO, AFNOR)
+* French (BEPO, Latin-9 only)
+* Canadian (CSA)
+
+https://vitrinelinguistique.oqlf.gouv.qc.ca/ressources-linguistiques/contenus-telechargeables
+
 ### Accent marks
 
 * `éÉ´` Accent aigu typed using old slash/question key.
