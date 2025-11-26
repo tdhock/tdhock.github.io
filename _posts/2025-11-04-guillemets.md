@@ -164,7 +164,9 @@ Other French layouts on Ubuntu:
 * French (BEPO, Latin-9 only)
 * Canadian (CSA)
 
-https://vitrinelinguistique.oqlf.gouv.qc.ca/ressources-linguistiques/contenus-telechargeables
+Cette touche est la cent-cinquième du clavier. Elle n’existe pas sur les claviers à 104 touches. Si votre clavier ne possède cette touche, les caractères peuvent être obtenus différemment : « ê » et « Ê » grâce l’accent circonflexe mort ; la barre oblique « / » est en accès direct sur la touche 9 et le circonflexe non mort est en AltGr+6.
+
+* [apprentissage de bépo par exercises dans un navigateur](http://dactylotest.free.fr/bepodactyl/)
 
 ### Accent marks
 
