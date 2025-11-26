@@ -168,6 +168,34 @@ Cette touche est la cent-cinquième du clavier. Elle n’existe pas sur les clav
 
 * [apprentissage de bépo par exercises dans un navigateur](http://dactylotest.free.fr/bepodactyl/)
 
+[CSA keyboard](https://en.wikipedia.org/wiki/CSA_keyboard) wikipedia page explains that Windows Canadian Multilingual Standard = Ubuntu CSA, more or less: "Figure 1: The Windows version differs from the official standard in terms of the location of dead keys (middle dot ·, tilde ~) and the absence of a few characters, including đ, ⅛ and the dot above ˙. The euro sign € was not included in the Canadian standard in 1992 and is not officially included in the standard yet (R2021). Microsoft added this symbol in 1999 (4 and E keys), following the ISO 9995-3 standard."
+
+* [wikipedia Description](https://en.wikipedia.org/wiki/CSA_keyboard#Description) says "It is possible to completely do without the dead key for the grave accent, as the only three French letters that use it (À, È, and Ù) are directly accessible in both lowercase and uppercase on this keyboard. However, the grave accent (dead key) remains in the primary group to type the characters ù/Ù on an ANSI keyboard, which lacks a key to the left of the Z key."
+
+Comparing keyboards
+
+* [interactive comparison of old vs new azerty](https://norme-azerty.fr/en/#explore)
+* [Une des principales différences par rapport à la disposition proposée par Francis Leboutte est l’usage de la touche modificatrice Alt Gr au lieu de la touche morte accent grave « ` ».](https://fr.wikipedia.org/wiki/Disposition_Dvorak#B%C3%A9po), [more details](https://bepo.fr/wiki/Dvorak-fr).
+
+* [qwerty-intl](https://en.wikipedia.org/wiki/QWERTY#US-International)
+* [azerty](http://xahlee.info/kbd//french_new_keyboard_layout.html)
+* [bépo](http://xahlee.info/kbd//bepo_layout.html)
+
+| feature   | qwerty-intl      | CSA                      | Can-fr           | azerty           | bépo         |
+|-----------|------------------|--------------------------|------------------|------------------|--------------|
+| ê         | dead key + e     | dead key + e             | dead key + e     | dead key + e     | 1 touche     |
+| é         | dead key + e     | 1 touche                 | 1 touche         | 1 touche         | 1 touche     |
+| ç         | dead key + c     | 1 touche                 | dead key + c     | 1 touche         | 1 touche     |
+| backtick  | dead key + space | AltGr + dead key + space | dead key + space | dead key + space | Shift touche |
+| oe        | missing          | AltGr touch              | missing          | AltGr touche     | AltGr touche |
+| ergonomic | no               | no                       | no               | no               | yes          |
+
+|           | English     | French     |
+|-----------|-------------|------------|
+| old       | qwerty      | azerty     |
+| new       | qwerty-intl | azerty-new |
+| ergonomic | Dvorak      | bépo       |
+
 ### Accent marks
 
 * `éÉ´` Accent aigu typed using old slash/question key.
