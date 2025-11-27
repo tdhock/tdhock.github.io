@@ -202,6 +202,13 @@ Comparing keyboards
 * undo `C-_` impossible, `C-/` easier (/ is on 9).
 * `M-<` start `M->` end impossible, `C-start` `C-end` instead.
 * `C-k` kill less convenient, can use right Ctrl with left index.
+* arithmetic `+-/*` on `7890`.
+* if missing 105è key on bottom left, `y` is `^` dead key for typing êÊ.
+* AltGr-i then i makes ï.
+* vertical bar `|` on AltGr-b.
+* and `&` on AltGr-e.
+* question `?` is shift n.
+* exclamation `!` is shift y.
 
 ```elisp
 (global-set-key (kbd "C-«") 'beginning-of-buffer)
