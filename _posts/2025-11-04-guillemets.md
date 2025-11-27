@@ -196,6 +196,20 @@ Comparing keyboards
 | new       | qwerty-intl | azerty-new |
 | ergonomic | Dvorak      | bépo       |
 
+
+## bépo tricks
+
+* undo `C-_` impossible, `C-/` easier (/ is on 9).
+* `M-<` start `M->` end impossible, `C-start` `C-end` instead.
+* `C-k` kill less convenient, can use right Ctrl with left index.
+
+```elisp
+(global-set-key (kbd "C-«") 'beginning-of-buffer)
+(global-set-key (kbd "C-»") 'end-of-buffer)
+```
+
+## French Canadian tricks
+
 ### Accent marks
 
 * `éÉ´` Accent aigu typed using old slash/question key.
@@ -210,7 +224,7 @@ Comparing keyboards
   * go to start no longer requires shift key: left Alt then old backslash key (above return).
   * go to end is same but with shift key.
   
-### what is the difference between usual hypen/minus and right Alt period?
+## what is the difference between usual hypen/minus and right Alt period?
 
 ```
              position: 5000 of 5000 (100%), column: 11
