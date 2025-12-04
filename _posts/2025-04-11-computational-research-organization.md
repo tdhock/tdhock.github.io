@@ -213,7 +213,7 @@ In that case, you should create a Pull Request, to send your fix to the owner of
 If the owner is you, then you don't need to do a Pull Request (you could just commit to the main/master branch), but you may want to make a Pull Request anyway, to make it easier for code review.
 
 What is a Pull Request? It is a web page on GitHub for discussing changes from one branch to another.
-For a good into to git for R, try reading [Happy Git and GitHub for the useR](https://happygitwithr.com/).
+For a good intro to git for R, try reading [Happy Git and GitHub for the useR](https://happygitwithr.com/).
 
 ### Pull requests with your own repo
 
