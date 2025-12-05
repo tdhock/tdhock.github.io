@@ -44,6 +44,7 @@ interesting to you, and for which you think there would be an
 interesting future research project/publication. Then write a summary,
 in your own words (not copying from the publication), that contains
 
+* Your motivation: why did you choose this paper?
 * Background: what is the problem setting and data? For example, in regression the data is a n x p input/feature matrix, an n-vector of outputs/labels, problem is learning a function which takes a p-dimensional input/feature vector and returns a real-valued output/prediction.
 * Previous work: what are the existing approaches for that problem, and what are their drawbacks that motivate a new algorithm? For example, in regression there are linear models, neural networks, boosting, etc.
 * Novelty: what are the new ideas presented in the paper? Are they theoretical or empirical, or both? For example, the paper could use existing models/data and present a new proof about the optimality/speed of an existing algorithm, or it could use existing algorithms/data with a new neural network model architecture, or it could present new benchmark data sets for comparing various existing algorithms/models.
@@ -97,4 +98,4 @@ Updated 19 Sept 2024: added natbib guidelines.
 
 Updated 17 Oct 2024: one or two pages.
 
-Updated 5 Dec 2025: one to three pages.
+Updated 5 Dec 2025: one to three pages, your motivation.
