@@ -79,8 +79,10 @@ previous projects, which answers the following questions.
   code you used to make that figure. Please write about why you made
   the figure, and the main message you wanted to communicate with that
   figure. If you have not ever used code to make figures, please read
-  [Chapter 2 of the Animint2
-  Manual](https://rcdata.nau.edu/genomic-ml/animint2-manual/Ch02-ggplot2.html),
+  Chapter 2 of the Animint2 Manual in
+  [English](https://animint-manual-en.netlify.app)
+  or
+  [French](https://animint-manual-fr.netlify.app),
   and use one of the exercises to satisfy this application requirement. 
   Best would be to write a whole paragraph about your figure, like we do in research papers:
   * Setting: start by explaining what your goal is: what are you trying to understand by making a figure?
@@ -96,4 +98,4 @@ Updated 19 Sept 2024: added natbib guidelines.
 
 Updated 17 Oct 2024: one or two pages.
 
-Updated 5 Dec 2025: one to three pages, your motivation, no chatgpt.
+Updated 5 Dec 2025: one to three pages, your motivation, no AI tools, update animint2 link.
