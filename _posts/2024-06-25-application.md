@@ -4,11 +4,9 @@ title: Research student application
 description: Please read if you want to do research under my supervision
 ---
 
-To work in the LASSO lab, please write an application (1-3
-pages), with section headings corresponding to the sections
-below. Ideally, please typeset your response using LaTeX and/or
-Overleaf, and include a bibliography with at least one citation to the
-paper you read.
+To work in the LASSO lab, please write an application (1-3 pages), with section headings corresponding to the sections below.
+Ideally, please typeset your response using LaTeX and/or Overleaf, and include a bibliography with at least one citation to the paper you read.
+So I can evaluate your coding and English writing abilities, please do not use AI tools (ChatGPT, Copilot, etc) when writing your application.
 
 ## Mentorship plan reading and writing application
 
@@ -98,4 +96,4 @@ Updated 19 Sept 2024: added natbib guidelines.
 
 Updated 17 Oct 2024: one or two pages.
 
-Updated 5 Dec 2025: one to three pages, your motivation.
+Updated 5 Dec 2025: one to three pages, your motivation, no chatgpt.
