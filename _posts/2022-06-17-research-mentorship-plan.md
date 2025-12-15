@@ -41,7 +41,7 @@ expect to learn how to:
   in order to facilitate reproducible research.
 - write scholarship/grant applications which describe future research
   directions.
-- use writing that is inclusive, see [Sherbrooke French guide](https://www.usherbrooke.ca/langue/fileadmin/sites/langue/documents/Guide_redaction_inclusive_vf.pdf).
+- use writing that is inclusive, see [Government of Canada Inclusive writing guidelines and resources](https://www.noslangues-ourlanguages.gc.ca/en/writing-tips-plus/inclusive-writing-guidelines-resources), [Guide de rédaction inclusive de l’Université de Sherbrooke](https://www.usherbrooke.ca/langue/fileadmin/sites/langue/documents/Guide_redaction_inclusive_vf.pdf), [Les termes rédaction épicène et écriture inclusive de La Banque de dépannage linguistique du Québec](https://vitrinelinguistique.oqlf.gouv.qc.ca/25421/banque-de-depannage-linguistique/la-redaction-et-la-communication/feminisation-et-redaction-epicene/redaction-epicene/les-termes-redaction-epicene-et-ecriture-inclusive).
   
 Students should expect to do the following:
 - keep a lab notebook / research journal on google docs / github
@@ -111,3 +111,5 @@ Updated 18 Jan 2024: added Sagan quote about scientific method.
 Updated 6 Aug 2024: added Sherbrooke storage links.
 
 Updated 5 Feb 2025: added link to Sherbrooke inclusive guide.
+
+Updated 15 Dec 2025: added links to Québec and Canada inclusive writing guides.
