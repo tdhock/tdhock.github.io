@@ -7,7 +7,7 @@ description: Parsing bibtex and generating markdown
 I have been updating my
 [publications](https://tdhock.github.io/publications/) page by editing
 markdown for several years. Today I updated my self-citation database,
-[TDH-refs.bib](/assets/TDH-refs.bib), so that is is consistent with
+[TDH-refs.bib](/assets/TDH-refs.bib), to be consistent with
 that publications page. In this post we explore the extent to which it would be possible to generate the publications page, using the bib file as a source.
 
 ```{r Ropts, echo=FALSE}
