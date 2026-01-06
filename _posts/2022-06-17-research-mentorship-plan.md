@@ -34,7 +34,7 @@ expect to learn how to:
   experiments, to compare the speed and prediction accuracy of a new
   machine learning algorithm with previously proposed baselines, and
   create figures/tables that visualize the results.
-- write and publish research papers which specifically describe the
+- [write and publish research papers](https://www.nature.com/articles/s41587-025-02584-1) which specifically describe the
   theoretical and empirical novelty of a new algorithm, and cite
   previous research to emphasize what ideas are old/new.
 - publish free/open-source code such as R packages on GitHub and CRAN,
