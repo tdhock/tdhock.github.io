@@ -273,3 +273,15 @@ Character code properties: customize what to show
   general-category: Pd (Punctuation, Dash)
   decomposition: (45) ('-')
 ```
+
+
+## Update 8 jan 2026
+
+I have been typing as a bépoète for over a month, and I am hooked!
+Touch typing on the home row definitely feels more comfortable and natural.
+I prepared [a slide](https://docs.google.com/presentation/d/1U7RgXtTttg8TxBRYs0aRApcJvQ5tUQrbIvMxKp7XlbA/edit?slide=id.g3b5767da9f3_0_4#slide=id.g3b5767da9f3_0_4) showing the differences between several keyboard layouts, in terms of how to input characters that are frequently used in programming.
+The main advatages of bépo are:
+
+* no dead keys required (other French keyboard layouts have `` `^~ `` as dead keys, which means to input the symbol, you first type the key, and then type space).
+* no combinations of AltGr with right hand (other French keyboard layouts have 3–6 symbols on the right hand, which makes it difficult to type, because AltGr is on the right).
+* 13 symbols directly accessible (no modifier required), which is not as many as azerty legacy (15), but actually more than qwerty US (11).
