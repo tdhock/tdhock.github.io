@@ -285,3 +285,11 @@ The main advatages of bépo are:
 * no dead keys required (other French keyboard layouts have `` `^~ `` as dead keys, which means to input the symbol, you first type the key, and then type space).
 * no combinations of AltGr with right hand (other French keyboard layouts have 3–6 symbols on the right hand, which makes it difficult to type, because AltGr is on the right).
 * 13 symbols directly accessible (no modifier required), which is not as many as azerty legacy (15), but actually more than qwerty US (11).
+
+### even more optimization
+
+There seems to be a lively community of developers working on new keyboard layouts :
+
+* [Ergo-L](https://ergol.org/bepo/) has ergonomic benefits with respect to bépo, especially for English, and uses an all purpose dead key (to insert any accent — cool!), but no accented characters on direct access (bummer!).
+* [Optimot](https://optimot.fr/presentation.html#avantages-d-optimot) has a crazy amount of symbols on dead keys.
+* [Ergopti](https://ergopti.fr/informations#manque-de-caracteres-et-non-optimisation-pour-les-autres-langues) removed support for languages other than French and English, and uses a magic dead key.
