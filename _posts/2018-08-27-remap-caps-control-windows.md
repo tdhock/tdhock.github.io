@@ -25,6 +25,7 @@ script) containing
 
 ``` 
 Capslock::Control 
+AppsKey::Alt
 ```
 
 Then I used ahk2exe to convert the ahk file to an executable
@@ -38,3 +39,7 @@ Finally I opened the C:\Users\user\AppData folder by typing
 default) Then I copied the caps2ctrl.exe file to
 `C:\Users\user\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`
 and it runs every time I log in.
+
+### Update 9 jan 2026
+
+Added `AppsKey::Alt` to change right menu key to another Alt (useful for some emacs commands).
