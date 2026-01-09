@@ -292,4 +292,4 @@ There seems to be a lively community of developers working on new keyboard layou
 
 * [Ergo-L](https://ergol.org/bepo/) has ergonomic benefits with respect to bépo, especially for English, and uses an all purpose dead key (to insert any accent — cool!), but no accented characters on direct access (bummer!).
 * [Optimot](https://optimot.fr/presentation.html#avantages-d-optimot) has a crazy amount of symbols on dead keys.
-* [Ergopti](https://ergopti.fr/informations#manque-de-caracteres-et-non-optimisation-pour-les-autres-langues) removed support for languages other than French and English, and uses a magic dead key.
+* [Ergopti](https://ergopti.fr/informations#manque-de-caracteres-et-non-optimisation-pour-les-autres-langues) removed support for languages other than French and English, puts numbers on direct access, and uses a magic dead key.
