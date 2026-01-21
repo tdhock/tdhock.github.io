@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=6)
 if(FALSE){
-  knitr::knit(paste0(repo.dir, ".Rmd"))
+  knitr::knit(paste0(post.id, ".Rmd"))
 }
 ```
 
