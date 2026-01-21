@@ -1,0 +1,80 @@
+---
+layout: post
+title: Hugging Face data
+description: And other data repositories
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2026-01-21-mlr3-learners"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=20,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+This post discusses different options for hosting machine learning data sets.
+
+## Motivation
+
+Our lab recently [published a paper about SOAK](https://onlinelibrary.wiley.com/doi/10.1002/sam.70055), a new cross-validation method for comparing generalization across different subsets.
+That paper used SOAK to analyze 20 different data sets.
+For reproducibility, we want to make those data sets publicly available, along with the code we used to compute the results in that paper.
+
+## Code on GitHub (2008)
+
+As I do with all of my papers, I created a GitHub repo for the source code.
+The README contains a section [Reproducibility](https://github.com/tdhock/cv-same-other-paper?tab=readme-ov-file#reproducibility) that provides links to
+
+* the data set files
+* the result CSV files, with the prediction error rates of different models on different data sets. And the R code used to compute these from the data set files.
+* the result figures and tables. And the R code used to compute these from the result CSV files.
+
+## Our university server
+
+One classic method we used for hosting the data files was our university server, which provides [a web page](https://rcdata.nau.edu/genomic-ml/cv-same-other-paper/data_Classif/) where each of the 20 data sets can be downloaded individually.
+
+The advantage of this method is simplicity and generality (works with any data, maybe even not related to a research paper), and the fact that each file can be downloaded individually (without having to download all 20).
+The disadvantage is the lack of documentation and meta-data.
+
+## Zenodo (2013)
+
+The other method that we used was [Zenodo](https://zenodo.org/records/18273949), which is a free reproducibility servict that is available to all academic researchers, to support their publications, [since 2013 (max 50GB)](https://en.wikipedia.org/wiki/Zenodo).
+
+This involved zipping all 20 files together, then uploading the zip file, and filling out some meta-data in a web form.
+
+Advantages are the meta-data on the web page (links to the code and research paper), and that it can be used to support any academic publication (not just machine learning).
+Disadvantage is that all 20 files must be downloaded together (can not download one or two if not all 20 are needed).
+
+## UCI ([1987](https://archive.ics.uci.edu/about/))
+
+[UC Irvine Machine Learning Repository](https://archive.ics.uci.edu/) is another classic option for machine learning data sets, that I used in the past to share the [chipseq data](https://archive.ics.uci.edu/dataset/439/chipseq) to support my PeakSeg papers, like [Hocking TD, Rigaill G, Fearnhead P, Bourque G, Constrained Dynamic Programming and Supervised Penalty Learning Algorithms for Peak Detection in Genomic Data, Journal of Machine Learning Research 2020, 21(87)](https://jmlr.org/papers/v21/18-843.html).
+
+Advantage is you can search for data sets using meta-data that are specific to ML (number of instances, associated tasks, …), but disadvantage is no standard data set file format (hard to use multiple data sets in the same way, need to write standardization code for each data set).
+
+## OpenML (2014)
+
+[OpenML](https://www.openml.org/) is an academic machine learning repository, first published at [KDD’14](https://dl.acm.org/doi/10.1145/2641190.2641198).
+In principle it is more useful than UCI because it has even more meta-data, like which columns should be used for inputs and outputs.
+And there are programmatic ways to download data sets.
+
+* [OpenML](https://github.com/openml/openml-r) is an R package that I used in [a blog post](https://tdhock.github.io/blog/2025/imbalance-openml/), but is deprecated because it uses mlr (old original version, not 3).
+* [mlr3oml](https://github.com/mlr-org/mlr3oml) is the newer R package that provides an interface with mlr3.
+* [openml-python](https://github.com/openml/openml-python) is the python interface.
+
+## Hugging Face (2020)
+
+[hfhub](https://github.com/mlverse/hfhub) is an R port of the [huggingface_hub](https://github.com/huggingface/huggingface_hub) python library, [v1.0 released in 2025](https://huggingface.co/blog/huggingface-hub-v1).
+
+[huggingfaceR](https://github.com/farach/huggingfaceR) is another R package for models instead of data.
+
+[HuggingFace Datasets](https://huggingface.co/datasets) is the web interface.
+
+Advantage is more recent and popular, disadvantage is no mlr3 support.
+I posted [an issue](https://github.com/mlr-org/mlr3oml/issues/146) asking if there is a function for converting a huggingface data set to a mlr3 task.
