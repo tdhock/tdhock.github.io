@@ -4,21 +4,6 @@ title: Hugging Face data
 description: And other data repositories
 ---
 
-```{r Ropts, echo=FALSE}
-repo.dir <- normalizePath("..")
-post.id <- "2026-01-21-mlr3-learners"
-fig.path <- file.path(repo.dir, "assets", "img", post.id)
-knitr::opts_chunk$set(
-  dpi=100,
-  fig.path=paste0(fig.path, "/"),
-  fig.width=20,
-  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
-  fig.height=6)
-if(FALSE){
-  knitr::knit(paste0(post.id, ".Rmd"))
-}
-```
-
 This post discusses different options for hosting machine learning data sets.
 
 ## Motivation
