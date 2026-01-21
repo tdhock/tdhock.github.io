@@ -1,0 +1,62 @@
+---
+layout: post
+title: mlr3 learners list
+description: And class projects
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2026-01-21-mlr3-learners"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=20,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+if(FALSE){
+  knitr::knit(paste0(repo.dir, ".Rmd"))
+}
+```
+
+The purpose of this vignette is to make lists of
+
+* learners that currently exist in mlr3,
+* CRAN packages that do not yet have a learner.
+
+## Current Learners
+
+mlr3 web site has [a list of learners](https://mlr-org.com/learners.html), created using [learners.qmd](https://github.com/mlr-org/mlr3website/blob/main/mlr-org/learners.qmd).
+
+```{r}
+pkgs <- c("mlr3", "mlr3learners", "mlr3extralearners", "mlr3proba", "mlr3cluster", "mlr3torch", "torchvision")
+remotes::install_github("mlr-org/mlr3extralearners")
+for(pkg in pkgs){
+  if(!requireNamespace(pkg))install.packages(pkg)
+  requireNamespace(pkg)
+}
+library(data.table)
+content = as.data.table(mlr3::mlr_learners, objects = TRUE)
+content[, base_package := purrr::map(object, function(x) strsplit(x$man, "::", TRUE)[[1]][1])]
+content[, packages := purrr::pmap(list(packages, base_package), function(x, y) setdiff(x, c(y, "mlr3")))]
+learners = rlang::set_names(content$object, content$key)
+content[, `:=`(object = NULL, task_type = NULL)]
+
+# fix mlr3probaproba
+content[is.na(base_package), base_package := "mlr3proba"]
+
+content
+```
+
+The table above seems consistent with the learners web page.
+
+## wish list
+
+I asked in [an issue](https://github.com/mlr-org/mlr3extralearners/issues/539), and there is a [list of issues which are learners to implement](https://github.com/mlr-org/mlr3extralearners/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Learner%20Status%3A%20Request%22) (CRAN packages with no mlr3 Learner written yet).
+These would be good options for student projects in my class.
+
+## session info
+
+```{r}
+sessionInfo()
+```
