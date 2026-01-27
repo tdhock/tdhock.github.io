@@ -8,6 +8,32 @@ The purpose of this post is to explain how to install the torch R package on All
 
 # Errors
 
+## torch pre-built binary package with cuda on rorqual
+
+I tried [installing from pre-built binaries](https://torch.mlverse.org/docs/dev/articles/installation#pre-built).
+
+[I posted an issue about lantern not loading](https://github.com/mlverse/torch/issues/1401).
+lantern links to librt which links to libpthread, which seems to be an incompatible version, 
+
+```
+R/x86_64-pc-linux-gnu-library/4.5/torch/lib/librt.so.1: 
+ /cvmfs/soft.computecanada.ca/gentoo/2023/x86-64-v3/usr/lib64/libpthread.so.0: 
+ version `GLIBC_PRIVATE' not found 
+ (required by R/x86_64-pc-linux-gnu-library/4.5/torch/lib/librt.so.1)
+```
+
+A comment said a work-around is to rename the `librt.so.1` file to `librt.so.1.bak`.
+That did not work for me.
+It gave me a new ldd warning,
+
+```
+[thocking@rorqual4 lib]$ ldd liblantern.so
+./liblantern.so: 
+ /home/thocking/R/x86_64-pc-linux-gnu-library/4.5/torch/lib/./libc.so.6: 
+ version `GLIBC_ABI_DT_RELR' not found 
+ (required by /cvmfs/soft.computecanada.ca/gentoo/2023/x86-64-v3/usr/lib64/librt.so.1)
+```
+
 ## torch source package with cuda on rorqual
 
 ### my ticket
@@ -269,6 +295,12 @@ An irrecoverable exception occurred. R is aborting now ...
 Illegal instruction (core dumped)
 ```
 
+The error above seems to happen when compiling on login (or compute) node, and then running on GPU node.
+The fix is to remove all R packages (torch and others), then ask for a GPU node, and install again (using instructions above).
+This is unusual! Typically installation from login nodes is preferred, but in this case it does not work.
+
+### Comparison with rorqual errors
+
 On rorqual login node I get a different error below
 
 ```
@@ -300,31 +332,6 @@ torch_tensor
 [ CUDAFloatType{1} ]
 ```
 
-on 
+# Conclusion
 
-### torch pre-built binary package with cuda on rorqual
-
-I tried [installing from pre-built binaries](https://torch.mlverse.org/docs/dev/articles/installation#pre-built).
-
-[I posted an issue about lantern not loading](https://github.com/mlverse/torch/issues/1401).
-lantern links to librt which links to libpthread, which seems to be an incompatible version, 
-
-```
-R/x86_64-pc-linux-gnu-library/4.5/torch/lib/librt.so.1: 
- /cvmfs/soft.computecanada.ca/gentoo/2023/x86-64-v3/usr/lib64/libpthread.so.0: 
- version `GLIBC_PRIVATE' not found 
- (required by R/x86_64-pc-linux-gnu-library/4.5/torch/lib/librt.so.1)
-```
-
-A comment said a work-around is to rename the `librt.so.1` file to `librt.so.1.bak`.
-That did not work for me.
-It gave me a new ldd warning,
-
-```
-[thocking@rorqual4 lib]$ ldd liblantern.so
-./liblantern.so: 
- /home/thocking/R/x86_64-pc-linux-gnu-library/4.5/torch/lib/./libc.so.6: 
- version `GLIBC_ABI_DT_RELR' not found 
- (required by /cvmfs/soft.computecanada.ca/gentoo/2023/x86-64-v3/usr/lib64/librt.so.1)
-```
-
+We have seen several problems and solutions for installing torch in R on Alliance Canada clusters.
