@@ -285,7 +285,7 @@ frame #2: c10::cuda::c10_cuda_che
 Execution halted
 ```
 
-The error goes away on a compute node below
+The error goes away on a GPU compute node below
 
 ```
 [thocking@rorqual3 ~]$ srun -t 1:00:00 --mem=1GB --cpus-per-task=1 --gpus-per-node=h100_10gb:1 --pty bash

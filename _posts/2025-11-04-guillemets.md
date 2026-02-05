@@ -293,3 +293,66 @@ There seems to be a lively community of developers working on new keyboard layou
 * [Ergo-L](https://ergol.org/bepo/) has ergonomic benefits with respect to bépo, especially for English, and uses an all purpose dead key (to insert any accent — cool!), but no accented characters on direct access (bummer!).
 * [Optimot](https://optimot.fr/presentation.html#avantages-d-optimot) has a crazy amount of symbols on dead keys.
 * [Ergopti](https://ergopti.fr/informations#manque-de-caracteres-et-non-optimisation-pour-les-autres-langues) removed support for languages other than French and English, puts numbers on direct access, and uses a magic dead key.
+
+## Update 5 fév 2026
+
+There is some issue displaying the three kinds of spaces.
+
+Bépo web site recommends [DejaVu](https://bepo.fr/wiki/Liens#Polices_d'%C3%A9criture_pour_b%C3%A9po).
+
+Below we clearly see the difference but it is not a Mono spaced font (important for terminal table output from R `data.table` or python `pandas`).
+
+![three different spaces using DejaVu Math TeX Gyre font in emacs](/assets/img/2025-11-04-guillemets/spaces-DejaVuMathTeXGyre.png)
+
+Below we see no difference between the non-breaking spaces.
+
+![three different spaces using DejaVu Sans Mono font in emacs](/assets/img/2025-11-04-guillemets/spaces-DejaVuSansMono.png)
+
+Below the default emacs font shows a difference but 
+
+![three different spaces using Courier New font in emacs](/assets/img/2025-11-04-guillemets/spaces-DejaVuCourierNew.png)
+
+```elisp
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:family "DejaVu Math TeX Gyre" :foundry "outline" :slant normal :weight regular :height 113 :width normal)))))
+```
+
+Where do the rules come from?
+
+* [aide-mémoire](https://gitlab.com/bepo/misc/-/raw/master/documents/aide-memoire/bepo_aide-memoire.pdf)
+* [OQLF](https://vitrinelinguistique.oqlf.gouv.qc.ca/22039/la-typographie/espacement/espacement-avant-et-apres-les-signes-de-ponctuation-et-les-symboles)
+* [Jacques André](https://jacques-andre.fr/faqtypo/lessons.pdf) copié ci-dessous
+
+![André Table 1](/assets/img/2025-11-04-guillemets/AndréTable1.png)
+
+| symbole                   | aide-mémoire    | André           | OQLF            |
+|---------------------------|-----------------|-----------------|-----------------|
+| `;` point-virgule         | foo ; bar       | foo ; bar       | foo ; bar       |
+| `!` point d’exclamation   | foo ! bar       | foo ! bar       | foo ! bar       |
+| `?` point d’interrogation | foo ? bar       | foo ? bar       | foo ? bar       |
+| `«»` guillemets           | foo « bar » baz | foo « bar » baz | foo « bar » baz |
+
+Tout les trois sources sont d’accord sur :
+
+* le tiret incise : foo — bar — baz
+* le deux-points : foo
+
+Commentaires :
+
+* André mentionne l’espace fine dans le texte, mais le Table 1 contient seulement espace normale et espace insécable.
+* aide-mémoire n’est pas d’accord avec OQLF sur les espaces dans les guillemets.
+* dans emacs la police des tableaux dans markdown s’affiche bien la différence entre les deux espaces insécables. Comment faire de cette police le defaut ?
+
+![emacs table](/assets/img/2025-11-04-guillemets/differences.png)
+
+OQLF says there are only four uses for espace fine :
+
+| Barre oblique         | L’affiche ouvert / fermé |
+| point d’exclamation   | Félicitations !          |
+| point d’interrogation | Pourriez-vous ?          |
+| point virgule         | foo ;                    |
+
