@@ -358,6 +358,8 @@ Commentaires :
 
 ![emacs table](/assets/img/2025-11-04-guillemets/differences.png)
 
+![emacs win courier info](/assets/img/2025-11-04-guillemets/courier-info-win.png)
+
 OQLF says there are only four uses for espace fine :
 
 | Barre oblique         | L’affiche ouvert / fermé |
