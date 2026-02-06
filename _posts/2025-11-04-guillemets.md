@@ -304,9 +304,17 @@ Below we clearly see the difference but it is not a Mono spaced font (important 
 
 ![three different spaces using DejaVu Math TeX Gyre font in emacs](/assets/img/2025-11-04-guillemets/spaces-DejaVuMathTeXGyre.png)
 
-Below we see no difference between the non-breaking spaces.
+Below we see no difference between the non-breaking spaces. (windows)
 
-![three different spaces using DejaVu Sans Mono font in emacs](/assets/img/2025-11-04-guillemets/spaces-DejaVuSansMono.png)
+![three different spaces using DejaVu Sans Mono font in emacs on windows](/assets/img/2025-11-04-guillemets/spaces-DejaVuSansMono.png)
+
+Below we see no difference between the non-breaking spaces. (ubuntu)
+Curiously, Ubuntu shows two differences
+
+* top line espaces fines (narrow non-breaking spaces) are displayed in Linux Libertine Display O (not as wide as all other text in DejaVu Sans Mono).
+* table does not have different font (but is different from surrounding text on windows).
+
+![three different spaces using DejaVu Sans Mono font in emacs on ubuntu](/assets/img/2025-11-04-guillemets/spaces-DejaVuSansMonoUbuntu.png)
 
 Below the default emacs font shows a difference but 
 
