@@ -353,6 +353,7 @@ Commentaires :
 
 * André mentionne l’espace fine dans le texte, mais le Table 1 contient seulement espace normale et espace insécable.
 * aide-mémoire n’est pas d’accord avec OQLF sur les espaces dans les guillemets.
+* OQLF seems more pragmatic (Sur les réseaux sociaux, s’il n’est pas possible d’insérer une espace insécable, celle-ci peut être omise) and bépo aide-mémoire more idealistic, more rich and detailed (different kinds of tirets, etc).
 * dans emacs la police des tableaux dans markdown s’affiche bien la différence entre les deux espaces insécables. Comment faire de cette police le defaut ?
 
 ![emacs table](/assets/img/2025-11-04-guillemets/differences.png)
@@ -364,3 +365,21 @@ OQLF says there are only four uses for espace fine :
 | point d’interrogation | Pourriez-vous ?          |
 | point virgule         | foo ;                    |
 
+OQLF has the following 10 examples for which I may use l’espace insécable : (represented by underscore below)
+
+| barre oblique                    | `arrache‑pissenlit_/ dandelion weeder` |
+| deux-points                      | `Tél._: 123 456‑7890`                  |
+| Fraction (précédée d’un chiffre) | `1_½_tasse de farine`                  |
+| guillemets                       | `«_tout le personnel_»`                |
+| section                          | `p. 8, §_5, ¶_2`                       |
+| Perluète                         | `Ébénisterie Côté, Morin &_Filles`     |
+| Pourcentage                      | `8_% et de 7,25_%.`                    |
+| Signe arithmétique `+−÷×=<>`     | `12_×_5_=_60`                          |
+| unités de mesure                 | `amenez 58_kg et 5_$_CA à 14_h_30 svp` |
+| tiret incise                     | `foo —_bar_— baz`                      |
+
+* pour la barre oblique pour opposer deux mots, on n’utilise pas d’espace (L’affiche ouvert/fermé ne se trouve plus sur la porte de l’établissement.)
+* pour une fraction toute seule, on l’entoure avec les espace normales.
+* § est sur la clé E (P en bépo) et ¶ sur backtick, les deux avec Maj et AltGr.
+* `−÷×` sont sur 890 avec AltGr (entre 7+ et = sur bépo).
+* tiret incise est sur 1 avec AltGr.
