@@ -1,0 +1,102 @@
+---
+layout: post
+title: Markdown links to bibtex
+description: Regular expressions exercise
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2026-02-10-links-to-bibtex"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=20,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The purpose of this page is to convert markdown links to bibtex using regular expressions.
+
+## Problem
+
+I am using markdown (actually quarto) to write two online "books"
+
+* [Animated interactive data visualization using animint2 in R](https://animint-manual-en.netlify.app/)
+* [Visualisation interactive de données dans R avec animint2](https://animint-manual-fr.netlify.app/)
+
+Including hyperlinks in markdown is via the syntax
+
+```
+[text that will appear](hyperlink)
+```
+
+This works fine for HTML output, where we can click the link.
+But in PDF output we get blue text, and the link is lost when the document is printed.
+An example is shown below.
+
+![french and english links](/assets/img/2026-02-10/links-diff.png)
+
+* left we see the French version with bibtex references.
+* right we see the English version with markdown hyperlinks.
+* top we see the web page output.
+* bottom we see the PDF output (and https URL in references section of French version).
+
+I already wrote a CI script [test-references.R](https://github.com/animint/animint-manual-en/pull/19) that errors if it finds markdown links.
+
+```{r}
+chapters <- "~/R/animint-manual-en/chapters"
+qmd.files <- c(
+  Sys.glob(file.path(chapters, "*qmd"),
+  Sys.glob(file.path(chapters, "*/index.qmd"))
+library(data.table)
+violations <- list()
+for(qmd in qmd.files){
+  link_dt <- nc::capture_all_str(
+    qmd,
+    "\\]\\(",
+    url="http.*?",
+    "\\)")
+  if(nrow(link_dt)){
+    violations[[qmd]] <- link_dt$url
+  }
+}
+print(violations)
+```
+
+The goal of this post is to write a conversion to bibtex.
+The source code to find is `please consult our [wiki FAQ](https://github.com/tdhock/animint2/wiki/FAQ#web-browser-on-local-indexhtml-file-is-blank)`.
+We want to change it to
+
+```
+please consult our wiki FAQ [@animintFAQ]
+```
+
+```bib
+@unpublished{animintFAQ,
+  title={Animint FAQ},
+  author={Toby Hocking},
+  url={https://github.com/tdhock/animint2/wiki/FAQ#web-browser-on-local-indexhtml-file-is-blank},
+  year={2025}
+}
+```
+
+## one link
+
+```{r}
+qmd_lines <- readLines(qmd)
+link_dt <- nc::capture_all_str(
+  qmd,
+  "\\]\\(",
+  url="http.*?",
+  "\\)")
+```
+
+## session info
+
+```{r}
+sessionInfo()
+```
