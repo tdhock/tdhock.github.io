@@ -311,11 +311,11 @@ Finally we create the entries for the bib file.
 
 
 ``` r
-bib_vec <- match_dt[-.N, sprintf("@unpublished{%s,
-  title={%s},
-  author={TODO},
-  url={%s},
-  year={2026}
+bib_vec <- match_dt[-.N, sprintf("@unpublished{ %s,
+  title={ %s },
+  author={ TODO },
+  url={ %s },
+  year={ 2026 }
 }
 ", key, title, url)]
 cat(paste(bib_vec, collapse="\n"))
