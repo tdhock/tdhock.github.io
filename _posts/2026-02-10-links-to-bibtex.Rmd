@@ -38,7 +38,7 @@ This works fine for HTML output, where we can click the link.
 But in PDF output we get blue text, and the link is lost when the document is printed.
 An example is shown below.
 
-![french and english links](/assets/img/2026-02-10/links-diff.png)
+![french and english links](/assets/img/2026-02-10-links-to-bibtex/links-diff.png)
 
 * left we see the French version with bibtex references.
 * right we see the English version with markdown hyperlinks.

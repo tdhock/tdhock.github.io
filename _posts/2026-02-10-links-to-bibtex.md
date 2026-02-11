@@ -25,7 +25,7 @@ This works fine for HTML output, where we can click the link.
 But in PDF output we get blue text, and the link is lost when the document is printed.
 An example is shown below.
 
-![french and english links](/assets/img/2026-02-10/links-diff.png)
+![french and english links](/assets/img/2026-02-10-links-to-bibtex/links-diff.png)
 
 * left we see the French version with bibtex references.
 * right we see the English version with markdown hyperlinks.
@@ -201,7 +201,7 @@ nc::capture_all_str(qmd, link_pattern)
 The output above is a table with two lines, one for each markdown link in the `qmd` file.
 This pattern is not sufficient for our purpose, which is to change each link to a citation.
 To do that we need a pattern which will result in a set of matches that spans the whole file.
-We do that below by adding 
+We do that below by adding
 
 * a `before` group that captures anything before the link, even newlines, as indicated by `(?s)`.
 * an alternative that matches the end of the file, `$`, instead of the link.
