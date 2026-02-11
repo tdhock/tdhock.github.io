@@ -322,18 +322,18 @@ cat(paste(bib_vec, collapse="\n"))
 ```
 
 ```
-## @unpublished{PeakSegJoint_package,
-##   title={PeakSegJoint package},
-##   author={TODO},
-##   url={https://github.com/tdhock/PeakSegJoint},
-##   year={2026}
+## @unpublished{ PeakSegJoint_package,
+##   title={ PeakSegJoint package },
+##   author={ TODO },
+##   url={ https://github.com/tdhock/PeakSegJoint },
+##   year={ 2026 }
 ## }
 ## 
-## @unpublished{this_visualization_of_linear_model_and_nearest_neighbors,
-##   title={this visualization of linear model and nearest neighbors},
-##   author={TODO},
-##   url={https://tdhock.github.io/2023-12-04-degree-neighbors/},
-##   year={2026}
+## @unpublished{ this_visualization_of_linear_model_and_nearest_neighbors,
+##   title={ this visualization of linear model and nearest neighbors },
+##   author={ TODO },
+##   url={ https://tdhock.github.io/2023-12-04-degree-neighbors/ },
+##   year={ 2026 }
 ## }
 ```
 
