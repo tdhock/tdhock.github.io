@@ -104,6 +104,7 @@ link_pattern <- list(
   "\\]\\(",
   url="http.*?",
   "\\)")
+options(nc.engine="RE2")
 nc::capture_all_str(qmd, link_pattern)
 ```
 
@@ -117,7 +118,7 @@ We do that below by adding
 
 ```{r}
 before_pattern <- list(
-  before="(?s).*?",
+  before="(?s).+?",
   nc::alternatives(
     link=link_pattern,
     "$"))
@@ -186,9 +187,42 @@ The output above shows two entries for a bib file.
 
 ## find and replace in all files
 
-TODO
+```{r}
+chapters <- "~/R/animint-manual-en/chapters"
+qmd.files <- c(
+  Sys.glob(file.path(chapters,"*qmd")),
+  Sys.glob(file.path(chapters,"*/index.qmd")))
+bib_list <- list()
+for(qmd in qmd.files){
+  match_dt <- nc::capture_all_str(qmd, before_pattern)[
+  , key := gsub(" ", "_", title)
+  ][
+  , replacement := ifelse(
+    link=="", "",
+    sprintf("%s [@%s]", title, key))
+  ]
+  new_content <- match_dt[, paste(paste0(before, replacement), collapse="")]
+  cat(new_content, file=qmd)
+  bib_list[[qmd]] <- match_dt[-.N, sprintf("@unpublished{ %s,
+  title={ %s },
+  author={ TODO },
+  url={ %s },
+  year={ 2026 }
+}
+", key, title, url)]
+}
 
-## Don’t use gsub etc.
+cat(paste(unlist(bib_list), collapse="\n"))
+```
+
+After running the code above, I copied the output to the end of the `refs.bib` file, then [manually corrected the TODOs](https://github.com/animint/animint-manual-en/pull/19/commits/84a60ddcd292ceaccd759c24be2a4645f50d54be) in [PR19](https://github.com/animint/animint-manual-en/pull/19/).
+
+## Conclusion
+
+We have seen how regex can be used for a non-trivial find and replace across multiple qmd files: changing markdown links to bib citations.
+The `before_pattern` is generally useful for matching an entire file, so I created [an issue in nc](https://github.com/tdhock/nc/issues/35) about potentially creating a pattern-making function.
+
+## Bonus: don’t use gsub etc.
 
 You may be tempted to use `gsub()` or similar string replacement functions, but they actually do not work in this case.
 

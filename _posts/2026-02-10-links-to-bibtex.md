@@ -41,6 +41,22 @@ qmd.files <- c(
   Sys.glob(file.path(chapters,"*qmd")),
   Sys.glob(file.path(chapters,"*/index.qmd")))
 library(data.table)
+```
+
+```
+## data.table 1.18.2.1 utilise 1 threads (voir ?getDTthreads).  Dernières actualités : r-datatable.com
+## **********
+## Exécution de data.table en anglais ; l'aide du package n'est disponible qu'en anglais. Lorsque vous recherchez de l'aide en ligne, veillez à vérifier également le message d'erreur en anglais. Pour ce faire, consultez les fichiers po/R-<locale>.po et po/<locale>.po dans le source du package, où les messages d'erreur en langue native et ceux en anglais figurent côte à côte. Vous pouvez aussi essayer d'appeler Sys.setLanguage('en') avant de reproduire le message d'erreur.
+## **********
+## 
+## Attachement du package : 'data.table'
+## 
+## L'objet suivant est masqué depuis 'package:base':
+## 
+##     %notin%
+```
+
+``` r
 get_violations <- function(qmd){
   nc::capture_all_str(
     qmd,
@@ -59,93 +75,14 @@ print(violations)
 ```
 
 ```
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/contribute.qmd`
-## [1] "https://github.com/animint/animint-manual-en/issues/new"
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/index.qmd`
-## [1] "https://en.wikipedia.org/wiki/Lady_tasting_tea"
-## [2] "https://en.wikipedia.org/wiki/Keeling_Curve"   
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch02/index.qmd`
-## [1] "https://en.wiktionary.org/wiki/sketch"                                                   
-## [2] "http://adv-r.had.co.nz/OO-essentials.html#s3"                                            
-## [3] "https://github.com/tdhock/animint2/wiki/FAQ#web-browser-on-local-indexhtml-file-is-blank"
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch03/index.qmd`
-## [1] "https://yihui.name/animation/examples/"
-## 
 ## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch05/index.qmd`
-##  [1] "http://rmarkdown.rstudio.com/"                                                                            
-##  [2] "https://app.netlify.com/drop"                                                                             
-##  [3] "https://pages.github.com/"                                                                                
-##  [4] "https://github.com/tdhock/animint2/wiki/FAQ#web-browser-on-local-indexhtml-file-is-blank"                 
-##  [5] "https://app.netlify.com/drop"                                                                             
-##  [6] "https://docs.netlify.com/deploy/deploy-overview/"                                                         
-##  [7] "https://pages.github.com/"                                                                                
-##  [8] "https://github.com/join"                                                                                  
-##  [9] "https://github.com/tdhock/cs499-spring2020"                                                               
-## [10] "https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-quadratic-interactive.R"
-## [11] "https://vimeo.com"                                                                                        
-## [12] "https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-several-interactive.R"  
-## [13] "https://github.com/tdhock/cs499-spring2020/blob/master/2020-02-03-capacity/figure-quadratic-interactive.R"
-## [14] "https://github.com/tdhock/2020-02-03-capacity-polynomial-degree/blob/gh-pages/README.md"                  
-## [15] "https://github.com/animint/gallery/blob/gh-pages/repos.txt"                                               
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch06/index.qmd`
-## [1] "http://www.w3schools.com/html/html5_svg.asp"                                                  
-## [2] "http://www.w3schools.com/tags/att_global_id.asp"                                              
-## [3] "https://github.com/tdhock/animint/wiki/Testing"                                               
-## [4] "https://tdhock.github.io/2025-01-WorldBank-facets-map/"                                       
-## [5] "https://tdhock.github.io/2025-01-WorldBank-facets-map/"                                       
-## [6] "https://tdhock.github.io/figure-binseg-cv-most-frequently-selected-fr/"                       
-## [7] "http://selectize.github.io/selectize.js/"                                                     
-## [8] "https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer2-PredictedPeaks.R"
+## [1] "https://app.netlify.com/drop"                                                            
+## [2] "https://github.com/tdhock/animint2/wiki/FAQ#web-browser-on-local-indexhtml-file-is-blank"
+## [3] "https://github.com/join"                                                                 
+## [4] "https://vimeo.com"                                                                       
 ## 
 ## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch07/index.qmd`
-## [1] "https://github.com/tdhock/animint2/compare"                                                            
-## [2] "https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer4-update-axes-multiple-ss.R"
-## [3] "https://github.com/tdhock/animint/issues/148"                                                          
-## [4] "https://github.com/tdhock/animint/issues/149"                                                          
-## [5] "https://github.com/animint/animint2/issues/230"                                                        
-## [6] "http://docs.ggplot2.org/current/theme.html"                                                            
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch08/index.qmd`
-## [1] "https://tdhock.github.io/2025-01-WorldBank-facets-map/"
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch10/index.qmd`
-## [1] "http://statweb.stanford.edu/~tibs/ElemStatLearn/"
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch11/index.qmd`
-## [1] "https://en.wikipedia.org/wiki/Lasso_%28statistics%29"
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch12/index.qmd`
-## [1] "https://en.wikipedia.org/wiki/Support_vector_machine"
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch13/index.qmd`
-## [1] "https://en.wikipedia.org/wiki/Poisson_regression" 
-## [2] "https://en.wikipedia.org/wiki/Binomial_regression"
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch14/index.qmd`
-## [1] "https://github.com/tdhock/PeakSegJoint"               
-## [2] "https://tdhock.github.io/2023-12-04-degree-neighbors/"
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch15/index.qmd`
-## [1] "https://www.wolframalpha.com/input/?i=a*x+%2Bb*log%28x%29%2B+c%3D0"
-## [2] "https://en.wikipedia.org/wiki/Newton%27s_method"                   
-## [3] "https://en.wikipedia.org/wiki/Binomial_regression"                 
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch16/index.qmd`
-## [1] "https://github.com/tdhock/change-tutorial"                                                                                                         
-## [2] "https://rcdata.nau.edu/genomic-ml/animint-gallery/2016-01-28-Max-margin-interval-regression-for-supervised-segmentation-model-selection/index.html"
-## [3] "https://rcdata.nau.edu/genomic-ml/animint-gallery/2016-11-10-Max-margin-supervised-penalty-learning-for-peak-detection-in-ChIP-seq-data/index.html"
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch19/index.qmd`
-## [1] "https://en.wikipedia.org/wiki/P-value"                                                        
-## [2] "https://altair-viz.github.io/user_guide/large_datasets.html#preaggregate-and-filter-in-pandas"
-## [3] "https://web.archive.org/web/20250827141658/https://plotly-r.com/performance"                  
-## 
-## $`/home/local/USHERBROOKE/hoct2726/R/animint-manual-en/chapters/ch20/index.qmd`
-## [1] "https://rdrr.io/cran/mlbench/man/Sonar.html"
+## [1] "https://github.com/tdhock/animint2/blob/master/tests/testthat/test-renderer4-update-axes-multiple-ss.R"
 ```
 
 The goal of this post is to write a conversion to bibtex.
@@ -184,18 +121,12 @@ link_pattern <- list(
   "\\]\\(",
   url="http.*?",
   "\\)")
+options(nc.engine="RE2")
 nc::capture_all_str(qmd, link_pattern)
 ```
 
 ```
-##                                                       title
-##                                                      <char>
-## 1:                                     PeakSegJoint package
-## 2: this visualization of linear model and nearest neighbors
-##                                                      url
-##                                                   <char>
-## 1:                https://github.com/tdhock/PeakSegJoint
-## 2: https://tdhock.github.io/2023-12-04-degree-neighbors/
+## data.table est vide (0 ligne et 2 colonne): title,url
 ```
 
 The output above is a table with two lines, one for each markdown link in the `qmd` file.
@@ -209,7 +140,7 @@ We do that below by adding
 
 ``` r
 before_pattern <- list(
-  before="(?s).*?",
+  before="(?s).+?",
   nc::alternatives(
     link=link_pattern,
     "$"))
@@ -218,12 +149,10 @@ tibble::tibble(match_dt)
 ```
 
 ````
-## # A tibble: 3 × 4
+## # A tibble: 1 × 4
 ##   before                                                                          link  title url  
 ##   <chr>                                                                           <chr> <chr> <chr>
-## 1 "# Named `clickSelects` and `showSelected`\n\n```{r setup, echo=FALSE}\nknitr:… "[Pe… "Pea… "htt…
-## 2 ", which is for peak detection in genomic data sequences.\nThe code below down… "[th… "thi… "htt…
-## 3 ".\n* Use named `clickSelects` and `showSelected` to create a visualization of… ""    ""    ""
+## 1 "# Named `clickSelects` and `showSelected`\n\n```{r setup, echo=FALSE}\nknitr:… ""    ""    ""
 ````
 
 ``` r
@@ -231,12 +160,10 @@ tibble::tibble(match_dt[, .(title, url)])
 ```
 
 ```
-## # A tibble: 3 × 2
-##   title                                                      url                                   
-##   <chr>                                                      <chr>                                 
-## 1 "PeakSegJoint package"                                     "https://github.com/tdhock/PeakSegJoi…
-## 2 "this visualization of linear model and nearest neighbors" "https://tdhock.github.io/2023-12-04-…
-## 3 ""                                                         ""
+## # A tibble: 1 × 2
+##   title url  
+##   <chr> <chr>
+## 1 ""    ""
 ```
 
 The output above shows that there were three matches.
@@ -254,6 +181,14 @@ same_content <- match_dt[, paste(paste0(before, link), collapse="")]
 writeLines(same_content, same.qmd)
 qlist <- list(original=qmd, reconstituted=same.qmd)
 q_data_list <- sapply(qlist, readLines, simplify=FALSE)
+```
+
+```
+## Warning in FUN(X[[i]], ...): ligne finale incomplète trouvée dans
+## '~/R/animint-manual-en/chapters/ch14/index.qmd'
+```
+
+``` r
 with(q_data_list, identical(original, reconstituted))
 ```
 
@@ -279,9 +214,7 @@ match_dt[
 ```
 
 ```
-## [1] "PeakSegJoint package [@PeakSegJoint_package]"                                                                        
-## [2] "this visualization of linear model and nearest neighbors [@this_visualization_of_linear_model_and_nearest_neighbors]"
-## [3] ""
+## [1] ""
 ```
 
 We see above that `title` has been used to create the bibtex citation `key` which appears in square brackets.
@@ -302,8 +235,7 @@ get_violations(same_content)
 ```
 
 ```
-## [1] "https://github.com/tdhock/PeakSegJoint"               
-## [2] "https://tdhock.github.io/2023-12-04-degree-neighbors/"
+## character(0)
 ```
 
 Above we see that there are no violations using the new content, but there were two violations using the old content.
@@ -321,29 +253,56 @@ bib_vec <- match_dt[-.N, sprintf("@unpublished{ %s,
 cat(paste(bib_vec, collapse="\n"))
 ```
 
-```
-## @unpublished{ PeakSegJoint_package,
-##   title={ PeakSegJoint package },
-##   author={ TODO },
-##   url={ https://github.com/tdhock/PeakSegJoint },
-##   year={ 2026 }
-## }
-## 
-## @unpublished{ this_visualization_of_linear_model_and_nearest_neighbors,
-##   title={ this visualization of linear model and nearest neighbors },
-##   author={ TODO },
-##   url={ https://tdhock.github.io/2023-12-04-degree-neighbors/ },
-##   year={ 2026 }
-## }
-```
-
 The output above shows two entries for a bib file.
 
 ## find and replace in all files
 
-TODO
 
-## Don’t use gsub etc.
+``` r
+chapters <- "~/R/animint-manual-en/chapters"
+qmd.files <- c(
+  Sys.glob(file.path(chapters,"*qmd")),
+  Sys.glob(file.path(chapters,"*/index.qmd")))
+bib_list <- list()
+for(qmd in qmd.files){
+  match_dt <- nc::capture_all_str(qmd, before_pattern)[
+  , key := gsub(" ", "_", title)
+  ][
+  , replacement := ifelse(
+    link=="", "",
+    sprintf("%s [@%s]", title, key))
+  ]
+  new_content <- match_dt[, paste(paste0(before, replacement), collapse="")]
+  cat(new_content, file=qmd)
+  bib_list[[qmd]] <- match_dt[-.N, sprintf("@unpublished{ %s,
+  title={ %s },
+  author={ TODO },
+  url={ %s },
+  year={ 2026 }
+}
+", key, title, url)]
+}
+
+cat(paste(unlist(bib_list), collapse="\n"))
+```
+
+```
+## @unpublished{ vimeo,
+##   title={ vimeo },
+##   author={ TODO },
+##   url={ https://vimeo.com },
+##   year={ 2026 }
+## }
+```
+
+After running the code above, I copied the output to the end of the `refs.bib` file, then [manually corrected the TODOs](https://github.com/animint/animint-manual-en/pull/19/commits/84a60ddcd292ceaccd759c24be2a4645f50d54be) in [PR19](https://github.com/animint/animint-manual-en/pull/19/).
+
+## Conclusion
+
+We have seen how regex can be used for a non-trivial find and replace across multiple qmd files: changing markdown links to bib citations.
+The `before_pattern` is generally useful for matching an entire file, so I created [an issue in nc](https://github.com/tdhock/nc/issues/35) about potentially creating a pattern-making function.
+
+## Bonus: don’t use gsub etc.
 
 You may be tempted to use `gsub()` or similar string replacement functions, but they actually do not work in this case.
 
