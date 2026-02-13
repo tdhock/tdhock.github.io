@@ -15,7 +15,9 @@ knitr::opts_chunk$set(
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=6)
 if(FALSE){
+  system("cd ~/R/animint-manual-en && git checkout 1eb3e69e4f1e97e53a8a0153d73677743e802f0b")
   knitr::knit(paste0(post.id, ".Rmd"))
+  system("cd ~/R/animint-manual-en && git restore chapters/*/index.qmd chapters/*qmd")
 }
 ```
 
@@ -104,7 +106,6 @@ link_pattern <- list(
   "\\]\\(",
   url="http.*?",
   "\\)")
-options(nc.engine="RE2")
 nc::capture_all_str(qmd, link_pattern)
 ```
 
