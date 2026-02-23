@@ -44,6 +44,10 @@ expect to learn how to:
 - use writing that is inclusive, see [Government of Canada Inclusive writing guidelines and resources](https://www.noslangues-ourlanguages.gc.ca/en/writing-tips-plus/inclusive-writing-guidelines-resources), [Guide de rédaction inclusive de l’Université de Sherbrooke](https://www.usherbrooke.ca/langue/fileadmin/sites/langue/documents/Guide_redaction_inclusive_vf.pdf), [Les termes rédaction épicène et écriture inclusive de La Banque de dépannage linguistique du Québec](https://vitrinelinguistique.oqlf.gouv.qc.ca/25421/banque-de-depannage-linguistique/la-redaction-et-la-communication/feminisation-et-redaction-epicene/redaction-epicene/les-termes-redaction-epicene-et-ecriture-inclusive).
   
 Students should expect to do the following:
+- get paid for working on their research project. Master and PHD student stipends are ~30–40k$CAD/year, paid from my research grants. Also, for people with Canadian citizenship or permanent residence, it would be very good for your CV, if you apply for, and get an award like 
+  – [NSERC](https://nserc-crsng.canada.ca/en/funding-opportunity/canada-graduate-research-scholarship-doctoral-program)
+  – [FRQNT](https://frq.gouv.qc.ca/programme/bourses-de-doctorat-en-recherche-2026-2027-b2-volet-regulier-et-volet-reintegration-a-la-recherche)
+  - But these awards are not mandatory — I will provide you funding even if you do not you get one of these awards.
 - keep a lab notebook / research journal on google docs / github
   README / similar. The lab notebook should be organized
   chronologically (most recent at the top), with an entry for every
