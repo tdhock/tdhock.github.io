@@ -1,0 +1,154 @@
+---
+layout: post
+title: Org to Markdown
+description: Regular expressions exercise
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2026-03-16-org-to-md"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=20,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+if(FALSE){
+  system("cd ~/R/animint-manual-en && git checkout 1eb3e69e4f1e97e53a8a0153d73677743e802f0b")
+  knitr::knit(paste0(post.id, ".Rmd"))
+  system("cd ~/R/animint-manual-en && git restore chapters/*/index.qmd chapters/*qmd")
+}
+```
+
+The purpose of this page is to convert [this org](https://github.com/tdhock/2023-08-deep-learning/blob/main/installation.org) to markdown using regular expressions.
+
+```{r}
+org_text <- r"{To do the homeworks you need to use emacs and python; it is
+recommended to install/use [[https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html][anaconda/miniconda]],
+- emacs is the required IDE for the class. It allows you to write/edit
+  code without using the mouse, and has great python support,
+  including conda environments, interactive execution, completion, ...
+  - [[https://www.youtube.com/playlist?list=PLwc48KSH3D1OeAHFQhWpd8Fz8rLhTaD7t][My emacs and python screencasts show you how to install emacs and configure it to work with python]].
+  - [[https://www.gnu.org/software/emacs/download.html][Download and Install GNU Emacs]].
+  - [[https://elpy.readthedocs.io/en/latest/introduction.html#installation][Installation instructions for Elpy, which is a python IDE for emacs]].
+  - [[https://www.emacswiki.org/emacs/PythonProgrammingInEmacs][PythonProgrammingInEmacs on the emacswiki has instructions for setting up other emacs python IDEs]].
+- If you want to use a different IDE (not emacs), then you need to
+  come to office hours and show me that you can do interactive python
+  code execution in that other IDE. That means having one window with
+  python code, another window with python console, and you can use a
+  keyboard command to execute one or more lines of code at a time, and
+  immediately see the output in the console.
+
+** Instructions for conda
+
+After [[https://docs.conda.io/en/latest/miniconda.html][downloading conda]], and before you activate an environment, you need to
+setup your shell for the first time.
+
+#+begin_src shell-script
+conda init bash
+#+end_src
+
+That should put some code in your ~/.bash_profile, I had to copy it to
+my ~/.bashrc to get it to work on my setup (git bash in emacs shell on
+windows). After restarting your shell you should see a (base) prefix
+in your prompt, which indicates the name of the currently activated
+conda environment.  
+
+After that, you can install python, with the same version that I use,
+via:
+
+#+begin_src shell-script
+  conda create -n 2023-08-deep-learning
+  conda activate 2023-08-deep-learning
+  conda install python=3.11.4
+#+end_src
+
+That should create and activate a new conda environment with the
+required python version.
+After activation, that environment will be used for new python
+processes, looking for python modules, etc.
+
+** Python support in emacs
+
+First of all, if this is your first time ever using emacs, please type
+C-h t (type h while holding down control, then let go of control and
+type t) to open the emacs tutorial. Read through the entire tutorial
+and do all of the exercises, which will teach you the most important
+keyboard shortcuts for navigating and editing code. Keep re-doing
+the tutorial every day until you remember all of the keyboard shortcuts.
+
+To get python support in emacs I had to install emacs packages
+(elpy,conda). To do that first you need to put the following in your
+~/.emacs file (which contains user-specific commands to run on emacs startup)
+to tell it to download packages from the MELPA
+repository,
+
+#+BEGIN_SRC elisp
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
+#+END_SRC
+
+After putting the above in your ~/.emacs you need to restart emacs,
+then run M-x package-list-packages (M-x means hold down the option/alt
+key and type x) to see a list of packages you can install. Search for
+elpy and conda (maybe with C-s, meaning hold down control key and type
+s), mark for installation by typing i, then type x to install all
+packages marked for installation. Finally to tell emacs to use elpy
+with python code, and my conda environments, I put the following in my
+~/.emacs file:
+
+#+begin_src elisp
+  (elpy-enable)
+  (setq elpy-shell-starting-directory 'current-directory)
+  (setq conda-anaconda-home (expand-file-name "~/miniconda3"))
+  (setq conda-env-home-directory conda-anaconda-home)
+#+end_src
+
+Make sure to change the path above from "~/miniconda3" to 
+wherever you have installed miniconda, then again restart emacs.
+In emacs When editing a python file we can "activate" the conda
+environment via M-x conda-env-activate RET 2023-08-deep-learning RET then C-c C-z
+to get an interactive shell, then
+- C-RET to send line and step,
+- C-c to send highlighted region.
+
+See
+https://elpy.readthedocs.io/en/latest/ide.html for more elpy key
+commands (sending code from python code files to the interactive
+shell), and https://realpython.com/emacs-the-best-python-editor/ for a
+nice tutorial about emacs and python.
+
+** FAQ 
+
+On windows python not found error, or emacs can't find the python in
+your conda env, please fix by
+
+#+begin_src elisp
+  (setq python-shell-interpreter "python");not "python3" !
+#+end_src
+
+Also if you have a space in your username, and you get an error about
+version "is" when you try conda-env-activate, then please try this fix:
+https://github.com/necaris/conda.el/pull/150}"
+
+library(data.table)
+sub_dt <- rowwiseDT(
+  find=, replace=,
+  "^\\*\\*", "##",
+  "(?i)#\\+(BEGIN|END)_SRC *", "```",
+  "\\[\\[(.+?)\\]\\[(.+?)\\]\\]", "[\\2](\\1)")
+subject <- org_text
+for(row_i in 1:nrow(sub_dt)){
+  sub_row <- sub_dt[row_i]
+  subject <- sub_row[, gsub(find, replace, subject)]
+}
+cat(subject)
+```
+
+## session info
+
+```{r}
+sessionInfo()
+```
