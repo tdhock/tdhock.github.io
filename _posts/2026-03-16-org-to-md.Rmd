@@ -15,9 +15,7 @@ knitr::opts_chunk$set(
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=6)
 if(FALSE){
-  system("cd ~/R/animint-manual-en && git checkout 1eb3e69e4f1e97e53a8a0153d73677743e802f0b")
   knitr::knit(paste0(post.id, ".Rmd"))
-  system("cd ~/R/animint-manual-en && git restore chapters/*/index.qmd chapters/*qmd")
 }
 ```
 
@@ -136,13 +134,13 @@ https://github.com/necaris/conda.el/pull/150}"
 library(data.table)
 sub_dt <- rowwiseDT(
   find=, replace=,
-  "^\\*\\*", "##",
+  "(?<=\n)\\*\\*", "##",
   "(?i)#\\+(BEGIN|END)_SRC *", "```",
   "\\[\\[(.+?)\\]\\[(.+?)\\]\\]", "[\\2](\\1)")
 subject <- org_text
 for(row_i in 1:nrow(sub_dt)){
   sub_row <- sub_dt[row_i]
-  subject <- sub_row[, gsub(find, replace, subject)]
+  subject <- sub_row[, gsub(find, replace, subject, perl=TRUE)]
 }
 cat(subject)
 ```
