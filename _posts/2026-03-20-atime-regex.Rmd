@@ -1,0 +1,62 @@
+---
+layout: post
+title: Asypmptotic timing of text parsing
+description: Regular expressions exercise
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2026-03-20-atime-regex"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=20,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The purpose of this page is to compare efficiency of different methods for parsing text.
+
+## Problem
+
+I recently wrote the test code below,
+
+```{r}
+sacct.txt <- system.file(
+  package="slurm", "extdata", "sacct-e-rorqual-2026-03-20.txt", mustWork=TRUE)
+computed <- slurm::sacct_fields(paste("cat", sacct.txt))
+sacct.lines <- readLines(sacct.txt)
+expected <- strsplit(gsub(" +", " ", paste(sacct.lines, collapse=" ")), " ")[[1]]
+identical(computed, expected)
+```
+
+Are the two methods comparable speed?
+
+## Test
+
+The atime package allows us to see differences in computation time as a function of data size.
+
+```{r atime}
+ares <- atime::atime(
+  setup={
+    Nlines <- rep(sacct.lines, N)
+  },
+  seconds.limit = 0.1,
+  do.call=do.call(c, strsplit(Nlines, " +")),
+  unlist=unlist(strsplit(Nlines, " +")),
+  strsplit=strsplit(paste(Nlines, collapse=" "), " +")[[1]],
+  capture_all_str=nc::capture_all_str(Nlines, field="\\w+")$field)
+plot(ares)
+```
+
+We can see above that there are some constant factor time and memory differences.
+
+## session info
+
+```{r}
+sessionInfo()
+```
