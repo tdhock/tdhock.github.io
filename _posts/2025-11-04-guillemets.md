@@ -385,3 +385,15 @@ OQLF has the following 10 examples for which I may use l’espace insécable : 
 * § est sur la clé E (P en bépo) et ¶ sur backtick, les deux avec Maj et AltGr.
 * `−÷×` sont sur 890 avec AltGr (entre 7+ et = sur bépo).
 * tiret incise est sur 1 avec AltGr.
+
+## Update 19 mars 2026
+
+I am sick and tired of accidental keyboard layout switching on windows.
+
+[This article](https://www.digitalcitizen.life/keyboard-language-shortcut/) explains there are three hot keys that switch by default:
+
+* Win + Space: this is the one I like to use.
+* Left Alt + Shift: does not seem to work for me.
+* Ctrl + Shift: this is the culprit which I accidently activate, and which I would like to disable.
+
+Settings, search typing, Advanced keyboard settings, Input language hot keys, Advanced key settings, Hot keys for input languages, Between input languages, Change key sequence…, Switch Keyboard layout, Not assigned (was Ctrl + Shift), OK, OK.

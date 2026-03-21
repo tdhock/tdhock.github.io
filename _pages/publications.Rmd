@@ -23,7 +23,7 @@ description: Peer-reviewed papers and preprints with links to code and data
   citation database, and use it to cite my papers. This is the file
   that was used to
   [generate](https://tdhock.github.io/blog/2024/auto-pubs-page/) the
-  list of publications below.
+  list of publications below and in [this PDF](/assets/TDH-refs.pdf).
 
 ```{r Ropts, echo=FALSE}
 if(FALSE){
