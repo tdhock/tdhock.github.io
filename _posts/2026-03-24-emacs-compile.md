@@ -114,6 +114,8 @@ How can we get that highlighting and hyperlink to work?
 
 # Finding the source
 
+## Debug test file
+
 I created the following text file to debug the issue.
 
 ```
@@ -133,9 +135,33 @@ When I open this file in emacs with default configuration (on windows or on linu
 * we see that of the g++ errors (top three lines), only the third line is highlighted.
 
 These data suggest that the source of the issue is that the emacs code that parses output of g++ does not allow leading spaces.
-It only works if the file name occurs at the beginning of the line.
-I checked the emacs source code, and this is true!
-`C-h v compilation-error-regexp-alist-alist` shows 
+It only works on real g++ output, whin the file name occurs at the beginning of the line.
+This g++ output is modified by pip, so emacs does not recognize it.
+Yet.
+
+## Emacs source code
+
+The [emacs docs for compilation-mode](https://www.gnu.org/software/emacs/manual/html_node/emacs/Compilation-Mode.html) say that "Compilation mode uses the variable `compilation-error-regexp-alist` which lists various error message formats and tells Emacs how to extract the locus from each."
+Doing `C-h v compilation-error-regexp-alist` shows
+
+```
+compilation-error-regexp-alist is a variable defined in ‘compile.el’.
+
+Its value is
+(absoft ada aix ant bash borland python-tracebacks-and-caml cmake cmake-info comma msft edg-1 edg-2 epc ftnchek gradle-kotlin gradle-android iar ibm irix java javac jikes-file maven jikes-line clang-include gcc-include ruby-Test::Unit gmake gnu cucumber lcc makepp mips-1 mips-2 omake oracle perl php rxp shellcheck sparc-pascal-file sparc-pascal-line sparc-pascal-example sun sun-ada watcom 4bsd gcov-file gcov-header gcov-nomark gcov-called-line gcov-never-called perl--Pod::Checker perl--Test perl--Test2 perl--Test::Harness weblint guile-file guile-line typescript-tsc-plain typescript-tsc-pretty)
+
+Alist that specifies how to match errors in compiler output.
+On GNU and Unix, any string is a valid filename, so these
+matchers must make some common sense assumptions, which catch
+normal cases.  A shorter list will be lighter on resource usage.
+
+Instead of an alist element, you can use a symbol, which is
+looked up in ‘compilation-error-regexp-alist-alist’.  You can see
+the predefined symbols and their effects in the file
+‘etc/compilation.txt’ (linked below if you are customizing this).
+```
+
+Following that link, `C-h v compilation-error-regexp-alist-alist` shows a bunch of regexes, including the one below which appears to be for GCC (GNU Compiler Collection).
 
 ```elisp
  (gnu "^\\(?:[[:alpha:]][.[:alnum:]-]+: ?\\| +|\\)?\\(?1:\\(?:[^	
@@ -154,7 +180,9 @@ The regex code above starts with a caret `^` indicating the start of the line, a
 
 # Work-around
 
-A temporary fix is to put the code below in `~/.emacs`.
+Now that we have found the problematic piece of code, we can fix it.
+A quick fix is to put the code below in `~/.emacs`.
+It adds a new regex pattern to the Alist that emacs uses to parse compilation mode buffers.
 
 ```elisp
 ;; for gcc error messages when compiling C++ code in a python package via pip.
@@ -171,7 +199,7 @@ A temporary fix is to put the code below in `~/.emacs`.
 (6 . 7)))
 ```
 
-The code above has a minor change, addition of ` *` after the initial `^` of the regex.
+With respect to the `gnu` regex supplied with emacs, the code above has a minor change: addition of ` *` (space star) after the initial `^` (caret) of the regex.
 Using this configuration, emacs correctly highlights all four lines in my example, as shown below.
 
 ![four-hilite](/assets/img/2026-03-24-emacs-compile/four-hilite.png)
