@@ -126,7 +126,7 @@ src/add.cpp:8:31: error: invalid operands of types ‘const double’ and ‘con
 
 When I open this file in emacs with default configuration (on windows or on linux), I only see highlight on the last two lines, as shown below.
 
-![two-hilite](/assets/img/2026-01-24-emacs-compile/two-hilite.png)
+![two-hilite](/assets/img/2026-03-24-emacs-compile/two-hilite.png)
 
 * the first and last lines are real output from pip, which includes two spaces at the start of each line.
 * the second and third lines are artificial lines with 1 or 0 spaces at the start.
@@ -174,7 +174,7 @@ A temporary fix is to put the code below in `~/.emacs`.
 The code above has a minor change, addition of ` *` after the initial `^` of the regex.
 Using this configuration, emacs correctly highlights all four lines in my example, as shown below.
 
-![four-hilite](/assets/img/2026-01-24-emacs-compile/four-hilite.png)
+![four-hilite](/assets/img/2026-03-24-emacs-compile/four-hilite.png)
 
 # Submitting a PR to emacs
 
