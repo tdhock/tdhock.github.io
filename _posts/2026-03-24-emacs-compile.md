@@ -206,15 +206,28 @@ Using this configuration, emacs correctly highlights all four lines in my exampl
 
 # Submitting a PR to emacs
 
-TODO
+In the previous section, we hacked a fix, and deployed it to the user-specific `~/.emacs` config file.
+In this section, I discuss how this change could be submitted to the emacs source code, for the benefit of all users of a future version of emacs.
 
-tests?
+First we need to download the development version of emacs, and make sure its tests pass on my system.
+Second, we should add a test that fails for the use case we want to fix (gcc error with two leading spaces).
+Third, we can make the change to the source code, and run the tests again.
+If all tests pass, then we are good to submit the new code and test. (and maybe updated documentation?)
 
-https://www.rahuljuliato.com/posts/compiling_emacs_30_1
+## Installing emacs devel from source
 
-https://protesilaos.com/codelog/2025-03-22-emacs-build-source-debian/
+This section shows how to install emacs devel from git.
+First I read these articles
 
-The following took ~10 minutes:
+* [Compiling Emacs 30.1 from the source on Debian](https://www.rahuljuliato.com/posts/compiling_emacs_30_1)
+  * not git version
+* [Emacs: how I build from emacs.git on Debian stable](https://protesilaos.com/codelog/2025-03-22-emacs-build-source-debian/)
+  * with git, runs `./autogen.sh`
+
+Both articles are on debian, and I am on Ubuntu, but that did not seem to cause any problems.
+
+First we clone from GNU git server. The following took ~10 minutes.
+May be better to clone the [GitHub mirror](https://github.com/emacs-mirror/emacs.git) next time.
 
 ```
 (base) hoct2726@dinf-thock-02i:~$  git clone https://git.savannah.gnu.org/git/emacs.git
@@ -227,7 +240,7 @@ Resolving deltas: 100% (1005441/1005441), done.
 Updating files: 100% (5552/5552), done.
 ```
 
-Next autogen
+Next autogen creates the configure script.
 
 ```
 (base) hoct2726@dinf-thock-02i:~$ cd emacs/
@@ -263,7 +276,7 @@ Installing git hooks...
 You can now run './configure'.
 ```
 
-Next configure
+Next configure creates the Makefile.
 
 ```
 (base) hoct2726@dinf-thock-02i:~/emacs[master]$ ./configure --with-gif=ifavailable --with-gnutls=ifavailable
@@ -274,7 +287,7 @@ config.status: executing doc/emacs/emacsver.texi commands
 config.status: executing etc-refcards-emacsver.tex commands
 ```
 
-Next make
+Next make compiles emacs.
 
 ```
 (base) hoct2726@dinf-thock-02i:~/emacs[master]$ make
@@ -287,3 +300,14 @@ make[2]: Entering directory '/home/local/USHERBROOKE/hoct2726/emacs/lib'
 ```
 
 We can run the built emacs in `src/emacs`.
+
+## Sending a patch
+
+[Sending Patches for GNU Emacs](https://www.gnu.org/software/emacs/manual/html_node/emacs/Sending-Patches.html) explains the steps for sending a patch.
+How to run tests?
+
+* [ert](https://www.gnu.org/software/emacs/manual/html_mono/ert.html) is a test framework for elisp.
+* [README in test directory of emacs source code](https://github.com/emacs-mirror/emacs/tree/master/test) says to run `make check`.
+
+TODO
+
