@@ -46,6 +46,24 @@ ares <- atime::atime(
 plot(ares)
 ```
 
+```
+## Loading required namespace: ggplot2
+```
+
+```
+## Loading required namespace: directlabels
+```
+
+```
+## Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
+## ℹ Please use tidy evaluation idioms with `aes()`.
+## ℹ See also `vignette("ggplot2-in-packages")` for more information.
+## ℹ The deprecated feature was likely used in the directlabels package.
+##   Please report the issue at <https://github.com/tdhock/directlabels/issues>.
+## This warning is displayed once per session.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
+```
+
 ![plot of chunk atime](/assets/img/2026-03-20-atime-regex/atime-1.png)
 
 We can see above that there are some constant factor time and memory differences.
@@ -79,13 +97,13 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] directlabels_2025.6.24 vctrs_0.7.1            knitr_1.51             cli_3.6.5             
-##  [5] xfun_0.56              rlang_1.1.7            otel_0.2.0             bench_1.1.4           
+##  [1] directlabels_2025.6.24 vctrs_0.7.1            cli_3.6.5              knitr_1.51            
+##  [5] rlang_1.1.7            xfun_0.56              otel_0.2.0             bench_1.1.4           
 ##  [9] generics_0.1.4         S7_0.2.1               data.table_1.18.2.1    glue_1.8.0            
 ## [13] nc_2026.2.20           scales_1.4.0           quadprog_1.5-8         grid_4.6.0            
 ## [17] evaluate_1.0.5         tibble_3.3.1           profmem_0.7.0          lifecycle_1.0.5       
 ## [21] compiler_4.6.0         dplyr_1.2.0            RColorBrewer_1.1-3     pkgconfig_2.0.3       
 ## [25] atime_2025.9.30        farver_2.1.2           lattice_0.22-9         R6_2.6.1              
 ## [29] tidyselect_1.2.1       pillar_1.11.1          slurm_2026.3.20        magrittr_2.0.4        
-## [33] tools_4.6.0            withr_3.0.2            gtable_0.3.6           ggplot2_4.0.2
+## [33] withr_3.0.2            tools_4.6.0            gtable_0.3.6           ggplot2_4.0.2
 ```

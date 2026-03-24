@@ -11,7 +11,7 @@ fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
   fig.path=paste0(fig.path, "/"),
-  fig.width=20,
+  fig.width=10,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=6)
 if(FALSE){
