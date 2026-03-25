@@ -721,7 +721,44 @@ This is strange. This test case has leading spaces, and is supposed to match gnu
 Then why doesn’t my subject match to the gnu pattern?
 Because the subject needs six spaces (two is not enough in pip).
 
-![four-hilite](/assets/img/2026-03-24-emacs-compile/six-spaces.png)
+![six spaces](/assets/img/2026-03-24-emacs-compile/six-spaces.png)
+
+What part of the gnu pattern matches six spaces?
+Below `regexp-builder` says that it does not match.
+Then why does it get highlighted in the `compilation-mode` buffer, and why does the test pass?
+
+![regexp builder](/assets/img/2026-03-24-emacs-compile/regexp-builder.png)
+
+Not clear. The code which runs this test is
+
+```elisp
+      ;; Test all built-in rules except `omake' to avoid interference.
+      (let ((compilation-error-regexp-alist (remq 'omake all-rules)))
+        (mapc #'compile--test-error-line compile-tests--test-regexps-data))
+
+      ;; Test the `omake' rule separately.
+      ;; This doesn't actually test the `omake' rule itself but its
+      ;; indirect effects.
+      (let ((compilation-error-regexp-alist all-rules)
+            (test
+             '(gnu "      alpha.c:5:15: error: expected ';' after expression"
+                   1 15 5 "alpha.c")))
+        (compile--test-error-line test))
+```
+
+What is the `omake` rule?
+
+```elisp
+    (omake
+     ;; "omake -P" reports "file foo changed"
+     ;; (useful if you do "cvs up" and want to see what has changed)
+     "^\\*\\*\\* omake: file \\(.*\\) changed" 1 nil nil nil nil
+     ;; FIXME-omake: This tries to prevent reusing pre-existing markers
+     ;; for subsequent messages, since those messages's line numbers
+     ;; are about another version of the file.
+     (0 (progn (compilation--flush-file-structure (match-string 1))
+               nil)))
+```
 
 # Faster testing
 
