@@ -200,7 +200,7 @@ It adds a new regex pattern to the Alist that emacs uses to parse compilation mo
 (6 . 7)))
 ```
 
-With respect to the `gnu` regex supplied with emacs, the code above has a minor change: addition of ` *` (space star) after the initial `^` (caret) of the regex.
+With respect to the `gnu` regex supplied with emacs, the code above has a minor change: addition of ` *` (space star means zero or more spaces) after the initial `^` (caret means start of line) of the regex.
 Using this configuration, emacs correctly highlights all four lines in my example, as shown below.
 
 ![four-hilite](/assets/img/2026-03-24-emacs-compile/four-hilite.png)
@@ -1369,3 +1369,30 @@ Configured using:
 Before sending that, do I need to [configure sending mail from emacs](https://thedroidguy.com/how-to-use-email-within-emacs-step-by-step-guide-for-beginners-1263534)?
 Using [my university instructions](https://www.usherbrooke.ca/services-informatiques/repertoire/collaboration/courriel/configuration#acc-4289-1348), there is a MS server, which [seems complicated](https://emacs.stackexchange.com/questions/61060/how-to-make-email-in-emacs-work-with-an-oauth2-requirement) to setup with emacs.
 Instead I will try to do web mail.
+
+# Final work-around
+
+On my Linux machine I installed this work-around code in my [`~/.emacs`](https://github.com/tdhock/dotfiles/blob/master/.emacs)
+
+```elisp
+;; for gcc error messages when compiling C++ code in a python package via pip.
+(require 'compile)
+(add-to-list 'compilation-error-regexp-alist 'gnu-in-pip)
+(add-to-list 'compilation-error-regexp-alist-alist '(gnu-in-pip "^\\(?:[[:alpha:]][.[:alnum:]-]+: ?\\| +|?\\)?\\(?1:\\(?:[^	
+ 0-9]\\|[0-9]+[^
+0-9]\\)\\(?:[^
+ :]\\| [^
+/-]\\|:[^
+ ]\\)*?\\): ?\\(?2:[0-9]+\\)\\(?:-\\(?4:[0-9]+\\)\\(?:\\.\\(?5:[0-9]+\\)\\)?\\|[.:]\\(?3:[0-9]+\\)\\(?:-\\(?:\\(?4:[0-9]+\\)\\.\\)?\\(?5:[0-9]+\\)\\)?\\)?:\\(?: *\\(?6:\\(?:FutureWarning\\|RuntimeWarning\\|W\\(?::\\|arning\\)\\|warning\\)\\)\\| *\\(?7:\\(?:I\\(?::\\|nfo\\(?:rmation\\(?:al\\)?\\)?\\)\\|Note\\|in\\(?:fo\\(?:rmation\\(?:al\\)?\\)?\\|stantiated from\\)\\|note\\|required from\\)\\|\\[ skipping .+ ]\\)\\| *\\(?:[Ee]rror\\)\\|[0-9]?\\(?:[^
+0-9]\\|$\\)\\|[0-9][0-9][0-9]\\)" 1
+(2 . 4)
+(3 . 5)
+(6 . 7)))
+```
+
+Note above that we require compile, and use the optional vertical bar instead of the added space star.
+
+# Conclusion
+
+We had a problem rendering error messages in compilation buffers in emacs.
+We proposed a work-around and sent a patch.
