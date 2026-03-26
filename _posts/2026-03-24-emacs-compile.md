@@ -50,7 +50,8 @@ Then I put the following in `Rpkg/src/.dir-locals.el` to compile an R package wi
 
 ## Emacs configuration in Python package
 
-Then I put the following in `pypkg/src/.dir-locals.el` to compile a Python package with pybind11 binding to C++ code:
+The example described below is from [this project](https://github.com/tdhock/2026-01-aa-grande-echelle/tree/main/demos/pybind11-numpy-interface).
+Then I put the following in [`pypkg/src/.dir-locals.el`](https://github.com/tdhock/2026-01-aa-grande-echelle/blob/main/demos/pybind11-numpy-interface/interface-proj/src/.dir-locals.el) to compile a Python package with pybind11 binding to C++ code:
 
 ```elisp
 ((nil . ((compile-command . "cd .. && make"))))
@@ -1106,4 +1107,51 @@ index 67a713857e3..e3c79803ca0 100644
 2.43.0
 ```
 
-Finally I run `M-x submit-emacs-patch`.
+It seems this test was not good enough.
+I got confused:
+
+* `omake` is indeed part of `compilation-error-regexp-alist` in my release emacs (29.3).
+* but `omake` is absent from that list in my dev emacs:
+
+```
+(absoft ada aix ant bash borland python-tracebacks-and-caml cmake
+	cmake-info comma msft edg-1 edg-2 epc ftnchek gradle-kotlin
+	gradle-kotlin-legacy gradle-android iar ibm irix java javac
+	jikes-file maven jikes-line clang-include gcc-include
+	ruby-Test::Unit rust-panic lua lua-stack gmake gnu cucumber
+	lcc makepp mips-1 mips-2 oracle perl php rust rxp shellcheck
+	sparc-pascal-file sparc-pascal-line sparc-pascal-example sun
+	sun-ada watcom 4bsd gcov-file gcov-header gcov-nomark
+	gcov-called-line gcov-never-called perl--Pod::Checker
+	perl--Test perl--Test2 perl--Test::Harness weblint guile-file
+	guile-line typescript-tsc-plain typescript-tsc-pretty)
+```
+
+Where is this defined?
+
+![omake new](/assets/img/2026-03-24-emacs-compile/omake new.png)
+
+So in fact the extra leading spaces regex is not added.
+And the two leading spaces still does not match.
+
+# Back to the drawing board
+
+TODO
+
+# Submit patch
+
+Finally I run `M-x submit-emacs-patch` from within `src/emacs` (so the dev version appears in the email).
+
+```text
+Hi! First of all, thank you very much for maintaining emacs!
+I have been using emacs for 20+ years, but this is my first patch.
+
+This is a minor new feature (or bug fix?) for compilation-mode.
+I run pip install -v to compile python extension modules,
+which include C++ code compiled by g++ on Ubuntu.
+I expect compilation-mode should highlight errors from g++,
+but it does not, because pip adds two spaces in front:
+
+https://tdhock.github.io/blog/2026/emacs-compile/
+I read https://www.gnu.org/software/emacs/manual/html_node/emacs/Sending-Patches.html
+```
