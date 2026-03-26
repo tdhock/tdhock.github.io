@@ -779,7 +779,7 @@ I get same error as before
       (different-atoms cucumber gnu)))
 ```
 
-Move down too, so cucumber matches first? No, another failure.
+Move down too, so cucumber matches first? Yes, but another failure.
 
 ```
     testcase: (gnu "      alpha.c:5:15: error: expected ';' after expression" 1 15 5 "alpha.c")
@@ -788,6 +788,7 @@ Move down too, so cucumber matches first? No, another failure.
       (equal nil 15) :value nil :explanation (different-types nil 15)))
 ```
 
+The output above indicates that the column 15 was not parsed (because it is not present in cucumber regexp, which took priority).
 This is strange. This test case has leading spaces, and is supposed to match gnu pattern!!
 Then why doesn’t my subject match to the gnu pattern?
 Because the subject needs six spaces (two is not enough in pip).
@@ -1136,7 +1137,7 @@ And the two leading spaces still does not match.
 
 # Back to the drawing board
 
-TODO
+TODO optional vertical bar with modified test.
 
 # Submit patch
 
