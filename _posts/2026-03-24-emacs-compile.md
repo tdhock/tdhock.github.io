@@ -1130,14 +1130,64 @@ I got confused:
 
 Where is this defined?
 
-![omake new](/assets/img/2026-03-24-emacs-compile/omake new.png)
+![omake new](/assets/img/2026-03-24-emacs-compile/omake-new.png)
 
 So in fact the extra leading spaces regex is not added.
 And the two leading spaces still does not match.
 
 # Back to the drawing board
 
-TODO optional vertical bar with modified test.
+Since the previous solution did not work (and test changes may be too complex for maintainers to accept),
+let’s go back to trying an optional vertical bar with modified test.
+
+Back to master, and tests pass.
+
+```
+(base) hoct2726@dinf-thock-02i:~/emacs[master]$ rm -f lisp/progmodes/compile.elc && src/emacs -batch -Q -l test/lisp/progmodes/compile-tests.el -l ert -f ert-run-tests-batch-and-exit
+Running 3 tests (2026-03-26 00:07:52-0400, selector ‘t’)
+   passed  1/3  compile-test-error-regexps (0.125272 sec)
+   passed  2/3  compile-test-functions (0.000262 sec)
+   passed  3/3  compile-test-grep-regexps (0.003000 sec)
+
+Ran 3 tests, 3 results as expected, 0 unexpected (2026-03-26 00:07:52-0400, 0.128853 sec)
+```
+
+Make vertical bar optional, and tests fail.
+
+```
+(base) hoct2726@dinf-thock-02i:~/emacs[leading-spaces]$ rm -f lisp/progmodes/compile.elc && src/emacs -batch -Q -l test/lisp/progmodes/compile-tests.el -l ert -f ert-run-tests-batch-and-exit
+Running 3 tests (2026-03-26 00:08:43-0400, selector ‘t’)
+…
+Test compile-test-error-regexps condition:
+    testcase: (cucumber "      /home/gusev/.rvm/foo/bar.rb:500:in `_wrap_assertion'" 1 nil 500 "/home/gusev/.rvm/foo/bar.rb" error)
+    (ert-test-failed
+     ((should (equal rule (compilation--message->rule msg))) :form
+      (equal cucumber gnu) :value nil :explanation
+      (different-atoms cucumber gnu)))
+   FAILED  1/3  compile-test-error-regexps (0.019534 sec) at test/lisp/progmodes/compile-tests.el:536
+   passed  2/3  compile-test-functions (0.000833 sec)
+   passed  3/3  compile-test-grep-regexps (0.003385 sec)
+
+Ran 3 tests, 2 results as expected, 1 unexpected (2026-03-26 00:08:43-0400, 0.213527 sec)
+
+1 unexpected results:
+   FAILED  compile-test-error-regexps
+```
+
+Change cucumber to gnu, and tests pass.
+
+```
+(base) hoct2726@dinf-thock-02i:~/emacs[leading-spaces*]$ rm -f lisp/progmodes/compile.elc && src/emacs -batch -Q -l test/lisp/progmodes/compile-tests.el -l ert -f ert-run-tests-batch-and-exit
+Running 3 tests (2026-03-26 00:09:21-0400, selector ‘t’)
+   passed  1/3  compile-test-error-regexps (0.126230 sec)
+   passed  2/3  compile-test-functions (0.000253 sec)
+   passed  3/3  compile-test-grep-regexps (0.003022 sec)
+
+Ran 3 tests, 3 results as expected, 0 unexpected (2026-03-26 00:09:21-0400, 0.129811 sec)
+```
+
+![all hilite](/assets/img/2026-03-24-emacs-compile/all-hilite.png)
+
 
 # Submit patch
 
