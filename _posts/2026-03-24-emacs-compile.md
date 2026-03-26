@@ -1304,6 +1304,11 @@ index 67a713857e3..caf386b4950 100644
 Finally I run `M-x submit-emacs-patch` from within `src/emacs` (so the dev version appears in the email).
 
 ```text
+To: bug-gnu-emacs@gnu.org
+Subject: [PATCH] Make | optional for gnu regexp in compilation-mode
+From: Toby Dylan Hocking <hoct2726@dinf-thock-02i.mail-host-address-is-not-set>
+X-Debbugs-Cc: Chong Yidong <cyd@stupidchicken.com>
+
 Hi! First of all, thank you very much for maintaining emacs!
 I have been using emacs for 20+ years, but this is my first patch.
 
@@ -1313,6 +1318,54 @@ which include C++ code compiled by g++ on Ubuntu.
 I expect compilation-mode should highlight errors from g++,
 but it does not, because pip adds two spaces in front:
 
+  src/add.cpp:8:31: error: invalid operands of types ‘const double’ and ‘const double*’ to binary ‘operator+’
+
+I tried the same on windows (pip uses visual studio instead of gcc),
+and I observed that compilation-mode correctly highlights this:
+
+  src/add.cpp(8): error C2111: '+': pointer addition requires integral operand
+
+To double check this issue exists on your emacs,
+try M-x compilation-mode in this buffer.
+
+After some investigation, I found that the issue must be in
+file lisp/progmodes/compile.el, compilation-error-regexp-alist-alist,
+regexp gnu (used for parsing errors from g++).
+To fix this, I modified this regexp to allow spaces before the file.
+This regexp already allows leading spaces,
+but only if there is a vertical bar just before the file.
+I propose to fix this by making this vertical bar optional.
+The attached patch also includes a new test case,
+and a modification of an existing test case for the cucumber regexp,
+which now gets matched by the gnu regexp
+(but with no change to the resulting parse data).
+
+In emacs from git, these changes do not introduce any new errors from
+make check, on my Ubuntu system. I read
+https://www.gnu.org/software/emacs/manual/html_node/emacs/Sending-Patches.html
+and CONTRIBUTE, and consulted recent commit messages,
+to try to create a patch that would be easy to review.
+Thanks for your consideration and time!
+
+Toby Hocking
+Professor
+Department d’Informatique
+Université de Sherbrooke
+
+PS for even more details (tl;dr) and screenshots see:
 https://tdhock.github.io/blog/2026/emacs-compile/
-I read https://www.gnu.org/software/emacs/manual/html_node/emacs/Sending-Patches.html
+
+In GNU Emacs 31.0.50 (build 1, x86_64-pc-linux-gnu, X toolkit, cairo
+ version 1.18.0, Xaw scroll bars) of 2026-03-25 built on dinf-thock-02i
+Repository revision: f2b9b827c977dee0031e44901cbf3e1111e1cc09
+Repository branch: master
+Windowing system distributor 'The X.Org Foundation', version 11.0.12101011
+System Description: Ubuntu 24.04.4 LTS
+
+Configured using:
+ 'configure --with-gif=ifavailable --with-gnutls=ifavailable'
 ```
+
+Before sending that, do I need to [configure sending mail from emacs](https://thedroidguy.com/how-to-use-email-within-emacs-step-by-step-guide-for-beginners-1263534)?
+Using [my university instructions](https://www.usherbrooke.ca/services-informatiques/repertoire/collaboration/courriel/configuration#acc-4289-1348), there is a MS server, which [seems complicated](https://emacs.stackexchange.com/questions/61060/how-to-make-email-in-emacs-work-with-an-oauth2-requirement) to setup with emacs.
+Instead I will try to do web mail.
