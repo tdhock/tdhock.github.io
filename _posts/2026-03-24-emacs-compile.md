@@ -1197,6 +1197,8 @@ Make | optional for gnu regexp in compilation-mode
 * lisp/progmodes/compile.el
 (compilation-error-regexp-alist-alist):
 Make leading | optional with leading spaces.
+* etc/compilation.txt
+(gnu): added new error with two leading spaces.
 * test/lisp/progmodes/compile-tests.el
 (compile-test-error-regexps):
 One new error found.
@@ -1208,17 +1210,19 @@ one expected match by cucumber changed to gnu.
 New patch:
 
 ```
-(base) hoct2726@dinf-thock-02i:~/emacs[leading-spaces*]$ git format-patch master
+(base) hoct2726@dinf-thock-02i:~/emacs[leading-spaces]$ git format-patch master
 0001-Make-optional-for-gnu-regexp-in-compilation-mode.patch
 (base) hoct2726@dinf-thock-02i:~/emacs[leading-spaces]$ cat 0001-Make-optional-for-gnu-regexp-in-compilation-mode.patch
-From fe73c657fb2fc46fa6aece049c867b550715cf00 Mon Sep 17 00:00:00 2001
+From 8fea3ecb1a1bd943c1d0b7658e10d0a0861cdcd6 Mon Sep 17 00:00:00 2001
 From: Toby Dylan Hocking <toby.hocking@r-project.org>
-Date: Thu, 26 Mar 2026 00:37:26 -0400
+Date: Thu, 26 Mar 2026 08:51:27 -0400
 Subject: [PATCH] Make | optional for gnu regexp in compilation-mode
 
 * lisp/progmodes/compile.el
 (compilation-error-regexp-alist-alist):
 Make leading | optional with leading spaces.
+* etc/compilation.txt
+(gnu): added new error with two leading spaces.
 * test/lisp/progmodes/compile-tests.el
 (compile-test-error-regexps):
 One new error found.
@@ -1226,10 +1230,23 @@ One new error found.
 One new error test case for gnu with two leading spaces,
 one expected match by cucumber changed to gnu.
 ---
+ etc/compilation.txt                  | 1 +
  lisp/progmodes/compile.el            | 5 +++--
  test/lisp/progmodes/compile-tests.el | 7 +++++--
- 2 files changed, 8 insertions(+), 4 deletions(-)
+ 3 files changed, 9 insertions(+), 4 deletions(-)
 
+diff --git a/etc/compilation.txt b/etc/compilation.txt
+index 801d262f5aa..b97ba12fb9a 100644
+--- a/etc/compilation.txt
++++ b/etc/compilation.txt
+@@ -331,6 +331,7 @@ boost/container/detail/flat_tree.hpp:589:25:   [ skipping 5 instantiation contex
+    |
+    |board.h:60:21:
+    |   60 | #define I(b, C) ((C).y * (b)->width + (C).x)
++  src/add.cpp:8:31: error: invalid operands of types ‘const double’ and ‘const double*’ to binary ‘operator+’
+ 
+ 
+ * Guile backtrace, 2.0.11
 diff --git a/lisp/progmodes/compile.el b/lisp/progmodes/compile.el
 index c0a734ae818..c95497377f3 100644
 --- a/lisp/progmodes/compile.el
