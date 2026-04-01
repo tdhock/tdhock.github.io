@@ -9,7 +9,7 @@ My main contributions to free/open-source software are
 [R](http://r-project.org) packages that provide implementations of the
 methods described in my research papers (see below). 
 
-### Service to open science and software
+## Service to open science and software
 
 - Co-leader, Volet Science Ouverte (Open Science Initiative), Réseau
   Santé Numérique (Network On Digital Health), 2024-2032.
@@ -30,7 +30,7 @@ methods described in my research papers (see below).
 - I was president of the organizing committee for "R in Montreal 2018,"
   a local conference for useRs and developeRs.
   
-### xgboost: Extreme Gradient Boosting
+## xgboost: Extreme Gradient Boosting
 
 To support our paper about [Survival Regression with Accelerated
 Failure Time Model in
@@ -40,15 +40,26 @@ the AFT objectives in xgboost,
 [Documentation](https://xgboost.readthedocs.io/en/latest/tutorials/aft_survival_analysis.html),
 [Video](https://www.youtube.com/watch?v=HuWRnzgGuIo).
 
+## SOAK: Same/Other/All K-fold cross-validation
+
+To support our paper, [Same/Other/All K-Fold Cross-Validation for Estimating Similarity of Patterns in Data Subsets](https://onlinelibrary.wiley.com/doi/10.1002/sam.70055), we created R and Python packages.
+
 ### mlr3resampling: cross-validation for mlr3 framework in R
 
-mlr3 is a framework for machine learning in R. To support an upcoming
-research paper about applications of cross-validation, we created the
-[mlr3resampling](https://github.com/tdhock/mlr3resampling) R package,
-which provides reference implementations of useful non-standard
-cross-validation algorithms.
+mlr3 is a framework for machine learning in R.
+We created the [mlr3resampling](https://github.com/tdhock/mlr3resampling) R package, which provides a reference implementation of SOAK, `mlr3resampling::ResamplingSameOtherSizesCV`.
+It introduces a new column role, `subset`, which is used in SOAK (fix one test subset, train on Same/Other/All subsets).
+Our implementation also supports
+
+* groups of samples that must stay together when splitting (column role=group).
+* stratification, so that splits respect proportions of a categorical variable (column role=stratum).
+* down-sampling, to easily see if differences between Same/Other/All training are due to sample size, or due to different patterns in subsets.
    
-### aum: Area Under Min(FP,FN)
+### soakpy
+
+My PHD student Tung Nguyen created [soakpy](https://pypi.org/project/soakpy/), a python port of SOAK, with an interface compatible with scikit-learn.
+
+## aum: Area Under Min(FP,FN)
 
 To support our [JMLR 2023
 paper](https://jmlr.org/papers/v24/21-0751.html) about optimizing the
@@ -65,7 +76,7 @@ as a sub-routine:
 In 2025 ([PR#1310](https://github.com/mlverse/torch/pull/1310)) a version of my AUM loss function was merged into `library(torch)` in R.
 I maintain [another version in `library(mlr3torchAUM)`](https://github.com/tdhock/mlr3torchAUM/blob/numerical-stability/R/MeasureClassifROCAUM.R) which is compatible with the `mlr3torch` framework.
 
-### SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
+## SPARSEMODr: SPAtial Resolution-SEnsitive Models of Outbreak Dynamics
 
 To support our paper about infectious disease modeling, we created the
 [SPARSEMODr](https://github.com/NAU-CCL/SPARSEMODr/) R
@@ -75,7 +86,7 @@ medRxiv](https://www.medrxiv.org/content/10.1101/2021.05.13.21256216v1),
 Protocols](https://academic.oup.com/biomethods/advance-article/doi/10.1093/biomethods/bpac022/6680179)
 (2022).
 
-### RcppDeepState: fuzz testing compiled code in R packages
+## RcppDeepState: fuzz testing compiled code in R packages
 
 To support our R consortium funded project about fuzz testing C++
 functions in R packages that use Rcpp, we created the
@@ -83,20 +94,20 @@ functions in R packages that use Rcpp, we created the
 package and [github
 action](https://github.com/FabrizioSandri/RcppDeepState-action).
 
-### LOPART: Labeled Optimal Partitioning
+## LOPART: Labeled Optimal Partitioning
 
 To support our [Computational Statistics](https://rdcu.be/cQ8qM)
 (2022) paper about Labeled Optimal Partitioning, we created the
 [LOPART](https://github.com/tdhock/LOPART) R package.
 
-### gfpop: Graph-constrained Functional Pruning Optimal Partitioning
+## gfpop: Graph-constrained Functional Pruning Optimal Partitioning
 
 To support our paper about graph-constrained optimal changepoint
 detection, we created the [gfpop](https://github.com/vrunge/gfpop) and
 [gfpopgui](https://github.com/julianstanley/gfpopgui) R
 packages. [arXiv:2002.03646](https://arxiv.org/abs/2002.03646)
 
-### PeakSeg: up-down constrained changepoint detection
+## PeakSeg: up-down constrained changepoint detection
 
 The PeakSeg R packages contain algorithms for inferring optimal
 segmentation models subject to the constraint that up changes must be
@@ -144,7 +155,7 @@ can be interpreted in terms of peaks (after up changes) and background
   for a Range Of
   ComplexitieS.
 
-### PeakError: label error computation for peak models
+## PeakError: label error computation for peak models
 
 To support our
 [Bioinformatics (2017)
@@ -153,7 +164,7 @@ created the R package
 [PeakError](https://CRAN.R-project.org/package=PeakError) which computes
 the number of incorrect labels for a given set of predicted peaks.
 
-### clusterpath: convex clustering
+## clusterpath: convex clustering
 
 To support our
 [ICML'11 paper](http://www.icml-2011.org/papers/419_icmlpaper.pdf)
@@ -161,7 +172,7 @@ about the "clusterpath," a convex formulation of hierarchical
 clustering, we created the clusterpath R package, available on
 [R-Forge](http://clusterpath.r-forge.r-project.org/). 
 
-### rankSVMcompare: support vector machines for ranking and comparing
+## rankSVMcompare: support vector machines for ranking and comparing
 
 To support our
 paper about a Support Vector Machine (SVM) algorithm
@@ -169,7 +180,7 @@ for ranking and comparing (in preparation,
 [arXiv:1401.8008](http://arxiv.org/abs/1401.8008)), we created the
 [rankSVMcompare](https://github.com/tdhock/rankSVMcompare) R package.
 
-### animint: animated interactive grammar of graphics
+## animint: animated interactive grammar of graphics
 
 To support our
 [JCGS](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2018.1513367)
@@ -180,7 +191,7 @@ the [animint](https://github.com/tdhock/animint) R package. The more
 recent version is [animint2](https://github.com/tdhock/animint2).
 [Video in French](https://www.youtube.com/watch?v=Em6AVJi37zo).
 
-### fpop: functional pruning optimal partitioning
+## fpop: functional pruning optimal partitioning
 
 To support our
 [Statistics and Computing](https://link.springer.com/article/10.1007/s11222-016-9636-3)
@@ -188,14 +199,14 @@ To support our
 partitioning algorithm, we created the
 [fpop](https://r-forge.r-project.org/R/?group_id=1851) R package.
 
-### mmit: max margin interval trees
+## mmit: max margin interval trees
 
 To support our
 [NeurIPS'17](http://papers.nips.cc/paper/7080-maximum-margin-interval-trees)
 paper about max margin interval trees, we created the
 [mmit](https://github.com/aldro61/mmit) R package and Python module.
 
-### penaltyLearning: supervised changepoint detection
+## penaltyLearning: supervised changepoint detection
 
 To support our [ICML'13
 paper](http://proceedings.mlr.press/v28/hocking13.html), [useR2017
@@ -207,13 +218,13 @@ the
 [penaltyLearning](https://CRAN.R-project.org/package=penaltyLearning)
 R package.
 
-### iregnet: elastic net regularized interval regression
+## iregnet: elastic net regularized interval regression
 
 To support our paper about elastic net regularized interval regression
 models (in preparation), we created the
 [iregnet](https://github.com/anujkhare/iregnet) R package.
 
-### binsegRcpp: binary segmentation
+## binsegRcpp: binary segmentation
 
 To use as a baseline efficient implementation of binary segmentation
 in various papers such as [Labeled Optimal
@@ -222,7 +233,7 @@ selection](https://amstat.tandfonline.com/doi/full/10.1080/10618600.2021.2000422
 [binsegRcpp](https://cloud.r-project.org/web/packages/binsegRcpp/) R
 package.
 
-### directlabels: automatic label placement on figures
+## directlabels: automatic label placement on figures
 
 To support my poster "Adding direct labels to plots" which won
 [Best Student Poster at useR 2011](https://www.r-project.org/conferences/useR-2011/),
@@ -230,14 +241,14 @@ we created the
 [directlabels](https://CRAN.R-project.org/package=directlabels) R
 package.
 
-### inlinedocs: documentation generation
+## inlinedocs: documentation generation
 
 To support our
 [Journal of Statistical Software (2013) paper](https://www.jstatsoft.org/article/view/v054i06)
 about documentation generation for R, we created the
 [inlinedocs](https://CRAN.R-project.org/package=inlinedocs) R package.
 
-### namedCapture: regular expressions for text parsing
+## namedCapture: regular expressions for text parsing
 
 To support our [R Journal
 paper](https://journal.r-project.org/archive/2019/RJ-2019-050/index.html)
@@ -255,7 +266,7 @@ package, and provided various contributions to base R:
   gregexpr](https://stat.ethz.ch/pipermail/r-devel/2019-February/077315.html). Tomas
   Kalibera merged the fixes into R (since version 3.6 in 2019).
 
-### nc: named capture regular expressions for text parsing and data reshaping
+## nc: named capture regular expressions for text parsing and data reshaping
 
 To support our [R Journal paper](https://journal.r-project.org/archive/2021/RJ-2021-029/index.html)
 about data reshaping using regular expressions, we created the
@@ -265,12 +276,12 @@ contributed C code and the new measure
 function](https://github.com/Rdatatable/data.table/pull/4731) to the
 data.table package (since version 1.14.1 in 2021). [Tutorial videos](https://www.youtube.com/playlist?list=PLwc48KSH3D1P8R7470s0lgcUObJLEXSSO)!
 
-### Python pandas str.extractall method for regular expressions
+## Python pandas str.extractall method for regular expressions
 
 I wrote the `str.extractall` method for regular expressions, which was
 [merged into pandas in 2016](https://github.com/pandas-dev/pandas/pull/11386).
 
-### data.table
+## data.table
 
 To support my NSF POSE funded project (2023-2025) about expanding the
 open-source community around R
@@ -281,7 +292,7 @@ was recognized as co-author (committer). Videos:
 - [Madrid R User Group, Feb 2025](https://vimeo.com/1061999204).
 - [PyData Global, Dec 2024](https://www.youtube.com/watch?v=l_7FXnppu-g).
 
-### atime: Asymptotic Time and Memory Complexity
+## atime: Asymptotic Time and Memory Complexity
 
 To support our paper about testing and improving software for large
 data, using asymptotic time and memory measurement, we created the
