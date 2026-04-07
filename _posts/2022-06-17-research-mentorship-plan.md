@@ -44,9 +44,12 @@ expect to learn how to:
 - use writing that is inclusive, see [Government of Canada Inclusive writing guidelines and resources](https://www.noslangues-ourlanguages.gc.ca/en/writing-tips-plus/inclusive-writing-guidelines-resources), [Guide de rédaction inclusive de l’Université de Sherbrooke](https://www.usherbrooke.ca/langue/fileadmin/sites/langue/documents/Guide_redaction_inclusive_vf.pdf), [Les termes rédaction épicène et écriture inclusive de La Banque de dépannage linguistique du Québec](https://vitrinelinguistique.oqlf.gouv.qc.ca/25421/banque-de-depannage-linguistique/la-redaction-et-la-communication/feminisation-et-redaction-epicene/redaction-epicene/les-termes-redaction-epicene-et-ecriture-inclusive).
   
 Students should expect to do the following:
-- get paid for working on their research project. Master and PHD student stipends are ~30–40k$CAD/year, paid from my research grants. Also, for people with Canadian citizenship or permanent residence, it would be very good for your CV, if you apply for, and get an award like 
-  * [NSERC](https://nserc-crsng.canada.ca/en/funding-opportunity/canada-graduate-research-scholarship-doctoral-program)
-  * [FRQNT](https://frq.gouv.qc.ca/programme/bourses-de-doctorat-en-recherche-2026-2027-b2-volet-regulier-et-volet-reintegration-a-la-recherche)
+- get paid for working on their research project. Master and PHD student stipends are ~30–40k$CAD/year, paid from my research grants. Also, it would be very good for your CV, if you apply for, and get an award like
+  * NSERC [master](https://nserc-crsng.canada.ca/en/funding-opportunity/canada-graduate-research-scholarship-masters-program), only for people with Canadian citizenship or permanent residence, $27,000 for 12 months in 2026.
+  * NSERC [doctoral](https://nserc-crsng.canada.ca/en/funding-opportunity/canada-graduate-research-scholarship-doctoral-program), $40,000 per year for 3 years in 2026.
+  * FRQNT [master](https://frq.gouv.qc.ca/programme/bourses-de-maitrise-en-recherche-2026-2027-b1-volet-regulier-et-volet-reintegration-a-la-recherche/), $20,000 per year for 2 years in 2026.
+  * FRQNT [doctoral](https://frq.gouv.qc.ca/programme/bourses-de-doctorat-en-recherche-2026-2027-b2-volet-regulier-et-volet-reintegration-a-la-recherche), only for people with Canadian citizenship or permanent residence, $25,000 per year for 4 years in 2026.
+  * If you get one of these awards, then some/all of your funding will come from the award, and my research grants will provide the rest.
   * But these awards are not mandatory — I will provide you funding even if you do not you get one of these awards.
 - keep a lab notebook / research journal on google docs / github
   README / similar. The lab notebook should be organized
@@ -117,3 +120,7 @@ Updated 6 Aug 2024: added Sherbrooke storage links.
 Updated 5 Feb 2025: added link to Sherbrooke inclusive guide.
 
 Updated 15 Dec 2025: added links to Québec and Canada inclusive writing guides.
+
+Updated 23 Feb 2026: added funding details, with links to Canada and Québec doctoral grants.
+
+Updated 7 Apr 2026: added links to master grants.
