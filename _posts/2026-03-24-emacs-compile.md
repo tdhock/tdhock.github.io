@@ -200,7 +200,7 @@ It adds a new regex pattern to the Alist that emacs uses to parse compilation mo
 (6 . 7)))
 ```
 
-With respect to the `gnu` regex supplied with emacs, the code above has a minor change: addition of ` *` (space star means zero or more spaces) after the initial `^` (caret means start of line) of the regex.
+With respect to the `gnu` regex supplied with emacs, the code above has a minor change: addition of `` *`` (space star means zero or more spaces) after the initial `^` (caret means start of line) of the regex.
 Using this configuration, emacs correctly highlights all four lines in my example, as shown below.
 
 ![four-hilite](/assets/img/2026-03-24-emacs-compile/four-hilite.png)
