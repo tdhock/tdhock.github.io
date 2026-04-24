@@ -286,8 +286,7 @@ I wrote the `str.extractall` method for regular expressions, which was
 To support my NSF POSE funded project (2023-2025) about expanding the
 open-source community around R
 [data.table](https://github.com/Rdatatable/data.table), I provided
-several important contributions, such as the `measure()` function, and
-was recognized as co-author (committer). Videos:
+several important contributions: governance, the `measure()` function for data reshaping, tests for [reverse dependencies](https://github.com/Rdatatable/data.table/wiki/Revdep-checks) and [performance](https://github.com/Rdatatable/data.table/wiki/Performance-testing). I am co-author (committer) since 2024. Videos:
 
 - [Madrid R User Group, Feb 2025](https://vimeo.com/1061999204).
 - [PyData Global, Dec 2024](https://www.youtube.com/watch?v=l_7FXnppu-g).
