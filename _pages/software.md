@@ -263,8 +263,8 @@ package, and provided various contributions to base R:
 * We sent R-devel a [bug report for
   substring](https://stat.ethz.ch/pipermail/r-devel/2019-February/077393.html)
   and [a patch for
-  gregexpr](https://stat.ethz.ch/pipermail/r-devel/2019-February/077315.html). Tomas
-  Kalibera merged the fixes into R (since version 3.6 in 2019).
+  gregexpr](https://stat.ethz.ch/pipermail/r-devel/2019-February/077315.html).
+  Tomàš Kalibera merged the fixes into R (since version 3.6 in 2019).
 
 ## nc: named capture regular expressions for text parsing and data reshaping
 
