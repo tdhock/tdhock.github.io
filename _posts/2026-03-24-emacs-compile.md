@@ -1396,3 +1396,9 @@ Note above that we require compile, and use the optional vertical bar instead of
 
 We had a problem rendering error messages in compilation buffers in emacs.
 We proposed a work-around and sent a patch.
+
+# Update 
+
+Sean Whitton merged my [commit](https://github.com/emacs-mirror/emacs/commit/eb4835e5215fdc1af78ac660abf7afcee7a79434) into emacs!!
+
+A summary of this contribution appears in the [Contribution aux logiciel libres](https://docs.google.com/presentation/d/1HWStDr_t0F0BEFYGGsRURu3wNw2QdO9lZNUGRXt_28g/edit?slide=id.g38b3964d103_0_25#slide=id.g38b3964d103_0_25) (contributing to free software) slides I used for IFT704, Winter 2026.

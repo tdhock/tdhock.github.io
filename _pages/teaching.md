@@ -244,15 +244,23 @@ Left to right: Joe, Toby, Farnoosh, Atiyeh, Anuraag, Zaoyi.
 ## Google Summer of Code students mentored
 
 I have mentored the following students in coding free/open-source software.
+- [Wei Cao](https://github.com/weicaocw), 2026, mlr3torchAUM (primary mentor)
+- [Aman Kashyap](https://github.com/AmanKashyap0807), 2026, mlr3torchAUM (primary mentor)
+- [Weidong "William" Zhang](https://github.com/williamzhang7792), 2026, label constrained change-point detection. (primary mentor, co-mentor: Vincent Runge)
+- [Nishita Shah](https://github.com/Nishita-shah1), 2026, animint2 (primary mentor: Yufan Fei).
+- [Gaurav Chaudhary](https://github.com/ANAMASGARD), 2026, animint2 (primary mentor: Suhaani Agarwal).
+- Anjani Nandan, 2026, mlr3hf (primary mentor: Sebastian Fischer).
+- [Huy Nhat Minh Nguyen](https://github.com/sleepysnorlax05), 2026, mlr3changepoint: A Unified Framework for Weakly supervised Changepoint Detection (primary mentor: Marc Becker).
+- Srishti Dutta, 2026, torchvision (primary mentor: Christophe Regouby).
+- [Derrick Richard](https://github.com/DerrickUnleashed), 2025-2026, [improving torchvision](https://medium.com/@derrickrds/final-reflections-on-my-gsoc-journey-with-torchvision-r-a10133990206) (primary mentor: Christophe Regouby).
+- [Vinit Thakur](https://github.com/venom1204), 2025-2026, [improving data.table](https://venom1204.github.io/2025-08-29-final-submission/) (primary mentor: Josh Wu).
 - [Priyanshu Tiwari](https://github.com/plato-12), 2025, [dirichletprocess improvements](https://plato-12.github.io/files/GSoC_2025_Work_Product.html).
 - [Sagnik Mandal](https://github.com/criticic), 2025, [performance testing optimization](https://cynik.is-a.dev/blog/20250613-gsoc-2025-blog).
 - [Minh Long Nguyen](https://github.com/edelweiss611428), 2025, [rupturesRcpp package](https://github.com/edelweiss611428/rupturesRcpp/tree/gsoc-2025) for change-point detection in R.
-- [Derrick Richard](https://github.com/DerrickUnleashed), 2025, [improving torchvision](https://medium.com/@derrickrds/final-reflections-on-my-gsoc-journey-with-torchvision-r-a10133990206).
 - [Akanksha Koshti](https://github.com/koshtiakanksha), 2025, [improving torchvision](https://medium.com/@koshtiakanksha12/gsoc-2025-final-reflections-and-contributions-to-the-r-project-e1b4e319e4ee).
 - [Biplab Sutradhar](https://github.com/biplab-sutradhar), 2025, [improving animint2](https://biplab-sutradhar.github.io/gsoc_journey/).
 - [Suhaani Agarwal](https://github.com/suhaani-agarwal), 2025, [improving animint2](https://suhaani-agarwal.github.io/suhaani-gsoc25/progress.html).
 - [Mukul Kumar](https://github.com/Mukulyadav2004), 2025, [improving data.table](https://mukulyadav2004.github.io/Mukul-GSoC-2025/2025-08-29-final-submission/).
-- [Vinit Thakur](https://github.com/venom1204), 2025, [improving data.table](https://venom1204.github.io/2025-08-29-final-submission/).
 - [Siddesh Deodhar](https://github.com/siddhesh195), 2024, [chromote and plot layout for animint2](https://siddhesh195.github.io/gsoc2024/).
 - [Josh Wu](https://github.com/joshhwuu), 2024, [new features for data.table](https://joshhwuu.github.io/gsoc/).
 - [Nitish Jha](https://github.com/Nj221102), 2024, [closing data.table issues](https://nj221102.github.io/Nitish-gSoc-24/2024-08-24-gsoc'24-summary/).
