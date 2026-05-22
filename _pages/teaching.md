@@ -92,6 +92,7 @@ Neil DeGrasse Tyson, Cosmos (2014), Episode 1: Standing Up in the Milky Way.
 
 For the students below, my role is primary advisor, unless another primary advisor is mentioned.
 
+* [Zina Randria](https://github.com/zina29k), research intern, Summer 2026.
 * [Elise Jorge](https://github.com/eoojj), research intern, Fall 2025. Primary advisors: Nathalie Vialaneix, Pierre Neuvial, Sylvain Foissac.
 * [Omar Guenoun](https://github.com/OGuenoun), research intern, Summer 2025.
 * [Justine Ruch](https://github.com/juruch), research intern, Summer 2025.
