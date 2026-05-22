@@ -76,12 +76,16 @@ Topics without links below are on my TODO list.
 - [R and Emacs Speaks Statistics](https://www.youtube.com/playlist?list=PLwc48KSH3D1Onsed66FPLywMSIQmAhUYJ)
   - [On Monsoon](https://www.youtube.com/watch?v=PByS8QnqDGc&list=PLwc48KSH3D1Onsed66FPLywMSIQmAhUYJ&index=11)
 - [emacs and python](https://www.youtube.com/playlist?list=PLwc48KSH3D1OeAHFQhWpd8Fz8rLhTaD7t)
-- Interpreting machine learning models with feature selection
 - Data manipulation with data.table, [LatinR Oct'23 slide source](https://github.com/tdhock/2023-10-LatinR-data.table?tab=readme-ov-file#english), [updated slides](https://docs.google.com/presentation/d/1mHTFR6Eg7OdKi6yJcAvMk5_B8hjtMmsczs8Ewxt2xT8/edit?usp=sharing). Videos:
   - [Madrid R User Group, Feb 2025](https://vimeo.com/1061999204).
   - [PyData Global, Dec 2024](https://www.youtube.com/watch?v=l_7FXnppu-g).
+- GitHub
+  - [Collaborative web sites with GitHub+Netlify](https://www.youtube.com/watch?v=W8ZqRq5TzPk)
+  - R packaging on GitHub
+  - [Pull requests with git/github](https://vimeo.com/manage/videos/1159760944)
+- Parallel machine learning benchmarks in R with mlr3
+- Interpreting machine learning models with feature selection
 - Interactive data visualization with the grammar of graphics
-- git/github 
 
 ## Sherbrooke students mentored
 
