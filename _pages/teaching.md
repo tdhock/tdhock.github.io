@@ -81,7 +81,7 @@ Topics without links below are on my TODO list.
   - [PyData Global, Dec 2024](https://www.youtube.com/watch?v=l_7FXnppu-g).
 - GitHub
   - [Collaborative web sites with GitHub+Netlify](https://www.youtube.com/watch?v=W8ZqRq5TzPk)
-  - R packaging on GitHub
+  - [R packaging on GitHub](https://youtu.be/E1F6-t-9G3o)
   - [Pull requests with git/github](https://vimeo.com/manage/videos/1159760944)
 - Parallel machine learning benchmarks in R with mlr3
 - Interpreting machine learning models with feature selection
