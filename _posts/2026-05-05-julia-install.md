@@ -181,3 +181,60 @@ PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
 TaylorSeries = "6aa5eb33-94cf-58f4-a9d0-e4b2c4fc25ea"
 
 ```
+
+## windows
+
+On windows, the [downloads page](https://julialang.org/downloads/) says to install Julia using either the MSIX App Installer (a student said they tried this and got a dll load error), or via the package manager,
+
+```
+winget install --name Julia --id 9NJNWW8PVKMN -e -s msstore
+```
+
+I got:
+
+```
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindows
+
+PS C:\Users\hoct2726> winget install --name Julia --id 9NJNWW8PVKMN -e -s msstore
+Trouvé Julia [9NJNWW8PVKMN] Version Unknown
+Ce package est fourni via Microsoft Store. Le winget devra peut-être acquérir le package à partir du Microsoft Store pour le compte de l’utilisateur actuel.
+Contrats pour Julia [9NJNWW8PVKMN] Version Unknown
+Version : Unknown
+Publisher : JuliaHub, Inc.
+ID de l’Editeur https://julialang.org/
+URL de support de l’éditeur : mailto:contact@julialang.org
+Licence : ms-windows-store://pdp/?ProductId=9NJNWW8PVKMN
+URL de confidentialité : https://juliacomputing.com/privacy/
+Contrats :
+  Category: Developer tools
+  Pricing: Free
+  Free Trial: No
+  Terms of Transaction: https://aka.ms/microsoft-store-terms-of-transaction
+  Seizure Warning: https://aka.ms/microsoft-store-seizure-warning
+  Store License Terms: https://aka.ms/microsoft-store-license
+
+L’éditeur exige que vous consultiez les informations ci-dessus et acceptiez les contrats avant de procéder à l’installation.
+Acceptez-vous les conditions ?
+[Y] Oui  [N] Non:
+[Y] Oui  [N] Non: Y
+Démarrage du package d’installation... Merci de patienter.
+  ██████████████████████████████  100%
+Installé correctement
+PS C:\Users\hoct2726> julia
+    Checking for new Julia versions
+  Installing Julia 1.12.6+0.x64.w64.mingw32
+         Add Installed Julia channel 'release'
+               _
+   _       _ _(_)_     |  Documentation: https://docs.julialang.org
+  (_)     | (_) (_)    |
+   _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
+  | | | | | | |/ _` |  |
+  | | |_| | | | (_| |  |  Version 1.12.6 (2026-04-09)
+ _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org release
+|__/                   |
+
+julia>
+```
