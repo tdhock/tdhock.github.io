@@ -1,0 +1,194 @@
+---
+layout: post
+title: More precise imbalanced data generation
+description: No more rounding issues
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2026-06-11-exact-downsampling"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+options(width=120)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=10,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The purpose of this page is to continue the exploration of [Creating large imbalanced data benchmarks](https://tdhock.github.io/blog/2025/imbalance-openml/).
+
+## Problem
+
+We are creating machine learning algorithms for imbalanced classification problems.
+We would like to know if these algorithms work well for training on imbalanced data, and predicting on balanced data, and vice versa.
+We therefore would like to create different subsets for testing.
+Assume we start with the `higgs` data, binary classification with this many data in each class:
+
+```{r}
+Tpos=5829123
+Tneg=5170877
+```
+
+Below are the target proportions of the minority negative class:
+
+```{r}
+Target_prop <- 10^seq(-1, -5)
+```
+
+Below we repeat the calculations in the previous post:
+
+```{r}
+library(data.table)
+(orig_dt <- data.table(
+  Target_prop,
+  N_pos_neg = as.integer(Tpos/(3-2*Target_prop))
+)[
+, n_pos := Tpos-N_pos_neg
+][
+, n_neg := as.integer(Target_prop*n_pos/(1-Target_prop))
+][
+, n_imb := n_pos+n_neg
+][, let(
+  pos=n_pos+N_pos_neg,
+  neg=n_neg+N_pos_neg,
+  check_prop = n_neg/n_imb
+)][])
+```
+The numbers above seem reasonable, but
+
+* `Target_prop=5e-01` (balanced) has `neg>Tneg` which is not possible (not enough negative samples).
+* the `Target_prop` (desired imbalance) is often a bit larger than `check_prop` (actual imbalance).
+* the `check_N` columns are off by one or two.
+
+## Proposed fix
+
+To fix the issues above, we start with the idea that for any target proportion, we want `n_neg` to be the largest integer such that the number of positive samples used is less than or equal the total number of samples: `N + n_pos <= Tpos` (and same for negative).
+That gives us the code below, which also works for negative proportions greater than 0.5:
+
+```{r}
+compute_target_counts <- function(p_neg, Tpos, Tneg){
+  p_small <- ifelse(p_neg<0.5, p_neg, 1-p_neg)
+  n_small = as.integer(pmin(
+    2*Tpos*p_small/(3*(1-p_neg)+p_neg),
+    2*Tneg*p_small/(1+2*p_neg)
+  ))
+  data.table(p_neg)[, let(
+    n_pos = ifelse(
+      p_neg<0.5,
+      n_small*(1-p_neg)/p_neg,
+      n_small),
+    n_neg = ifelse(
+      p_neg<0.5,
+      n_small,
+      n_small*p_neg/(1-p_neg))
+  )][
+  , n_imb := n_pos+n_neg
+  ][
+  , N_pos := n_imb/2
+  ][
+  , N_neg := n_imb-N_pos
+  ][, let(
+    pos=n_pos+N_pos,
+    neg=n_neg+N_neg
+  )][
+  , check_prop := n_neg/n_imb
+  ][]
+}
+p_neg <- sort(c(Target_prop, 1-Target_prop), decreasing = TRUE)
+#p_neg <- sort(seq(0.45, 0.55, by=0.01), decreasing = TRUE)
+compute_target_counts(p_neg, Tpos, Tneg)
+```
+
+## Visualization
+
+```{r higgs}
+br <- c(10^seq(-5, -1), 0.5)
+breaks=unique(c(br, 1-br))
+p_lo <- c(
+  seq(0.01, 0.5, by=0.01),
+  10^seq(-5, -1, by=0.1))
+p_grid <- unique(sort(c(p_lo, 1-p_lo)))
+(grid_dt <- compute_target_counts(p_grid, Tpos, Tneg))
+grid_dt[, diff := p_neg-check_prop][order(abs(diff))]
+library(ggplot2)
+(grid_long <- melt(grid_dt, measure.vars=measure(prefix, class, pattern="^(|n_|N_)(pos|neg)$")))
+
+n_max <- grid_long[, .SD[value==max(value)], by=.(prefix, class)]
+
+(gg <- ggplot()+
+   ggtitle("total counts")+
+   theme_bw()+
+   scale_size_manual(values=c(
+     neg=3, pos=1))+
+   scale_linetype_manual(values=c(
+     "solid",
+     "dotted",
+     "dashed"))+
+   geom_line(aes(
+     p_neg, value, color=class, size=class, linetype=prefix),
+     data=grid_long)+
+   geom_hline(aes(
+     yintercept=value),
+     data=data.frame(value=c(Tpos, Tneg)))+
+   scale_fill_manual(values=c(max="black"))+
+   geom_point(aes(
+     p_neg, value, color=class, fill=point),
+     shape=21,
+     data=n_max[, point := "max"]))
+```
+
+```{r higgs-log}
+gg+
+  scale_x_continuous(transform="logit", breaks=breaks)+
+  scale_y_log10()
+```
+
+## other data
+
+```{r}
+Laribi_dt <- fread("~/projects/stratified-group-cv/data/Laribi2024.csv")
+```
+
+```{r Laribi}
+ltab <- table(Laribi_dt$target)
+(Laribi_grid_dt <- compute_target_counts(p_grid, ltab[1], ltab[2])[is.finite(check_prop)])
+Laribi_grid_dt[, diff := p_neg-check_prop][order(abs(diff))]
+(grid_long <- melt(Laribi_grid_dt, measure.vars=measure(prefix, class, pattern="^(|n_|N_)(pos|neg)$")))
+
+n_max <- grid_long[, .SD[value==max(value)], by=.(prefix, class)]
+
+(gg <- ggplot()+
+   ggtitle("total counts")+
+   theme_bw()+
+   scale_size_manual(values=c(
+     neg=3, pos=1))+
+   scale_linetype_manual(values=c(
+     "solid",
+     "dotted",
+     "dashed"))+
+   geom_line(aes(
+     p_neg, value, color=class, size=class, linetype=prefix),
+     data=grid_long)+
+   scale_fill_manual(values=c(max="black"))+
+   geom_point(aes(
+     p_neg, value, color=class, fill=point),
+     shape=21,
+     data=n_max[, point := "max"]))
+```
+
+```{r Laribi-log}
+gg+
+  scale_x_continuous(transform="logit", breaks=breaks)+
+  scale_y_log10()
+```
+
+## session info
+
+```{r}
+sessionInfo()
+```
