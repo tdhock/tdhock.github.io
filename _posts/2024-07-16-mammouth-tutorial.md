@@ -451,6 +451,19 @@ export PATH=$HOME/bin:$PATH
 export EDITOR="emacs -nw"
 ```
 
+## batchtools configuration
+
+See [monsoon](https://tdhock.github.io/blog/2020/monsoon-batchtools/) tutorial for configuring batchtools.
+
+Download [slurm-afterok.tmpl](https://raw.githubusercontent.com/tdhock/PeakSegPipeline/master/inst/templates/slurm-afterok.tmpl) and put the following in your `~/.batchtools.conf.R`
+
+```r
+(slurm.tmpl <- normalizePath(
+  "~/slurm-afterok.tmpl",
+  mustWork=TRUE))
+cluster.functions = makeClusterFunctionsSlurm(slurm.tmpl)
+```
+
 ## Node types
 
 [MP2 docs](https://docs.alliancecan.ca/wiki/Mp2/en) under
