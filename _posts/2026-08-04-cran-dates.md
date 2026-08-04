@@ -1,7 +1,7 @@
 ---
 layout: post
-title: More precise imbalanced data generation
-description: No more rounding issues
+title: Automatic related software tables
+description: Parsing CRAN web pages
 ---
 
 
@@ -107,7 +107,7 @@ Below we query the current CRAN web pages to determine if each package is curren
 pdt[, available := {
   tfile <- file.path(tempdir(), pkg)
   if(!file.exists(tfile)){
-    u <- sprintf("https://cran.r-project.org/web/packages/%s", pkg)
+    u <- sprintf("https://cloud.r-project.org/web/packages/%s", pkg)
     download.file(u, tfile)
   }
   adt <- nc::capture_all_str(tfile, dl="tar.gz")
@@ -139,19 +139,6 @@ Below we create a data table for packages of interest.
 
 ``` r
 library(data.table)
-```
-
-```
-## data.table 1.18.4 using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
-## 
-## Attaching package: 'data.table'
-## 
-## The following object is masked from 'package:base':
-## 
-##     %notin%
-```
-
-``` r
 (time.dt <- pdt[
 , as.data.table(adb[[paste(pkg)]])[, .(mtime)], by=.(pkg=factor(pkg, pkg), available)
 ][
@@ -295,6 +282,6 @@ sessionInfo()
 ## [1] data.table_1.18.4
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] compiler_4.7.0  nc_2026.4.20    cli_3.6.6       tools_4.7.0     pillar_1.11.1   glue_1.8.1      vctrs_0.7.3    
-##  [8] knitr_1.51      xfun_0.60       lifecycle_1.0.5 rlang_1.3.0     evaluate_1.0.5
+## [1] compiler_4.7.0 nc_2026.4.20   cli_3.6.6      tools_4.7.0    knitr_1.51     xfun_0.60      rlang_1.3.0   
+## [8] evaluate_1.0.5
 ```

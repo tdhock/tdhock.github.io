@@ -1,7 +1,7 @@
 ---
 layout: post
-title: More precise imbalanced data generation
-description: No more rounding issues
+title: Automatic related software tables
+description: Parsing CRAN web pages
 ---
 
 ```{r Ropts, echo=FALSE}
@@ -51,7 +51,7 @@ Below we query the current CRAN web pages to determine if each package is curren
 pdt[, available := {
   tfile <- file.path(tempdir(), pkg)
   if(!file.exists(tfile)){
-    u <- sprintf("https://cran.r-project.org/web/packages/%s", pkg)
+    u <- sprintf("https://cloud.r-project.org/web/packages/%s", pkg)
     download.file(u, tfile)
   }
   adt <- nc::capture_all_str(tfile, dl="tar.gz")
