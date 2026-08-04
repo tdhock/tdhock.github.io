@@ -1,0 +1,112 @@
+---
+layout: post
+title: More precise imbalanced data generation
+description: No more rounding issues
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2026-08-04-cran-dates"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+options(width=120)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=10,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The purpose of this page is to automatically get publication dates off CRAN Archive web pages.
+
+To construct a related work table for a paper, we want publication dates from CRAN packages.
+
+As mentioned in [my previous post](https://data-table-raft.netlify.app/posts/2026-04-15-happy_birthday-toby_hocking/) about `data.table`’s 20th birthday, we can download the CRAN archive meta-data via:
+
+```{r}
+adb <- tools::CRAN_archive_db()
+head(adb)
+```
+
+Above we see a list of matrices, one per package.
+
+Below we define the packages of interest by parsing an org-mode readme file using a regular expression.
+
+```{r}
+(pdt <- nc::capture_all_str(
+  "~/projects/sparse-label-positions/README.org",
+  " ",
+  pkg="[^ ]+?",
+  "::"))
+```
+
+Above we see a table with one row per package of interest.
+
+Below we query the current CRAN web pages to determine if each package is currently published.
+
+```{r}
+pdt[, available := {
+  tfile <- file.path(tempdir(), pkg)
+  if(!file.exists(tfile)){
+    u <- sprintf("https://cran.r-project.org/web/packages/%s", pkg)
+    download.file(u, tfile)
+  }
+  adt <- nc::capture_all_str(tfile, dl="tar.gz")
+  nrow(adt)>0
+}, by=pkg][]
+```
+
+Above we see that all but two packages are currently available.
+
+Below we create a data table for packages of interest.
+
+```{r}
+(time.dt <- pdt[
+, as.data.table(adb[[paste(pkg)]])[, .(mtime)], by=.(pkg=factor(pkg, pkg), available)
+][
+, year := strftime(mtime, "%Y")
+][])
+```
+
+Above we see a table with one row per publication time, per package of interest.
+
+Below we reshape to one row per package:
+
+```{r}
+time.wide <- dcast(
+  time.dt,
+  pkg + available ~ .,
+  list(min, max),
+  value.var=c("mtime", "year")
+)[
+, years := sprintf("%s–%s", year_min, year_max)
+][]
+time.wide[, .(pkg, available, years)]
+```
+
+Above we see the packages presented in the same order as they were defined.
+
+```{r}
+time.wide[order(mtime_min), .(pkg, available, years)]
+```
+
+Above packages are sorted by first publication date.
+
+Below packages are sorted by last publication date.
+
+```{r}
+time.wide[order(mtime_max), .(pkg, available, years)]
+```
+
+## Conclusions
+
+We have shown how to get CRAN publication dates for a list of R packages of interest.
+
+## session info
+
+```{r}
+sessionInfo()
+```
