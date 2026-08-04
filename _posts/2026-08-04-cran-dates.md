@@ -138,6 +138,20 @@ Below we create a data table for packages of interest.
 
 
 ``` r
+library(data.table)
+```
+
+```
+## data.table 1.18.4 using 1 threads (see ?getDTthreads).  Latest news: r-datatable.com
+## 
+## Attaching package: 'data.table'
+## 
+## The following object is masked from 'package:base':
+## 
+##     %notin%
+```
+
+``` r
 (time.dt <- pdt[
 , as.data.table(adb[[paste(pkg)]])[, .(mtime)], by=.(pkg=factor(pkg, pkg), available)
 ][
@@ -146,8 +160,19 @@ Below we create a data table for packages of interest.
 ```
 
 ```
-## Error in `as.data.table()`:
-## ! could not find function "as.data.table"
+##           pkg available               mtime   year
+##        <fctr>    <lgcl>              <POSc> <char>
+##   1:   monreg      TRUE 2009-02-25 03:29:22   2009
+##   2:   monreg      TRUE 2013-02-14 09:47:21   2013
+##   3:   monreg      TRUE 2015-03-04 15:31:32   2015
+##   4:   monreg      TRUE 2020-04-26 03:00:11   2020
+##   5:   monreg      TRUE 2006-01-30 15:10:27   2006
+##  ---                                              
+## 256: quadprog      TRUE 2010-04-09 13:30:51   2010
+## 257: quadprog      TRUE 2011-05-12 06:25:50   2011
+## 258: quadprog      TRUE 2013-04-17 07:42:50   2013
+## 259: quadprog      TRUE 2019-04-26 09:21:16   2019
+## 260: quadprog      TRUE 2019-05-06 15:00:04   2019
 ```
 
 Above we see a table with one row per publication time, per package of interest.
@@ -164,20 +189,25 @@ time.wide <- dcast(
 )[
 , years := sprintf("%s–%s", year_min, year_max)
 ][]
-```
-
-```
-## Error in `dcast()`:
-## ! could not find function "dcast"
-```
-
-``` r
 time.wide[, .(pkg, available, years)]
 ```
 
 ```
-## Error:
-## ! object 'time.wide' not found
+## Key: <pkg, available>
+##            pkg available     years
+##         <fctr>    <lgcl>    <char>
+##  1:     monreg      TRUE 2006–2020
+##  2:    fdrtool      TRUE 2006–2021
+##  3:        cir      TRUE 2008–2024
+##  4:        Iso      TRUE 2008–2020
+##  5:       clue      TRUE 2004–2026
+##  6: logcondens      TRUE 2006–2023
+##  7:   sandwich      TRUE 2004–2026
+##  8:     intcox     FALSE 2006–2013
+##  9:       SAGx     FALSE 2005–2006
+## 10:     smacof      TRUE 2008–2024
+## 11:    isotone      TRUE 2009–2023
+## 12:   quadprog      TRUE 1999–2019
 ```
 
 Above we see the packages presented in the same order as they were defined.
@@ -188,8 +218,20 @@ time.wide[order(mtime_min), .(pkg, available, years)]
 ```
 
 ```
-## Error:
-## ! object 'time.wide' not found
+##            pkg available     years
+##         <fctr>    <lgcl>    <char>
+##  1:   quadprog      TRUE 1999–2019
+##  2:   sandwich      TRUE 2004–2026
+##  3:       clue      TRUE 2004–2026
+##  4:       SAGx     FALSE 2005–2006
+##  5:     monreg      TRUE 2006–2020
+##  6:     intcox     FALSE 2006–2013
+##  7:    fdrtool      TRUE 2006–2021
+##  8: logcondens      TRUE 2006–2023
+##  9:        cir      TRUE 2008–2024
+## 10:        Iso      TRUE 2008–2020
+## 11:     smacof      TRUE 2008–2024
+## 12:    isotone      TRUE 2009–2023
 ```
 
 Above packages are sorted by first publication date.
@@ -202,8 +244,20 @@ time.wide[order(mtime_max), .(pkg, available, years)]
 ```
 
 ```
-## Error:
-## ! object 'time.wide' not found
+##            pkg available     years
+##         <fctr>    <lgcl>    <char>
+##  1:       SAGx     FALSE 2005–2006
+##  2:     intcox     FALSE 2006–2013
+##  3:   quadprog      TRUE 1999–2019
+##  4:     monreg      TRUE 2006–2020
+##  5:        Iso      TRUE 2008–2020
+##  6:    fdrtool      TRUE 2006–2021
+##  7:    isotone      TRUE 2009–2023
+##  8: logcondens      TRUE 2006–2023
+##  9:     smacof      TRUE 2008–2024
+## 10:        cir      TRUE 2008–2024
+## 11:       clue      TRUE 2004–2026
+## 12:   sandwich      TRUE 2004–2026
 ```
 
 ## Conclusions
@@ -237,8 +291,10 @@ sessionInfo()
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
+## other attached packages:
+## [1] data.table_1.18.4
+## 
 ## loaded via a namespace (and not attached):
-##  [1] compiler_4.7.0    nc_2026.4.20      cli_3.6.6         tools_4.7.0       pillar_1.11.1     glue_1.8.1       
-##  [7] vctrs_0.7.3       data.table_1.18.4 knitr_1.51        xfun_0.60         lifecycle_1.0.5   rlang_1.3.0      
-## [13] evaluate_1.0.5
+##  [1] compiler_4.7.0  nc_2026.4.20    cli_3.6.6       tools_4.7.0     pillar_1.11.1   glue_1.8.1      vctrs_0.7.3    
+##  [8] knitr_1.51      xfun_0.60       lifecycle_1.0.5 rlang_1.3.0     evaluate_1.0.5
 ```

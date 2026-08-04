@@ -64,6 +64,7 @@ Above we see that all but two packages are currently available.
 Below we create a data table for packages of interest.
 
 ```{r}
+library(data.table)
 (time.dt <- pdt[
 , as.data.table(adb[[paste(pkg)]])[, .(mtime)], by=.(pkg=factor(pkg, pkg), available)
 ][
