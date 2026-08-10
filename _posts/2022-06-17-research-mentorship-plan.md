@@ -75,6 +75,9 @@ Students should expect to do the following:
   steps in advancing the frontier of knowledge (both your knowledge,
   and our collective knowledge).
   "Science works on the frontier between knowledge and ignorance. We're not afraid to admit what we don't know. There's no shame in that. The only shame is to pretend that we have all the answers." Neil DeGrasse Tyson, Cosmos (2014), Episode 2: Some of the Things That Molecules Do.
+- take classes to fulfill degree requirements, typically
+  - [Maitrîse en informatique, cheminement de type recherche régulier](https://www.usherbrooke.ca/admission/programme/654/maitrise-en-informatique#acc-000-0).
+  - [Doctorat en informatique, cheminement en informatique](https://www.usherbrooke.ca/admission/programme/728/doctorat-en-informatique#acc-000-0).
 - make backups of data which are important for doing the above
   activities, by keeping copies in 2+ of the following: 
   (1) your personal computer, 
