@@ -88,7 +88,7 @@ Students should expect to do the following:
   - You do not need to pass a standardized French/English test prior to application/admission.
   - Classes at Sherbrooke to fulfill your degree requirements are in French.
   - Research will mostly be in English (for international activities like papers and conferences), with French used for local activities (theses, defenses).
-  - If you are fluent in English but not French, then you should be interested to learn French, and willing to devote some of your time, on a regular basis each week, to your French language learning.
+  - If you are fluent in English but not French, then to fit into Québec society, you should be interested to learn French, and willing to devote some of your time, on a regular basis each week, to your French language learning.
    - [Cours de français du gouvernement du Québec](https://www.usherbrooke.ca/formation-continue/subventions-et-partenariats/francais)
    - Most of the university students and staff speak French, but can also speak some English, so in one-on-one conversations, people may hear you struggling in French, and then switch to English, which does not help your French language learning. In that case, you can suggest switching back to French so you can practice: "j’aimerais mieux parler français avec vous" or "on devrait parler français."
    - The best way to learn French is to find conversation partners who do not speak English very fluently, and then engage them in one on one conversations in French.
