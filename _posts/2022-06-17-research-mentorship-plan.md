@@ -78,6 +78,22 @@ Students should expect to do the following:
 - take classes to fulfill degree requirements, typically
   - [Maitrîse en informatique, cheminement de type recherche régulier](https://www.usherbrooke.ca/admission/programme/654/maitrise-en-informatique#acc-000-0).
   - [Doctorat en informatique, cheminement en informatique](https://www.usherbrooke.ca/admission/programme/728/doctorat-en-informatique#acc-000-0).
+- (for foreign students) do admission and immigration paper work
+ - [Documents d’immigration](https://www.usherbrooke.ca/international/fr/etudier-a-udes/immigration/documents-immigration) for studying at UDS.
+ - If you have questions related to immigration paper work, please ask
+  - International@USherbrooke.ca if you have not yet been admitted, or
+  - Julie.Desnoyers@USherbrooke.ca if you have been admitted to our master or PHD program.
+ - Language requirements:
+  - To do research with me, you need to be fluent in English or French (or both).
+  - You do not need to pass a standardized French/English test prior to application/admission.
+  - Classes at Sherbrooke to fulfill your degree requirements are in French.
+  - Research will mostly be in English (for international activities like papers and conferences), with French used for local activities (theses, defenses).
+  - If you are fluent in English but not French, then you should be interested to learn French, and willing to devote some of your time, on a regular basis each week, to your French language learning.
+   - [Cours de français du gouvernement du Québec](https://www.usherbrooke.ca/formation-continue/subventions-et-partenariats/francais)
+   - Most of the university students and staff speak French, but can also speak some English, so in one-on-one conversations, people may hear you struggling in French, and then switch to English, which does not help your French language learning. In that case, you can suggest switching back to French so you can practice: "j’aimerais mieux parler français avec vous" or "on devrait parler français."
+   - The best way to learn French is to find conversation partners who do not speak English very fluently, and then engage them in one on one conversations in French.
+   - Another way is to join a conversation with a group of French speakers. Although it is more difficult to understand group discussions, it is also unlikely that the group switches to English. For example, you can join us for an informal discussion in French over lunch every weekday, noon to 1pm, in the Salle de Pause, D4-1012.
+   - It is normal to not understand everything right away when learning a new language. But it is important to be honest about what you did and did not understand. Like with research, it is important to frequently ask questions to clarify your understanding.
 - make backups of data which are important for doing the above
   activities, by keeping copies in 2+ of the following: 
   (1) your personal computer, 
@@ -127,3 +143,7 @@ Updated 15 Dec 2025: added links to Québec and Canada inclusive writing guides.
 Updated 23 Feb 2026: added funding details, with links to Canada and Québec doctoral grants.
 
 Updated 7 Apr 2026: added links to master grants.
+
+Updated 10 Aug 2026: added degree requirements.
+
+Updated 11 Aug 2026: added language requirements.
