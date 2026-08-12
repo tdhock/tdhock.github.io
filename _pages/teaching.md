@@ -104,17 +104,17 @@ For the students below, my role is primary advisor, unless another primary advis
   
 ## NAU students mentored
 
-* [Tung Lam Nguyen](https://github.com/lamtung16), Informatics and Computing PHD, Spring 2024 - present.
-* [Bilal Aslam](https://github.com/bilalaslam45), Informatics and Computing PHD, Fall 2022 - present. Primary advisor: Kevin Gurney.
 * [Daniel Agyapong](https://github.com/EngineerDanny), Informatics and Computing PHD, Fall 2022 - present. 
+* [Tung Lam Nguyen](https://github.com/lamtung16), Informatics and Computing PHD, Spring 2024 - Spring 2026, then went to [University of South Florida](https://www.usf.edu/) as Assistant Professor.
+* [Bilal Aslam](https://github.com/bilalaslam45), Informatics and Computing PHD, Fall 2022 - Fall 2025 (Primary advisor: Kevin Gurney), then stayed at NAU for postdoc with Kevin Gurney.
 * [Karl Harshe](https://github.com/harsheka), MechE PHD, Fall 2022 - Spring 2024. Primary advisor: Zach Lerner.
 * [Doris Amoakohene](https://github.com/DorisAmoakohene), Inf master, Fall 2023 - Spring 2025.
 * [Tianyi (Bruce) Chen](https://github.com/TyBruceChen), CS undergrad, 2023 - 2024, then went to UCSB for master in communication, control, and signal processing.
 * [Cameron Bodine](https://github.com/CameronBodine), Informatics and Computing PHD, Spring 2020 - Spring 2024, then did postdoc at University of Delaware. Primary advisor: Dan Buscombe.
 * [Trevor Silverstein](https://github.com/trevb11), Informatics and Computing PHD, Fall 2023, then went back to teach school.
 * [Jadon Fowler](https://github.com/phase), CS master, Fall 2022 - Spring 2023, working as software developer at [Lunar Client](https://www.lunarclient.com/).
-* [Austin Malmin](https://github.com/austinmalmin), CS master, Spring 2023, now Salesforce developer at [Microchip](https://www.microchip.com).
-* [Kyle Rust](https://github.com/rustky), CS master, Fall 2021 - Fall 2022, working as data scientist at [CHS](https://www.chsinc.com/).
+* [Austin Malmin](https://github.com/austinmalmin), CS master, Spring 2023, then went to work as Salesforce developer at [Microchip](https://www.microchip.com).
+* [Kyle Rust](https://github.com/rustky), CS master, Fall 2021 - Fall 2022, then went to work as data scientist at [CHS](https://www.chsinc.com/).
 * [Charlie Saluski](https://github.com/Csaluski), CS undergrad, Spring 2022.
 * [Balaji Senthilkumar](https://github.com/balaji-senthil), CS master, Spring 2022.
 * [Jacob Kaufman](https://github.com/jkaufy), CS master, Spring 2022, then went to [General Dynamics](https://www.gd.com/).
