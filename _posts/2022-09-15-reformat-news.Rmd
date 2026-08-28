@@ -42,7 +42,7 @@ Check: package subdirectories, Result: NOTE
 The first few lines of my old NEWS file were
 
 ```{r}
-NEWS <- "~/R/aum/NEWS"
+NEWS <- "~/R/WeightedROC/NEWS"
 NEWS <- "~/teaching/regex-tutorial/NEWS/old/aum.txt"
 NEWS.lines <- readLines(NEWS)
 cat(head(NEWS.lines, 19), sep="\n")
