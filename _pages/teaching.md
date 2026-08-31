@@ -105,7 +105,7 @@ For the students below, my role is primary advisor, unless another primary advis
 ## NAU students mentored
 
 * [Daniel Agyapong](https://github.com/EngineerDanny), Informatics and Computing PHD, Fall 2022 - present. 
-* [Tung Lam Nguyen](https://github.com/lamtung16), Informatics and Computing PHD, Spring 2024 - Spring 2026, then went to [University of South Florida](https://www.usf.edu/) as Assistant Professor.
+* [Tung Lam Nguyen](https://github.com/lamtung16), Informatics and Computing PHD, Spring 2024 - Spring 2026, then went to [University of South Florida](https://www.usf.edu/) as Assistant Professor of Instruction.
 * [Bilal Aslam](https://github.com/bilalaslam45), Informatics and Computing PHD, Fall 2022 - Fall 2025 (Primary advisor: Kevin Gurney), then stayed at NAU for postdoc with Kevin Gurney.
 * [Karl Harshe](https://github.com/harsheka), MechE PHD, Fall 2022 - Spring 2024. Primary advisor: Zach Lerner.
 * [Doris Amoakohene](https://github.com/DorisAmoakohene), Inf master, Fall 2023 - Spring 2025.
