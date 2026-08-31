@@ -139,6 +139,12 @@ For the students below, my role is primary advisor, unless another primary advis
 * [Anuraag Srivastava](https://github.com/as4378), CS master, Fall 2018 - Spring 2020, then went to Chicago to work as a software engineer for a company.
 * [Brandon Dunn](https://github.com/bd288), EE master, Fall 2018 - Spring 2019, then went to [Raytheon](https://www.rtx.com/).
 
+### Sherbrooke summer interns, Aug 2026
+
+Left to right: Toby, Zina, Wei.
+
+![Sherbrooke cross Aug 2026](/assets/img/lab-photos/2026-08-interns.jpg)
+
 ### Sherbrooke coffee break, Nov 2025
 
 Left to right: Wei, Toby, Félix, Elise.
