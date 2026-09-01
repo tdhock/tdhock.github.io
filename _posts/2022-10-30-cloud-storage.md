@@ -67,4 +67,5 @@ and those files can be shared via:
     [GitLab](https://docs.gitlab.com/user/storage_usage_quotas/) and
     [Bitbucket](https://www.atlassian.com/blog/it-teams/important-changes-coming-to-bitbucket-clouds-free-plan).
 - Google Drive: 10GB.
+- Zenodo for archiving research data to accompany publications.
 - Hugging Face (can be used by github commands): a total storage capacity of 300 GB per repo, with a maximum file size of 20 GB and a limit of 100,000 files per repo. For example, my student repository contains genome sequences, such as the one found here: [chipseq](https://huggingface.co/datasets/lamtung16/compressed_chipseq).

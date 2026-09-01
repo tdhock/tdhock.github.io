@@ -107,7 +107,7 @@ When you do computational research, you will inevitably encounter
 problems that prevent you from advancing / finishing your paper.
 How do you get help, when you have an error/issue that is blocking you?
 You should ask for help, but to do that, you should first create a
-Minimal Reproducible Example (MRE) that that can be used to precisely
+Minimal Reproducible Example (MRE) that can be used to precisely
 communicate your issue to someone else.
 
 Typically the first reflex would be to send your whole git repo a
@@ -281,7 +281,7 @@ You want the Files Changed tab to show as few diff lines as possible, so that yo
 - [animint -Inf bug](https://github.com/animint/animint2/pull/170/files)
 - [nc alevels helper fun](https://github.com/tdhock/nc/pull/30)
 - [nc type.convert arg](https://github.com/tdhock/nc/pull/29/files)
-- [data.table id.vars=patterns()](https://github.com/Rdatatable/data.table/pull/6880>)
+- [data.table id.vars=patterns()](https://github.com/Rdatatable/data.table/pull/6880)
 
 Some discussions / code reviews:
 
