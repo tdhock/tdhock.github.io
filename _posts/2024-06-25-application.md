@@ -6,7 +6,7 @@ description: Please read if you want to do research under my supervision
 
 To work in the LASSO lab, please write an application (1-3 pages), with section headings corresponding to the sections below.
 Ideally, please typeset your response using LaTeX and/or Overleaf, and include a bibliography with at least one citation to the paper you read.
-So I can evaluate your coding and English writing abilities, please do copy from AI tools (ChatGPT, Copilot, etc) when writing your application.
+So I can evaluate your coding and English writing abilities, please do NOT copy from AI tools (ChatGPT, Copilot, etc) when writing your application.
 If your application seems to be copied from AI, then that is a [406 error](https://406.fail/), and I will not review it.
 
 ## Mentorship plan reading and writing application

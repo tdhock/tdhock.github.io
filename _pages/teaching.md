@@ -7,8 +7,10 @@ description: Course materials and students mentored
 
 ## Course materials
 
+- Fall 2026, UDS IFT 704, Apprentissage Automatique à grande échelle, [web site](https://github.com/tdhock/2026-08-aa-grande-echelle).
+- Fall 2026, UDS IFT 603/712, Techniques d'Apprentissage, [web site](https://tdhock.github.io/2026-08-apprentissage) adapted from materials by [Pierre-Marc Jodoin](https://jodoin.github.io).
 - Summer 2026, UDS [ROP 631](https://www.usherbrooke.ca/admission/fiches-cours/ROP631), Optimisation non linéaire, [my course materials](https://github.com/tdhock/2026-05-nlopt).
-- Spring 2026, UDS IFT 704, Apprentissage Automatique à grand échelle, [my course materials](https://github.com/tdhock/2025-08-aa-grande-echelle).
+- Spring 2026, UDS IFT 704, Apprentissage Automatique à grande échelle, [my course materials](https://github.com/tdhock/2025-08-aa-grande-echelle).
 - Fall 2024, UDS IFT 187, Éléments de bases de données, [supplementary course materials](https://github.com/tdhock/2024-08-data-bases).
 - Fall 2024, UDS IFT 603/712, Techniques d'Apprentissage, [web site](https://tdhock.github.io/2024-08-ift603-712/) adapted from materials by [Pierre-Marc Jodoin](https://jodoin.github.io/).
 - Spring 2024, NAU SES graduate seminar on R Package development, [my slides](https://docs.google.com/presentation/d/1_ErpxRSYfBhM6Jl2RTprisT2c6iebvzd1cstcwuxUjg/edit?usp=sharing).
