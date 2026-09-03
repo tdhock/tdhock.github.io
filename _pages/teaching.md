@@ -85,7 +85,7 @@ Topics without links below are on my TODO list.
   - [Collaborative web sites with GitHub+Netlify](https://www.youtube.com/watch?v=W8ZqRq5TzPk)
   - [R packaging on GitHub](https://youtu.be/E1F6-t-9G3o)
   - [Pull requests with git/github](https://vimeo.com/manage/videos/1159760944)
-- Parallel machine learning benchmarks in R with mlr3
+- [Machine learning cross-validation in parallel on a SLURM cluster](https://docs.google.com/presentation/d/1ZM4Hv9q7_YUHkbCuL7D4sNM7Pv713J7sEDyLhAM4zTQ)
 - Interpreting machine learning models with feature selection
 - Interactive data visualization with the grammar of graphics
 
