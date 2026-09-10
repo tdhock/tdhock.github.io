@@ -1408,15 +1408,14 @@ Update 10 Sept 2026: these fixes are available in the new release of emacs:
 ```
 wget https://ftp.gnu.org/gnu/emacs/emacs-31.1.tar.xz
 tar xf emacs-31.1.tar.xz
+cd emacs-31.1
 ./configure --with-gif=ifavailable --with-gnutls=ifavailable --prefix=$HOME
 make
 make install
 ```
 
-![emacs 27 vs 31](/assets/img/2026-03-24-emacs-compile/emacs-27-31.png)
+![emacs 29 vs 31](/assets/img/2026-03-24-emacs-compile/emacs-29-31.png)
 
-Above we see Emacs 27.1 and 31.1 running on my ~2010 MacBook.
-Both show correct highlighting.
-The correct highlighting for 31.1 was expected due to my fix.
-But I did not expect to see it for version 27.1.
-This suggests the issue was introduced some time after 27.1.
+Above we see Emacs 29.3 (bundled in Ubuntu Noble 24.04) and Emacs 31.1 (compiled from source released Aug 2026) running on my work laptop.
+Left/old shows incorrect highlighting, whereas right/new is correct, thanks to my patch!
+
