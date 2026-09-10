@@ -1402,3 +1402,21 @@ We proposed a work-around and sent a patch.
 Sean Whitton merged my [commit](https://github.com/emacs-mirror/emacs/commit/eb4835e5215fdc1af78ac660abf7afcee7a79434) into emacs!!
 
 A summary of this contribution appears in the [Contribution aux logiciel libres](https://docs.google.com/presentation/d/1HWStDr_t0F0BEFYGGsRURu3wNw2QdO9lZNUGRXt_28g/edit?slide=id.g38b3964d103_0_25#slide=id.g38b3964d103_0_25) (contributing to free software) slides I used for IFT704, Winter 2026.
+
+Update 10 Sept 2026: these fixes are available in the new release of emacs:
+
+```
+wget https://ftp.gnu.org/gnu/emacs/emacs-31.1.tar.xz
+tar xf emacs-31.1.tar.xz
+./configure --with-gif=ifavailable --with-gnutls=ifavailable --prefix=$HOME
+make
+make install
+```
+
+![emacs 27 vs 31](/assets/img/2026-03-24-emacs-compile/emacs-27-31.png)
+
+Above we see Emacs 27.1 and 31.1 running on my ~2010 MacBook.
+Both show correct highlighting.
+The correct highlighting for 31.1 was expected due to my fix.
+But I did not expect to see it for version 27.1.
+This suggests the issue was introduced some time after 27.1.
