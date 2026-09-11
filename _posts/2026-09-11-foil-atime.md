@@ -6,7 +6,7 @@ description: Comparison with atime
 
 
 
-Recently Visruth Srimath Kandali asked me to review his [foil proposal](https://visruthsk.github.io/foil-ISC-2026/).
+Recently Visruth Srimath Kandali asked me to review his [`foil` proposal](https://visruthsk.github.io/foil-ISC-2026/).
 
 ## Comments about memory measurement
 
@@ -49,12 +49,12 @@ plot(vec.mat.result)
 * We also see that dense `matrix` allocation and `vector` allocation are the same speed for small N, but dense `matrix` allocation is asymptotically slower.
 
 The amount of data needed to get to the asymptotic regime depends on the particular computer you are using.
-So if you use benchmark only one data size, 
+So if you benchmark only one data size,
 
 * it may be in the constant factor regime on one machine,
 * and in the asymptotic regime on another machine.
 
-This is a drawback of other benchmarking software (besides atime), such as foil, touchstone, etc.
+This is a drawback of other non-asymptotic benchmarking software (besides atime), such as `foil`, `touchstone`, etc.
 
 ## Comments on comparing package versions
 
@@ -70,7 +70,7 @@ Example `atime` test case definitions for GitHub Actions CI:
 
 ## Paired comparison
 
-A central feature of foil is paired comparison, which I believe means running benchmarks like this (for the matrix/vector example discussed above)
+A central feature of `foil` is paired comparison, which I believe means running benchmarks like this (for the matrix/vector example discussed above)
 
 * matrix run 1
 * vector run 1
@@ -80,7 +80,7 @@ A central feature of foil is paired comparison, which I believe means running be
 * matrix run 10
 * vector run 10
 
-This approach is preferred by foil to limit drift, which means that the earlier runs may be faster or slower than later runs.
+This approach is preferred by `foil` to limit drift, which means that the earlier runs may be faster or slower than later runs.
 In contrast `atime` uses `bench::mark`, and the man page does not specify the order, but the source code says
 
 ```r
@@ -99,6 +99,9 @@ which means that it does all of the runs for one expression, than the other:
 * …
 * vector run 10
 
+This method would be more sensitive to drift.
+For example if there was some background task during earlier runs, but not later runs, then the matrix runs may appear slower than they should (if there was no background task).
+
 However, the focus in `foil` and `touchstone` on comparing two expressions can be a limitation in the context of performance testing (in which the expressions are different software versions that may be relevant in the context of a GitHub Pull Request).
 Whereas `foil` and `touchstone` are limited to comparing two versions (PR branch and base=main), `atime_pkg()` by default includes other relevant versions (merge-base, CRAN) and can also show user defined historical versions (this has been very important in `data.table`, which had many performance issues reported over the years, so many historical versions to run as references of fast and slow code).
 
@@ -107,11 +110,12 @@ Whereas `foil` and `touchstone` are limited to comparing two versions (PR branch
 In `atime` performance testing, test cases are defined in a special file, `package/.ci/atime/tests.R`.
 In the `foil` proposal, I did not see any mention of how the tests are defined.
 I think it's pretty important that test cases for performance should be separate from other test cases like unit tests, which have small data sizes and so are irrelevant for performance.
-That is the main drawback of previous systems like [Rperform](https://github.com/analyticalmonk/Rperform).
+That is the main drawback of previous systems like [Rperform](https://github.com/analyticalmonk/Rperform), which is limited to measuring time and memory of `testthat` test cases.
 
 ## Other figures
 
-The code below computes best asymptotic references:
+Here, we continuing the `atime` code example, in order to highlight its other unique features (not related to performance testing different versions of R packages).
+The code below computes best asymptotic references, which can be used to infer the asymptotic complexity classes (big-O notation).
 
 
 ``` r
@@ -131,7 +135,11 @@ The code below computes the throughput, or the data size we can handle with a gi
 
 
 ``` r
-vec.mat.pred <- predict(vec.mat.ref)
+vec.mat.pred <- predict(
+  vec.mat.ref,
+  seconds=vec.mat.ref$seconds.limit,
+  kilobytes=1000,
+  length=1e6)
 plot(vec.mat.pred)
 ```
 
@@ -140,9 +148,19 @@ plot(vec.mat.pred)
 ## introduced infinite values.
 ```
 
+```
+## Warning in ggplot2::scale_y_log10("median line, min/max band"): log-10 transformation introduced infinite values.
+```
+
 ![plot of chunk atime-pred](/assets/img/2026-09-11-foil-atime/atime-pred-1.png)
 
-Above we see the `N` at the time limit is about the same for sparse `Matrix` and `vector`, both orders of magnitude larger than the `N` for dense `matrix`.
+Above we see
+
+* top panel: the `N` at the memory limit of 1000 kilobytes is about the same for sparse `Matrix` and `vector`, both orders of magnitude larger than the `N` for dense `matrix`.
+* center panel: the `N` with length=1e6 is the same for sparse `Matrix` and dense `matrix`, both 1000 times smaller than `N` for `vector`.
+* bottom panel: the `N` at the time limit is about the same for sparse `Matrix` and `vector`, both orders of magnitude larger than the `N` for dense `matrix`.
+
+Overall, we have highlighted the unique features of `atime` for benchmarking R code.
 
 ## Session info
 
