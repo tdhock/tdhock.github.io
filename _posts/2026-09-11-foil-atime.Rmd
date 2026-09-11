@@ -26,7 +26,7 @@ Recently Visruth Srimath Kandali asked me to review his [foil proposal](https://
 
 I told him that in general it would be great to have a tool that lets us measure the peak memory used outside of the regular R memory.
 
-In comparison, my R package [atime](https://atime-docs.netlify.app/) is for asymtotic benchmarking, and is limited to measuring regular R memory, because it uses [bench::mark()](https://bench.r-lib.org/reference/mark.html) for each data size.
+In comparison, my R package [atime](https://atime-docs.netlify.app/) is for asymptotic benchmarking, and is limited to measuring regular R memory, because it uses [bench::mark()](https://bench.r-lib.org/reference/mark.html) for each data size.
 The plus side is that this is portable to all different versions of R (mac win linux).
 The minus side is that it only works for the R memory manager, not other memory.
 
