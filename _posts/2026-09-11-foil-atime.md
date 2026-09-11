@@ -1,0 +1,109 @@
+---
+layout: post
+title: Benchmarking with foil
+description: Comparison with atime
+---
+
+
+
+Recently Visruth Srimath Kandali asked me to review his [foil proposal](https://visruthsk.github.io/foil-ISC-2026/).
+
+## Comments about memory measurement
+
+I told him that in general it would be great to have a tool that lets us measure the peak memory used outside of the regular R memory.
+
+In comparison, my R package [atime](https://atime-docs.netlify.app/) is for asymtotic benchmarking, and is limited to measuring regular R memory, because it uses [bench::mark()](https://bench.r-lib.org/reference/mark.html) for each data size.
+The plus side is that this is portable to all different versions of R (mac win linux).
+The minus side is that it only works for the R memory manager, not other memory.
+
+## Comments about asymptotic measurement
+
+The distinctive feature of `atime` is measuring time, memory and other quantities as a function of data size, which makes it a lot easier to see differences between versions.
+This feature is called asymptotic measurement, because the goal is to determine the computation requirements for the big data regime.
+This feature is not present in the other packages mentioned in the proposal.
+And it is important because if you only use one fixed data size, you don’t know if the algorithm is in its asymptotic regime (big data), which is the important regime for most statistical software.
+For example, consider sparse matrix or dense vector allocation (Figure 4 of [atime R Journal paper](https://rjournal.github.io/articles/RJ-2026-013/)).
+
+
+``` r
+library(Matrix)
+vec.mat.result <- atime::atime(
+  N = 10^seq(1, 7, by=0.25),  
+  vector = numeric(N),
+  matrix = matrix(0, N, N),
+  Matrix = Matrix(0, N, N),
+  result = function(x)data.frame(length = length(x)))
+plot(vec.mat.result)
+```
+
+```
+## Warning in ggplot2::scale_y_log10("median line, min/max band"): log-10 transformation introduced infinite values.
+## log-10 transformation introduced infinite values.
+## log-10 transformation introduced infinite values.
+```
+
+![plot of chunk atime-vec-mat](/assets/img/2026-09-11-foil-atime/atime-vec-mat-1.png)
+
+* Above we see that `vector` allocation is faster than sparse `Matrix` allocation by a constant factor (for small N), but they take the same (linear) time in the asymptotic regime (`N>1e6` on this machine).
+* We also see that dense `matrix` allocation and `vector` allocation are the same speed for small N, but dense `matrix` allocation is asymptotically slower.
+
+The amount of data needed to get to the asymptotic regime depends on the particular computer you are using.
+So if you use benchmark only one data size, 
+
+* it may be in the constant factor regime on one machine,
+* and in the asymptotic regime on another machine.
+
+This is a drawback of other benchmarking software (besides atime), such as foil, touchstone, etc.
+
+## Comments on comparing package versions
+
+Another unique feature of `atime` is running different package versions in the same R session, whereas other software runs the different versions in different R sessions, which may be a source of noise.
+The drawback of this feature is that you may have to create a custom `pkg.edit.fun` for editing modified package versions, so that they can install in the same R session.
+This was the case for `data.table`, which requires a rather complex `pkg.edit.fun`, due to its non-standard installation scripts for compiled code, and its need for back-compatibility.
+However, this is not necessary for most R packages, which use standard installation and Rcpp.
+Example `atime` test case definitions for GitHub Actions CI:
+
+* [animint2](https://github.com/animint/animint2/blob/master/.ci/atime/tests.R)
+* [binsegRcpp](https://github.com/tdhock/binsegRcpp/blob/master/.ci/atime/tests.R)
+* [data.table](https://github.com/Rdatatable/data.table/blob/master/.ci/atime/tests.R)
+
+## Paired comparison
+
+A central feature of foil is paired comparison, which I believe means running benchmarks like this (for the matrix/vector example discussed above)
+
+* matrix run 1
+* vector run 1
+* matrix run 2
+* vector run 2
+* …
+* matrix run 10
+* vector run 10
+
+This approach is preferred by foil to limit drift, which means that the earlier runs may be faster or slower than later runs.
+In contrast `atime` uses `bench::mark`, and the man page does not specify the order, but the source code says
+
+```r
+        for (i in seq_len(length(exprs))) {
+            res <- eval_one(exprs[[i]], memory)
+```
+
+which means that it does all of the runs for one expression, than the other:
+
+* matrix run 1
+* matrix run 2
+* …
+* matrix run 10
+* vector run 1
+* vector run 2
+* …
+* vector run 10
+
+However, the focus in `foil` and `touchstone` on comparing two expressions can be a limitation in the context of performance testing (in which the expressions are different software versions that may be relevant in the context of a GitHub Pull Request).
+Whereas `foil` and `touchstone` are limited to comparing two versions (PR branch and base=main), `atime_pkg()` by default includes other relevant versions (merge-base, CRAN) and can also show user defined historical versions (this has been very important in `data.table`, which had many performance issues reported over the years, so many historical versions to run as references of fast and slow code).
+
+## Test case definition
+
+In `atime` performance testing, test cases are defined in a special file, `package/.ci/atime/tests.R`.
+In the `foil` proposal, I did not see any mention of how the tests are defined.
+I think it's pretty important that test cases for performance should be separate from other test cases like unit tests, which have small data sizes and so are irrelevant for performance.
+That is the main drawback of previous systems like [Rperform](https://github.com/analyticalmonk/Rperform).
