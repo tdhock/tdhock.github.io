@@ -41,7 +41,8 @@ For example, consider sparse matrix or dense vector allocation (Figure 4 of [ati
 ```{r atime-vec-mat}
 library(Matrix)
 vec.mat.result <- atime::atime(
-  N = 10^seq(1, 7, by=0.25),  
+  seconds.limit=0.1,
+  N = 10^seq(1, 8, by=0.25),  
   vector = numeric(N),
   matrix = matrix(0, N, N),
   Matrix = Matrix(0, N, N),
@@ -112,3 +113,29 @@ In `atime` performance testing, test cases are defined in a special file, `packa
 In the `foil` proposal, I did not see any mention of how the tests are defined.
 I think it's pretty important that test cases for performance should be separate from other test cases like unit tests, which have small data sizes and so are irrelevant for performance.
 That is the main drawback of previous systems like [Rperform](https://github.com/analyticalmonk/Rperform).
+
+## Other figures
+
+The code below computes best asymptotic references:
+
+```{r atime-ref}
+vec.mat.ref <- atime::references_best(vec.mat.result)
+plot(vec.mat.ref)
+```
+
+We see above linear time, `O(N)`, for `vector` and sparse `Matrix`, but quadratic time, `O(N^2)` for dense `matrix`.
+
+The code below computes the throughput, or the data size we can handle with a given time limit.
+
+```{r atime-pred}
+vec.mat.pred <- predict(vec.mat.ref)
+plot(vec.mat.pred)
+```
+
+Above we see the `N` at the time limit is about the same for sparse `Matrix` and `vector`, both orders of magnitude larger than the `N` for dense `matrix`.
+
+## Session info
+
+```{r}
+sessionInfo()
+```

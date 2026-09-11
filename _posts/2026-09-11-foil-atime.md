@@ -28,7 +28,8 @@ For example, consider sparse matrix or dense vector allocation (Figure 4 of [ati
 ``` r
 library(Matrix)
 vec.mat.result <- atime::atime(
-  N = 10^seq(1, 7, by=0.25),  
+  seconds.limit=0.1,
+  N = 10^seq(1, 8, by=0.25),  
   vector = numeric(N),
   matrix = matrix(0, N, N),
   Matrix = Matrix(0, N, N),
@@ -107,3 +108,78 @@ In `atime` performance testing, test cases are defined in a special file, `packa
 In the `foil` proposal, I did not see any mention of how the tests are defined.
 I think it's pretty important that test cases for performance should be separate from other test cases like unit tests, which have small data sizes and so are irrelevant for performance.
 That is the main drawback of previous systems like [Rperform](https://github.com/analyticalmonk/Rperform).
+
+## Other figures
+
+The code below computes best asymptotic references:
+
+
+``` r
+vec.mat.ref <- atime::references_best(vec.mat.result)
+plot(vec.mat.ref)
+```
+
+```
+## Warning in ggplot2::scale_y_log10(""): log-10 transformation introduced infinite values.
+```
+
+![plot of chunk atime-ref](/assets/img/2026-09-11-foil-atime/atime-ref-1.png)
+
+We see above linear time, `O(N)`, for `vector` and sparse `Matrix`, but quadratic time, `O(N^2)` for dense `matrix`.
+
+The code below computes the throughput, or the data size we can handle with a given time limit.
+
+
+``` r
+vec.mat.pred <- predict(vec.mat.ref)
+plot(vec.mat.pred)
+```
+
+```
+## Warning in ggplot2::scale_x_log10("N", breaks = meas[, 10^seq(ceiling(min(log10(N))), : log-10 transformation
+## introduced infinite values.
+```
+
+![plot of chunk atime-pred](/assets/img/2026-09-11-foil-atime/atime-pred-1.png)
+
+Above we see the `N` at the time limit is about the same for sparse `Matrix` and `vector`, both orders of magnitude larger than the `N` for dense `matrix`.
+
+## Session info
+
+
+``` r
+sessionInfo()
+```
+
+```
+## R Under development (unstable) (2026-07-28 r90311)
+## Platform: x86_64-pc-linux-gnu
+## Running under: Ubuntu 24.04.5 LTS
+## 
+## Matrix products: default
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=en_US.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+## 
+## time zone: America/Toronto
+## tzcode source: system (glibc)
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] Matrix_1.7-6
+## 
+## loaded via a namespace (and not attached):
+##  [1] directlabels_2026.8.28 vctrs_0.7.3            knitr_1.51             cli_3.6.6              xfun_0.60             
+##  [6] rlang_1.3.0            otel_0.2.0             bench_1.1.4            generics_0.1.4         S7_0.2.2              
+## [11] data.table_1.18.6.1    glue_1.8.1             scales_1.4.0           grid_4.7.0             evaluate_1.0.5        
+## [16] tibble_3.3.1           profmem_0.7.0          lifecycle_1.0.5        compiler_4.7.0         dplyr_1.2.1           
+## [21] RColorBrewer_1.1-3     Rcpp_1.1.2             pkgconfig_2.0.3        atime_2026.4.2         farver_2.1.2          
+## [26] lattice_0.22-9         R6_2.6.1               tidyselect_1.2.1       pillar_1.11.1          magrittr_2.0.5        
+## [31] tools_4.7.0            withr_3.0.3            gtable_0.3.6           ggplot2_4.0.3
+```
