@@ -1459,7 +1459,7 @@ So we configure via
 
 ```
 sudo aptitude install libgccjit-12-dev gnutls-dev 
-CC=/usr/bin/gcc ./configure --with-gif=ifavailable --with-gnutls=1 --prefix=$HOME
+./configure --with-gif=ifavailable --with-gnutls=ifavailable --prefix=$HOME
 make
 make install
 ```
