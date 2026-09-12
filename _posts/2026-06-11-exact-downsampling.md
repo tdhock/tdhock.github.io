@@ -431,6 +431,9 @@ n_max <- grid_long[, .SD[value==max(value)], by=.(prefix, class)]
    geom_line(aes(
      p_neg, value, color=class, size=class, linetype=prefix),
      data=grid_long)+
+   geom_hline(aes(
+     yintercept=value),
+     data=data.frame(value=as.numeric(ltab)))+
    scale_fill_manual(values=c(max="black"))+
    geom_point(aes(
      p_neg, value, color=class, fill=point),
