@@ -1419,3 +1419,107 @@ make install
 Above we see Emacs 29.3 (bundled in Ubuntu Noble 24.04) and Emacs 31.1 (compiled from source released Aug 2026) running on my work laptop.
 Left/old shows incorrect highlighting, whereas right/new is correct, thanks to my patch!
 
+The configure above results in emacs without download capabilities on my old MacBook (package-install does not work).
+
+```
+(base) tdhock@tdhock-MacBook:~/src/emacs-31.1$ ./configure --with-gif=ifavailable --with-gnutls=1 --prefix=$HOME
+checking for xcrun... no
+…
+checking for gcc_jit_context_acquire in -lgccjit... no
+configure: WARNING: Elisp native compiler can't be enabled as libgccjit was not
+found.
+Please try installing libgccjit or a similar package if you want to have it
+enabled.
+checking for libgccjit.h... no
+configure: WARNING: Elisp native compiler can't be enabled as libgccjit header files
+were not found.
+Please try installing libgccjit-dev or a similar package if you want to have it
+enabled.
+.
+configure: error: The following required libraries were not found:
+     gnutls
+Maybe some development libraries/packages are missing?
+To build anyway, give:
+     --with-gnutls=ifavailable
+as options to configure.
+
+(base) tdhock@tdhock-MacBook:~/src/emacs-31.1$  aptitude search gnutls-dev
+v   gnutls-dev                      -                           
+…
+
+(base) tdhock@tdhock-MacBook:~/src/emacs-31.1$  aptitude search libgccjit
+…
+p   libgccjit-12-dev                - compilation à la volée de GCC — fichiers d
+
+(base) tdhock@tdhock-MacBook:~/src/emacs-31.1$ gcc --version
+gcc (GCC) 12.3.0
+```
+
+So we configure via
+
+```
+sudo aptitude install libgccjit-12-dev gnutls-dev 
+CC=/usr/bin/gcc ./configure --with-gif=ifavailable --with-gnutls=1 --prefix=$HOME
+make
+make install
+```
+
+Above was still not sufficient for libgccjit, see below.
+
+```
+(base) tdhock@tdhock-MacBook:~/src/emacs-31.1$ ./configure --with-gif=ifavailable --with-gnutls=1 --prefix=$HOME
+checking for xcrun... no
+…
+checking for gcc_jit_context_acquire in -lgccjit... no
+configure: WARNING: Elisp native compiler can't be enabled as libgccjit was not
+found.
+Please try installing libgccjit or a similar package if you want to have it
+enabled.
+checking for libgccjit.h... no
+configure: WARNING: Elisp native compiler can't be enabled as libgccjit header files
+were not found.
+Please try installing libgccjit-dev or a similar package if you want to have it
+enabled.
+…
+configure: WARNING: This configuration installs a 'movemail' program
+that does not retrieve POP3 email.  By default, Emacs 25 and earlier
+installed a 'movemail' program that retrieved POP3 email via only
+insecure channels, a practice that is no longer recommended but that
+you can continue to support by using './configure --with-pop'.
+configure: You might want to install GNU Mailutils
+<https://mailutils.org> and use './configure --with-mailutils'.
+```
+
+why? Maybe not the right gcc?
+
+```
+(base) tdhock@tdhock-MacBook:~/src/emacs-31.1$ which gcc
+/home/tdhock/bin/gcc
+(base) tdhock@tdhock-MacBook:~/src/emacs-31.1$ /usr/bin/gcc --version
+gcc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+```
+
+Above we see that gcc-12 we saw earlier is under /home, whereas /usr/bin/gcc is version 11, so we install libgccjit-11-dev and tell configure to use that gcc.
+
+```
+(base) tdhock@tdhock-MacBook:~/src/emacs-31.1$  aptitude search libgccjit
+p   libgccjit-10-dev                - compilation à la volée de GCC — fichiers d
+p   libgccjit-10-dev:i386           - compilation à la volée de GCC — fichiers d
+p   libgccjit-10-doc                - compilation à la volée de GCC — documentat
+p   libgccjit-11-dev                - compilation à la volée de GCC — fichiers d
+…
+```
+
+So below seems to work:
+
+```
+sudo aptitude install libgccjit-11-dev gnutls-dev mailutils
+CC=/usr/bin/gcc ./configure --with-gif=ifavailable --with-gnutls=1 --prefix=$HOME
+make
+make install
+```
+
+![emacs 27 vs 31](/assets/img/2026-03-24-emacs-compile/emacs-27-31.png)
+
+Above we see Emacs 27.1 (bundled in Ubuntu Jammy 22.04) and Emacs 31.1 (compiled from source released Aug 2026) running on my old ~2010 MacBook.
+Both left/old and right/new show correct highlighting, which indicates that the issue was a regression introduced some time between Emacs versions 27.1 and 29.3, and that my patch fixed this regression.
