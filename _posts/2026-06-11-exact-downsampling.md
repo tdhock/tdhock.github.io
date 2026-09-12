@@ -239,7 +239,7 @@ compute_target_counts(
 ## 10: 0.001 3884112  3888 3888000 1944000 1944000 5828112 1947888      0.001
 ```
 
-Above we can see that this method is accurate even for 
+Above we can see that this method is accurate even for these arbitrary target proportions.
 
 ## Visualization
 
@@ -334,14 +334,6 @@ n_max <- grid_long[, .SD[value==max(value)], by=.(prefix, class)]
      p_neg, value, color=class, fill=point),
      shape=21,
      data=n_max[, point := "max"]))
-```
-
-```
-## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-## ℹ Please use `linewidth` instead.
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-## generated.
 ```
 
 ![plot of chunk higgs](/assets/img/2026-06-11-exact-downsampling/higgs-1.png)
