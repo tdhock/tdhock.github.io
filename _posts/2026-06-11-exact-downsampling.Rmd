@@ -37,7 +37,8 @@ Tneg=5170877
 Below are the target proportions of the minority negative class:
 
 ```{r}
-Target_prop <- 10^seq(-1, -5)
+lseq <- 10^seq(-1, -5)
+(Target_prop <- sort(c(4.5*lseq, lseq)))
 ```
 
 Below we repeat the calculations in the previous post:
@@ -59,11 +60,17 @@ library(data.table)
   check_prop = n_neg/n_imb
 )][])
 ```
+
+* `Target_prop` is the desired proportion of negative samples in the imbalanced subset.
+* `N_pos_neg` is the number of positive and negative samples in the balanced subset.
+* `n_pos` and `n_neg` are the numbers of samples in the imbalanced subset, and `n_imb` is their sum.
+* `pos` and `neg` are the total numbers of samples, across both subsets. We see that `pos=Tpos` in every row, and that `neg<Tneg` is true in every row except the last.
+* `check_prop` is the actual proportion of negative samples in the imbalanced subset.
+
 The numbers above seem reasonable, but
 
-* `Target_prop=5e-01` (balanced) has `neg>Tneg` which is not possible (not enough negative samples).
+* `Target_prop=4.5e-01` (almost balanced) has `neg>Tneg=5170877` which is not possible (not enough negative samples).
 * the `Target_prop` (desired imbalance) is often a bit larger than `check_prop` (actual imbalance).
-* the `check_N` columns are off by one or two.
 
 ## Proposed fix
 
@@ -100,9 +107,32 @@ compute_target_counts <- function(p_neg, Tpos, Tneg){
   ][]
 }
 p_neg <- sort(c(Target_prop, 1-Target_prop), decreasing = TRUE)
-#p_neg <- sort(seq(0.45, 0.55, by=0.01), decreasing = TRUE)
 compute_target_counts(p_neg, Tpos, Tneg)
 ```
+
+Above we see the issues are fixed:
+
+* Every row has a valid `neg <= Tneg = 5170877` (no more `neg` values that are too large to create), even for large values of the target proportion for the negative class, `p_neg >= 0.45`.
+* `check_prop` is equal to `p_neg` in every row (no more small differences).
+
+Below we do the computation for some other target proportions:
+
+```{r}
+compute_target_counts(
+  sort(seq(0.25, 0.75, by=0.05), decreasing = TRUE),
+  Tpos, Tneg)
+compute_target_counts(
+  sort(seq(0.45, 0.55, by=0.01), decreasing = TRUE),
+  Tpos, Tneg)
+compute_target_counts(
+  sort(seq(0.99, 0.999, by=0.001), decreasing = TRUE),
+  Tpos, Tneg)
+compute_target_counts(
+  sort(seq(0.001, 0.01, by=0.001), decreasing = TRUE),
+  Tpos, Tneg)
+```
+
+Above we can see that this method is accurate even for 
 
 ## Visualization
 
