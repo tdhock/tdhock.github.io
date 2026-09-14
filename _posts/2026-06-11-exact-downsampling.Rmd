@@ -69,9 +69,8 @@ library(data.table)
 
 The numbers above seem reasonable, but
 
-* the `Target_prop` (desired imbalance) is often a bit larger than `check_prop` (actual imbalance).
-* There are almost the same number of samples in the imbalanced and balanced subsets, but not quite.
-* `Target_prop=4.5e-01` (almost balanced) has `neg>Tneg=5170877` which is not possible (not enough negative samples).
+* There are almost the same number of samples in the imbalanced and balanced subsets, but not quite (difference shown in `extra_imb` column below).
+* `Target_prop=4.5e-01` (almost balanced) has `neg>Tneg=5170877` which is not possible (not enough negative samples, shown as negative value in `unused_neg` column below).
 
 ```{r}
 orig_dt[, .(
@@ -94,20 +93,23 @@ We use these facts
 * `N_pos_neg + n_neg <= Tneg`
 
 Starting with the inequality `N_pos_neg + n_neg <= Tneg`, we use the definition of `N_pos_neg` and `p_neg` to get `n_neg/(2*p_neg)*(2*p_neg+1) <= Tneg`, which we solve for `n_neg`. Same for the `Tpos` inequality.
-That gives us the code below, which also works for negative proportions greater than 0.5:
+If the variable were real numbers, it would be a linear program, and we could interpret the code below as solving by attempting to identify which constraint is active.
+
+Actually the variables are integers, so we need to do some rounding.
+The approach below first rounds `N_pos_neg` which is the number of negative and positive samples in the balanced subset, which therefore has `N_pos_neg*2` samples (always an even number).
+To make sure the imbalanced subset has the same number of samples, we round the counts of the smaller class (`n_small` in the code below), and then define the counts of the larger class to be consistent.
+That gives us the code below,
 
 ```{r}
 compute_target_counts <- function(p_neg, Tpos, Tneg){
   n_pos_max <- 2*Tpos*(1-p_neg)/(3-2*p_neg)
   n_pos_max_neg <- n_pos_max*p_neg/(1-p_neg)
-  n_pos_max_neg/(n_pos_max+n_pos_max_neg)
   n_pos_max_N <- (n_pos_max_neg+n_pos_max)/2
   n_pos_max_neg_extra <- Tneg-n_pos_max_neg-n_pos_max_N
   n_neg_max <- 2*Tneg*p_neg/(1+2*p_neg)
   n_neg_max_pos <- n_neg_max*(1-p_neg)/p_neg
-  n_neg_max/(n_neg_max_pos+n_neg_max)
   n_neg_max_N <- (n_neg_max_pos+n_neg_max)/2
-  n_neg_max_pos_extra <- Tpos-n_neg_max_pos-n_neg_max_N
+  ##n_neg_max_pos_extra <- Tpos-n_neg_max_pos-n_neg_max_N
   N_pos_neg <- as.integer(floor(
     ifelse(n_pos_max_neg_extra<0, n_neg_max_N, n_pos_max_N)))
   n_small <- as.integer(round(ifelse(
@@ -133,34 +135,27 @@ compute_target_counts <- function(p_neg, Tpos, Tneg){
 }
 p_neg <- sort(c(Target_prop, 1-Target_prop), decreasing = TRUE)
 (fix_dt <- compute_target_counts(p_neg, Tpos, Tneg))
-compute_target_counts(0.05, 140L, 60L)
+```
+
+Above we see `check_prop` is still nearly equal to `p_neg` in every row, and the issues are fixed:
+
+* it works for negative proportions greater than 0.5, unlike the previous code.
+* There are always the same number of samples in the imbalanced and balanced subsets (`extra_imb=0` in every row).
+* Every row has a valid `neg <= Tneg = 5170877` (no more `neg` values that are too large to create), even for large values of the target proportion for the negative class, `p_neg >= 0.45`. This is verified above: all rows have non-negative numbers in the `unused` columns.
+
+Below we do the computation for a simple example with 140 positive samples, and 60 negative samples, which should be easy to split into
+
+* a balanced subset with 50 positive and 50 negative samples,
+* and an imbalanced subset with 90 positive and 10 negative samples (10% imbalance).
+
+```{r}
 compute_target_counts(seq(0.05, 0.15, by=0.01), 140L, 60L)
 ```
 
-Above we see the issues are fixed:
+Above we can see that this method is accurate:
 
-* `check_prop` is nearly equal to `p_neg` in every row (`prop_diff` 1e-8 or smaller).
-* There are nearly the same number of samples in the imbalanced and balanced subsets (`extra_imb` 0 or 1).
-* Every row has a valid `neg <= Tneg = 5170877` (no more `neg` values that are too large to create), even for large values of the target proportion for the negative class, `p_neg >= 0.45`.
-
-Below we do the computation for some other target proportions:
-
-```{r}
-compute_target_counts(
-  sort(seq(0.25, 0.75, by=0.05), decreasing = TRUE),
-  Tpos, Tneg)
-compute_target_counts(
-  sort(seq(0.45, 0.55, by=0.01), decreasing = TRUE),
-  Tpos, Tneg)
-compute_target_counts(
-  sort(seq(0.99, 0.999, by=0.001), decreasing = TRUE),
-  Tpos, Tneg)
-compute_target_counts(
-  sort(seq(0.001, 0.01, by=0.001), decreasing = TRUE),
-  Tpos, Tneg)
-```
-
-Above we can see that this method is accurate even for these arbitrary target proportions.
+* for `p_neg=0.1`, we get `N_pos_neg=50`, `n_pos=90`, and `n_neg=10`.
+* for other `p_neg` values (target proportion of negative samples in imbalanced subset), we get reasonable results (small `prop_diff` values).
 
 ## Visualization
 
@@ -172,37 +167,62 @@ p_lo <- c(
   10^seq(-5, -1, by=0.1))
 p_grid <- unique(sort(c(p_lo, 1-p_lo)))
 (grid_dt <- compute_target_counts(p_grid, Tpos, Tneg))
-grid_dt[, diff := p_neg-check_prop][order(abs(diff))]
 library(ggplot2)
-(grid_long <- melt(grid_dt, measure.vars=measure(prefix, class, pattern="^(|n_|N_)(pos|neg)$")))
-n_max <- grid_long[, .SD[value==max(value)], by=.(prefix, class)]
-
-(gg <- ggplot()+
-   ggtitle("total counts")+
+mygg <- function(dt, ref.vec){
+  grid_long <- melt(
+    dt,
+    measure.vars=measure(prefix, class, pattern="^(|n_|N_)(pos|neg)$")
+  )[, subset := ifelse(prefix=="", "imbalanced\n+balanced", "imbalanced")]
+  n_max <- grid_long[, .SD[value==max(value)], by=.(subset, class)]
+  ref.df <- data.frame(
+    vjust=c(-0.5, 1.5),
+    class=c("pos","neg"),
+    value=ref.vec)
+  ggplot()+
    theme_bw()+
-   scale_size_manual(values=c(
+   scale_linewidth_manual(values=c(
      neg=3, pos=1))+
    scale_linetype_manual(values=c(
      "solid",
      "dotted",
      "dashed"))+
    geom_line(aes(
-     p_neg, value, color=class, size=class, linetype=prefix),
+     p_neg, value, color=class, linewidth=class, linetype=subset),
      data=grid_long)+
    geom_hline(aes(
      yintercept=value),
-     data=data.frame(value=c(Tpos, Tneg)))+
-   scale_fill_manual(values=c(max="black"))+
+     data=ref.df)+
+   geom_text(aes(
+     0, value,
+     vjust=vjust,
+     label=sprintf(
+       " Total %s samples = %s",
+       class, format(value, big.mark=",", scientific=FALSE, trim=TRUE))),
+     hjust=0,
+     data=ref.df)+
+    scale_fill_manual(values=c(max="black"))+
+    scale_y_continuous("Number of samples (linear scale)")+
+    scale_x_continuous(
+      "Propportion of negative samples in imbalanced subset (linear scale)")+
    geom_point(aes(
      p_neg, value, color=class, fill=point),
      shape=21,
-     data=n_max[, point := "max"]))
+     data=n_max[, point := "max"])
+}
+(gg <- mygg(grid_dt, c(Tpos, Tneg)))
 ```
+
+In these data, we see that 
+
+* for small values of the proportion of negative samples in the imbalanced subset, all positive samples are used, and some negative samples are unused.
+* for large values of the proportion of negative samples in the imbalanced subset, all negative samples are used, and some positive samples are unused.
 
 ```{r higgs-log}
 gg+
-  scale_x_continuous(transform="logit", breaks=breaks)+
-  scale_y_log10()
+  scale_x_continuous(
+    "Propportion of negative samples in imbalanced subset (logit scale)",
+    transform="logit", breaks=breaks)+
+  scale_y_log10("Number of samples (log scale)")
 ```
 
 ## Laribi2024 data
@@ -213,31 +233,11 @@ These data come from the [zenodo](https://zenodo.org/records/12954673) of Laribi
 Laribi_dt <- fread("~/projects/stratified-group-cv/data/Laribi2024.csv")
 (ltab <- table(Laribi_dt$target))
 min.n <- 10
-(Laribi_grid_dt <- compute_target_counts(p_grid, ltab[2], ltab[1])[min.n <= n_neg & min.n <= n_pos])
-(grid_long <- melt(Laribi_grid_dt, measure.vars=measure(prefix, class, pattern="^(|n_|N_)(pos|neg)$")))
-n_max <- grid_long[, .SD[value==max(value)], by=.(prefix, class)]
-
-(gg <- ggplot()+
-   ggtitle("total counts")+
-   theme_bw()+
-   scale_size_manual(values=c(
-     neg=3, pos=1))+
-   scale_linetype_manual(values=c(
-     "solid",
-     "dotted",
-     "dashed"))+
-   geom_line(aes(
-     p_neg, value, color=class, size=class, linetype=prefix),
-     data=grid_long)+
-   geom_hline(aes(
-     yintercept=value),
-     data=data.frame(value=as.numeric(ltab)))+
-   scale_fill_manual(values=c(max="black"))+
-   geom_point(aes(
-     p_neg, value, color=class, fill=point),
-     shape=21,
-     data=n_max[, point := "max"]))
+(Laribi_grid_dt <- compute_target_counts(p_grid, ltab[1], ltab[2])[min.n <= n_neg & min.n <= n_pos])
+(gg <- mygg(Laribi_grid_dt, as.numeric(ltab)))
 ```
+
+In these data we see that for any values of the proportion of negative samples in the imbalanced subset, all negative samples are used, and some positive samples are unused.
 
 ```{r Laribi-log}
 gg+
@@ -245,10 +245,14 @@ gg+
   scale_y_log10()
 ```
 
-```{r}
-Laribi_grid_dt[order(unused_neg)]
-Laribi_grid_dt[order(unused_pos)]
-```
+Note the x axis limits in the figure above denote the extreme negative class proportions which can be supported using these data, with a max of at least 10 samples from each class in each subset.
+
+## Conclusions
+
+We have studied a robust method for dividing a binary classification data set into one balanced subset, and another imbalanced subset, with a variable amount of class imbalance. We showed that the proposed method guarantees the same number of samples in each subset, so this method can be used with [SOAK](https://onlinelibrary.wiley.com/doi/10.1002/sam.70055), for comparing machine learning algorithms for imbalanced binary classification. Future work includes
+
+* application to benchmark data (Higgs, MNIST, etc).
+* generalization to multiple classes.
 
 ## session info
 
