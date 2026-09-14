@@ -1,0 +1,196 @@
+---
+layout: post
+title: Hierarchical imbalanced data generation
+description: More controlled comparisons
+---
+
+```{r Ropts, echo=FALSE}
+repo.dir <- normalizePath("..")
+post.id <- "2026-09-14-hierachical-imbalanced-subset-generation"
+fig.path <- file.path(repo.dir, "assets", "img", post.id)
+options(width=120)
+knitr::opts_chunk$set(
+  dpi=100,
+  fig.path=paste0(fig.path, "/"),
+  fig.width=10,
+  fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
+  fig.height=6)
+if(FALSE){
+  knitr::knit(paste0(post.id, ".Rmd"))
+}
+```
+
+The purpose of this page is to continue the exploration of [More precise imbalanced data generation](https://tdhock.github.io/blog/2026/exact-downsampling).
+That post explained how to divide a binary classification data set into two subsets:
+
+* one balanced subset with 50% positive, 50% negative labels.
+* one imbalanced subset with an arbitrary proportion of negative labels, `p_neg`.
+* such that the two subsets have the same number of samples.
+
+That setup can be used for comparing imbalanced versus balanced training, in the context of our recently proposed [SOAK algorithm, Hocking et al, Comp Stat Data Anal 2026](https://doi.org/10.1002/sam.70055).
+However that method does not allow for controlled comparison of training on different imbalance ratios, which would be interesting to explore how much class imbalance a learning algorithm can handle.
+That would require a hierarchical definition of imbalanced subsets, which was discussed in [another previous blog](https://tdhock.github.io/blog/2025/imbalance-openml/) (but without control for sample size).
+In this blog we explain a method which has both properties: 
+
+* subsets have equal sample sizes,
+* and different imbalance proportions are hierarchical.
+
+Both properties are desirable, to ensure controlled comparison.
+If we see a difference in test error rates, we want to be sure that the effect is due to the class imbalance, and not some other difference between train sets (like number of samples or which samples were used).
+
+## Problem with previous method
+
+We are creating machine learning algorithms for imbalanced classification problems.
+We would like to know if these algorithms work well for training on imbalanced data, and predicting on balanced data, and vice versa.
+We therefore would like to create different subsets for testing.
+Assume we start with the `higgs` data, binary classification with this many data in each class:
+
+```{r}
+Tpos=5829123L
+Tneg=5170877L
+```
+
+Below are the target proportions of the negative class:
+
+```{r}
+(Target_prop <- 10^seq(-1, -5))
+```
+
+Below we repeat the calculations in the previous post:
+
+```{r}
+library(data.table)
+compute_target_counts <- function(p_neg, Tpos, Tneg){
+  n_pos_max <- 2*Tpos*(1-p_neg)/(3-2*p_neg)
+  n_pos_max_neg <- n_pos_max*p_neg/(1-p_neg)
+  n_pos_max_N <- (n_pos_max_neg+n_pos_max)/2
+  n_pos_max_neg_extra <- Tneg-n_pos_max_neg-n_pos_max_N
+  n_neg_max <- 2*Tneg*p_neg/(1+2*p_neg)
+  n_neg_max_pos <- n_neg_max*(1-p_neg)/p_neg
+  n_neg_max_N <- (n_neg_max_pos+n_neg_max)/2
+  ##n_neg_max_pos_extra <- Tpos-n_neg_max_pos-n_neg_max_N
+  N_pos_neg <- as.integer(floor(
+    ifelse(n_pos_max_neg_extra<0, n_neg_max_N, n_pos_max_N)))
+  n_small <- as.integer(round(ifelse(
+    p_neg<0.5,
+    ifelse(n_pos_max_neg_extra<0, n_neg_max, n_pos_max_neg),
+    ifelse(n_pos_max_neg_extra<0, n_neg_max_pos, n_pos_max))))
+  n_large <- 2L*N_pos_neg-n_small
+  data.table(
+    p_neg,
+    N_pos_neg,
+    n_pos=ifelse(p_neg<0.5, n_large, n_small),
+    n_neg=ifelse(p_neg<0.5, n_small, n_large)
+  )[, let(
+    pos = n_pos + N_pos_neg,
+    neg = n_neg + N_pos_neg,
+    check_prop = n_neg/(n_neg+n_pos)
+  )][, let(
+    prop_diff=check_prop-p_neg,
+    extra_imb=n_pos+n_neg - 2L*N_pos_neg,
+    unused_neg=Tneg-neg,
+    unused_pos=Tpos-pos
+  )][]
+}
+p_neg <- sort(c(Target_prop, 1-Target_prop), decreasing = TRUE)
+(prev_dt <- compute_target_counts(p_neg, Tpos, Tneg))
+```
+
+Above we see the results from the previous post.
+
+* it works for negative proportions greater than 0.5.
+* There are always the same number of samples in the imbalanced and balanced subsets (`extra_imb=0` in every row).
+* Every row has a valid `neg <= Tneg = 5170877` (no `neg` values that are too large to create), even for large values of the target proportion for the negative class, `p_neg >= 0.45`. This is verified above: all rows have non-negative numbers in the `unused` columns.
+
+So each row defines a valid pair of subsets (one balanced, one imbalanced), but the rows are not consistent with each other.
+Look at the `N_pos_neg` column. Values are not quite the same, so we can’t use this method to create hierarchical subsets.
+We would like to have, for example:
+
+* `p_neg=0.01` and `p_neg=0.1` having the same sized subsets, and
+* `p_neg=0.01` having a subset of the negative examples of `p_neg=0.1`, and
+* `p_neg=0.1` having a subset of the positive examples of `p_neg=0.01`.
+
+## New hierarchical method
+
+We assume there is a list of desired proportions of the negative class in the imbalanced subset:
+
+```{r}
+Target_prop
+```
+
+The most extreme is:
+
+```{r}
+xp_neg <- min(Target_prop)
+```
+
+The main idea of the new method is to divide the whole data into three sets:
+
+* two sets X and Y with equal numbers of positive and negative samples,
+* one set E with some extra samples of either the positive or negative class.
+
+For each target proportion of negative samples in the imbalanced subset,
+these sets will be used to create subsets:
+
+* Xi versus Y: an imbalanced version of X, created by removing the first few rows of the minority class, and by adding the first few rows of E.
+* X versus Yi: an imbalanced version of Y, created by removing the first few rows of the minority class, and by adding the first few rows of E.
+* X versus Y: both subsets balanced, for comparing prediction error rates with a baseline training method.
+
+### Identifying active constraint
+
+There are two inequality constraints to consider in the computation of `N`, the number of positive samples (and negative samples) in A and B (there are 2N samples in A, 2N samples in B, 4N samples total across A and B).
+
+First constraint is the same as the previous method, `N + n_pos <= Tpos`.
+If this is active, then the number of positive samples in the most imbalanced subset is the limiting factor.
+
+```{r}
+n_pos_max <- 2*Tpos*(1-xp_neg)/(3-2*xp_neg)
+n_pos_max_neg <- n_pos_max*xp_neg/(1-xp_neg)
+(n_pos_max_N <- as.integer(floor((n_pos_max_neg+n_pos_max)/2)))
+(n_pos_max_bal_neg <- n_pos_max_N*2)
+Tneg-n_pos_max_bal_neg
+```
+
+We see above that there are many negative samples left over, so this works.
+Below we consider the other option, could N be limited by the number of negative samples in the balanced subset?
+
+```{r}
+(Tneg_N <- as.integer(floor(Tneg/2)))
+(Tneg_n_pos <- Tneg*(1-xp_neg))
+(Tneg_imb_pos <- Tneg_n_pos+Tneg_N)
+Tpos-Tneg_imb_pos
+```
+
+We see above a negative value, indicating this is not feasible.
+The other constraint must be active.
+
+### Computing subset sizes
+
+
+```{r}
+data.table(
+  Target_prop=c(0.5, Target_prop),
+  n_bal=2L*n_pos_max_N
+)[, let(
+  n_neg=as.integer(round(2*n_pos_max_N*Target_prop))
+)][, let(
+  n_pos=n_bal-n_neg
+)][, let(
+  n_imb=n_pos+n_neg,
+  extra_pos=Tpos-n_pos-n_pos_max_N,
+  extra_neg=Tneg-n_neg-n_pos_max_N
+)][]
+```
+
+TODO target prop > 0.5.
+TODO sizes from other constraints.
+
+## Conclusions
+
+TODO
+
+## session info
+
+```{r}
+sessionInfo()
+```
