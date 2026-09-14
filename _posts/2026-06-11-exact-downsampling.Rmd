@@ -30,8 +30,8 @@ We therefore would like to create different subsets for testing.
 Assume we start with the `higgs` data, binary classification with this many data in each class:
 
 ```{r}
-Tpos=5829123
-Tneg=5170877
+Tpos=5829123L
+Tneg=5170877L
 ```
 
 Below are the target proportions of the minority negative class:
@@ -98,37 +98,43 @@ That gives us the code below, which also works for negative proportions greater 
 
 ```{r}
 compute_target_counts <- function(p_neg, Tpos, Tneg){
-  p_small <- ifelse(p_neg<0.5, p_neg, 1-p_neg)
-  n_small = as.integer(pmin(
-    2*Tpos*p_small/(3*(1-p_neg)+p_neg),
-    2*Tneg*p_small/(1+2*p_neg)
-  ))
-  data.table(p_neg)[, let(
-    n_pos = ifelse(
-      p_neg<0.5,
-      as.integer(n_small*(1-p_neg)/p_neg),
-      n_small),
-    n_neg = ifelse(
-      p_neg<0.5,
-      n_small,
-      as.integer(n_small*p_neg/(1-p_neg)))
-  )][
-  , n_imb := n_pos + n_neg
-  ][
-  , N_pos_neg := as.integer(n_imb/2)
-  ][, let(
+  n_pos_max <- 2*Tpos*(1-p_neg)/(3-2*p_neg)
+  n_pos_max_neg <- n_pos_max*p_neg/(1-p_neg)
+  n_pos_max_neg/(n_pos_max+n_pos_max_neg)
+  n_pos_max_N <- (n_pos_max_neg+n_pos_max)/2
+  n_pos_max_neg_extra <- Tneg-n_pos_max_neg-n_pos_max_N
+  n_neg_max <- 2*Tneg*p_neg/(1+2*p_neg)
+  n_neg_max_pos <- n_neg_max*(1-p_neg)/p_neg
+  n_neg_max/(n_neg_max_pos+n_neg_max)
+  n_neg_max_N <- (n_neg_max_pos+n_neg_max)/2
+  n_neg_max_pos_extra <- Tpos-n_neg_max_pos-n_neg_max_N
+  N_pos_neg <- as.integer(floor(
+    ifelse(n_pos_max_neg_extra<0, n_neg_max_N, n_pos_max_N)))
+  n_small <- as.integer(round(ifelse(
+    p_neg<0.5,
+    ifelse(n_pos_max_neg_extra<0, n_neg_max, n_pos_max_neg),
+    ifelse(n_pos_max_neg_extra<0, n_neg_max_pos, n_pos_max))))
+  n_large <- 2L*N_pos_neg-n_small
+  data.table(
+    p_neg,
+    N_pos_neg,
+    n_pos=ifelse(p_neg<0.5, n_large, n_small),
+    n_neg=ifelse(p_neg<0.5, n_small, n_large)
+  )[, let(
     pos = n_pos + N_pos_neg,
     neg = n_neg + N_pos_neg,
-    check_prop = n_neg/n_imb
+    check_prop = n_neg/(n_neg+n_pos)
   )][, let(
     prop_diff=check_prop-p_neg,
-    extra_imb=n_imb - 2*N_pos_neg,
+    extra_imb=n_pos+n_neg - 2L*N_pos_neg,
     unused_neg=Tneg-neg,
     unused_pos=Tpos-pos
   )][]
 }
 p_neg <- sort(c(Target_prop, 1-Target_prop), decreasing = TRUE)
 (fix_dt <- compute_target_counts(p_neg, Tpos, Tneg))
+compute_target_counts(0.05, 140L, 60L)
+compute_target_counts(seq(0.05, 0.15, by=0.01), 140L, 60L)
 ```
 
 Above we see the issues are fixed:
@@ -206,27 +212,9 @@ These data come from the [zenodo](https://zenodo.org/records/12954673) of Laribi
 ```{r Laribi}
 Laribi_dt <- fread("~/projects/stratified-group-cv/data/Laribi2024.csv")
 (ltab <- table(Laribi_dt$target))
-Tpos <- ltab[1]
-Tneg <- ltab[2]
-(Laribi_grid_dt <- data.table(
-  p_neg
-)[, let(
-  n_neg_max=2*Tneg*p_neg/(2*p_neg+1),
-  n_pos_max=2*Tpos*(1-p_neg)/(3-2*p_neg)
-)][, let(
-  n_neg_max_pos=n_neg_max*(1-p_neg)/p_neg,
-  n_pos_max_neg=n_pos_max*p_neg/(1-p_neg)
-)][, let(
-  n_neg_max_N=(n_neg_max+n_neg_max_pos)/2,
-  n_pos_max_N=(n_pos_max+n_pos_max_neg)/2
-)][, let(
-  n_neg_max_D=Tpos-n_neg_max_N-n_neg_max_pos,
-  n_pos_max_D=Tneg-n_pos_max_N-n_pos_max_neg
-)][])
-Laribi_grid_dt[100]
-(Laribi_grid_dt <- compute_target_counts(p_grid, Tpos, Tneg)[is.finite(check_prop)])
+min.n <- 10
+(Laribi_grid_dt <- compute_target_counts(p_grid, ltab[2], ltab[1])[min.n <= n_neg & min.n <= n_pos])
 (grid_long <- melt(Laribi_grid_dt, measure.vars=measure(prefix, class, pattern="^(|n_|N_)(pos|neg)$")))
-
 n_max <- grid_long[, .SD[value==max(value)], by=.(prefix, class)]
 
 (gg <- ggplot()+
