@@ -8,7 +8,7 @@ description: No more rounding issues
 repo.dir <- normalizePath("..")
 post.id <- "2026-06-11-exact-downsampling"
 fig.path <- file.path(repo.dir, "assets", "img", post.id)
-options(width=140)
+options(width=120)
 knitr::opts_chunk$set(
   dpi=100,
   fig.path=paste0(fig.path, "/"),
@@ -159,14 +159,23 @@ Above we can see that this method is accurate:
 
 ## Visualization
 
-```{r higgs}
+The goal of this visualization is to understand how the number of samples in each class varies, as a function of `p_neg`, the target proportion of negative samples in the imbalanced subset.
+
+```{r}
 br <- c(10^seq(-5, -1), 0.5)
-breaks=unique(c(br, 1-br))
+breaks <- unique(c(br, 1-br))
 p_lo <- c(
   seq(0.01, 0.5, by=0.01),
   10^seq(-5, -1, by=0.1))
 p_grid <- unique(sort(c(p_lo, 1-p_lo)))
 (grid_dt <- compute_target_counts(p_grid, Tpos, Tneg))
+```
+
+The table above shows the results computed on a grid of input values.
+The code above includes `p_lo` on the log and linear scale, because we want to visualize the results on both scales below.
+First, the code below does the linear scale visualization.
+
+```{r higgs}
 library(ggplot2)
 mygg <- function(dt, ref.vec){
   grid_long <- melt(
@@ -203,7 +212,7 @@ mygg <- function(dt, ref.vec){
     scale_fill_manual(values=c(max="black"))+
     scale_y_continuous("Number of samples (linear scale)")+
     scale_x_continuous(
-      "Propportion of negative samples in imbalanced subset (linear scale)")+
+      "Proportion of negative samples in imbalanced subset (linear scale)")+
    geom_point(aes(
      p_neg, value, color=class, fill=point),
      shape=21,
@@ -212,18 +221,27 @@ mygg <- function(dt, ref.vec){
 (gg <- mygg(grid_dt, c(Tpos, Tneg)))
 ```
 
+Above, the linear scale visualization emphasizes the details near the largest function values.
 In these data, we see that 
 
 * for small values of the proportion of negative samples in the imbalanced subset, all positive samples are used, and some negative samples are unused.
 * for large values of the proportion of negative samples in the imbalanced subset, all negative samples are used, and some positive samples are unused.
 
+Below, we do the log scale visualization,
+
 ```{r higgs-log}
-gg+
-  scale_x_continuous(
-    "Propportion of negative samples in imbalanced subset (logit scale)",
-    transform="logit", breaks=breaks)+
-  scale_y_log10("Number of samples (log scale)")
+mylog <- function(g){
+  g+
+    scale_x_continuous(
+      "Proportion of negative samples in imbalanced subset (logit scale)",
+      transform="logit", breaks=breaks)+
+    scale_y_log10("Number of samples (log scale)")
+}
+mylog(gg)
 ```
+
+Above, the log scale visualization emphasizes the details near the smallest values.
+In particular, the linear trends on the log scale indicate that the number of positive/negative samples calculated is linearly related to `p_neg`, the desired proportion of negative samples in the imbalanced subset.
 
 ## Laribi2024 data
 
@@ -240,9 +258,7 @@ min.n <- 10
 In these data we see that for any values of the proportion of negative samples in the imbalanced subset, all negative samples are used, and some positive samples are unused.
 
 ```{r Laribi-log}
-gg+
-  scale_x_continuous(transform="logit", breaks=breaks)+
-  scale_y_log10()
+mylog(gg)
 ```
 
 Note the x axis limits in the figure above denote the extreme negative class proportions which can be supported using these data, with a max of at least 10 samples from each class in each subset.

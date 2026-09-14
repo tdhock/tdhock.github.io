@@ -186,6 +186,7 @@ p_neg <- sort(c(Target_prop, 1-Target_prop), decreasing = TRUE)
 ## 19: 0.000045   1943099 3886023     175 5829122 1943274 4.503116e-05  3.115899e-08         0    3227603          1
 ## 20: 0.000010   1943053 3886067      39 5829120 1943092 1.003575e-05  3.575301e-08         0    3227785          3
 ##        p_neg N_pos_neg   n_pos   n_neg     pos     neg   check_prop     prop_diff extra_imb unused_neg unused_pos
+##        <num>     <int>   <int>   <int>   <int>   <int>        <num>         <num>     <int>      <int>      <int>
 ```
 
 Above we see `check_prop` is still nearly equal to `p_neg` in every row, and the issues are fixed:
@@ -227,10 +228,12 @@ Above we can see that this method is accurate:
 
 ## Visualization
 
+The goal of this visualization is to understand how the number of samples in each class varies, as a function of `p_neg`, the target proportion of negative samples in the imbalanced subset.
+
 
 ``` r
 br <- c(10^seq(-5, -1), 0.5)
-breaks=unique(c(br, 1-br))
+breaks <- unique(c(br, 1-br))
 p_lo <- c(
   seq(0.01, 0.5, by=0.01),
   10^seq(-5, -1, by=0.1))
@@ -253,6 +256,11 @@ p_grid <- unique(sort(c(p_lo, 1-p_lo)))
 ## 177: 9.999874e-01   1723640      43 3447237 1723683 5170877 9.999875e-01  1.156517e-07         0          0    4105440
 ## 178: 9.999900e-01   1723637      34 3447240 1723671 5170877 9.999901e-01  1.371344e-07         0          0    4105452
 ```
+
+The table above shows the results computed on a grid of input values.
+The code above includes `p_lo` on the log and linear scale, because we want to visualize the results on both scales below.
+First, the code below does the linear scale visualization.
+
 
 ``` r
 library(ggplot2)
@@ -291,7 +299,7 @@ mygg <- function(dt, ref.vec){
     scale_fill_manual(values=c(max="black"))+
     scale_y_continuous("Number of samples (linear scale)")+
     scale_x_continuous(
-      "Propportion of negative samples in imbalanced subset (linear scale)")+
+      "Proportion of negative samples in imbalanced subset (linear scale)")+
    geom_point(aes(
      p_neg, value, color=class, fill=point),
      shape=21,
@@ -302,18 +310,24 @@ mygg <- function(dt, ref.vec){
 
 ![plot of chunk higgs](/assets/img/2026-06-11-exact-downsampling/higgs-1.png)
 
+Above, the linear scale visualization emphasizes the details near the largest function values.
 In these data, we see that 
 
 * for small values of the proportion of negative samples in the imbalanced subset, all positive samples are used, and some negative samples are unused.
 * for large values of the proportion of negative samples in the imbalanced subset, all negative samples are used, and some positive samples are unused.
 
+Below, we do the log scale visualization,
+
 
 ``` r
-gg+
-  scale_x_continuous(
-    "Propportion of negative samples in imbalanced subset (logit scale)",
-    transform="logit", breaks=breaks)+
-  scale_y_log10("Number of samples (log scale)")
+mylog <- function(g){
+  g+
+    scale_x_continuous(
+      "Proportion of negative samples in imbalanced subset (logit scale)",
+      transform="logit", breaks=breaks)+
+    scale_y_log10("Number of samples (log scale)")
+}
+mylog(gg)
 ```
 
 ```
@@ -324,11 +338,14 @@ gg+
 ```
 
 ```
-## Warning in scale_x_continuous("Propportion of negative samples in imbalanced subset (logit scale)", : prob-logis transformation introduced
-## infinite values.
+## Warning in scale_x_continuous("Proportion of negative samples in imbalanced subset (logit scale)", : prob-logis
+## transformation introduced infinite values.
 ```
 
 ![plot of chunk higgs-log](/assets/img/2026-06-11-exact-downsampling/higgs-log-1.png)
+
+Above, the log scale visualization emphasizes the details near the smallest values.
+In particular, the linear trends on the log scale indicate that the number of positive/negative samples calculated is linearly related to `p_neg`, the desired proportion of negative samples in the imbalanced subset.
 
 ## Laribi2024 data
 
@@ -377,9 +394,7 @@ In these data we see that for any values of the proportion of negative samples i
 
 
 ``` r
-gg+
-  scale_x_continuous(transform="logit", breaks=breaks)+
-  scale_y_log10()
+mylog(gg)
 ```
 
 ```
@@ -390,7 +405,8 @@ gg+
 ```
 
 ```
-## Warning in scale_x_continuous(transform = "logit", breaks = breaks): prob-logis transformation introduced infinite values.
+## Warning in scale_x_continuous("Proportion of negative samples in imbalanced subset (logit scale)", : prob-logis
+## transformation introduced infinite values.
 ```
 
 ![plot of chunk Laribi-log](/assets/img/2026-06-11-exact-downsampling/Laribi-log-1.png)
@@ -412,31 +428,32 @@ sessionInfo()
 ```
 
 ```
-## R Under development (unstable) (2025-02-06 r87694)
+## R Under development (unstable) (2026-07-28 r90311)
 ## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 22.04.5 LTS
+## Running under: Ubuntu 24.04.5 LTS
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0  LAPACK version 3.10.0
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8     LC_MONETARY=fr_FR.UTF-8   
-##  [6] LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                  LC_ADDRESS=C               LC_TELEPHONE=C            
-## [11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=en_US.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
 ## time zone: America/Toronto
 ## tzcode source: system (glibc)
 ## 
 ## attached base packages:
-## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_3.5.1     data.table_1.17.0
+## [1] ggplot2_4.0.3       data.table_1.18.6.1
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] labeling_0.4.3   R6_2.5.1         xfun_0.50        tidyselect_1.2.1 farver_2.1.2     magrittr_2.0.3   gtable_0.3.6     glue_1.8.0      
-##  [9] tibble_3.2.1     knitr_1.49       pkgconfig_2.0.3  generics_0.1.3   dplyr_1.1.4      lifecycle_1.0.4  cli_3.6.3        scales_1.3.0    
-## [17] grid_4.5.0       vctrs_0.6.5      withr_3.0.2      compiler_4.5.0   tools_4.5.0      evaluate_1.0.3   munsell_0.5.1    pillar_1.10.1   
-## [25] colorspace_2.1-1 crayon_1.5.3     rlang_1.1.5
+##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           tidyselect_1.2.1   xfun_0.60          farver_2.1.2      
+##  [7] magrittr_2.0.5     gtable_0.3.6       glue_1.8.1         tibble_3.3.1       knitr_1.51         pkgconfig_2.0.3   
+## [13] generics_0.1.4     dplyr_1.2.1        lifecycle_1.0.5    cli_3.6.6          S7_0.2.2           scales_1.4.0      
+## [19] vctrs_0.7.3        grid_4.7.0         withr_3.0.3        compiler_4.7.0     tools_4.7.0        pillar_1.11.1     
+## [25] evaluate_1.0.5     otel_0.2.0         rlang_1.3.0
 ```
