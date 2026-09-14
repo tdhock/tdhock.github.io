@@ -21,7 +21,7 @@ Tpos=5829123L
 Tneg=5170877L
 ```
 
-Below are the target proportions of the minority negative class:
+Below are the target proportions of the negative class:
 
 
 ``` r
