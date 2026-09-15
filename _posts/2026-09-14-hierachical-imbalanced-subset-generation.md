@@ -53,6 +53,16 @@ Below we repeat the calculations in the previous post:
 
 ``` r
 library(data.table)
+```
+
+```
+## data.table 1.17.0 utilise 1 threads (voir ?getDTthreads).  Dernières actualités : r-datatable.com
+## **********
+## Running data.table in English; package support is available in English only. When searching for online help, be sure to also check for the English error message. This can be obtained by looking at the po/R-<locale>.po and po/<locale>.po files in the package source, where the native language and English error messages can be found side-by-side. You can also try calling Sys.setLanguage('en') prior to reproducing the error message.
+## **********
+```
+
+``` r
 compute_target_counts <- function(p_neg, Tpos, Tneg){
   n_pos_max <- 2*Tpos*(1-p_neg)/(3-2*p_neg)
   n_pos_max_neg <- n_pos_max*p_neg/(1-p_neg)
@@ -135,7 +145,11 @@ The most extreme is:
 
 
 ``` r
-xp_neg <- min(Target_prop)
+(xp_neg <- min(Target_prop))
+```
+
+```
+## [1] 1e-05
 ```
 
 The main idea of the new method is to divide the whole data into three sets:
@@ -159,8 +173,22 @@ If this is active, then the number of positive samples in the most imbalanced su
 
 
 ``` r
-n_pos_max <- 2*Tpos*(1-xp_neg)/(3-2*xp_neg)
-n_pos_max_neg <- n_pos_max*xp_neg/(1-xp_neg)
+(n_pos_max <- 2*Tpos*(1-xp_neg)/(3-2*xp_neg))
+```
+
+```
+## [1] 3886069
+```
+
+``` r
+(n_pos_max_neg <- n_pos_max*xp_neg/(1-xp_neg))
+```
+
+```
+## [1] 38.86108
+```
+
+``` r
 (n_pos_max_N <- as.integer(floor((n_pos_max_neg+n_pos_max)/2)))
 ```
 
@@ -221,46 +249,712 @@ Tpos-Tneg_imb_pos
 ```
 
 We see above a negative value, indicating this is not feasible.
+Maxing out the negative examples does not leave enough extra positive examples.
 The other constraint must be active.
 
 ### Computing subset sizes
 
 
+``` r
+extab <- function(Tprop, N, Tpos, Tneg){
+  dt <- data.table(
+    p_neg=sort(c(0.5, Tprop)),
+    n_bal=2L*N
+  )[, let(
+    n_neg=as.integer(round(2*N*p_neg))
+  )][, let(
+    n_pos=n_bal-n_neg
+  )][, let(
+    n_imb=n_pos+n_neg,
+    unused_pos=Tpos-n_pos-N,
+    unused_neg=Tneg-n_neg-N
+  )][]
+  list(props=dt, params=dt[, data.table(
+    extra_pos=max(n_pos-N),
+    extra_neg=max(n_neg-N),
+    N)])
+}
+extab(Target_prop, n_pos_max_N, Tpos, Tneg)
+```
+
+```
+## $props
+##    p_neg   n_bal   n_neg   n_pos   n_imb unused_pos unused_neg
+##    <num>   <int>   <int>   <int>   <int>      <int>      <int>
+## 1: 1e-05 3886106      39 3886067 3886106          3    3227785
+## 2: 1e-04 3886106     389 3885717 3886106        353    3227435
+## 3: 1e-03 3886106    3886 3882220 3886106       3850    3223938
+## 4: 1e-02 3886106   38861 3847245 3886106      38825    3188963
+## 5: 1e-01 3886106  388611 3497495 3886106     388575    2839213
+## 6: 5e-01 3886106 1943053 1943053 3886106    1943017    1284771
+## 
+## $params
+##    extra_pos extra_neg       N
+##        <int>     <int>   <int>
+## 1:   1943014         0 1943053
+```
+
+We see above that `n_bal == n_imb` for each row, which means the two subsets have the same number of samples, and we can create hierarchical subsets.
+
+### Other constraint active
+
+When would the other constraint become active?
+If there are not enough negative samples, for example ten times fewer:
+
 
 ``` r
-data.table(
-  Target_prop=c(0.5, Target_prop),
-  n_bal=2L*n_pos_max_N
-)[, let(
-  n_neg=as.integer(round(2*n_pos_max_N*Target_prop))
-)][, let(
-  n_pos=n_bal-n_neg
-)][, let(
-  n_imb=n_pos+n_neg,
-  extra_pos=Tpos-n_pos-n_pos_max_N,
-  extra_neg=Tneg-n_neg-n_pos_max_N
-)][]
+Tpos=5829123L
+Tneg=517087L
+
+(n_pos_max <- 2*Tpos*(1-xp_neg)/(3-2*xp_neg))
 ```
 
 ```
-##    Target_prop   n_bal   n_neg   n_pos   n_imb extra_pos extra_neg
-##          <num>   <int>   <int>   <int>   <int>     <int>     <int>
-## 1:       5e-01 3886106 1943053 1943053 3886106   1943017   1284771
-## 2:       1e-01 3886106  388611 3497495 3886106    388575   2839213
-## 3:       1e-02 3886106   38861 3847245 3886106     38825   3188963
-## 4:       1e-03 3886106    3886 3882220 3886106      3850   3223938
-## 5:       1e-04 3886106     389 3885717 3886106       353   3227435
-## 6:       1e-05 3886106      39 3886067 3886106         3   3227785
+## [1] 3886069
 ```
 
-TODO target prop > 0.5.
-TODO sizes from other constraints.
+``` r
+(n_pos_max_neg <- n_pos_max*xp_neg/(1-xp_neg))
+```
+
+```
+## [1] 38.86108
+```
+
+``` r
+(n_pos_max_N <- as.integer(floor((n_pos_max_neg+n_pos_max)/2)))
+```
+
+```
+## [1] 1943053
+```
+
+``` r
+(n_pos_max_bal_neg <- n_pos_max_N*2)
+```
+
+```
+## [1] 3886106
+```
+
+``` r
+Tneg-n_pos_max_bal_neg
+```
+
+```
+## [1] -3369019
+```
+
+Above the negative number indicates that there are not enough negative samples for this constraint to be active.
+Below we compute the feasibility for the other constraint.
+
+
+``` r
+(Tneg_N <- as.integer(floor(Tneg/2)))
+```
+
+```
+## [1] 258543
+```
+
+``` r
+(Tneg_n_pos <- Tneg*(1-xp_neg))
+```
+
+```
+## [1] 517081.8
+```
+
+``` r
+(Tneg_imb_pos <- Tneg_n_pos+Tneg_N)
+```
+
+```
+## [1] 775624.8
+```
+
+``` r
+Tpos-Tneg_imb_pos
+```
+
+```
+## [1] 5053498
+```
+
+Above we see a positive number, which indicates that the number of positive samples is feasible.
+
+
+``` r
+extab(Target_prop, Tneg_N, Tpos, Tneg)
+```
+
+```
+## $props
+##    p_neg  n_bal  n_neg  n_pos  n_imb unused_pos unused_neg
+##    <num>  <int>  <int>  <int>  <int>      <int>      <int>
+## 1: 1e-05 517086      5 517081 517086    5053499     258539
+## 2: 1e-04 517086     52 517034 517086    5053546     258492
+## 3: 1e-03 517086    517 516569 517086    5054011     258027
+## 4: 1e-02 517086   5171 511915 517086    5058665     253373
+## 5: 1e-01 517086  51709 465377 517086    5105203     206835
+## 6: 5e-01 517086 258543 258543 517086    5312037          1
+## 
+## $params
+##    extra_pos extra_neg      N
+##        <int>     <int>  <int>
+## 1:    258538         0 258543
+```
+
+Above we see `extra_neg` close to zero, indicating the number of negative samples was the limiting factor.
+
+### Large target proportion of negative samples in imbalanced subset
+
+How does the algorithm work for target proportion greater than one half?
+In that case there are two inequalities to check:
+
+* `N + n_neg <= Tneg`
+* `2*N <= Tpos`
+
+
+``` r
+Tpos=5829123L
+Tneg=5170877L
+(Target_prop <- 1-10^seq(-1, -5))
+```
+
+```
+## [1] 0.90000 0.99000 0.99900 0.99990 0.99999
+```
+
+``` r
+(xp_neg <- max(Target_prop))
+```
+
+```
+## [1] 0.99999
+```
+
+``` r
+(n_neg_max <- 2*Tneg*xp_neg/(1+2*xp_neg))
+```
+
+```
+## [1] 3447240
+```
+
+``` r
+(n_neg_max_pos <- n_neg_max*(1-xp_neg)/xp_neg)
+```
+
+```
+## [1] 34.47274
+```
+
+``` r
+(n_neg_max_N <- (n_neg_max_pos+n_neg_max)/2)
+```
+
+```
+## [1] 1723637
+```
+
+``` r
+(n_neg_max_bal_pos <- n_neg_max_N*2)
+```
+
+```
+## [1] 3447274
+```
+
+``` r
+Tpos-n_neg_max_bal_pos
+```
+
+```
+## [1] 2381849
+```
+
+Above the positive number indicates that are enough positive samples for this constraint to be active.
+Below we compute the feasibility for the other constraint.
+
+
+``` r
+(Tpos_N <- as.integer(floor(Tpos/2)))
+```
+
+```
+## [1] 2914561
+```
+
+``` r
+(Tpos_n_pos <- Tpos*(1-xp_neg))
+```
+
+```
+## [1] 58.29123
+```
+
+``` r
+(Tpos_n_neg <- Tpos_N*2-Tpos_n_pos)
+```
+
+```
+## [1] 5829064
+```
+
+``` r
+(Tpos_imb_neg <- Tpos_n_neg+Tpos_N)
+```
+
+```
+## [1] 8743625
+```
+
+``` r
+Tneg-Tpos_imb_neg
+```
+
+```
+## [1] -3572748
+```
+
+The negative number indicates this second constraint is not active.
+
+### General code for both cases
+
+The function below works for both cases.
+
+
+``` r
+ntab <- function(Target_prop, Tpos, Tneg){
+  if(all(Target_prop<0.5)){
+    Tminor <- Tneg
+    Tmajor <- Tpos
+    p_minor <- Target_prop
+  }else if(all(Target_prop>0.5)){
+    Tminor <- Tpos
+    Tmajor <- Tneg
+    p_minor <- 1-Target_prop
+  }else stop("Target_prop should be numeric, with each entry greater than 0.5, or each entry less than 0.5")
+  xp_minor <- min(p_minor)
+  (n_pos_max <- 2*Tmajor*(1-xp_minor)/(3-2*xp_minor))
+  (n_pos_max_neg <- n_pos_max*xp_minor/(1-xp_minor))
+  (n_pos_max_N <- as.integer(floor((n_pos_max_neg+n_pos_max)/2)))
+  (n_pos_max_bal_neg <- n_pos_max_N*2)
+  (Tminor_N <- as.integer(floor(Tminor/2)))
+  N <- if(Tminor<n_pos_max_bal_neg)Tminor_N else n_pos_max_N
+  extab(Target_prop, N, Tpos, Tneg)
+}
+ntab(1-10^seq(-1, -5), 5829123L, 5170877L)
+```
+
+```
+## $props
+##      p_neg   n_bal   n_neg   n_pos   n_imb unused_pos unused_neg
+##      <num>   <int>   <int>   <int>   <int>      <int>      <int>
+## 1: 0.50000 3447274 1723637 1723637 3447274    2381849    1723603
+## 2: 0.90000 3447274 3102547  344727 3447274    3760759     344693
+## 3: 0.99000 3447274 3412801   34473 3447274    4071013      34439
+## 4: 0.99900 3447274 3443827    3447 3447274    4102039       3413
+## 5: 0.99990 3447274 3446929     345 3447274    4105141        311
+## 6: 0.99999 3447274 3447240      34 3447274    4105452          0
+## 
+## $params
+##    extra_pos extra_neg       N
+##        <int>     <int>   <int>
+## 1:         0   1723603 1723637
+```
+
+``` r
+ntab(1-10^seq(-1, -5), 582912L, 5170877L)
+```
+
+```
+## $props
+##      p_neg  n_bal  n_neg  n_pos  n_imb unused_pos unused_neg
+##      <num>  <int>  <int>  <int>  <int>      <int>      <int>
+## 1: 0.50000 582912 291456 291456 582912          0    4587965
+## 2: 0.90000 582912 524621  58291 582912     233165    4354800
+## 3: 0.99000 582912 577083   5829 582912     285627    4302338
+## 4: 0.99900 582912 582329    583 582912     290873    4297092
+## 5: 0.99990 582912 582854     58 582912     291398    4296567
+## 6: 0.99999 582912 582906      6 582912     291450    4296515
+## 
+## $params
+##    extra_pos extra_neg      N
+##        <int>     <int>  <int>
+## 1:         0    291450 291456
+```
+
+``` r
+ntab(10^seq(-1, -5), 5829123L, 5170877L)
+```
+
+```
+## $props
+##    p_neg   n_bal   n_neg   n_pos   n_imb unused_pos unused_neg
+##    <num>   <int>   <int>   <int>   <int>      <int>      <int>
+## 1: 1e-05 3886106      39 3886067 3886106          3    3227785
+## 2: 1e-04 3886106     389 3885717 3886106        353    3227435
+## 3: 1e-03 3886106    3886 3882220 3886106       3850    3223938
+## 4: 1e-02 3886106   38861 3847245 3886106      38825    3188963
+## 5: 1e-01 3886106  388611 3497495 3886106     388575    2839213
+## 6: 5e-01 3886106 1943053 1943053 3886106    1943017    1284771
+## 
+## $params
+##    extra_pos extra_neg       N
+##        <int>     <int>   <int>
+## 1:   1943014         0 1943053
+```
+
+``` r
+ntab(10^seq(-1, -5), 5829123L, 517087L)
+```
+
+```
+## $props
+##    p_neg  n_bal  n_neg  n_pos  n_imb unused_pos unused_neg
+##    <num>  <int>  <int>  <int>  <int>      <int>      <int>
+## 1: 1e-05 517086      5 517081 517086    5053499     258539
+## 2: 1e-04 517086     52 517034 517086    5053546     258492
+## 3: 1e-03 517086    517 516569 517086    5054011     258027
+## 4: 1e-02 517086   5171 511915 517086    5058665     253373
+## 5: 1e-01 517086  51709 465377 517086    5105203     206835
+## 6: 5e-01 517086 258543 258543 517086    5312037          1
+## 
+## $params
+##    extra_pos extra_neg      N
+##        <int>     <int>  <int>
+## 1:    258538         0 258543
+```
+
+``` r
+ntab(10^seq(-1, -2), 3000L, 2000L)
+```
+
+```
+## $props
+##    p_neg n_bal n_neg n_pos n_imb unused_pos unused_neg
+##    <num> <int> <int> <int> <int>      <int>      <int>
+## 1:  0.01  2000    20  1980  2000         20        980
+## 2:  0.10  2000   200  1800  2000        200        800
+## 3:  0.50  2000  1000  1000  2000       1000          0
+## 
+## $params
+##    extra_pos extra_neg     N
+##        <int>     <int> <int>
+## 1:       980         0  1000
+```
+
+We see in all the results above that `n_bal == n_imb`.
+Either positive or negative numbers are the limiting factor.
+
+## Creating CSV data based on counts
+
+After having computed the target number of samples in each subset, we need to assign rows to A/B/E sets.
+Here is a dummy data table,
+
+
+``` r
+dummy.dt <- data.table(y=rep(0:1, c(2000,3000)))
+Tlist <- setNames(as.list(table(dummy.dt$y)), c("Tneg", "Tpos"))
+Tlist$Target_prop <- 10^seq(-1, -2)
+Tlist
+```
+
+```
+## $Tneg
+## [1] 2000
+## 
+## $Tpos
+## [1] 3000
+## 
+## $Target_prop
+## [1] 0.10 0.01
+```
+
+``` r
+(count.list <- do.call(ntab, Tlist))
+```
+
+```
+## $props
+##    p_neg n_bal n_neg n_pos n_imb unused_pos unused_neg
+##    <num> <int> <int> <int> <int>      <int>      <int>
+## 1:  0.01  2000    20  1980  2000         20        980
+## 2:  0.10  2000   200  1800  2000        200        800
+## 3:  0.50  2000  1000  1000  2000       1000          0
+## 
+## $params
+##    extra_pos extra_neg     N
+##        <int>     <int> <int>
+## 1:       980         0  1000
+```
+
+Above we see the expected counts for a small problem with 2000 samples in A and B, with 980 extra positives.
+
+
+``` r
+set.seed(1)
+(ind.dt <- dummy.dt[
+, row := .I
+][sample(.N)][
+, set := NA_character_
+][])
+```
+
+```
+##           y   row    set
+##       <int> <int> <char>
+##    1:     0  1017   <NA>
+##    2:     1  4775   <NA>
+##    3:     1  2177   <NA>
+##    4:     0  1533   <NA>
+##    5:     1  4567   <NA>
+##   ---                   
+## 4996:     0  1397   <NA>
+## 4997:     1  2779   <NA>
+## 4998:     0  1255   <NA>
+## 4999:     1  2262   <NA>
+## 5000:     1  2606   <NA>
+```
+
+Above we see a random ordering of the data rows, set not yet assigned.
+
+
+``` r
+label.list <- list(pos=1,neg=0)
+N <- count.list$params$N
+for(label.name in names(label.list)){
+  label.value <- label.list[[label.name]]
+  label.extra <- count.list$params[[paste0("extra_", label.name)]]
+  set.values <- rep(c("X","Y","E"), c(N,N,label.extra))
+  label.i <- which(ind.dt$y==label.value)[seq_along(set.values)]
+  ind.dt[label.i, set := set.values]
+}
+ind.dt[, table(set, y, useNA="always")]
+```
+
+```
+##       y
+## set       0    1 <NA>
+##   E       0  980    0
+##   X    1000 1000    0
+##   Y    1000 1000    0
+##   <NA>    0   20    0
+```
+
+Above we see set has been assigned,
+
+* 1000 positive samples in each of X and Y,
+* 1000 negative samples in each of X and Y,
+* 980 positive samples in E,
+* 20 unused positive samples (missing set).
+
+We assign fold below too.
+
+
+``` r
+n.folds <- 5L
+ind.dt[, fold := rep(1:n.folds, length.out=.N), by=.(set, y)][]
+```
+
+```
+##           y   row    set  fold
+##       <int> <int> <char> <int>
+##    1:     0  1017      X     1
+##    2:     1  4775      X     1
+##    3:     1  2177      X     2
+##    4:     0  1533      X     2
+##    5:     1  4567      X     3
+##   ---                         
+## 4996:     0  1397      Y     4
+## 4997:     1  2779   <NA>     3
+## 4998:     0  1255      Y     5
+## 4999:     1  2262   <NA>     4
+## 5000:     1  2606   <NA>     5
+```
+
+Now we create the output columns representing the different subsets.
+
+
+``` r
+(out.unsort <- ind.dt[, data.table(
+  fold,
+  Xb_Yb=ifelse(set %in% c("X","Y"), set, NA))])
+```
+
+```
+##        fold  Xb_Yb
+##       <int> <char>
+##    1:     1      X
+##    2:     1      X
+##    3:     2      X
+##    4:     2      X
+##    5:     3      X
+##   ---             
+## 4996:     4      Y
+## 4997:     3   <NA>
+## 4998:     5      Y
+## 4999:     4   <NA>
+## 5000:     5   <NA>
+```
+
+``` r
+out.unsort[, table(fold, Xb_Yb)]
+```
+
+```
+##     Xb_Yb
+## fold   X   Y
+##    1 400 400
+##    2 400 400
+##    3 400 400
+##    4 400 400
+##    5 400 400
+```
+
+``` r
+imb.counts <- count.list$props[p_neg != 0.5]
+pos.part <- function(x)ifelse(x<0, 0, x)
+for(imb.i in 1:nrow(imb.counts)){
+  imb.row <- imb.counts[imb.i]
+  for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
+    add.dt <- data.table(ind.dt)
+    imb.set <- ifelse(grepl("Xi", cformat), "X", "Y")
+    for(label.name in names(label.list)){
+      label.value <- label.list[[label.name]]
+      label.n <- imb.row[[paste0("n_", label.name)]]
+      rm.vec <- ind.dt[, which(y==label.value & set==imb.set)]
+      rm.n <- pos.part(N-label.n)
+      rm.indices <- rm.vec[seq_len(rm.n)]
+      add.dt[rm.indices, set := NA]
+      add.vec <- ind.dt[, which(y==label.value & set=="E")]
+      add.n <- pos.part(label.n-N)
+      add.indices <- add.vec[seq_len(add.n)]
+      add.dt[add.indices, set := imb.set]
+    }
+    add.dt[set=="E", set := NA]
+    add.dt[, table(fold, paste(set, y))]
+    set(
+      out.unsort,
+      j=sprintf(cformat, imb.row$p_neg),
+      value=add.dt$set)
+  }
+}
+```
+
+Finally we sort back to the original row order:
+
+
+``` r
+orig.ord <- order(ind.dt$row)
+(out.sort <- out.unsort[orig.ord])
+```
+
+```
+##        fold  Xb_Yb Xineg0.01_Yb Xb_Yineg0.01 Xineg0.1_Yb Xb_Yineg0.1
+##       <int> <char>       <char>       <char>      <char>      <char>
+##    1:     1      Y            Y         <NA>           Y        <NA>
+##    2:     2      Y            Y            Y           Y           Y
+##    3:     2      Y            Y         <NA>           Y        <NA>
+##    4:     1      X         <NA>            X        <NA>           X
+##    5:     4      Y            Y         <NA>           Y        <NA>
+##   ---                                                               
+## 4996:     5      Y            Y            Y           Y           Y
+## 4997:     5      Y            Y            Y           Y           Y
+## 4998:     4   <NA>            X            Y           X           Y
+## 4999:     2      X            X            X           X           X
+## 5000:     1      X            X            X           X           X
+```
+
+The table above is a CSV data file that we can save alongside the original CSV data file.
+
+
+``` r
+fwrite(out.sort, tf <- tempfile())
+system(paste("head", tf))
+```
+
+The output above shows the first few lines of the CSV file that describes the cross-validation experiment we have created.
+
+## Verification
+
+Now we verify that the counts are reasonable.
+
+
+``` r
+check.dt.list <- list()
+for(sub.col.i in 2:ncol(out.sort)){
+  sub.col.name <- names(out.sort)[sub.col.i]
+  two.cols <- out.sort[, c(1, sub.col.i), with=FALSE]
+  setnames(two.cols, c("fold", "subset"))
+  count.dt <- data.table(dummy.dt, two.cols)[, .(
+    rows=.N
+  ), keyby=.(y, fold, subset)]
+  stats.dt <- dcast(
+    count.dt,
+    subset + y ~ .,
+    list(sum, var, length),
+    value.var="rows")
+  check.dt.list[[sub.col.name]] <- data.table(sub.col.name, stats.dt)
+}
+(check.dt <- rbindlist(check.dt.list))
+```
+
+```
+##     sub.col.name subset     y rows_sum rows_var rows_length
+##           <char> <char> <int>    <int>    <num>       <int>
+##  1:        Xb_Yb   <NA>     1     1000        0           5
+##  2:        Xb_Yb      X     0     1000        0           5
+##  3:        Xb_Yb      X     1     1000        0           5
+##  4:        Xb_Yb      Y     0     1000        0           5
+##  5:        Xb_Yb      Y     1     1000        0           5
+##  6: Xineg0.01_Yb   <NA>     0      980        0           5
+##  7: Xineg0.01_Yb   <NA>     1       20        0           5
+##  8: Xineg0.01_Yb      X     0       20        0           5
+##  9: Xineg0.01_Yb      X     1     1980        0           5
+## 10: Xineg0.01_Yb      Y     0     1000        0           5
+## 11: Xineg0.01_Yb      Y     1     1000        0           5
+## 12: Xb_Yineg0.01   <NA>     0      980        0           5
+## 13: Xb_Yineg0.01   <NA>     1       20        0           5
+## 14: Xb_Yineg0.01      X     0     1000        0           5
+## 15: Xb_Yineg0.01      X     1     1000        0           5
+## 16: Xb_Yineg0.01      Y     0       20        0           5
+## 17: Xb_Yineg0.01      Y     1     1980        0           5
+## 18:  Xineg0.1_Yb   <NA>     0      800        0           5
+## 19:  Xineg0.1_Yb   <NA>     1      200        0           5
+## 20:  Xineg0.1_Yb      X     0      200        0           5
+## 21:  Xineg0.1_Yb      X     1     1800        0           5
+## 22:  Xineg0.1_Yb      Y     0     1000        0           5
+## 23:  Xineg0.1_Yb      Y     1     1000        0           5
+## 24:  Xb_Yineg0.1   <NA>     0      800        0           5
+## 25:  Xb_Yineg0.1   <NA>     1      200        0           5
+## 26:  Xb_Yineg0.1      X     0     1000        0           5
+## 27:  Xb_Yineg0.1      X     1     1000        0           5
+## 28:  Xb_Yineg0.1      Y     0      200        0           5
+## 29:  Xb_Yineg0.1      Y     1     1800        0           5
+##     sub.col.name subset     y rows_sum rows_var rows_length
+```
+
+The table above has one row per combination of CSV column, subset, and label. We see that the results are reasonable.
+
+* subset is either X or Y.
+* number of rows per subset is always 2000.
+* no variance between number of rows across folds, which means fold assignment respects stratification and subsets.
 
 ## Conclusions
 
-TODO
+We have shown how to split a binary classification data set into two subsets.
 
-## session info
+* Either the two subsets are both balanced (baseline),
+* or one or the other subset is imbalanced to given proportions.
+* each subset always has the same sample size, 
+* and more imbalanced subsets are hierarchical: minor class samples are removed, major class samples are added (so there is a certain kind of continuity between imbalance proportions).
+
+This code will be useful for creating imbalanced classification benchmarks, for comparing various machine learning algorithms.
+
+## Session info
 
 
 ``` r
@@ -268,32 +962,28 @@ sessionInfo()
 ```
 
 ```
-## R Under development (unstable) (2026-07-28 r90311)
+## R Under development (unstable) (2025-02-06 r87694)
 ## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 24.04.5 LTS
+## Running under: Ubuntu 22.04.5 LTS
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0  LAPACK version 3.10.0
 ## 
 ## locale:
-##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=en_US.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=en_US.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
 ##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
 ## time zone: America/Toronto
 ## tzcode source: system (glibc)
 ## 
 ## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_4.0.3       data.table_1.18.6.1
+## [1] data.table_1.17.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           tidyselect_1.2.1   xfun_0.60          farver_2.1.2      
-##  [7] magrittr_2.0.5     gtable_0.3.6       glue_1.8.1         tibble_3.3.1       knitr_1.51         pkgconfig_2.0.3   
-## [13] generics_0.1.4     dplyr_1.2.1        lifecycle_1.0.5    cli_3.6.6          S7_0.2.2           scales_1.4.0      
-## [19] vctrs_0.7.3        grid_4.7.0         withr_3.0.3        compiler_4.7.0     tools_4.7.0        pillar_1.11.1     
-## [25] evaluate_1.0.5     otel_0.2.0         rlang_1.3.0
+## [1] compiler_4.5.0 tools_4.5.0    knitr_1.49     xfun_0.50      evaluate_1.0.3
 ```

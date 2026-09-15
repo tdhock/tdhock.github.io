@@ -121,7 +121,7 @@ Target_prop
 The most extreme is:
 
 ```{r}
-xp_neg <- min(Target_prop)
+(xp_neg <- min(Target_prop))
 ```
 
 The main idea of the new method is to divide the whole data into three sets:
@@ -144,8 +144,8 @@ First constraint is the same as the previous method, `N + n_pos <= Tpos`.
 If this is active, then the number of positive samples in the most imbalanced subset is the limiting factor.
 
 ```{r}
-n_pos_max <- 2*Tpos*(1-xp_neg)/(3-2*xp_neg)
-n_pos_max_neg <- n_pos_max*xp_neg/(1-xp_neg)
+(n_pos_max <- 2*Tpos*(1-xp_neg)/(3-2*xp_neg))
+(n_pos_max_neg <- n_pos_max*xp_neg/(1-xp_neg))
 (n_pos_max_N <- as.integer(floor((n_pos_max_neg+n_pos_max)/2)))
 (n_pos_max_bal_neg <- n_pos_max_N*2)
 Tneg-n_pos_max_bal_neg
@@ -162,34 +162,283 @@ Tpos-Tneg_imb_pos
 ```
 
 We see above a negative value, indicating this is not feasible.
+Maxing out the negative examples does not leave enough extra positive examples.
 The other constraint must be active.
 
 ### Computing subset sizes
 
-
 ```{r}
-data.table(
-  Target_prop=c(0.5, Target_prop),
-  n_bal=2L*n_pos_max_N
-)[, let(
-  n_neg=as.integer(round(2*n_pos_max_N*Target_prop))
-)][, let(
-  n_pos=n_bal-n_neg
-)][, let(
-  n_imb=n_pos+n_neg,
-  extra_pos=Tpos-n_pos-n_pos_max_N,
-  extra_neg=Tneg-n_neg-n_pos_max_N
-)][]
+extab <- function(Tprop, N, Tpos, Tneg){
+  dt <- data.table(
+    p_neg=sort(c(0.5, Tprop)),
+    n_bal=2L*N
+  )[, let(
+    n_neg=as.integer(round(2*N*p_neg))
+  )][, let(
+    n_pos=n_bal-n_neg
+  )][, let(
+    n_imb=n_pos+n_neg,
+    unused_pos=Tpos-n_pos-N,
+    unused_neg=Tneg-n_neg-N
+  )][]
+  list(props=dt, params=dt[, data.table(
+    extra_pos=max(n_pos-N),
+    extra_neg=max(n_neg-N),
+    N)])
+}
+extab(Target_prop, n_pos_max_N, Tpos, Tneg)
 ```
 
-TODO target prop > 0.5.
-TODO sizes from other constraints.
+We see above that `n_bal == n_imb` for each row, which means the two subsets have the same number of samples, and we can create hierarchical subsets.
+
+### Other constraint active
+
+When would the other constraint become active?
+If there are not enough negative samples, for example ten times fewer:
+
+```{r}
+Tpos=5829123L
+Tneg=517087L
+
+(n_pos_max <- 2*Tpos*(1-xp_neg)/(3-2*xp_neg))
+(n_pos_max_neg <- n_pos_max*xp_neg/(1-xp_neg))
+(n_pos_max_N <- as.integer(floor((n_pos_max_neg+n_pos_max)/2)))
+(n_pos_max_bal_neg <- n_pos_max_N*2)
+Tneg-n_pos_max_bal_neg
+```
+
+Above the negative number indicates that there are not enough negative samples for this constraint to be active.
+Below we compute the feasibility for the other constraint.
+
+```{r}
+(Tneg_N <- as.integer(floor(Tneg/2)))
+(Tneg_n_pos <- Tneg*(1-xp_neg))
+(Tneg_imb_pos <- Tneg_n_pos+Tneg_N)
+Tpos-Tneg_imb_pos
+```
+
+Above we see a positive number, which indicates that the number of positive samples is feasible.
+
+```{r}
+extab(Target_prop, Tneg_N, Tpos, Tneg)
+```
+
+Above we see `extra_neg` close to zero, indicating the number of negative samples was the limiting factor.
+
+### Large target proportion of negative samples in imbalanced subset
+
+How does the algorithm work for target proportion greater than one half?
+In that case there are two inequalities to check:
+
+* `N + n_neg <= Tneg`
+* `2*N <= Tpos`
+
+```{r}
+Tpos=5829123L
+Tneg=5170877L
+(Target_prop <- 1-10^seq(-1, -5))
+(xp_neg <- max(Target_prop))
+
+(n_neg_max <- 2*Tneg*xp_neg/(1+2*xp_neg))
+(n_neg_max_pos <- n_neg_max*(1-xp_neg)/xp_neg)
+(n_neg_max_N <- (n_neg_max_pos+n_neg_max)/2)
+(n_neg_max_bal_pos <- n_neg_max_N*2)
+Tpos-n_neg_max_bal_pos
+```
+
+Above the positive number indicates that are enough positive samples for this constraint to be active.
+Below we compute the feasibility for the other constraint.
+
+```{r}
+(Tpos_N <- as.integer(floor(Tpos/2)))
+(Tpos_n_pos <- Tpos*(1-xp_neg))
+(Tpos_n_neg <- Tpos_N*2-Tpos_n_pos)
+(Tpos_imb_neg <- Tpos_n_neg+Tpos_N)
+Tneg-Tpos_imb_neg
+```
+
+The negative number indicates this second constraint is not active.
+
+### General code for both cases
+
+The function below works for both cases.
+
+```{r}
+ntab <- function(Target_prop, Tpos, Tneg){
+  if(all(Target_prop<0.5)){
+    Tminor <- Tneg
+    Tmajor <- Tpos
+    p_minor <- Target_prop
+  }else if(all(Target_prop>0.5)){
+    Tminor <- Tpos
+    Tmajor <- Tneg
+    p_minor <- 1-Target_prop
+  }else stop("Target_prop should be numeric, with each entry greater than 0.5, or each entry less than 0.5")
+  xp_minor <- min(p_minor)
+  (n_pos_max <- 2*Tmajor*(1-xp_minor)/(3-2*xp_minor))
+  (n_pos_max_neg <- n_pos_max*xp_minor/(1-xp_minor))
+  (n_pos_max_N <- as.integer(floor((n_pos_max_neg+n_pos_max)/2)))
+  (n_pos_max_bal_neg <- n_pos_max_N*2)
+  (Tminor_N <- as.integer(floor(Tminor/2)))
+  N <- if(Tminor<n_pos_max_bal_neg)Tminor_N else n_pos_max_N
+  extab(Target_prop, N, Tpos, Tneg)
+}
+ntab(1-10^seq(-1, -5), 5829123L, 5170877L)
+ntab(1-10^seq(-1, -5), 582912L, 5170877L)
+ntab(10^seq(-1, -5), 5829123L, 5170877L)
+ntab(10^seq(-1, -5), 5829123L, 517087L)
+ntab(10^seq(-1, -2), 3000L, 2000L)
+```
+
+We see in all the results above that `n_bal == n_imb`.
+Either positive or negative numbers are the limiting factor.
+
+## Creating CSV data based on counts
+
+After having computed the target number of samples in each subset, we need to assign rows to A/B/E sets.
+Here is a dummy data table,
+
+```{r}
+dummy.dt <- data.table(y=rep(0:1, c(2000,3000)))
+Tlist <- setNames(as.list(table(dummy.dt$y)), c("Tneg", "Tpos"))
+Tlist$Target_prop <- 10^seq(-1, -2)
+Tlist
+(count.list <- do.call(ntab, Tlist))
+```
+
+Above we see the expected counts for a small problem with 2000 samples in A and B, with 980 extra positives.
+
+```{r}
+set.seed(1)
+(ind.dt <- dummy.dt[
+, row := .I
+][sample(.N)][
+, set := NA_character_
+][])
+```
+
+Above we see a random ordering of the data rows, set not yet assigned.
+
+```{r}
+label.list <- list(pos=1,neg=0)
+N <- count.list$params$N
+for(label.name in names(label.list)){
+  label.value <- label.list[[label.name]]
+  label.extra <- count.list$params[[paste0("extra_", label.name)]]
+  set.values <- rep(c("X","Y","E"), c(N,N,label.extra))
+  label.i <- which(ind.dt$y==label.value)[seq_along(set.values)]
+  ind.dt[label.i, set := set.values]
+}
+ind.dt[, table(set, y, useNA="always")]
+```
+
+Above we see set has been assigned,
+
+* 1000 positive samples in each of X and Y,
+* 1000 negative samples in each of X and Y,
+* 980 positive samples in E,
+* 20 unused positive samples (missing set).
+
+We assign fold below too.
+
+```{r}
+n.folds <- 5L
+ind.dt[, fold := rep(1:n.folds, length.out=.N), by=.(set, y)][]
+```
+
+Now we create the output columns representing the different subsets.
+
+```{r}
+(out.unsort <- ind.dt[, data.table(
+  fold,
+  Xb_Yb=ifelse(set %in% c("X","Y"), set, NA))])
+out.unsort[, table(fold, Xb_Yb)]
+imb.counts <- count.list$props[p_neg != 0.5]
+pos.part <- function(x)ifelse(x<0, 0, x)
+for(imb.i in 1:nrow(imb.counts)){
+  imb.row <- imb.counts[imb.i]
+  for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
+    add.dt <- data.table(ind.dt)
+    imb.set <- ifelse(grepl("Xi", cformat), "X", "Y")
+    for(label.name in names(label.list)){
+      label.value <- label.list[[label.name]]
+      label.n <- imb.row[[paste0("n_", label.name)]]
+      rm.vec <- ind.dt[, which(y==label.value & set==imb.set)]
+      rm.n <- pos.part(N-label.n)
+      rm.indices <- rm.vec[seq_len(rm.n)]
+      add.dt[rm.indices, set := NA]
+      add.vec <- ind.dt[, which(y==label.value & set=="E")]
+      add.n <- pos.part(label.n-N)
+      add.indices <- add.vec[seq_len(add.n)]
+      add.dt[add.indices, set := imb.set]
+    }
+    add.dt[set=="E", set := NA]
+    add.dt[, table(fold, paste(set, y))]
+    set(
+      out.unsort,
+      j=sprintf(cformat, imb.row$p_neg),
+      value=add.dt$set)
+  }
+}
+```
+
+Finally we sort back to the original row order:
+
+```{r}
+orig.ord <- order(ind.dt$row)
+(out.sort <- out.unsort[orig.ord])
+```
+
+The table above is a CSV data file that we can save alongside the original CSV data file.
+
+```{r}
+fwrite(out.sort, tf <- tempfile())
+system(paste("head", tf))
+```
+
+The output above shows the first few lines of the CSV file that describes the cross-validation experiment we have created.
+
+## Verification
+
+Now we verify that the counts are reasonable.
+
+```{r}
+check.dt.list <- list()
+for(sub.col.i in 2:ncol(out.sort)){
+  sub.col.name <- names(out.sort)[sub.col.i]
+  two.cols <- out.sort[, c(1, sub.col.i), with=FALSE]
+  setnames(two.cols, c("fold", "subset"))
+  count.dt <- data.table(dummy.dt, two.cols)[, .(
+    rows=.N
+  ), keyby=.(y, fold, subset)]
+  stats.dt <- dcast(
+    count.dt,
+    subset + y ~ .,
+    list(sum, var, length),
+    value.var="rows")
+  check.dt.list[[sub.col.name]] <- data.table(sub.col.name, stats.dt)
+}
+(check.dt <- rbindlist(check.dt.list))
+```
+
+The table above has one row per combination of CSV column, subset, and label. We see that the results are reasonable.
+
+* subset is either X or Y.
+* number of rows per subset is always 2000.
+* no variance between number of rows across folds, which means fold assignment respects stratification and subsets.
 
 ## Conclusions
 
-TODO
+We have shown how to split a binary classification data set into two subsets.
 
-## session info
+* Either the two subsets are both balanced (baseline),
+* or one or the other subset is imbalanced to given proportions.
+* each subset always has the same sample size, 
+* and more imbalanced subsets are hierarchical: minor class samples are removed, major class samples are added (so there is a certain kind of continuity between imbalance proportions).
+
+This code will be useful for creating imbalanced classification benchmarks, for comparing various machine learning algorithms.
+
+## Session info
 
 ```{r}
 sessionInfo()
