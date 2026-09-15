@@ -792,6 +792,9 @@ Now we create the output columns representing the different subsets.
 ## 5000:     5   <NA>
 ```
 
+The `Xb_Yb` column represents the random assignment of two balanced subsets (a baseline).
+
+
 ``` r
 out.unsort[, table(fold, Xb_Yb)]
 ```
@@ -806,13 +809,21 @@ out.unsort[, table(fold, Xb_Yb)]
 ##    5 400 400
 ```
 
+Above we can see the distribution of folds across subsets is uniform.
+Below we create the other output columns, representing mapping of data rows to splits with an imbalanced subset.
+
+
 ``` r
 imb.counts <- count.list$props[p_neg != 0.5]
 pos.part <- function(x)ifelse(x<0, 0, x)
 for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
   for(imb.i in nrow(imb.counts):1){
     imb.row <- imb.counts[imb.i]
-    add.dt <- data.table(ind.dt)
+    j.name <- sprintf(cformat, imb.row$p_neg)
+    set(
+      out.unsort,
+      j=j.name,
+      value=ind.dt$set)
     imb.set <- ifelse(grepl("Xi", cformat), "X", "Y")
     for(label.name in names(label.list)){
       label.value <- label.list[[label.name]]
@@ -826,15 +837,19 @@ for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
         possible.indices <- ind.dt[, which(y==label.value & set==find.rep.row$find.set)]
         change.n <- pos.part((N-label.n)*find.rep.row$sign)
         change.indices <- possible.indices[seq_len(change.n)]
-        add.dt[change.indices, set := find.rep.row$rep.set]
+        set(
+          out.unsort,
+          i=change.indices,
+          j=j.name,
+          value=find.rep.row$rep.set)
       }
+      is.E <- which(out.unsort[[j.name]]=="E")
+      set(
+        out.unsort,
+        i=is.E,
+        j=j.name,
+        value=NA)
     }
-    add.dt[set=="E", set := NA]
-    add.dt[, table(fold, paste(set, y))]#check
-    set(
-      out.unsort,
-      j=sprintf(cformat, imb.row$p_neg),
-      value=add.dt$set)
   }
 }
 ```
@@ -1108,12 +1123,9 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] ggplot2_4.0.3       data.table_1.18.6.1
+## [1] data.table_1.18.6.1
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           tidyselect_1.2.1   xfun_0.60          farver_2.1.2      
-##  [7] magrittr_2.0.5     gtable_0.3.6       glue_1.8.1         tibble_3.3.1       knitr_1.51         pkgconfig_2.0.3   
-## [13] generics_0.1.4     dplyr_1.2.1        lifecycle_1.0.5    cli_3.6.6          S7_0.2.2           scales_1.4.0      
-## [19] vctrs_0.7.3        grid_4.7.0         withr_3.0.3        compiler_4.7.0     tools_4.7.0        pillar_1.11.1     
-## [25] evaluate_1.0.5     otel_0.2.0         rlang_1.3.0
+## [1] compiler_4.7.0 cli_3.6.6      tools_4.7.0    otel_0.2.0     knitr_1.51     xfun_0.60      rlang_1.3.0   
+## [8] evaluate_1.0.5
 ```

@@ -354,13 +354,28 @@ Now we create the output columns representing the different subsets.
 (out.unsort <- ind.dt[, data.table(
   fold,
   Xb_Yb=ifelse(set %in% c("X","Y"), set, NA))])
+```
+
+The `Xb_Yb` column represents the random assignment of two balanced subsets (a baseline).
+
+```{r}
 out.unsort[, table(fold, Xb_Yb)]
+```
+
+Above we can see the distribution of folds across subsets is uniform.
+Below we create the other output columns, representing mapping of data rows to splits with an imbalanced subset.
+
+```{r}
 imb.counts <- count.list$props[p_neg != 0.5]
 pos.part <- function(x)ifelse(x<0, 0, x)
 for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
   for(imb.i in nrow(imb.counts):1){
     imb.row <- imb.counts[imb.i]
-    add.dt <- data.table(ind.dt)
+    j.name <- sprintf(cformat, imb.row$p_neg)
+    set(
+      out.unsort,
+      j=j.name,
+      value=ind.dt$set)
     imb.set <- ifelse(grepl("Xi", cformat), "X", "Y")
     for(label.name in names(label.list)){
       label.value <- label.list[[label.name]]
@@ -374,15 +389,19 @@ for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
         possible.indices <- ind.dt[, which(y==label.value & set==find.rep.row$find.set)]
         change.n <- pos.part((N-label.n)*find.rep.row$sign)
         change.indices <- possible.indices[seq_len(change.n)]
-        add.dt[change.indices, set := find.rep.row$rep.set]
+        set(
+          out.unsort,
+          i=change.indices,
+          j=j.name,
+          value=find.rep.row$rep.set)
       }
+      is.E <- which(out.unsort[[j.name]]=="E")
+      set(
+        out.unsort,
+        i=is.E,
+        j=j.name,
+        value=NA)
     }
-    add.dt[set=="E", set := NA]
-    add.dt[, table(fold, paste(set, y))]#check
-    set(
-      out.unsort,
-      j=sprintf(cformat, imb.row$p_neg),
-      value=add.dt$set)
   }
 }
 ```
