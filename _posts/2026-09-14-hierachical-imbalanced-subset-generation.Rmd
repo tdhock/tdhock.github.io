@@ -355,9 +355,9 @@ Now we create the output columns representing the different subsets.
 out.unsort[, table(fold, Xb_Yb)]
 imb.counts <- count.list$props[p_neg != 0.5]
 pos.part <- function(x)ifelse(x<0, 0, x)
-for(imb.i in 1:nrow(imb.counts)){
-  imb.row <- imb.counts[imb.i]
-  for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
+for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
+  for(imb.i in nrow(imb.counts):1){
+    imb.row <- imb.counts[imb.i]
     add.dt <- data.table(ind.dt)
     imb.set <- ifelse(grepl("Xi", cformat), "X", "Y")
     for(label.name in names(label.list)){
@@ -373,7 +373,7 @@ for(imb.i in 1:nrow(imb.counts)){
       add.dt[add.indices, set := imb.set]
     }
     add.dt[set=="E", set := NA]
-    add.dt[, table(fold, paste(set, y))]
+    add.dt[, table(fold, paste(set, y))]#check
     set(
       out.unsort,
       j=sprintf(cformat, imb.row$p_neg),
@@ -386,7 +386,8 @@ Finally we sort back to the original row order:
 
 ```{r}
 orig.ord <- order(ind.dt$row)
-(out.sort <- out.unsort[orig.ord])
+print(data.table(ind.dt[, .(y, set)], out.unsort)[orig.ord], topn=50)
+out.sort <- out.unsort[orig.ord]
 ```
 
 The table above is a CSV data file that we can save alongside the original CSV data file.

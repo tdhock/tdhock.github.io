@@ -53,16 +53,6 @@ Below we repeat the calculations in the previous post:
 
 ``` r
 library(data.table)
-```
-
-```
-## data.table 1.17.0 utilise 1 threads (voir ?getDTthreads).  Dernières actualités : r-datatable.com
-## **********
-## Running data.table in English; package support is available in English only. When searching for online help, be sure to also check for the English error message. This can be obtained by looking at the po/R-<locale>.po and po/<locale>.po files in the package source, where the native language and English error messages can be found side-by-side. You can also try calling Sys.setLanguage('en') prior to reproducing the error message.
-## **********
-```
-
-``` r
 compute_target_counts <- function(p_neg, Tpos, Tneg){
   n_pos_max <- 2*Tpos*(1-p_neg)/(3-2*p_neg)
   n_pos_max_neg <- n_pos_max*p_neg/(1-p_neg)
@@ -817,9 +807,9 @@ out.unsort[, table(fold, Xb_Yb)]
 ``` r
 imb.counts <- count.list$props[p_neg != 0.5]
 pos.part <- function(x)ifelse(x<0, 0, x)
-for(imb.i in 1:nrow(imb.counts)){
-  imb.row <- imb.counts[imb.i]
-  for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
+for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
+  for(imb.i in nrow(imb.counts):1){
+    imb.row <- imb.counts[imb.i]
     add.dt <- data.table(ind.dt)
     imb.set <- ifelse(grepl("Xi", cformat), "X", "Y")
     for(label.name in names(label.list)){
@@ -835,7 +825,7 @@ for(imb.i in 1:nrow(imb.counts)){
       add.dt[add.indices, set := imb.set]
     }
     add.dt[set=="E", set := NA]
-    add.dt[, table(fold, paste(set, y))]
+    add.dt[, table(fold, paste(set, y))]#check
     set(
       out.unsort,
       j=sprintf(cformat, imb.row$p_neg),
@@ -849,23 +839,117 @@ Finally we sort back to the original row order:
 
 ``` r
 orig.ord <- order(ind.dt$row)
-(out.sort <- out.unsort[orig.ord])
+print(data.table(ind.dt[, .(y, set)], out.unsort)[orig.ord], topn=50)
 ```
 
 ```
-##        fold  Xb_Yb Xineg0.01_Yb Xb_Yineg0.01 Xineg0.1_Yb Xb_Yineg0.1
-##       <int> <char>       <char>       <char>      <char>      <char>
-##    1:     1      Y            Y         <NA>           Y        <NA>
-##    2:     2      Y            Y            Y           Y           Y
-##    3:     2      Y            Y         <NA>           Y        <NA>
-##    4:     1      X         <NA>            X        <NA>           X
-##    5:     4      Y            Y         <NA>           Y        <NA>
-##   ---                                                               
-## 4996:     5      Y            Y            Y           Y           Y
-## 4997:     5      Y            Y            Y           Y           Y
-## 4998:     4   <NA>            X            Y           X           Y
-## 4999:     2      X            X            X           X           X
-## 5000:     1      X            X            X           X           X
+##           y    set  fold  Xb_Yb Xineg0.1_Yb Xineg0.01_Yb Xb_Yineg0.1 Xb_Yineg0.01
+##       <int> <char> <int> <char>      <char>       <char>      <char>       <char>
+##    1:     0      Y     1      Y           Y            Y        <NA>         <NA>
+##    2:     0      Y     2      Y           Y            Y           Y            Y
+##    3:     0      Y     2      Y           Y            Y        <NA>         <NA>
+##    4:     0      X     1      X        <NA>         <NA>           X            X
+##    5:     0      Y     4      Y           Y            Y        <NA>         <NA>
+##    6:     0      Y     5      Y           Y            Y        <NA>         <NA>
+##    7:     0      X     5      X        <NA>         <NA>           X            X
+##    8:     0      Y     4      Y           Y            Y        <NA>         <NA>
+##    9:     0      X     3      X        <NA>         <NA>           X            X
+##   10:     0      Y     4      Y           Y            Y           Y         <NA>
+##   11:     0      X     5      X        <NA>         <NA>           X            X
+##   12:     0      Y     2      Y           Y            Y        <NA>         <NA>
+##   13:     0      Y     3      Y           Y            Y           Y         <NA>
+##   14:     0      X     5      X        <NA>         <NA>           X            X
+##   15:     0      X     1      X        <NA>         <NA>           X            X
+##   16:     0      X     4      X        <NA>         <NA>           X            X
+##   17:     0      X     2      X        <NA>         <NA>           X            X
+##   18:     0      Y     2      Y           Y            Y        <NA>         <NA>
+##   19:     0      Y     1      Y           Y            Y        <NA>         <NA>
+##   20:     0      Y     1      Y           Y            Y        <NA>         <NA>
+##   21:     0      Y     3      Y           Y            Y        <NA>         <NA>
+##   22:     0      X     1      X        <NA>         <NA>           X            X
+##   23:     0      X     4      X        <NA>         <NA>           X            X
+##   24:     0      Y     5      Y           Y            Y           Y         <NA>
+##   25:     0      Y     3      Y           Y            Y        <NA>         <NA>
+##   26:     0      Y     5      Y           Y            Y        <NA>         <NA>
+##   27:     0      X     4      X        <NA>         <NA>           X            X
+##   28:     0      Y     5      Y           Y            Y        <NA>         <NA>
+##   29:     0      X     3      X        <NA>         <NA>           X            X
+##   30:     0      Y     1      Y           Y            Y        <NA>         <NA>
+##   31:     0      Y     5      Y           Y            Y           Y         <NA>
+##   32:     0      Y     2      Y           Y            Y        <NA>         <NA>
+##   33:     0      Y     4      Y           Y            Y        <NA>         <NA>
+##   34:     0      X     2      X        <NA>         <NA>           X            X
+##   35:     0      Y     2      Y           Y            Y           Y         <NA>
+##   36:     0      X     5      X        <NA>         <NA>           X            X
+##   37:     0      X     4      X        <NA>         <NA>           X            X
+##   38:     0      X     4      X           X         <NA>           X            X
+##   39:     0      X     2      X        <NA>         <NA>           X            X
+##   40:     0      X     1      X        <NA>         <NA>           X            X
+##   41:     0      X     2      X        <NA>         <NA>           X            X
+##   42:     0      Y     1      Y           Y            Y        <NA>         <NA>
+##   43:     0      Y     1      Y           Y            Y        <NA>         <NA>
+##   44:     0      X     1      X        <NA>         <NA>           X            X
+##   45:     0      Y     4      Y           Y            Y        <NA>         <NA>
+##   46:     0      X     1      X        <NA>         <NA>           X            X
+##   47:     0      Y     4      Y           Y            Y        <NA>         <NA>
+##   48:     0      X     5      X        <NA>         <NA>           X            X
+##   49:     0      Y     5      Y           Y            Y           Y         <NA>
+##   50:     0      X     3      X           X         <NA>           X            X
+##   ---                                                                            
+## 4951:     1      X     5      X           X            X           X            X
+## 4952:     1      Y     1      Y           Y            Y           Y            Y
+## 4953:     1      X     5      X           X            X           X            X
+## 4954:     1      Y     3      Y           Y            Y           Y            Y
+## 4955:     1      Y     1      Y           Y            Y           Y            Y
+## 4956:     1      Y     3      Y           Y            Y           Y            Y
+## 4957:     1      Y     4      Y           Y            Y           Y            Y
+## 4958:     1      Y     3      Y           Y            Y           Y            Y
+## 4959:     1      E     3   <NA>           X            X           Y            Y
+## 4960:     1      X     5      X           X            X           X            X
+## 4961:     1      E     4   <NA>           X            X           Y            Y
+## 4962:     1      Y     2      Y           Y            Y           Y            Y
+## 4963:     1      X     4      X           X            X           X            X
+## 4964:     1      X     5      X           X            X           X            X
+## 4965:     1      Y     4      Y           Y            Y           Y            Y
+## 4966:     1      E     4   <NA>           X            X           Y            Y
+## 4967:     1      X     1      X           X            X           X            X
+## 4968:     1      X     3      X           X            X           X            X
+## 4969:     1      E     4   <NA>           X            X           Y            Y
+## 4970:     1      Y     1      Y           Y            Y           Y            Y
+## 4971:     1      X     1      X           X            X           X            X
+## 4972:     1      E     4   <NA>           X            X           Y            Y
+## 4973:     1      E     3   <NA>           X            X           Y            Y
+## 4974:     1      Y     1      Y           Y            Y           Y            Y
+## 4975:     1      X     2      X           X            X           X            X
+## 4976:     1      Y     1      Y           Y            Y           Y            Y
+## 4977:     1      Y     4      Y           Y            Y           Y            Y
+## 4978:     1      E     3   <NA>           X            X           Y            Y
+## 4979:     1      Y     3      Y           Y            Y           Y            Y
+## 4980:     1      E     4   <NA>           X            X           Y            Y
+## 4981:     1      E     2   <NA>        <NA>            X        <NA>            Y
+## 4982:     1      Y     4      Y           Y            Y           Y            Y
+## 4983:     1      X     4      X           X            X           X            X
+## 4984:     1      E     1   <NA>           X            X           Y            Y
+## 4985:     1      X     2      X           X            X           X            X
+## 4986:     1      Y     4      Y           Y            Y           Y            Y
+## 4987:     1      Y     1      Y           Y            Y           Y            Y
+## 4988:     1      Y     2      Y           Y            Y           Y            Y
+## 4989:     1      Y     3      Y           Y            Y           Y            Y
+## 4990:     1      E     2   <NA>           X            X           Y            Y
+## 4991:     1      X     1      X           X            X           X            X
+## 4992:     1      X     1      X           X            X           X            X
+## 4993:     1      X     3      X           X            X           X            X
+## 4994:     1      E     5   <NA>           X            X           Y            Y
+## 4995:     1      E     3   <NA>           X            X           Y            Y
+## 4996:     1      Y     5      Y           Y            Y           Y            Y
+## 4997:     1      Y     5      Y           Y            Y           Y            Y
+## 4998:     1      E     4   <NA>           X            X           Y            Y
+## 4999:     1      X     2      X           X            X           X            X
+## 5000:     1      X     1      X           X            X           X            X
+```
+
+``` r
+out.sort <- out.unsort[orig.ord]
 ```
 
 The table above is a CSV data file that we can save alongside the original CSV data file.
@@ -910,30 +994,30 @@ for(sub.col.i in 2:ncol(out.sort)){
 ##  3:        Xb_Yb      X     1     1000        0           5
 ##  4:        Xb_Yb      Y     0     1000        0           5
 ##  5:        Xb_Yb      Y     1     1000        0           5
-##  6: Xineg0.01_Yb   <NA>     0      980        0           5
-##  7: Xineg0.01_Yb   <NA>     1       20        0           5
-##  8: Xineg0.01_Yb      X     0       20        0           5
-##  9: Xineg0.01_Yb      X     1     1980        0           5
-## 10: Xineg0.01_Yb      Y     0     1000        0           5
-## 11: Xineg0.01_Yb      Y     1     1000        0           5
-## 12: Xb_Yineg0.01   <NA>     0      980        0           5
-## 13: Xb_Yineg0.01   <NA>     1       20        0           5
-## 14: Xb_Yineg0.01      X     0     1000        0           5
-## 15: Xb_Yineg0.01      X     1     1000        0           5
-## 16: Xb_Yineg0.01      Y     0       20        0           5
-## 17: Xb_Yineg0.01      Y     1     1980        0           5
-## 18:  Xineg0.1_Yb   <NA>     0      800        0           5
-## 19:  Xineg0.1_Yb   <NA>     1      200        0           5
-## 20:  Xineg0.1_Yb      X     0      200        0           5
-## 21:  Xineg0.1_Yb      X     1     1800        0           5
-## 22:  Xineg0.1_Yb      Y     0     1000        0           5
-## 23:  Xineg0.1_Yb      Y     1     1000        0           5
-## 24:  Xb_Yineg0.1   <NA>     0      800        0           5
-## 25:  Xb_Yineg0.1   <NA>     1      200        0           5
-## 26:  Xb_Yineg0.1      X     0     1000        0           5
-## 27:  Xb_Yineg0.1      X     1     1000        0           5
-## 28:  Xb_Yineg0.1      Y     0      200        0           5
-## 29:  Xb_Yineg0.1      Y     1     1800        0           5
+##  6:  Xineg0.1_Yb   <NA>     0      800        0           5
+##  7:  Xineg0.1_Yb   <NA>     1      200        0           5
+##  8:  Xineg0.1_Yb      X     0      200        0           5
+##  9:  Xineg0.1_Yb      X     1     1800        0           5
+## 10:  Xineg0.1_Yb      Y     0     1000        0           5
+## 11:  Xineg0.1_Yb      Y     1     1000        0           5
+## 12: Xineg0.01_Yb   <NA>     0      980        0           5
+## 13: Xineg0.01_Yb   <NA>     1       20        0           5
+## 14: Xineg0.01_Yb      X     0       20        0           5
+## 15: Xineg0.01_Yb      X     1     1980        0           5
+## 16: Xineg0.01_Yb      Y     0     1000        0           5
+## 17: Xineg0.01_Yb      Y     1     1000        0           5
+## 18:  Xb_Yineg0.1   <NA>     0      800        0           5
+## 19:  Xb_Yineg0.1   <NA>     1      200        0           5
+## 20:  Xb_Yineg0.1      X     0     1000        0           5
+## 21:  Xb_Yineg0.1      X     1     1000        0           5
+## 22:  Xb_Yineg0.1      Y     0      200        0           5
+## 23:  Xb_Yineg0.1      Y     1     1800        0           5
+## 24: Xb_Yineg0.01   <NA>     0      980        0           5
+## 25: Xb_Yineg0.01   <NA>     1       20        0           5
+## 26: Xb_Yineg0.01      X     0     1000        0           5
+## 27: Xb_Yineg0.01      X     1     1000        0           5
+## 28: Xb_Yineg0.01      Y     0       20        0           5
+## 29: Xb_Yineg0.01      Y     1     1980        0           5
 ##     sub.col.name subset     y rows_sum rows_var rows_length
 ```
 
