@@ -646,7 +646,9 @@ Here is a dummy data table,
 
 
 ``` r
-dummy.dt <- data.table(y=rep(0:1, c(2000,3000)))
+dummy.dt <- data.table(
+  y=rep(0:1, c(2000,3000)),
+  x1=NA, x2=NA) #example feature columns.
 Tlist <- setNames(as.list(table(dummy.dt$y)), c("Tneg", "Tpos"))
 Tlist$Target_prop <- 10^seq(-1, -2)
 Tlist
@@ -686,7 +688,7 @@ Above we see the expected counts for a small problem with 2000 samples in A and 
 
 ``` r
 set.seed(1)
-(ind.dt <- dummy.dt[
+(ind.dt <- data.table(dummy.dt)[
 , row := .I
 ][sample(.N)][
 , set := NA_character_
@@ -694,19 +696,19 @@ set.seed(1)
 ```
 
 ```
-##           y   row    set
-##       <int> <int> <char>
-##    1:     0  1017   <NA>
-##    2:     1  4775   <NA>
-##    3:     1  2177   <NA>
-##    4:     0  1533   <NA>
-##    5:     1  4567   <NA>
-##   ---                   
-## 4996:     0  1397   <NA>
-## 4997:     1  2779   <NA>
-## 4998:     0  1255   <NA>
-## 4999:     1  2262   <NA>
-## 5000:     1  2606   <NA>
+##           y     x1     x2   row    set
+##       <int> <lgcl> <lgcl> <int> <char>
+##    1:     0     NA     NA  1017   <NA>
+##    2:     1     NA     NA  4775   <NA>
+##    3:     1     NA     NA  2177   <NA>
+##    4:     0     NA     NA  1533   <NA>
+##    5:     1     NA     NA  4567   <NA>
+##   ---                                 
+## 4996:     0     NA     NA  1397   <NA>
+## 4997:     1     NA     NA  2779   <NA>
+## 4998:     0     NA     NA  1255   <NA>
+## 4999:     1     NA     NA  2262   <NA>
+## 5000:     1     NA     NA  2606   <NA>
 ```
 
 Above we see a random ordering of the data rows, set not yet assigned.
@@ -750,19 +752,19 @@ ind.dt[, fold := rep(1:n.folds, length.out=.N), by=.(set, y)][]
 ```
 
 ```
-##           y   row    set  fold
-##       <int> <int> <char> <int>
-##    1:     0  1017      X     1
-##    2:     1  4775      X     1
-##    3:     1  2177      X     2
-##    4:     0  1533      X     2
-##    5:     1  4567      X     3
-##   ---                         
-## 4996:     0  1397      Y     4
-## 4997:     1  2779   <NA>     3
-## 4998:     0  1255      Y     5
-## 4999:     1  2262   <NA>     4
-## 5000:     1  2606   <NA>     5
+##           y     x1     x2   row    set  fold
+##       <int> <lgcl> <lgcl> <int> <char> <int>
+##    1:     0     NA     NA  1017      X     1
+##    2:     1     NA     NA  4775      X     1
+##    3:     1     NA     NA  2177      X     2
+##    4:     0     NA     NA  1533      X     2
+##    5:     1     NA     NA  4567      X     3
+##   ---                                       
+## 4996:     0     NA     NA  1397      Y     4
+## 4997:     1     NA     NA  2779   <NA>     3
+## 4998:     0     NA     NA  1255      Y     5
+## 4999:     1     NA     NA  2262   <NA>     4
+## 5000:     1     NA     NA  2606   <NA>     5
 ```
 
 Now we create the output columns representing the different subsets.
@@ -815,14 +817,17 @@ for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
     for(label.name in names(label.list)){
       label.value <- label.list[[label.name]]
       label.n <- imb.row[[paste0("n_", label.name)]]
-      rm.vec <- ind.dt[, which(y==label.value & set==imb.set)]
-      rm.n <- pos.part(N-label.n)
-      rm.indices <- rm.vec[seq_len(rm.n)]
-      add.dt[rm.indices, set := NA]
-      add.vec <- ind.dt[, which(y==label.value & set=="E")]
-      add.n <- pos.part(label.n-N)
-      add.indices <- add.vec[seq_len(add.n)]
-      add.dt[add.indices, set := imb.set]
+      find.rep.dt <- rowwiseDT(
+        find.set=, sign=, rep.set=,
+        imb.set, 1, NA, #rm
+        "E", -1, imb.set)#add
+      for(find.rep.i in 1:nrow(find.rep.dt)){
+        find.rep.row <- find.rep.dt[find.rep.i]
+        possible.indices <- ind.dt[, which(y==label.value & set==find.rep.row$find.set)]
+        change.n <- pos.part((N-label.n)*find.rep.row$sign)
+        change.indices <- possible.indices[seq_len(change.n)]
+        add.dt[change.indices, set := find.rep.row$rep.set]
+      }
     }
     add.dt[set=="E", set := NA]
     add.dt[, table(fold, paste(set, y))]#check
@@ -839,7 +844,7 @@ Finally we sort back to the original row order:
 
 ``` r
 orig.ord <- order(ind.dt$row)
-print(data.table(ind.dt[, .(y, set)], out.unsort)[orig.ord], topn=50)
+(with.y.set <- data.table(ind.dt[, .(y, set)], out.unsort)[orig.ord])
 ```
 
 ```
@@ -850,97 +855,7 @@ print(data.table(ind.dt[, .(y, set)], out.unsort)[orig.ord], topn=50)
 ##    3:     0      Y     2      Y           Y            Y        <NA>         <NA>
 ##    4:     0      X     1      X        <NA>         <NA>           X            X
 ##    5:     0      Y     4      Y           Y            Y        <NA>         <NA>
-##    6:     0      Y     5      Y           Y            Y        <NA>         <NA>
-##    7:     0      X     5      X        <NA>         <NA>           X            X
-##    8:     0      Y     4      Y           Y            Y        <NA>         <NA>
-##    9:     0      X     3      X        <NA>         <NA>           X            X
-##   10:     0      Y     4      Y           Y            Y           Y         <NA>
-##   11:     0      X     5      X        <NA>         <NA>           X            X
-##   12:     0      Y     2      Y           Y            Y        <NA>         <NA>
-##   13:     0      Y     3      Y           Y            Y           Y         <NA>
-##   14:     0      X     5      X        <NA>         <NA>           X            X
-##   15:     0      X     1      X        <NA>         <NA>           X            X
-##   16:     0      X     4      X        <NA>         <NA>           X            X
-##   17:     0      X     2      X        <NA>         <NA>           X            X
-##   18:     0      Y     2      Y           Y            Y        <NA>         <NA>
-##   19:     0      Y     1      Y           Y            Y        <NA>         <NA>
-##   20:     0      Y     1      Y           Y            Y        <NA>         <NA>
-##   21:     0      Y     3      Y           Y            Y        <NA>         <NA>
-##   22:     0      X     1      X        <NA>         <NA>           X            X
-##   23:     0      X     4      X        <NA>         <NA>           X            X
-##   24:     0      Y     5      Y           Y            Y           Y         <NA>
-##   25:     0      Y     3      Y           Y            Y        <NA>         <NA>
-##   26:     0      Y     5      Y           Y            Y        <NA>         <NA>
-##   27:     0      X     4      X        <NA>         <NA>           X            X
-##   28:     0      Y     5      Y           Y            Y        <NA>         <NA>
-##   29:     0      X     3      X        <NA>         <NA>           X            X
-##   30:     0      Y     1      Y           Y            Y        <NA>         <NA>
-##   31:     0      Y     5      Y           Y            Y           Y         <NA>
-##   32:     0      Y     2      Y           Y            Y        <NA>         <NA>
-##   33:     0      Y     4      Y           Y            Y        <NA>         <NA>
-##   34:     0      X     2      X        <NA>         <NA>           X            X
-##   35:     0      Y     2      Y           Y            Y           Y         <NA>
-##   36:     0      X     5      X        <NA>         <NA>           X            X
-##   37:     0      X     4      X        <NA>         <NA>           X            X
-##   38:     0      X     4      X           X         <NA>           X            X
-##   39:     0      X     2      X        <NA>         <NA>           X            X
-##   40:     0      X     1      X        <NA>         <NA>           X            X
-##   41:     0      X     2      X        <NA>         <NA>           X            X
-##   42:     0      Y     1      Y           Y            Y        <NA>         <NA>
-##   43:     0      Y     1      Y           Y            Y        <NA>         <NA>
-##   44:     0      X     1      X        <NA>         <NA>           X            X
-##   45:     0      Y     4      Y           Y            Y        <NA>         <NA>
-##   46:     0      X     1      X        <NA>         <NA>           X            X
-##   47:     0      Y     4      Y           Y            Y        <NA>         <NA>
-##   48:     0      X     5      X        <NA>         <NA>           X            X
-##   49:     0      Y     5      Y           Y            Y           Y         <NA>
-##   50:     0      X     3      X           X         <NA>           X            X
 ##   ---                                                                            
-## 4951:     1      X     5      X           X            X           X            X
-## 4952:     1      Y     1      Y           Y            Y           Y            Y
-## 4953:     1      X     5      X           X            X           X            X
-## 4954:     1      Y     3      Y           Y            Y           Y            Y
-## 4955:     1      Y     1      Y           Y            Y           Y            Y
-## 4956:     1      Y     3      Y           Y            Y           Y            Y
-## 4957:     1      Y     4      Y           Y            Y           Y            Y
-## 4958:     1      Y     3      Y           Y            Y           Y            Y
-## 4959:     1      E     3   <NA>           X            X           Y            Y
-## 4960:     1      X     5      X           X            X           X            X
-## 4961:     1      E     4   <NA>           X            X           Y            Y
-## 4962:     1      Y     2      Y           Y            Y           Y            Y
-## 4963:     1      X     4      X           X            X           X            X
-## 4964:     1      X     5      X           X            X           X            X
-## 4965:     1      Y     4      Y           Y            Y           Y            Y
-## 4966:     1      E     4   <NA>           X            X           Y            Y
-## 4967:     1      X     1      X           X            X           X            X
-## 4968:     1      X     3      X           X            X           X            X
-## 4969:     1      E     4   <NA>           X            X           Y            Y
-## 4970:     1      Y     1      Y           Y            Y           Y            Y
-## 4971:     1      X     1      X           X            X           X            X
-## 4972:     1      E     4   <NA>           X            X           Y            Y
-## 4973:     1      E     3   <NA>           X            X           Y            Y
-## 4974:     1      Y     1      Y           Y            Y           Y            Y
-## 4975:     1      X     2      X           X            X           X            X
-## 4976:     1      Y     1      Y           Y            Y           Y            Y
-## 4977:     1      Y     4      Y           Y            Y           Y            Y
-## 4978:     1      E     3   <NA>           X            X           Y            Y
-## 4979:     1      Y     3      Y           Y            Y           Y            Y
-## 4980:     1      E     4   <NA>           X            X           Y            Y
-## 4981:     1      E     2   <NA>        <NA>            X        <NA>            Y
-## 4982:     1      Y     4      Y           Y            Y           Y            Y
-## 4983:     1      X     4      X           X            X           X            X
-## 4984:     1      E     1   <NA>           X            X           Y            Y
-## 4985:     1      X     2      X           X            X           X            X
-## 4986:     1      Y     4      Y           Y            Y           Y            Y
-## 4987:     1      Y     1      Y           Y            Y           Y            Y
-## 4988:     1      Y     2      Y           Y            Y           Y            Y
-## 4989:     1      Y     3      Y           Y            Y           Y            Y
-## 4990:     1      E     2   <NA>           X            X           Y            Y
-## 4991:     1      X     1      X           X            X           X            X
-## 4992:     1      X     1      X           X            X           X            X
-## 4993:     1      X     3      X           X            X           X            X
-## 4994:     1      E     5   <NA>           X            X           Y            Y
-## 4995:     1      E     3   <NA>           X            X           Y            Y
 ## 4996:     1      Y     5      Y           Y            Y           Y            Y
 ## 4997:     1      Y     5      Y           Y            Y           Y            Y
 ## 4998:     1      E     4   <NA>           X            X           Y            Y
@@ -949,15 +864,109 @@ print(data.table(ind.dt[, .(y, set)], out.unsort)[orig.ord], topn=50)
 ```
 
 ``` r
-out.sort <- out.unsort[orig.ord]
+with.y.set[, .(rows=.N), keyby=names(with.y.set)]  
 ```
 
-The table above is a CSV data file that we can save alongside the original CSV data file.
+```
+## Key: <y, set, fold, Xb_Yb, Xineg0.1_Yb, Xineg0.01_Yb, Xb_Yineg0.1, Xb_Yineg0.01>
+##         y    set  fold  Xb_Yb Xineg0.1_Yb Xineg0.01_Yb Xb_Yineg0.1 Xb_Yineg0.01  rows
+##     <int> <char> <int> <char>      <char>       <char>      <char>       <char> <int>
+##  1:     0      X     1      X        <NA>         <NA>           X            X   160
+##  2:     0      X     1      X           X         <NA>           X            X    36
+##  3:     0      X     1      X           X            X           X            X     4
+##  4:     0      X     2      X        <NA>         <NA>           X            X   160
+##  5:     0      X     2      X           X         <NA>           X            X    36
+##  6:     0      X     2      X           X            X           X            X     4
+##  7:     0      X     3      X        <NA>         <NA>           X            X   160
+##  8:     0      X     3      X           X         <NA>           X            X    36
+##  9:     0      X     3      X           X            X           X            X     4
+## 10:     0      X     4      X        <NA>         <NA>           X            X   160
+## 11:     0      X     4      X           X         <NA>           X            X    36
+## 12:     0      X     4      X           X            X           X            X     4
+## 13:     0      X     5      X        <NA>         <NA>           X            X   160
+## 14:     0      X     5      X           X         <NA>           X            X    36
+## 15:     0      X     5      X           X            X           X            X     4
+## 16:     0      Y     1      Y           Y            Y        <NA>         <NA>   160
+## 17:     0      Y     1      Y           Y            Y           Y         <NA>    36
+## 18:     0      Y     1      Y           Y            Y           Y            Y     4
+## 19:     0      Y     2      Y           Y            Y        <NA>         <NA>   160
+## 20:     0      Y     2      Y           Y            Y           Y         <NA>    36
+## 21:     0      Y     2      Y           Y            Y           Y            Y     4
+## 22:     0      Y     3      Y           Y            Y        <NA>         <NA>   160
+## 23:     0      Y     3      Y           Y            Y           Y         <NA>    36
+## 24:     0      Y     3      Y           Y            Y           Y            Y     4
+## 25:     0      Y     4      Y           Y            Y        <NA>         <NA>   160
+## 26:     0      Y     4      Y           Y            Y           Y         <NA>    36
+## 27:     0      Y     4      Y           Y            Y           Y            Y     4
+## 28:     0      Y     5      Y           Y            Y        <NA>         <NA>   160
+## 29:     0      Y     5      Y           Y            Y           Y         <NA>    36
+## 30:     0      Y     5      Y           Y            Y           Y            Y     4
+## 31:     1   <NA>     1   <NA>        <NA>         <NA>        <NA>         <NA>     4
+## 32:     1   <NA>     2   <NA>        <NA>         <NA>        <NA>         <NA>     4
+## 33:     1   <NA>     3   <NA>        <NA>         <NA>        <NA>         <NA>     4
+## 34:     1   <NA>     4   <NA>        <NA>         <NA>        <NA>         <NA>     4
+## 35:     1   <NA>     5   <NA>        <NA>         <NA>        <NA>         <NA>     4
+## 36:     1      E     1   <NA>        <NA>            X        <NA>            Y    36
+## 37:     1      E     1   <NA>           X            X           Y            Y   160
+## 38:     1      E     2   <NA>        <NA>            X        <NA>            Y    36
+## 39:     1      E     2   <NA>           X            X           Y            Y   160
+## 40:     1      E     3   <NA>        <NA>            X        <NA>            Y    36
+## 41:     1      E     3   <NA>           X            X           Y            Y   160
+## 42:     1      E     4   <NA>        <NA>            X        <NA>            Y    36
+## 43:     1      E     4   <NA>           X            X           Y            Y   160
+## 44:     1      E     5   <NA>        <NA>            X        <NA>            Y    36
+## 45:     1      E     5   <NA>           X            X           Y            Y   160
+## 46:     1      X     1      X           X            X           X            X   200
+## 47:     1      X     2      X           X            X           X            X   200
+## 48:     1      X     3      X           X            X           X            X   200
+## 49:     1      X     4      X           X            X           X            X   200
+## 50:     1      X     5      X           X            X           X            X   200
+## 51:     1      Y     1      Y           Y            Y           Y            Y   200
+## 52:     1      Y     2      Y           Y            Y           Y            Y   200
+## 53:     1      Y     3      Y           Y            Y           Y            Y   200
+## 54:     1      Y     4      Y           Y            Y           Y            Y   200
+## 55:     1      Y     5      Y           Y            Y           Y            Y   200
+##         y    set  fold  Xb_Yb Xineg0.1_Yb Xineg0.01_Yb Xb_Yineg0.1 Xb_Yineg0.01  rows
+##     <int> <char> <int> <char>      <char>       <char>      <char>       <char> <int>
+```
+
+Above we can see the desired properties.
+
+* In the first half of the table, with `y=0`, when a row has been removed in `ineg0.1`, then it is also removed in `ineg0.01` (hierarchical removal of negative samples as negative proportion is decreased).
+* In the second half of the table, with `y=1` when a row has been added in `ineg0.1`, then it is also added in `ineg0.01` (hierarchical addition of positive samples as negative proportion is decreased).
+* The distribution of folds is uniform: theres are equal numbers of rows with each pattern in each fold (stratification).
+
+Below we create a table for output, with rows in the same order as the original table.
 
 
 ``` r
-fwrite(out.sort, tf <- tempfile())
-system(paste("head", tf))
+(out.sort <- out.unsort[orig.ord])
+```
+
+```
+##        fold  Xb_Yb Xineg0.1_Yb Xineg0.01_Yb Xb_Yineg0.1 Xb_Yineg0.01
+##       <int> <char>      <char>       <char>      <char>       <char>
+##    1:     1      Y           Y            Y        <NA>         <NA>
+##    2:     2      Y           Y            Y           Y            Y
+##    3:     2      Y           Y            Y        <NA>         <NA>
+##    4:     1      X        <NA>         <NA>           X            X
+##    5:     4      Y           Y            Y        <NA>         <NA>
+##   ---                                                               
+## 4996:     5      Y           Y            Y           Y            Y
+## 4997:     5      Y           Y            Y           Y            Y
+## 4998:     4   <NA>           X            X           Y            Y
+## 4999:     2      X           X            X           X            X
+## 5000:     1      X           X            X           X            X
+```
+
+The table above is a split info table that we can save alongside the original table.
+
+
+``` r
+fwrite(dummy.dt, data.file <- tempfile())
+system(paste("head", data.file))
+fwrite(out.sort, split.file <- tempfile())
+system(paste("head", split.file))
 ```
 
 The output above shows the first few lines of the CSV file that describes the cross-validation experiment we have created.
@@ -1019,6 +1028,7 @@ for(sub.col.i in 2:ncol(out.sort)){
 ## 28: Xb_Yineg0.01      Y     0       20        0           5
 ## 29: Xb_Yineg0.01      Y     1     1980        0           5
 ##     sub.col.name subset     y rows_sum rows_var rows_length
+##           <char> <char> <int>    <int>    <num>       <int>
 ```
 
 The table above has one row per combination of CSV column, subset, and label. We see that the results are reasonable.
@@ -1046,28 +1056,32 @@ sessionInfo()
 ```
 
 ```
-## R Under development (unstable) (2025-02-06 r87694)
+## R Under development (unstable) (2026-07-28 r90311)
 ## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 22.04.5 LTS
+## Running under: Ubuntu 24.04.5 LTS
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0  LAPACK version 3.10.0
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
 ## 
 ## locale:
-##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
-##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=en_US.UTF-8    LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
 ##  [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
 ## time zone: America/Toronto
 ## tzcode source: system (glibc)
 ## 
 ## attached base packages:
-## [1] stats     graphics  utils     datasets  grDevices methods   base     
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] data.table_1.17.0
+## [1] ggplot2_4.0.3       data.table_1.18.6.1
 ## 
 ## loaded via a namespace (and not attached):
-## [1] compiler_4.5.0 tools_4.5.0    knitr_1.49     xfun_0.50      evaluate_1.0.3
+##  [1] labeling_0.4.3     RColorBrewer_1.1-3 R6_2.6.1           tidyselect_1.2.1   xfun_0.60          farver_2.1.2      
+##  [7] magrittr_2.0.5     gtable_0.3.6       glue_1.8.1         tibble_3.3.1       knitr_1.51         pkgconfig_2.0.3   
+## [13] generics_0.1.4     dplyr_1.2.1        lifecycle_1.0.5    cli_3.6.6          S7_0.2.2           scales_1.4.0      
+## [19] vctrs_0.7.3        grid_4.7.0         withr_3.0.3        compiler_4.7.0     tools_4.7.0        pillar_1.11.1     
+## [25] evaluate_1.0.5     otel_0.2.0         rlang_1.3.0
 ```
