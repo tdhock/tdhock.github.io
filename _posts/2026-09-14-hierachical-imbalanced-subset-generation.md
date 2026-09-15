@@ -863,6 +863,14 @@ orig.ord <- order(ind.dt$row)
 ## 5000:     1      X     1      X           X            X           X            X
 ```
 
+The column names can be interpreted as follows:
+
+* `b` suffix for balanced: `Xb` and `Yb`.
+* `i` suffix for imbalanced, with a specified proportion of negative labels: `ineg0.1`, `ineg0.01`.
+
+Below we count each unique row pattern.
+
+
 ``` r
 with.y.set[, .(rows=.N), keyby=names(with.y.set)]  
 ```
@@ -933,7 +941,8 @@ with.y.set[, .(rows=.N), keyby=names(with.y.set)]
 Above we can see the desired properties.
 
 * In the first half of the table, with `y=0`, when a row has been removed in `ineg0.1`, then it is also removed in `ineg0.01` (hierarchical removal of negative samples as negative proportion is decreased).
-* In the second half of the table, with `y=1` when a row has been added in `ineg0.1`, then it is also added in `ineg0.01` (hierarchical addition of positive samples as negative proportion is decreased).
+* In the second half of the table, with `y=1`, when a row has been added in `ineg0.1`, then it is also added in `ineg0.01` (hierarchical addition of positive samples as negative proportion is decreased).
+* The same E rows are used for addition in Xi and Yi.
 * The distribution of folds is uniform: theres are equal numbers of rows with each pattern in each fold (stratification).
 
 Below we create a table for output, with rows in the same order as the original table.
