@@ -421,10 +421,12 @@ Below we create a table for output, with rows in the same order as the original 
 The table above is a split info table that we can save alongside the original table.
 
 ```{r}
-fwrite(dummy.dt, data.file <- tempfile())
-system(paste("head", data.file))
-fwrite(out.sort, split.file <- tempfile())
-system(paste("head", split.file))
+fwrite_head <- function(dt){
+  fwrite(dt, data.file <- tempfile())
+  cat(head(readLines(data.file)), sep="\n")
+}
+fwrite_head(dummy.dt)
+fwrite_head(out.sort)
 ```
 
 The output above shows the first few lines of the CSV file that describes the cross-validation experiment we have created.

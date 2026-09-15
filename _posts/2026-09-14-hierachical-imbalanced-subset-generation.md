@@ -972,10 +972,33 @@ The table above is a split info table that we can save alongside the original ta
 
 
 ``` r
-fwrite(dummy.dt, data.file <- tempfile())
-system(paste("head", data.file))
-fwrite(out.sort, split.file <- tempfile())
-system(paste("head", split.file))
+fwrite_head <- function(dt){
+  fwrite(dt, data.file <- tempfile())
+  cat(head(readLines(data.file)), sep="\n")
+}
+fwrite_head(dummy.dt)
+```
+
+```
+## y,x1,x2
+## 0,,
+## 0,,
+## 0,,
+## 0,,
+## 0,,
+```
+
+``` r
+fwrite_head(out.sort)
+```
+
+```
+## fold,Xb_Yb,Xineg0.1_Yb,Xineg0.01_Yb,Xb_Yineg0.1,Xb_Yineg0.01
+## 1,Y,Y,Y,,
+## 2,Y,Y,Y,Y,Y
+## 2,Y,Y,Y,,
+## 1,X,,,X,X
+## 4,Y,Y,Y,,
 ```
 
 The output above shows the first few lines of the CSV file that describes the cross-validation experiment we have created.
