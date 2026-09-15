@@ -1084,6 +1084,192 @@ The table above has one row per combination of CSV column, subset, and label. We
 * number of rows per subset is always 2000.
 * no variance between number of rows across folds, which means fold assignment respects stratification and subsets.
 
+## Higgs data
+
+Below we compute CSV subset files for two random seeds, and for downsampling both classes.
+
+
+``` r
+(higgs.dt <- fread("higgs.csv", select="target"))
+```
+
+```
+##           target
+##            <num>
+##        1:      1
+##        2:      1
+##        3:      1
+##        4:      0
+##        5:      1
+##       ---       
+## 10999996:      1
+## 10999997:      1
+## 10999998:      1
+## 10999999:      0
+## 11000000:      0
+```
+
+``` r
+get_subsets <- function(y.vec, p_neg, n.folds=5L){
+  Tlist <- setNames(as.list(table(y.vec)), c("Tneg", "Tpos"))
+  Tlist$Target_prop <- p_neg
+  Tlist
+  (count.list <- do.call(ntab, Tlist))
+  (ind.dt <- data.table(y=y.vec)[
+  , row := .I
+  ][sample(.N)][
+  , set := NA_character_
+  ][])
+  label.list <- list(pos=1,neg=0)
+  N <- count.list$params$N
+  for(label.name in names(label.list)){
+    label.value <- label.list[[label.name]]
+    label.extra <- count.list$params[[paste0("extra_", label.name)]]
+    set.values <- rep(c("X","Y","E"), c(N,N,label.extra))
+    label.i <- which(ind.dt$y==label.value)[seq_along(set.values)]
+    ind.dt[label.i, set := set.values]
+  }
+  ind.dt[, fold := rep(1:n.folds, length.out=.N), by=.(set, y)][]
+  (out.unsort <- ind.dt[, data.table(
+    fold,
+    Xb_Yb=ifelse(set %in% c("X","Y"), set, NA))])
+  imb.counts <- count.list$props[p_neg != 0.5][order(abs(p_neg-0.5))]
+  pos.part <- function(x)ifelse(x<0, 0, x)
+  for(cformat in c("Xineg%s_Yb", "Xb_Yineg%s")){
+    for(imb.i in 1:nrow(imb.counts)){
+      imb.row <- imb.counts[imb.i]
+      j.name <- sprintf(cformat, imb.row$p_neg)
+      set(
+        out.unsort,
+        j=j.name,
+        value=ind.dt$set)
+      imb.set <- ifelse(grepl("Xi", cformat), "X", "Y")
+      for(label.name in names(label.list)){
+        label.value <- label.list[[label.name]]
+        label.n <- imb.row[[paste0("n_", label.name)]]
+        find.rep.dt <- rowwiseDT(
+          find.set=, sign=, rep.set=,
+          imb.set, 1, NA, #rm
+          "E", -1, imb.set)#add
+        for(find.rep.i in 1:nrow(find.rep.dt)){
+          find.rep.row <- find.rep.dt[find.rep.i]
+          possible.indices <- ind.dt[, which(y==label.value & set==find.rep.row$find.set)]
+          change.n <- pos.part((N-label.n)*find.rep.row$sign)
+          change.indices <- possible.indices[seq_len(change.n)]
+          set(
+            out.unsort,
+            i=change.indices,
+            j=j.name,
+            value=find.rep.row$rep.set)
+        }
+        is.E <- which(out.unsort[[j.name]]=="E")
+        set(
+          out.unsort,
+          i=is.E,
+          j=j.name,
+          value=NA)
+      }
+    }
+  }
+  orig.ord <- order(ind.dt$row)
+  out.unsort[orig.ord]
+}
+
+(higgs.p <- (10^seq(-3, -1))*0.5)
+```
+
+```
+## [1] 5e-04 5e-03 5e-02
+```
+
+``` r
+p.list <- list(neg=higgs.p, pos=1-higgs.p)
+for(minor.class in names(p.list)){
+  p.vec <- p.list[[minor.class]]
+  for(seed in 1:2){
+    set.seed(seed)
+    (higgs.sub.dt <- get_subsets(higgs.dt$target, p.vec))
+    print(out.csv <- sprintf(
+      "higgs_subsets_seed=%d_pneg[%s,%s].csv",
+      seed, min(p.vec), max(p.vec)))
+    fwrite(higgs.sub.dt, out.csv)
+  }
+}
+```
+
+```
+## [1] "higgs_subsets_seed=1_pneg[5e-04,0.05].csv"
+## [1] "higgs_subsets_seed=2_pneg[5e-04,0.05].csv"
+## [1] "higgs_subsets_seed=1_pneg[0.95,0.9995].csv"
+## [1] "higgs_subsets_seed=2_pneg[0.95,0.9995].csv"
+```
+
+``` r
+higgs.sub.dt
+```
+
+```
+##            fold  Xb_Yb Xineg0.95_Yb Xineg0.995_Yb Xineg0.9995_Yb Xb_Yineg0.95 Xb_Yineg0.995 Xb_Yineg0.9995
+##           <int> <char>       <char>        <char>         <char>       <char>        <char>         <char>
+##        1:     3      Y            Y             Y              Y            Y          <NA>           <NA>
+##        2:     1      X            X          <NA>           <NA>            X             X              X
+##        3:     3   <NA>         <NA>          <NA>           <NA>         <NA>          <NA>           <NA>
+##        4:     1      X            X             X              X            X             X              X
+##        5:     1   <NA>         <NA>          <NA>           <NA>         <NA>          <NA>           <NA>
+##       ---                                                                                                 
+## 10999996:     1      X         <NA>          <NA>           <NA>            X             X              X
+## 10999997:     4      X         <NA>          <NA>           <NA>            X             X              X
+## 10999998:     3      Y            Y             Y              Y         <NA>          <NA>           <NA>
+## 10999999:     2      X            X             X              X            X             X              X
+## 11000000:     3      X            X             X              X            X             X              X
+```
+
+Above we see the last table created and saved to CSV.
+
+
+``` r
+table(higgs.sub.dt$fold, paste(higgs.sub.dt[["Xb_Yineg0.9995"]], higgs.dt$target))
+```
+
+```
+##    
+##       NA 0   NA 1    X 0    X 1    Y 0    Y 1
+##   1      1 820641 344840 344840 689336    344
+##   2      0 820640 344840 344840 689335    345
+##   3      0 820640 344840 344840 689335    345
+##   4      0 820639 344840 344840 689335    345
+##   5      0 820639 344840 344840 689335    345
+```
+
+Above we see that the data counts across subsets and folds are as expected (X balanced, Y imbalanced mostly negative).
+
+
+``` r
+cat(system("du -ms higgs*csv", intern=TRUE), sep="\n")
+```
+
+```
+## 5310	higgs.csv
+## 141	higgs_subsets_seed=1_pneg[0.95,0.9995].csv
+## 147	higgs_subsets_seed=1_pneg[5e-04,0.05].csv
+## 141	higgs_subsets_seed=2_pneg[0.95,0.9995].csv
+## 147	higgs_subsets_seed=2_pneg[5e-04,0.05].csv
+```
+
+Above we see that the CSV files we created are 141 MB (for large `pneg`) or 147 MB (for small `pneg`).
+This makes sense because there are fewer negative samples, as shown below.
+
+
+``` r
+table(higgs.dt$target)
+```
+
+```
+## 
+##       0       1 
+## 5170877 5829123
+```
+
 ## Conclusions
 
 We have shown how to split a binary classification data set into two subsets.
