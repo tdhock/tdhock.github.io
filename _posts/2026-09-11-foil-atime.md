@@ -114,7 +114,7 @@ That is the main drawback of previous systems like [Rperform](https://github.com
 
 ## Other figures
 
-Here, we continuing the `atime` code example, in order to highlight its other unique features (not related to performance testing different versions of R packages).
+Here, we continue the `atime` code example, in order to highlight its other unique features (not related to performance testing different versions of R packages).
 The code below computes best asymptotic references, which can be used to infer the asymptotic complexity classes (big-O notation).
 
 
@@ -193,11 +193,11 @@ sessionInfo()
 ## [1] Matrix_1.7-6
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] directlabels_2026.8.28 vctrs_0.7.3            knitr_1.51             cli_3.6.6              xfun_0.60             
-##  [6] rlang_1.3.0            otel_0.2.0             bench_1.1.4            generics_0.1.4         S7_0.2.2              
+##  [1] directlabels_2026.8.28 vctrs_0.7.3            cli_3.6.6              knitr_1.51             rlang_1.3.0           
+##  [6] xfun_0.60              otel_0.2.0             bench_1.1.4            generics_0.1.4         S7_0.2.2              
 ## [11] data.table_1.18.6.1    glue_1.8.1             scales_1.4.0           grid_4.7.0             evaluate_1.0.5        
 ## [16] tibble_3.3.1           profmem_0.7.0          lifecycle_1.0.5        compiler_4.7.0         dplyr_1.2.1           
 ## [21] RColorBrewer_1.1-3     Rcpp_1.1.2             pkgconfig_2.0.3        atime_2026.4.2         farver_2.1.2          
 ## [26] lattice_0.22-9         R6_2.6.1               tidyselect_1.2.1       pillar_1.11.1          magrittr_2.0.5        
-## [31] tools_4.7.0            withr_3.0.3            gtable_0.3.6           ggplot2_4.0.3
+## [31] withr_3.0.3            tools_4.7.0            gtable_0.3.6           ggplot2_4.0.3
 ```
