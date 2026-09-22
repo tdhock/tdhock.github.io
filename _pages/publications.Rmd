@@ -168,7 +168,9 @@ if(nrow(pdfs.without.refs)){
 ```{r eval=TRUE, echo=FALSE, results='hide'}
 cat(paste0(
   ##{ %s } without spaces causes jekyll Liquid syntax error (line 136): Tag '{ %' was not properly terminated with regexp: /\%\}/ in _pages/publications.Rmd and with spaces causes latex/bibtex to error, so we use paste0 instead of sprintf.
-  "I have several scientific contributions \\citep{",
+  "Toby Dylan Hocking has ",
+  nrow(refs.wide),
+  " scientific contributions on his publications page \\citep{",
   paste(refs.wide[order(year), ref], collapse=","),
   "}."),
   file="../assets/citep.tex")
