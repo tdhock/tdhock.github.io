@@ -63,6 +63,11 @@ into one row of a data table:
 
 ```{r}
 options(datatable.prettyprint.char=15)
+add.space.between.double.curly.braces <- function(x){
+  ## this is only necessary in the blog, to avoid jekyll error
+  ## Liquid Exception: …was not properly terminated with regexp: /\}\}/ in /github/workspace/_posts/2026-09-22-find-bib-issues.md
+  gsub("\\{\\{", "\\{ \\{", x)
+}
 (refs.dt <- nc::capture_all_str(
   refs.vec,
   nc::before_match(
@@ -71,7 +76,7 @@ options(datatable.prettyprint.char=15)
     "[{]",
     ref="[^,]+",
     ",\n",
-    fields="(?s).*?", function(x)gsub("\\{\\{", "\\{ \\{", x),
+    fields="(?s).*?", add.space.between.double.curly.braces,
     "[}](?:$|\n *\n)")))
 refs.dt[c(1,.N), fields]
 ```
