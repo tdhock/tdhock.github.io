@@ -166,7 +166,7 @@ refs.dt[c(1,.N), fields]
 
 The output above shows that the bib file was converted to a table with 76 rows.
 
-## Check for fields too ling
+## Check for fields too long
 
 
 ``` r
