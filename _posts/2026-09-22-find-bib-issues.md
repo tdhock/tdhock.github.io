@@ -306,11 +306,15 @@ refs.fields[, .(ref.count=.N), by=.(variable,value)][eq.counts,on=.(variable,val
 
 ## Verify clean
 
-Normally there should not be any quotes or curly braces in fields:
+Normally there should not be any quotes or curly braces in fields after parsing:
 
 
 ``` r
-cat(grep('[{}"]', refs.fields$value, value=TRUE), sep="\n\n")
+refs.fields[grep('[{}"]', value)]
+```
+
+```
+## Empty data.table (0 rows and 6 cols): type,ref,before,match,variable,value
 ```
 
 ## Conclusion
