@@ -205,29 +205,38 @@ seconds.limit <- 0.1
 Below we define two versions of data table to test: current release is 1.18.6, and version tested in my previous 2023 post is 1.14.8.
 
 ```{r}
-dt.vers <- list("1.18.6", "1.14.8")
+dt.vers <- c("1.18.6", "1.14.8", installed="")
+names(dt.vers) <- ifelse(names(dt.vers)=="", dt.vers, names(dt.vers))
 ```
 
 Next we define a function which generates a list of R expressions to test (one element for each version of data table).
 
 ```{r}
-dt_exprs <- function(name, expr){
-  dt.exprs <- do.call(atime::atime_versions_exprs, c(list(
+dt_exprs <- function(e){
+  expr <- substitute(e)
+  names(dt.vers) <- paste0(
+    format(expr[[2]][[1]]),
+    "\n",
+    names(dt.vers))
+  atime::atime_versions_exprs(
     "~/R/data.table",
     pkg.edit.fun=edit.data.table,
-    expr=substitute(expr),
-    setNames(dt.vers, dt.vers))))
-  names(dt.exprs) <- paste0(name, "\n", names(dt.exprs))
-  dt.exprs
+    expr=expr,
+    sha.vec=dt.vers)
 }
-(dt.write.exprs <- dt_exprs(
-  "data.table::fwrite",
-  data.table::fwrite(input.df, tempfile(), showProgress = FALSE)))
+(dt.write.exprs <- dt_exprs({
+  data.table::fwrite(input.df, tempfile(), showProgress = FALSE)
+}))
 ```
 
 Now we compute timings of writing some random normal data to CSV.
 
 ```{r write}
+if(requireNamespace("arrow")){
+  dt.write.exprs$write_csv_arrow <-quote(
+    arrow::write_csv_arrow(input.df, tempfile())
+  )
+}
 atime.write.vary.cols <- atime::atime(
   setup={
     set.seed(1)
@@ -237,12 +246,6 @@ atime.write.vary.cols <- atime::atime(
   },
   seconds.limit = seconds.limit,
   expr.list=dt.write.exprs,
-  "data.table::fwrite"={
-    data.table::fwrite(input.df, tempfile(), showProgress = FALSE)
-  },
-  "write_csv_arrow"={
-    arrow::write_csv_arrow(input.df, tempfile())
-  },
   "readr::write_csv"={
     readr::write_csv(input.df, tempfile(), progress = FALSE)
   },
@@ -254,7 +257,7 @@ write.colors <- c(
   "readr::write_csv"="#9970AB",
   "data.table::fwrite\n1.14.8"="#D6604D",
   "data.table::fwrite\n1.18.6"="#E7604D",
-  "data.table::fwrite"="#F7604D",
+  "data.table::fwrite\ninstalled"="#F7604D",
   "write_csv_arrow"="#BF812D", 
   "utils::write.csv"="deepskyblue")
 gg.write <- plot(pred.write.vary.cols)+
@@ -280,10 +283,10 @@ tfgrid <- function(param, ...)atime::atime_grid(
   setNames(list(c(TRUE,FALSE)), param),
   ..., expr.param.sep="\n")
 (expr.list <- c(
-  dt_exprs(
-    "data.table::fread",
-    data.table::fread(input.csv, showProgress = FALSE)),
-  tfgrid(
+  dt_exprs({
+    data.table::fread(input.csv, showProgress = FALSE)
+  }),
+  if(requireNamespace("arrow"))tfgrid(
     "asDF",
     read_csv_arrow={
       ## https://francoismichonneau.net/2022/10/import-big-csv/
@@ -301,10 +304,7 @@ atime.read.vary.cols <- atime::atime(
     input.mat <- matrix(input.vec, n.rows, N)
     input.df <- data.frame(input.mat)
     input.csv <- tempfile()
-    fwrite(input.df, input.csv)
-  },
-  "data.table::fread"={
-    data.table::fread(input.csv, showProgress = FALSE)
+    data.table::fwrite(input.df, input.csv)
   },
   seconds.limit = seconds.limit,
   expr.list = expr.list,
@@ -317,7 +317,7 @@ read.colors <- c(
   "readr::read_csv\nlazy=FALSE"="#99909B",
   "data.table::fread\n1.14.8"="#D6604D",
   "data.table::fread\n1.18.6"="#E7604D",
-  "data.table::fread"="#F7604D",
+  "data.table::fread\ninstalled"="#F7604D",
   "read_csv_arrow\nasDF=TRUE"="#BF812D", 
   "read_csv_arrow\nasDF=FALSE"="#9F912D", 
   "utils::read.csv"="deepskyblue")
