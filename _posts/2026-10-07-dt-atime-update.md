@@ -209,37 +209,62 @@ Below we define two versions of data table to test: current release is 1.18.6, a
 
 
 ``` r
-dt.vers <- list("1.18.6", "1.14.8")
+dt.vers <- c("1.18.6", "1.14.8", installed="")
+names(dt.vers) <- ifelse(names(dt.vers)=="", dt.vers, names(dt.vers))
 ```
 
 Next we define a function which generates a list of R expressions to test (one element for each version of data table).
 
 
 ``` r
-dt_exprs <- function(name, expr){
-  dt.exprs <- do.call(atime::atime_versions_exprs, c(list(
+dt_exprs <- function(e){
+  expr <- substitute(e)
+  names(dt.vers) <- paste0(
+    format(expr[[2]][[1]]),
+    "\n",
+    names(dt.vers))
+  atime::atime_versions_exprs(
     "~/R/data.table",
     pkg.edit.fun=edit.data.table,
-    expr=substitute(expr),
-    setNames(dt.vers, dt.vers))))
-  names(dt.exprs) <- paste0(name, "\n", names(dt.exprs))
-  dt.exprs
+    expr=expr,
+    sha.vec=dt.vers)
 }
-(dt.write.exprs <- dt_exprs(
-  "data.table::fwrite",
-  data.table::fwrite(input.df, tempfile(), showProgress = FALSE)))
+(dt.write.exprs <- dt_exprs({
+  data.table::fwrite(input.df, tempfile(), showProgress = FALSE)
+}))
 ```
 
 ```
 ## $`data.table::fwrite\n1.18.6`
-## data.table.1.18.6::fwrite(input.df, tempfile(), showProgress = FALSE)
+## {
+##     data.table.1.18.6::fwrite(input.df, tempfile(), showProgress = FALSE)
+## }
 ## 
 ## $`data.table::fwrite\n1.14.8`
-## data.table.1.14.8::fwrite(input.df, tempfile(), showProgress = FALSE)
+## {
+##     data.table.1.14.8::fwrite(input.df, tempfile(), showProgress = FALSE)
+## }
+## 
+## $`data.table::fwrite\ninstalled`
+## {
+##     data.table::fwrite(input.df, tempfile(), showProgress = FALSE)
+## }
 ```
 
 Now we compute timings of writing some random normal data to CSV.
 
+
+``` r
+if(requireNamespace("arrow")){
+  dt.write.exprs$write_csv_arrow <-quote(
+    arrow::write_csv_arrow(input.df, tempfile())
+  )
+}
+```
+
+```
+## Le chargement a nécessité le package : arrow
+```
 
 ``` r
 atime.write.vary.cols <- atime::atime(
@@ -251,12 +276,6 @@ atime.write.vary.cols <- atime::atime(
   },
   seconds.limit = seconds.limit,
   expr.list=dt.write.exprs,
-  "data.table::fwrite"={
-    data.table::fwrite(input.df, tempfile(), showProgress = FALSE)
-  },
-  "write_csv_arrow"={
-    arrow::write_csv_arrow(input.df, tempfile())
-  },
   "readr::write_csv"={
     readr::write_csv(input.df, tempfile(), progress = FALSE)
   },
@@ -268,7 +287,7 @@ write.colors <- c(
   "readr::write_csv"="#9970AB",
   "data.table::fwrite\n1.14.8"="#D6604D",
   "data.table::fwrite\n1.18.6"="#E7604D",
-  "data.table::fwrite"="#F7604D",
+  "data.table::fwrite\ninstalled"="#F7604D",
   "write_csv_arrow"="#BF812D", 
   "utils::write.csv"="deepskyblue")
 gg.write <- plot(pred.write.vary.cols)+
@@ -286,6 +305,9 @@ over 10 timings")+
 ```
 ## Scale for x is already present.
 ## Adding another scale for x, which will replace the existing scale.
+```
+
+```
 ## Scale for y is already present.
 ## Adding another scale for y, which will replace the existing scale.
 ```
@@ -295,8 +317,8 @@ gg.write
 ```
 
 ```
-## Warning in scale_x_log10("N = number of columns to write"): log-10 transformation introduced infinite
-## values.
+## Warning in scale_x_log10("N = number of columns to write"): log-10
+## transformation introduced infinite values.
 ```
 
 ![plot of chunk write](/assets/img/2026-10-07-dt-atime-update/write-1.png)
@@ -312,10 +334,10 @@ tfgrid <- function(param, ...)atime::atime_grid(
   setNames(list(c(TRUE,FALSE)), param),
   ..., expr.param.sep="\n")
 (expr.list <- c(
-  dt_exprs(
-    "data.table::fread",
-    data.table::fread(input.csv, showProgress = FALSE)),
-  tfgrid(
+  dt_exprs({
+    data.table::fread(input.csv, showProgress = FALSE)
+  }),
+  if(requireNamespace("arrow"))tfgrid(
     "asDF",
     read_csv_arrow={
       ## https://francoismichonneau.net/2022/10/import-big-csv/
@@ -329,20 +351,23 @@ tfgrid <- function(param, ...)atime::atime_grid(
 ```
 
 ```
+## Le chargement a nécessité le package : arrow
+```
+
+```
 ## $`data.table::fread\n1.18.6`
-## data.table.1.18.6::fread(input.csv, showProgress = FALSE)
-## 
-## $`data.table::fread\n1.14.8`
-## data.table.1.14.8::fread(input.csv, showProgress = FALSE)
-## 
-## $`read_csv_arrow\nasDF=FALSE`
 ## {
-##     arrow::read_csv_arrow(input.csv, as_data_frame = FALSE)
+##     data.table.1.18.6::fread(input.csv, showProgress = FALSE)
 ## }
 ## 
-## $`read_csv_arrow\nasDF=TRUE`
+## $`data.table::fread\n1.14.8`
 ## {
-##     arrow::read_csv_arrow(input.csv, as_data_frame = TRUE)
+##     data.table.1.14.8::fread(input.csv, showProgress = FALSE)
+## }
+## 
+## $`data.table::fread\ninstalled`
+## {
+##     data.table::fread(input.csv, showProgress = FALSE)
 ## }
 ## 
 ## $`readr::read_csv\nlazy=FALSE`
@@ -366,10 +391,7 @@ atime.read.vary.cols <- atime::atime(
     input.mat <- matrix(input.vec, n.rows, N)
     input.df <- data.frame(input.mat)
     input.csv <- tempfile()
-    fwrite(input.df, input.csv)
-  },
-  "data.table::fread"={
-    data.table::fread(input.csv, showProgress = FALSE)
+    data.table::fwrite(input.df, input.csv)
   },
   seconds.limit = seconds.limit,
   expr.list = expr.list,
@@ -382,7 +404,7 @@ read.colors <- c(
   "readr::read_csv\nlazy=FALSE"="#99909B",
   "data.table::fread\n1.14.8"="#D6604D",
   "data.table::fread\n1.18.6"="#E7604D",
-  "data.table::fread"="#F7604D",
+  "data.table::fread\ninstalled"="#F7604D",
   "read_csv_arrow\nasDF=TRUE"="#BF812D", 
   "read_csv_arrow\nasDF=FALSE"="#9F912D", 
   "utils::read.csv"="deepskyblue")
@@ -401,6 +423,9 @@ over 10 timings")+
 ```
 ## Scale for x is already present.
 ## Adding another scale for x, which will replace the existing scale.
+```
+
+```
 ## Scale for y is already present.
 ## Adding another scale for y, which will replace the existing scale.
 ```
@@ -410,8 +435,8 @@ gg.read
 ```
 
 ```
-## Warning in scale_x_log10("N = number of columns to read"): log-10 transformation introduced infinite
-## values.
+## Warning in scale_x_log10("N = number of columns to read"): log-10
+## transformation introduced infinite values.
 ```
 
 ![plot of chunk read](/assets/img/2026-10-07-dt-atime-update/read-1.png)
@@ -435,14 +460,8 @@ benchmarkme::get_cpu()
 ```
 
 ```
-## $vendor_id
-## [1] "GenuineIntel"
-## 
-## $model_name
-## [1] "Intel(R) Core(TM) Ultra 5 125U"
-## 
-## $no_of_cores
-## [1] 14
+## Error in `loadNamespace()`:
+## ! aucun package nommé 'benchmarkme' n'est trouvé
 ```
 
 ``` r
@@ -450,53 +469,51 @@ sessionInfo()
 ```
 
 ```
-## R Under development (unstable) (2026-07-28 r90311)
+## R Under development (unstable) (2026-09-16 r90549)
 ## Platform: x86_64-pc-linux-gnu
-## Running under: Ubuntu 24.04.5 LTS
+## Running under: Ubuntu 22.04.5 LTS
 ## 
 ## Matrix products: default
-## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.12.0 
-## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.12.0  LAPACK version 3.12.0
+## BLAS:   /usr/lib/x86_64-linux-gnu/blas/libblas.so.3.10.0 
+## LAPACK: /usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.10.0  LAPACK version 3.10.0
 ## 
 ## locale:
-##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C               LC_TIME=fr_FR.UTF-8       
-##  [4] LC_COLLATE=en_US.UTF-8     LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=en_US.UTF-8   
-##  [7] LC_PAPER=fr_FR.UTF-8       LC_NAME=C                  LC_ADDRESS=C              
-## [10] LC_TELEPHONE=C             LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
+##  [1] LC_CTYPE=fr_FR.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=fr_FR.UTF-8        LC_COLLATE=fr_FR.UTF-8    
+##  [5] LC_MONETARY=fr_FR.UTF-8    LC_MESSAGES=fr_FR.UTF-8   
+##  [7] LC_PAPER=fr_FR.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=fr_FR.UTF-8 LC_IDENTIFICATION=C       
 ## 
 ## time zone: America/Toronto
 ## tzcode source: system (glibc)
 ## 
 ## attached base packages:
-## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## other attached packages:
-## [1] atime_2026.10.7 testthat_3.3.2  ggplot2_4.0.3  
+## [1] atime_2026.9.17 ggplot2_4.0.3  
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] benchmarkmeData_2.0.0      gtable_0.3.6               xfun_0.61                 
-##  [4] devtools_2.5.2             bench_1.1.4                lattice_0.23-1            
-##  [7] tzdb_0.5.0                 vctrs_0.7.3                tools_4.7.0               
-## [10] generics_0.1.4             parallel_4.7.0             tibble_3.3.1              
-## [13] pkgconfig_2.0.3            data.table.1.14.8_1.14.8   Matrix_1.7-6              
-## [16] data.table_1.18.6.1        RColorBrewer_1.1-3         S7_0.2.2                  
-## [19] desc_1.4.3                 assertthat_0.2.1           lifecycle_1.0.5           
-## [22] stringr_1.6.0              compiler_4.7.0             farver_2.1.2              
-## [25] credentials_2.0.3          brio_1.1.5                 codetools_0.2-20          
-## [28] sys_3.4.3                  usethis_3.2.2              profmem_0.7.0             
-## [31] pillar_1.11.1              crayon_1.5.3               ellipsis_0.3.3            
-## [34] openssl_2.4.2              cachem_1.1.0               sessioninfo_1.2.4         
-## [37] iterators_1.0.14           foreach_1.5.2              tidyselect_1.2.1          
-## [40] stringi_1.8.9              dplyr_1.2.1                purrr_1.2.2               
-## [43] arrow_25.0.1               rprojroot_2.1.1            fastmap_1.2.0             
-## [46] grid_4.7.0                 cli_3.6.6                  magrittr_2.0.5            
-## [49] pkgbuild_1.4.8             readr_2.2.0                withr_3.0.3               
-## [52] scales_1.4.0               bit64_4.8.6                httr_1.4.9                
-## [55] data.table.1.18.6_1.18.6.1 bit_4.6.0                  otel_0.2.0                
-## [58] benchmarkme_1.0.8          askpass_1.2.1              hms_1.1.4                 
-## [61] evaluate_1.0.5             memoise_2.0.1              knitr_1.52                
-## [64] doParallel_1.0.17          rlang_1.3.0                gert_2.4.1                
-## [67] Rcpp_1.1.2                 glue_1.8.1                 directlabels_2026.8.28    
-## [70] pkgload_1.5.3              rstudioapi_0.19.0          vroom_1.7.1               
-## [73] R6_2.6.1                   fs_2.1.0
+##  [1] bit_4.6.0                  gtable_0.3.6              
+##  [3] dplyr_1.2.1                compiler_4.7.0            
+##  [5] crayon_1.5.3               Rcpp_1.1.2                
+##  [7] tidyselect_1.2.1           scales_1.4.0              
+##  [9] directlabels_2026.8.27     lattice_0.23-1            
+## [11] readr_2.2.0                R6_2.6.1                  
+## [13] generics_0.1.4             knitr_1.52                
+## [15] tibble_3.3.1               pillar_1.11.1             
+## [17] RColorBrewer_1.1-3         tzdb_0.5.0                
+## [19] rlang_1.3.0                xfun_0.61                 
+## [21] S7_0.2.2                   otel_0.2.0                
+## [23] bit64_4.8.6                cli_3.6.6                 
+## [25] withr_3.0.3                magrittr_2.0.5            
+## [27] grid_4.7.0                 vroom_1.7.1               
+## [29] hms_1.1.4                  lifecycle_1.0.5           
+## [31] data.table.1.18.6_1.18.6.1 vctrs_0.7.3               
+## [33] bench_1.1.4                evaluate_1.0.5            
+## [35] glue_1.8.1                 data.table_1.18.6.1       
+## [37] farver_2.1.2               data.table.1.14.8_1.14.8  
+## [39] profmem_0.7.0              tools_4.7.0               
+## [41] pkgconfig_2.0.3
 ```
