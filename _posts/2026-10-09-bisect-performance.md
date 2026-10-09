@@ -14,11 +14,17 @@ Recently [I re-ran some benchmarks](https://tdhock.github.io/blog/2026/dt-atime-
 
 Below is the original from 2023, old code and old hardware:
 
-![read old code old laptop](/assets/img/2024-06-20-directions/map-to-tobys-office.png)
+![read old code old laptop](/assets/img/2026-10-09-bisect-performance/read-old-code-old-laptop.png)
 
+Below is the new code and old hardware:
 
+![read new code old laptop](/assets/img/2026-10-09-bisect-performance/read-new-code-old-laptop.png)
 
-The CSV writing function looked about the same, but the reading function was slower!
+Below is the new code and new hardware:
+
+![read new code new laptop](/assets/img/2026-10-09-bisect-performance/read-new-code-new-laptop.png)
+
+We can see that the reading function is slower!
 When was this slowdown introduced?
 
 I wrote some new functions in [atime](https://github.com/tdhock/atime/pull/131) for answering this question.
@@ -48,6 +54,11 @@ I added a new test case in [PR7907](https://github.com/Rdatatable/data.table/pul
 The key parts of the code below which enable performance bisecting are the Fast/Slow commits.
 We run `git bisect` with old=Fast and new=Slow, and we get [this interesting result](https://tdhock.github.io/2026-10-09-fread-git-bisect/):
 
+![fread](/assets/img/2026-10-09-bisect-performance/fread-perf-bisect-overview.png)
+
+We see in the first bisect on the left, that the bisect stopped with an intermediate performance, about halfway between Fast and Slow.
+So we re-ran git bisect twice more, and we found two different PRs related to fread, which likely caused the slowdown, see below.
+
 ```
 #Fast="1685a3b47d48f323afeae589545f7cbb7717ec28", #not as fast as Fast, but use as Fast in bisect with Slow.
 #Slow="1.18.6",
@@ -75,6 +86,7 @@ Date:   Mon Nov 3 22:03:18 2025 +0100
 bisect found first bad commit
 ```
 
+TODO more discussion.
 
 ```
 #Fast="1.14.8",
@@ -168,7 +180,14 @@ Date:   Mon Oct 20 19:20:52 2025 +0200
 bisect found first bad commit
 ```
 
-
 ## Example 2
 
-[PR7912](https://github.com/Rdatatable/data.table/pull/7912)
+TODO discuss how atime gets the same results as in [PR7912](https://github.com/Rdatatable/data.table/pull/7912).
+
+![reg before](/assets/img/2026-10-09-bisect-performance/dt-by-reg-before.png)
+
+![slow fast](/assets/img/2026-10-09-bisect-performance/dt-by-slow-fast.png)
+
+## Example 3
+
+poncatime TODO
