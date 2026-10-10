@@ -188,6 +188,14 @@ TODO discuss how atime gets the same results as in [PR7912](https://github.com/R
 
 ![slow fast](/assets/img/2026-10-09-bisect-performance/dt-by-slow-fast.png)
 
+### Comparison between machines
+
+Two computers (2010 and 2025), 10x absolute throughput differences, same qualitative results, same wall time.
+
+![reg before](/assets/img/2026-10-09-bisect-performance/dt-by-reg-before-compare.png)
+
+![slow fast](/assets/img/2026-10-09-bisect-performance/dt-by-slow-fast-compare.png)
+
 ## Example 3
 
 poncatime TODO
