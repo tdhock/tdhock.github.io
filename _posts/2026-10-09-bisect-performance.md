@@ -196,6 +196,10 @@ Two computers (2010 and 2025), 10x absolute throughput differences, same qualita
 
 ![slow fast](/assets/img/2026-10-09-bisect-performance/dt-by-slow-fast-compare.png)
 
+![slow timeline](/assets/img/2026-10-09-bisect-performance/viz-PR7912-timeline.png)
+
+![slow minutes](/assets/img/2026-10-09-bisect-performance/viz-PR7912-minutes.png)
+
 ## Example 3
 
 poncatime TODO
