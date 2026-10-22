@@ -59,10 +59,12 @@ Students should expect to do the following:
   and specific ideas for next steps. Please read my guide about
   [organizing computational research projects](/blog/2025/computational-research-organization).
 - have a one-on-one weekly meeting with me, to discuss progress and
-  next steps (using the lab notebook to help explain). You should work
-  an appropriate amount of time each week in order to make progress
-  each week. For example Graduate Research Assistants (GRAs) should
-  expect to work 20 hours per week on their research project.
+  next steps (using the lab notebook to help explain). In order to
+  make progress each week, you should work on your research project an
+  appropriate amount of time. A typical full time research student
+  will work on their project 4–8 hours every weekday, Monday through
+  Friday.
+- enjoy life in Sherbrooke outside of the lab. I encourage you to avoid working in evenings, and to avoid working on weekends, so you can have a healthy work-life balance. Sherbrooke is a city with a lot of opportunities for outdoor activities (downhill and cross-country ski in winter, water ski in summer, mountain biking, hiking, etc). In your application, please write a sentence or two about what activities you would like to do in your free time, outside of your research work in the lab.
 - participate in weekly lab meetings, in which students create and
   deliver 60 minute scientific presentations, and get feedback from
   other research students in the lab who are working on similar
@@ -78,6 +80,7 @@ Students should expect to do the following:
 - take classes to fulfill degree requirements, typically
   - [Maitrîse en informatique, cheminement de type recherche régulier](https://www.usherbrooke.ca/admission/programme/654/maitrise-en-informatique#acc-000-0).
   - [Doctorat en informatique, cheminement en informatique](https://www.usherbrooke.ca/admission/programme/728/doctorat-en-informatique#acc-000-0).
+- enjoy life outside 
 - (for foreign students) do admission and immigration paper work
   - [Documents d’immigration](https://www.usherbrooke.ca/international/fr/etudier-a-udes/immigration/documents-immigration) for studying at UDS.
   - If you have questions related to immigration paper work, please ask
@@ -148,3 +151,5 @@ Updated 7 Apr 2026: added links to master grants.
 Updated 10 Aug 2026: added degree requirements.
 
 Updated 11 Aug 2026: added language requirements.
+
+Updated 22 Oct 2026: added activities in Sherbrooke outside of the lab.
