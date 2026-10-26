@@ -1,7 +1,7 @@
 ---
 layout: post
-title: data.table asymptotic timings
-description: Motivational figures
+title: Updating data.table asymptotic timings
+description: Different results after three years
 ---
 
 
@@ -303,11 +303,12 @@ over 10 timings")+
 ```
 
 ```
-## Scale for x is already present.
-## Adding another scale for x, which will replace the existing scale.
+## Le chargement a nécessité le package : directlabels
 ```
 
 ```
+## Scale for x is already present.
+## Adding another scale for x, which will replace the existing scale.
 ## Scale for y is already present.
 ## Adding another scale for y, which will replace the existing scale.
 ```
@@ -452,6 +453,8 @@ Looking at the current atime test code, there are two tests for fread:
 
 There are no test cases with N=columns, we should add this as one!
 
+Update 23 Oct 2026: I created [a new performance test case for fread in #7907](https://github.com/Rdatatable/data.table/pull/7907), and [here is some more discussion of this case, including a git bisect](https://tdhock.github.io/blog/2026/bisect-performance).
+
 ## cpu and version info
 
 
@@ -460,8 +463,14 @@ benchmarkme::get_cpu()
 ```
 
 ```
-## Error in `loadNamespace()`:
-## ! aucun package nommé 'benchmarkme' n'est trouvé
+## $vendor_id
+## [1] "GenuineIntel"
+## 
+## $model_name
+## [1] "Intel(R) Core(TM)2 Duo CPU P7350 @ 2.00GHz"
+## 
+## $no_of_cores
+## [1] 2
 ```
 
 ``` r
@@ -492,28 +501,34 @@ sessionInfo()
 ## [1] stats     graphics  utils     datasets  grDevices methods   base     
 ## 
 ## other attached packages:
-## [1] atime_2026.9.17 ggplot2_4.0.3  
+## [1] ggplot2_4.0.3
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] bit_4.6.0                  gtable_0.3.6              
-##  [3] dplyr_1.2.1                compiler_4.7.0            
-##  [5] crayon_1.5.3               Rcpp_1.1.2                
-##  [7] tidyselect_1.2.1           scales_1.4.0              
-##  [9] directlabels_2026.8.27     lattice_0.23-1            
-## [11] readr_2.2.0                R6_2.6.1                  
-## [13] generics_0.1.4             knitr_1.52                
-## [15] tibble_3.3.1               pillar_1.11.1             
-## [17] RColorBrewer_1.1-3         tzdb_0.5.0                
-## [19] rlang_1.3.0                xfun_0.61                 
-## [21] S7_0.2.2                   otel_0.2.0                
-## [23] bit64_4.8.6                cli_3.6.6                 
-## [25] withr_3.0.3                magrittr_2.0.5            
-## [27] grid_4.7.0                 vroom_1.7.1               
-## [29] hms_1.1.4                  lifecycle_1.0.5           
-## [31] data.table.1.18.6_1.18.6.1 vctrs_0.7.3               
-## [33] bench_1.1.4                evaluate_1.0.5            
-## [35] glue_1.8.1                 data.table_1.18.6.1       
-## [37] farver_2.1.2               data.table.1.14.8_1.14.8  
-## [39] profmem_0.7.0              tools_4.7.0               
-## [41] pkgconfig_2.0.3
+##  [1] generics_0.1.4             stringi_1.8.9             
+##  [3] lattice_0.23-1             hms_1.1.4                 
+##  [5] magrittr_2.0.5             evaluate_1.0.5            
+##  [7] grid_4.7.0                 RColorBrewer_1.1-3        
+##  [9] iterators_1.0.14           foreach_1.5.2             
+## [11] doParallel_1.0.17          Matrix_1.7-6              
+## [13] bench_1.1.4                httr_1.4.9                
+## [15] scales_1.4.0               codetools_0.2-20          
+## [17] cli_3.6.6                  rlang_1.3.0               
+## [19] crayon_1.5.3               atime_2026.10.22          
+## [21] bit64_4.8.6                withr_3.0.3               
+## [23] otel_0.2.0                 tools_4.7.0               
+## [25] parallel_4.7.0             tzdb_0.5.0                
+## [27] data.table.1.14.8_1.14.8   dplyr_1.2.1               
+## [29] profmem_0.7.0              benchmarkme_1.0.8         
+## [31] vctrs_0.7.3                R6_2.6.1                  
+## [33] lifecycle_1.0.5            stringr_1.6.0             
+## [35] bit_4.6.0                  vroom_1.7.1               
+## [37] data.table.1.18.6_1.18.6.1 pkgconfig_2.0.3           
+## [39] pillar_1.11.1              gtable_0.3.6              
+## [41] data.table_1.18.6.1        glue_1.8.1                
+## [43] Rcpp_1.1.2                 benchmarkmeData_2.0.0     
+## [45] xfun_0.61                  tibble_3.3.1              
+## [47] tidyselect_1.2.1           knitr_1.52                
+## [49] farver_2.1.2               readr_2.2.0               
+## [51] compiler_4.7.0             S7_0.2.2                  
+## [53] directlabels_2026.8.27
 ```

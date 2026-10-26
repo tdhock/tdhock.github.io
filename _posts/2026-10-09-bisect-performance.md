@@ -27,7 +27,7 @@ Below is the new code and new hardware:
 We can see that the reading function is slower!
 When was this slowdown introduced?
 
-I wrote some new functions in [atime](https://github.com/tdhock/atime/pull/131) for answering this question.
+I wrote the new `atime::bisect()` function in [atime](https://github.com/tdhock/atime/pull/131) for answering this question.
 
 I added a new test case in [PR7907](https://github.com/Rdatatable/data.table/pull/7907).
 
@@ -86,7 +86,7 @@ Date:   Mon Nov 3 22:03:18 2025 +0100
 bisect found first bad commit
 ```
 
-TODO more discussion.
+Both the bisect above, and the bisect below, revealed PRs related to fread, which could be plausibly blamed for the performance degradation.
 
 ```
 #Fast="1.14.8",
@@ -180,26 +180,69 @@ Date:   Mon Oct 20 19:20:52 2025 +0200
 bisect found first bad commit
 ```
 
-## Example 2
+## Example 2: previous known slowdown in min/max by group
 
-TODO discuss how atime gets the same results as in [PR7912](https://github.com/Rdatatable/data.table/pull/7912).
+The second example we discuss in the new paper is how `atime::bisect()` gets the same results as in [PR7912](https://github.com/Rdatatable/data.table/pull/7912).
 
 ![reg before](/assets/img/2026-10-09-bisect-performance/dt-by-reg-before.png)
 
 ![slow fast](/assets/img/2026-10-09-bisect-performance/dt-by-slow-fast.png)
 
+We first got the two results above, but those are only two of five change-points in performance for that test case.
+To understand which PRs affect performance, we created a [new gallery-atime with interactive graphics](https://tdhock.github.io/gallery-atime) created from git bisect data, including [this one](https://tdhock.github.io/2026-10-13-bisect-performance-pr7912/) which shows details for five change-points found using seven bisects.
+Below we see a non-interactive timeline of throughput as a function of commits over time.
+
+![slow timeline](/assets/img/2026-10-09-bisect-performance/viz-PR7912-timeline.png)
+
+And below we see the amount of time it takes to compute the bisects for this test case.
+
+![slow minutes](/assets/img/2026-10-09-bisect-performance/viz-PR7912-minutes.png)
+
 ### Comparison between machines
 
-Two computers (2010 and 2025), 10x absolute throughput differences, same qualitative results, same wall time.
+Two computers (2010 and 2025), 10x absolute throughput differences, same qualitative results, both reasonable wall time.
 
 ![reg before](/assets/img/2026-10-09-bisect-performance/dt-by-reg-before-compare.png)
 
 ![slow fast](/assets/img/2026-10-09-bisect-performance/dt-by-slow-fast-compare.png)
 
-![slow timeline](/assets/img/2026-10-09-bisect-performance/viz-PR7912-timeline.png)
+## Example 3: ponca
 
-![slow minutes](/assets/img/2026-10-09-bisect-performance/viz-PR7912-minutes.png)
+Ponca is a C++ library for point cloud analysis, created by Nicolas Mellado, visiting scholar in Sherbrooke last year.
+We worked together to set up atime for testing ponca in the poncatime repo, and the [git bisect analysis](https://tdhock.github.io/2026-10-16-ponca-git-bisect-asoCurvatureEstimation/) revealed a bug fix commit that was responsible for a constant factor slowdown between ponca v1.0 and v1.4.
 
-## Example 3
+## New `bisect.commits` argument
 
-poncatime TODO
+At first I thought we should comment the commits used only in bisect analysis, because we don’t want to see too many commit curves on the regular CI performance test plot.
+But it is a hassle to have to comment and uncomment when you want to run a git bisect analysis, so I created a new `bisect.commits` argument, that I proposed to use in test case definitions in PRs [#7912 min/max by group test](https://github.com/Rdatatable/data.table/pull/7912/files) and [#7907 fread test](https://github.com/Rdatatable/data.table/pull/7907/files). So we can use those commits as old/new in git bisect, but they will not show up to clutter the regular CI figure.
+
+## Related papers and software
+
+I invited my colleague Alex Groce to co-author the paper, and he added some very relevant citations to the software engineering literature.
+For example [Goldsmith, Aiken, Wilkerson, Measuring empirical computational complexity, ESEC-FSE’07](https://dl.acm.org/doi/abs/10.1145/1287624.1287681) uses regression to estimate big-O complexity from iteration count data (our atime uses classification and wall time instead).
+
+Another example is the GuessCompx R package, published only once on CRAN in 2019.
+
+* like atime, it did empirical estimation of asymptotic (big-O) time/memory complexity.
+* like atime, it used classification with reference curves (constant, linear, quadratic, cubic, squareroot, log, NlogN).
+
+but there are numerous differences:
+
+* atime only fits to large N, GuessCompx uses all N (unfortunately including N in constant overhead regime).
+* atime fits by distance to second largest data point, GuessCompx fits by leave-one-out CV.
+* atime can fit asymptotic reference curves to arbitrary units, GuessCompx is limited to time and memory.
+* atime runs several expressions, GuessCompx runs one function.
+* atime plots use log-log scales, GuessCompx plot use linear scales (which hide details because N is varied on a log scale).
+
+## Conclusions
+
+In preparing a paper submission about atime, I ended up writing some new code to make bisect performance analysis easy.
+The basic workflow is:
+
+* identify a use case for which performance is important
+* identify a pair of old/new commits with different performance
+* use that information to write a test case in `pkg/.ci/atime/tests.R`
+* run `atime::bisect("pkg","test_name","old_commit","new_commit")` as in [#7912 min/max by group test](https://github.com/Rdatatable/data.table/pull/7912/files)
+* use animint2 to visualize the performance over the commit history, and the detailed asymptotic timings obtained to decide each commit tested. For example, see [viz.R](https://github.com/tdhock/data.table-pr7912-bisect-viz/blob/main/viz.R) for the animint2 viz code used to make [this viz](https://tdhock.github.io/2026-10-13-bisect-performance-pr7912).
+
+I intend to use this framework in the future to bisect other performance issues in R data.table.

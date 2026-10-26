@@ -1,7 +1,7 @@
 ---
 layout: post
-title: data.table asymptotic timings
-description: Motivational figures
+title: Updating data.table asymptotic timings
+description: Different results after three years
 ---
 
 ```{r Ropts, echo=FALSE}
@@ -11,7 +11,7 @@ fig.path <- file.path(repo.dir, "assets", "img", post.id)
 knitr::opts_chunk$set(
   dpi=100,
   fig.path=paste0(fig.path, "/"),
-  fig.width=20,
+  fig.width=10,
   fig.process=function(path)sub(repo.dir, "", path, fixed=TRUE),
   fig.height=6)
 if(FALSE){
@@ -344,6 +344,8 @@ Looking at the current atime test code, there are two tests for fread:
 * `fread disk overhead improved in #6925` reads 1 row, N times.
 
 There are no test cases with N=columns, we should add this as one!
+
+Update 23 Oct 2026: I created [a new performance test case for fread in #7907](https://github.com/Rdatatable/data.table/pull/7907), and [here is some more discussion of this case, including a git bisect](https://tdhock.github.io/blog/2026/bisect-performance).
 
 ## cpu and version info
 
