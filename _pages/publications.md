@@ -20,10 +20,12 @@ description: Peer-reviewed papers and preprints with links to code and data
   package with a reference implementation of the algorithms described
   in our paper. See also my [Software](https://tdhock.github.io/software/) page.
 - Please download my [TDH-refs.bib](/assets/TDH-refs.bib) BibTeX
-  citation database, and use it to cite my papers. This is the file
-  that was used to
-  [generate](https://tdhock.github.io/blog/2024/auto-pubs-page/) the
-  list of publications below and in [this PDF](/assets/TDH-refs.pdf).
+  citation database, and use it to cite my papers. That bib file
+  was used to generate the
+  list of publications below and in
+  [this PDF](/assets/TDH-refs.pdf),
+  using [this Rmd source code](https://github.com/tdhock/tdhock.github.io/blob/master/_pages/publications.Rmd),
+  as [explained on my blog](https://tdhock.github.io/blog/2024/auto-pubs-page/).
 
 <table style='width:30%;'>
  <thead>
