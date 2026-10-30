@@ -1523,3 +1523,5 @@ make install
 
 Above we see Emacs 27.1 (bundled in Ubuntu Jammy 22.04) and Emacs 31.1 (compiled from source released Aug 2026) running on my old ~2010 MacBook.
 Both left/old and right/new show correct highlighting, which indicates that the issue was a regression introduced some time between Emacs versions 27.1 and 29.3, and that my patch fixed this regression.
+
+[Debian unstable](https://tracker.debian.org/pkg/emacs) has emacs-30.2 as of Oct 2026.
