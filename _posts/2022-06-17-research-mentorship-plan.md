@@ -81,7 +81,11 @@ Students should expect to do the following:
   - [Maitrîse en informatique, cheminement de type recherche régulier](https://www.usherbrooke.ca/admission/programme/654/maitrise-en-informatique#acc-000-0).
   - [Doctorat en informatique, cheminement en informatique](https://www.usherbrooke.ca/admission/programme/728/doctorat-en-informatique#acc-000-0).
 - (for foreign students) do admission and immigration paper work
-  - [Documents d’immigration](https://www.usherbrooke.ca/international/fr/etudier-a-udes/immigration/documents-immigration) for studying at UDS.
+  - [Documents d’immigration](https://www.usherbrooke.ca/international/fr/etudier-a-udes/immigration/documents-immigration) describes how you can apply for a [study permit](https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit/apply.html) ([permis d’études](https://www.canada.ca/fr/immigration-refugies-citoyennete/services/etudier-canada/permis-etudes/presenter-demande.html)), which you need to get before you start taking classes in Sherbrooke.
+  - After obtaining your degree, you can stay in Canada and work for three years with an open work permit, [PTPD](https://www.canada.ca/fr/immigration-refugies-citoyennete/services/etudier-canada/travail/apres-obtention-diplome.html)
+  - After two years working in Québec, you can apply for [PSTQ](https://www.quebec.ca/immigration/permanente/travailleurs-qualifies/programme-selection-travailleurs-qualifies).
+  - ~6 months later, you should obtain a cértificat de seléction du Québec, which permits you to apply for Canada permanent residence.
+  - ~3 years after obtaining permanent residence, you can apply for Canada citizenship.
   - If you have questions related to immigration paper work, please ask
     - International@USherbrooke.ca if you have not yet been admitted, or
     - Julie.Desnoyers@USherbrooke.ca if you have been admitted to our master or PHD program.
