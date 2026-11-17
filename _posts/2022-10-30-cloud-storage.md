@@ -6,14 +6,12 @@ description: Different options for internal and external sharing
 
 ## Sherbrooke
 
-At Sherbrooke we have a couple of options,
+At Sherbrooke we have these options:
 
 - [OneDrive](https://www.usherbrooke.ca/services-informatiques/repertoire/collaboration/microsoft-365/onedrive): 1TB, maybe use [DriveToWeb](https://www.drv.tw/#how) for sharing results on public web pages?
-- [Alliance Canada project
-  space](https://docs.alliancecan.ca/wiki/Storage_and_file_management#Filesystem_quotas_and_policies):
-  1TB, [shareable with collaborators via copy to globus shared
-  endpoint](https://docs.alliancecan.ca/wiki/Sharing_data).
-- [EspaceWeb](https://www.usherbrooke.ca/services-informatiques/repertoire/applications/espace-web#acc-4085-1131): 1GB, web access.
+- [Alliance Canada project space](https://docs.alliancecan.ca/wiki/Storage_and_file_management#Filesystem_quotas_and_policies):
+  1TB, [shareable with collaborators via copy to globus shared endpoint](https://docs.alliancecan.ca/wiki/Sharing_data).
+- [Guide des communications web](https://www.usherbrooke.ca/typo3_guide-com-web/sites-web/services-offerts) (EspaceWeb n’existe plus depuis 2026).
 
 ## NAU
 
