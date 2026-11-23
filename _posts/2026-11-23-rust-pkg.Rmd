@@ -65,6 +65,31 @@ TODO
 
 The [CRAN’s Rust versions](https://extendr.rs/publishing/cran-msrv/) page has a list of versions of rustc and cargo on each of the CRAN check machines.
 
+I followed the [Create an R package](https://extendr.rs/introduction/) demo on the Rust in R intro page, and it worked on my Ubuntu machine.
+
+I read [A Brief Introduction to Rust](https://extendr.rs/rust-intro/), which explains Rust basics, for an audience already familiar with R programming. This guide explains Rust collections (generic of arrays and vectors), but it does not explain R data types. For example `Vec<i32>` is a Rust vector of integers, and `Vec<f64>` is a Rust vector of double precision numbers.
+
+I read [Developing Rust-powered R Packages](https://extendr.rs/development/), which says I need Rust 1.65.0, do I have it? Yes:
+
+```
+(base) hoct2726@dinf-thock-02i:~/tdhock.github.io/_posts[master*]$ rustc --version
+rustc 1.83.0-nightly (9e394f551 2024-09-25)
+```
+
+The mapping between R and Rust data types is explained in [Vector types](https://extendr.rs/development/data-types/):
+
+| extendr  | Rcpp          | R           | C++       |
+|----------|---------------|-------------|-----------|
+| Integers | IntegerVector | `integer()` | `*int`    |
+| Doubles  | NumericVector | `double()`  | `*double` |
+| List     | List          | `list()`    | -         |
+
+It says we need to add `#[extendr]` macro on the line before a Rust function we want to call from R.
+
+[Package Structure](https://extendr.rs/development/package-structure/) explains that we run `devtools::document()` to re-generate `R/extendr-wrappers.R`.
+The only files we edit are `src/rust/src/*.rs` and `src/rust/Cargo.toml`.
+If you want rust deps, add in `Cargo.toml` under `[dependencies]`.
+
 ## cpu and version info
 
 ```{r}
