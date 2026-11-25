@@ -63,11 +63,116 @@ TODO
 
 ## misc
 
-The [CRAN’s Rust versions](https://extendr.rs/publishing/cran-msrv/) page has a list of versions of rustc and cargo on each of the CRAN check machines.
+[Issue](https://github.com/extendr/extendr.github.io/issues/22) about mutating R objects in place, and the [docs mention `iter_mut()`](https://extendr.rs/extendr/extendr_api/wrapper/doubles/struct.Doubles.html).
 
-I followed the [Create an R package](https://extendr.rs/introduction/) demo on the Rust in R intro page, and it worked on my Ubuntu machine.
+The [CRAN’s Rust versions](https://extendr.rs/publishing/cran-msrv/) page has a list of versions of rustc and cargo on each of the CRAN check machines. MSRV = Minimal Supported Rust Version.
+
+Opening lib.rs in emacs is Fundamental (no special support).
+Installing `rustic` package in emacs gives syntax highlighting.
+
+I put the following in `src/rust/src/.dir-locals.el`
+
+```elisp
+((nil . ((compile-command . "R -e \"devtools::load_all()\""))))
+```
+
+And I get the following error:
+
+```
+   RUSTFLAGS=" --print=native-static-libs" cargo build  --lib  --manifest-path=./rust/Cargo.toml --target-dir ./rust/target 
+      Compiling helloextendr v0.1.0 (/home/local/USHERBROOKE/hoct2726/R/helloextendr/src/rust)
+   error[E0308]: mismatched types
+    --> src/lib.rs:7:5
+     |
+   6 | fn hello_world() -> &'static str {
+     |                     ------------ expected `&'static str` because of return type
+   7 |     5
+     |     ^ expected `&str`, found integer
+```
+
+emacs highlight `--> src/lib.rs` which is not found, does emacs regex need updating?
+Currently we have a regex with starts with `bol`, beginning of line, problematic.
+
+```elisp
+    (rust
+     ,(rx bol (or (group-n 1 "error") (group-n 2 "warning") (group-n 3 "note"))
+          (? "[" (+ (in "A-Z" "0-9")) "]") ":" (* nonl)
+          "\n" (+ " ") "-->"
+          " " (group-n 4 (+ nonl))        ; file
+          ":" (group-n 5 (+ (in "0-9")))  ; line
+          ":" (group-n 6 (+ (in "0-9")))) ; column
+     4 5 6 (2 . 3)
+     nil
+     (1 compilation-error-face)
+     (2 compilation-warning-face)
+     (3 compilation-info-face))
+```
+
+Below I added `(* " ")`
+
+```elisp
+    (rust
+     ,(rx bol (* " ") (or (group-n 1 "error") (group-n 2 "warning") (group-n 3 "note"))
+          (? "[" (+ (in "A-Z" "0-9")) "]") ":" (* nonl)
+          "\n" (+ " ") "-->"
+          " " (group-n 4 (+ nonl))        ; file
+          ":" (group-n 5 (+ (in "0-9")))  ; line
+          ":" (group-n 6 (+ (in "0-9")))) ; column
+     4 5 6 (2 . 3)
+     nil
+     (1 compilation-error-face)
+     (2 compilation-warning-face)
+     (3 compilation-info-face))
+```
+
+This is an issue with devtools, which adds two spaces before R CMD INSTALL output.
+Work-around is this code in `.emacs`:
+
+```elisp
+
+```
+
+Even better work-around is to avoid devtools.
+Regular `R CMD INSTALL` has no leading spaces to prevent correct highlighting:
+
+```
+RUSTFLAGS=" --print=native-static-libs" cargo build  --lib --release --manifest-path=./rust/Cargo.toml --target-dir ./rust/target 
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.27
+   Compiling extendr-ffi v0.9.0
+   Compiling paste v1.0.15
+   Compiling extendr-api v0.9.0
+   Compiling lazy_static v1.5.1
+   Compiling once_cell v1.21.4
+   Compiling syn v2.0.119
+   Compiling syn v3.0.10
+   Compiling readonly v0.2.14
+   Compiling extendr-macros v0.9.0
+   Compiling helloextendr v0.1.0 (/home/local/USHERBROOKE/hoct2726/R/helloextendr/src/rust)
+error[E0308]: mismatched types
+ --> src/lib.rs:7:5
+  |
+6 | fn hello_world() -> &'static str {
+  |                     ------------ expected `&'static str` because of return type
+7 |     5
+  |     ^ expected `&str`, found integer
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `helloextendr` (lib) due to 1 previous error
+```
+
+So put this in `.dir-locals.el` instead:
+
+```elisp
+((nil . ((compile-command . "cd .. && R CMD INSTALL ../.."))))
+```
+
+I followed the [Create an R package](https://extendr.rs/introduction/) demo on the Rust in R intro page, and it worked on my Ubuntu machine, using CRAN version of rextendr, 0.5.0, whereas that doc web page says 0.9.0.
 
 I read [A Brief Introduction to Rust](https://extendr.rs/rust-intro/), which explains Rust basics, for an audience already familiar with R programming. This guide explains Rust collections (generic of arrays and vectors), but it does not explain R data types. For example `Vec<i32>` is a Rust vector of integers, and `Vec<f64>` is a Rust vector of double precision numbers.
+[Borrowing](https://extendr.rs/rust-intro/ownership/) explains that we need to prefix a type with `&` to avoid compile error about ownership.
+And in Rust there are arrays (fixed length) and vectors (variable length), and the syntax `x: &[f64]` means a slice which can be either.
 
 I read [Developing Rust-powered R Packages](https://extendr.rs/development/), which says I need Rust 1.65.0, do I have it? Yes:
 
@@ -89,6 +194,28 @@ It says we need to add `#[extendr]` macro on the line before a Rust function we 
 [Package Structure](https://extendr.rs/development/package-structure/) explains that we run `devtools::document()` to re-generate `R/extendr-wrappers.R`.
 The only files we edit are `src/rust/src/*.rs` and `src/rust/Cargo.toml`.
 If you want rust deps, add in `Cargo.toml` under `[dependencies]`.
+
+[Burn](https://github.com/tracel-ai/burn) in Rust is like torch in python.
+
+[Release notes for rextendr 0.9.0](https://extendr.rs/blog/extendr-v090/) say that there still may be breaking changes before releasing v1.0.
+
+[pyo3](https://pyo3.rs/main/index.html) is the python analog:
+
+|      | python   | R        |
+|------|----------|----------|
+| Rust | pyo3     | rextendr |
+| C++  | pybind11 | Rcpp     |
+
+Josiah Parry’s [slides](https://josiah.rs/about/).
+
+## Rust packages on CRAN
+
+* [tomledit](https://cloud.r-project.org/web/packages/tomledit)
+
+### Archived
+
+* [rsgeo](https://cloud.r-project.org/web/packages/rsgeo)
+* [polars](https://cloud.r-project.org/web/packages/polars)
 
 ## cpu and version info
 
