@@ -186,6 +186,12 @@ edit.data.table = function(old.Package, new.Package, sha, new.pkg.path) {
     close(f)
   }
 }
+
+if(FALSE){
+  tinfo <- atime::atime_pkg_test_info("~/R/data.table")
+  edit.data.table <- tinfo$test.list[[1]]$pkg.edit.fun
+  atime::atime_versions_remove("data.table")
+}
 ```
 
 ## fwrite: fast CSV writer
